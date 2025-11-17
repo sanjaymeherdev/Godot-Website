@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot 4 Multiplayer Mastery - Build a Professional Battle Royale Game</title>
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --secondary: #2a2a2a;
+            --accent: #00d9ff;
+            --light: #f8f9fa;
+            --dark: #1a1a1a;
+            --success: #28a745;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background: linear-gradient(135deg, var(--dark) 0%, #2d1b69 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .cta-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .cta-button:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 100px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+        
+        /* Features Grid */
+        .features {
+            padding: 100px 0;
+            background: var(--secondary);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--primary);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        /* Curriculum */
+        .curriculum {
+            padding: 100px 0;
+        }
+        
+        .module {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .module-header {
+            padding: 1.5rem;
+            background: rgba(255, 107, 53, 0.1);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .module-content {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .module-content.active {
+            max-height: 500px;
+            padding: 1.5rem;
+        }
+        
+        .lesson {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Pricing */
+        .pricing {
+            padding: 100px 0;
+            background: var(--secondary);
+            text-align: center;
+        }
+        
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .price {
+            font-size: 3rem;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+        
+        .price-original {
+            text-decoration: line-through;
+            color: #ccc;
+            margin-right: 1rem;
+        }
+        
+        .bonus-list {
+            text-align: left;
+            margin: 2rem 0;
+        }
+        
+        .bonus-item {
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .bonus-item::before {
+            content: "🎁";
+            margin-right: 1rem;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 100px 0;
+        }
+        
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        /* FAQ */
+        .faq {
+            padding: 100px 0;
+            background: var(--secondary);
+        }
+        
+        .faq-item {
+            margin-bottom: 1rem;
+        }
+        
+        .faq-question {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer.active {
+            max-height: 500px;
+            padding: 1.5rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 2px solid var(--primary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOTMP</div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#curriculum">Curriculum</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#testimonials">Testimonials</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <a href="#pricing" class="cta-button">Enroll Now</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🚀 COMPLETE MULTIPLAYER MASTERCLASS</div>
+            <h1>Build a Professional Battle Royale Game with Godot 4</h1>
+            <p>Go from beginner to pro by creating a complete multiplayer game with advanced networking, AI enemies, vehicles, and full backend integration</p>
+            <a href="#pricing" class="cta-button">Start Learning Today →</a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">What You'll Build</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎮</div>
+                    <h3>Complete Battle Royale System</h3>
+                    <p>Shrinking safe zones, kill feed, victory conditions, and full game cycle management</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Advanced Multiplayer Networking</h3>
+                    <p>Client-server architecture, RPC calls, state synchronization, and lag compensation</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Smart AI Enemies</h3>
+                    <p>Zombie melee combat and ranged enemies with advanced targeting and group behavior</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚗</div>
+                    <h3>Vehicle System</h3>
+                    <p>Physics-based cars with enter/exit mechanics, camera control, and multiplayer sync</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Backend Integration</h3>
+                    <p>Supabase authentication, user profiles, data persistence, and cloud saves</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Production-Ready Code</h3>
+                    <p>Optimized, documented, and scalable codebase you can use in your own projects</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curriculum -->
+    <section class="curriculum" id="curriculum">
+        <div class="container">
+            <h2 class="section-title">Course Curriculum</h2>
+            <div class="modules">
+                <div class="module">
+                    <div class="module-header" onclick="toggleModule(1)">
+                        <h3>Module 1: Foundation & Setup</h3>
+                        <span>+</span>
+                    </div>
+                    <div class="module-content" id="module1">
+                        <div class="lesson">• Godot 4 Multiplayer Architecture Overview</div>
+                        <div class="lesson">• Project Structure & Scene Organization</div>
+                        <div class="lesson">• Basic Player Movement & Camera Control</div>
+                        <div class="lesson">• Input System & Key Bindings</div>
+                    </div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-header" onclick="toggleModule(2)">
+                        <h3>Module 2: Advanced Player Systems</h3>
+                        <span>+</span>
+                    </div>
+                    <div class="module-content" id="module2">
+                        <div class="lesson">• Multi-stance Movement (Normal/Crouch/Prone)</div>
+                        <div class="lesson">• Dual Weapon System (Gun & Melee)</div>
+                        <div class="lesson">• Health, Damage & Combat Mechanics</div>
+                        <div class="lesson">• Animation State Management</div>
+                    </div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-header" onclick="toggleModule(3)">
+                        <h3>Module 3: Multiplayer Networking</h3>
+                        <span>+</span>
+                    </div>
+                    <div class="module-content" id="module3">
+                        <div class="lesson">• Client-Server Model Implementation</div>
+                        <div class="lesson">• RPC Calls & Remote Procedure Calls</div>
+                        <div class="lesson">• State Synchronization & Prediction</div>
+                        <div class="lesson">• Chat System & Player Communication</div>
+                    </div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-header" onclick="toggleModule(4)">
+                        <h3>Module 4: AI Enemy Systems</h3>
+                        <span>+</span>
+                    </div>
+                    <div class="module-content" id="module4">
+                        <div class="lesson">• Zombie Melee Combat AI</div>
+                        <div class="lesson">• Ranged Enemy Targeting System</div>
+                        <div class="lesson">• Group Detection & Priority Targeting</div>
+                        <div class="lesson">• Multiplayer AI Synchronization</div>
+                    </div>
+                </div>
+                
+                <div class="module">
+                    <div class="module-header" onclick="toggleModule(5)">
+                        <h3>Module 5: Backend & Progression</h3>
+                        <span>+</span>
+                    </div>
+                    <div class="module-content" id="module5">
+                        <div class="lesson">• Supabase Authentication Integration</div>
+                        <div class="lesson">• User Profiles & Data Persistence</div>
+                        <div class="lesson">• Character Selection & Customization</div>
+                        <div class="lesson">• Save/Load System Implementation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section-title">Enroll Today</h2>
+            <div class="pricing-card">
+                <h3>Complete Multiplayer Mastery</h3>
+                <div class="price">
+                    <span class="price-original">$297</span>
+                    <span>$197</span>
+                </div>
+                <p>One-time payment, lifetime access</p>
+                
+                <div class="bonus-list">
+                    <div class="bonus-item">Complete Source Code ($500+ value)</div>
+                    <div class="bonus-item">6+ Hours of HD Video Content</div>
+                    <div class="bonus-item">Private Discord Community Access</div>
+                    <div class="bonus-item">1 Year of Course Updates</div>
+                    <div class="bonus-item">Certificate of Completion</div>
+                </div>
+                
+                <a href="#" class="cta-button" style="display: block; text-align: center;">Enroll Now & Get Instant Access</a>
+                
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
+                    🔒 30-Day Money-Back Guarantee
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Students Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <p>"This course transformed me from a beginner to being able to create professional multiplayer games. The code quality is production-ready!"</p>
+                    <div style="margin-top: 1rem; font-weight: bold;">- Alex, Indie Developer</div>
+                </div>
+                <div class="testimonial-card">
+                    <p>"The multiplayer networking section alone is worth the price. Finally understand how to properly sync game states across clients."</p>
+                    <div style="margin-top: 1rem; font-weight: bold;">- Sarah, Game Dev Student</div>
+                </div>
+                <div class="testimonial-card">
+                    <p>"I've taken many Godot courses, but this is the first one that covers backend integration and persistent data properly."</p>
+                    <div style="margin-top: 1rem; font-weight: bold;">- Mike, Professional Developer</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(1)">
+                        <span>Do I need prior Godot experience?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer" id="faq1">
+                        <p>Basic Godot knowledge is recommended, but we start from foundational concepts and build up gradually. Complete beginners can follow along with some extra effort.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(2)">
+                        <span>How long does it take to complete?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer" id="faq2">
+                        <p>The core content is about 6-8 hours, but implementing everything and understanding the concepts will take 2-4 weeks depending on your pace.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(3)">
+                        <span>Can I use the code in commercial projects?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer" id="faq3">
+                        <p>Yes! All code created in the course is yours to use in personal or commercial projects. We teach production-ready patterns you can apply anywhere.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(4)">
+                        <span>What if I get stuck?</span>
+                        <span>+</span>
+                    </div>
+                    <div class="faq-answer" id="faq4">
+                        <p>You'll get access to our private Discord community where you can ask questions, get help from me and other students, and share your progress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOTMP</div>
+            <p>Master Multiplayer Game Development with Godot 4</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Multiplayer Mastery. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleModule(moduleNum) {
+            const module = document.getElementById(`module${moduleNum}`);
+            module.classList.toggle('active');
+            const header = module.previousElementSibling;
+            header.querySelector('span').textContent = module.classList.contains('active') ? '−' : '+';
+        }
+        
+        function toggleFAQ(faqNum) {
+            const answer = document.getElementById(`faq${faqNum}`);
+            answer.classList.toggle('active');
+            const question = answer.previousElementSibling;
+            question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
+        }
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
