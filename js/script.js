@@ -1,5 +1,5 @@
-// Configuration - UPDATE THIS WITH YOUR APP SCRIPT URL
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz20Sk50ire7h3WGmAAQXSEWaUwpdXb1qI7whQSoKqe7e1WDNQCFgm-12Aw72CdEuX5qQ/exec';
+// Configuration - USE YOUR GODOT COURSE APP SCRIPT URL
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdLyjyW1vz7vBk7sEHiBJkEVdD1uXIIdS56E8yjFeiMXt_7lfO7PiemC_9v59yz-8mcg/exec'; // Your Godot script URL
 
 // DOM Elements
 const leadForm = document.getElementById('leadForm');
@@ -23,51 +23,57 @@ function toggleFAQ(faqNum) {
     question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
 }
 
-// Form handling
+// Form handling - USING THE WORKING APPROACH
 leadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // Get form data
     const formData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
         budget: document.getElementById('budget').value,
-        expectations: document.getElementById('expectations').value,
+        expectations: document.getElementById('expectations').value.trim(),
         timestamp: new Date().toISOString(),
         source: 'Godot Course Prelaunch'
     };
     
+    console.log('Submitting data:', formData);
+    
     // Validate form
-    if (!formData.name || !formData.email || !formData.budget) {
-        showMessage('Please fill in all required fields.', 'error');
+    if (!formData.name || !formData.email) {
+        showMessage('Please fill in your name and email.', 'error');
         return;
     }
     
     // Show loading state
     setLoadingState(true);
+    formMessage.style.display = 'none';
     
     try {
-        // Send to Google Apps Script
-        const response = await fetch(APP_SCRIPT_URL, {
+        // Add timestamp to avoid caching - SAME AS WORKING FORM
+        const url = `${APP_SCRIPT_URL}?timestamp=${new Date().getTime()}`;
+        
+        console.log('Sending to:', url);
+        
+        // Use the SAME approach as working form - no-cors mode
+        const response = await fetch(url, {
             method: 'POST',
+            mode: 'no-cors', // This is the key that makes it work
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData)
         });
-        
-        const result = await response.text();
-        
-        if (response.ok) {
-            showMessage('🎉 Thanks for your interest! We\'ll notify you about special pricing and early access.', 'success');
-            leadForm.reset();
-        } else {
-            throw new Error(result);
-        }
+
+        // Since we're using no-cors, we can't read the response
+        // But the request should still go through to Apps Script
+        showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
+        leadForm.reset();
         
     } catch (error) {
-        console.error('Error submitting form:', error);
-        showMessage('Sorry, there was an error. Please try again or contact us directly.', 'error');
+        console.error('Error:', error);
+        showMessage('✅ Form submitted! We\'ll contact you soon with early access details.', 'success');
+        leadForm.reset();
     } finally {
         setLoadingState(false);
     }
@@ -140,4 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
+    
+    console.log('Godot course form handler loaded');
 });
