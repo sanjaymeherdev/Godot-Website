@@ -171,45 +171,48 @@
             }
 
             async checkAdminAuth() {
+                console.log('🔐 Checking admin auth...');
                 const { data: { session }, error } = await supabase.auth.getSession();
                 
                 if (session?.user) {
+                    console.log('👤 User session found:', session.user.email);
+                    this.currentUser = session.user;
+                    
                     const isAdmin = await this.checkAdminRole(session.user.id);
+                    console.log('🛡️ Admin check result:', isAdmin);
                     
                     if (!isAdmin) {
+                        console.log('❌ Access denied - not admin');
                         this.redirectToLogin('Access denied. Admin privileges required.');
                         return;
                     }
                     
                     this.currentUser = session.user;
                     document.getElementById('adminEmail').textContent = session.user.email;
+                    console.log('✅ Admin access granted');
                     
                 } else {
+                    console.log('❌ No user session found');
                     this.redirectToLogin('Please login to access admin panel.');
                 }
             }
 
             async checkAdminRole(userId) {
-                try {
-                    const { data, error } = await supabase
-                        .from('admin_roles')
-                        .select('*')
-                        .eq('user_id', userId)
-                        .single();
-
-                    if (error) {
-                        console.log('Admin role check error:', error);
-                        return false;
-                    }
-
-                    return !!data;
-                } catch (error) {
-                    console.error('Error checking admin role:', error);
+                // Simple email-based admin check (same as login page)
+                const adminEmails = ['graphicyin@gmail.com'];
+                
+                if (!this.currentUser || !this.currentUser.email) {
+                    console.log('❌ No current user or email found');
                     return false;
                 }
+                
+                const isAdmin = adminEmails.includes(this.currentUser.email.toLowerCase());
+                console.log('🛡️ Admin check for', this.currentUser.email, ':', isAdmin);
+                return isAdmin;
             }
 
             redirectToLogin(message = '') {
+                console.log('🔀 Redirecting to login:', message);
                 if (message) {
                     localStorage.setItem('adminLoginMessage', message);
                 }
