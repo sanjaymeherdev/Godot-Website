@@ -27,7 +27,6 @@
             text-align: center;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="admin-login-container">
@@ -60,32 +59,22 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Supabase Configuration
         const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
 
+        // Initialize Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Fixed admin role check
-        async function checkAdminRole(userId) {
-            try {
-                console.log('Checking admin role for user:', userId);
-                
-                const { data, error } = await supabase
-                    .from('admin_roles')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .maybeSingle();  // Use maybeSingle instead of single
-
-                console.log('Admin check result:', data, error);
-                
-                // Return true if data exists, false otherwise
-                return !!data;
-                
-            } catch (error) {
-                console.error('Error checking admin role:', error);
-                return false;
-            }
+        // SIMPLE ADMIN CHECK - Only graphicyin@gmail.com is admin
+        function isAdminUser(email) {
+            const adminEmails = [
+                'graphicyin@gmail.com'
+                // Add more admin emails here if needed
+            ];
+            return adminEmails.includes(email.toLowerCase());
         }
 
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
@@ -99,8 +88,11 @@
             messageEl.style.display = 'none';
             submitBtn.disabled = true;
             submitBtn.textContent = 'Authenticating...';
+            submitBtn.style.opacity = '0.7';
 
             try {
+                console.log('🚀 Attempting login for:', email);
+                
                 // 1. Sign in
                 const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
                     email: email,
@@ -108,19 +100,23 @@
                 });
 
                 if (authError) {
+                    console.error('❌ Login failed:', authError);
                     throw new Error('Login failed: ' + authError.message);
                 }
 
-                console.log('User logged in:', authData.user);
+                console.log('✅ Login successful:', authData.user.email);
 
-                // 2. Check admin role
-                const isAdmin = await checkAdminRole(authData.user.id);
+                // 2. SIMPLE ADMIN CHECK - Only check email, no database query
+                const isAdmin = isAdminUser(authData.user.email);
                 
                 if (!isAdmin) {
+                    console.log('❌ Not an admin user:', authData.user.email);
                     await supabase.auth.signOut();
-                    throw new Error('Admin privileges required. User is not an admin.');
+                    throw new Error('Admin privileges required. Only specific users can access the admin panel.');
                 }
 
+                console.log('🎉 Admin access granted to:', authData.user.email);
+                
                 // 3. Success - redirect to admin panel
                 messageEl.textContent = '✅ Admin access granted! Redirecting...';
                 messageEl.style.backgroundColor = 'rgba(40, 167, 69, 0.2)';
@@ -132,7 +128,7 @@
                 }, 1000);
 
             } catch (error) {
-                console.error('Login error:', error);
+                console.error('💥 Error:', error);
                 
                 messageEl.textContent = '❌ ' + error.message;
                 messageEl.style.backgroundColor = 'rgba(220, 53, 69, 0.2)';
@@ -141,14 +137,24 @@
                 
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Access Admin Panel';
+                submitBtn.style.opacity = '1';
             }
         });
 
         // Check if already logged in
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
+                console.log('📱 Already signed in as:', session.user.email);
                 document.getElementById('adminEmail').value = session.user.email;
-                console.log('Already signed in as:', session.user.email);
+                
+                // Show message if already logged in but not admin
+                if (!isAdminUser(session.user.email)) {
+                    const messageEl = document.getElementById('message');
+                    messageEl.textContent = '⚠️ You are logged in but not an admin user. Please log out and use admin credentials.';
+                    messageEl.style.backgroundColor = 'rgba(255, 193, 7, 0.2)';
+                    messageEl.style.color = 'var(--warning)';
+                    messageEl.style.display = 'block';
+                }
             }
         });
     </script>
