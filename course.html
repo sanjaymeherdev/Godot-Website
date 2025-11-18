@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godot 3D MP - Course LMS</title>
+    <title>Courses - Godot 3D MP LMS</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/lms.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,6 +25,7 @@
                 <!-- Desktop User Menu -->
                 <div class="user-menu">
                     <span id="userEmail" class="user-email"></span>
+                    <span id="userTier" class="user-tier"></span>
                     <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
                 </div>
                 
@@ -48,6 +49,7 @@
                 <!-- Mobile User Info -->
                 <div class="mobile-user-menu">
                     <div class="mobile-user-email" id="mobileUserEmail"></div>
+                    <div class="mobile-user-tier" id="mobileUserTier"></div>
                     <button class="mobile-logout-btn" id="mobileLogoutBtn">Logout</button>
                 </div>
             </div>
@@ -72,9 +74,10 @@
     <section id="dashboard" class="lms-dashboard" style="display: none;">
         <div class="container">
             <div class="dashboard-header">
-                <h1>Welcome to Godot 4 Battle Royale Course</h1>
+                <h1>Godot Multiplayer Courses</h1>
                 <div class="user-info">
                     <p>Email: <span id="displayEmail"></span></p>
+                    <p>Tier: <strong id="displayTier"></strong></p>
                     <p>User ID: <span id="displayUserId"></span></p>
                 </div>
             </div>
@@ -88,84 +91,36 @@
                 </div>
                 <div id="coursesContainer" class="courses-grid">
                     <!-- Courses will be loaded here -->
-                    <div class="course-card locked">
-                        <h3>Godot 4 Basics</h3>
-                        <p>Learn the fundamentals of Godot 4 and get started with 3D game development</p>
-                        <div class="course-meta">
-                            <span class="course-tier">Free</span>
-                            <span class="course-price">$0</span>
-                        </div>
-                        <div class="course-actions">
-                            <button class="cta-button" onclick="selectCourse('basic')">Start Learning</button>
-                        </div>
-                    </div>
-                    
-                    <div class="course-card locked">
-                        <h3>Multiplayer Mastery</h3>
-                        <p>Advanced networking and multiplayer game development</p>
-                        <div class="course-meta">
-                            <span class="course-tier">Basic</span>
-                            <span class="course-price">$49.99</span>
-                        </div>
-                        <div class="course-actions">
-                            <button class="cta-button purchase" onclick="purchaseCourse('multiplayer')">Purchase - $49.99</button>
-                        </div>
-                    </div>
-                    
-                    <div class="course-card locked">
-                        <h3>Battle Royale Pro</h3>
-                        <p>Complete battle royale development with advanced mechanics</p>
-                        <div class="course-meta">
-                            <span class="course-tier">Pro</span>
-                            <span class="course-price">$99.99</span>
-                        </div>
-                        <div class="course-actions">
-                            <button class="cta-button purchase" onclick="purchaseCourse('battle-royale')">Purchase - $99.99</button>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Modules View -->
-            <div id="modulesView" class="modules-view" style="display: none;">
-                <div class="container">
-                    <button id="backToCourses" class="back-button" onclick="backToCourses()">← Back to Courses</button>
-                    <div class="modules-container">
-                        <div class="modules-sidebar">
-                            <h3>Course Modules</h3>
+            <!-- Course Details View -->
+            <div id="courseDetailsView" class="course-details-view" style="display: none;">
+                <button id="backToCourses" class="back-button" onclick="backToCourses()">← Back to Courses</button>
+                <div class="course-details-container">
+                    <div class="course-header-details">
+                        <h2 id="courseDetailTitle"></h2>
+                        <p id="courseDetailDescription"></p>
+                        <div class="course-meta-details">
+                            <span class="course-tier-badge" id="courseDetailTier"></span>
+                            <span class="course-price" id="courseDetailPrice"></span>
+                        </div>
+                    </div>
+
+                    <div class="course-content">
+                        <!-- Modules Section -->
+                        <div class="modules-section">
+                            <h3>Course Content</h3>
                             <div id="modulesList" class="modules-list">
                                 <!-- Modules will be loaded here -->
                             </div>
                         </div>
-                        <div class="video-section">
-                            <div class="video-container">
-                                <div id="videoPlayer" class="video-player">
-                                    <div class="video-placeholder">
-                                        <div class="placeholder-content">
-                                            <div class="lock-icon">📚</div>
-                                            <h3>Select a lesson to start learning</h3>
-                                            <p>Choose from the course modules to begin your journey</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="video-controls">
-                                    <button id="prevBtn" class="control-btn nav-btn">◀ Previous</button>
-                                    <button id="playPause" class="control-btn play-btn" disabled>
-                                        <span class="play-icon">▶ Play</span>
-                                        <span class="pause-icon" style="display: none;">⏸ Pause</span>
-                                    </button>
-                                    <button id="nextBtn" class="control-btn nav-btn">Next ▶</button>
-                                </div>
-                            </div>
 
-                            <div class="video-info">
-                                <h2 id="videoTitle">No video selected</h2>
-                                <p id="videoDescription">Select a lesson from the course modules to view its content</p>
-                                <div class="video-meta">
-                                    <span class="video-duration" id="videoDuration">Duration: --:--</span>
-                                    <span class="video-status" id="videoStatus">Not started</span>
-                                </div>
+                        <!-- Downloads Section -->
+                        <div class="downloads-section">
+                            <h3>Resources & Downloads</h3>
+                            <div id="downloadsList" class="downloads-list">
+                                <!-- Downloads will be loaded here -->
                             </div>
                         </div>
                     </div>
@@ -191,35 +146,43 @@
                 </div>
 
                 <div class="progress-card">
-                    <h3>Time Spent</h3>
-                    <div class="time-stats">
-                        <div class="time-item">
-                            <span class="time-label">Total:</span>
-                            <span id="totalTime" class="time-value">0h 0m</span>
+                    <h3>Your Subscription</h3>
+                    <div class="subscription-status">
+                        <div class="tier-info">
+                            <span class="tier-label">Current Tier:</span>
+                            <span id="progressTier" class="tier-value">Free</span>
                         </div>
-                        <div class="time-item">
-                            <span class="time-label">This Week:</span>
-                            <span id="weeklyTime" class="time-value">0h 0m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="progress-card">
-                    <h3>Recent Activity</h3>
-                    <div class="activity-list" id="activityList">
-                        <div class="activity-item">
-                            <div>Joined the course</div>
-                            <small>Just now</small>
-                        </div>
-                        <div class="activity-item">
-                            <div>Started learning Godot 4</div>
-                            <small>Just now</small>
+                        <div class="upgrade-options">
+                            <button class="upgrade-btn basic" onclick="upgradeToTier('basic')">Upgrade to Basic - $100</button>
+                            <button class="upgrade-btn premium" onclick="upgradeToTier('premium')">Upgrade to Premium - $200</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Purchase Course</h3>
+                <button class="close-btn" onclick="closePurchaseModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>You are purchasing: <strong id="purchaseCourseTitle"></strong></p>
+                <p>Price: <strong id="purchaseCoursePrice"></strong></p>
+                <p>Your tier will be upgraded to: <strong id="purchaseTierUpgrade"></strong></p>
+                
+                <div class="payment-options">
+                    <h4>Select Payment Method:</h4>
+                    <button class="payment-btn stripe" onclick="processPayment('stripe')">Pay with Stripe</button>
+                    <button class="payment-btn paypal" onclick="processPayment('paypal')">Pay with PayPal</button>
+                    <button class="payment-btn manual" onclick="processPayment('manual')">Manual Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Mobile Menu Functionality
@@ -228,8 +191,6 @@
         const mobileMenu = document.getElementById('mobileMenu');
         const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
         const body = document.body;
-        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-        const mobileUserEmail = document.getElementById('mobileUserEmail');
 
         function openMobileMenu() {
             mobileMenu.classList.add('active');
@@ -243,11 +204,9 @@
             body.classList.remove('menu-open');
         }
 
-        // Event Listeners
         mobileMenuBtn.addEventListener('click', openMobileMenu);
         mobileCloseBtn.addEventListener('click', closeMobileMenu);
         mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-        mobileLogoutBtn.addEventListener('click', logout);
 
         // Close menu when clicking on links
         const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
@@ -255,146 +214,376 @@
             link.addEventListener('click', closeMobileMenu);
         });
 
-        // Close menu on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeMobileMenu();
-            }
-        });
-
-        // Update mobile user email
-        function updateMobileUserInfo(email) {
-            if (mobileUserEmail) {
-                mobileUserEmail.textContent = email;
-            }
-        }
-
-        // Your existing auth code...
+        // Supabase Configuration
         const SUPABASE_URL = 'https://crkuifhjovcfvmtkextl.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya3VpZmhqb3ZjZnZtdGtleHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzODYyODgsImV4cCI6MjA3NTk2MjI4OH0.4cHSa8lsQ9GPTRlZdUOyrFaELVVzdu-4S2fiQ7WlsD8';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function checkAuthState() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            const authRequired = document.getElementById('authRequired');
-            const dashboard = document.getElementById('dashboard');
-            const progressSection = document.getElementById('progress');
-            const userEmail = document.getElementById('userEmail');
-            const displayEmail = document.getElementById('displayEmail');
-            const displayUserId = document.getElementById('displayUserId');
+        class LMSManager {
+            constructor() {
+                this.currentUser = null;
+                this.userProfile = null;
+                this.courses = [];
+                this.userCourses = [];
+                this.currentCourse = null;
+                this.init();
+            }
 
-            if (session && session.user) {
-                authRequired.style.display = 'none';
-                dashboard.style.display = 'block';
-                progressSection.style.display = 'block';
-                userEmail.textContent = session.user.email;
-                displayEmail.textContent = session.user.email;
-                displayUserId.textContent = session.user.id.substring(0, 8) + '...';
-                updateMobileUserInfo(session.user.email);
+            async init() {
+                await this.checkAuthState();
+                this.setupEventListeners();
+            }
+
+            async checkAuthState() {
+                const { data: { session }, error } = await supabase.auth.getSession();
                 
-                console.log('User authenticated:', session.user.email);
-            } else {
-                authRequired.style.display = 'block';
-                dashboard.style.display = 'none';
-                progressSection.style.display = 'none';
-                console.log('User not authenticated');
+                const authRequired = document.getElementById('authRequired');
+                const dashboard = document.getElementById('dashboard');
+                const progressSection = document.getElementById('progress');
+                const userEmail = document.getElementById('userEmail');
+                const displayEmail = document.getElementById('displayEmail');
+                const displayUserId = document.getElementById('displayUserId');
+                const mobileUserEmail = document.getElementById('mobileUserEmail');
+
+                if (session && session.user) {
+                    this.currentUser = session.user;
+                    authRequired.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    progressSection.style.display = 'block';
+                    
+                    userEmail.textContent = session.user.email;
+                    displayEmail.textContent = session.user.email;
+                    displayUserId.textContent = session.user.id.substring(0, 8) + '...';
+                    mobileUserEmail.textContent = session.user.email;
+                    
+                    await this.loadUserData();
+                    await this.loadCourses();
+                    await this.loadUserCourses();
+                    this.renderCourses();
+                    this.updateProgress();
+                    
+                } else {
+                    authRequired.style.display = 'block';
+                    dashboard.style.display = 'none';
+                    progressSection.style.display = 'none';
+                }
+            }
+
+            async loadUserData() {
+                if (!this.currentUser) return;
+
+                try {
+                    const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', this.currentUser.id)
+                        .single();
+
+                    if (error) throw error;
+                    this.userProfile = data;
+                    
+                    // Update UI with user tier
+                    document.getElementById('currentTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('displayTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('progressTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('userTier').textContent = this.userProfile.subscription_tier;
+                    document.getElementById('mobileUserTier').textContent = this.userProfile.subscription_tier;
+                    
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                }
+            }
+
+            async loadCourses() {
+                try {
+                    const { data, error } = await supabase
+                        .from('courses')
+                        .select('*')
+                        .eq('is_active', true)
+                        .order('created_at');
+
+                    if (error) throw error;
+                    this.courses = data || [];
+                } catch (error) {
+                    console.error('Error loading courses:', error);
+                    this.courses = [];
+                }
+            }
+
+            async loadUserCourses() {
+                if (!this.currentUser) return;
+
+                try {
+                    const { data, error } = await supabase
+                        .from('user_courses')
+                        .select('*')
+                        .eq('user_id', this.currentUser.id)
+                        .eq('payment_status', 'completed');
+
+                    if (error) throw error;
+                    this.userCourses = data || [];
+                    
+                    document.getElementById('purchasedCount').textContent = this.userCourses.length;
+                    
+                } catch (error) {
+                    console.error('Error loading user courses:', error);
+                    this.userCourses = [];
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+                document.getElementById('mobileLogoutBtn').addEventListener('click', () => this.logout());
+            }
+
+            renderCourses() {
+                const container = document.getElementById('coursesContainer');
+                if (!container) return;
+
+                container.innerHTML = this.courses.map(course => {
+                    const hasAccess = this.hasCourseAccess(course.id);
+                    const canPurchase = this.canPurchaseCourse(course);
+                    
+                    return `
+                        <div class="course-card ${hasAccess ? 'unlocked' : 'locked'}">
+                            ${hasAccess ? '<div class="access-badge">✅ Access Granted</div>' : ''}
+                            <h3>${course.title}</h3>
+                            <p>${course.description}</p>
+                            <div class="course-meta">
+                                <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
+                                <span class="course-price">$${course.price}</span>
+                            </div>
+                            <div class="course-actions">
+                                ${hasAccess ? 
+                                    `<button class="cta-button" onclick="lmsManager.viewCourse('${course.id}')">Access Course</button>` :
+                                    (canPurchase ?
+                                        `<button class="cta-button purchase" onclick="lmsManager.purchaseCourse('${course.id}')">Purchase - $${course.price}</button>` :
+                                        `<button class="cta-button disabled" disabled>Upgrade Tier Required</button>`
+                                    )
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            hasCourseAccess(courseId) {
+                const course = this.courses.find(c => c.id === courseId);
+                if (!course) return false;
+
+                // Check if user has purchased the course
+                const hasPurchased = this.userCourses.some(uc => uc.course_id === courseId);
+                
+                // Check if user's tier meets course requirement
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0;
+                const courseTierLevel = tierLevel[course.required_tier] || 0;
+                
+                return hasPurchased && userTierLevel >= courseTierLevel;
+            }
+
+            canPurchaseCourse(course) {
+                const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 0;
+                const courseTierLevel = tierLevel[course.required_tier] || 0;
+                
+                return userTierLevel >= courseTierLevel && !this.hasCourseAccess(course.id);
+            }
+
+            async viewCourse(courseId) {
+                this.currentCourse = this.courses.find(c => c.id === courseId);
+                if (!this.currentCourse) return;
+
+                document.getElementById('coursesView').style.display = 'none';
+                document.getElementById('courseDetailsView').style.display = 'block';
+
+                document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
+                document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
+                document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
+                document.getElementById('courseDetailPrice').textContent = '$' + this.currentCourse.price;
+
+                await this.loadCourseModules(courseId);
+                await this.loadCourseDownloads(courseId);
+            }
+
+            async loadCourseModules(courseId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('course_modules')
+                        .select('*')
+                        .eq('course_id', courseId)
+                        .order('module_order');
+
+                    if (error) throw error;
+
+                    const modulesList = document.getElementById('modulesList');
+                    modulesList.innerHTML = (data || []).map(module => {
+                        const isLocked = module.is_premium && this.userProfile?.subscription_tier !== 'premium';
+                        
+                        return `
+                            <div class="module-item ${isLocked ? 'locked' : ''}">
+                                <div class="module-header">
+                                    <span class="module-number">${module.module_order.toString().padStart(2, '0')}</span>
+                                    <span class="module-title">${module.title} ${isLocked ? '🔒' : ''}</span>
+                                    <span class="module-duration">${module.duration}</span>
+                                    <span class="module-status status-${isLocked ? 'locked' : 'unlocked'}">
+                                        ${isLocked ? 'PREMIUM CONTENT' : 'AVAILABLE'}
+                                    </span>
+                                </div>
+                                <div class="module-description">
+                                    <p>${module.description}</p>
+                                    ${isLocked ? 
+                                        '<div class="premium-lock-message">Upgrade to Premium to access this content</div>' : 
+                                        (module.video_url ? 
+                                            `<a href="${module.video_url}" target="_blank" class="video-link">Watch Video →</a>` : 
+                                            '<em>Content coming soon</em>'
+                                        )
+                                    }
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading modules:', error);
+                }
+            }
+
+            async loadCourseDownloads(courseId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('course_downloads')
+                        .select('*')
+                        .eq('course_id', courseId)
+                        .order('created_at');
+
+                    if (error) throw error;
+
+                    const downloadsList = document.getElementById('downloadsList');
+                    downloadsList.innerHTML = (data || []).map(download => {
+                        const isLocked = download.is_premium && this.userProfile?.subscription_tier !== 'premium';
+                        
+                        return `
+                            <div class="download-item ${isLocked ? 'locked' : ''}">
+                                <div class="download-info">
+                                    <h4>${download.title} ${isLocked ? '🔒' : ''}</h4>
+                                    <span class="file-size">${download.file_size}</span>
+                                </div>
+                                <div class="download-actions">
+                                    ${isLocked ? 
+                                        '<button class="btn-secondary" disabled>Premium Required</button>' :
+                                        `<a href="${download.file_url}" target="_blank" class="cta-button">Download</a>`
+                                    }
+                                </div>
+                                ${isLocked ? 
+                                    '<div class="premium-lock-message">Upgrade to Premium to download this resource</div>' : 
+                                    ''
+                                }
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error('Error loading downloads:', error);
+                }
+            }
+
+            async purchaseCourse(courseId) {
+                const course = this.courses.find(c => c.id === courseId);
+                if (!course) return;
+
+                // For demo purposes - in production, integrate with payment gateway
+                try {
+                    const { data, error } = await supabase
+                        .from('user_courses')
+                        .insert([{
+                            user_id: this.currentUser.id,
+                            course_id: courseId,
+                            payment_status: 'completed',
+                            purchased_price: course.price
+                        }]);
+
+                    if (error) throw error;
+
+                    // Update user tier if purchasing higher tier course
+                    const tierLevel = { 'free': 0, 'basic': 1, 'premium': 2 };
+                    const currentTierLevel = tierLevel[this.userProfile.subscription_tier];
+                    const courseTierLevel = tierLevel[course.required_tier];
+                    
+                    if (courseTierLevel > currentTierLevel) {
+                        await supabase
+                            .from('profiles')
+                            .update({ subscription_tier: course.required_tier })
+                            .eq('id', this.currentUser.id);
+                    }
+
+                    alert('🎉 Course purchased successfully! You now have access.');
+                    await this.loadUserData();
+                    await this.loadUserCourses();
+                    this.renderCourses();
+                    
+                } catch (error) {
+                    console.error('Error purchasing course:', error);
+                    alert('❌ Purchase failed: ' + error.message);
+                }
+            }
+
+            async logout() {
+                try {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Logout failed: ' + error.message);
+                }
+            }
+
+            updateProgress() {
+                // Update progress circle based on completed modules
+                const progress = 25; // Demo value
+                const circle = document.getElementById('completionCircle');
+                const percent = document.getElementById('completionPercent');
+                
+                const circumference = 339.292;
+                const offset = circumference - (progress / 100) * circumference;
+                
+                circle.style.strokeDashoffset = offset;
+                percent.textContent = progress + '%';
             }
         }
 
-        async function logout() {
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('Logout failed: ' + error.message);
-            }
-        }
-
-        // Course Management Functions
-        function selectCourse(courseId) {
-            document.getElementById('coursesView').style.display = 'none';
-            document.getElementById('modulesView').style.display = 'block';
-            // Load modules for the selected course
-            loadCourseModules(courseId);
-        }
-
+        // Global functions
         function backToCourses() {
             document.getElementById('coursesView').style.display = 'block';
-            document.getElementById('modulesView').style.display = 'none';
+            document.getElementById('courseDetailsView').style.display = 'none';
         }
 
-        function purchaseCourse(courseId) {
-            alert('Purchase functionality would be integrated with Stripe/Payment gateway for course: ' + courseId);
-            // In real implementation, this would redirect to payment page
+        function upgradeToTier(tier) {
+            alert(`In production, this would redirect to payment page for ${tier} tier upgrade.`);
+            // Integration with payment gateway would go here
         }
 
-        function loadCourseModules(courseId) {
-            // Simulate loading modules
-            const modulesList = document.getElementById('modulesList');
-            const modules = [
-                { id: 1, title: 'Introduction to Godot 4', description: 'Get started with Godot 4 basics', duration: '15:30', unlocked: true },
-                { id: 2, title: 'Multiplayer Networking', description: 'Learn client-server architecture', duration: '22:45', unlocked: true },
-                { id: 3, title: 'Character System', description: 'Create and animate 3D characters', duration: '28:15', unlocked: false },
-                { id: 4, title: 'Battle Royale Mechanics', description: 'Implement safe zones and game cycles', duration: '35:20', unlocked: false }
-            ];
-
-            modulesList.innerHTML = modules.map(module => `
-                <div class="module-item ${module.unlocked ? '' : 'locked'}" onclick="${module.unlocked ? `selectModule(${module.id})` : ''}">
-                    <div class="module-header">
-                        <span class="module-number">${module.id.toString().padStart(2, '0')}</span>
-                        <span class="module-title">${module.title}</span>
-                        <span class="module-duration">${module.duration}</span>
-                        <span class="module-status status-${module.unlocked ? 'unlocked' : 'locked'}">
-                            ${module.unlocked ? '▶ Available' : '🔒 Locked'}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').classList.remove('active');
         }
 
-        function selectModule(moduleId) {
-            // Simulate module selection
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoTitle = document.getElementById('videoTitle');
-            const videoDescription = document.getElementById('videoDescription');
-            const videoDuration = document.getElementById('videoDuration');
-            const videoStatus = document.getElementById('videoStatus');
-
-            videoTitle.textContent = 'Module ' + moduleId + ' Selected';
-            videoDescription.textContent = 'This is where the video content would play.';
-            videoDuration.textContent = 'Duration: 25:00';
-            videoStatus.textContent = 'In Progress';
-
-            videoPlayer.innerHTML = `
-                <div class="video-placeholder">
-                    <div class="placeholder-content">
-                        <div class="lock-icon">🎬</div>
-                        <h3>Video Player</h3>
-                        <p>Course video content would play here</p>
-                    </div>
-                </div>
-            `;
-
-            // Enable controls
-            document.getElementById('playPause').disabled = false;
+        function processPayment(method) {
+            alert(`In production, this would process ${method} payment.`);
+            closePurchaseModal();
         }
 
-        // Initialize
+        // Initialize LMS Manager
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuthState();
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-            
-            // Initialize course modules for basic course
-            loadCourseModules('basic');
+            window.lmsManager = new LMSManager();
         });
 
+        // Auth state listener
         supabase.auth.onAuthStateChange((event, session) => {
-            console.log('Auth state changed:', event);
-            checkAuthState();
+            if (window.lmsManager) {
+                window.lmsManager.checkAuthState();
+            }
         });
     </script>
 </body>
