@@ -39,11 +39,24 @@ class AdminPanel {
     }
 
     async checkAdminRole(userId) {
-        // For now, we'll check if the user email contains "admin"
-        // In production, you should implement proper role-based access control
-        const email = this.currentUser?.email || '';
-        return email.includes('admin') || email.includes('@yourdomain.com');
+    try {
+        const { data, error } = await supabase
+            .from('admin_roles')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+
+        if (error) {
+            console.log('Admin role check error:', error);
+            return false;
+        }
+
+        return !!data; // Returns true if admin role exists
+    } catch (error) {
+        console.error('Error checking admin role:', error);
+        return false;
     }
+}
 
     async loadDashboardData() {
         await this.loadCourses();
