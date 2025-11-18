@@ -14,17 +14,47 @@
         <div class="container">
             <nav>
                 <div class="logo">GODOT 3D MP</div>
+                
+                <!-- Desktop Navigation -->
                 <div class="nav-links">
                     <a href="index.html">Home</a>
                     <a href="#dashboard">Dashboard</a>
                     <a href="#progress">My Progress</a>
-                    <div class="user-menu">
-                        <span id="userEmail" class="user-email"></span>
-                        <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
-                    </div>
                 </div>
+                
+                <!-- Desktop User Menu -->
+                <div class="user-menu">
+                    <span id="userEmail" class="user-email"></span>
+                    <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             </nav>
         </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT 3D MP</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="#dashboard" onclick="closeMobileMenu()">Dashboard</a>
+                <a href="#progress" onclick="closeMobileMenu()">My Progress</a>
+                
+                <!-- Mobile User Info -->
+                <div class="mobile-user-menu">
+                    <div class="mobile-user-email" id="mobileUserEmail"></div>
+                    <button class="mobile-logout-btn" id="mobileLogoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     </header>
 
     <!-- Authentication Required Message -->
@@ -42,101 +72,108 @@
     <section id="dashboard" class="lms-dashboard" style="display: none;">
         <div class="container">
             <div class="dashboard-header">
-                <h1>Godot 4 Battle Royale Course</h1>
-                <div class="user-progress">
-                    <div class="progress-info">
-                        <span>Course Progress: </span>
-                        <strong id="progressPercentage">0%</strong>
+                <h1>Welcome to Godot 4 Battle Royale Course</h1>
+                <div class="user-info">
+                    <p>Email: <span id="displayEmail"></span></p>
+                    <p>User ID: <span id="displayUserId"></span></p>
+                </div>
+            </div>
+
+            <!-- Courses View -->
+            <div id="coursesView" class="courses-view">
+                <h2>Available Courses</h2>
+                <div class="subscription-info">
+                    <p>Current Tier: <strong id="currentTier">Free</strong></p>
+                    <p>Purchased Courses: <strong id="purchasedCount">0</strong></p>
+                </div>
+                <div id="coursesContainer" class="courses-grid">
+                    <!-- Courses will be loaded here -->
+                    <div class="course-card locked">
+                        <h3>Godot 4 Basics</h3>
+                        <p>Learn the fundamentals of Godot 4 and get started with 3D game development</p>
+                        <div class="course-meta">
+                            <span class="course-tier">Free</span>
+                            <span class="course-price">$0</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="cta-button" onclick="selectCourse('basic')">Start Learning</button>
+                        </div>
                     </div>
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill"></div>
+                    
+                    <div class="course-card locked">
+                        <h3>Multiplayer Mastery</h3>
+                        <p>Advanced networking and multiplayer game development</p>
+                        <div class="course-meta">
+                            <span class="course-tier">Basic</span>
+                            <span class="course-price">$49.99</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="cta-button purchase" onclick="purchaseCourse('multiplayer')">Purchase - $49.99</button>
+                        </div>
+                    </div>
+                    
+                    <div class="course-card locked">
+                        <h3>Battle Royale Pro</h3>
+                        <p>Complete battle royale development with advanced mechanics</p>
+                        <div class="course-meta">
+                            <span class="course-tier">Pro</span>
+                            <span class="course-price">$99.99</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="cta-button purchase" onclick="purchaseCourse('battle-royale')">Purchase - $99.99</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="lms-layout">
-                <!-- Video Player Section -->
-                <div class="video-section">
-                    <div class="video-container">
-                        <div id="videoPlayer" class="video-player">
-                            <div class="video-placeholder">
-                                <div class="placeholder-content">
-                                    <div class="lock-icon">📚</div>
-                                    <h3>Select a lesson to start learning</h3>
-                                    <p>Choose from the course modules to begin your journey</p>
+            <!-- Modules View -->
+            <div id="modulesView" class="modules-view" style="display: none;">
+                <div class="container">
+                    <button id="backToCourses" class="back-button" onclick="backToCourses()">← Back to Courses</button>
+                    <div class="modules-container">
+                        <div class="modules-sidebar">
+                            <h3>Course Modules</h3>
+                            <div id="modulesList" class="modules-list">
+                                <!-- Modules will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="video-section">
+                            <div class="video-container">
+                                <div id="videoPlayer" class="video-player">
+                                    <div class="video-placeholder">
+                                        <div class="placeholder-content">
+                                            <div class="lock-icon">📚</div>
+                                            <h3>Select a lesson to start learning</h3>
+                                            <p>Choose from the course modules to begin your journey</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="video-controls">
+                                    <button id="prevBtn" class="control-btn nav-btn">◀ Previous</button>
+                                    <button id="playPause" class="control-btn play-btn" disabled>
+                                        <span class="play-icon">▶ Play</span>
+                                        <span class="pause-icon" style="display: none;">⏸ Pause</span>
+                                    </button>
+                                    <button id="nextBtn" class="control-btn nav-btn">Next ▶</button>
+                                </div>
+                            </div>
+
+                            <div class="video-info">
+                                <h2 id="videoTitle">No video selected</h2>
+                                <p id="videoDescription">Select a lesson from the course modules to view its content</p>
+                                <div class="video-meta">
+                                    <span class="video-duration" id="videoDuration">Duration: --:--</span>
+                                    <span class="video-status" id="videoStatus">Not started</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="video-controls">
-                            <button id="prevBtn" class="control-btn nav-btn">◀ Previous</button>
-                            <button id="playPause" class="control-btn play-btn" disabled>
-                                <span class="play-icon">▶ Play</span>
-                                <span class="pause-icon" style="display: none;">⏸ Pause</span>
-                            </button>
-                            <button id="nextBtn" class="control-btn nav-btn">Next ▶</button>
-                        </div>
-                    </div>
-
-                    <div class="video-info">
-                        <h2 id="videoTitle">No video selected</h2>
-                        <p id="videoDescription">Select a lesson from the course modules to view its content</p>
-                        <div class="video-meta">
-                            <span class="video-duration" id="videoDuration">Duration: --:--</span>
-                            <span class="video-status" id="videoStatus">Not started</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Course Modules Sidebar -->
-                <div class="modules-sidebar">
-                    <div class="modules-header">
-                        <h3>Course Modules</h3>
-                        <div class="modules-filter">
-                            <button class="filter-btn active" data-filter="all">All</button>
-                            <button class="filter-btn" data-filter="unlocked">Unlocked</button>
-                            <button class="filter-btn" data-filter="completed">Completed</button>
-                        </div>
-                    </div>
-
-                    <div class="modules-list" id="modulesList">
-                        <!-- Modules will be loaded dynamically -->
                     </div>
                 </div>
             </div>
         </div>
     </section>
-<!-- Courses View -->
-<div id="coursesView" class="courses-view">
-    <div class="container">
-        <h2>Available Courses</h2>
-        <div class="subscription-info">
-            <p>Current Tier: <strong id="currentTier">Free</strong></p>
-            <p>Purchased Courses: <strong id="purchasedCount">0</strong></p>
-        </div>
-        <div id="coursesContainer" class="courses-grid">
-            <!-- Courses will be loaded here -->
-        </div>
-    </div>
-</div>
 
-<!-- Modules View -->
-<div id="modulesView" class="modules-view" style="display: none;">
-    <div class="container">
-        <button id="backToCourses" class="back-button" style="display: none;">← Back to Courses</button>
-        <div class="modules-container">
-            <div class="modules-sidebar">
-                <h3>Course Modules</h3>
-                <div id="modulesList" class="modules-list">
-                    <!-- Modules will be loaded here -->
-                </div>
-            </div>
-            <div class="video-section">
-                <!-- Video player remains the same -->
-            </div>
-        </div>
-    </div>
-</div>
     <!-- Progress Overview -->
     <section id="progress" class="progress-overview" style="display: none;">
         <div class="container">
@@ -170,14 +207,195 @@
                 <div class="progress-card">
                     <h3>Recent Activity</h3>
                     <div class="activity-list" id="activityList">
-                        <!-- Recent activities will be loaded here -->
+                        <div class="activity-item">
+                            <div>Joined the course</div>
+                            <small>Just now</small>
+                        </div>
+                        <div class="activity-item">
+                            <div>Started learning Godot 4</div>
+                            <small>Just now</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <script src="js/auth.js"></script>
-    <script src="js/lms.js"></script>
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const mobileUserEmail = document.getElementById('mobileUserEmail');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        mobileLogoutBtn.addEventListener('click', logout);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        // Update mobile user email
+        function updateMobileUserInfo(email) {
+            if (mobileUserEmail) {
+                mobileUserEmail.textContent = email;
+            }
+        }
+
+        // Your existing auth code...
+        const SUPABASE_URL = 'https://crkuifhjovcfvmtkextl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNya3VpZmhqb3ZjZnZtdGtleHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzODYyODgsImV4cCI6MjA3NTk2MjI4OH0.4cHSa8lsQ9GPTRlZdUOyrFaELVVzdu-4S2fiQ7WlsD8';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function checkAuthState() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            const authRequired = document.getElementById('authRequired');
+            const dashboard = document.getElementById('dashboard');
+            const progressSection = document.getElementById('progress');
+            const userEmail = document.getElementById('userEmail');
+            const displayEmail = document.getElementById('displayEmail');
+            const displayUserId = document.getElementById('displayUserId');
+
+            if (session && session.user) {
+                authRequired.style.display = 'none';
+                dashboard.style.display = 'block';
+                progressSection.style.display = 'block';
+                userEmail.textContent = session.user.email;
+                displayEmail.textContent = session.user.email;
+                displayUserId.textContent = session.user.id.substring(0, 8) + '...';
+                updateMobileUserInfo(session.user.email);
+                
+                console.log('User authenticated:', session.user.email);
+            } else {
+                authRequired.style.display = 'block';
+                dashboard.style.display = 'none';
+                progressSection.style.display = 'none';
+                console.log('User not authenticated');
+            }
+        }
+
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        }
+
+        // Course Management Functions
+        function selectCourse(courseId) {
+            document.getElementById('coursesView').style.display = 'none';
+            document.getElementById('modulesView').style.display = 'block';
+            // Load modules for the selected course
+            loadCourseModules(courseId);
+        }
+
+        function backToCourses() {
+            document.getElementById('coursesView').style.display = 'block';
+            document.getElementById('modulesView').style.display = 'none';
+        }
+
+        function purchaseCourse(courseId) {
+            alert('Purchase functionality would be integrated with Stripe/Payment gateway for course: ' + courseId);
+            // In real implementation, this would redirect to payment page
+        }
+
+        function loadCourseModules(courseId) {
+            // Simulate loading modules
+            const modulesList = document.getElementById('modulesList');
+            const modules = [
+                { id: 1, title: 'Introduction to Godot 4', description: 'Get started with Godot 4 basics', duration: '15:30', unlocked: true },
+                { id: 2, title: 'Multiplayer Networking', description: 'Learn client-server architecture', duration: '22:45', unlocked: true },
+                { id: 3, title: 'Character System', description: 'Create and animate 3D characters', duration: '28:15', unlocked: false },
+                { id: 4, title: 'Battle Royale Mechanics', description: 'Implement safe zones and game cycles', duration: '35:20', unlocked: false }
+            ];
+
+            modulesList.innerHTML = modules.map(module => `
+                <div class="module-item ${module.unlocked ? '' : 'locked'}" onclick="${module.unlocked ? `selectModule(${module.id})` : ''}">
+                    <div class="module-header">
+                        <span class="module-number">${module.id.toString().padStart(2, '0')}</span>
+                        <span class="module-title">${module.title}</span>
+                        <span class="module-duration">${module.duration}</span>
+                        <span class="module-status status-${module.unlocked ? 'unlocked' : 'locked'}">
+                            ${module.unlocked ? '▶ Available' : '🔒 Locked'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectModule(moduleId) {
+            // Simulate module selection
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoTitle = document.getElementById('videoTitle');
+            const videoDescription = document.getElementById('videoDescription');
+            const videoDuration = document.getElementById('videoDuration');
+            const videoStatus = document.getElementById('videoStatus');
+
+            videoTitle.textContent = 'Module ' + moduleId + ' Selected';
+            videoDescription.textContent = 'This is where the video content would play.';
+            videoDuration.textContent = 'Duration: 25:00';
+            videoStatus.textContent = 'In Progress';
+
+            videoPlayer.innerHTML = `
+                <div class="video-placeholder">
+                    <div class="placeholder-content">
+                        <div class="lock-icon">🎬</div>
+                        <h3>Video Player</h3>
+                        <p>Course video content would play here</p>
+                    </div>
+                </div>
+            `;
+
+            // Enable controls
+            document.getElementById('playPause').disabled = false;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Initialize course modules for basic course
+            loadCourseModules('basic');
+        });
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+            checkAuthState();
+        });
+    </script>
 </body>
 </html>
