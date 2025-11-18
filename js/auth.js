@@ -527,3 +527,53 @@ if (window.location.pathname.includes('course.html')) {
         });
     });
 }
+// Add these methods to AuthManager class
+async getUserProfile(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async getUserCourses(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('user_courses')
+            .select(`
+                *,
+                courses (*)
+            `)
+            .eq('user_id', userId)
+            .eq('payment_status', 'completed');
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async getUserProgress(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('user_progress')
+            .select(`
+                *,
+                course_modules (*)
+            `)
+            .eq('user_id', userId);
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
