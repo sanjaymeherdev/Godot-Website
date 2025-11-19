@@ -52,6 +52,15 @@ class AdminPanel {
         document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
         document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
         document.getElementById('chapterForm').addEventListener('submit', (e) => this.handleChapterSubmit(e));
+        
+        // Add navigation click handlers
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.getAttribute('href').replace('#', '');
+                showSection(sectionId);
+            });
+        });
     }
 
     async loadDashboardData() {
@@ -79,30 +88,25 @@ class AdminPanel {
 
     async loadStudents() {
         try {
-            // Get all users from auth
-            const { data: { users }, error } = await supabase.auth.admin.listUsers();
+            // Get all students from profiles table (includes email now)
+            const { data: profiles, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
             if (error) throw error;
 
-            // Get user profiles
-            const { data: profiles, error: profileError } = await supabase
-                .from('profiles')
-                .select('*');
+            // Convert profiles to students
+            this.students = profiles.map(profile => ({
+                id: profile.id,
+                email: profile.email || `user_${profile.id.substring(0, 8)}@example.com`,
+                created_at: profile.created_at,
+                last_sign_in_at: profile.last_sign_in_at || profile.updated_at,
+                subscription_tier: profile.subscription_tier || 'free',
+                profile_updated: profile.updated_at
+            }));
 
-            if (profileError) throw profileError;
-
-            // Combine data
-            this.students = users.map(user => {
-                const profile = profiles.find(p => p.id === user.id) || {};
-                return {
-                    id: user.id,
-                    email: user.email,
-                    created_at: user.created_at,
-                    last_sign_in_at: user.last_sign_in_at,
-                    subscription_tier: profile.subscription_tier || 'free',
-                    profile_updated: profile.updated_at
-                };
-            });
-
+            console.log('Loaded students:', this.students);
             this.renderStudents();
             
         } catch (error) {
@@ -194,7 +198,7 @@ class AdminPanel {
                             <option value="basic" ${student.subscription_tier === 'basic' ? 'selected' : ''}>Basic</option>
                             <option value="premium" ${student.subscription_tier === 'premium' ? 'selected' : ''}>Premium</option>
                         </select>
-                        <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">Details</button>
+                        <button class="btn-small" onclick="adminPanel.editStudentEmail('${student.id}')">Edit Email</button>
                         <button class="btn-small btn-danger" onclick="adminPanel.deleteStudent('${student.id}')">Delete</button>
                     </div>
                 </div>
@@ -494,13 +498,45 @@ class AdminPanel {
         }
     }
 
+    async editStudentEmail(studentId) {
+        const student = this.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const newEmail = prompt('Enter new email for student:', student.email);
+        if (newEmail && newEmail !== student.email) {
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ 
+                        email: newEmail,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', studentId);
+
+                if (error) throw error;
+
+                await this.loadStudents();
+                this.showMessage('Student email updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating student email:', error);
+                this.showMessage('Error updating student email: ' + error.message, 'error');
+            }
+        }
+    }
+
     async deleteStudent(studentId) {
-        if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+        if (!confirm('Are you sure you want to delete this student? This will remove them from the system.')) {
             return;
         }
 
         try {
-            const { error } = await supabase.auth.admin.deleteUser(studentId);
+            // Delete from profiles table
+            const { error } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', studentId);
+
             if (error) throw error;
 
             await this.loadStudents();
@@ -590,7 +626,7 @@ class AdminPanel {
                             <option value="basic" ${student.subscription_tier === 'basic' ? 'selected' : ''}>Basic</option>
                             <option value="premium" ${student.subscription_tier === 'premium' ? 'selected' : ''}>Premium</option>
                         </select>
-                        <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">Details</button>
+                        <button class="btn-small" onclick="adminPanel.editStudentEmail('${student.id}')">Edit Email</button>
                         <button class="btn-small btn-danger" onclick="adminPanel.deleteStudent('${student.id}')">Delete</button>
                     </div>
                 </div>
@@ -637,10 +673,21 @@ function showSection(sectionId) {
     document.querySelectorAll('.admin-section').forEach(section => {
         section.style.display = 'none';
     });
-    document.getElementById(sectionId).style.display = 'block';
+    
+    // Show the selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+    } else {
+        // Fallback to dashboard
+        document.getElementById('dashboard').style.display = 'block';
+        sectionId = 'dashboard';
+    }
     
     // Set active navigation
-    window.adminPanel.setActiveNav(sectionId);
+    if (window.adminPanel) {
+        window.adminPanel.setActiveNav(sectionId);
+    }
     
     // Update URL hash
     window.location.hash = sectionId;
@@ -671,7 +718,23 @@ function resetChapterForm() {
     }
 }
 
+// Handle initial page load
+function handleHashChange() {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && ['dashboard', 'courses', 'students'].includes(hash)) {
+        showSection(hash);
+    } else {
+        showSection('dashboard');
+    }
+}
+
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', function() {
     window.adminPanel = new AdminPanel();
+    
+    // Handle initial page load
+    handleHashChange();
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('hashchange', handleHashChange);
 });
