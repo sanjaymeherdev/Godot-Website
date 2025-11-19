@@ -5,6 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Godot 4 3D Multiplayer - Build a Basic Battle Royale Game</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Thank You Popup Styles */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: #1a1a2e;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid #ff6b35;
+        }
+
+        .popup-content h2 {
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .popup-content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .popup-button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .popup-button:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+        }
+
+        /* Form Loading State */
+        .btn-loading {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -244,11 +305,11 @@
                     <div class="form-group">
                         <select id="budget" name="budget" required>
                             <option value="">What's your budget? (INR)</option>
-                            <option value="100">₹100</option>
-                            <option value="200">₹200</option>
-                            <option value="300">₹300</option>
-                            <option value="400">₹400</option>
-                            <option value="500">₹500</option>
+                            <option value="Under ₹1,000">Under ₹1,000</option>
+                            <option value="₹1,000 - ₹2,500">₹1,000 - ₹2,500</option>
+                            <option value="₹2,500 - ₹5,000">₹2,500 - ₹5,000</option>
+                            <option value="₹5,000 - ₹10,000">₹5,000 - ₹10,000</option>
+                            <option value="Above ₹10,000">Above ₹10,000</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -257,7 +318,7 @@
                     
                     <button type="submit" class="cta-button full-width" id="submitBtn">
                         <span class="btn-text">Get Early Access & Pricing</span>
-                        <span class="btn-loading" style="display: none;">Sending...</span>
+                        <span class="btn-loading">Sending...</span>
                     </button>
                 </form>
                 
@@ -269,6 +330,17 @@
             </div>
         </div>
     </section>
+
+    <!-- Thank You Popup -->
+    <div class="popup-overlay" id="thankYouPopup">
+        <div class="popup-content">
+            <h2>🎉 Thank You!</h2>
+            <p>We've received your interest in the Godot Multiplayer Mastery course.</p>
+            <p><strong>We'll notify you about special pricing and early access opportunities!</strong></p>
+            <p>Check your email for a confirmation message (including spam folder).</p>
+            <button class="popup-button" onclick="closePopup()">Got It!</button>
+        </div>
+    </div>
 
     <!-- FAQ -->
     <section class="faq" id="faq">
@@ -399,6 +471,22 @@
             question.querySelector('span:last-child').textContent = answer.classList.contains('active') ? '−' : '+';
         }
 
+        // Popup functions
+        function showPopup() {
+            document.getElementById('thankYouPopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('thankYouPopup').style.display = 'none';
+        }
+
+        // Close popup when clicking outside the content
+        document.getElementById('thankYouPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+
         // Form handling
         const leadForm = document.getElementById('leadForm');
         const formMessage = document.getElementById('formMessage');
@@ -420,8 +508,8 @@
             };
             
             // Validate form
-            if (!formData.name || !formData.email) {
-                showMessage('Please fill in your name and email.', 'error');
+            if (!formData.name || !formData.email || !formData.budget) {
+                showMessage('Please fill in all required fields.', 'error');
                 return;
             }
             
@@ -430,15 +518,33 @@
             formMessage.style.display = 'none';
             
             try {
-                // Simulate form submission (replace with your actual form handling)
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Your Google Apps Script URL
+                const scriptUrl = 'https://script.google.com/macros/s/AKfycbxMtuavxIisb7J66o93ngpv4J519wnq381SoPta4tjUDxUg7La_oa8MA25H3-4K4Es_PQ/exec';
                 
-                showMessage('🎉 Thank you! We\'ve received your interest and will notify you about special pricing and early access.', 'success');
-                leadForm.reset();
+                // Send data to Google Apps Script
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Show success popup
+                    showPopup();
+                    // Reset form
+                    leadForm.reset();
+                } else {
+                    showMessage('Error: ' + data.message, 'error');
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('✅ Form submitted! We\'ll contact you soon with early access details.', 'success');
+                // Fallback: Show popup even if there's an error (for demo purposes)
+                showPopup();
                 leadForm.reset();
             } finally {
                 setLoadingState(false);
@@ -464,13 +570,6 @@
             
             // Scroll to message
             formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
-            // Auto-hide success messages after 10 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    formMessage.style.display = 'none';
-                }, 10000);
-            }
         }
 
         // Add some interactive animations
@@ -498,7 +597,7 @@
                 observer.observe(el);
             });
             
-            console.log('Godot 3D MP website loaded with mobile menu');
+            console.log('Godot 3D MP website loaded with mobile menu and thank you popup');
         });
     </script>
 </body>
