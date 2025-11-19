@@ -4,177 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .plan-badge {
-            @apply px-3 py-1 rounded-full text-sm font-medium;
-        }
-        .plan-badge.premium {
-            @apply bg-purple-100 text-purple-800 border border-purple-300;
-        }
-        .plan-badge.basic {
-            @apply bg-blue-100 text-blue-800 border border-blue-300;
-        }
-        .plan-badge.free {
-            @apply bg-gray-100 text-gray-800 border border-gray-300;
-        }
-        .nav-tab {
-            @apply px-4 py-2 rounded-lg transition-all duration-200;
-        }
-        .nav-tab.active {
-            @apply bg-blue-500 text-white shadow-lg;
-        }
-        .nav-tab:not(.active) {
-            @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <!-- Navigation -->
     <nav class="bg-white shadow-lg">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
                 <div class="flex space-x-2" id="nav-tabs">
-                    <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
-                    <button class="nav-tab" data-tab="students">Student Management</button>
-                    <button class="nav-tab" data-tab="settings">Settings</button>
+                    <button class="nav-tab active" data-tab="profiles">Profiles</button>
+                    <button class="nav-tab" data-tab="courses">Courses</button>
+                    <button class="nav-tab" data-tab="chapters">Chapters</button>
+                    <button class="nav-tab" data-tab="content">Content</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container mx-auto px-6 py-8">
-        <!-- Dashboard Tab -->
-        <div id="dashboard-tab" class="tab-content">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold mb-6">Admin Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                        <div class="text-3xl font-bold text-blue-600" id="total-users">0</div>
-                        <div class="text-blue-800 font-medium">Total Users</div>
-                    </div>
-                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-                        <div class="text-3xl font-bold text-green-600" id="active-users">0</div>
-                        <div class="text-green-800 font-medium">Active Today</div>
-                    </div>
-                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
-                        <div class="text-3xl font-bold text-purple-600" id="premium-count">0</div>
-                        <div class="text-purple-800 font-medium">Premium Users</div>
-                    </div>
-                    <div class="bg-orange-50 p-6 rounded-lg border border-orange-200">
-                        <div class="text-3xl font-bold text-orange-600" id="revenue">0</div>
-                        <div class="text-orange-800 font-medium">Revenue</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Student Management Tab -->
-        <div id="students-tab" class="tab-content hidden">
+        <!-- Profiles Tab -->
+        <div id="profiles-tab" class="tab-content">
             <div class="bg-white rounded-lg shadow overflow-hidden">
-                <!-- Student Management Header -->
-                <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
-                    <h2 class="text-2xl font-bold mb-2">Student Management</h2>
-                    <p class="opacity-90">Manage student profiles, subscriptions, and access</p>
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold">User Profiles</h2>
+                    <p class="text-gray-600">Manage user profiles</p>
                 </div>
-
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-gray-50 border-b">
-                    <div class="bg-white p-4 rounded-lg shadow-sm border">
-                        <div class="text-2xl font-bold text-blue-600" id="total-students">0</div>
-                        <div class="text-gray-600 text-sm">Total Students</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border">
-                        <div class="text-2xl font-bold text-purple-600" id="premium-students">0</div>
-                        <div class="text-gray-600 text-sm">Premium</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border">
-                        <div class="text-2xl font-bold text-blue-600" id="basic-students">0</div>
-                        <div class="text-gray-600 text-sm">Basic</div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border">
-                        <div class="text-2xl font-bold text-gray-600" id="free-students">0</div>
-                        <div class="text-gray-600 text-sm">Free</div>
-                    </div>
-                </div>
-
-                <!-- Action Bar -->
-                <div class="p-4 bg-white border-b flex flex-wrap gap-3 justify-between items-center">
-                    <div class="flex flex-wrap gap-3">
-                        <button id="refresh-students" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition flex items-center">
-                            🔄 Refresh
-                        </button>
-                        <button id="bulk-update" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition flex items-center">
-                            📊 Bulk Update
-                        </button>
-                        <button id="export-data" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center">
-                            📤 Export CSV
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" id="select-all-students" class="w-4 h-4">
-                        <label for="select-all-students" class="text-sm text-gray-600">Select All</label>
-                    </div>
-                </div>
-
-                <!-- Students Table -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Select</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscription</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signup Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subscription</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="students-table-body" class="bg-white divide-y divide-gray-200">
-                            <tr id="students-loading">
-                                <td colspan="6" class="px-6 py-8 text-center">
-                                    <div class="flex items-center justify-center">
-                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                                        <span class="ml-3 text-gray-600">Loading students...</span>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="profiles-table-body">
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Settings Tab -->
-        <div id="settings-tab" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold mb-6">Settings</h2>
-                <p class="text-gray-600">Admin settings and configuration options.</p>
+        <!-- Courses Tab -->
+        <div id="courses-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Courses</h2>
+                        <p class="text-gray-600">Manage courses</p>
+                    </div>
+                    <button onclick="adminPanel.showCourseModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Course</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-table-body">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No courses</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapters Tab -->
+        <div id="chapters-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Chapters</h2>
+                        <p class="text-gray-600">Manage chapters</p>
+                    </div>
+                    <button onclick="adminPanel.showChapterModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Chapter</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Course</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chapters-table-body">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No chapters</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tab -->
+        <div id="content-tab" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">Content</h2>
+                        <p class="text-gray-600">Manage content</p>
+                    </div>
+                    <button onclick="adminPanel.showContentModal()" class="bg-blue-500 text-white px-4 py-2 rounded">Add Content</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chapter</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="content-table-body">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No content</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Tier Update Modal -->
-    <div id="tier-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-bold mb-4">Update Subscription Tier</h3>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Select Tier:</label>
-                <select id="tier-select" class="w-full p-2 border border-gray-300 rounded-lg">
-                    <option value="premium">Premium</option>
-                    <option value="basic">Basic</option>
-                    <option value="free">Free</option>
-                </select>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button id="cancel-tier-update" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
-                    Cancel
-                </button>
-                <button id="confirm-tier-update" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                    Update Tier
-                </button>
+    <!-- Modals -->
+    <div id="course-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg w-96">
+            <h3 class="text-lg font-bold mb-4" id="course-modal-title">Add Course</h3>
+            <input type="text" id="course-title" placeholder="Course Title" class="w-full p-2 border rounded mb-2">
+            <textarea id="course-desc" placeholder="Description" class="w-full p-2 border rounded mb-2"></textarea>
+            <select id="course-status" class="w-full p-2 border rounded mb-4">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button onclick="adminPanel.hideCourseModal()" class="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
+                <button onclick="adminPanel.saveCourse()" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
             </div>
         </div>
     </div>
