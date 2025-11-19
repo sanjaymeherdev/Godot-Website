@@ -1,5 +1,5 @@
 // Configuration - USE YOUR GODOT COURSE APP SCRIPT URL
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1ll88Q3Wjgug_OkPb49l-Ne_EZsj9wfM_8N2OpfhwLWGnAVzRMSt-xZP_wVsyhSjeLA/exec'; // Your Godot script URL
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKgujBeZCHMeBGSGuVZcge5J-_C_3n6o1WuSfptZQ_51pWHLyaLsqZmB2SaKfsSXl3OA/exec'; // Your Godot script URL
 
 // DOM Elements
 const leadForm = document.getElementById('leadForm');
