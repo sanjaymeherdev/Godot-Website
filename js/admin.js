@@ -424,7 +424,7 @@ class AdminPanel {
         );
     }
 
-    // COURSES RENDERING AND FILTERING
+    // COURSES RENDERING AND FILTERING - UPDATED FILTER LOGIC
     renderCourses() {
         const container = document.getElementById('adminCoursesList');
         if (!container) return;
@@ -439,7 +439,7 @@ class AdminPanel {
         }
 
         container.innerHTML = this.filteredCourses.map(course => {
-            // FIXED: Only show status badge, not active/inactive
+            // Only show status badge, not active/inactive
             const statusClass = `status-${course.status}`;
             const statusText = course.status.charAt(0).toUpperCase() + course.status.slice(1);
             
@@ -471,6 +471,50 @@ class AdminPanel {
                 </div>
             `;
         }).join('');
+    }
+
+    // UPDATED FILTER METHOD - 'free' changed to 'basic'
+    filterCourses(filter) {
+        this.currentFilter = filter;
+        
+        // Update filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        switch (filter) {
+            case 'active':
+                this.filteredCourses = this.courses.filter(course => course.is_active);
+                break;
+            case 'inactive':
+                this.filteredCourses = this.courses.filter(course => !course.is_active);
+                break;
+            case 'basic':  // CHANGED FROM 'free' TO 'basic'
+                this.filteredCourses = this.courses.filter(course => course.required_tier === 'basic');
+                break;
+            case 'premium':
+                this.filteredCourses = this.courses.filter(course => course.required_tier === 'premium');
+                break;
+            default:
+                this.filteredCourses = [...this.courses];
+        }
+
+        this.renderCourses();
+    }
+
+    searchCourses(query) {
+        if (!query.trim()) {
+            this.filteredCourses = [...this.courses];
+        } else {
+            const searchTerm = query.toLowerCase();
+            this.filteredCourses = this.courses.filter(course => 
+                course.title.toLowerCase().includes(searchTerm) ||
+                course.description.toLowerCase().includes(searchTerm) ||
+                course.required_tier.toLowerCase().includes(searchTerm)
+            );
+        }
+        this.renderCourses();
     }
 
     // MODULES RENDERING
@@ -509,49 +553,6 @@ class AdminPanel {
         }).join('');
     }
 
-    filterCourses(filter) {
-        this.currentFilter = filter;
-        
-        // Update filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-
-        switch (filter) {
-            case 'active':
-                this.filteredCourses = this.courses.filter(course => course.is_active);
-                break;
-            case 'inactive':
-                this.filteredCourses = this.courses.filter(course => !course.is_active);
-                break;
-            case 'free':
-                this.filteredCourses = this.courses.filter(course => course.required_tier === 'basic');
-                break;
-            case 'premium':
-                this.filteredCourses = this.courses.filter(course => course.required_tier === 'premium');
-                break;
-            default:
-                this.filteredCourses = [...this.courses];
-        }
-
-        this.renderCourses();
-    }
-
-    searchCourses(query) {
-        if (!query.trim()) {
-            this.filteredCourses = [...this.courses];
-        } else {
-            const searchTerm = query.toLowerCase();
-            this.filteredCourses = this.courses.filter(course => 
-                course.title.toLowerCase().includes(searchTerm) ||
-                course.description.toLowerCase().includes(searchTerm) ||
-                course.required_tier.toLowerCase().includes(searchTerm)
-            );
-        }
-        this.renderCourses();
-    }
-
     // STUDENTS MANAGEMENT
     renderStudents() {
         const container = document.getElementById('studentsList');
@@ -572,7 +573,7 @@ class AdminPanel {
                     <div class="student-info">
                         <h3>${student.email}</h3>
                         <div class="student-meta">
-                            <span>Tier: ${student.subscription_tier || 'free'}</span>
+                            <span>Tier: ${student.subscription_tier || 'basic'}</span>
                             <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
                             <span>Last Sign In: ${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleDateString() : 'Never'}</span>
                         </div>
@@ -615,6 +616,7 @@ class AdminPanel {
             form.reset();
             document.getElementById('courseId').value = '';
             document.getElementById('courseStatus').value = 'draft';
+            document.getElementById('courseTier').value = 'basic'; // DEFAULT SET TO BASIC
             document.getElementById('courseActive').checked = true;
         }
         
@@ -654,7 +656,7 @@ class AdminPanel {
             form.reset();
             document.getElementById('moduleId').value = '';
             document.getElementById('moduleOrder').value = this.modules.length + 1;
-            document.getElementById('moduleTier').value = 'free';
+            document.getElementById('moduleTier').value = 'basic'; // DEFAULT SET TO BASIC
             document.getElementById('moduleIsPremium').checked = false;
         }
         
@@ -740,9 +742,9 @@ class AdminPanel {
         }
     }
 
-    // Student management methods (to be implemented)
+    // Student management methods
     editStudent(studentId) {
-        this.showMessage('Student tier editing will be implemented in Phase 3', 'info');
+        this.showMessage('Student tier editing will be implemented in next phase', 'info');
     }
 }
 
@@ -764,323 +766,7 @@ function showSection(sectionId) {
     // Update URL hash
     window.location.hash = sectionId;
 }
-// Add these methods to the existing AdminPanel class in admin.js
 
-// Enhanced Student Management Methods
-async loadStudents() {
-    try {
-        // Get all users
-        const { data: users, error } = await supabase.auth.admin.listUsers();
-        
-        if (error) throw error;
-        
-        // Get user profiles
-        const { data: profiles, error: profileError } = await supabase
-            .from('profiles')
-            .select('*');
-
-        if (profileError) throw profileError;
-
-        // Get user courses and progress
-        const { data: userCourses, error: coursesError } = await supabase
-            .from('user_courses')
-            .select('*')
-            .eq('payment_status', 'completed');
-
-        const { data: userProgress, error: progressError } = await supabase
-            .from('user_progress')
-            .select('*');
-
-        // Combine all data
-        this.students = users.users.map(user => {
-            const profile = profiles.find(p => p.id === user.id) || {};
-            const courses = userCourses?.filter(uc => uc.user_id === user.id) || [];
-            const progress = userProgress?.filter(up => up.user_id === user.id) || [];
-            
-            return {
-                ...user,
-                ...profile,
-                enrolled_courses: courses.length,
-                completed_modules: progress.filter(p => p.completed).length,
-                total_progress: progress.length > 0 ? 
-                    Math.round((progress.filter(p => p.completed).length / progress.length) * 100) : 0
-            };
-        });
-
-        this.renderStudents();
-        
-    } catch (error) {
-        console.error('Error loading students:', error);
-        this.students = [];
-    }
-}
-
-renderStudents() {
-    const container = document.getElementById('studentsList');
-    if (!container) return;
-
-    if (this.students.length === 0) {
-        container.innerHTML = `
-            <div class="placeholder-message">
-                <p>No students found. Student data will appear here once users start signing up.</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = this.students.map(student => {
-        return `
-            <div class="student-item">
-                <div class="student-info">
-                    <h3>${student.email}</h3>
-                    <div class="student-meta">
-                        <span class="tier-badge tier-${student.subscription_tier || 'basic'}">${(student.subscription_tier || 'basic').toUpperCase()}</span>
-                        <span>Joined: ${new Date(student.created_at).toLocaleDateString()}</span>
-                        <span>Courses: ${student.enrolled_courses}</span>
-                        <span>Progress: ${student.total_progress}%</span>
-                    </div>
-                </div>
-                <div class="student-actions">
-                    <button class="btn-small" onclick="adminPanel.editStudentTier('${student.id}')">Edit Tier</button>
-                    <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">View Details</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-async editStudentTier(studentId) {
-    const student = this.students.find(s => s.id === studentId);
-    if (!student) return;
-
-    const newTier = prompt(`Change tier for ${student.email}\n\nCurrent: ${student.subscription_tier || 'basic'}\n\nEnter new tier (basic/premium):`, student.subscription_tier || 'basic');
-    
-    if (newTier && ['basic', 'premium'].includes(newTier.toLowerCase())) {
-        try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ subscription_tier: newTier.toLowerCase() })
-                .eq('id', studentId);
-
-            if (error) throw error;
-
-            this.showMessage(`✅ Tier updated to ${newTier} for ${student.email}`, 'success');
-            await this.loadStudents();
-            
-        } catch (error) {
-            console.error('Error updating student tier:', error);
-            this.showMessage('❌ Error updating tier: ' + error.message, 'error');
-        }
-    }
-}
-
-async viewStudentDetails(studentId) {
-    const student = this.students.find(s => s.id === studentId);
-    if (!student) return;
-
-    // Load detailed student information
-    const [courses, progress, activity] = await Promise.all([
-        this.getStudentCourses(studentId),
-        this.getStudentProgress(studentId),
-        this.getStudentActivity(studentId)
-    ]);
-
-    const detailsHtml = `
-        <div class="student-details">
-            <div class="detail-section">
-                <h4>Student Information</h4>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Email:</label>
-                        <span>${student.email}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tier:</label>
-                        <span class="tier-badge tier-${student.subscription_tier || 'basic'}">${(student.subscription_tier || 'basic').toUpperCase()}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Joined:</label>
-                        <span>${new Date(student.created_at).toLocaleString()}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Last Sign In:</label>
-                        <span>${student.last_sign_in_at ? new Date(student.last_sign_in_at).toLocaleString() : 'Never'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h4>Learning Progress</h4>
-                <div class="progress-stats">
-                    <div class="stat">
-                        <span class="stat-number">${student.enrolled_courses}</span>
-                        <span class="stat-label">Enrolled Courses</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">${student.completed_modules}</span>
-                        <span class="stat-label">Completed Modules</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">${student.total_progress}%</span>
-                        <span class="stat-label">Overall Progress</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h4>Enrolled Courses</h4>
-                ${courses.length > 0 ? `
-                    <div class="courses-list">
-                        ${courses.map(course => `
-                            <div class="course-progress-item">
-                                <div class="course-info">
-                                    <h5>${course.title}</h5>
-                                    <span>Progress: ${course.progress}%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${course.progress}%"></div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : '<p>No enrolled courses</p>'}
-            </div>
-
-            <div class="detail-section">
-                <h4>Recent Activity</h4>
-                ${activity.length > 0 ? `
-                    <div class="activity-list">
-                        ${activity.slice(0, 5).map(act => `
-                            <div class="activity-item">
-                                <span>${this.formatActivity(act)}</span>
-                                <small>${new Date(act.created_at).toLocaleString()}</small>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : '<p>No recent activity</p>'}
-            </div>
-        </div>
-    `;
-
-    // You would show this in a modal similar to course/modals
-    this.showStudentDetailsModal(student.email, detailsHtml);
-}
-
-async getStudentCourses(studentId) {
-    try {
-        const { data, error } = await supabase
-            .from('user_courses')
-            .select(`
-                *,
-                courses (title)
-            `)
-            .eq('user_id', studentId)
-            .eq('payment_status', 'completed');
-
-        if (error) throw error;
-
-        // Calculate progress for each course
-        const coursesWithProgress = await Promise.all(
-            (data || []).map(async (userCourse) => {
-                const progress = await this.getCourseProgressForStudent(studentId, userCourse.course_id);
-                return {
-                    title: userCourse.courses?.title || 'Unknown Course',
-                    progress: progress.percentage
-                };
-            })
-        );
-
-        return coursesWithProgress;
-    } catch (error) {
-        console.error('Error loading student courses:', error);
-        return [];
-    }
-}
-
-async getCourseProgressForStudent(studentId, courseId) {
-    try {
-        const { data: modules, error } = await supabase
-            .from('course_modules')
-            .select('id')
-            .eq('course_id', courseId);
-
-        if (error) throw error;
-
-        const { data: progress, error: progressError } = await supabase
-            .from('user_progress')
-            .select('module_id, completed')
-            .eq('user_id', studentId)
-            .in('module_id', modules.map(m => m.id));
-
-        if (progressError) throw progressError;
-
-        const completed = progress?.filter(p => p.completed).length || 0;
-        const total = modules.length;
-
-        return {
-            completed,
-            total,
-            percentage: total > 0 ? Math.round((completed / total) * 100) : 0
-        };
-    } catch (error) {
-        console.error('Error calculating course progress:', error);
-        return { completed: 0, total: 0, percentage: 0 };
-    }
-}
-
-async getStudentProgress(studentId) {
-    try {
-        const { data, error } = await supabase
-            .from('user_progress')
-            .select('*')
-            .eq('user_id', studentId);
-
-        if (error) throw error;
-        return data || [];
-    } catch (error) {
-        console.error('Error loading student progress:', error);
-        return [];
-    }
-}
-
-async getStudentActivity(studentId) {
-    try {
-        const { data, error } = await supabase
-            .from('user_activity')
-            .select('*')
-            .eq('user_id', studentId)
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (error) throw error;
-        return data || [];
-    } catch (error) {
-        console.error('Error loading student activity:', error);
-        return [];
-    }
-}
-
-formatActivity(activity) {
-    switch (activity.activity_type) {
-        case 'module_access':
-            return `Accessed module: ${activity.metadata?.module_title || 'Unknown'}`;
-        case 'module_complete':
-            return `Completed module: ${activity.metadata?.module_title || 'Unknown'}`;
-        case 'course_purchase':
-            return `Purchased course: ${activity.metadata?.course_title || 'Unknown'}`;
-        case 'tier_upgrade':
-            return `Upgraded from ${activity.metadata?.from_tier} to ${activity.metadata?.to_tier}`;
-        default:
-            return 'Activity recorded';
-    }
-}
-
-showStudentDetailsModal(title, content) {
-    // Create or show modal with student details
-    // Similar to your existing modal system
-    console.log('Show student details:', title, content);
-    // Implement modal display logic here
-}
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Supabase Configuration
