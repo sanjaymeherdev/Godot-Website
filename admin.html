@@ -18,9 +18,9 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="nav-links">
-                    <a href="#dashboard">Dashboard</a>
-                    <a href="#courses">Courses</a>
-                    <a href="#students">Students</a>
+                    <a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a>
+                    <a href="#courses" onclick="showSection('courses')">Courses</a>
+                    <a href="#students" onclick="showSection('students')">Students</a>
                 </div>
                 
                 <!-- Admin User Menu -->
@@ -28,8 +28,34 @@
                     <span id="adminEmail" class="user-email"></span>
                     <button id="adminLogoutBtn" class="cta-button logout-btn">Logout</button>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             </nav>
         </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT 3D MP - ADMIN</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="#dashboard" onclick="showSection('dashboard'); closeMobileMenu();">Dashboard</a>
+                <a href="#courses" onclick="showSection('courses'); closeMobileMenu();">Courses</a>
+                <a href="#students" onclick="showSection('students'); closeMobileMenu();">Students</a>
+                
+                <!-- Mobile User Info -->
+                <div class="mobile-user-menu">
+                    <div class="mobile-user-email" id="mobileAdminEmail"></div>
+                    <button class="mobile-logout-btn" id="mobileAdminLogoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     </header>
 
     <!-- Admin Dashboard -->
@@ -50,6 +76,10 @@
                     <span id="totalCourses" class="stat-number">0</span>
                 </div>
                 <div class="stat-card">
+                    <h3>Active Courses</h3>
+                    <span id="activeCourses" class="stat-number">0</span>
+                </div>
+                <div class="stat-card">
                     <h3>Admin Status</h3>
                     <span class="stat-number">✅ Active</span>
                 </div>
@@ -67,10 +97,20 @@
                         <span class="action-icon">👥</span>
                         <span>View Students</span>
                     </button>
-                    <button class="action-btn" onclick="openCourseModal()">
+                    <button class="action-btn" onclick="adminPanel.openCourseModal()">
                         <span class="action-icon">➕</span>
                         <span>Add New Course</span>
                     </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-list" id="recentActivityList">
+                    <div class="placeholder-message">
+                        <p>Recent admin activities will appear here.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,13 +121,29 @@
         <div class="container">
             <div class="section-header">
                 <h2>Course Management</h2>
-                <button class="cta-button" onclick="openCourseModal()">+ Add New Course</button>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="courseSearch" placeholder="Search courses..." onkeyup="adminPanel.searchCourses(this.value)">
+                    </div>
+                    <button class="cta-button" onclick="adminPanel.openCourseModal()">
+                        <span class="action-icon">➕</span>
+                        Add New Course
+                    </button>
+                </div>
             </div>
 
+            <!-- Courses Filter -->
+            <div class="courses-filter">
+                <button class="filter-btn active" onclick="adminPanel.filterCourses('all')">All</button>
+                <button class="filter-btn" onclick="adminPanel.filterCourses('active')">Active</button>
+                <button class="filter-btn" onclick="adminPanel.filterCourses('inactive')">Inactive</button>
+                <button class="filter-btn" onclick="adminPanel.filterCourses('free')">Free</button>
+                <button class="filter-btn" onclick="adminPanel.filterCourses('premium')">Premium</button>
+            </div>
+
+            <!-- Courses List -->
             <div class="courses-list" id="adminCoursesList">
-                <div class="placeholder-message">
-                    <p>No courses yet. Click "Add New Course" to get started.</p>
-                </div>
+                <div class="loading-message">Loading courses...</div>
             </div>
         </div>
     </section>
@@ -97,6 +153,9 @@
         <div class="container">
             <div class="section-header">
                 <h2>Student Management</h2>
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Search students..." onkeyup="adminPanel.searchStudents(this.value)">
+                </div>
             </div>
 
             <div class="students-list" id="studentsList">
@@ -107,224 +166,92 @@
         </div>
     </section>
 
-    <!-- Simple Course Modal -->
+    <!-- Course Modal -->
     <div id="courseModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add New Course</h3>
-                <button class="close-btn" onclick="closeCourseModal()">✕</button>
+                <h3 id="courseModalTitle">Add New Course</h3>
+                <button class="close-btn" onclick="adminPanel.closeCourseModal()">✕</button>
             </div>
             <form id="courseForm" class="modal-form">
+                <input type="hidden" id="courseId" value="">
+                
                 <div class="form-group">
-                    <label for="courseTitle">Course Title</label>
-                    <input type="text" id="courseTitle" required>
+                    <label for="courseTitle">Course Title *</label>
+                    <input type="text" id="courseTitle" required placeholder="Enter course title">
                 </div>
                 
                 <div class="form-group">
-                    <label for="courseDescription">Description</label>
-                    <textarea id="courseDescription" rows="4" required></textarea>
+                    <label for="courseDescription">Description *</label>
+                    <textarea id="courseDescription" rows="4" required placeholder="Enter course description"></textarea>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="courseTier">Required Tier</label>
+                        <label for="courseTier">Required Tier *</label>
                         <select id="courseTier" required>
                             <option value="free">Free</option>
                             <option value="basic">Basic</option>
-                            <option value="pro">Pro</option>
+                            <option value="premium">Premium</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="coursePrice">Price ($)</label>
-                        <input type="number" id="coursePrice" step="0.01" min="0" required>
+                        <label for="coursePrice">Price ($) *</label>
+                        <input type="number" id="coursePrice" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseStatus">Status</label>
+                        <select id="courseStatus">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="courseActive" checked>
+                            <span class="checkmark"></span>
+                            Active Course
+                        </label>
                     </div>
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn-secondary" onclick="closeCourseModal()">Cancel</button>
-                    <button type="submit" class="cta-button">Create Course</button>
+                    <button type="button" class="btn-secondary" onclick="adminPanel.closeCourseModal()">Cancel</button>
+                    <button type="submit" class="cta-button" id="courseSubmitBtn">
+                        <span class="btn-text">Create Course</span>
+                        <span class="btn-loading" style="display: none;">Saving...</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmModalTitle">Confirm Action</h3>
+                <button class="close-btn" onclick="adminPanel.closeConfirmModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmModalMessage">Are you sure you want to perform this action?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="adminPanel.closeConfirmModal()">Cancel</button>
+                    <button type="button" class="cta-button btn-danger" id="confirmActionBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Display -->
     <div id="adminMessage" class="form-message" style="display: none;"></div>
 
-    <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
-        // Initialize Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        class AdminPanel {
-            constructor() {
-                this.currentUser = null;
-                this.init();
-            }
-
-            async init() {
-                await this.checkAdminAuth();
-                this.setupEventListeners();
-                this.loadDashboardData();
-            }
-
-            async checkAdminAuth() {
-                console.log('🔐 Checking admin auth...');
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (session?.user) {
-                    console.log('👤 User session found:', session.user.email);
-                    this.currentUser = session.user;
-                    
-                    const isAdmin = await this.checkAdminRole(session.user.id);
-                    console.log('🛡️ Admin check result:', isAdmin);
-                    
-                    if (!isAdmin) {
-                        console.log('❌ Access denied - not admin');
-                        this.redirectToLogin('Access denied. Admin privileges required.');
-                        return;
-                    }
-                    
-                    this.currentUser = session.user;
-                    document.getElementById('adminEmail').textContent = session.user.email;
-                    console.log('✅ Admin access granted');
-                    
-                } else {
-                    console.log('❌ No user session found');
-                    this.redirectToLogin('Please login to access admin panel.');
-                }
-            }
-
-            async checkAdminRole(userId) {
-                // Simple email-based admin check (same as login page)
-                const adminEmails = ['graphicyin@gmail.com'];
-                
-                if (!this.currentUser || !this.currentUser.email) {
-                    console.log('❌ No current user or email found');
-                    return false;
-                }
-                
-                const isAdmin = adminEmails.includes(this.currentUser.email.toLowerCase());
-                console.log('🛡️ Admin check for', this.currentUser.email, ':', isAdmin);
-                return isAdmin;
-            }
-
-            redirectToLogin(message = '') {
-                console.log('🔀 Redirecting to login:', message);
-                if (message) {
-                    localStorage.setItem('adminLoginMessage', message);
-                }
-                window.location.href = 'admin-login.html';
-            }
-
-            setupEventListeners() {
-                // Logout button
-                document.getElementById('adminLogoutBtn').addEventListener('click', () => this.logout());
-
-                // Course form
-                document.getElementById('courseForm').addEventListener('submit', (e) => this.handleCourseSubmit(e));
-            }
-
-            async loadDashboardData() {
-                await this.loadStats();
-            }
-
-            async loadStats() {
-                try {
-                    // Get total students
-                    const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
-                    if (!usersError) {
-                        document.getElementById('totalStudents').textContent = users.users.length;
-                    }
-
-                    // Get total courses
-                    const { data: courses, error: coursesError } = await supabase
-                        .from('courses')
-                        .select('id');
-                    
-                    if (!coursesError) {
-                        document.getElementById('totalCourses').textContent = courses.length;
-                    }
-
-                } catch (error) {
-                    console.error('Error loading stats:', error);
-                }
-            }
-
-            async handleCourseSubmit(e) {
-                e.preventDefault();
-                
-                const courseData = {
-                    title: document.getElementById('courseTitle').value,
-                    description: document.getElementById('courseDescription').value,
-                    required_tier: document.getElementById('courseTier').value,
-                    price: parseFloat(document.getElementById('coursePrice').value),
-                    is_active: true
-                };
-
-                try {
-                    const { error } = await supabase
-                        .from('courses')
-                        .insert([courseData]);
-
-                    if (error) throw error;
-
-                    this.showMessage('Course created successfully!', 'success');
-                    this.closeCourseModal();
-                    this.loadDashboardData();
-                    
-                } catch (error) {
-                    console.error('Error creating course:', error);
-                    this.showMessage('Error creating course: ' + error.message, 'error');
-                }
-            }
-
-            async logout() {
-                try {
-                    const { error } = await supabase.auth.signOut();
-                    if (error) throw error;
-                    window.location.href = 'admin-login.html';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    this.showMessage('Logout failed: ' + error.message, 'error');
-                }
-            }
-
-            showMessage(message, type) {
-                const messageEl = document.getElementById('adminMessage');
-                messageEl.textContent = message;
-                messageEl.className = `form-message ${type}`;
-                messageEl.style.display = 'block';
-                
-                setTimeout(() => {
-                    messageEl.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-        // Global functions for modals and navigation
-        function showSection(sectionId) {
-            document.querySelectorAll('.admin-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
-        }
-
-        function openCourseModal() {
-            document.getElementById('courseModal').classList.add('active');
-        }
-
-        function closeCourseModal() {
-            document.getElementById('courseModal').classList.remove('active');
-            document.getElementById('courseForm').reset();
-        }
-
-        // Initialize admin panel
-        document.addEventListener('DOMContentLoaded', function() {
-            window.adminPanel = new AdminPanel();
-        });
-    </script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
