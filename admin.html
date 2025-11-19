@@ -332,33 +332,38 @@
 
             async loadStudents() {
                 try {
-                    // Get all users from auth
-                    const { data: { users }, error } = await supabase.auth.admin.listUsers();
+                    console.log('👥 Loading students from profiles...');
                     
-                    if (error) throw error;
-                    
-                    // Get user profiles
-                    const { data: profiles, error: profileError } = await supabase
+                    // Get all profiles with user data
+                    const { data: profiles, error } = await supabase
                         .from('profiles')
-                        .select('*');
+                        .select(`
+                            *,
+                            auth_users:auth.users(email, created_at, last_sign_in_at)
+                        `);
 
-                    if (profileError) throw profileError;
+                    if (error) {
+                        console.error('Error loading profiles:', error);
+                        throw error;
+                    }
 
-                    // Combine user data with profiles
-                    this.students = users.map(user => {
-                        const profile = profiles.find(p => p.id === user.id) || {};
+                    console.log('📊 Profiles data:', profiles);
+
+                    // Transform the data to match our structure
+                    this.students = profiles.map(profile => {
                         return {
-                            id: user.id,
-                            email: user.email,
-                            created_at: user.created_at,
-                            last_sign_in_at: user.last_sign_in_at,
+                            id: profile.id,
+                            email: profile.email || 'No email',
+                            created_at: profile.created_at,
+                            last_sign_in_at: profile.last_sign_in_at,
                             subscription_tier: profile.subscription_tier || 'free'
                         };
                     });
 
-                    console.log('👥 Loaded students:', this.students);
+                    console.log('✅ Final students list:', this.students);
+
                 } catch (error) {
-                    console.error('Error loading students:', error);
+                    console.error('❌ Error loading students:', error);
                     this.students = [];
                 }
             }
@@ -372,6 +377,7 @@
 
                     if (error) throw error;
                     this.chapters = data || [];
+                    console.log('📖 Loaded chapters:', this.chapters);
                 } catch (error) {
                     console.error('Error loading chapters:', error);
                     this.chapters = [];
@@ -459,10 +465,12 @@
                 const container = document.getElementById('studentsList');
                 if (!container) return;
 
+                console.log('🎨 Rendering students:', this.students);
+
                 if (this.students.length === 0) {
                     container.innerHTML = `
                         <div class="placeholder-message">
-                            <p>No students found yet.</p>
+                            <p>No students found yet. Students will appear here when they sign up.</p>
                         </div>
                     `;
                     return;
@@ -542,6 +550,8 @@
                     order_index: parseInt(document.getElementById('chapterOrder').value),
                     video_url: document.getElementById('chapterVideoUrl').value || null
                 };
+
+                console.log('💾 Saving chapter:', chapterData);
 
                 try {
                     if (chapterId) {
