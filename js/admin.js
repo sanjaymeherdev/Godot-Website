@@ -526,7 +526,7 @@ class AdminPanel {
                 this.filteredCourses = this.courses.filter(course => !course.is_active);
                 break;
             case 'free':
-                this.filteredCourses = this.courses.filter(course => course.required_tier === 'free');
+                this.filteredCourses = this.courses.filter(course => course.required_tier === 'basic');
                 break;
             case 'premium':
                 this.filteredCourses = this.courses.filter(course => course.required_tier === 'premium');
