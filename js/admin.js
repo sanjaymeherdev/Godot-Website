@@ -19,7 +19,7 @@ class AdminPanel {
     }
 
     async checkAdminAuth() {
-        console.log('🔐 Checking admin auth...');
+        console.log('🔍 Checking admin auth...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (session?.user) {
@@ -114,6 +114,7 @@ class AdminPanel {
 
     async loadDashboardData() {
         await this.loadCourses();
+        await this.loadStudents();
         await this.loadStats();
     }
 
@@ -195,6 +196,27 @@ class AdminPanel {
             console.error('Error loading modules:', error);
             this.showMessage('Error loading modules: ' + error.message, 'error');
             this.modules = [];
+        }
+    }
+
+    async loadStudents() {
+        try {
+            this.showLoading('students');
+            
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            
+            this.students = data || [];
+            this.renderStudents();
+            
+        } catch (error) {
+            console.error('Error loading students:', error);
+            this.showMessage('Error loading students: ' + error.message, 'error');
+            this.students = [];
         }
     }
 
@@ -297,6 +319,7 @@ class AdminPanel {
                     await this.loadCourses();
                     await this.loadStats();
                     this.showMessage('✅ Course deleted successfully!', 'success');
+                    this.closeConfirmModal();
                     
                 } catch (error) {
                     console.error('Error deleting course:', error);
@@ -386,6 +409,7 @@ class AdminPanel {
                     await this.loadModules(this.currentCourseId);
                     await this.loadStats();
                     this.showMessage('✅ Module deleted successfully!', 'success');
+                    this.closeConfirmModal();
                     
                 } catch (error) {
                     console.error('Error deleting module:', error);
@@ -395,7 +419,7 @@ class AdminPanel {
         );
     }
 
-    // COURSES RENDERING AND FILTERING - UPDATED FILTER LOGIC
+    // COURSES RENDERING AND FILTERING
     renderCourses() {
         const container = document.getElementById('adminCoursesList');
         if (!container) return;
@@ -410,7 +434,6 @@ class AdminPanel {
         }
 
         container.innerHTML = this.filteredCourses.map(course => {
-            // Only show status badge, not active/inactive
             const statusClass = `status-${course.status}`;
             const statusText = course.status.charAt(0).toUpperCase() + course.status.slice(1);
             
@@ -444,7 +467,6 @@ class AdminPanel {
         }).join('');
     }
 
-    // UPDATED FILTER METHOD - 'free' changed to 'basic'
     filterCourses(filter) {
         this.currentFilter = filter;
         
@@ -461,7 +483,7 @@ class AdminPanel {
             case 'inactive':
                 this.filteredCourses = this.courses.filter(course => !course.is_active);
                 break;
-            case 'basic':  // CHANGED FROM 'free' TO 'basic'
+            case 'basic':
                 this.filteredCourses = this.courses.filter(course => course.required_tier === 'basic');
                 break;
             case 'premium':
@@ -524,22 +546,159 @@ class AdminPanel {
         }).join('');
     }
 
-    // STUDENTS MANAGEMENT - SIMPLIFIED
+    // STUDENTS MANAGEMENT
     renderStudents() {
         const container = document.getElementById('studentsList');
         if (!container) return;
 
-        container.innerHTML = `
-            <div class="placeholder-message">
-                <p>Student management features are currently being developed.</p>
-                <p>Total student count is displayed in the Dashboard.</p>
-            </div>
-        `;
+        if (this.students.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No students found. Students will appear here once they sign up.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.students.map(student => {
+            const createdDate = new Date(student.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            const updatedDate = student.updated_at 
+                ? new Date(student.updated_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                })
+                : 'N/A';
+
+            const tierClass = student.subscription_tier === 'premium' ? 'tier-premium' : 'tier-basic';
+            const tierText = student.subscription_tier ? student.subscription_tier.toUpperCase() : 'BASIC';
+
+            return `
+                <div class="student-item">
+                    <div class="student-info">
+                        <h3>${student.email}</h3>
+                        <div class="student-meta">
+                            <span class="student-tier ${tierClass}">${tierText}</span>
+                            <span>Created: ${createdDate}</span>
+                            <span>Updated: ${updatedDate}</span>
+                        </div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">View Details</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     searchStudents(query) {
-        // Student search functionality removed
-        console.log('Student search is not yet implemented');
+        const container = document.getElementById('studentsList');
+        if (!container) return;
+
+        if (!query.trim()) {
+            this.renderStudents();
+            return;
+        }
+
+        const searchTerm = query.toLowerCase();
+        const filteredStudents = this.students.filter(student => 
+            student.email.toLowerCase().includes(searchTerm) ||
+            (student.subscription_tier && student.subscription_tier.toLowerCase().includes(searchTerm))
+        );
+
+        if (filteredStudents.length === 0) {
+            container.innerHTML = `
+                <div class="placeholder-message">
+                    <p>No students found matching "${query}"</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filteredStudents.map(student => {
+            const createdDate = new Date(student.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            const updatedDate = student.updated_at 
+                ? new Date(student.updated_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                })
+                : 'N/A';
+
+            const tierClass = student.subscription_tier === 'premium' ? 'tier-premium' : 'tier-basic';
+            const tierText = student.subscription_tier ? student.subscription_tier.toUpperCase() : 'BASIC';
+
+            return `
+                <div class="student-item">
+                    <div class="student-info">
+                        <h3>${student.email}</h3>
+                        <div class="student-meta">
+                            <span class="student-tier ${tierClass}">${tierText}</span>
+                            <span>Created: ${createdDate}</span>
+                            <span>Updated: ${updatedDate}</span>
+                        </div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn-small" onclick="adminPanel.viewStudentDetails('${student.id}')">View Details</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    viewStudentDetails(studentId) {
+        const student = this.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const createdDate = new Date(student.created_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const updatedDate = student.updated_at 
+            ? new Date(student.updated_at).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+            : 'Not updated yet';
+
+        const detailsHTML = `
+            <div style="text-align: left; line-height: 1.8;">
+                <p><strong>Email:</strong> ${student.email}</p>
+                <p><strong>Subscription Tier:</strong> ${student.subscription_tier || 'basic'}</p>
+                <p><strong>Created:</strong> ${createdDate}</p>
+                <p><strong>Last Updated:</strong> ${updatedDate}</p>
+                <p><strong>User ID:</strong> ${student.id}</p>
+            </div>
+        `;
+
+        document.getElementById('confirmModalTitle').textContent = 'Student Details';
+        document.getElementById('confirmModalMessage').innerHTML = detailsHTML;
+        
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        confirmBtn.textContent = 'Close';
+        confirmBtn.className = 'cta-button';
+        confirmBtn.onclick = () => {
+            this.closeConfirmModal();
+        };
+        
+        document.getElementById('confirmModal').classList.add('active');
     }
 
     // MODAL MANAGEMENT
@@ -567,7 +726,7 @@ class AdminPanel {
             form.reset();
             document.getElementById('courseId').value = '';
             document.getElementById('courseStatus').value = 'draft';
-            document.getElementById('courseTier').value = 'basic'; // DEFAULT SET TO BASIC
+            document.getElementById('courseTier').value = 'basic';
             document.getElementById('courseActive').checked = true;
         }
         
@@ -607,7 +766,7 @@ class AdminPanel {
             form.reset();
             document.getElementById('moduleId').value = '';
             document.getElementById('moduleOrder').value = this.modules.length + 1;
-            document.getElementById('moduleTier').value = 'basic'; // DEFAULT SET TO BASIC
+            document.getElementById('moduleTier').value = 'basic';
             document.getElementById('moduleIsPremium').checked = false;
         }
         
@@ -641,7 +800,7 @@ class AdminPanel {
 
     showConfirmModal(title, message, confirmCallback) {
         document.getElementById('confirmModalTitle').textContent = title;
-        document.getElementById('confirmModalMessage').textContent = message;
+        document.getElementById('confirmModalMessage').innerHTML = message;
         
         const confirmBtn = document.getElementById('confirmActionBtn');
         confirmBtn.onclick = confirmCallback;
@@ -653,9 +812,20 @@ class AdminPanel {
         document.getElementById('confirmModal').classList.remove('active');
     }
 
+    renderDashboard() {
+        // Dashboard is rendered on load, this can be used for dynamic updates
+        console.log('Dashboard rendered');
+    }
+
     // UTILITY METHODS
     showLoading(section) {
-        const container = document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}List`);
+        let container;
+        if (section === 'students') {
+            container = document.getElementById('studentsList');
+        } else {
+            container = document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}List`);
+        }
+        
         if (container) {
             container.innerHTML = '<div class="loading-message">Loading...</div>';
         }
@@ -693,9 +863,9 @@ class AdminPanel {
         }
     }
 
-    // Student management methods - simplified
+    // Student management methods
     editStudent(studentId) {
-        this.showMessage('Student management features are currently being developed.', 'info');
+        this.viewStudentDetails(studentId);
     }
 }
 
@@ -709,7 +879,7 @@ function showSection(sectionId) {
     // Show selected section
     document.getElementById(sectionId).style.display = 'block';
     
-    // Update active state in navigation (optional)
+    // Update active state in navigation
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.classList.remove('active');
     });
