@@ -223,32 +223,111 @@
             }
 
             async loadUserData() {
-                if (!this.currentUser) return;
+    if (!this.currentUser) return;
 
-                try {
-                    // Try to get profile by user ID
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', this.currentUser.id)
-                        .single();
+    try {
+        // First, get the profile
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', this.currentUser.id)
+            .single();
 
-                    if (error) {
-                        // Profile not found - create one
-                        console.log('Profile not found, creating new profile...');
-                        await this.createUserProfile();
-                        return;
-                    }
+        if (error) {
+            // Profile not found - create new one with email from Auth
+            console.log('Profile not found, creating new profile...');
+            await this.createUserProfile();
+            return;
+        }
 
-                    this.userProfile = data;
-                    this.updateTierUI();
-                    
-                } catch (error) {
-                    console.error('Error loading user profile:', error);
-                    this.setDefaultTier();
-                }
-            }
+        // Profile exists - check if email is null and update if needed
+        if (!data.email || data.email === null || data.email === '') {
+            console.log('Email is null in profile, updating from Auth...');
+            await this.updateProfileEmail();
+            return;
+        }
 
+        this.userProfile = data;
+        this.updateTierUI();
+        
+    } catch (error) {
+        console.error('Error loading user profile:', error);
+        this.setDefaultTier();
+    }
+}
+
+async createUserProfile() {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .insert([{
+                id: this.currentUser.id,
+                email: this.currentUser.email, // Get email from Auth user
+                subscription_tier: 'free',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        
+        this.userProfile = data;
+        this.updateTierUI();
+        console.log('✅ New profile created with email:', this.userProfile.email);
+        
+    } catch (error) {
+        console.error('Error creating user profile:', error);
+        this.setDefaultTier();
+    }
+}
+
+async updateProfileEmail() {
+    try {
+        // Update the profile with email from Auth user
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({
+                email: this.currentUser.email, // Get email from Auth user
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', this.currentUser.id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        
+        this.userProfile = data;
+        this.updateTierUI();
+        console.log('✅ Profile email updated:', this.userProfile.email);
+        
+    } catch (error) {
+        console.error('Error updating profile email:', error);
+        // Even if update fails, try to load the profile without email
+        await this.loadProfileWithoutEmail();
+    }
+}
+
+async loadProfileWithoutEmail() {
+    try {
+        // Load profile even if email update failed
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', this.currentUser.id)
+            .single();
+
+        if (error) throw error;
+        
+        this.userProfile = data;
+        this.updateTierUI();
+        console.log('✅ Profile loaded (email may be null):', this.userProfile);
+        
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        this.setDefaultTier();
+    }
+}
             updateTierUI() {
                 if (!this.userProfile) {
                     this.setDefaultTier();
