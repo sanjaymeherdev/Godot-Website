@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Courses - Godot 3D MP LMS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/lms.css">
+    <style>
+        /* Additional styles for the free course page */
+        .free-course-page {
+            padding: 120px 0 50px;
+            background: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .youtube-banner {
+            background: linear-gradient(135deg, #FF0000, #CC0000);
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .youtube-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>');
+            background-size: 100px;
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+        }
+        
+        .youtube-banner h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .youtube-banner p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .youtube-subscribe-btn {
+            background: white;
+            color: #FF0000;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .youtube-subscribe-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .videos-section {
+            margin-top: 3rem;
+        }
+        
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .video-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .video-card:hover .video-thumbnail img {
+            transform: scale(1.05);
+        }
+        
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.8);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .video-card:hover .play-icon {
+            opacity: 1;
+        }
+        
+        .video-info {
+            padding: 1.5rem;
+        }
+        
+        .video-info h3 {
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            line-height: 1.4;
+        }
+        
+        .video-info p {
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        .back-to-courses {
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .youtube-banner h1 {
+                font-size: 2rem;
+            }
+            
+            .youtube-banner p {
+                font-size: 1rem;
+            }
+            
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT 3D MP</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="course.html">Courses</a>
+                    <a href="freecourse.html" class="active">Free Content</a>
+                </div>
+                
+                <!-- Desktop User Menu -->
+                <div class="user-menu">
+                    <span id="userEmail" class="user-email"></span>
+                    <span id="userTier" class="user-tier"></span>
+                    <button id="logoutBtn" class="cta-button logout-btn">Logout</button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT 3D MP</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="course.html" onclick="closeMobileMenu()">Courses</a>
+                <a href="freecourse.html" onclick="closeMobileMenu()" class="active">Free Content</a>
+                
+                <!-- Mobile User Info -->
+                <div class="mobile-user-menu">
+                    <div class="mobile-user-email" id="mobileUserEmail"></div>
+                    <div class="mobile-user-tier" id="mobileUserTier"></div>
+                    <button class="mobile-logout-btn" id="mobileLogoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Free Course Content -->
+    <section class="free-course-page">
+        <div class="container">
+            <a href="course.html" class="cta-button back-to-courses">← Back to All Courses</a>
+            
+            <!-- YouTube Channel Banner -->
+            <div class="youtube-banner">
+                <h1>Free Godot Tutorials</h1>
+                <p>Learn Godot 4 and 3D multiplayer development with our free YouTube tutorials. New content added regularly!</p>
+                <a href="https://www.youtube.com/@graphicyin" target="_blank" class="youtube-subscribe-btn">
+                    <span>📺</span> Subscribe to Our Channel
+                </a>
+            </div>
+            
+            <!-- Videos Section -->
+            <div class="videos-section">
+                <h2 class="section-title">Latest Tutorials</h2>
+                
+                <div class="videos-grid" id="videosContainer">
+                    <!-- Video 1 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Godot 4 3D Multiplayer Setup">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Godot 4 3D Multiplayer Setup - Complete Guide</h3>
+                            <p>Learn how to set up a complete 3D multiplayer system in Godot 4 with client-server architecture and RPC calls.</p>
+                            <div class="video-meta">
+                                <span>45:22</span>
+                                <span>2 weeks ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Character Controller in Godot 4">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Advanced Character Controller in Godot 4</h3>
+                            <p>Create a robust 3D character controller with animations, camera controls, and physics interactions.</p>
+                            <div class="video-meta">
+                                <span>32:15</span>
+                                <span>1 month ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 3 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Battle Royale Game Mechanics">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Battle Royale Game Mechanics in Godot</h3>
+                            <p>Implement shrinking safe zones, minimaps, and player elimination systems for your battle royale game.</p>
+                            <div class="video-meta">
+                                <span>28:47</span>
+                                <span>2 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 4 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Networking Optimization">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Multiplayer Networking Optimization</h3>
+                            <p>Learn techniques to optimize your Godot multiplayer games for better performance and reduced latency.</p>
+                            <div class="video-meta">
+                                <span>37:12</span>
+                                <span>3 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 5 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Weapon Systems">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Creating Weapon Systems in Godot 4</h3>
+                            <p>Build gun and melee weapon systems with raycasting, animations, and multiplayer synchronization.</p>
+                            <div class="video-meta">
+                                <span>41:05</span>
+                                <span>4 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video 6 -->
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="UI and HUD Design">
+                            <div class="play-icon">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <h3>Game UI and HUD Design in Godot</h3>
+                            <p>Create professional user interfaces, health bars, minimaps, and score displays for your games.</p>
+                            <div class="video-meta">
+                                <span>29:33</span>
+                                <span>5 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- YouTube Embed Section -->
+            <div class="videos-section">
+                <h2 class="section-title">Featured Tutorial</h2>
+                <div class="video-container" style="max-width: 800px; margin: 0 auto;">
+                    <div class="video-player">
+                        <iframe 
+                            width="100%" 
+                            height="450" 
+                            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                            title="Featured Godot Tutorial" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="video-info" style="text-align: center; margin-top: 1rem;">
+                        <h3>Getting Started with Godot 4 Multiplayer</h3>
+                        <p>A comprehensive introduction to multiplayer game development in Godot 4, covering the fundamentals you need to know.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call to Action -->
+            <div style="text-align: center; margin-top: 4rem; padding: 3rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px;">
+                <h2 style="color: var(--primary); margin-bottom: 1rem;">Want More In-Depth Content?</h2>
+                <p style="color: #ccc; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Our premium courses include complete project files, downloadable resources, and direct support from instructors.
+                </p>
+                <a href="course.html" class="cta-button">Explore Premium Courses</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        // Video card click handlers
+        document.querySelectorAll('.video-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // In a real implementation, this would open the video in a modal or redirect to YouTube
+                const videoTitle = this.querySelector('h3').textContent;
+                alert(`Playing: ${videoTitle}\n\nIn a real implementation, this would open the YouTube video.`);
+            });
+        });
+
+        // Check authentication state
+        const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function checkAuthState() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            const userEmail = document.getElementById('userEmail');
+            const mobileUserEmail = document.getElementById('mobileUserEmail');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+            if (session && session.user) {
+                userEmail.textContent = session.user.email;
+                mobileUserEmail.textContent = session.user.email;
+                
+                // Set up logout handlers
+                logoutBtn.addEventListener('click', () => logout());
+                mobileLogoutBtn.addEventListener('click', () => logout());
+            } else {
+                // If not logged in, redirect to login
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            
+            // Add animation to video cards
+            const observerOptions = { 
+                threshold: 0.1, 
+                rootMargin: '0px 0px -50px 0px' 
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.video-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
