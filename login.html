@@ -238,6 +238,30 @@
             }
         }
 
+        // Create user profile in profiles table
+        async function createUserProfile(userId, userEmail) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        id: userId,
+                        email: userEmail,
+                        subscription_tier: 'free',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                console.log('✅ New user profile created with free tier');
+                return { success: true, data };
+            } catch (error) {
+                console.error('❌ Error creating user profile:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
         // Form toggles
         document.getElementById('showSignup')?.addEventListener('click', (e) => {
             e.preventDefault();
@@ -440,7 +464,8 @@
             }
 
             try {
-                const { data, error } = await supabase.auth.signUp({
+                // Step 1: Create Auth user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -448,22 +473,29 @@
                     }
                 });
 
-                if (error) {
-                    throw error;
+                if (authError) {
+                    throw authError;
                 }
 
-                if (data.user) {
-                    showMessage('🎉 Account created! Please check your email to confirm your account.', 'success');
+                if (authData.user) {
+                    // Step 2: Create profile in profiles table
+                    const profileResult = await createUserProfile(authData.user.id, email);
                     
-                    // Clear form
-                    document.getElementById('registerForm').reset();
-                    
-                    // Switch back to login after delay
-                    setTimeout(() => {
-                        document.getElementById('loginForm').style.display = 'block';
-                        document.getElementById('signupForm').style.display = 'none';
-                        showMessage('✅ Please check your email and confirm your account, then login.', 'success');
-                    }, 3000);
+                    if (profileResult.success) {
+                        showMessage('🎉 Account created! Please check your email to confirm your account.', 'success');
+                        
+                        // Clear form
+                        document.getElementById('registerForm').reset();
+                        
+                        // Switch back to login after delay
+                        setTimeout(() => {
+                            document.getElementById('loginForm').style.display = 'block';
+                            document.getElementById('signupForm').style.display = 'none';
+                            showMessage('✅ Please check your email and confirm your account, then login.', 'success');
+                        }, 3000);
+                    } else {
+                        throw new Error('Failed to create user profile: ' + profileResult.error);
+                    }
                 }
 
             } catch (error) {
@@ -471,6 +503,8 @@
                 
                 if (error.message.includes('already registered')) {
                     showMessage('❌ An account with this email already exists', 'error');
+                } else if (error.message.includes('Failed to create user profile')) {
+                    showMessage('❌ Account created but profile setup failed. Please contact support.', 'error');
                 } else {
                     showMessage('❌ ' + error.message, 'error');
                 }
@@ -644,7 +678,7 @@
         // Initialize auth check when page loads
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthState();
-            console.log('Auth system initialized with Supabase - Manual token extraction enabled');
+            console.log('Auth system initialized with Supabase - Auto profile creation enabled');
         });
     </script>
 </body>
