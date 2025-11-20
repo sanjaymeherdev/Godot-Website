@@ -423,95 +423,79 @@
         });
 
         // Register Form
-        document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('signupBtn');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoading = submitBtn.querySelector('.btn-loading');
+document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('signupBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
 
-            // Show loading state
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline';
-            submitBtn.disabled = true;
+    // Show loading state
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    submitBtn.disabled = true;
 
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // Validation
-            if (!email || !password || !confirmPassword) {
-                showMessage('Please fill in all fields', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
+    // Validation
+    if (!email || !password || !confirmPassword) {
+        showMessage('Please fill in all fields', 'error');
+        resetButtonState(submitBtn, btnText, btnLoading);
+        return;
+    }
 
-            if (!isValidEmail(email)) {
-                showMessage('Please enter a valid email address', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
+    if (!isValidEmail(email)) {
+        showMessage('Please enter a valid email address', 'error');
+        resetButtonState(submitBtn, btnText, btnLoading);
+        return;
+    }
 
-            if (password.length < 6) {
-                showMessage('Password must be at least 6 characters', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
+    if (password.length < 6) {
+        showMessage('Password must be at least 6 characters', 'error');
+        resetButtonState(submitBtn, btnText, btnLoading);
+        return;
+    }
 
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
+    if (password !== confirmPassword) {
+        showMessage('Passwords do not match', 'error');
+        resetButtonState(submitBtn, btnText, btnLoading);
+        return;
+    }
 
-            try {
-                // Step 1: Create Auth user
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        emailRedirectTo: window.location.origin + '/login.html'
-                    }
-                });
-
-                if (authError) {
-                    throw authError;
-                }
-
-                if (authData.user) {
-                    // Step 2: Create profile in profiles table
-                    const profileResult = await createUserProfile(authData.user.id, email);
-                    
-                    if (profileResult.success) {
-                        showMessage('🎉 Account created! Please check your email to confirm your account.', 'success');
-                        
-                        // Clear form
-                        document.getElementById('registerForm').reset();
-                        
-                        // Switch back to login after delay
-                        setTimeout(() => {
-                            document.getElementById('loginForm').style.display = 'block';
-                            document.getElementById('signupForm').style.display = 'none';
-                            showMessage('✅ Please check your email and confirm your account, then login.', 'success');
-                        }, 3000);
-                    } else {
-                        throw new Error('Failed to create user profile: ' + profileResult.error);
-                    }
-                }
-
-            } catch (error) {
-                console.error('Signup error:', error);
-                
-                if (error.message.includes('already registered')) {
-                    showMessage('❌ An account with this email already exists', 'error');
-                } else if (error.message.includes('Failed to create user profile')) {
-                    showMessage('❌ Account created but profile setup failed. Please contact support.', 'error');
-                } else {
-                    showMessage('❌ ' + error.message, 'error');
-                }
-            } finally {
-                resetButtonState(submitBtn, btnText, btnLoading);
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                emailRedirectTo: window.location.origin + '/login.html'
             }
         });
+
+        if (error) {
+            throw error;
+        }
+
+        // Always show success and redirect to login
+        showMessage('🎉 Account created successfully! You can now login.', 'success');
+        
+        // Clear form and show login immediately
+        document.getElementById('registerForm').reset();
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('signupForm').style.display = 'none';
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        
+        if (error.message.includes('already registered')) {
+            showMessage('❌ An account with this email already exists', 'error');
+        } else {
+            showMessage('❌ ' + error.message, 'error');
+        }
+    } finally {
+        resetButtonState(submitBtn, btnText, btnLoading);
+    }
+});
 
         // Password Reset Request Form
         document.getElementById('resetPasswordForm')?.addEventListener('submit', async (e) => {
