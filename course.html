@@ -86,7 +86,7 @@
             <div id="coursesView" class="courses-view">
                 <h2>Available Courses</h2>
                 <div class="subscription-info">
-                    <p>Current Tier: <strong id="currentTier">Basic</strong></p>
+                    <p>Current Tier: <strong id="currentTier">Free</strong></p>
                     <p>Purchased Courses: <strong id="purchasedCount">0</strong></p>
                 </div>
                 <div id="coursesContainer" class="courses-grid">
@@ -150,7 +150,7 @@
                     <div class="subscription-status">
                         <div class="tier-info">
                             <span class="tier-label">Current Tier:</span>
-                            <span id="progressTier" class="tier-value">Basic</span>
+                            <span id="progressTier" class="tier-value">Free</span>
                         </div>
                         <div class="upgrade-options">
                             <!-- Upgrade options will be dynamically loaded -->
@@ -252,27 +252,17 @@
                 if (!this.currentUser) return;
 
                 try {
-                    // First try to get profile by user ID
-                    let { data, error } = await supabase
+                    // Try to get profile by user ID
+                    const { data, error } = await supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', this.currentUser.id)
                         .single();
 
-                    // If no profile found by ID, try by email
-                    if (error || !data) {
-                        console.log('No profile found by ID, trying by email...');
-                        ({ data, error } = await supabase
-                            .from('profiles')
-                            .select('*')
-                            .eq('email', this.currentUser.email)
-                            .single());
-                    }
-
-                    // If still no profile found, create one
-                    if (error || !data) {
-                        console.log('No profile found, creating new profile...');
-                        await this.createUserProfile();
+                    if (error) {
+                        // Profile not found - check if user exists in Auth but not in Profiles
+                        console.log('Profile not found, checking if user exists in Auth...');
+                        await this.handleMissingProfile();
                         return;
                     }
 
@@ -280,7 +270,7 @@
                     
                     // Update UI with user tier
                     const userTier = this.userProfile.subscription_tier?.trim();
-                    const displayTier = userTier && userTier !== '' ? userTier : 'basic';
+                    const displayTier = userTier && userTier !== '' ? userTier : 'free';
                     
                     document.getElementById('currentTier').textContent = displayTier;
                     document.getElementById('displayTier').textContent = displayTier;
@@ -290,19 +280,29 @@
                     
                 } catch (error) {
                     console.error('Error loading user profile:', error);
-                    // Create profile if there's an error
-                    await this.createUserProfile();
+                    this.setDefaultTier();
                 }
             }
 
-            async createUserProfile() {
+            async handleMissingProfile() {
                 try {
+                    // Verify user exists in Auth
+                    const { data: authData, error: authError } = await supabase.auth.getUser();
+                    
+                    if (authError || !authData.user) {
+                        console.log('User not found in Auth either');
+                        this.setDefaultTier();
+                        return;
+                    }
+
+                    // User exists in Auth but not in Profiles - create profile
+                    console.log('User exists in Auth but not in Profiles, creating profile...');
                     const { data, error } = await supabase
                         .from('profiles')
                         .insert([{
                             id: this.currentUser.id,
                             email: this.currentUser.email,
-                            subscription_tier: 'basic',
+                            subscription_tier: 'free',
                             created_at: new Date().toISOString(),
                             updated_at: new Date().toISOString()
                         }])
@@ -313,16 +313,16 @@
                     
                     this.userProfile = data;
                     this.setDefaultTier();
-                    console.log('New profile created with basic tier');
+                    console.log('New profile created with free tier for existing Auth user');
                     
                 } catch (error) {
-                    console.error('Error creating user profile:', error);
+                    console.error('Error creating profile for Auth user:', error);
                     this.setDefaultTier();
                 }
             }
 
             setDefaultTier() {
-                const defaultTier = 'basic';
+                const defaultTier = 'free';
                 document.getElementById('currentTier').textContent = defaultTier;
                 document.getElementById('displayTier').textContent = defaultTier;
                 document.getElementById('progressTier').textContent = defaultTier;
@@ -391,7 +391,7 @@
                             <p>${course.description}</p>
                             <div class="course-meta">
                                 <span class="course-tier">${course.required_tier.toUpperCase()} TIER</span>
-                                <span class="course-price">${course.required_tier === 'basic' ? 'FREE' : 'PREMIUM'}</span>
+                                <span class="course-price">${course.required_tier === 'free' ? 'FREE' : 'PREMIUM'}</span>
                             </div>
                             <div class="course-actions">
                                 ${hasAccess ? 
@@ -412,7 +412,7 @@
                 if (!course) return false;
 
                 // Check if user's tier meets course requirement
-                const tierLevel = { 'basic': 1, 'premium': 2 };
+                const tierLevel = { 'free': 1, 'premium': 2 };
                 const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
                 const courseTierLevel = tierLevel[course.required_tier] || 1;
                 
@@ -420,7 +420,7 @@
             }
 
             canUpgradeToCourse(course) {
-                const tierLevel = { 'basic': 1, 'premium': 2 };
+                const tierLevel = { 'free': 1, 'premium': 2 };
                 const userTierLevel = tierLevel[this.userProfile?.subscription_tier] || 1;
                 const courseTierLevel = tierLevel[course.required_tier] || 1;
                 
@@ -438,7 +438,7 @@
                 document.getElementById('courseDetailTitle').textContent = this.currentCourse.title;
                 document.getElementById('courseDetailDescription').textContent = this.currentCourse.description;
                 document.getElementById('courseDetailTier').textContent = this.currentCourse.required_tier.toUpperCase() + ' TIER';
-                document.getElementById('courseDetailPrice').textContent = this.currentCourse.required_tier === 'basic' ? 'FREE' : 'PREMIUM';
+                document.getElementById('courseDetailPrice').textContent = this.currentCourse.required_tier === 'free' ? 'FREE' : 'PREMIUM';
 
                 await this.loadCourseModules(courseId);
                 await this.loadCourseDownloads(courseId);
@@ -544,9 +544,9 @@
                 const upgradeContainer = document.querySelector('.upgrade-options');
                 if (!upgradeContainer) return;
 
-                const userTier = this.userProfile?.subscription_tier || 'basic';
+                const userTier = this.userProfile?.subscription_tier || 'free';
                 
-                if (userTier === 'basic') {
+                if (userTier === 'free') {
                     upgradeContainer.innerHTML = `
                         <button class="upgrade-btn premium" onclick="lmsManager.requestUpgrade('premium')">
                             Upgrade to Premium - Contact via WhatsApp
