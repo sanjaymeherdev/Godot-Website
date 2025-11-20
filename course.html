@@ -249,48 +249,6 @@
                 }
             }
 
-            async createUserProfile() {
-                try {
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .insert([{
-                            id: this.currentUser.id,
-                            email: this.currentUser.email,
-                            subscription_tier: 'free',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        }])
-                        .select()
-                        .single();
-
-                    if (error) {
-                        // If duplicate key error, profile was already created - try to fetch it
-                        if (error.code === '23505') {
-                            console.log('Profile already exists, fetching...');
-                            const { data: existingData, error: fetchError } = await supabase
-                                .from('profiles')
-                                .select('*')
-                                .eq('id', this.currentUser.id)
-                                .single();
-                            
-                            if (fetchError) throw fetchError;
-                            this.userProfile = existingData;
-                        } else {
-                            throw error;
-                        }
-                    } else {
-                        this.userProfile = data;
-                    }
-                    
-                    this.updateTierUI();
-                    console.log('✅ Profile loaded/created successfully');
-                    
-                } catch (error) {
-                    console.error('Error creating/fetching user profile:', error);
-                    this.setDefaultTier();
-                }
-            }
-
             updateTierUI() {
                 if (!this.userProfile) {
                     this.setDefaultTier();
