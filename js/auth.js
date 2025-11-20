@@ -115,16 +115,56 @@ class AuthManager {
 
     async updatePasswordWithToken(accessToken, newPassword) {
         try {
-            const { data, error } = await supabase.auth.updateUser({
-                password: newPassword
-            }, {
-                accessToken: accessToken
+            // Use direct REST API call like Godot implementation
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    password: newPassword
+                })
             });
 
-            if (error) throw error;
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error_description || data.msg || 'Password update failed');
+            }
+
             return { success: true, data };
         } catch (error) {
             return { success: false, error: error.message };
+        }
+    }
+
+    async debugTokenValidation(accessToken) {
+        try {
+            // Test if the token is valid by making a simple user info request
+            const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            const data = await response.json();
+            console.log('Token validation response:', {
+                status: response.status,
+                data: data
+            });
+
+            return { 
+                valid: response.ok, 
+                status: response.status,
+                data: data 
+            };
+        } catch (error) {
+            console.error('Token validation error:', error);
+            return { valid: false, error: error.message };
         }
     }
 
@@ -172,6 +212,57 @@ class AuthManager {
         
         console.log("No access token found in URL");
         return "";
+    }
+
+    // Profile management methods
+    async getUserProfile(userId) {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async getUserCourses(userId) {
+        try {
+            const { data, error } = await supabase
+                .from('user_courses')
+                .select(`
+                    *,
+                    courses (*)
+                `)
+                .eq('user_id', userId)
+                .eq('payment_status', 'completed');
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async getUserProgress(userId) {
+        try {
+            const { data, error } = await supabase
+                .from('user_progress')
+                .select(`
+                    *,
+                    course_modules (*)
+                `)
+                .eq('user_id', userId);
+
+            if (error) throw error;
+            return { success: true, data };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
     }
 }
 
@@ -446,6 +537,15 @@ if (window.location.pathname.includes('login.html')) {
             btnLoading.style.display = 'inline';
             submitBtn.disabled = true;
 
+            // Validate token first (optional but helpful for debugging)
+            const tokenValidation = await authManager.debugTokenValidation(accessToken);
+            if (!tokenValidation.valid) {
+                showMessage('❌ Invalid or expired reset token. Please request a new reset link.', 'error');
+                resetButtonState(submitBtn, btnText, btnLoading);
+                return;
+            }
+
+            // Use the direct REST API method (like Godot)
             const result = await authManager.updatePasswordWithToken(accessToken, newPassword);
 
             if (result.success) {
@@ -476,6 +576,8 @@ if (window.location.pathname.includes('login.html')) {
                 showMessage('❌ An account with this email already exists', 'error');
             } else if (error.includes('invalid token') || error.includes('expired')) {
                 showMessage('❌ Invalid or expired reset token. Please request a new reset link.', 'error');
+            } else if (error.includes('Password should be at least 6 characters')) {
+                showMessage('❌ Password must be at least 6 characters', 'error');
             } else {
                 showMessage('❌ ' + error, 'error');
             }
@@ -525,54 +627,4 @@ if (window.location.pathname.includes('course.html')) {
             }
         });
     });
-}
-// Add these methods to AuthManager class
-async getUserProfile(userId) {
-    try {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-async getUserCourses(userId) {
-    try {
-        const { data, error } = await supabase
-            .from('user_courses')
-            .select(`
-                *,
-                courses (*)
-            `)
-            .eq('user_id', userId)
-            .eq('payment_status', 'completed');
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-async getUserProgress(userId) {
-    try {
-        const { data, error } = await supabase
-            .from('user_progress')
-            .select(`
-                *,
-                course_modules (*)
-            `)
-            .eq('user_id', userId);
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
 }
