@@ -8,6 +8,72 @@ const submitBtn = document.getElementById('submitBtn');
 const btnText = submitBtn.querySelector('.btn-text');
 const btnLoading = submitBtn.querySelector('.btn-loading');
 
+// Fullscreen Image Modal Elements
+const imageModal = document.getElementById('imageModal');
+const modalImage = document.getElementById('modalImage');
+const modalCaption = document.getElementById('modalCaption');
+const modalClose = document.getElementById('modalClose');
+
+// Initialize Fullscreen Modal
+function initImageModal() {
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    
+    galleryItems.forEach(item => {
+        const img = item.querySelector('img');
+        if (img) {
+            // Only add click event for desktop
+            if (window.innerWidth > 768) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openImageModal(img.src, img.alt);
+                });
+                
+                // Add keyboard navigation
+                item.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openImageModal(img.src, img.alt);
+                    }
+                });
+            }
+        }
+    });
+    
+    // Close modal events
+    modalClose.addEventListener('click', closeImageModal);
+    imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) {
+            closeImageModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && imageModal.classList.contains('active')) {
+            closeImageModal();
+        }
+    });
+}
+
+// Function to open image in fullscreen
+function openImageModal(imageSrc, imageAlt) {
+    modalImage.src = imageSrc;
+    modalCaption.textContent = imageAlt;
+    imageModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Function to close modal
+function closeImageModal() {
+    imageModal.classList.remove('active');
+    document.body.style.overflow = '';
+    // Reset image after transition
+    setTimeout(() => {
+        modalImage.src = '';
+        modalCaption.textContent = '';
+    }, 300);
+}
+
 // Form handling with Pabbly Integration
 leadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -129,19 +195,28 @@ function showMessage(message, type) {
     }
 }
 
-// Smooth scrolling and animations (keep existing code)
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
-});
-
+// Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+    // Initialize image modal
+    initImageModal();
+    
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = { 
+        threshold: 0.1, 
+        rootMargin: '0px 0px -50px 0px' 
+    };
+    
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -158,5 +233,5 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
     
-    console.log('Godot 3D MP with Pabbly integration loaded');
+    console.log('Godot 3D MP website loaded with Pabbly integration and image modal');
 });
