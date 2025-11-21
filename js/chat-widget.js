@@ -7,7 +7,7 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.backendUrl = 'https://script.google.com/macros/s/AKfycbzcxRUO1SiiJ4iFNZfhmB2slclBd8HzOqLSsLAphX-LwSyTjfWOrXXGcCmhSAzRq9r5Xg/exec'; // Replace after deploying GAS
+        this.backendUrl = 'https://script.google.com/macros/s/AKfycbx0LfVwbwY2i3U5Oo_2bGAthAHesr55l7akdsqq3o4QQvEKTp0nsMjq7_9GYHGtpi__1Q/exec'; // Replace after deploying GAS
         
         this.initializeElements();
         this.attachEventListeners();
@@ -276,4 +276,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.chatWidget = new ChatWidget();
     }
 });
+
 
