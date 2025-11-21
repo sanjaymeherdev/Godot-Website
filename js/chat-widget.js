@@ -6,7 +6,7 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.backendUrl = 'https://1454e379-5d20-4c4f-91ff-4859f3439300-00-2mhzvdi91js6d.sisko.replit.dev';
+        this.backendUrl = 'https://chatbotdisord.onrender.com';
         
         this.initializeElements();
         this.attachEventListeners();
@@ -378,3 +378,4 @@ if (document.readyState === 'loading') {
 } else {
     initializeChatWidget();
 }
+
