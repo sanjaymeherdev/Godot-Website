@@ -11,7 +11,7 @@ class ChatWidget {
         this.pollingInterval = null;
         
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
-        this.backendUrl = 'https://script.google.com/macros/s/AKfycbz63HpgcrGRbRoBs339ik9j9n5EtZK_ZTvSRpjSsrzgatNEN4NC0IW1gdNvD82g3mTFiA/exec';
+        this.backendUrl = 'https://script.google.com/macros/s/AKfycbyVqL9-CfKROdOg8rPlbbvHvwIUCU_k0Bb4qTKzt5hnUrwXWHp_JxMl5jxNJuEmK8InVA/exec';
         
         this.initializeElements();
         this.attachEventListeners();
@@ -295,4 +295,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.chatWidget = new ChatWidget();
     }
 });
+
 
