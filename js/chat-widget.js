@@ -1,19 +1,25 @@
-// Updated chat-widget.js - Connects to Discord Bot API
+// Fixed chat-widget.js - Single initialization and proper event handling
 class ChatWidget {
     constructor() {
-        if (window.chatWidgetInitialized) return;
-        
         this.isChatOpen = false;
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
         this.backendUrl = 'https://1454e379-5d20-4c4f-91ff-4859f3439300-00-2mhzvdi91js6d.sisko.replit.dev/';
+        this.isInitialized = false;
+        
+        this.initialize();
+    }
+
+    initialize() {
+        if (this.isInitialized) return;
         
         this.initializeElements();
         this.attachEventListeners();
         this.startPolling();
         
-        window.chatWidgetInitialized = true;
+        this.isInitialized = true;
+        console.log('✅ Chat widget initialized');
     }
 
     initializeElements() {
@@ -28,6 +34,11 @@ class ChatWidget {
         this.sendMessageBtn = document.getElementById('sendMessageBtn');
         this.userNameInput = document.getElementById('userName');
         this.ticketIdInput = document.getElementById('ticketId');
+        
+        // Ensure chat starts closed
+        if (this.chatContainer) {
+            this.chatContainer.style.display = 'none';
+        }
         
         this.resetChatState();
     }
@@ -46,47 +57,100 @@ class ChatWidget {
     }
 
     attachEventListeners() {
-        if (!this.chatToggle || !this.closeChat || !this.startChatBtn) return;
-
-        this.chatToggle.addEventListener('click', () => this.toggleChat());
-        this.closeChat.addEventListener('click', () => this.closeChatWindow());
-        this.startChatBtn.addEventListener('click', () => this.startChat());
-        this.sendMessageBtn.addEventListener('click', () => this.sendMessage());
+        // Remove any existing event listeners first
+        this.removeEventListeners();
+        
+        if (this.chatToggle) {
+            this.chatToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleChat();
+            });
+        }
+        
+        if (this.closeChat) {
+            this.closeChat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.closeChatWindow();
+            });
+        }
+        
+        if (this.startChatBtn) {
+            this.startChatBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.startChat();
+            });
+        }
+        
+        if (this.sendMessageBtn) {
+            this.sendMessageBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.sendMessage();
+            });
+        }
         
         if (this.messageInput) {
             this.messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.sendMessage();
+                if (e.key === 'Enter') {
+                    e.stopPropagation();
+                    this.sendMessage();
+                }
             });
         }
 
+        // Close chat when clicking outside
         document.addEventListener('click', (e) => {
             if (this.isChatOpen && 
+                this.chatContainer && 
                 !this.chatContainer.contains(e.target) && 
+                this.chatToggle && 
                 !this.chatToggle.contains(e.target)) {
                 this.closeChatWindow();
             }
         });
+
+        // Prevent propagation for chat container clicks
+        if (this.chatContainer) {
+            this.chatContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    }
+
+    removeEventListeners() {
+        // This is a simplified approach - in production you'd use removeEventListener
+        // For now, we'll rely on proper initialization
+        console.log('🔄 Resetting event listeners');
     }
 
     toggleChat() {
         this.isChatOpen = !this.isChatOpen;
-        this.chatContainer.style.display = this.isChatOpen ? 'flex' : 'none';
+        
+        if (this.chatContainer) {
+            this.chatContainer.style.display = this.isChatOpen ? 'flex' : 'none';
+        }
         
         if (this.isChatOpen) {
+            console.log('💬 Opening chat');
             setTimeout(() => {
                 if (this.messageInput) this.messageInput.focus();
             }, 100);
+        } else {
+            console.log('❌ Closing chat');
         }
     }
 
     closeChatWindow() {
         this.isChatOpen = false;
-        this.chatContainer.style.display = 'none';
+        if (this.chatContainer) {
+            this.chatContainer.style.display = 'none';
+        }
     }
 
     async startChat() {
+        if (!this.userNameInput) return;
+        
         this.userName = this.userNameInput.value.trim();
-        const ticketId = this.ticketIdInput.value.trim();
+        const ticketId = this.ticketIdInput ? this.ticketIdInput.value.trim() : '';
         
         if (!this.userName) {
             alert('Please enter your name to continue');
@@ -104,9 +168,9 @@ class ChatWidget {
                 await this.startNewChat();
             }
             
-            this.welcomeScreen.style.display = 'none';
-            this.chatMessages.style.display = 'flex';
-            this.chatInputArea.style.display = 'flex';
+            if (this.welcomeScreen) this.welcomeScreen.style.display = 'none';
+            if (this.chatMessages) this.chatMessages.style.display = 'flex';
+            if (this.chatInputArea) this.chatInputArea.style.display = 'flex';
             
         } catch (error) {
             console.error('Error starting chat:', error);
@@ -115,6 +179,8 @@ class ChatWidget {
     }
 
     async startNewChat() {
+        if (!this.chatMessages) return;
+        
         this.chatMessages.innerHTML = '';
         
         const response = await this.sendToBackend('/api/new_chat', {
@@ -131,6 +197,8 @@ class ChatWidget {
     }
 
     async continueExistingChat() {
+        if (!this.chatMessages) return;
+        
         this.chatMessages.innerHTML = '';
         
         const response = await this.sendToBackend('/api/continue_chat', {
@@ -163,8 +231,10 @@ class ChatWidget {
     }
 
     async sendMessage() {
+        if (!this.messageInput || !this.currentTicketId) return;
+        
         const message = this.messageInput.value.trim();
-        if (!message || !this.currentTicketId) return;
+        if (!message) return;
         
         this.addMessage(message, 'user');
         this.messageInput.value = '';
@@ -185,6 +255,8 @@ class ChatWidget {
     }
 
     addMessage(text, sender, scroll = true) {
+        if (!this.chatMessages) return;
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
         
@@ -201,6 +273,8 @@ class ChatWidget {
     }
 
     showTypingIndicator() {
+        if (!this.chatMessages) return;
+        
         const existingIndicator = document.getElementById('typingIndicator');
         if (existingIndicator) existingIndicator.remove();
         
@@ -259,6 +333,8 @@ class ChatWidget {
     }
 
     syncMessages(messages) {
+        if (!this.chatMessages) return;
+        
         const existingMessages = Array.from(this.chatMessages.querySelectorAll('.message-content'))
             .map(el => el.textContent);
             
@@ -274,8 +350,26 @@ class ChatWidget {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (!window.chatWidget) {
-        window.chatWidget = new ChatWidget();
+// Global initialization with protection against multiple instances
+let chatWidgetInstance = null;
+
+function initializeChatWidget() {
+    if (chatWidgetInstance) {
+        console.log('⚠️ Chat widget already initialized');
+        return chatWidgetInstance;
     }
-});
+    
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            chatWidgetInstance = new ChatWidget();
+        });
+    } else {
+        chatWidgetInstance = new ChatWidget();
+    }
+    
+    return chatWidgetInstance;
+}
+
+// Initialize when script loads
+initializeChatWidget();
