@@ -1,4 +1,4 @@
-// chat-widget.js - Updated with Backend Integration
+// Updated chat-widget.js - Connects to Discord Bot API
 class ChatWidget {
     constructor() {
         if (window.chatWidgetInitialized) return;
@@ -7,14 +7,11 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.lastMessageId = null;
-        this.pollingInterval = null;
-        
-        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
-        this.backendUrl = 'https://script.google.com/macros/s/AKfycbyVqL9-CfKROdOg8rPlbbvHvwIUCU_k0Bb4qTKzt5hnUrwXWHp_JxMl5jxNJuEmK8InVA/exec';
+        this.backendUrl = window.location.origin;
         
         this.initializeElements();
         this.attachEventListeners();
+        this.startPolling();
         
         window.chatWidgetInitialized = true;
     }
@@ -46,12 +43,6 @@ class ChatWidget {
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
-        this.lastMessageId = null;
-        
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
-        }
     }
 
     attachEventListeners() {
@@ -83,9 +74,7 @@ class ChatWidget {
         
         if (this.isChatOpen) {
             setTimeout(() => {
-                if (this.messageInput && this.currentTicketId) {
-                    this.messageInput.focus();
-                }
+                if (this.messageInput) this.messageInput.focus();
             }, 100);
         }
     }
@@ -105,16 +94,11 @@ class ChatWidget {
         }
         
         try {
-            this.startChatBtn.disabled = true;
-            this.startChatBtn.textContent = 'Connecting...';
-            
             if (ticketId) {
-                // Continue existing chat
                 this.currentTicketId = ticketId;
                 this.isNewChat = false;
                 await this.continueExistingChat();
             } else {
-                // Start new chat
                 this.currentTicketId = this.generateTicketId();
                 this.isNewChat = true;
                 await this.startNewChat();
@@ -124,64 +108,53 @@ class ChatWidget {
             this.chatMessages.style.display = 'flex';
             this.chatInputArea.style.display = 'flex';
             
-            // Start polling for new messages
-            this.startPolling();
-            
         } catch (error) {
             console.error('Error starting chat:', error);
             alert('Error starting chat: ' + error.message);
-            this.startChatBtn.disabled = false;
-            this.startChatBtn.textContent = 'Start Chat';
         }
     }
 
     async startNewChat() {
         this.chatMessages.innerHTML = '';
         
-        const response = await this.sendToBackend('new_chat', {
+        const response = await this.sendToBackend('/api/new_chat', {
             userName: this.userName,
             ticketId: this.currentTicketId
         });
         
         if (response.success) {
-            this.addMessage(`Hello ${this.userName}! How can we help you today?`, 'bot');
-            this.addMessage(`Your ticket ID is: ${this.currentTicketId}`, 'bot', true);
-            this.addMessage(`Please save this ID to continue this chat later.`, 'bot');
+            this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
+            await this.loadMessages();
         } else {
-            throw new Error(response.error || 'Failed to start chat');
+            throw new Error(response.error);
         }
     }
 
     async continueExistingChat() {
         this.chatMessages.innerHTML = '';
         
-        const response = await this.sendToBackend('continue_chat', {
+        const response = await this.sendToBackend('/api/continue_chat', {
             userName: this.userName,
             ticketId: this.currentTicketId
         });
         
         if (response.success) {
-            this.addMessage(`Welcome back ${this.userName}!`, 'bot');
-            this.addMessage(`Continuing your previous conversation (${this.currentTicketId})`, 'bot');
-            
-            // Load previous messages
+            this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
             await this.loadMessages();
         } else {
-            throw new Error(response.error || 'Failed to continue chat');
+            throw new Error(response.error);
         }
     }
 
     async loadMessages() {
         try {
-            const response = await this.sendToBackend('get_messages', {
-                ticketId: this.currentTicketId,
-                lastMessageId: this.lastMessageId
+            const response = await this.sendToBackend('/api/get_messages', {
+                ticketId: this.currentTicketId
             });
             
-            if (response.success && response.messages) {
+            if (response.success) {
                 response.messages.forEach(msg => {
-                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot', false, msg.id);
-                    this.lastMessageId = msg.id;
+                    this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot', false);
                 });
             }
         } catch (error) {
@@ -197,15 +170,13 @@ class ChatWidget {
         this.messageInput.value = '';
         
         try {
-            await this.sendToBackend('user_message', {
+            await this.sendToBackend('/api/user_message', {
                 userName: this.userName,
                 ticketId: this.currentTicketId,
                 message: message
             });
             
-            // Show typing indicator briefly
             this.showTypingIndicator();
-            setTimeout(() => this.hideTypingIndicator(), 2000);
             
         } catch (error) {
             console.error('Error sending message:', error);
@@ -213,28 +184,25 @@ class ChatWidget {
         }
     }
 
-    addMessage(text, sender, isTicketId = false, messageId = null) {
+    addMessage(text, sender, scroll = true) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}-message`;
-        if (messageId) messageDiv.dataset.messageId = messageId;
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
-        
-        if (isTicketId) {
-            contentDiv.innerHTML = `<div class="ticket-id">${text}</div>`;
-        } else {
-            contentDiv.textContent = text;
-        }
+        contentDiv.textContent = text;
         
         messageDiv.appendChild(contentDiv);
         this.chatMessages.appendChild(messageDiv);
-        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        
+        if (scroll) {
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        }
     }
 
     showTypingIndicator() {
         const existingIndicator = document.getElementById('typingIndicator');
-        if (existingIndicator) return;
+        if (existingIndicator) existingIndicator.remove();
         
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message bot-message typing-indicator';
@@ -247,23 +215,22 @@ class ChatWidget {
         typingDiv.appendChild(contentDiv);
         this.chatMessages.appendChild(typingDiv);
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        
+        setTimeout(() => {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }, 2000);
     }
 
-    hideTypingIndicator() {
-        const indicator = document.getElementById('typingIndicator');
-        if (indicator) indicator.remove();
-    }
-
-    async sendToBackend(action, data) {
-        const response = await fetch(this.backendUrl, {
+    async sendToBackend(endpoint, data) {
+        const response = await fetch(this.backendUrl + endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                action: action,
-                ...data
-            })
+            body: JSON.stringify(data)
         });
         
         if (!response.ok) {
@@ -274,26 +241,41 @@ class ChatWidget {
     }
 
     startPolling() {
-        // Poll for new messages every 3 seconds
-        this.pollingInterval = setInterval(async () => {
+        setInterval(async () => {
             if (this.currentTicketId && this.isChatOpen) {
-                await this.loadMessages();
+                try {
+                    const response = await this.sendToBackend('/api/get_messages', {
+                        ticketId: this.currentTicketId
+                    });
+                    
+                    if (response.success) {
+                        this.syncMessages(response.messages);
+                    }
+                } catch (error) {
+                    console.error('Error polling messages:', error);
+                }
             }
         }, 3000);
     }
 
+    syncMessages(messages) {
+        const existingMessages = Array.from(this.chatMessages.querySelectorAll('.message-content'))
+            .map(el => el.textContent);
+            
+        messages.forEach(msg => {
+            if (!existingMessages.includes(msg.message)) {
+                this.addMessage(msg.message, msg.sender === 'user' ? 'user' : 'bot');
+            }
+        });
+    }
+
     generateTicketId() {
-        const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-        return `TKT-${timestamp}-${random}`.toUpperCase();
+        return 'TKT-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     }
 }
 
-// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     if (!window.chatWidget) {
         window.chatWidget = new ChatWidget();
     }
 });
-
-
