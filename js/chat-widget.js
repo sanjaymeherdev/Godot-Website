@@ -11,7 +11,7 @@ class ChatWidget {
         this.pollingInterval = null;
         
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
-        this.backendUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        this.backendUrl = 'https://script.google.com/macros/s/AKfycbz63HpgcrGRbRoBs339ik9j9n5EtZK_ZTvSRpjSsrzgatNEN4NC0IW1gdNvD82g3mTFiA/exec';
         
         this.initializeElements();
         this.attachEventListeners();
@@ -295,3 +295,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.chatWidget = new ChatWidget();
     }
 });
+
