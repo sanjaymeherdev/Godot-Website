@@ -434,30 +434,19 @@
             console.log('Godot 3D MP website loaded with full functionality');
         });
     </script>
-
-    <!-- Second Script Section: Chat Widget Initialization -->
-    <script>
-        // Initialize chat widget after everything is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit to ensure chat-widget.js is loaded
-            setTimeout(() => {
-                if (typeof ChatWidget !== 'undefined') {
-                    window.chatWidget = new ChatWidget();
-                    console.log('Chat widget initialized successfully');
-                } else {
-                    console.log('ChatWidget not found, waiting a bit more...');
-                    // Try again after a short delay
-                    setTimeout(() => {
-                        if (typeof ChatWidget !== 'undefined') {
-                            window.chatWidget = new ChatWidget();
-                            console.log('Chat widget initialized on second attempt');
-                        } else {
-                            console.error('ChatWidget class not found. Make sure js/chat-widget.js is loaded correctly.');
-                        }
-                    }, 500);
-                }
-            }, 100);
-        });
-    </script>
+ <!-- Second Script Section: Chat Widget Initialization -->
+<script>
+    // Initialize chat widget after everything is loaded - SINGLE INITIALIZATION
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit to ensure chat-widget.js is loaded
+        setTimeout(() => {
+            if (typeof ChatWidget !== 'undefined' && !window.chatWidget) {
+                window.chatWidget = new ChatWidget();
+                console.log('Chat widget initialized successfully');
+            }
+        }, 100);
+    });
+</script>
 </body>
 </html>
+
