@@ -1,12 +1,22 @@
 // Chat Widget Functionality
 class ChatWidget {
     constructor() {
+        // Check if already initialized
+        if (window.chatWidgetInitialized) {
+            console.log('Chat widget already initialized');
+            return;
+        }
+        
         this.isChatOpen = false;
         this.currentTicketId = null;
         this.userName = '';
         this.isNewChat = true;
         this.initializeElements();
         this.attachEventListeners();
+        
+        // Mark as initialized
+        window.chatWidgetInitialized = true;
+        console.log('Chat widget initialized successfully');
     }
 
     initializeElements() {
@@ -24,9 +34,49 @@ class ChatWidget {
         this.sendMessageBtn = document.getElementById('sendMessageBtn');
         this.userNameInput = document.getElementById('userName');
         this.ticketIdInput = document.getElementById('ticketId');
+        
+        // Reset any existing state
+        this.resetChatState();
+    }
+
+    resetChatState() {
+        // Clear any existing messages
+        if (this.chatMessages) {
+            this.chatMessages.innerHTML = '';
+        }
+        
+        // Reset form inputs
+        if (this.userNameInput) {
+            this.userNameInput.value = '';
+        }
+        if (this.ticketIdInput) {
+            this.ticketIdInput.value = '';
+        }
+        
+        // Show welcome screen
+        if (this.welcomeScreen) {
+            this.welcomeScreen.style.display = 'flex';
+        }
+        if (this.chatMessages) {
+            this.chatMessages.style.display = 'none';
+        }
+        if (this.chatInputArea) {
+            this.chatInputArea.style.display = 'none';
+        }
+        
+        // Reset internal state
+        this.currentTicketId = null;
+        this.userName = '';
+        this.isNewChat = true;
     }
 
     attachEventListeners() {
+        // Check if elements exist before adding listeners
+        if (!this.chatToggle || !this.closeChat || !this.startChatBtn) {
+            console.error('Chat widget elements not found');
+            return;
+        }
+
         // Toggle chat window
         this.chatToggle.addEventListener('click', () => this.toggleChat());
         this.closeChat.addEventListener('click', () => this.closeChatWindow());
@@ -36,9 +86,11 @@ class ChatWidget {
 
         // Send message
         this.sendMessageBtn.addEventListener('click', () => this.sendMessage());
-        this.messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendMessage();
-        });
+        if (this.messageInput) {
+            this.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.sendMessage();
+            });
+        }
 
         // Close chat when clicking outside
         document.addEventListener('click', (e) => {
@@ -55,7 +107,11 @@ class ChatWidget {
         this.chatContainer.style.display = this.isChatOpen ? 'flex' : 'none';
         
         if (this.isChatOpen) {
-            this.messageInput.focus();
+            setTimeout(() => {
+                if (this.messageInput) {
+                    this.messageInput.focus();
+                }
+            }, 100);
         }
     }
 
@@ -91,6 +147,10 @@ class ChatWidget {
     }
 
     startNewChat() {
+        // Clear any existing messages first
+        this.chatMessages.innerHTML = '';
+        
+        // Add welcome messages
         this.addMessage(`Hello ${this.userName}! How can we help you today?`, 'bot');
         this.addMessage(`Your ticket ID is: ${this.currentTicketId}. Please save this ID to continue this chat later.`, 'bot');
         
@@ -102,6 +162,9 @@ class ChatWidget {
     }
 
     continueExistingChat() {
+        // Clear any existing messages first
+        this.chatMessages.innerHTML = '';
+        
         this.addMessage(`Welcome back ${this.userName}! Continuing your previous conversation.`, 'bot');
         
         // Send to backend to fetch previous messages
@@ -146,6 +209,12 @@ class ChatWidget {
     }
 
     showTypingIndicator() {
+        // Remove existing typing indicator if any
+        const existingIndicator = document.getElementById('typingIndicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
         const typingDiv = document.createElement('div');
         typingDiv.className = 'message bot-message typing-indicator';
         typingDiv.id = 'typingIndicator';
@@ -205,7 +274,10 @@ class ChatWidget {
     }
 }
 
-// Initialize chat widget when DOM is loaded
+// Initialize chat widget when DOM is loaded - SINGLE INITIALIZATION
 document.addEventListener('DOMContentLoaded', () => {
-    window.chatWidget = new ChatWidget();
+    // Only initialize if not already initialized
+    if (!window.chatWidget) {
+        window.chatWidget = new ChatWidget();
+    }
 });
