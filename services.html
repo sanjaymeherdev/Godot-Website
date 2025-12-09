@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - Custom Game Development Solutions</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* Services Page Specific Styles */
+        .services-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .services-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .services-intro {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(255, 107, 53, 0.2);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .service-header {
+            padding: 2rem 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .service-header h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .service-pricing {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .service-features {
+            padding: 1.5rem 2rem;
+        }
+        
+        .service-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .service-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .service-features li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .service-actions {
+            padding: 0 2rem 2rem;
+            text-align: center;
+        }
+        
+        .service-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .service-btn:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+        }
+        
+        .consultation-btn {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .consultation-btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+        }
+        
+        .delivery-timeline {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 1.5rem 2rem;
+            margin: 1rem 2rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .portfolio-section {
+            background: var(--secondary);
+            padding: 80px 0;
+            margin-top: 4rem;
+        }
+        
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .portfolio-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .portfolio-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .portfolio-content {
+            padding: 1.5rem;
+        }
+        
+        .process-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .process-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            position: relative;
+        }
+        
+        .process-steps::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            z-index: 1;
+        }
+        
+        .process-step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        
+        .testimonials-section {
+            background: var(--secondary);
+            padding: 80px 0;
+        }
+        
+        .testimonial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: #ccc;
+        }
+        
+        .testimonial-author {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .services-cta {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            color: white;
+        }
+        
+        .services-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Contact Form */
+        .contact-form {
+            background: var(--dark);
+            padding: 80px 0;
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .services-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .process-steps {
+                flex-direction: column;
+                gap: 3rem;
+            }
+            
+            .process-steps::before {
+                display: none;
+            }
+            
+            .portfolio-grid,
+            .testimonial-cards {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .services-cta h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .services-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .services-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .service-header {
+                padding: 1.5rem 1.5rem 1rem;
+            }
+            
+            .service-features {
+                padding: 1rem 1.5rem;
+            }
+            
+            .delivery-timeline {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">SERVICES</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html" class="active">Services</a>
+                    <a href="course.html">Courses</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#consultation" class="cta-button">Get Consultation</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">SERVICES</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="course.html" onclick="closeMobileMenu()">Courses</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#consultation" class="cta-button" onclick="closeMobileMenu()">Get Consultation</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="services-hero" id="services">
+        <div class="container">
+            <h1>Custom Game Development Services</h1>
+            <div class="services-intro">
+                <p><strong>Need more than a script?</strong> Get custom game development solutions tailored to your needs.</p>
+                <p>From complete game development to specific coding solutions, we help bring your game ideas to life.</p>
+            </div>
+            <a href="#all-services" class="cta-button">View All Services →</a>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section class="container" id="all-services">
+        <h2 class="section-title">Our Services</h2>
+        <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">Custom solutions for your game development needs</p>
+        
+        <div class="services-grid">
+            <!-- Service 1: Game Assets Development -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🎨</div>
+                    <h3>Game Assets Development</h3>
+                    <div class="service-pricing">Starting at ₹999</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Custom 3D Models & Textures</li>
+                        <li>Character Design & Modeling</li>
+                        <li>Environment Assets</li>
+                        <li>UI/UX Assets & Elements</li>
+                        <li>Animation Assets</li>
+                        <li>Optimized for Mobile</li>
+                        <li>Multiple LODs Included</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Delivery:</strong> 7-14 days based on complexity
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Game Assets Development')">
+                        🎯 Order Now
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Game Assets Development')">
+                        📅 Free Consultation
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Service 2: Full Game Development -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🕹️</div>
+                    <h3>Full Game Development</h3>
+                    <div class="service-pricing">Starting at ₹4,999</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Complete Game from Concept to Launch</li>
+                        <li>Multiplayer/Co-op Games</li>
+                        <li>Mobile Game Development</li>
+                        <li>PC Game Development</li>
+                        <li>Full Documentation</li>
+                        <li>Testing & Bug Fixing</li>
+                        <li>App Store Deployment</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Delivery:</strong> 30-60 days based on scope
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Full Game Development')">
+                        🎯 Order Now
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Full Game Development')">
+                        📅 Free Consultation
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Service 3: Specific Coding Solution -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">💻</div>
+                    <h3>Specific Coding Solution</h3>
+                    <div class="service-pricing">Starting at ₹299</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Custom Script Development</li>
+                        <li>Bug Fixing & Debugging</li>
+                        <li>Performance Optimization</li>
+                        <li>Feature Implementation</li>
+                        <li>Code Review & Analysis</li>
+                        <li>Multiplayer Synchronization</li>
+                        <li>Mobile Optimization</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Delivery:</strong> 3-7 days based on complexity
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Specific Coding Solution')">
+                        🎯 Order Now
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Specific Coding Solution')">
+                        📅 Free Consultation
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Service 4: Character & Vehicle Animation -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">🎭</div>
+                    <h3>Character & Vehicle Animation</h3>
+                    <div class="service-pricing">Starting at ₹699</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Character Rigging & Animation</li>
+                        <li>Vehicle Animation & Controls</li>
+                        <li>Facial Animation System</li>
+                        <li>IK (Inverse Kinematics) Setup</li>
+                        <li>Blend Trees & State Machines</li>
+                        <li>Animation Events & Triggers</li>
+                        <li>Mobile-Optimized Animations</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Delivery:</strong> 7-14 days based on complexity
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Character & Vehicle Animation')">
+                        🎯 Order Now
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Character & Vehicle Animation')">
+                        📅 Free Consultation
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Service 5: Godot Beginner Live Course -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">👨‍🏫</div>
+                    <h3>Godot Beginner Live Course</h3>
+                    <div class="service-pricing">₹1,999</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Live 1-on-1 Sessions</li>
+                        <li>8 Hours of Live Training</li>
+                        <li>From Zero to Game Developer</li>
+                        <li>Hands-on Projects</li>
+                        <li>Personalized Learning Path</li>
+                        <li>Recorded Sessions Access</li>
+                        <li>Post-course Support</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Schedule:</strong> Flexible timing, 2 sessions/week
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Godot Beginner Live Course')">
+                        🎯 Book Course
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Godot Beginner Live Course')">
+                        📅 Free Demo Session
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Service 6: Game System Development -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">⚙️</div>
+                    <h3>Game System Development</h3>
+                    <div class="service-pricing">Starting at ₹799</div>
+                </div>
+                
+                <div class="service-features">
+                    <ul>
+                        <li>Inventory System Development</li>
+                        <li>Quest & Mission System</li>
+                        <li>Economy & Trading System</li>
+                        <li>Save/Load System</li>
+                        <li>AI Behavior Systems</li>
+                        <li>Multiplayer Networking</li>
+                        <li>Custom UI Systems</li>
+                    </ul>
+                </div>
+                
+                <div class="delivery-timeline">
+                    <strong>Delivery:</strong> 10-20 days based on complexity
+                </div>
+                
+                <div class="service-actions">
+                    <button class="service-btn" onclick="orderService('Game System Development')">
+                        🎯 Order Now
+                    </button>
+                    <button class="consultation-btn" onclick="bookConsultation('Game System Development')">
+                        📅 Free Consultation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process-section">
+        <div class="container">
+            <h2 class="section-title">Our Working Process</h2>
+            
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3>Consultation</h3>
+                    <p>Free discussion of your requirements</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3>Quotation</h3>
+                    <p>Detailed proposal & pricing</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3>Development</h3>
+                    <p>Regular updates & progress sharing</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <h3>Delivery</h3>
+                    <p>Complete project with documentation</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">5</div>
+                    <h3>Support</h3>
+                    <p>Post-delivery support & maintenance</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio-section">
+        <div class="container">
+            <h2 class="section-title">Our Work Portfolio</h2>
+            
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <img src="https://via.placeholder.com/400x200/2d1b69/ffffff?text=Multiplayer+Game" alt="Multiplayer Game" class="portfolio-image">
+                    <div class="portfolio-content">
+                        <h4>Battle Royale Game</h4>
+                        <p>Complete multiplayer game with 50+ concurrent players</p>
+                    </div>
+                </div>
+                
+                <div class="portfolio-item">
+                    <img src="https://via.placeholder.com/400x200/ff6b35/ffffff?text=Mobile+Racing" alt="Mobile Racing Game" class="portfolio-image">
+                    <div class="portfolio-content">
+                        <h4>Mobile Racing Game</h4>
+                        <p>Optimized for mobile with 60 FPS performance</p>
+                    </div>
+                </div>
+                
+                <div class="portfolio-item">
+                    <img src="https://via.placeholder.com/400x200/00d9ff/000000?text=AI+NPC+System" alt="AI NPC System" class="portfolio-image">
+                    <div class="portfolio-content">
+                        <h4>AI NPC System</h4>
+                        <p>Advanced AI with conversation system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">Client Testimonials</h2>
+            
+            <div class="testimonial-cards">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "The custom inventory system they developed saved us months of work. Professional, timely, and excellent quality."
+                    </div>
+                    <div class="testimonial-author">- Game Studio, Mumbai</div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "As a beginner, the live Godot course was exactly what I needed. Sanjay explained complex concepts in simple terms."
+                    </div>
+                    <div class="testimonial-author">- Student Developer, Delhi</div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "We needed a specific multiplayer synchronization solution. They delivered exactly what we needed ahead of schedule."
+                    </div>
+                    <div class="testimonial-author">- Indie Game Team, Bangalore</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section class="contact-form" id="consultation">
+        <div class="container">
+            <h2 class="section-title">Request Free Consultation</h2>
+            
+            <div class="form-container">
+                <form id="consultationForm" class="lead-form">
+                    <div class="form-group">
+                        <label for="serviceName">Your Name</label>
+                        <input type="text" id="serviceName" name="name" required placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="serviceEmail">Email Address</label>
+                        <input type="email" id="serviceEmail" name="email" required placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="servicePhone">WhatsApp Number</label>
+                        <input type="tel" id="servicePhone" name="phone" required placeholder="+91 98765 43210">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="serviceType">Service Interested In</label>
+                        <select id="serviceType" name="service_type" required>
+                            <option value="">Select a service</option>
+                            <option value="Game Assets Development">Game Assets Development</option>
+                            <option value="Full Game Development">Full Game Development</option>
+                            <option value="Specific Coding Solution">Specific Coding Solution</option>
+                            <option value="Character & Vehicle Animation">Character & Vehicle Animation</option>
+                            <option value="Godot Beginner Live Course">Godot Beginner Live Course</option>
+                            <option value="Game System Development">Game System Development</option>
+                            <option value="Custom Requirements">Custom Requirements</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="serviceDescription">Project Description</label>
+                        <textarea id="serviceDescription" name="description" rows="4" placeholder="Briefly describe your project requirements..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-button full-width">
+                        📅 Request Free Consultation
+                    </button>
+                </form>
+                
+                <div id="serviceMessage" class="form-message"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="services-cta">
+        <div class="container">
+            <h2>Ready to Start Your Project?</h2>
+            <p>Contact us today for a free consultation and quote for your game development needs.</p>
+            <button class="cta-button" style="background: white; color: var(--primary); margin-top: 2rem;" onclick="openWhatsApp('Service Inquiry')">
+                📱 Chat on WhatsApp
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">SERVICES</div>
+            <p>Custom Game Development Solutions for Your Unique Requirements</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Development Services. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chat-loader.js"></script>
+    
+    <script>
+        // Mobile Menu Functions
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        // Service Order Functions
+        function orderService(serviceName) {
+            const message = `Hello! I'd like to order your "${serviceName}" service. Please provide more details.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function bookConsultation(serviceName) {
+            const message = `Hello! I'd like to book a free consultation for "${serviceName}" service.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function openWhatsApp(inquiryType) {
+            const message = `Hello! I have a ${inquiryType} about your services. Please provide more details.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Consultation Form Submission
+        document.getElementById('consultationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('serviceName').value;
+            const email = document.getElementById('serviceEmail').value;
+            const phone = document.getElementById('servicePhone').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const description = document.getElementById('serviceDescription').value;
+            
+            if (!name || !email || !phone || !serviceType) {
+                showServiceMessage('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Create WhatsApp message
+            const message = `Consultation Request:\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nService: ${serviceType}\nDescription: ${description}`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            
+            // Open WhatsApp
+            window.open(whatsappUrl, '_blank');
+            
+            // Show success message
+            showServiceMessage('✅ Opening WhatsApp to send your consultation request', 'success');
+            
+            // Clear form
+            document.getElementById('consultationForm').reset();
+        });
+
+        function showServiceMessage(message, type) {
+            const messageElement = document.getElementById('serviceMessage');
+            messageElement.textContent = message;
+            messageElement.className = `form-message ${type}`;
+            messageElement.style.display = 'block';
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Add active class to current page
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage || 
+                    (currentPage === '' && linkPage === 'index.html')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
