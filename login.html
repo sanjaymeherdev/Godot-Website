@@ -73,7 +73,11 @@
                 </button>
             </form>
 
-          
+            <!-- ADDED: Signup link in login form -->
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="#" id="showSignup">Create Account</a></p>
+                <!-- <p><a href="#" id="showResetPassword">Forgot password?</a></p> -->
+            </div>
         </div>
 
         <!-- Signup Form -->
@@ -110,17 +114,17 @@
                 <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
             </div>
         </div>
-        </div>
     </div>
 
     <div id="authMessage" class="form-message"></div>
-<!-- Chat Widget -->
-<div class="chat-widget">
-    <!-- Chat widget will be injected here by chat-loader.js -->
-</div>
 
-<!-- Before </body> -->
-<script src="js/chat-loader.js"></script>
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chat-loader.js"></script>
     <script>
         // Mobile Menu Functionality
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -159,16 +163,20 @@
             }
         });
 
-        // Supabase Configuration - USING YOUR CREDENTIALS
+        // Supabase Configuration
         const SUPABASE_URL = 'https://usooclimfkregwrtmdki.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
 
         // Initialize Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true
+            }
+        });
 
         // Auth state management
         let currentUser = null;
-        let extractedAccessToken = "";
 
         // Check authentication state on page load
         async function checkAuthState() {
@@ -205,13 +213,11 @@
             }
         }
 
-        // Form toggles
+        // Form toggles - ADDED COMPLETE TOGGLE FUNCTIONS
         document.getElementById('showSignup')?.addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('signupForm').style.display = 'block';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('resetTokenForm').style.display = 'none';
             clearMessage();
         });
 
@@ -219,17 +225,6 @@
             e.preventDefault();
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('resetTokenForm').style.display = 'none';
-            clearMessage();
-        });
-
-        document.getElementById('showLoginFromReset')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('resetForm').style.display = 'none';
-            document.getElementById('resetTokenForm').style.display = 'none';
             clearMessage();
         });
 
@@ -292,100 +287,10 @@
             }
         });
 
-      // Register Form - UPDATED VERSION
-document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const submitBtn = document.getElementById('signupBtn');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoading = submitBtn.querySelector('.btn-loading');
-
-    // Show loading state
-    btnText.style.display = 'none';
-    btnLoading.style.display = 'inline';
-    submitBtn.disabled = true;
-
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    // Validation
-    if (!email || !password || !confirmPassword) {
-        showMessage('Please fill in all fields', 'error');
-        resetButtonState(submitBtn, btnText, btnLoading);
-        return;
-    }
-
-    if (!isValidEmail(email)) {
-        showMessage('Please enter a valid email address', 'error');
-        resetButtonState(submitBtn, btnText, btnLoading);
-        return;
-    }
-
-    if (password.length < 6) {
-        showMessage('Password must be at least 6 characters', 'error');
-        resetButtonState(submitBtn, btnText, btnLoading);
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        showMessage('Passwords do not match', 'error');
-        resetButtonState(submitBtn, btnText, btnLoading);
-        return;
-    }
-
-    try {
-        // Step 1: Create Auth user
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                emailRedirectTo: window.location.origin + '/login.html'
-            }
-        });
-
-        if (authError) throw authError;
-
-        if (authData.user) {
-            // Step 2: Create profile immediately using the form email
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([{
-                    id: authData.user.id,
-                    email: email,  // Use the email from the form directly
-                    subscription_tier: 'free',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }]);
-
-            if (profileError) {
-                console.error('Profile creation error:', profileError);
-                // Continue anyway - profile might already exist
-            }
-
-            showMessage('🎉 Account created successfully! You can now login.', 'success');
-            
-            // Clear form and show login immediately
-            document.getElementById('registerForm').reset();
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('signupForm').style.display = 'none';
-        }
-
-    } catch (error) {
-        console.error('Signup error:', error);
-        
-        if (error.message.includes('already registered')) {
-            showMessage('❌ An account with this email already exists', 'error');
-        } else {
-            showMessage('❌ ' + error.message, 'error');
-        }
-    } finally {
-        resetButtonState(submitBtn, btnText, btnLoading);
-    }
-});
-        // Password Reset Request Form
-        document.getElementById('resetPasswordForm')?.addEventListener('submit', async (e) => {
+        // Register Form
+        document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitBtn = document.getElementById('resetBtn');
+            const submitBtn = document.getElementById('signupBtn');
             const btnText = submitBtn.querySelector('.btn-text');
             const btnLoading = submitBtn.querySelector('.btn-loading');
 
@@ -394,10 +299,13 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
             btnLoading.style.display = 'inline';
             submitBtn.disabled = true;
 
-            const email = document.getElementById('resetEmail').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (!email) {
-                showMessage('Please enter your email address', 'error');
+            // Validation
+            if (!email || !password || !confirmPassword) {
+                showMessage('Please fill in all fields', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
                 return;
             }
@@ -408,104 +316,61 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
                 return;
             }
 
-            try {
-                const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin + '/login.html'
-                });
-
-                if (error) {
-                    throw error;
-                }
-
-                showMessage('📧 Password reset link sent! Check your email and paste the URL below.', 'success');
-                
-                // Clear form and switch to token entry form
-                document.getElementById('resetPasswordForm').reset();
-                document.getElementById('resetForm').style.display = 'none';
-                document.getElementById('resetTokenForm').style.display = 'block';
-
-            } catch (error) {
-                console.error('Password reset error:', error);
-                showMessage('❌ ' + error.message, 'error');
-            } finally {
-                resetButtonState(submitBtn, btnText, btnLoading);
-            }
-        });
-
-        // Password Reset Token Form
-        document.getElementById('resetTokenFormElement')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('resetTokenBtn');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoading = submitBtn.querySelector('.btn-loading');
-
-            // Show loading state
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline';
-            submitBtn.disabled = true;
-
-            const resetUrl = document.getElementById('resetUrl').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-
-            // Validation
-            if (!resetUrl || !newPassword || !confirmNewPassword) {
-                showMessage('Please fill in all fields', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
-
-            if (newPassword.length < 6) {
+            if (password.length < 6) {
                 showMessage('Password must be at least 6 characters', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
                 return;
             }
 
-            if (newPassword !== confirmNewPassword) {
+            if (password !== confirmPassword) {
                 showMessage('Passwords do not match', 'error');
                 resetButtonState(submitBtn, btnText, btnLoading);
                 return;
             }
 
-            // Use extracted token or try to extract from URL
-            let accessToken = extractedAccessToken;
-            if (!accessToken) {
-                accessToken = extractAccessTokenFromUrl(resetUrl);
-            }
-
-            if (!accessToken) {
-                showMessage('❌ Please paste a valid reset URL containing an access token', 'error');
-                resetButtonState(submitBtn, btnText, btnLoading);
-                return;
-            }
-
             try {
-                // Update password using access token (same as your Godot method)
-                const { data, error } = await supabase.auth.updateUser({
-                    password: newPassword
-                }, {
-                    accessToken: accessToken
+                // Step 1: Create Auth user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/login.html'
+                    }
                 });
 
-                if (error) {
-                    throw error;
+                if (authError) throw authError;
+
+                if (authData.user) {
+                    // Step 2: Create profile immediately using the form email
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .insert([{
+                            id: authData.user.id,
+                            email: email,
+                            subscription_tier: 'free',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }]);
+
+                    if (profileError) {
+                        console.error('Profile creation error:', profileError);
+                    }
+
+                    showMessage('🎉 Account created successfully! Please check your email to confirm your account. You can now login.', 'success');
+                    
+                    // Switch to login form after successful registration
+                    setTimeout(() => {
+                        document.getElementById('loginForm').style.display = 'block';
+                        document.getElementById('signupForm').style.display = 'none';
+                        document.getElementById('registerForm').reset();
+                    }, 3000);
                 }
 
-                showMessage('✅ Password reset successfully! You can now login with your new password.', 'success');
-                
-                // Clear forms and redirect to login
-                setTimeout(() => {
-                    document.getElementById('resetTokenForm').style.display = 'none';
-                    document.getElementById('loginForm').style.display = 'block';
-                    document.getElementById('resetTokenFormElement').reset();
-                    extractedAccessToken = "";
-                }, 3000);
-
             } catch (error) {
-                console.error('Password update error:', error);
+                console.error('Signup error:', error);
                 
-                if (error.message.includes('invalid token') || error.message.includes('expired')) {
-                    showMessage('❌ Invalid or expired reset token. Please request a new reset link.', 'error');
+                if (error.message.includes('already registered')) {
+                    showMessage('❌ An account with this email already exists', 'error');
                 } else {
                     showMessage('❌ ' + error.message, 'error');
                 }
@@ -535,7 +400,9 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
         }
 
         function clearMessage() {
-            document.getElementById('authMessage').style.display = 'none';
+            const messageElement = document.getElementById('authMessage');
+            messageElement.style.display = 'none';
+            messageElement.textContent = '';
         }
 
         function resetButtonState(button, text, loading) {
@@ -547,10 +414,8 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
         // Initialize auth check when page loads
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthState();
-            console.log('Auth system initialized with Supabase - Auto profile creation enabled');
+            console.log('Auth system initialized with Supabase');
         });
     </script>
-    <!-- Add this before </body> in ALL pages -->
-<script src="js/chat-loader.js"></script>
 </body>
 </html>
