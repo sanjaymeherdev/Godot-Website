@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Courses - Video Tutorials with Scripts</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* Mini Courses Page Specific Styles */
+        .courses-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .courses-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .courses-intro {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        .courses-comparison {
+            background: var(--secondary);
+            padding: 3rem;
+            border-radius: 15px;
+            margin: 3rem auto;
+            max-width: 800px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .comparison-column {
+            padding: 2rem;
+            border-radius: 10px;
+        }
+        
+        .comparison-column.script-only {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--primary);
+        }
+        
+        .comparison-column.mini-course {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--accent);
+        }
+        
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .course-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 15px 30px rgba(0, 217, 255, 0.2);
+        }
+        
+        .course-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .course-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .course-header h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .course-price {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .course-price .original-price {
+            font-size: 1.2rem;
+            color: #ccc;
+            text-decoration: line-through;
+            margin-right: 1rem;
+        }
+        
+        .course-features {
+            padding: 1.5rem 2rem;
+        }
+        
+        .course-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .course-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .course-features li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .course-includes {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 1.5rem 2rem;
+            margin: 0 2rem 1rem;
+            border-radius: 10px;
+        }
+        
+        .course-includes h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .course-actions {
+            padding: 0 2rem 2rem;
+        }
+        
+        .course-btn {
+            width: 100%;
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .course-btn:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+        }
+        
+        .video-preview {
+            margin: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-preview::before {
+            content: "▶";
+            position: absolute;
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .courses-benefits {
+            background: var(--secondary);
+            padding: 80px 0;
+            margin-top: 4rem;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .benefit-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .faq-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .courses-cta {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent) 0%, #0099cc 100%);
+            color: var(--dark);
+        }
+        
+        .courses-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Bundle Offer */
+        .bundle-offer {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 3rem;
+            border-radius: 15px;
+            margin: 3rem auto;
+            max-width: 800px;
+            text-align: center;
+            color: white;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .courses-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .courses-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .courses-cta h2 {
+                font-size: 2rem;
+            }
+            
+            .bundle-offer {
+                padding: 2rem 1.5rem;
+                margin: 2rem 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .courses-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .courses-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .course-header {
+                padding: 1.5rem 1.5rem 1rem;
+            }
+            
+            .course-features {
+                padding: 1rem 1.5rem;
+            }
+            
+            .course-includes {
+                margin: 0 1rem 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">MINI COURSES</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html" class="active">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="course.html">Courses</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#courses" class="cta-button">View Courses</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">MINI COURSES</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="course.html" onclick="closeMobileMenu()">Courses</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#courses" class="cta-button" onclick="closeMobileMenu()">View Courses</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="courses-hero" id="courses">
+        <div class="container">
+            <h1>Mini Courses with Scripts</h1>
+            <div class="courses-intro">
+                <p><strong>Learn by doing!</strong> Get complete video tutorials + ready-to-use scripts. Perfect for developers who want to understand AND implement.</p>
+                <p>Each course includes detailed video explanations, complete source code, and step-by-step implementation guides.</p>
+            </div>
+            <a href="#all-courses" class="cta-button">Browse All Courses →</a>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="container">
+        <div class="courses-comparison">
+            <h2 style="text-align: center; color: var(--accent); margin-bottom: 2rem;">Scripts vs Mini Courses</h2>
+            <div class="comparison-grid">
+                <div class="comparison-column script-only">
+                    <h3>Script Only</h3>
+                    <ul>
+                        <li>Ready-to-use script</li>
+                        <li>Basic documentation</li>
+                        <li>One-time payment</li>
+                        <li>Plug & play</li>
+                        <li>Support via WhatsApp</li>
+                    </ul>
+                    <div style="margin-top: 2rem; font-size: 1.2rem; color: var(--primary);">
+                        <strong>Starting at ₹49</strong>
+                    </div>
+                </div>
+                
+                <div class="comparison-column mini-course">
+                    <h3>Mini Course</h3>
+                    <ul>
+                        <li><strong>Complete video tutorials</strong></li>
+                        <li><strong>Full source code included</strong></li>
+                        <li><strong>Step-by-step implementation</strong></li>
+                        <li><strong>Detailed explanations</strong></li>
+                        <li><strong>Priority support</strong></li>
+                        <li><strong>Customization guidance</strong></li>
+                    </ul>
+                    <div style="margin-top: 2rem; font-size: 1.5rem; color: var(--accent);">
+                        <strong>2× Value for 2× Price</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Grid -->
+    <section class="container" id="all-courses">
+        <h2 class="section-title">Available Mini Courses</h2>
+        <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">Each course includes video tutorials + complete scripts</p>
+        
+        <div class="courses-grid">
+            <!-- Course 1: Player System -->
+            <div class="course-card">
+                <div class="course-badge">BEST VALUE</div>
+                <div class="course-header">
+                    <h3>Player Controller Masterclass</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹398</span> ₹399
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('player-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + Player Controller Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>6+ hours of video tutorials</li>
+                        <li>Complete player movement system</li>
+                        <li>Stance-based animations explained</li>
+                        <li>Weapon system implementation</li>
+                        <li>UI integration tutorials</li>
+                        <li>Debugging & optimization tips</li>
+                        <li>Mobile adaptation guide</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('Player Controller Masterclass', 399)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Course 2: Car System -->
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>Multiplayer Car System Course</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹198</span> ₹199
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('car-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + Car System Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>4 hours of video tutorials</li>
+                        <li>Multiplayer synchronization explained</li>
+                        <li>Passenger system implementation</li>
+                        <li>Network optimization techniques</li>
+                        <li>Physics & controls deep dive</li>
+                        <li>Mobile touch controls tutorial</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('Multiplayer Car System Course', 199)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Course 3: AI Enemy -->
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>AI Enemy System Course</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹298</span> ₹299
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('ai-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + AI Enemy Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>5 hours of video tutorials</li>
+                        <li>Path finding algorithms explained</li>
+                        <li>Behavior tree implementation</li>
+                        <li>Zombie & ranged enemy AI</li>
+                        <li>Multiplayer AI optimization</li>
+                        <li>Difficulty scaling techniques</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('AI Enemy System Course', 299)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Course 4: GTA Map -->
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>GTA Map System Course</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹98</span> ₹99
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('map-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + GTA Map Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>3 hours of video tutorials</li>
+                        <li>Mini & full map implementation</li>
+                        <li>GPS & waypoint system tutorial</li>
+                        <li>Mobile-optimized UI design</li>
+                        <li>Performance optimization guide</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('GTA Map System Course', 99)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Course 5: AI NPC -->
+            <div class="course-card">
+                <div class="course-badge">ADVANCED</div>
+                <div class="course-header">
+                    <h3>AI NPC System Course</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹598</span> ₹599
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('npc-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + AI NPC Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>8+ hours of video tutorials</li>
+                        <li>Gemini AI integration explained</li>
+                        <li>Groq API implementation</li>
+                        <li>Dynamic dialog system tutorial</li>
+                        <li>Emotion & personality system</li>
+                        <li>Multi-language support guide</li>
+                        <li>Advanced AI techniques</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('AI NPC System Course', 599)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Course 6: Character Selection -->
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>Character Selection Course</h3>
+                    <div class="course-price">
+                        <span class="original-price">₹298</span> ₹299
+                    </div>
+                </div>
+                
+                <div class="video-preview" onclick="showPreview('character-course')">
+                    <!-- Video preview would go here -->
+                </div>
+                
+                <div class="course-includes">
+                    <h4>Includes:</h4>
+                    <p>Complete video course + Character Selection Script</p>
+                </div>
+                
+                <div class="course-features">
+                    <ul>
+                        <li>4 hours of video tutorials</li>
+                        <li>Lobby system implementation</li>
+                        <li>Multiplayer synchronization guide</li>
+                        <li>UI/UX design for character selection</li>
+                        <li>Team assignment system tutorial</li>
+                        <li>Mobile optimization techniques</li>
+                    </ul>
+                </div>
+                
+                <div class="course-actions">
+                    <button class="course-btn" onclick="buyCourse('Character Selection Course', 299)">
+                        🎓 Enroll Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bundle Offer -->
+    <section class="container">
+        <div class="bundle-offer">
+            <h3>🎁 Complete Bundle Offer</h3>
+            <p style="font-size: 1.3rem; margin: 1.5rem 0;">
+                <strong>Get ALL 6 Mini Courses + ALL 6 Scripts</strong><br>
+                Regular Price: ₹1,794
+            </p>
+            <div style="font-size: 2.5rem; margin: 1rem 0; font-weight: bold;">
+                ₹1,299 <small style="font-size: 1rem;">(Save ₹495!)</small>
+            </div>
+            <p style="margin: 1.5rem 0;">Limited time offer. Includes lifetime access to all content.</p>
+            <button class="cta-button" style="background: white; color: var(--primary);" onclick="buyBundle()">
+                🎯 Get Complete Bundle
+            </button>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="courses-benefits">
+        <div class="container">
+            <h2 class="section-title">Why Choose Mini Courses?</h2>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎓</div>
+                    <h3>Learn & Implement</h3>
+                    <p>Understand the concepts while getting working code.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎬</div>
+                    <h3>Video Tutorials</h3>
+                    <p>Step-by-step video guidance for every implementation.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">💬</div>
+                    <h3>Priority Support</h3>
+                    <p>Get your questions answered within 24 hours.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔄</div>
+                    <h3>Updates Included</h3>
+                    <p>Free updates to both scripts and video content.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>How do I access the course content?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>After purchase, you'll receive a Google Drive link with all video tutorials and source code files. You can download and access them anytime.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>What if I need help with implementation?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>All mini courses come with priority support via WhatsApp. You can ask questions and get guidance within 24 hours.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Can I customize the scripts for my game?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Absolutely! The courses teach you how to modify and extend the scripts for your specific needs. We also provide customization guidance.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Are there any recurring fees?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>No, all purchases are one-time payments. You get lifetime access to the content and future updates.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="courses-cta">
+        <div class="container">
+            <h2>Ready to Master Godot Development?</h2>
+            <p>Join hundreds of developers who've accelerated their game development with our mini courses.</p>
+            <button class="cta-button" style="background: var(--primary); color: white; margin-top: 2rem;" onclick="openWhatsApp('Mini Course Inquiry')">
+                📱 Chat on WhatsApp
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">MINI COURSES</div>
+            <p>Learn Godot Game Development with Video Tutorials + Ready-to-Use Scripts</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Mini Courses. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/chat-loader.js"></script>
+    
+    <script>
+        // Mobile Menu Functions
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Close menu when clicking on links
+        const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        // FAQ Toggle
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            answer.classList.toggle('active');
+            element.querySelector('span:last-child').textContent = 
+                answer.classList.contains('active') ? '−' : '+';
+        }
+
+        // Purchase Functions
+        function buyCourse(courseName, price) {
+            const message = `Hello! I'd like to enroll in the "${courseName}" mini course for ₹${price}.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function buyBundle() {
+            const message = `Hello! I'd like to purchase the Complete Bundle (6 Mini Courses + 6 Scripts) for ₹1,299.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function openWhatsApp(inquiryType) {
+            const message = `Hello! I have a ${inquiryType} about mini courses. Please provide more details.`;
+            const whatsappUrl = `https://wa.me/917504704502?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function showPreview(courseType) {
+            alert(`Video preview for ${courseType} would be shown here. In production, this would open a video player.`);
+        }
+
+        // Add active class to current page
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (linkPage === currentPage || 
+                    (currentPage === '' && linkPage === 'index.html')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
