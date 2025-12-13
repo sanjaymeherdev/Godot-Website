@@ -227,6 +227,8 @@
             font-weight: bold;
             transition: all 0.3s;
             font-size: 1rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
         }
 
         .btn:hover {
@@ -247,6 +249,21 @@
 
         .btn-secondary:hover {
             box-shadow: 0 10px 25px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .btn-clear:hover {
+            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
         }
 
         .output-area {
@@ -270,6 +287,11 @@
         .output-header h4 {
             color: var(--accent);
             font-size: 1.3rem;
+        }
+
+        .output-actions {
+            display: flex;
+            gap: 1rem;
         }
 
         .code-output {
@@ -365,6 +387,12 @@
             .section-title {
                 font-size: 2rem;
             }
+            .output-actions {
+                flex-direction: column;
+            }
+            .btn {
+                margin-right: 0;
+            }
         }
     </style>
 </head>
@@ -409,7 +437,7 @@
     <div class="main-content">
         <div class="container">
             <h1 style="text-align: center; margin-bottom: 0.5rem; font-size: 3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Godot AI Tools</h1>
-            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2.5rem; font-size: 1.2rem;">Generate GDScript code instantly with AI</p>
+            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2.5rem; font-size: 1.2rem;">Generate GDScript & Scene files instantly with AI</p>
 
             <div class="ai-tools-layout">
                 <aside class="sidebar">
@@ -419,13 +447,13 @@
                             <span class="tab-icon">🤖</span>
                             <span>AI Script Generator</span>
                         </button>
-                        <button class="tab-btn" data-tab="code-templates">
-                            <span class="tab-icon">📋</span>
-                            <span>Code Templates</span>
-                        </button>
                         <button class="tab-btn" data-tab="scene-generator">
                             <span class="tab-icon">🎬</span>
                             <span>Scene Generator</span>
+                        </button>
+                        <button class="tab-btn" data-tab="code-templates">
+                            <span class="tab-icon">📋</span>
+                            <span>Code Templates</span>
                         </button>
                         <button class="tab-btn" data-tab="code-refactor">
                             <span class="tab-icon">🔧</span>
@@ -443,62 +471,116 @@
                 </aside>
 
                 <main class="content-area">
+                    <!-- AI Script Generator Tab -->
                     <div class="tab-content active" id="script-generator">
                         <h2 class="section-title">🤖 AI Script Generator</h2>
-                        <p class="section-description">Describe your game mechanic and get production-ready GDScript code instantly.</p>
+                        <p class="section-description">Generate production-ready GDScript 4.4 code for your Godot games.</p>
 
                         <div class="api-config" id="generate">
                             <h4>⚙️ AI Configuration</h4>
                             <div class="config-grid">
                                 <div class="form-group">
-                                    <label for="api-provider">AI Provider</label>
-                                    <select id="api-provider">
+                                    <label for="script-provider">AI Provider</label>
+                                    <select id="script-provider">
                                         <option value="groq">Groq (Fast)</option>
                                         <option value="gemini">Google Gemini</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="api-model">AI Model</label>
-                                    <select id="api-model"></select>
+                                    <label for="script-model">AI Model</label>
+                                    <select id="script-model"></select>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="prompt">Describe what you want to create</label>
-                            <textarea id="prompt" placeholder="Example: Create a 2D platformer player controller with double jump, wall slide, and dash mechanics." rows="4"></textarea>
+                            <label for="script-prompt">Describe what you want to create</label>
+                            <textarea id="script-prompt" placeholder="Example: Create a 3D player controller with movement, jumping, and camera control. Use CharacterBody3D and include proper input handling." rows="4"></textarea>
                         </div>
 
-                        <button class="btn" id="generate-btn">🚀 Generate GDScript</button>
+                        <div class="btn-group">
+                            <button class="btn" id="generate-script-btn">🚀 Generate GDScript</button>
+                            <button class="btn btn-clear" id="clear-script-btn">🗑️ Clear</button>
+                        </div>
 
-                        <div class="loading" id="loading">
+                        <div class="loading" id="script-loading">
                             <div class="spinner"></div>
                             <p>AI is generating your script...</p>
                         </div>
 
-                        <div class="error-message message" id="error-message"></div>
-                        <div class="success-message message" id="success-message"></div>
+                        <div class="error-message message" id="script-error-message"></div>
+                        <div class="success-message message" id="script-success-message"></div>
 
-                        <div class="output-area" id="output-area" style="display: none;">
+                        <div class="output-area" id="script-output-area" style="display: none;">
                             <div class="output-header">
                                 <h4>✨ Generated GDScript</h4>
-                                <div style="display: flex; gap: 1rem;">
-                                    <button class="btn-secondary" id="copy-btn">📋 Copy Code</button>
-                                    <button class="btn-secondary" id="download-btn">💾 Download</button>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-script-btn">📋 Copy Code</button>
+                                    <button class="btn-secondary" id="download-script-btn">💾 Download (.gd)</button>
+                                    <button class="btn btn-clear" id="clear-output-btn">🗑️ Clear Output</button>
                                 </div>
                             </div>
-                            <pre class="code-output" id="code-output"></pre>
+                            <pre class="code-output" id="script-code-output"></pre>
                         </div>
                     </div>
 
-                    <!-- Other tabs remain the same -->
+                    <!-- Scene Generator Tab -->
+                    <div class="tab-content" id="scene-generator">
+                        <h2 class="section-title">🎬 Scene Generator</h2>
+                        <p class="section-description">Generate complete Godot scene files (.tscn) with node hierarchy.</p>
+
+                        <div class="api-config">
+                            <h4>⚙️ AI Configuration</h4>
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="scene-provider">AI Provider</label>
+                                    <select id="scene-provider">
+                                        <option value="groq">Groq (Fast)</option>
+                                        <option value="gemini">Google Gemini</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scene-model">AI Model</label>
+                                    <select id="scene-model"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="scene-prompt">Describe your scene structure</label>
+                            <textarea id="scene-prompt" placeholder="Example: Create a 3D main menu scene with a background, title label, start button, options button, and exit button. Use Control nodes for UI." rows="4"></textarea>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn" id="generate-scene-btn">🎬 Generate Scene</button>
+                            <button class="btn btn-clear" id="clear-scene-btn">🗑️ Clear</button>
+                        </div>
+
+                        <div class="loading" id="scene-loading">
+                            <div class="spinner"></div>
+                            <p>AI is generating your scene...</p>
+                        </div>
+
+                        <div class="error-message message" id="scene-error-message"></div>
+                        <div class="success-message message" id="scene-success-message"></div>
+
+                        <div class="output-area" id="scene-output-area" style="display: none;">
+                            <div class="output-header">
+                                <h4>✨ Generated Scene (.tscn)</h4>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-scene-btn">📋 Copy Scene</button>
+                                    <button class="btn-secondary" id="download-scene-btn">💾 Download (.tscn)</button>
+                                    <button class="btn btn-clear" id="clear-scene-output-btn">🗑️ Clear Output</button>
+                                </div>
+                            </div>
+                            <pre class="code-output" id="scene-code-output"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Other tabs -->
                     <div class="tab-content" id="code-templates">
                         <h2 class="section-title">📋 Code Templates</h2>
                         <p class="section-description">Pre-built code templates for common Godot patterns.</p>
-                    </div>
-                    <div class="tab-content" id="scene-generator">
-                        <h2 class="section-title">🎬 Scene Generator</h2>
-                        <p class="section-description">Coming Soon!</p>
                     </div>
                     <div class="tab-content" id="code-refactor">
                         <h2 class="section-title">🔧 Code Refactor</h2>
@@ -539,7 +621,7 @@
 
         // Initialize tabs
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tabs
+            // Tab switching
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabId = btn.dataset.tab;
@@ -550,77 +632,111 @@
                 });
             });
 
-            // Initialize API provider dropdown
-            const apiProvider = document.getElementById('api-provider');
-            const apiModel = document.getElementById('api-model');
+            // Initialize dropdowns for both script and scene generators
+            function initializeDropdowns(providerId, modelId, models) {
+                const provider = document.getElementById(providerId);
+                const model = document.getElementById(modelId);
 
-            function updateModels() {
-                const provider = apiProvider.value;
-                apiModel.innerHTML = '';
-                
-                MODELS[provider].forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.value;
-                    option.textContent = model.label;
-                    apiModel.appendChild(option);
-                });
+                function updateModels() {
+                    const selectedProvider = provider.value;
+                    model.innerHTML = '';
+                    
+                    MODELS[selectedProvider].forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.value;
+                        option.textContent = m.label;
+                        model.appendChild(option);
+                    });
+                }
+
+                provider.addEventListener('change', updateModels);
+                updateModels();
             }
 
-            apiProvider.addEventListener('change', updateModels);
-            updateModels(); // Set initial models
+            // Initialize both dropdowns
+            initializeDropdowns('script-provider', 'script-model', MODELS);
+            initializeDropdowns('scene-provider', 'scene-model', MODELS);
 
-            // Initialize generate button
-            const generateBtn = document.getElementById('generate-btn');
-            const promptInput = document.getElementById('prompt');
-            const loading = document.getElementById('loading');
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message');
-            const outputArea = document.getElementById('output-area');
-            const codeOutput = document.getElementById('code-output');
-            const copyBtn = document.getElementById('copy-btn');
-            const downloadBtn = document.getElementById('download-btn');
+            // ========== SCRIPT GENERATOR FUNCTIONS ==========
+            const generateScriptBtn = document.getElementById('generate-script-btn');
+            const scriptPrompt = document.getElementById('script-prompt');
+            const scriptLoading = document.getElementById('script-loading');
+            const scriptErrorMessage = document.getElementById('script-error-message');
+            const scriptSuccessMessage = document.getElementById('script-success-message');
+            const scriptOutputArea = document.getElementById('script-output-area');
+            const scriptCodeOutput = document.getElementById('script-code-output');
+            const copyScriptBtn = document.getElementById('copy-script-btn');
+            const downloadScriptBtn = document.getElementById('download-script-btn');
+            const clearScriptBtn = document.getElementById('clear-script-btn');
+            const clearOutputBtn = document.getElementById('clear-output-btn');
 
-            generateBtn.addEventListener('click', async function() {
-                const prompt = promptInput.value.trim();
-                const provider = apiProvider.value;
-                const model = apiModel.value;
+            // Clear script prompt
+            clearScriptBtn.addEventListener('click', function() {
+                scriptPrompt.value = '';
+                scriptPrompt.focus();
+            });
+
+            // Clear output
+            clearOutputBtn.addEventListener('click', function() {
+                scriptCodeOutput.textContent = '';
+                scriptOutputArea.style.display = 'none';
+                hideMessages('script');
+            });
+
+            generateScriptBtn.addEventListener('click', async function() {
+                const prompt = scriptPrompt.value.trim();
+                const provider = document.getElementById('script-provider').value;
+                const model = document.getElementById('script-model').value;
 
                 if (!prompt) {
-                    showMessage('error', 'Please describe what you want to create.');
+                    showMessage('script-error', 'Please describe what you want to create.');
                     return;
                 }
 
                 // Show loading
-                generateBtn.disabled = true;
-                loading.classList.add('active');
-                hideMessages();
-                outputArea.style.display = 'none';
+                generateScriptBtn.disabled = true;
+                scriptLoading.classList.add('active');
+                hideMessages('script');
+                scriptOutputArea.style.display = 'none';
 
                 try {
                     const code = await generateScript(prompt, provider, model);
-                    displayCode(code);
-                    showMessage('success', '✅ GDScript generated successfully!');
+                    displayCode(code, 'script');
+                    showMessage('script-success', '✅ GDScript generated successfully!');
                 } catch (error) {
-                    showMessage('error', `❌ Error: ${error.message}`);
+                    showMessage('script-error', `❌ Error: ${error.message}`);
                 } finally {
-                    generateBtn.disabled = false;
-                    loading.classList.remove('active');
+                    generateScriptBtn.disabled = false;
+                    scriptLoading.classList.remove('active');
                 }
             });
 
             async function generateScript(prompt, provider, model) {
-                const systemPrompt = `You are an expert Godot 4.4 game developer. Generate clean, production-ready GDScript 4.4 code.
-Requirements:
-1. Use GDScript 4.4 syntax
-2. Include proper type hints and comments
-3. Follow Godot best practices
-4. Structure code logically
-5. Default to 3D unless specified
-6. Make it production ready
+                const systemPrompt = `You are an expert Godot 4.4 game developer. Generate clean, production-ready GDScript 4.4 code following these STRICT rules:
+
+IMPORTANT RULES:
+1. Use ONLY Godot 4.4 OFFICIAL syntax from the official documentation
+2. ALWAYS use 3D nodes and systems unless SPECIFICALLY asked for 2D
+3. Use proper type hints for ALL variables and functions
+4. Include comprehensive comments explaining logic
+5. Follow Godot best practices and naming conventions
+6. Use @export for important properties
+7. Include proper error handling
+8. Make the code modular and reusable
+9. DO NOT include markdown code blocks or explanations
+10. Return ONLY the GDScript code
+
+DEFAULT TO 3D:
+- Use CharacterBody3D for player characters
+- Use Node3D for 3D nodes
+- Use Vector3 for 3D vectors
+- Use 3D physics and collisions
+
+ONLY use 2D if user explicitly asks for "2D" in their request.
 
 User request: ${prompt}
 
-Generate only the GDScript code, no explanations.`;
+Generate ONLY the GDScript code.`;
 
                 if (provider === 'groq') {
                     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -674,68 +790,262 @@ Generate only the GDScript code, no explanations.`;
                 }
             }
 
-            function displayCode(code) {
-                code = code.replace(/```(?:gdscript)?\n?/g, '').replace(/```/g, '').trim();
-                codeOutput.textContent = code;
-                outputArea.style.display = 'block';
-                outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            // ========== SCENE GENERATOR FUNCTIONS ==========
+            const generateSceneBtn = document.getElementById('generate-scene-btn');
+            const scenePrompt = document.getElementById('scene-prompt');
+            const sceneLoading = document.getElementById('scene-loading');
+            const sceneErrorMessage = document.getElementById('scene-error-message');
+            const sceneSuccessMessage = document.getElementById('scene-success-message');
+            const sceneOutputArea = document.getElementById('scene-output-area');
+            const sceneCodeOutput = document.getElementById('scene-code-output');
+            const copySceneBtn = document.getElementById('copy-scene-btn');
+            const downloadSceneBtn = document.getElementById('download-scene-btn');
+            const clearSceneBtn = document.getElementById('clear-scene-btn');
+            const clearSceneOutputBtn = document.getElementById('clear-scene-output-btn');
 
-            function showMessage(type, message) {
-                const element = type === 'error' ? errorMessage : successMessage;
-                element.textContent = message;
-                element.classList.add('show');
-                
-                if (type === 'success') {
-                    setTimeout(() => element.classList.remove('show'), 3000);
+            // Clear scene prompt
+            clearSceneBtn.addEventListener('click', function() {
+                scenePrompt.value = '';
+                scenePrompt.focus();
+            });
+
+            // Clear scene output
+            clearSceneOutputBtn.addEventListener('click', function() {
+                sceneCodeOutput.textContent = '';
+                sceneOutputArea.style.display = 'none';
+                hideMessages('scene');
+            });
+
+            generateSceneBtn.addEventListener('click', async function() {
+                const prompt = scenePrompt.value.trim();
+                const provider = document.getElementById('scene-provider').value;
+                const model = document.getElementById('scene-model').value;
+
+                if (!prompt) {
+                    showMessage('scene-error', 'Please describe your scene structure.');
+                    return;
+                }
+
+                // Show loading
+                generateSceneBtn.disabled = true;
+                sceneLoading.classList.add('active');
+                hideMessages('scene');
+                sceneOutputArea.style.display = 'none';
+
+                try {
+                    const scene = await generateScene(prompt, provider, model);
+                    displayCode(scene, 'scene');
+                    showMessage('scene-success', '✅ Scene generated successfully!');
+                } catch (error) {
+                    showMessage('scene-error', `❌ Error: ${error.message}`);
+                } finally {
+                    generateSceneBtn.disabled = false;
+                    sceneLoading.classList.remove('active');
+                }
+            });
+
+            async function generateScene(prompt, provider, model) {
+                const systemPrompt = `You are an expert Godot 4.4 scene designer. Generate a complete Godot scene file (.tscn) with node hierarchy.
+
+STRICT RULES:
+1. Output ONLY valid .tscn file content that can be saved directly as a .tscn file
+2. Use Godot 4.4 scene format with [gd_scene] header
+3. DO NOT include any attached scripts or theme overrides
+4. Use ONLY default theme settings for all nodes
+5. Structure nodes in a logical hierarchy
+6. Include proper node properties and connections
+7. Use 3D nodes by default unless specifically asked for 2D
+8. DO NOT include any markdown or explanations
+9. Return ONLY the .tscn file content
+
+IMPORTANT: The output must be valid .tscn format that can be copied and saved as a .tscn file and opened directly in Godot 4.4.
+
+Scene description: ${prompt}
+
+Generate ONLY the .tscn file content.`;
+
+                if (provider === 'groq') {
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_KEYS.groq}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: prompt }
+                            ],
+                            temperature: 0.7,
+                            max_tokens: 4000
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API Error');
+                    }
+
+                    const data = await response.json();
+                    return data.choices[0].message.content.trim();
+                } else { // gemini
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEYS.gemini}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: systemPrompt }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 4000
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API Error');
+                    }
+
+                    const data = await response.json();
+                    return data.candidates[0].content.parts[0].text.trim();
                 }
             }
 
-            function hideMessages() {
-                errorMessage.classList.remove('show');
-                successMessage.classList.remove('show');
+            // ========== UTILITY FUNCTIONS ==========
+            function displayCode(code, type) {
+                code = code.replace(/```(?:gdscript|tscn)?\n?/g, '').replace(/```/g, '').trim();
+                
+                if (type === 'script') {
+                    scriptCodeOutput.textContent = code;
+                    scriptOutputArea.style.display = 'block';
+                    scriptOutputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else if (type === 'scene') {
+                    sceneCodeOutput.textContent = code;
+                    sceneOutputArea.style.display = 'block';
+                    sceneOutputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
 
-            copyBtn.addEventListener('click', function() {
-                const code = codeOutput.textContent;
+            function showMessage(type, message) {
+                let element;
+                if (type.includes('script-error')) {
+                    element = scriptErrorMessage;
+                } else if (type.includes('script-success')) {
+                    element = scriptSuccessMessage;
+                } else if (type.includes('scene-error')) {
+                    element = sceneErrorMessage;
+                } else if (type.includes('scene-success')) {
+                    element = sceneSuccessMessage;
+                }
+                
+                if (element) {
+                    element.textContent = message;
+                    element.classList.add('show');
+                    
+                    if (type.includes('success')) {
+                        setTimeout(() => element.classList.remove('show'), 3000);
+                    }
+                }
+            }
+
+            function hideMessages(type) {
+                if (type === 'script' || !type) {
+                    scriptErrorMessage.classList.remove('show');
+                    scriptSuccessMessage.classList.remove('show');
+                }
+                if (type === 'scene' || !type) {
+                    sceneErrorMessage.classList.remove('show');
+                    sceneSuccessMessage.classList.remove('show');
+                }
+            }
+
+            // Copy script to clipboard
+            copyScriptBtn.addEventListener('click', function() {
+                const code = scriptCodeOutput.textContent;
                 navigator.clipboard.writeText(code).then(() => {
-                    copyBtn.textContent = '✓ Copied!';
+                    copyScriptBtn.textContent = '✓ Copied!';
                     setTimeout(() => {
-                        copyBtn.textContent = '📋 Copy Code';
+                        copyScriptBtn.textContent = '📋 Copy Code';
                     }, 2000);
                 });
             });
 
-            downloadBtn.addEventListener('click', function() {
-                const code = codeOutput.textContent;
+            // Download script
+            downloadScriptBtn.addEventListener('click', function() {
+                const code = scriptCodeOutput.textContent;
                 const blob = new Blob([code], { type: 'text/x-gdscript' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'godot_ai_script.gd';
+                a.download = 'godot_script.gd';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                downloadBtn.textContent = '✓ Downloaded!';
+                downloadScriptBtn.textContent = '✓ Downloaded!';
                 setTimeout(() => {
-                    downloadBtn.textContent = '💾 Download';
+                    downloadScriptBtn.textContent = '💾 Download (.gd)';
+                }, 2000);
+            });
+
+            // Copy scene to clipboard
+            copySceneBtn.addEventListener('click', function() {
+                const code = sceneCodeOutput.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    copySceneBtn.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        copySceneBtn.textContent = '📋 Copy Scene';
+                    }, 2000);
+                });
+            });
+
+            // Download scene
+            downloadSceneBtn.addEventListener('click', function() {
+                const code = sceneCodeOutput.textContent;
+                const blob = new Blob([code], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'godot_scene.tscn';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                downloadSceneBtn.textContent = '✓ Downloaded!';
+                setTimeout(() => {
+                    downloadSceneBtn.textContent = '💾 Download (.tscn)';
                 }, 2000);
             });
 
             // Example prompts
-            const examplePrompts = [
-                "Create a 2D player controller with double jump and dash",
-                "Make an inventory system for an RPG game",
-                "Generate enemy AI with patrol and chase states",
-                "Create a health and damage system for a shooter game",
-                "Make a save/load system using JSON"
+            const scriptExamples = [
+                "Create a 3D player controller with movement, jumping, and camera control",
+                "Make an inventory system for an RPG game using 3D items",
+                "Generate enemy AI with patrol and chase states in 3D",
+                "Create a health and damage system for a 3D shooter game",
+                "Make a save/load system using JSON for 3D game progress"
             ];
 
-            // Set random example on load
-            const randomPrompt = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
-            promptInput.placeholder = `Example: ${randomPrompt}`;
+            const sceneExamples = [
+                "Create a 3D main menu scene with background, title, and buttons",
+                "Make a player character scene with CharacterBody3D, mesh, and camera",
+                "Generate a 3D level scene with terrain, obstacles, and collectibles",
+                "Create a UI scene for game HUD with health bar and score display",
+                "Make a 3D enemy scene with AI navigation and attack zones"
+            ];
+
+            // Set random examples on load
+            const randomScript = scriptExamples[Math.floor(Math.random() * scriptExamples.length)];
+            const randomScene = sceneExamples[Math.floor(Math.random() * sceneExamples.length)];
+            scriptPrompt.placeholder = `Example: ${randomScript}`;
+            scenePrompt.placeholder = `Example: ${randomScene}`;
         });
 
         // Mobile menu functionality
