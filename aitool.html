@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godot AI Tools - AI-Powered GDScript Generator</title>
+    <title>Godot AI Tools - Complete AI-Powered Development Suite</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         :root {
@@ -17,6 +17,7 @@
             --darker: #121212;
             --success: #28a745;
             --error: #dc3545;
+            --warning: #ffc107;
         }
 
         * {
@@ -34,7 +35,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
         }
@@ -46,7 +47,7 @@
 
         .ai-tools-layout {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 2rem;
             margin-top: 2rem;
         }
@@ -60,6 +61,8 @@
             height: fit-content;
             position: sticky;
             top: 140px;
+            max-height: calc(100vh - 160px);
+            overflow-y: auto;
         }
 
         .sidebar h3 {
@@ -117,7 +120,7 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 2.5rem;
+            padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
@@ -138,7 +141,7 @@
 
         .section-title {
             color: var(--primary);
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, var(--primary), #ff8e53);
             -webkit-background-clip: text;
@@ -147,7 +150,7 @@
 
         .section-description {
             color: #ccc;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             line-height: 1.8;
             font-size: 1.1rem;
         }
@@ -157,7 +160,7 @@
             padding: 1.5rem;
             border-radius: 12px;
             border: 1px solid rgba(255, 107, 53, 0.3);
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             box-shadow: 0 4px 20px rgba(255, 107, 53, 0.1);
         }
 
@@ -214,27 +217,26 @@
         .form-group textarea {
             min-height: 150px;
             resize: vertical;
-            font-family: 'Courier New', monospace;
             line-height: 1.6;
         }
 
         .btn {
             background: linear-gradient(135deg, var(--primary), #e55a2b);
             color: white;
-            padding: 1rem 2.5rem;
+            padding: 1rem 2rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
-            font-size: 1rem;
-            margin-right: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
         }
 
         .btn:disabled {
@@ -249,7 +251,7 @@
         }
 
         .btn-secondary:hover {
-            box-shadow: 0 10px 25px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
         }
 
         .btn-clear {
@@ -257,7 +259,15 @@
         }
 
         .btn-clear:hover {
-            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.4);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
         }
 
         .btn-group {
@@ -268,10 +278,10 @@
         }
 
         .output-area {
-            margin-top: 2.5rem;
+            margin-top: 2rem;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
@@ -287,12 +297,13 @@
 
         .output-header h4 {
             color: var(--accent);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .output-actions {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .code-output {
@@ -305,8 +316,10 @@
             white-space: pre-wrap;
             min-height: 200px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
         }
 
         .loading {
@@ -325,8 +338,8 @@
             border-top: 4px solid var(--accent);
             border-right: 4px solid var(--primary);
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 1.5rem;
         }
@@ -339,7 +352,7 @@
         .message {
             padding: 1rem 1.5rem;
             border-radius: 8px;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             display: none;
             animation: slideIn 0.3s ease;
         }
@@ -360,6 +373,421 @@
             color: #6bff88;
         }
 
+        .warning-message {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+            border: 1px solid var(--warning);
+            color: #ffd95a;
+        }
+
+        /* Panel 3: Code Templates */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .template-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-icon {
+            font-size: 1.5rem;
+        }
+
+        .template-features {
+            margin-top: 1rem;
+        }
+
+        .feature-tag {
+            display: inline-block;
+            background: rgba(0, 217, 255, 0.1);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Panel 4: Visual Block Editor */
+        .block-editor-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 1.5rem;
+            height: 600px;
+        }
+
+        .block-palette {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .block-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .block-category h5 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .block-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            cursor: move;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .block-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .block-workspace {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .block-dropzone {
+            background: rgba(0, 217, 255, 0.05);
+            border: 2px dashed rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            color: var(--accent);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .block-stack {
+            min-height: 100%;
+        }
+
+        .block-settings {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .block-config {
+            margin-bottom: 1.5rem;
+        }
+
+        .block-config h5 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .block-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Panel 5: Particle System Generator */
+        .particle-config {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .particle-params {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .param-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .param-group h5 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .slider-container {
+            margin-bottom: 1rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+
+        .slider-label span {
+            color: var(--light);
+            font-size: 0.9rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-swatch.active {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .particle-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-canvas {
+            width: 300px;
+            height: 300px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Panel 6: NPC & Enemy Generator */
+        .npc-config {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .npc-type-selector {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .npc-type-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .npc-type-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .npc-type-card.active {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .npc-type-card h5 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .npc-params {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        /* Panel 7: Godot API Quick Reference */
+        .api-reference {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            height: 500px;
+        }
+
+        .class-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .class-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .class-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .class-item.active {
+            background: rgba(0, 217, 255, 0.1);
+            border-left: 4px solid var(--accent);
+        }
+
+        .class-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .class-details h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .class-info-section {
+            margin-bottom: 2rem;
+        }
+
+        .class-info-section h4 {
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .property-list,
+        .method-list {
+            list-style: none;
+        }
+
+        .property-item,
+        .method-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        .property-type,
+        .method-return {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        /* Panel 8: One-Liner Code Snippets */
+        .snippets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .snippet-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .snippet-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .snippet-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .snippet-card h5 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .snippet-code {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            text-align: left;
+            display: none;
+        }
+
+        .snippet-card.active .snippet-code {
+            display: block;
+        }
+
+        /* Mobile responsive */
         @media (max-width: 1024px) {
             .ai-tools-layout {
                 grid-template-columns: 1fr;
@@ -367,14 +795,23 @@
             .sidebar {
                 position: relative;
                 top: 0;
+                max-height: none;
             }
             .sidebar-tabs {
                 flex-direction: row;
                 overflow-x: auto;
+                padding-bottom: 0.5rem;
             }
             .tab-btn {
-                min-width: 180px;
+                min-width: 200px;
                 white-space: nowrap;
+            }
+            .block-editor-container,
+            .particle-config,
+            .npc-config,
+            .api-reference {
+                grid-template-columns: 1fr;
+                height: auto;
             }
         }
 
@@ -383,15 +820,20 @@
                 padding-top: 120px;
             }
             .content-area {
-                padding: 1.5rem;
+                padding: 1rem;
             }
             .section-title {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
-            .output-actions {
+            .templates-grid,
+            .snippets-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn-group {
                 flex-direction: column;
             }
             .btn {
+                width: 100%;
                 margin-right: 0;
             }
         }
@@ -437,12 +879,12 @@
 
     <div class="main-content">
         <div class="container">
-            <h1 style="text-align: center; margin-bottom: 0.5rem; font-size: 3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Godot AI Tools</h1>
-            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2.5rem; font-size: 1.2rem;">Generate GDScript & Scene files instantly with AI</p>
+            <h1 style="text-align: center; margin-bottom: 0.5rem; font-size: 2.5rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Godot AI Tools Suite</h1>
+            <p style="text-align: center; color: var(--accent-light); margin-bottom: 2rem; font-size: 1.1rem;">Complete AI-Powered Development Suite for Godot 4.4</p>
 
             <div class="ai-tools-layout">
                 <aside class="sidebar">
-                    <h3>🚀 AI Tools</h3>
+                    <h3>🚀 AI Tools Suite</h3>
                     <div class="sidebar-tabs">
                         <button class="tab-btn active" data-tab="script-generator">
                             <span class="tab-icon">🤖</span>
@@ -456,23 +898,31 @@
                             <span class="tab-icon">📋</span>
                             <span>Code Templates</span>
                         </button>
-                        <button class="tab-btn" data-tab="code-refactor">
-                            <span class="tab-icon">🔧</span>
-                            <span>Code Refactor</span>
+                        <button class="tab-btn" data-tab="block-editor">
+                            <span class="tab-icon">🧱</span>
+                            <span>Visual Block Editor</span>
                         </button>
-                        <button class="tab-btn" data-tab="debug-assistant">
-                            <span class="tab-icon">🐛</span>
-                            <span>Debug Assistant</span>
+                        <button class="tab-btn" data-tab="particle-generator">
+                            <span class="tab-icon">🎇</span>
+                            <span>Particle Generator</span>
                         </button>
-                        <button class="tab-btn" data-tab="code-explainer">
-                            <span class="tab-icon">💡</span>
-                            <span>Code Explainer</span>
+                        <button class="tab-btn" data-tab="npc-generator">
+                            <span class="tab-icon">👤</span>
+                            <span>NPC & Enemy Generator</span>
+                        </button>
+                        <button class="tab-btn" data-tab="api-reference">
+                            <span class="tab-icon">📚</span>
+                            <span>Godot API Reference</span>
+                        </button>
+                        <button class="tab-btn" data-tab="code-snippets">
+                            <span class="tab-icon">⚡</span>
+                            <span>Code Snippets</span>
                         </button>
                     </div>
                 </aside>
 
                 <main class="content-area">
-                    <!-- AI Script Generator Tab -->
+                    <!-- Panel 1: AI Script Generator -->
                     <div class="tab-content active" id="script-generator">
                         <h2 class="section-title">🤖 AI Script Generator</h2>
                         <p class="section-description">Generate production-ready GDScript 4.4 code for your Godot games.</p>
@@ -525,7 +975,7 @@
                         </div>
                     </div>
 
-                    <!-- Scene Generator Tab -->
+                    <!-- Panel 2: Scene Generator -->
                     <div class="tab-content" id="scene-generator">
                         <h2 class="section-title">🎬 Scene Generator</h2>
                         <p class="section-description">Generate complete Godot scene files (.tscn) with node hierarchy.</p>
@@ -578,22 +1028,596 @@
                         </div>
                     </div>
 
-                    <!-- Other tabs -->
+                    <!-- Panel 3: Code Templates -->
                     <div class="tab-content" id="code-templates">
                         <h2 class="section-title">📋 Code Templates</h2>
-                        <p class="section-description">Pre-built code templates for common Godot patterns.</p>
+                        <p class="section-description">Pre-built code templates for common Godot patterns. Click any template to load it for editing.</p>
+                        
+                        <div class="templates-grid">
+                            <!-- Template 1: Advanced Player Controller -->
+                            <div class="template-card" data-template="player">
+                                <h4><span class="template-icon">👤</span> Advanced Player Controller</h4>
+                                <p>A complete 3D player controller with advanced movement, combat, and vehicle systems.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Multiplayer</span>
+                                    <span class="feature-tag">Vehicle System</span>
+                                    <span class="feature-tag">Combat</span>
+                                    <span class="feature-tag">Animation</span>
+                                    <span class="feature-tag">Grenade System</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 2: Enhanced Zombie AI -->
+                            <div class="template-card" data-template="zombie">
+                                <h4><span class="template-icon">🧟</span> Enhanced Zombie AI</h4>
+                                <p>Smart obstacle avoidance with multiplayer sync and combat systems.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Pathfinding</span>
+                                    <span class="feature-tag">Multiplayer</span>
+                                    <span class="feature-tag">Combat</span>
+                                    <span class="feature-tag">Health System</span>
+                                    <span class="feature-tag">Detection</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 3: Grenade System -->
+                            <div class="template-card" data-template="grenade">
+                                <h4><span class="template-icon">💣</span> Grenade System</h4>
+                                <p>Complete grenade physics with explosion effects, damage, and friendly fire.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Physics</span>
+                                    <span class="feature-tag">Particles</span>
+                                    <span class="feature-tag">Damage System</span>
+                                    <span class="feature-tag">Area Detection</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 4: Vehicle Controller -->
+                            <div class="template-card" data-template="vehicle">
+                                <h4><span class="template-icon">🚗</span> Vehicle Controller</h4>
+                                <p>Complete car physics with driver/passenger seats and multiplayer sync.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Physics</span>
+                                    <span class="feature-tag">Seat System</span>
+                                    <span class="feature-tag">Animation</span>
+                                    <span class="feature-tag">Audio</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 5: Weapon Manager -->
+                            <div class="template-card" data-template="weapon">
+                                <h4><span class="template-icon">🔫</span> Weapon Manager</h4>
+                                <p>Modular weapon system with guns, throwables, melee, and inventory.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Inventory</span>
+                                    <span class="feature-tag">Reloading</span>
+                                    <span class="feature-tag">Multi-weapon</span>
+                                    <span class="feature-tag">Throwables</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 6: NPC System -->
+                            <div class="template-card" data-template="npc">
+                                <h4><span class="template-icon">👨‍🦰</span> NPC System</h4>
+                                <p>Civilian NPCs with wandering, fleeing, and damage response.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Wandering</span>
+                                    <span class="feature-tag">Fleeing</span>
+                                    <span class="feature-tag">Multiplayer</span>
+                                    <span class="feature-tag">Animation</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 7: Ranged Enemy -->
+                            <div class="template-card" data-template="ranged">
+                                <h4><span class="template-icon">🎯</span> Ranged Enemy</h4>
+                                <p>Shooting enemy with line-of-sight detection and projectile attacks.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Shooting</span>
+                                    <span class="feature-tag">Detection</span>
+                                    <span class="feature-tag">Multiplayer</span>
+                                    <span class="feature-tag">Audio</span>
+                                </div>
+                            </div>
+
+                            <!-- Template 8: Animation Controller -->
+                            <div class="template-card" data-template="animation">
+                                <h4><span class="template-icon">💃</span> Animation Controller</h4>
+                                <p>Advanced animation system with stance management and combat poses.</p>
+                                <div class="template-features">
+                                    <span class="feature-tag">Stance System</span>
+                                    <span class="feature-tag">Combat</span>
+                                    <span class="feature-tag">Smooth Blending</span>
+                                    <span class="feature-tag">Vehicle</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-area" id="template-output-area" style="display: none; margin-top: 2rem;">
+                            <div class="output-header">
+                                <h4>📋 Selected Template</h4>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-template-btn">📋 Copy Template</button>
+                                    <button class="btn btn-warning" id="edit-template-btn">✏️ Edit with AI</button>
+                                    <button class="btn btn-clear" id="close-template-btn">❌ Close</button>
+                                </div>
+                            </div>
+                            <pre class="code-output" id="template-code-output"></pre>
+                        </div>
                     </div>
-                    <div class="tab-content" id="code-refactor">
-                        <h2 class="section-title">🔧 Code Refactor</h2>
-                        <p class="section-description">Coming Soon!</p>
+
+                    <!-- Panel 4: Visual Block Editor -->
+                    <div class="tab-content" id="block-editor">
+                        <h2 class="section-title">🧱 Visual Block Editor</h2>
+                        <p class="section-description">Drag and drop blocks to create GDScript visually. Perfect for beginners!</p>
+                        
+                        <div class="block-editor-container">
+                            <!-- Block Palette -->
+                            <div class="block-palette">
+                                <div class="block-category">
+                                    <h5>Structure</h5>
+                                    <div class="block-item" data-type="extends">extends NodeType</div>
+                                    <div class="block-item" data-type="class">class_name MyClass</div>
+                                    <div class="block-item" data-type="signal">signal my_signal</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Variables</h5>
+                                    <div class="block-item" data-type="var">var variable_name</div>
+                                    <div class="block-item" data-type="const">const CONSTANT_NAME</div>
+                                    <div class="block-item" data-type="export">@export var config</div>
+                                    <div class="block-item" data-type="onready">@onready var node_ref</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Functions</h5>
+                                    <div class="block-item" data-type="ready">func _ready()</div>
+                                    <div class="block-item" data-type="process">func _process(delta)</div>
+                                    <div class="block-item" data-type="physics">func _physics_process(delta)</div>
+                                    <div class="block-item" data-type="input">func _input(event)</div>
+                                    <div class="block-item" data-type="custom">func my_function()</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Control Flow</h5>
+                                    <div class="block-item" data-type="if">if condition:</div>
+                                    <div class="block-item" data-type="elif">elif condition:</div>
+                                    <div class="block-item" data-type="else">else:</div>
+                                    <div class="block-item" data-type="for">for i in range():</div>
+                                    <div class="block-item" data-type="while">while condition:</div>
+                                    <div class="block-item" data-type="match">match value:</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Movement</h5>
+                                    <div class="block-item" data-type="move">move_and_slide()</div>
+                                    <div class="block-item" data-type="velocity">velocity = Vector3</div>
+                                    <div class="block-item" data-type="gravity">apply_gravity(delta)</div>
+                                    <div class="block-item" data-type="jump">jump()</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Combat</h5>
+                                    <div class="block-item" data-type="damage">take_damage(amount)</div>
+                                    <div class="block-item" data-type="attack">attack(target)</div>
+                                    <div class="block-item" data-type="health">current_health</div>
+                                    <div class="block-item" data-type="weapon">current_weapon</div>
+                                </div>
+                                
+                                <div class="block-category">
+                                    <h5>Multiplayer</h5>
+                                    <div class="block-item" data-type="rpc">@rpc func remote_func()</div>
+                                    <div class="block-item" data-type="sync">@export var sync_var</div>
+                                    <div class="block-item" data-type="authority">is_multiplayer_authority()</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Block Workspace -->
+                            <div class="block-workspace">
+                                <div class="block-dropzone" id="block-dropzone">
+                                    Drag blocks here to build your script
+                                </div>
+                                <div class="block-stack" id="block-stack" style="display: none;"></div>
+                            </div>
+                            
+                            <!-- Block Settings -->
+                            <div class="block-settings">
+                                <div class="block-config" id="block-config" style="display: none;">
+                                    <h5>Block Configuration</h5>
+                                    <div id="config-fields"></div>
+                                    <button class="btn btn-secondary" id="save-block-btn" style="margin-top: 1rem;">💾 Save Block</button>
+                                </div>
+                                <div id="block-help">
+                                    <h5>How to use:</h5>
+                                    <p>1. Drag blocks from left panel</p>
+                                    <p>2. Drop in workspace to build</p>
+                                    <p>3. Configure each block</p>
+                                    <p>4. Click "Generate Code" when done</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group" style="margin-top: 2rem;">
+                            <button class="btn" id="generate-from-blocks-btn">🧱 Generate Code from Blocks</button>
+                            <button class="btn btn-clear" id="clear-blocks-btn">🗑️ Clear Workspace</button>
+                            <button class="btn btn-secondary" id="export-blocks-btn">💾 Export as AI Prompt</button>
+                        </div>
+                        
+                        <div class="output-area" id="block-output-area" style="display: none; margin-top: 2rem;">
+                            <div class="output-header">
+                                <h4>🧱 Generated from Blocks</h4>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-block-code-btn">📋 Copy Code</button>
+                                    <button class="btn btn-clear" id="clear-block-output-btn">🗑️ Clear</button>
+                                </div>
+                            </div>
+                            <pre class="code-output" id="block-code-output"></pre>
+                        </div>
                     </div>
-                    <div class="tab-content" id="debug-assistant">
-                        <h2 class="section-title">🐛 Debug Assistant</h2>
-                        <p class="section-description">Coming Soon!</p>
+
+                    <!-- Panel 5: Particle System Generator -->
+                    <div class="tab-content" id="particle-generator">
+                        <h2 class="section-title">🎇 Particle System Generator</h2>
+                        <p class="section-description">Create beautiful particle effects for your Godot games.</p>
+                        
+                        <div class="particle-config">
+                            <div class="particle-params">
+                                <div class="param-group">
+                                    <h5>Particle Type</h5>
+                                    <select class="block-input" id="particle-type">
+                                        <option value="explosion">Explosion</option>
+                                        <option value="fire">Fire</option>
+                                        <option value="smoke">Smoke</option>
+                                        <option value="magic">Magic</option>
+                                        <option value="sparkle">Sparkle</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Amount: <span id="amount-value">50</span></h5>
+                                    <div class="slider-container">
+                                        <input type="range" min="10" max="500" value="50" class="slider" id="amount-slider">
+                                    </div>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Lifetime: <span id="lifetime-value">2.0</span>s</h5>
+                                    <div class="slider-container">
+                                        <input type="range" min="0.1" max="10" value="2" step="0.1" class="slider" id="lifetime-slider">
+                                    </div>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Spread: <span id="spread-value">45</span>°</h5>
+                                    <div class="slider-container">
+                                        <input type="range" min="0" max="180" value="45" class="slider" id="spread-slider">
+                                    </div>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Velocity: <span id="velocity-value">5-15</span></h5>
+                                    <div class="slider-container">
+                                        <label>Min: <input type="number" id="velocity-min" value="5" step="0.1" class="block-input" style="width: 60px;"></label>
+                                        <label>Max: <input type="number" id="velocity-max" value="15" step="0.1" class="block-input" style="width: 60px;"></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Colors</h5>
+                                    <div class="color-picker">
+                                        <div class="color-swatch active" style="background: #ffffcc;" data-color="#ffffcc"></div>
+                                        <div class="color-swatch" style="background: #ff9900;" data-color="#ff9900"></div>
+                                        <div class="color-swatch" style="background: #ff3300;" data-color="#ff3300"></div>
+                                        <div class="color-swatch" style="background: #660000;" data-color="#660000"></div>
+                                        <div class="color-swatch" style="background: #333333;" data-color="#333333"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="btn-group" style="margin-top: 2rem;">
+                                    <button class="btn" id="generate-particle-btn">🎇 Generate Particle System</button>
+                                    <button class="btn btn-clear" id="reset-particle-btn">🔄 Reset</button>
+                                </div>
+                            </div>
+                            
+                            <div class="particle-preview">
+                                <div class="preview-canvas" id="particle-preview">
+                                    <!-- Particle preview will be rendered here -->
+                                    <p style="color: #666; text-align: center; margin-top: 140px;">Particle Preview</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="output-area" id="particle-output-area" style="display: none; margin-top: 2rem;">
+                            <div class="output-header">
+                                <h4>🎇 Generated Particle System</h4>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-particle-btn">📋 Copy Code</button>
+                                    <button class="btn btn-secondary" id="download-particle-btn">💾 Download (.gd)</button>
+                                </div>
+                            </div>
+                            <pre class="code-output" id="particle-code-output"></pre>
+                        </div>
                     </div>
-                    <div class="tab-content" id="code-explainer">
-                        <h2 class="section-title">💡 Code Explainer</h2>
-                        <p class="section-description">Coming Soon!</p>
+
+                    <!-- Panel 6: NPC & Enemy Generator -->
+                    <div class="tab-content" id="npc-generator">
+                        <h2 class="section-title">👤 NPC & Enemy Generator</h2>
+                        <p class="section-description">Create intelligent NPCs and enemies with configurable behaviors.</p>
+                        
+                        <div class="npc-config">
+                            <div class="npc-type-selector">
+                                <h5>Select NPC Type</h5>
+                                <div class="npc-type-card active" data-type="civilian">
+                                    <h5>👨‍🦰 Civilian</h5>
+                                    <p>Wandering NPCs that flee from danger</p>
+                                </div>
+                                <div class="npc-type-card" data-type="zombie">
+                                    <h5>🧟 Zombie</h5>
+                                    <p>Melee enemy with obstacle avoidance</p>
+                                </div>
+                                <div class="npc-type-card" data-type="ranged">
+                                    <h5>🎯 Ranged Enemy</h5>
+                                    <p>Shoots projectiles from distance</p>
+                                </div>
+                                <div class="npc-type-card" data-type="police">
+                                    <h5>👮 Police</h5>
+                                    <p>Patrols and chases players</p>
+                                </div>
+                                <div class="npc-type-card" data-type="seller">
+                                    <h5>🏪 Seller</h5>
+                                    <p>Stationary NPC with dialogue</p>
+                                </div>
+                                <div class="npc-type-card" data-type="companion">
+                                    <h5>🐕 Companion</h5>
+                                    <p>Follows and assists the player</p>
+                                </div>
+                            </div>
+                            
+                            <div class="npc-params">
+                                <div class="param-group">
+                                    <h5>Basic Properties</h5>
+                                    <label>Health: <input type="number" id="npc-health" value="100" class="block-input" style="width: 80px;"></label>
+                                    <label>Speed: <input type="number" id="npc-speed" value="2.0" step="0.1" class="block-input" style="width: 80px;"></label>
+                                    <label>Detection Range: <input type="number" id="npc-range" value="10.0" step="0.5" class="block-input" style="width: 80px;"></label>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Behavior States</h5>
+                                    <label><input type="checkbox" id="state-idle" checked> Idle</label>
+                                    <label><input type="checkbox" id="state-patrol" checked> Patrol</label>
+                                    <label><input type="checkbox" id="state-chase"> Chase</label>
+                                    <label><input type="checkbox" id="state-attack"> Attack</label>
+                                    <label><input type="checkbox" id="state-flee" checked> Flee</label>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Combat Settings</h5>
+                                    <select id="combat-type" class="block-input">
+                                        <option value="none">No Combat</option>
+                                        <option value="melee">Melee</option>
+                                        <option value="ranged">Ranged</option>
+                                    </select>
+                                    <div id="combat-params" style="margin-top: 1rem;">
+                                        <label>Damage: <input type="number" id="npc-damage" value="10" class="block-input" style="width: 80px;"></label>
+                                        <label>Cooldown: <input type="number" id="npc-cooldown" value="1.0" step="0.1" class="block-input" style="width: 80px;"></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Senses</h5>
+                                    <label>Field of View: <input type="number" id="npc-fov" value="90" class="block-input" style="width: 80px;">°</label>
+                                    <label>Hearing Range: <input type="number" id="npc-hearing" value="5.0" step="0.5" class="block-input" style="width: 80px;"></label>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Navigation</h5>
+                                    <label><input type="checkbox" id="use-navigation" checked> Use NavigationServer</label>
+                                    <label>Update Interval: <input type="number" id="nav-interval" value="0.5" step="0.1" class="block-input" style="width: 80px;">s</label>
+                                </div>
+                                
+                                <div class="param-group">
+                                    <h5>Special Features</h5>
+                                    <textarea id="npc-features" class="block-input" rows="3" placeholder="Custom AI logic..."></textarea>
+                                </div>
+                                
+                                <div class="btn-group" style="margin-top: 2rem;">
+                                    <button class="btn" id="generate-npc-btn">👤 Generate NPC</button>
+                                    <button class="btn btn-clear" id="reset-npc-btn">🔄 Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="output-area" id="npc-output-area" style="display: none; margin-top: 2rem;">
+                            <div class="output-header">
+                                <h4>👤 Generated NPC Script</h4>
+                                <div class="output-actions">
+                                    <button class="btn-secondary" id="copy-npc-btn">📋 Copy Code</button>
+                                    <button class="btn btn-secondary" id="download-npc-btn">💾 Download (.gd)</button>
+                                </div>
+                            </div>
+                            <pre class="code-output" id="npc-code-output"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Panel 7: Godot API Quick Reference -->
+                    <div class="tab-content" id="api-reference">
+                        <h2 class="section-title">📚 Godot API Quick Reference</h2>
+                        <p class="section-description">Quick reference for Godot 4.4 classes, properties, and methods.</p>
+                        
+                        <div class="api-reference">
+                            <div class="class-list">
+                                <div class="class-item active" data-class="CharacterBody3D">CharacterBody3D</div>
+                                <div class="class-item" data-class="AnimationPlayer">AnimationPlayer</div>
+                                <div class="class-item" data-class="Label">Label</div>
+                                <div class="class-item" data-class="Camera3D">Camera3D</div>
+                                <div class="class-item" data-class="RigidBody3D">RigidBody3D</div>
+                                <div class="class-item" data-class="Area3D">Area3D</div>
+                                <div class="class-item" data-class="RayCast3D">RayCast3D</div>
+                                <div class="class-item" data-class="SpringArm3D">SpringArm3D</div>
+                                <div class="class-item" data-class="MeshInstance3D">MeshInstance3D</div>
+                                <div class="class-item" data-class="GPUParticles3D">GPUParticles3D</div>
+                                <div class="class-item" data-class="CollisionShape3D">CollisionShape3D</div>
+                                <div class="class-item" data-class="AudioStreamPlayer3D">AudioStreamPlayer3D</div>
+                                <div class="class-item" data-class="MultiplayerSynchronizer">MultiplayerSynchronizer</div>
+                                <div class="class-item" data-class="VehicleBody3D">VehicleBody3D</div>
+                                <div class="class-item" data-class="VehicleWheel3D">VehicleWheel3D</div>
+                            </div>
+                            
+                            <div class="class-details">
+                                <h3>CharacterBody3D</h3>
+                                
+                                <div class="class-info-section">
+                                    <h4>Inheritance</h4>
+                                    <p>Node3D → CharacterBody3D</p>
+                                </div>
+                                
+                                <div class="class-info-section">
+                                    <h4>Key Properties</h4>
+                                    <ul class="property-list">
+                                        <li class="property-item">
+                                            <strong>velocity</strong>: <span class="property-type">Vector3</span><br>
+                                            Current velocity vector
+                                        </li>
+                                        <li class="property-item">
+                                            <strong>max_slides</strong>: <span class="property-type">int</span><br>
+                                            Maximum slide collisions (default: 4)
+                                        </li>
+                                        <li class="property-item">
+                                            <strong>floor_stop_on_slope</strong>: <span class="property-type">bool</span><br>
+                                            Stop on slope (default: true)
+                                        </li>
+                                        <li class="property-item">
+                                            <strong>floor_max_angle</strong>: <span class="property-type">float</span><br>
+                                            Maximum floor angle in radians
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="class-info-section">
+                                    <h4>Essential Methods</h4>
+                                    <ul class="method-list">
+                                        <li class="method-item">
+                                            <strong>move_and_slide()</strong>: <span class="method-return">void</span><br>
+                                            Moves body using velocity, returns true if collision occurred
+                                        </li>
+                                        <li class="method-item">
+                                            <strong>is_on_floor()</strong>: <span class="method-return">bool</span><br>
+                                            Returns true if body is on floor
+                                        </li>
+                                        <li class="method-item">
+                                            <strong>is_on_wall()</strong>: <span class="method-return">bool</span><br>
+                                            Returns true if body is on wall
+                                        </li>
+                                        <li class="method-item">
+                                            <strong>is_on_ceiling()</strong>: <span class="method-return">bool</span><br>
+                                            Returns true if body is on ceiling
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="class-info-section">
+                                    <h4>Common Use Cases</h4>
+                                    <ul>
+                                        <li>Player character movement</li>
+                                        <li>NPC movement with physics</li>
+                                        <li>Platformer character controllers</li>
+                                        <li>Any character that needs physics-based movement</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 8: One-Liner Code Snippets -->
+                    <div class="tab-content" id="code-snippets">
+                        <h2 class="section-title">⚡ One-Liner Code Snippets</h2>
+                        <p class="section-description">Quick code snippets for common Godot operations. Click to copy!</p>
+                        
+                        <div class="snippets-grid">
+                            <div class="snippet-card">
+                                <div class="snippet-icon">📝</div>
+                                <h5>Set Label Text</h5>
+                                <p>Update a label's text</p>
+                                <pre class="snippet-code">$Label.text = "Hello World"</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🎬</div>
+                                <h5>Play Animation</h5>
+                                <p>Play animation with custom speed</p>
+                                <pre class="snippet-code">$AnimationPlayer.play("run", -1, 1.5, true)</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🎮</div>
+                                <h5>Check Input</h5>
+                                <p>Check if key is pressed</p>
+                                <pre class="snippet-code">if Input.is_action_pressed("move_right"):</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🚶</div>
+                                <h5>Move & Slide</h5>
+                                <p>Basic movement with physics</p>
+                                <pre class="snippet-code">velocity = move_and_slide(velocity, Vector3.UP)</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">➕</div>
+                                <h5>Instantiate</h5>
+                                <p>Create instance from scene</p>
+                                <pre class="snippet-code">var enemy = load("res://enemy.tscn").instantiate()</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">👶</div>
+                                <h5>Add Child</h5>
+                                <p>Add node to scene tree</p>
+                                <pre class="snippet-code">add_child(enemy)</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🎮</div>
+                                <h5>Get Input Vector</h5>
+                                <p>Get normalized input direction</p>
+                                <pre class="snippet-code">var input_dir = Input.get_vector("left", "right", "up", "down")</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🔗</div>
+                                <h5>Connect Signal</h5>
+                                <p>Connect button press signal</p>
+                                <pre class="snippet-code">$Button.pressed.connect(_on_button_pressed)</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🎯</div>
+                                <h5>RayCast Check</h5>
+                                <p>Check if raycast hit something</p>
+                                <pre class="snippet-code">if $RayCast3D.is_colliding(): print($RayCast3D.get_collider().name)</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">⚔️</div>
+                                <h5>Set Stance</h5>
+                                <p>Change player stance</p>
+                                <pre class="snippet-code">current_stance = "combat"</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">💥</div>
+                                <h5>Apply Damage</h5>
+                                <p>Apply damage to entity</p>
+                                <pre class="snippet-code">target.take_damage(10, player_id, "gun")</pre>
+                            </div>
+                            
+                            <div class="snippet-card">
+                                <div class="snippet-icon">🎵</div>
+                                <h5>Play Sound</h5>
+                                <p>Play 3D audio</p>
+                                <pre class="snippet-code">$AudioStreamPlayer3D.play()</pre>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
@@ -620,21 +1644,399 @@
             ]
         };
 
-        // Initialize tabs
+        // Template definitions
+        const TEMPLATES = {
+            player: {
+                name: "Advanced Player Controller",
+                description: "A complete 3D player controller with movement, combat, vehicles, and multiplayer.",
+                code: `extends CharacterBody3D
+
+# Player controller with advanced movement, combat, and vehicle systems
+# Features: Multiplayer sync, weapon management, grenade system, vehicle entry
+
+const NORMAL_SPEED = 2.0
+const SPRINT_SPEED = 6.0
+const CROUCH_SPEED = 1.0
+const PRONE_SPEED = 0.67
+const JUMP_VELOCITY = 4
+const PLAYER_DAMAGE = 20
+const MAX_HEALTH = 300
+
+# Weapon system
+@export var weapon_manager: Node3D = null
+@export var current_weapon: int = 0  # 0: Gun, 1: Melee, 2: Grenade, 3: None
+
+# Audio nodes
+@onready var walk_sound: AudioStreamPlayer3D = $WalkSound
+@onready var run_sound: AudioStreamPlayer3D = $RunSound
+
+# Combat system
+@onready var raycast: RayCast3D = $RayCast3D
+var can_shoot: bool = true
+var is_aiming: bool = false
+
+# Movement state
+var current_health: int = MAX_HEALTH
+var is_running_mode: bool = false
+var current_stance: String = "normal"
+var is_spectator: bool = false
+
+# Vehicle system
+var is_in_vehicle: bool = false
+var is_driver: bool = false
+var is_passenger: bool = false
+
+func _ready():
+    add_to_group("player")
+    set_multiplayer_authority(str(name).to_int())
+    
+    if is_multiplayer_authority():
+        Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _physics_process(delta):
+    if is_spectator or is_driver or is_passenger:
+        return
+    
+    # Apply gravity
+    if not is_on_floor():
+        velocity.y -= 20.0 * delta
+    
+    # Movement input
+    var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+    var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+    
+    if direction:
+        var speed = _get_current_speed()
+        velocity.x = direction.x * speed
+        velocity.z = direction.z * speed
+    else:
+        velocity.x = move_toward(velocity.x, 0, 10)
+        velocity.z = move_toward(velocity.z, 0, 10)
+    
+    # Jumping
+    if Input.is_action_just_pressed("jump") and is_on_floor():
+        velocity.y = JUMP_VELOCITY
+    
+    move_and_slide()
+
+func _get_current_speed() -> float:
+    match current_stance:
+        "crouch":
+            return CROUCH_SPEED
+        "prone":
+            return PRONE_SPEED
+        _:
+            if is_running_mode:
+                return SPRINT_SPEED
+            else:
+                return NORMAL_SPEED
+
+func take_damage(damage: int, source_id: int = -1, weapon_type: String = ""):
+    if is_spectator:
+        return
+    
+    current_health -= damage
+    current_health = max(0, current_health)
+    
+    if current_health <= 0:
+        _die(source_id, weapon_type)
+
+func _die(killer_id: int, weapon_type: String):
+    # Handle death logic
+    pass`
+            },
+            zombie: {
+                name: "Enhanced Zombie AI",
+                description: "Smart zombie with obstacle avoidance, multiplayer sync, and combat.",
+                code: `extends CharacterBody3D
+
+# Enhanced zombie with smart obstacle avoidance and multiplayer sync
+# Features: Pathfinding, group detection, priority targeting, combat
+
+const ZOMBIE_DAMAGE = 15
+const MAX_HEALTH = 100
+const ROTATION_SPEED = 5.0
+const MOVE_SPEED = 2.0
+const PRIORITY_DISTANCE = 10.0  # Prioritize players within 10m
+
+# Raycasts for obstacle detection
+@export var raycast_front: RayCast3D
+@export var raycast_left: RayCast3D
+@export var raycast_right: RayCast3D
+
+# Multiplayer sync
+@export var sync_health: int = MAX_HEALTH
+@export var sync_position: Vector3 = Vector3.ZERO
+@export var sync_target_id: int = 0
+@export var sync_is_dead: bool = false
+
+var current_health: int = MAX_HEALTH
+var target_player: CharacterBody3D = null
+var players_in_range: Array = []
+var is_dead: bool = false
+
+# Smart obstacle avoidance
+var current_avoidance_direction: Vector3 = Vector3.ZERO
+var is_avoiding_obstacle: bool = false
+var is_making_smart_turn: bool = false
+
+func _ready():
+    add_to_group("zombie")
+    set_multiplayer_authority(1)
+    _setup_collision()
+    _setup_detector()
+
+func _setup_collision():
+    collision_layer = 0
+    set_collision_layer_value(4, true)  # Zombies on layer 4
+    collision_mask = 0
+    set_collision_mask_value(1, true)   # World
+    set_collision_mask_value(2, true)   # Obstacles
+    set_collision_mask_value(3, true)   # Player
+
+func _physics_process(delta):
+    if sync_is_dead and not is_dead:
+        _die()
+        return
+    
+    if is_dead:
+        return
+    
+    # Apply gravity
+    if not is_on_floor():
+        velocity.y -= 20.0 * delta
+    else:
+        velocity.y = 0
+    
+    # Scan for players
+    _scan_for_players_by_group()
+    
+    if target_player and is_instance_valid(target_player):
+        _rotate_to_face_player(delta)
+        
+        var distance_to_player = global_position.distance_to(target_player.global_position)
+        
+        if distance_to_player <= 2.0:  # Attack range
+            velocity = Vector3.ZERO
+            if can_attack:
+                _start_attack()
+        else:
+            _move_with_smart_obstacle_avoidance(delta)
+    else:
+        velocity = Vector3.ZERO
+    
+    move_and_slide()
+    
+    # Update sync variables
+    if is_multiplayer_authority():
+        sync_position = global_position
+        sync_health = current_health
+        sync_is_dead = (current_health <= 0)
+
+func _move_with_smart_obstacle_avoidance(delta: float):
+    if not target_player:
+        return
+    
+    var direction_to_player = (target_player.global_position - global_position).normalized()
+    direction_to_player.y = 0
+    
+    # Check if direct path is clear
+    if raycast_front and not raycast_front.is_colliding():
+        # Direct path clear, move toward player
+        velocity.x = direction_to_player.x * MOVE_SPEED
+        velocity.z = direction_to_player.z * MOVE_SPEED
+        is_avoiding_obstacle = false
+    else:
+        # Path blocked, choose avoidance direction
+        if not is_avoiding_obstacle:
+            # Check left and right
+            var left_clear = raycast_left and not raycast_left.is_colliding()
+            var right_clear = raycast_right and not raycast_right.is_colliding()
+            
+            if left_clear and right_clear:
+                # Random choice
+                current_avoidance_direction = -global_transform.basis.x if randf() > 0.5 else global_transform.basis.x
+            elif left_clear:
+                current_avoidance_direction = -global_transform.basis.x
+            elif right_clear:
+                current_avoidance_direction = global_transform.basis.x
+            else:
+                # Both blocked, turn around
+                current_avoidance_direction = -global_transform.basis.z
+            
+            is_avoiding_obstacle = true
+        
+        # Move in avoidance direction
+        velocity.x = current_avoidance_direction.x * MOVE_SPEED
+        velocity.z = current_avoidance_direction.z * MOVE_SPEED
+
+func take_damage(damage: int):
+    if sync_is_dead or is_dead:
+        return
+    
+    if not is_multiplayer_authority():
+        rpc_id(1, "_apply_damage_on_host", damage)
+        return
+    
+    _apply_damage_on_host(damage)
+
+@rpc("any_peer", "call_local", "reliable")
+func _apply_damage_on_host(damage: int):
+    current_health -= damage
+    current_health = max(0, current_health)
+    sync_health = current_health
+    
+    if current_health <= 0:
+        sync_is_dead = true
+        _die()
+
+func _die():
+    is_dead = true
+    queue_free()`
+            },
+            grenade: {
+                name: "Grenade System",
+                description: "Complete grenade physics with explosion effects and damage system.",
+                code: `extends RigidBody3D
+
+# Complete grenade system with physics, explosion, and damage
+# Features: Physics simulation, particle effects, area damage, friendly fire
+
+@export var damage: int = 50
+@export var blast_radius: float = 5.0
+@export var fuse_time: float = 3.0
+@export var friendly_fire_enabled: bool = true
+
+@onready var explosion_area: Area3D = $Area3D
+var explosion_particles: GPUParticles3D = null
+var blast_wave: MeshInstance3D = null
+
+var is_armed: bool = false
+var thrower_id: int = -1
+var explosion_timer: float = 0.0
+var has_exploded: bool = false
+
+func _ready():
+    visible = false
+    freeze = true
+    
+    # Setup collision
+    collision_layer = 0
+    set_collision_layer_value(7, true)  # Grenade layer
+    collision_mask = 0
+    set_collision_mask_value(1, true)   # World
+    set_collision_mask_value(2, true)   # Obstacles
+    
+    # Create explosion particles
+    _create_explosion_particles()
+    _create_blast_wave()
+
+func arm_grenade(throw_direction: Vector3, throw_force: float, player_id: int, dmg: int, radius: float, fuse: float, friendly_fire: bool):
+    damage = dmg
+    blast_radius = radius
+    fuse_time = fuse
+    friendly_fire_enabled = friendly_fire
+    thrower_id = player_id
+    
+    # Make visible and enable physics
+    visible = true
+    freeze = false
+    
+    is_armed = true
+    explosion_timer = 0.0
+    
+    # Apply throw force
+    apply_central_impulse(throw_direction * throw_force)
+    apply_torque_impulse(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * 2.0)
+
+func _physics_process(delta):
+    if not is_armed or has_exploded:
+        return
+    
+    explosion_timer += delta
+    
+    if explosion_timer >= fuse_time:
+        _explode()
+
+func _explode():
+    if has_exploded:
+        return
+    
+    has_exploded = true
+    freeze = true
+    
+    # Trigger explosion effects
+    if explosion_particles:
+        explosion_particles.emitting = true
+    
+    if blast_wave:
+        _animate_blast_wave()
+    
+    # Apply damage
+    _apply_damage()
+    
+    # Cleanup after delay
+    await get_tree().create_timer(0.5).timeout
+    queue_free()
+
+func _apply_damage():
+    var bodies_in_radius = explosion_area.get_overlapping_bodies()
+    
+    for body in bodies_in_radius:
+        if not is_instance_valid(body):
+            continue
+        
+        var distance = global_position.distance_to(body.global_position)
+        if distance > blast_radius:
+            continue
+        
+        var damage_multiplier = 1.0 - (distance / blast_radius)
+        var actual_damage = int(damage * damage_multiplier)
+        
+        # Apply damage to players
+        if body.is_in_group("player"):
+            var player_id = int(body.name)
+            if not friendly_fire_enabled and player_id == thrower_id:
+                continue
+            
+            if body.has_method("take_damage"):
+                body.take_damage(actual_damage, thrower_id, "grenade")
+        
+        # Apply damage to enemies
+        elif body.is_in_group("zombie") or body.is_in_group("ranged"):
+            if body.has_method("take_damage"):
+                body.take_damage(actual_damage)
+        
+        # Apply physics impulse
+        if body is RigidBody3D:
+            var direction = (body.global_position - global_position).normalized()
+            body.apply_central_impulse(direction * 10.0 * damage_multiplier)`
+            }
+        };
+
+        // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching
+            // ========== TAB SYSTEM ==========
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabId = btn.dataset.tab;
+                    
+                    // Update active tab
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
                     btn.classList.add('active');
                     document.getElementById(tabId).classList.add('active');
+                    
+                    // Reset any active snippet cards
+                    document.querySelectorAll('.snippet-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
                 });
             });
 
-            // Initialize dropdowns for both script and scene generators
-            function initializeDropdowns(providerId, modelId, models) {
+            // ========== PANEL 1 & 2: Script & Scene Generators ==========
+            function initializeDropdowns(providerId, modelId) {
                 const provider = document.getElementById(providerId);
                 const model = document.getElementById(modelId);
 
@@ -654,34 +2056,669 @@
                 updateModels();
             }
 
-            // Initialize both dropdowns
-            initializeDropdowns('script-provider', 'script-model', MODELS);
-            initializeDropdowns('scene-provider', 'scene-model', MODELS);
+            // Initialize dropdowns for both generators
+            initializeDropdowns('script-provider', 'script-model');
+            initializeDropdowns('scene-provider', 'scene-model');
 
-            // ========== SCRIPT GENERATOR FUNCTIONS ==========
+            // ========== PANEL 3: Code Templates ==========
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const templateId = this.dataset.template;
+                    const template = TEMPLATES[templateId];
+                    
+                    if (template) {
+                        document.getElementById('template-code-output').textContent = template.code;
+                        document.getElementById('template-output-area').style.display = 'block';
+                        
+                        // Scroll to output
+                        document.getElementById('template-output-area').scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }
+                });
+            });
+
+            // Template actions
+            document.getElementById('copy-template-btn').addEventListener('click', function() {
+                const code = document.getElementById('template-code-output').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    this.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        this.textContent = '📋 Copy Template';
+                    }, 2000);
+                });
+            });
+
+            document.getElementById('edit-template-btn').addEventListener('click', function() {
+                const code = document.getElementById('template-code-output').textContent;
+                // Switch to script generator tab with the template loaded
+                document.querySelector('[data-tab="script-generator"]').click();
+                document.getElementById('script-prompt').value = `Please enhance and optimize this GDScript template:\n\n${code}`;
+                
+                // Show success message
+                showMessage('script-success', 'Template loaded for editing! Click "Generate GDScript" to enhance it.');
+            });
+
+            document.getElementById('close-template-btn').addEventListener('click', function() {
+                document.getElementById('template-output-area').style.display = 'none';
+            });
+
+            // ========== PANEL 4: Visual Block Editor ==========
+            let draggedBlock = null;
+            let blocks = [];
+
+            // Make blocks draggable
+            document.querySelectorAll('.block-item').forEach(block => {
+                block.setAttribute('draggable', 'true');
+                
+                block.addEventListener('dragstart', function(e) {
+                    draggedBlock = this.cloneNode(true);
+                    draggedBlock.style.opacity = '0.5';
+                    e.dataTransfer.setData('text/plain', this.dataset.type);
+                });
+            });
+
+            // Handle drop zone
+            const dropzone = document.getElementById('block-dropzone');
+            const blockStack = document.getElementById('block-stack');
+
+            dropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--accent)';
+                this.style.backgroundColor = 'rgba(0, 217, 255, 0.1)';
+            });
+
+            dropzone.addEventListener('dragleave', function() {
+                this.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+                this.style.backgroundColor = 'rgba(0, 217, 255, 0.05)';
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+                this.style.backgroundColor = 'rgba(0, 217, 255, 0.05)';
+                
+                const blockType = e.dataTransfer.getData('text/plain');
+                addBlockToWorkspace(blockType);
+            });
+
+            function addBlockToWorkspace(type) {
+                // Hide dropzone, show stack
+                dropzone.style.display = 'none';
+                blockStack.style.display = 'block';
+                
+                // Create new block
+                const block = document.createElement('div');
+                block.className = 'block-item';
+                block.dataset.type = type;
+                block.textContent = getBlockDefaultText(type);
+                block.draggable = true;
+                
+                // Make block draggable within workspace
+                block.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', 'move');
+                    this.classList.add('dragging');
+                });
+                
+                block.addEventListener('click', function() {
+                    showBlockConfig(this);
+                });
+                
+                blockStack.appendChild(block);
+                blocks.push({ type: type, config: {} });
+            }
+
+            function getBlockDefaultText(type) {
+                const texts = {
+                    'extends': 'extends CharacterBody3D',
+                    'var': 'var speed = 5.0',
+                    'export': '@export var max_health = 100',
+                    'onready': '@onready var camera = $Camera3D',
+                    'ready': 'func _ready():',
+                    'process': 'func _process(delta):',
+                    'physics': 'func _physics_process(delta):',
+                    'if': 'if condition:',
+                    'for': 'for i in range(10):',
+                    'move': 'move_and_slide()',
+                    'velocity': 'velocity = Vector3.FORWARD * speed',
+                    'damage': 'take_damage(10)',
+                    'rpc': '@rpc func sync_data()'
+                };
+                return texts[type] || type;
+            }
+
+            function showBlockConfig(blockElement) {
+                const configDiv = document.getElementById('block-config');
+                const fieldsDiv = document.getElementById('config-fields');
+                
+                configDiv.style.display = 'block';
+                fieldsDiv.innerHTML = '';
+                
+                const type = blockElement.dataset.type;
+                
+                // Different config fields based on block type
+                switch(type) {
+                    case 'extends':
+                        fieldsDiv.innerHTML = `
+                            <label>Node Type:
+                                <select class="block-input" id="node-type">
+                                    <option>CharacterBody3D</option>
+                                    <option>Node3D</option>
+                                    <option>Node2D</option>
+                                    <option>Control</option>
+                                </select>
+                            </label>
+                        `;
+                        break;
+                    case 'var':
+                        fieldsDiv.innerHTML = `
+                            <label>Variable Name:
+                                <input type="text" class="block-input" id="var-name" placeholder="my_variable">
+                            </label>
+                            <label>Variable Type:
+                                <select class="block-input" id="var-type">
+                                    <option value="">Inferred</option>
+                                    <option>int</option>
+                                    <option>float</option>
+                                    <option>String</option>
+                                    <option>bool</option>
+                                    <option>Vector3</option>
+                                    <option>Array</option>
+                                </select>
+                            </label>
+                            <label>Declaration:
+                                <select class="block-input" id="var-declaration">
+                                    <option value="normal">Normal</option>
+                                    <option value="export">@export</option>
+                                    <option value="onready">@onready</option>
+                                </select>
+                            </label>
+                        `;
+                        break;
+                    // Add more cases for other block types...
+                    default:
+                        fieldsDiv.innerHTML = `
+                            <label>Customize:
+                                <input type="text" class="block-input" id="custom-text" placeholder="Customize this block...">
+                            </label>
+                        `;
+                }
+                
+                // Save button
+                document.getElementById('save-block-btn').onclick = function() {
+                    saveBlockConfig(blockElement);
+                };
+            }
+
+            function saveBlockConfig(blockElement) {
+                const type = blockElement.dataset.type;
+                let newText = '';
+                
+                switch(type) {
+                    case 'extends':
+                        const nodeType = document.getElementById('node-type').value;
+                        newText = `extends ${nodeType}`;
+                        break;
+                    case 'var':
+                        const varName = document.getElementById('var-name').value || 'my_variable';
+                        const varType = document.getElementById('var-type').value;
+                        const varDecl = document.getElementById('var-declaration').value;
+                        
+                        let declaration = '';
+                        if (varDecl === 'export') declaration = '@export ';
+                        if (varDecl === 'onready') declaration = '@onready ';
+                        
+                        const typeHint = varType ? `: ${varType}` : '';
+                        newText = `${declaration}var ${varName}${typeHint}`;
+                        break;
+                    default:
+                        const customText = document.getElementById('custom-text')?.value || '';
+                        if (customText) newText = customText;
+                }
+                
+                if (newText) {
+                    blockElement.textContent = newText;
+                }
+                
+                document.getElementById('block-config').style.display = 'none';
+            }
+
+            // Generate code from blocks
+            document.getElementById('generate-from-blocks-btn').addEventListener('click', function() {
+                const blocks = Array.from(blockStack.querySelectorAll('.block-item'));
+                let code = '';
+                
+                blocks.forEach(block => {
+                    const text = block.textContent;
+                    const indent = text.startsWith('func') || text.startsWith('if') || text.startsWith('for') ? '    ' : '';
+                    code += indent + text + '\n';
+                });
+                
+                if (code.trim()) {
+                    document.getElementById('block-code-output').textContent = code;
+                    document.getElementById('block-output-area').style.display = 'block';
+                    
+                    // Scroll to output
+                    document.getElementById('block-output-area').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                } else {
+                    showMessage('block-error', 'Add some blocks first!');
+                }
+            });
+
+            // Clear blocks
+            document.getElementById('clear-blocks-btn').addEventListener('click', function() {
+                blockStack.innerHTML = '';
+                blocks = [];
+                dropzone.style.display = 'flex';
+                blockStack.style.display = 'none';
+                document.getElementById('block-output-area').style.display = 'none';
+            });
+
+            // Export blocks as AI prompt
+            document.getElementById('export-blocks-btn').addEventListener('click', function() {
+                const blocks = Array.from(blockStack.querySelectorAll('.block-item'));
+                let prompt = 'Create GDScript code with the following structure:\n\n';
+                
+                blocks.forEach((block, index) => {
+                    prompt += `${index + 1}. ${block.textContent}\n`;
+                });
+                
+                prompt += '\nPlease generate complete, production-ready GDScript code based on this structure.';
+                
+                // Switch to script generator with the prompt
+                document.querySelector('[data-tab="script-generator"]').click();
+                document.getElementById('script-prompt').value = prompt;
+                
+                showMessage('script-success', 'Blocks exported as AI prompt! Click "Generate GDScript" to create code.');
+            });
+
+            // ========== PANEL 5: Particle System Generator ==========
+            // Update slider values
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.addEventListener('input', function() {
+                    const valueId = this.id.replace('-slider', '-value');
+                    document.getElementById(valueId).textContent = this.value;
+                });
+            });
+
+            // Color picker
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', function() {
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Generate particle system
+            document.getElementById('generate-particle-btn').addEventListener('click', function() {
+                const type = document.getElementById('particle-type').value;
+                const amount = document.getElementById('amount-slider').value;
+                const lifetime = document.getElementById('lifetime-slider').value;
+                const spread = document.getElementById('spread-slider').value;
+                const velocityMin = document.getElementById('velocity-min').value;
+                const velocityMax = document.getElementById('velocity-max').value;
+                
+                // Generate particle system code
+                const code = generateParticleCode(type, amount, lifetime, spread, velocityMin, velocityMax);
+                
+                document.getElementById('particle-code-output').textContent = code;
+                document.getElementById('particle-output-area').style.display = 'block';
+                
+                // Scroll to output
+                document.getElementById('particle-output-area').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            });
+
+            function generateParticleCode(type, amount, lifetime, spread, velMin, velMax) {
+                return `extends GPUParticles3D
+
+# ${type.charAt(0).toUpperCase() + type.slice(1)} Particle System
+# Generated with Godot AI Tools
+
+func _ready():
+    # Configure particle system
+    amount = ${amount}
+    lifetime = ${lifetime}
+    explosiveness = 0.9
+    one_shot = true
+    
+    # Create process material
+    var material = ParticleProcessMaterial.new()
+    
+    # Emission settings
+    material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+    material.emission_sphere_radius = 0.5
+    
+    # Direction and spread
+    material.direction = Vector3(0, 1, 0)
+    material.spread = ${spread}.0
+    material.initial_velocity_min = ${velMin}.0
+    material.initial_velocity_max = ${velMax}.0
+    
+    # Scale
+    material.scale_min = 0.2
+    material.scale_max = 0.6
+    
+    # Color gradient based on type
+    var gradient = Gradient.new()
+    
+    ${getColorGradient(type)}
+    
+    material.color_ramp = gradient
+    
+    # Apply material
+    process_material = material
+    
+    # Create mesh for particles
+    var sphere_mesh = SphereMesh.new()
+    sphere_mesh.radius = 0.1
+    sphere_mesh.height = 0.2
+    draw_pass_1 = sphere_mesh
+
+# Helper function to play explosion
+func explode():
+    emitting = true
+    restart()
+    
+    await get_tree().create_timer(lifetime).timeout
+    queue_free()`;
+            }
+
+            function getColorGradient(type) {
+                const gradients = {
+                    explosion: `gradient.add_point(0.0, Color(1.0, 1.0, 0.8, 1.0))
+gradient.add_point(0.2, Color(1.0, 0.7, 0.0, 1.0))
+gradient.add_point(0.4, Color(1.0, 0.3, 0.0, 1.0))
+gradient.add_point(0.6, Color(0.6, 0.1, 0.0, 0.8))
+gradient.add_point(1.0, Color(0.2, 0.2, 0.2, 0.0))`,
+                    fire: `gradient.add_point(0.0, Color(1.0, 1.0, 0.8, 1.0))
+gradient.add_point(0.3, Color(1.0, 0.5, 0.0, 1.0))
+gradient.add_point(0.7, Color(0.8, 0.1, 0.0, 0.8))
+gradient.add_point(1.0, Color(0.1, 0.1, 0.1, 0.0))`,
+                    smoke: `gradient.add_point(0.0, Color(0.8, 0.8, 0.8, 0.8))
+gradient.add_point(0.5, Color(0.4, 0.4, 0.4, 0.6))
+gradient.add_point(1.0, Color(0.1, 0.1, 0.1, 0.0))`
+                };
+                
+                return gradients[type] || gradients.explosion;
+            }
+
+            // ========== PANEL 6: NPC Generator ==========
+            document.querySelectorAll('.npc-type-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.npc-type-card').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    updateNPCParams(this.dataset.type);
+                });
+            });
+
+            function updateNPCParams(type) {
+                // Update form based on NPC type
+                const combatParams = document.getElementById('combat-params');
+                const combatType = document.getElementById('combat-type');
+                
+                switch(type) {
+                    case 'civilian':
+                        combatType.value = 'none';
+                        combatParams.style.display = 'none';
+                        document.getElementById('state-attack').checked = false;
+                        document.getElementById('state-flee').checked = true;
+                        break;
+                    case 'zombie':
+                        combatType.value = 'melee';
+                        combatParams.style.display = 'block';
+                        document.getElementById('state-attack').checked = true;
+                        document.getElementById('state-flee').checked = false;
+                        break;
+                    case 'ranged':
+                        combatType.value = 'ranged';
+                        combatParams.style.display = 'block';
+                        document.getElementById('state-attack').checked = true;
+                        document.getElementById('state-flee').checked = false;
+                        break;
+                }
+            }
+
+            // Generate NPC
+            document.getElementById('generate-npc-btn').addEventListener('click', function() {
+                const type = document.querySelector('.npc-type-card.active').dataset.type;
+                const health = document.getElementById('npc-health').value;
+                const speed = document.getElementById('npc-speed').value;
+                const range = document.getElementById('npc-range').value;
+                
+                // Generate NPC code
+                const code = generateNPCCode(type, health, speed, range);
+                
+                document.getElementById('npc-code-output').textContent = code;
+                document.getElementById('npc-output-area').style.display = 'block';
+                
+                // Scroll to output
+                document.getElementById('npc-output-area').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            });
+
+            function generateNPCCode(type, health, speed, range) {
+                return `extends CharacterBody3D
+
+# ${type.charAt(0).toUpperCase() + type.slice(1)} NPC
+# Generated with Godot AI Tools
+
+@export var max_health: int = ${health}
+@export var move_speed: float = ${speed}
+@export var detection_range: float = ${range}
+@export var rotation_speed: float = 5.0
+
+var current_health: int = max_health
+var target_player: CharacterBody3D = null
+var is_active: bool = false
+var is_dead: bool = false
+
+# States
+enum State { IDLE, PATROL, CHASE, ATTACK, FLEE }
+var current_state: State = State.IDLE
+
+func _ready():
+    add_to_group("${type}")
+    _setup_collision()
+
+func _setup_collision():
+    collision_layer = 0
+    set_collision_layer_value(6, true)  # NPC layer
+    collision_mask = 0
+    set_collision_mask_value(1, true)   # World
+    set_collision_mask_value(2, true)   # Obstacles
+    set_collision_mask_value(3, true)   # Player
+
+func _physics_process(delta):
+    if is_dead:
+        return
+    
+    # Apply gravity
+    if not is_on_floor():
+        velocity.y -= 20.0 * delta
+    else:
+        velocity.y = 0
+    
+    # State machine
+    match current_state:
+        State.IDLE:
+            _idle_state(delta)
+        State.PATROL:
+            _patrol_state(delta)
+        State.CHASE:
+            _chase_state(delta)
+        State.ATTACK:
+            _attack_state(delta)
+        State.FLEE:
+            _flee_state(delta)
+    
+    move_and_slide()
+
+func _idle_state(delta):
+    velocity = Vector3.ZERO
+    
+    # Check for nearby players
+    var players = get_tree().get_nodes_in_group("player")
+    var nearest_player = null
+    var nearest_distance = INF
+    
+    for player in players:
+        if player.sync_is_dead:
+            continue
+        
+        var distance = global_position.distance_to(player.global_position)
+        if distance < detection_range and distance < nearest_distance:
+            nearest_distance = distance
+            nearest_player = player
+    
+    if nearest_player:
+        target_player = nearest_player
+        current_state = State.CHASE
+
+func _chase_state(delta):
+    if not target_player or target_player.sync_is_dead:
+        current_state = State.IDLE
+        return
+    
+    var direction = (target_player.global_position - global_position).normalized()
+    direction.y = 0
+    
+    # Rotate toward player
+    var target_rotation = atan2(direction.x, direction.z)
+    rotation.y = lerp_angle(rotation.y, target_rotation, rotation_speed * delta)
+    
+    # Move toward player
+    velocity.x = direction.x * move_speed
+    velocity.z = direction.z * move_speed
+    
+    # Check attack range
+    var distance = global_position.distance_to(target_player.global_position)
+    if distance < 2.0:
+        current_state = State.ATTACK
+
+func take_damage(damage: int, source_id: int = -1, weapon_type: String = ""):
+    if is_dead:
+        return
+    
+    current_health -= damage
+    current_health = max(0, current_health)
+    
+    if current_health <= 0:
+        _die()
+    else:
+        # Flee from damage source
+        current_state = State.FLEE
+
+func _die():
+    is_dead = true
+    velocity = Vector3.ZERO
+    queue_free()
+
+# Note: Add more state functions as needed based on selected behaviors`;
+            }
+
+            // ========== PANEL 7: API Reference ==========
+            document.querySelectorAll('.class-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.class-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const className = this.dataset.class;
+                    updateClassDetails(className);
+                });
+            });
+
+            function updateClassDetails(className) {
+                // This would normally fetch from an API or local database
+                // For now, we'll use hardcoded examples
+                const details = document.querySelector('.class-details');
+                
+                // Update with detailed information for the selected class
+                // In a real implementation, this would be more comprehensive
+                details.innerHTML = `<h3>${className}</h3>
+                    <div class="class-info-section">
+                        <h4>Inheritance</h4>
+                        <p>Node → ${className}</p>
+                    </div>
+                    <div class="class-info-section">
+                        <h4>Common Use Cases</h4>
+                        <ul>
+                            <li>Primary class for ${className.toLowerCase()} functionality</li>
+                            <li>Essential for ${className === 'CharacterBody3D' ? 'player movement' : 'scene objects'}</li>
+                            <li>Base class for many Godot systems</li>
+                        </ul>
+                    </div>
+                    <div class="class-info-section">
+                        <h4>Quick Tip</h4>
+                        <p>Always check the official Godot documentation for the most up-to-date information about ${className} properties and methods.</p>
+                    </div>`;
+            }
+
+            // ========== PANEL 8: Code Snippets ==========
+            document.querySelectorAll('.snippet-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // Toggle active state
+                    this.classList.toggle('active');
+                    
+                    // Copy code to clipboard when clicked
+                    const code = this.querySelector('.snippet-code').textContent;
+                    navigator.clipboard.writeText(code).then(() => {
+                        const title = this.querySelector('h5').textContent;
+                        showMessage('snippet-success', `✅ Copied: "${title}"`);
+                        
+                        // Reset after 2 seconds
+                        setTimeout(() => {
+                            this.classList.remove('active');
+                        }, 2000);
+                    });
+                });
+            });
+
+            // ========== UTILITY FUNCTIONS ==========
+            function showMessage(type, message) {
+                // Create a temporary message element
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type.includes('error') ? 'error-message' : 'success-message'}`;
+                messageDiv.textContent = message;
+                messageDiv.style.position = 'fixed';
+                messageDiv.style.top = '100px';
+                messageDiv.style.right = '20px';
+                messageDiv.style.zIndex = '1000';
+                
+                document.body.appendChild(messageDiv);
+                messageDiv.classList.add('show');
+                
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(messageDiv);
+                    }, 300);
+                }, 3000);
+            }
+
+            // ========== ORIGINAL SCRIPT GENERATOR FUNCTIONALITY ==========
+            // This section preserves your original script generator code
             const generateScriptBtn = document.getElementById('generate-script-btn');
             const scriptPrompt = document.getElementById('script-prompt');
             const scriptLoading = document.getElementById('script-loading');
-            const scriptErrorMessage = document.getElementById('script-error-message');
-            const scriptSuccessMessage = document.getElementById('script-success-message');
             const scriptOutputArea = document.getElementById('script-output-area');
             const scriptCodeOutput = document.getElementById('script-code-output');
             const copyScriptBtn = document.getElementById('copy-script-btn');
             const downloadScriptBtn = document.getElementById('download-script-btn');
             const clearScriptBtn = document.getElementById('clear-script-btn');
-            const clearOutputBtn = document.getElementById('clear-output-btn');
 
             // Clear script prompt
             clearScriptBtn.addEventListener('click', function() {
                 scriptPrompt.value = '';
                 scriptPrompt.focus();
-            });
-
-            // Clear output
-            clearOutputBtn.addEventListener('click', function() {
-                scriptCodeOutput.textContent = '';
-                scriptOutputArea.style.display = 'none';
-                hideMessages('script');
             });
 
             generateScriptBtn.addEventListener('click', async function() {
@@ -697,7 +2734,6 @@
                 // Show loading
                 generateScriptBtn.disabled = true;
                 scriptLoading.classList.add('active');
-                hideMessages('script');
                 scriptOutputArea.style.display = 'none';
 
                 try {
@@ -791,133 +2827,6 @@ Generate ONLY the GDScript code.`;
                 }
             }
 
-            // ========== SCENE GENERATOR FUNCTIONS ==========
-            const generateSceneBtn = document.getElementById('generate-scene-btn');
-            const scenePrompt = document.getElementById('scene-prompt');
-            const sceneLoading = document.getElementById('scene-loading');
-            const sceneErrorMessage = document.getElementById('scene-error-message');
-            const sceneSuccessMessage = document.getElementById('scene-success-message');
-            const sceneOutputArea = document.getElementById('scene-output-area');
-            const sceneCodeOutput = document.getElementById('scene-code-output');
-            const copySceneBtn = document.getElementById('copy-scene-btn');
-            const downloadSceneBtn = document.getElementById('download-scene-btn');
-            const clearSceneBtn = document.getElementById('clear-scene-btn');
-            const clearSceneOutputBtn = document.getElementById('clear-scene-output-btn');
-
-            // Clear scene prompt
-            clearSceneBtn.addEventListener('click', function() {
-                scenePrompt.value = '';
-                scenePrompt.focus();
-            });
-
-            // Clear scene output
-            clearSceneOutputBtn.addEventListener('click', function() {
-                sceneCodeOutput.textContent = '';
-                sceneOutputArea.style.display = 'none';
-                hideMessages('scene');
-            });
-
-            generateSceneBtn.addEventListener('click', async function() {
-                const prompt = scenePrompt.value.trim();
-                const provider = document.getElementById('scene-provider').value;
-                const model = document.getElementById('scene-model').value;
-
-                if (!prompt) {
-                    showMessage('scene-error', 'Please describe your scene structure.');
-                    return;
-                }
-
-                // Show loading
-                generateSceneBtn.disabled = true;
-                sceneLoading.classList.add('active');
-                hideMessages('scene');
-                sceneOutputArea.style.display = 'none';
-
-                try {
-                    const scene = await generateScene(prompt, provider, model);
-                    displayCode(scene, 'scene');
-                    showMessage('scene-success', '✅ Scene generated successfully!');
-                } catch (error) {
-                    showMessage('scene-error', `❌ Error: ${error.message}`);
-                } finally {
-                    generateSceneBtn.disabled = false;
-                    sceneLoading.classList.remove('active');
-                }
-            });
-
-            async function generateScene(prompt, provider, model) {
-                const systemPrompt = `You are an expert Godot 4.4 scene designer. Generate a complete Godot scene file (.tscn) with node hierarchy.
-
-STRICT RULES:
-1. Output ONLY valid .tscn file content that can be saved directly as a .tscn file
-2. Use Godot 4.4 scene format with [gd_scene] header
-3. DO NOT include any attached scripts or theme overrides
-4. Use ONLY default theme settings for all nodes
-5. Structure nodes in a logical hierarchy
-6. Include proper node properties and connections
-7. Use 3D nodes by default unless specifically asked for 2D
-8. DO NOT include any markdown or explanations
-9. Return ONLY the .tscn file content
-
-IMPORTANT: The output must be valid .tscn format that can be copied and saved as a .tscn file and opened directly in Godot 4.4.
-
-Scene description: ${prompt}
-
-Generate ONLY the .tscn file content.`;
-
-                if (provider === 'groq') {
-                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${API_KEYS.groq}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model: model,
-                            messages: [
-                                { role: 'system', content: systemPrompt },
-                                { role: 'user', content: prompt }
-                            ],
-                            temperature: 0.7,
-                            max_tokens: 4000
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error?.message || 'API Error');
-                    }
-
-                    const data = await response.json();
-                    return data.choices[0].message.content.trim();
-                } else { // gemini
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEYS.gemini}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: systemPrompt }]
-                            }],
-                            generationConfig: {
-                                temperature: 0.7,
-                                maxOutputTokens: 4000
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error?.message || 'API Error');
-                    }
-
-                    const data = await response.json();
-                    return data.candidates[0].content.parts[0].text.trim();
-                }
-            }
-
-            // ========== UTILITY FUNCTIONS ==========
             function displayCode(code, type) {
                 code = code.replace(/```(?:gdscript|tscn)?\n?/g, '').replace(/```/g, '').trim();
                 
@@ -925,43 +2834,6 @@ Generate ONLY the .tscn file content.`;
                     scriptCodeOutput.textContent = code;
                     scriptOutputArea.style.display = 'block';
                     scriptOutputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else if (type === 'scene') {
-                    sceneCodeOutput.textContent = code;
-                    sceneOutputArea.style.display = 'block';
-                    sceneOutputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            function showMessage(type, message) {
-                let element;
-                if (type.includes('script-error')) {
-                    element = scriptErrorMessage;
-                } else if (type.includes('script-success')) {
-                    element = scriptSuccessMessage;
-                } else if (type.includes('scene-error')) {
-                    element = sceneErrorMessage;
-                } else if (type.includes('scene-success')) {
-                    element = sceneSuccessMessage;
-                }
-                
-                if (element) {
-                    element.textContent = message;
-                    element.classList.add('show');
-                    
-                    if (type.includes('success')) {
-                        setTimeout(() => element.classList.remove('show'), 3000);
-                    }
-                }
-            }
-
-            function hideMessages(type) {
-                if (type === 'script' || !type) {
-                    scriptErrorMessage.classList.remove('show');
-                    scriptSuccessMessage.classList.remove('show');
-                }
-                if (type === 'scene' || !type) {
-                    sceneErrorMessage.classList.remove('show');
-                    sceneSuccessMessage.classList.remove('show');
                 }
             }
 
@@ -976,56 +2848,29 @@ Generate ONLY the .tscn file content.`;
                 });
             });
 
-            // Download script
-            downloadScriptBtn.addEventListener('click', function() {
-                const code = scriptCodeOutput.textContent;
-                const blob = new Blob([code], { type: 'text/x-gdscript' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'godot_script.gd';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                downloadScriptBtn.textContent = '✓ Downloaded!';
-                setTimeout(() => {
-                    downloadScriptBtn.textContent = '💾 Download (.gd)';
-                }, 2000);
-            });
+            // ========== MOBILE MENU ==========
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
-            // Copy scene to clipboard
-            copySceneBtn.addEventListener('click', function() {
-                const code = sceneCodeOutput.textContent;
-                navigator.clipboard.writeText(code).then(() => {
-                    copySceneBtn.textContent = '✓ Copied!';
-                    setTimeout(() => {
-                        copySceneBtn.textContent = '📋 Copy Scene';
-                    }, 2000);
-                });
-            });
+            function openMobileMenu() {
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.classList.add('active');
+                document.body.classList.add('menu-open');
+            }
 
-            // Download scene
-            downloadSceneBtn.addEventListener('click', function() {
-                const code = sceneCodeOutput.textContent;
-                const blob = new Blob([code], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'godot_scene.tscn';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                downloadSceneBtn.textContent = '✓ Downloaded!';
-                setTimeout(() => {
-                    downloadSceneBtn.textContent = '💾 Download (.tscn)';
-                }, 2000);
-            });
+            function closeMobileMenu() {
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            }
 
-            // Example prompts
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+            // ========== INITIALIZE WITH EXAMPLES ==========
             const scriptExamples = [
                 "Create a 3D player controller with movement, jumping, and camera control",
                 "Make an inventory system for an RPG game using 3D items",
@@ -1042,34 +2887,15 @@ Generate ONLY the .tscn file content.`;
                 "Make a 3D enemy scene with AI navigation and attack zones"
             ];
 
-            // Set random examples on load
+            // Set random examples
             const randomScript = scriptExamples[Math.floor(Math.random() * scriptExamples.length)];
             const randomScene = sceneExamples[Math.floor(Math.random() * sceneExamples.length)];
             scriptPrompt.placeholder = `Example: ${randomScript}`;
-            scenePrompt.placeholder = `Example: ${randomScene}`;
+            document.getElementById('scene-prompt').placeholder = `Example: ${randomScene}`;
+
+            // Initialize class details
+            updateClassDetails('CharacterBody3D');
         });
-
-        // Mobile menu functionality
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            document.body.classList.add('menu-open');
-        }
-
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            document.body.classList.remove('menu-open');
-        }
-
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
     </script>
 </body>
 </html>
