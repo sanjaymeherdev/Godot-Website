@@ -2111,7 +2111,1601 @@ func _apply_damage():
         description: "Complete 3D player with movement, combat, vehicles, and multiplayer sync.",
         filename: "player.gd",
         // PASTE YOUR FULL player.gd CODE HERE
-        code: ``
+        code: `extends CharacterBody3D
+
+const NORMAL_SPEED = 2.0
+const SPRINT_SPEED = 6.0
+const CROUCH_SPEED = 1.0
+const PRONE_SPEED = 0.67
+const JUMP_VELOCITY = 4
+const PLAYER_DAMAGE = 20
+const MAX_HEALTH = 300
+
+# ============ WEAPON SYSTEM ============
+@export var weapon_manager: WeaponManager = null
+@export var current_weapon: WeaponType = WeaponType.GUN
+@export var sync_weapon_visibility: bool = false
+@export var armature_node: Node3D = null
+var last_synced_animation: String = ""
+@export var friendly_fire_enabled: bool = true
+
+# Weapon nodes
+@export_category("Weapon Nodes")
+@export var gun_node: Node3D = null
+@export var melee_node: Node3D = null
+@export var grenade_node: Node3D = null
+
+# Weapon types
+enum WeaponType { GUN, MELEE, GRENADE, NONE }
+var interaction_prompt_ui: Control = null
+var is_near_interactive_npc: bool = false
+var npcai: bool = false
+# Grenade settings
+@export_category("Grenade Settings")
+@export var grenade_damage: int = 50
+@export var grenade_blast_radius: float = 5.0
+@export var grenade_throw_force: float = 15.0
+@export var grenade_fuse_time: float = 3.0
+@export var max_grenades: int = 3
+@export var grenade_template: PackedScene = null  # Changed to PackedScene
+@export var grenade_hand_position: Node3D = null  # Position where grenade appears in hand
+
+# UI
+@onready var nickname: Label3D = $PlayerNick/Nickname
+@onready var camera: Camera3D = $SpringArmOffset/SpringArm3D/Camera3D
+
+# ============ COLLISION SYSTEM ============
+@export_category("Collision Shapes")
+@export var normal_collision: CollisionShape3D = null
+@export var crouch_collision: CollisionShape3D = null
+@export var prone_collision: CollisionShape3D = null
+
+@export var normal_collision_disabled: bool = false
+@export var crouch_collision_disabled: bool = true
+@export var prone_collision_disabled: bool = true
+
+# ============ AUDIO SYSTEM ============
+@onready var walk_sound: AudioStreamPlayer3D = $WalkSound
+@onready var run_sound: AudioStreamPlayer3D = $RunSound
+@onready var jump_sound: AudioStreamPlayer3D = $JumpSound
+@onready var gun_fire_sound: AudioStreamPlayer3D = $GunFireSound
+@onready var melee_sound: AudioStreamPlayer3D = $MeleeSound
+
+# Audio state sync
+@export var footstep_counter: int = 0
+@export var footstep_type: String = "walk"
+@export var jump_counter: int = 0
+@export var is_firing_sync: bool = false
+@export var melee_counter: int = 0
+@export var sync_is_melee_attacking: bool = false
+@export var gun_fire_counter: int = 0  
+@export var melee_sound_counter: int = 0 
+
+# Audio tracking
+var last_footstep_counter: int = 0
+var last_jump_counter: int = 0
+var last_melee_counter: int = 0
+var last_gun_fire_counter: int = 0 
+var last_melee_sound_counter: int = 0
+
+# ============ COMBAT SYSTEM ============
+@onready var raycast: RayCast3D = $SpringArmOffset/SpringArm3D/Camera3D/RayCast3D
+@onready var health_label: Label = $HealthLabel
+@onready var detection_area: Area3D = $DetectionArea
+@onready var melee_hitbox: Area3D = $Champ/Armature/Skeleton3D/Hand/MeleeAttack
+
+@export_category("Combat Settings")
+@export var fire_rate: float = 0.2
+@export var red_particle_size: float = 0.2
+@export var red_particle_count: int = 8
+@export var black_dot_size: float = 0.04
+
+@export_category("Melee Settings")
+@export var melee_damage: int = 25
+@export var melee_cooldown: float = 1.0
+
+# Combat state
+var current_health: int = MAX_HEALTH
+var can_shoot: bool = true
+var is_firing_held: bool = false
+var is_aiming: bool = false
+var can_melee: bool = true
+var is_melee_attacking: bool = false
+var look_target: Vector3 = Vector3.ZERO
+var has_look_target: bool = false
+
+# Grenade state
+var is_grenade_aiming: bool = false
+var can_throw_grenade: bool = true
+var grenade_aim_start_time: float = 0.0
+var current_grenades: int = 30
+# New trajectory system
+var trajectory_path: Path3D = null
+var trajectory_mesh: CSGPolygon3D = null
+var impact_circle: CSGTorus3D = null
+# ============ MOVEMENT SYSTEM ============
+@export_category("Objects")
+@export var _body: Node3D = null
+@export var _spring_arm_offset: Node3D = null
+
+@export var sync_velocity: Vector3 = Vector3.ZERO
+@export var sync_visible: bool = true 
+@export var sync_is_dead: bool = false
+@export var sync_stance: String = "normal"
+
+# Movement state
+var mouse_locked = true
+var _current_speed: float
+var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var current_stance: String = "normal"
+var is_running_mode: bool = false
+var is_spectator: bool = false
+
+# ============ VEHICLE SYSTEM ============
+@export var is_in_vehicle: bool = false
+@export var is_driver: bool = false
+@export var is_passenger: bool = false
+var nearby_car: Node3D = null
+var nearby_passenger_car: Node3D = null
+var current_passenger_car: Node3D = null
+
+# ============ OTHER SYSTEMS ============
+var god_mode: bool = false
+var is_victory_dancing: bool = false
+var last_damage_source: int = -1
+var last_damage_weapon: String = ""
+var can_switch_weapon: bool = true
+
+# Stuck detection
+@export_category("Stuck Detection")
+@export var stuck_check_interval: float = 1.0
+@export var stuck_trigger_duration: float = 2.0
+@export var stuck_distance_threshold: float = 0.1
+var last_position: Vector3 = Vector3.ZERO
+var stuck_timer: float = 0.0
+var stuck_duration: float = 0.0
+var is_currently_stuck: bool = false
+
+# Collision sync
+var last_sync_stance: String = "normal"
+
+# Audio remote tracking
+var last_sync_velocity: Vector3 = Vector3.ZERO
+var velocity_stopped_frames: int = 0
+var required_stopped_frames: int = 2
+
+# Audio timing
+var footstep_timer: float = 0.0
+var walk_footstep_interval: float = 0.5
+var run_footstep_interval: float = 0.3
+
+# ============ INITIALIZATION ============
+func _enter_tree():
+	set_multiplayer_authority(str(name).to_int())
+	if has_node("SpringArmOffset/SpringArm3D/Camera3D"):
+		if not is_spectator:
+			$SpringArmOffset/SpringArm3D/Camera3D.current = is_multiplayer_authority()
+
+func _ready():
+	add_to_group("player")
+	_setup_audio_nodes()
+	_validate_collision_shapes()
+	_setup_collision()
+	_setup_raycast()
+	_setup_detection_area()
+					
+	if is_multiplayer_authority():
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		_setup_input_actions()
+		last_position = global_position
+		_update_health_ui()
+		_update_weapon_visibility()
+		
+		if melee_hitbox:
+			_setup_melee_hitbox() 
+			melee_hitbox.monitoring = false
+			melee_hitbox.body_entered.connect(_on_melee_hitbox_body_entered)
+			
+		if weapon_manager:
+			# Connect signals for UI updates
+			weapon_manager.weapon_changed.connect(_on_weapon_changed)
+			weapon_manager.ammo_changed.connect(_on_ammo_changed)
+			weapon_manager.out_of_ammo.connect(_on_out_of_ammo)
+	else:
+		_setup_3d_audio_for_others()
+		last_footstep_counter = footstep_counter
+		last_jump_counter = jump_counter
+		last_melee_counter = melee_counter
+		last_sync_stance = sync_stance
+	_setup_grenade_trajectory()
+	_update_weapon_visibility()
+	_apply_collision_shape(current_stance)
+	
+	print("Player initialized - Authority: ", is_multiplayer_authority())
+
+func _validate_collision_shapes():
+	if not normal_collision:
+		push_error("ERROR: Normal collision shape not assigned!")
+	if not crouch_collision:
+		push_error("ERROR: Crouch collision shape not assigned!")
+	if not prone_collision:
+		push_error("ERROR: Prone collision shape not assigned!")
+	
+	if normal_collision and crouch_collision and prone_collision:
+		print("✓ All collision shapes validated for player: ", name)
+
+func _setup_melee_hitbox():
+	if not melee_hitbox:
+		return
+	
+	melee_hitbox.collision_layer = 0
+	melee_hitbox.set_collision_layer_value(9, true)
+	melee_hitbox.collision_mask = 0
+	melee_hitbox.set_collision_mask_value(3, true)
+	melee_hitbox.set_collision_mask_value(4, true)
+	melee_hitbox.set_collision_mask_value(6, true)
+
+func _setup_collision():
+	collision_layer = 0
+	set_collision_layer_value(3, true)
+	collision_mask = 0
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, true)
+	set_collision_mask_value(3, true)
+	set_collision_mask_value(4, true)
+	set_collision_mask_value(6, true)
+	set_collision_mask_value(10, true)
+	
+func _setup_detection_area():
+	if not detection_area:
+		detection_area = Area3D.new()
+		detection_area.name = "DetectionArea"
+		add_child(detection_area)
+		
+		var collision_shape = CollisionShape3D.new()
+		var sphere = SphereShape3D.new()
+		sphere.radius = 1.0
+		collision_shape.shape = sphere
+		detection_area.add_child(collision_shape)
+	
+	detection_area.collision_layer = 0
+	detection_area.set_collision_layer_value(5, true)
+	detection_area.set_collision_mask_value(10, true)
+	detection_area.collision_mask = 0
+
+func _setup_raycast():
+	if raycast:
+		raycast.enabled = true
+		raycast.target_position = Vector3(0, 0, -100)
+		raycast.collision_mask = 0
+		raycast.set_collision_mask_value(4, true)
+		raycast.set_collision_mask_value(6, true)
+		raycast.set_collision_mask_value(3, true)
+		raycast.set_collision_mask_value(2, true)
+		
+
+# ============ INPUT SYSTEM ============
+func _setup_input_actions():
+	_add_key_input("move_forward", KEY_W)
+	_add_key_input("move_backward", KEY_S)
+	_add_key_input("move_left", KEY_A)
+	_add_key_input("move_right", KEY_D)
+	_add_key_input("jump", KEY_SPACE)
+	_add_key_input("toggle_mouse", KEY_M)
+	_add_key_input("toggle_run", KEY_SHIFT)
+	_add_key_input("fire", KEY_F)
+	_add_key_input("melee_attack", KEY_F)
+	_add_key_input("crouch", KEY_C)
+	_add_key_input("prone", KEY_X)
+	_add_key_input("cycle_weapon", KEY_Q)  # weapon toggle
+	_add_key_input("aim", KEY_V)
+	_add_key_input("aim_alt", KEY_G)
+	_add_key_input("enter_vehicle", KEY_P)
+	_add_key_input("interact", KEY_SLASH)
+	_add_key_input("throw_grenade", KEY_F)  # Same as fire for grenade
+	
+func _add_key_input(action: String, keycode: int):
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	
+	InputMap.action_erase_events(action)
+	var event = InputEventKey.new()
+	event.keycode = keycode
+	InputMap.action_add_event(action, event)
+	
+	if action == "fire" or action == "throw_grenade" or action == "melee_attack":
+		var mouse_event = InputEventMouseButton.new()
+		mouse_event.button_index = MOUSE_BUTTON_LEFT
+		InputMap.action_add_event(action, mouse_event)
+	elif action == "aim" or action == "aim_alt":
+		var mouse_event = InputEventMouseButton.new()
+		mouse_event.button_index = MOUSE_BUTTON_RIGHT
+		InputMap.action_add_event(action, mouse_event)
+
+func _input(event):
+	if event is InputEventKey and event.keycode == KEY_M and event.pressed:
+		mouse_locked = !mouse_locked
+		if mouse_locked:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
+	if Input.is_action_just_pressed("interact"):  # Press spacebar or enter
+		npcai = !npcai
+	# Skip input if driver
+	if is_driver or npcai:
+		return
+	if event.is_action_pressed("enter_vehicle") and is_passenger:
+		print("Exit Pressed - Passenger attempting to exit")
+		_exit_as_passenger()
+		return
+	# Passenger can only look around
+	if is_passenger:
+		if event is InputEventKey and event.keycode == KEY_M and event.pressed:
+			mouse_locked = !mouse_locked
+			if mouse_locked:
+				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			else:
+				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		return
+		
+	# Handle spectator input
+	if not is_multiplayer_authority():
+		if event.is_action_pressed("toggle_chat"):
+			pass
+		elif event.is_action_pressed("cycle_weapon"):
+			_switch_spectator_camera()
+		elif event is InputEventKey and event.keycode == KEY_M and event.pressed:
+			mouse_locked = !mouse_locked
+			if mouse_locked:
+				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			else:
+				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		else:
+			return
+		return
+	
+	# Handle weapon-specific input
+	match current_weapon:
+		WeaponType.GUN:
+			_handle_gun_input(event)
+		WeaponType.MELEE:
+			_handle_melee_input(event)
+		WeaponType.GRENADE:
+			_handle_grenade_input(event)
+		WeaponType.NONE:
+			_handle_no_weapon_input(event)
+	
+	# Handle common input
+	if event.is_action_pressed("toggle_run"):
+		_toggle_run()
+	
+	if event.is_action_pressed("crouch"):
+		_toggle_crouch()
+	
+	if event.is_action_pressed("prone"):
+		_toggle_prone()
+	
+	if event.is_action_pressed("cycle_weapon"):
+		_cycle_weapon()
+	
+	# Vehicle entry
+	if event.is_action_pressed("enter_vehicle"):
+		_handle_vehicle_entry()
+
+func _handle_gun_input(event):
+	if event.is_action_pressed("aim") or event.is_action_pressed("aim_alt"):
+		is_aiming = true
+	if event.is_action_released("aim") or event.is_action_released("aim_alt"):
+		is_aiming = false
+	
+	if event.is_action_pressed("fire") and mouse_locked:
+		is_firing_held = true
+		is_firing_sync = true
+	
+	if event.is_action_released("fire"):
+		is_firing_held = false
+		is_firing_sync = false
+
+func _handle_melee_input(event):
+	if event.is_action_pressed("melee_attack") and mouse_locked:
+		_melee_attack()
+
+func _handle_no_weapon_input(event):
+	# No combat actions in no weapon mode
+	pass
+
+func _handle_vehicle_entry():
+	# Driver entry
+	if nearby_car and not nearby_car.is_driver_occupied and not nearby_car.is_processing_entry:
+		print("Player entering as DRIVER")
+		nearby_car.start_entry_sequence(self)
+		is_in_vehicle = true
+		is_driver = true
+		set_process_input(false)
+		set_physics_process(false)
+		can_shoot = false
+		can_melee = false
+		can_switch_weapon = false
+		_update_weapon_visibility()
+		if camera:
+			camera.current = false
+		return
+	
+	# Passenger entry
+	if nearby_passenger_car and not nearby_passenger_car.is_passenger_occupied and not nearby_passenger_car.is_processing_passenger_entry:
+		print("Player entering as PASSENGER")
+		current_passenger_car = nearby_passenger_car
+		nearby_passenger_car.start_passenger_entry_sequence(self)
+		is_in_vehicle = true
+		is_passenger = true
+		set_physics_process(false)
+		can_shoot = false
+		can_melee = false
+		can_switch_weapon = false
+		_update_weapon_visibility()
+		return
+
+# ============ GRENADE SYSTEM ============
+func _setup_grenade_trajectory():
+	pass
+	
+func _handle_grenade_input(event):
+	if event.is_action_pressed("aim") or event.is_action_pressed("aim_alt"):
+		if current_grenades > 0:
+			is_grenade_aiming = true
+			_show_grenade_trajectory(true)
+			if _body:
+				_body.is_grenade_aiming = true
+	if event.is_action_released("aim") or event.is_action_released("aim_alt"):
+		is_grenade_aiming = false
+		_show_grenade_trajectory(false)
+		if _body:
+				_body.is_grenade_aiming = true
+	if event.is_action_pressed("throw_grenade") and mouse_locked and can_throw_grenade and current_grenades > 0:
+		_throw_grenade()
+
+func _show_grenade_trajectory(show: bool):
+	pass
+	
+func _update_trajectory_preview():
+	pass
+	
+@rpc("any_peer", "call_local", "reliable")
+func _sync_grenade_throw(spawn_pos: Vector3, throw_dir: Vector3, player_id: int):
+	"""Sync grenade throw across network"""
+	if not grenade_template:
+		return
+	
+	# Create grenade instance
+	var grenade_instance = grenade_template.instantiate()
+	var grenade = grenade_instance
+	
+	# Add to scene
+	get_tree().root.add_child(grenade)
+	grenade.global_position = spawn_pos
+	
+	# Arm the grenade
+	if grenade.has_method("arm_grenade"):
+		grenade.arm_grenade(throw_dir, grenade_throw_force, player_id, grenade_damage, grenade_blast_radius, grenade_fuse_time, friendly_fire_enabled)
+	
+	print("Synced grenade throw from player: ", player_id)
+
+func _throw_grenade():
+	if not can_throw_grenade or current_weapon != WeaponType.GRENADE:
+		return
+	
+	# Get current throwable from WeaponManager
+	if not weapon_manager:
+		return
+	
+	var current_throwable = weapon_manager.get_current_throwable()
+	if not current_throwable or current_throwable.current_count <= 0:
+		print("No throwables remaining!")
+		return
+	
+	# Use throwable from WeaponManager
+	if not weapon_manager.use_throwable():
+		return
+	
+	can_throw_grenade = false
+	
+	print("[Player] Starting throw sequence for: ", current_throwable.throwable_name)
+	
+	# Play throw animation
+	if _body and _body.has_method("play_grenade_throw_animation"):
+		await _body.play_grenade_throw_animation(current_stance)
+	
+	if not current_throwable.template:
+		push_error("Throwable template not assigned!")
+		return
+	
+	# Calculate spawn position and direction
+	var spawn_position: Vector3
+	if grenade_hand_position:
+		spawn_position = grenade_hand_position.global_position
+	elif melee_hitbox:
+		spawn_position = melee_hitbox.global_position
+	else:
+		spawn_position = global_position + Vector3(0, 1.5, 0) + global_transform.basis.z * -0.5
+	
+	var throw_direction = -camera.global_transform.basis.z
+	
+	# Sync throw across network with throwable data
+	rpc("_sync_throwable_throw", spawn_position, throw_direction, int(name), current_throwable.throwable_name)
+	
+	print("Threw ", current_throwable.throwable_name, "! Remaining: ", current_throwable.current_count)
+	
+	# Cooldown
+	await get_tree().create_timer(1.0).timeout
+	can_throw_grenade = true
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_throwable_throw(spawn_pos: Vector3, throw_dir: Vector3, player_id: int, throwable_name: String):
+	"""Sync throwable throw across network"""
+	if not weapon_manager:
+		return
+	
+	# Find the throwable data by name
+	var throwable_data = null
+	for throwable in weapon_manager.throwable_weapons:
+		if throwable.throwable_name == throwable_name:
+			throwable_data = throwable
+			break
+	
+	if not throwable_data or not throwable_data.template:
+		return
+	
+	# Create throwable instance
+	var throwable_instance = throwable_data.template.instantiate()
+	
+	# Add to scene
+	get_tree().root.add_child(throwable_instance)
+	throwable_instance.global_position = spawn_pos
+	
+	# Arm the throwable with its specific stats
+	if throwable_instance.has_method("arm_grenade"):
+		throwable_instance.arm_grenade(
+			throw_dir, 
+			throwable_data.throw_force, 
+			player_id, 
+			throwable_data.damage, 
+			throwable_data.blast_radius, 
+			throwable_data.fuse_time, 
+			friendly_fire_enabled
+		)
+	
+	print("Synced ", throwable_name, " throw from player: ", player_id)
+	
+func _update_grenade_ui():
+	"""Update grenade count UI"""
+	# Add your UI update code here
+	pass
+
+# ============ WEAPON SYSTEM ============
+func _cycle_weapon():
+	if is_spectator or not can_switch_weapon:
+		return
+	
+	match current_weapon:
+		WeaponType.GUN:
+			current_weapon = WeaponType.MELEE
+		WeaponType.MELEE:
+			current_weapon = WeaponType.GRENADE
+			if _body:
+				_body.is_grenade_aiming = false
+			_show_grenade_trajectory(false)
+		WeaponType.GRENADE:
+			current_weapon = WeaponType.NONE
+		WeaponType.NONE:
+			current_weapon = WeaponType.GUN
+	
+	# Update visibility immediately
+	_update_weapon_visibility()
+	
+	# Network sync
+	if is_multiplayer_authority():
+		rpc("sync_weapon_change", current_weapon)
+	
+	print("Switched to weapon: ", WeaponType.keys()[current_weapon])
+
+func _update_weapon_visibility():
+	# Hide weapons when in vehicle
+	if is_in_vehicle:
+		if gun_node:
+			gun_node.visible = false
+		if melee_node:
+			melee_node.visible = false
+		if grenade_node:
+			grenade_node.visible = false
+		return
+	
+	# Show/Hide root weapon nodes based on current weapon
+	if gun_node:
+		gun_node.visible = (current_weapon == WeaponType.GUN) and not is_spectator
+	if melee_node:
+		melee_node.visible = (current_weapon == WeaponType.MELEE) and not is_spectator
+	if grenade_node:
+		grenade_node.visible = (current_weapon == WeaponType.GRENADE) and not is_spectator
+	
+	# No weapon mode - hide all
+	if current_weapon == WeaponType.NONE:
+		if gun_node: gun_node.visible = false
+		if melee_node: melee_node.visible = false
+		if grenade_node: grenade_node.visible = false
+	
+	sync_weapon_visibility = !sync_weapon_visibility
+	
+	# CRITICAL: Tell weapon manager to update its child visibility
+	if weapon_manager:
+		weapon_manager._update_weapon_visibility()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_weapon_change(weapon_index: int):
+	current_weapon = weapon_index
+	_update_weapon_visibility()  # Add this line
+
+# ============ MOVEMENT SYSTEM ============
+func _physics_process(delta):
+	if is_spectator or is_driver or is_passenger or sync_is_dead or npcai:
+		return
+	
+	if is_multiplayer_authority():
+		_apply_collision_shape(current_stance)
+	else:
+		_sync_collision_from_exports()
+	
+	var allow_controls = is_multiplayer_authority()
+	
+	if not allow_controls:
+		return
+	
+	# Reset aiming if switching from grenade
+	if current_weapon != WeaponType.GRENADE and is_grenade_aiming:
+		is_grenade_aiming = false
+		_show_grenade_trajectory(false)
+	if is_grenade_aiming and current_weapon == WeaponType.GRENADE:
+		_update_trajectory_preview()
+	if current_weapon == WeaponType.MELEE and is_aiming:
+		is_aiming = false
+		
+	# Chat freeze check
+	var current_scene = get_tree().get_current_scene()
+	if current_scene and current_scene.has_method("is_chat_visible") and current_scene.is_chat_visible() and is_on_floor():
+		freeze()
+		_stop_footstep_sounds()
+		return
+
+	# Apply gravity
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+
+	# Jumping
+	if is_on_floor() and current_stance == "normal":
+		if Input.is_action_just_pressed("jump"):
+			velocity.y = JUMP_VELOCITY
+			jump_counter += 1
+			_play_jump_sound()
+
+	# Sync state
+	sync_velocity = velocity
+	sync_stance = current_stance
+	
+	# Stuck detection
+	_check_stuck(delta)
+	
+	# Look target for aiming
+	if (is_firing_held or is_aiming) and current_weapon == WeaponType.GUN:
+		_update_look_target()
+	else:
+		has_look_target = false
+	
+	# Shooting
+	if is_firing_held and can_shoot and mouse_locked and current_weapon == WeaponType.GUN:
+		_fire()
+	
+	# Movement
+	_move()
+	move_and_slide()
+	
+	# Animation
+	if _body:
+		var firing_state = false
+		if current_weapon == WeaponType.GUN:
+		# MODIFY THIS LINE to check if weapon is reloading
+			if weapon_manager:
+				firing_state = (is_firing_held and not weapon_manager.is_reloading()) if is_multiplayer_authority() else is_firing_sync
+			else:
+				firing_state = is_firing_held if is_multiplayer_authority() else is_firing_sync	
+		var should_look_at = has_look_target and (firing_state or is_aiming) and current_weapon == WeaponType.GUN
+		_body.animate(velocity, current_stance, firing_state, is_aiming, look_target if should_look_at else Vector3.ZERO)
+	# Audio
+	_update_footstep_audio(delta)
+
+func _move() -> void:
+	if is_spectator:
+		return
+	
+	var _input_direction: Vector2 = Vector2.ZERO
+	if is_multiplayer_authority():
+		_input_direction = Input.get_vector(
+			"move_left", "move_right",
+			"move_forward", "move_backward"
+		)
+
+	# Stop movement when prone and firing
+	if current_stance == "prone" and is_firing_held:
+		_input_direction = Vector2.ZERO
+
+	var _direction: Vector3 = transform.basis * Vector3(_input_direction.x, 0, _input_direction.y).normalized()
+
+	_update_speed()
+	_direction = _direction.rotated(Vector3.UP, _spring_arm_offset.rotation.y)
+
+	if _direction:
+		velocity.x = _direction.x * _current_speed
+		velocity.z = _direction.z * _current_speed
+		if _body:
+			_body.apply_rotation(velocity)
+		return
+
+	velocity.x = move_toward(velocity.x, 0, _current_speed)
+	velocity.z = move_toward(velocity.z, 0, _current_speed)
+
+func _update_speed():
+	match current_stance:
+		"crouch":
+			_current_speed = CROUCH_SPEED
+		"prone":
+			_current_speed = PRONE_SPEED
+		_:
+			if is_running_mode:
+				_current_speed = SPRINT_SPEED
+			else:
+				_current_speed = NORMAL_SPEED
+
+func is_running() -> bool:
+	return is_running_mode
+
+# ============ STANCE SYSTEM ============	
+func _toggle_run():
+	if is_spectator or current_stance == "crouch" or current_stance == "prone":
+		return
+	is_running_mode = !is_running_mode
+
+func _toggle_crouch():
+	if is_spectator:
+		return
+	
+	if current_stance == "crouch":
+		current_stance = "normal"
+		is_running_mode = false
+	elif current_stance == "normal":
+		current_stance = "crouch"
+		is_running_mode = false
+	elif current_stance == "prone":
+		current_stance = "crouch"
+		is_running_mode = false
+	
+	_apply_collision_shape(current_stance)
+
+func _toggle_prone():
+	if is_spectator:
+		return
+	
+	if current_stance == "prone":
+		current_stance = "normal"
+	elif current_stance == "normal":
+		current_stance = "prone"
+		is_running_mode = false
+	elif current_stance == "crouch":
+		current_stance = "prone"
+		is_running_mode = false
+	
+	_apply_collision_shape(current_stance)
+
+# ============ COMBAT SYSTEM ============
+func _fire():
+	if is_spectator or current_weapon != WeaponType.GUN:
+		return
+	if weapon_manager and weapon_manager.is_reloading():
+		return 
+	# Use weapon manager if available
+	if weapon_manager:
+		if not weapon_manager.try_fire():
+			return  # Cannot fire (reloading or out of ammo)
+		
+		# Get damage from weapon manager
+		var current_damage = weapon_manager.get_current_damage()
+		
+		# Play sound
+		_play_gun_fire_sound()
+		gun_fire_counter += 1
+		
+		if raycast and raycast.is_colliding():
+			var collider = raycast.get_collider()
+			var hit_point = raycast.get_collision_point()
+			var hit_normal = raycast.get_collision_normal()
+			
+			if collider and collider.is_in_group("player"):
+				if collider != self and friendly_fire_enabled:
+					if collider.has_method("take_damage"):
+						collider.take_damage(current_damage, int(name), "gun")
+						_spawn_impact_effect(hit_point, hit_normal, true)
+			elif collider and collider.is_in_group("zombie"):
+				if collider.has_method("take_damage"):
+					collider.take_damage(current_damage)
+					_spawn_impact_effect(hit_point, hit_normal, true)
+			elif collider and collider.is_in_group("ranged"):
+				if collider.has_method("take_damage"):
+					collider.take_damage(current_damage)
+					_spawn_impact_effect(hit_point, hit_normal, true)
+			elif collider and collider.has_method("take_damage"):
+				collider.take_damage(current_damage)
+				_spawn_impact_effect(hit_point, hit_normal, true)
+			else:
+				_spawn_impact_effect(hit_point, hit_normal, false)
+	else:
+		# Fallback to original fire system
+		can_shoot = false
+		_play_gun_fire_sound()
+		gun_fire_counter += 1
+		
+		# ... rest of original fire code ...
+		
+		await get_tree().create_timer(fire_rate).timeout
+		can_shoot = true
+
+func _melee_attack():
+	if is_spectator or not can_melee or is_melee_attacking or not mouse_locked:
+		return
+	
+	if current_weapon != WeaponType.MELEE:
+		return
+	
+	can_melee = false
+	is_melee_attacking = true
+	sync_is_melee_attacking = true
+	melee_counter += 1
+	_play_melee_sound()
+	melee_sound_counter += 1
+	
+	if _body and _body.has_method("play_melee_animation"):
+		_body.play_melee_animation()
+	
+	await get_tree().create_timer(0.2).timeout
+	
+	if is_instance_valid(self) and melee_hitbox:
+		melee_hitbox.monitoring = true
+	
+	await get_tree().create_timer(0.5).timeout
+	
+	if is_instance_valid(self) and melee_hitbox:
+		melee_hitbox.monitoring = false
+	
+	await get_tree().create_timer(0.5).timeout
+	
+	if is_instance_valid(self):
+		is_melee_attacking = false
+		can_melee = true
+		sync_is_melee_attacking = false
+
+func _on_melee_hitbox_body_entered(body: Node):
+	if not is_melee_attacking:
+		return
+	
+	if body.is_in_group("player"):
+		if body != self and friendly_fire_enabled:
+			if body.has_method("take_damage"):
+				body.take_damage(melee_damage, int(name), "melee")
+				melee_hitbox.set_deferred("monitoring", false)
+		return
+	
+	if body.is_in_group("zombie") or body.is_in_group("ranged"):
+		if body.has_method("take_damage"):
+			body.take_damage(melee_damage)
+			melee_hitbox.set_deferred("monitoring", false)
+		return
+	
+	if body.has_method("take_damage"):
+		body.take_damage(melee_damage)
+		melee_hitbox.set_deferred("monitoring", false)
+
+# ============ DAMAGE SYSTEM ============
+func take_damage(damage: int, source_id: int = -1, weapon_type: String = ""):
+	if is_spectator or sync_is_dead or god_mode:
+		return
+	
+	if not is_multiplayer_authority():
+		rpc_id(int(name), "_take_damage_local", damage, source_id, weapon_type)
+		return
+	
+	_take_damage_local(damage, source_id, weapon_type)
+
+@rpc("any_peer", "call_local", "reliable")
+func _take_damage_local(damage: int, source_id: int = -1, weapon_type: String = ""):
+	if sync_is_dead:
+		return
+	
+	if source_id != -1:
+		last_damage_source = source_id
+		last_damage_weapon = weapon_type
+	
+	current_health -= damage
+	current_health = max(0, current_health)
+	_update_health_ui()
+	
+	if current_health <= 0:
+		sync_is_dead = true
+		_die()
+
+func _update_health_ui():
+	if health_label:
+		health_label.text = "Health: " + str(current_health)
+
+func _die():
+	if is_spectator or (sync_is_dead and not is_multiplayer_authority()):
+		return
+	
+	var killer_id = last_damage_source
+	var weapon_type = last_damage_weapon
+	
+	var lobby = get_tree().get_current_scene()
+	if lobby and lobby.has_method("report_kill"):
+		if multiplayer.is_server():
+			lobby.report_kill(killer_id, int(name), weapon_type)
+		else:
+			rpc_id(1, "_report_player_kill_to_lobby", killer_id, int(name), weapon_type)
+	
+	sync_is_dead = true
+	
+	if _body and _body.has_method("play_death_animation"):
+		_body.play_death_animation(current_stance)
+	
+	collision_layer = 0
+	collision_mask = 0
+		
+	_stop_footstep_sounds()
+	
+	if detection_area:
+		detection_area.monitoring = false
+	
+	if is_multiplayer_authority():
+		_switch_to_spectator_camera()
+		
+	if is_multiplayer_authority():
+		await get_tree().create_timer(2.0).timeout
+		if is_instance_valid(self):
+			queue_free()
+
+# ============ AUDIO SYSTEM ============
+func _setup_audio_nodes():
+	# ... (keep your existing audio setup code)
+	pass
+
+func _setup_3d_audio_for_others():
+	if walk_sound:
+		walk_sound.max_distance = 20.0
+	if run_sound:
+		run_sound.max_distance = 20.0
+	if jump_sound:
+		jump_sound.max_distance = 20.0
+	if gun_fire_sound:
+		gun_fire_sound.max_distance = 50.0
+	if melee_sound:
+		melee_sound.max_distance = 15.0
+
+func _update_footstep_audio(delta):
+	if is_spectator:
+		return
+	
+	if current_stance == "crouch" or current_stance == "prone":
+		_stop_footstep_sounds()
+		footstep_timer = 0.0
+		return
+	
+	var is_moving = velocity.length() > 0.1 and is_on_floor()
+	
+	if is_moving:
+		footstep_timer += delta
+		var current_interval = run_footstep_interval if is_running_mode else walk_footstep_interval
+		
+		if footstep_timer >= current_interval:
+			footstep_type = "run" if is_running_mode else "walk"
+			footstep_counter += 1
+			_play_footstep_sound(footstep_type)
+			footstep_timer = 0.0
+	else:
+		_stop_footstep_sounds()
+		footstep_timer = 0.0
+
+func _check_remote_audio():
+	if footstep_counter != last_footstep_counter:
+		_play_footstep_sound(footstep_type)
+		last_footstep_counter = footstep_counter
+	
+	if jump_counter != last_jump_counter:
+		_play_jump_sound()
+		last_jump_counter = jump_counter
+	
+	if melee_counter != last_melee_counter:
+		if _body and _body.has_method("play_melee_animation"):
+			_body.play_melee_animation()
+		last_melee_counter = melee_counter
+		
+	if gun_fire_counter != last_gun_fire_counter:
+		_play_gun_fire_sound()
+		last_gun_fire_counter = gun_fire_counter
+	
+	if melee_sound_counter != last_melee_sound_counter:
+		_play_melee_sound()
+		last_melee_sound_counter = melee_sound_counter
+
+func _play_footstep_sound(step_type: String):
+	_stop_footstep_sounds()
+	match step_type:
+		"walk":
+			if walk_sound and walk_sound.stream:
+				walk_sound.play()
+		"run":
+			if run_sound and run_sound.stream:
+				run_sound.play()
+				
+func _play_gun_fire_sound():
+	if gun_fire_sound and gun_fire_sound.stream:
+		gun_fire_sound.play()
+
+func _play_melee_sound():
+	if melee_sound and melee_sound.stream:
+		melee_sound.play()
+		
+func _play_jump_sound():
+	if jump_sound and jump_sound.stream:
+		if not jump_sound.playing:
+			jump_sound.play()
+
+func _stop_footstep_sounds():
+	if walk_sound and walk_sound.playing:
+		walk_sound.stop()
+	if run_sound and run_sound.playing:
+		run_sound.stop()
+
+# ============ COLLISION SYSTEM ============
+func _apply_collision_shape(stance: String):
+	if not normal_collision or not crouch_collision or not prone_collision:
+		push_error("Collision shapes not properly assigned!")
+		return
+	
+	match stance:
+		"normal":
+			normal_collision_disabled = false
+			crouch_collision_disabled = true
+			prone_collision_disabled = true
+		"crouch":
+			normal_collision_disabled = true
+			crouch_collision_disabled = false
+			prone_collision_disabled = true
+		"prone":
+			normal_collision_disabled = true
+			crouch_collision_disabled = true
+			prone_collision_disabled = false
+		_:
+			normal_collision_disabled = false
+			crouch_collision_disabled = true
+			prone_collision_disabled = true
+	
+	normal_collision.disabled = normal_collision_disabled
+	crouch_collision.disabled = crouch_collision_disabled
+	prone_collision.disabled = prone_collision_disabled
+
+func _sync_collision_from_exports():
+	if not normal_collision or not crouch_collision or not prone_collision:
+		return
+	
+	normal_collision.disabled = normal_collision_disabled
+	crouch_collision.disabled = crouch_collision_disabled
+	prone_collision.disabled = prone_collision_disabled
+
+# ============ VEHICLE SYSTEM ============
+func _exit_as_passenger():
+	if not is_passenger or not current_passenger_car:
+		return
+	
+	var car = current_passenger_car 
+	
+	if car.passenger_enter_area:
+		global_position = car.passenger_enter_area.global_position
+	
+	if car.passenger_original_transform:
+		var original_rotation = car.passenger_original_transform.basis.get_euler()
+		global_rotation = original_rotation
+		if _body:
+			_body.rotation = Vector3.ZERO
+	
+	set_physics_process(true)
+	can_shoot = true
+	can_melee = true
+	can_switch_weapon = true
+	is_in_vehicle = false
+	is_passenger = false
+	_update_weapon_visibility()
+	_setup_collision()
+	
+	if _body:
+		_body.is_in_car = false
+		_body.is_melee_attacking = false
+		_body.is_dancing = false
+		_body.is_grenade_aiming = false
+		_body.is_throwing_grenade = false
+		if _body.animation_player:
+			_body.animation_player.stop()
+			if _body.animation_player.has_animation("RifleIdle"):
+				_body.animation_player.play("RifleIdle")
+	
+	current_stance = "normal"
+	_apply_collision_shape(current_stance)
+	
+	car.clear_passenger_seat()
+	current_passenger_car = null
+	
+	if is_multiplayer_authority():
+		mouse_locked = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _enable_after_vehicle_exit():
+	set_process_input(true)
+	set_physics_process(true)
+	
+	can_shoot = true
+	can_melee = true
+	can_switch_weapon = true
+	is_firing_held = false
+	is_firing_sync = false
+	is_aiming = false
+	
+	_update_weapon_visibility()
+	_setup_collision()
+	
+	mouse_locked = true
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	if camera:
+		camera.current = true
+	
+	current_stance = "normal"
+	_apply_collision_shape(current_stance)
+
+# ============ SPECTATOR SYSTEM ============
+func set_spectator(value: bool):
+	is_spectator = value
+	if is_spectator:
+		if gun_node:
+			gun_node.visible = false
+		if melee_node:
+			melee_node.visible = false
+		if grenade_node:
+			grenade_node.visible = false
+		
+		collision_layer = 0
+		collision_mask = 0
+		
+		if detection_area:
+			detection_area.monitoring = false
+		
+		freeze()
+		_stop_footstep_sounds()
+		
+		if raycast:
+			raycast.enabled = false
+	else:
+		_update_weapon_visibility()
+		_setup_collision()
+		
+		if detection_area:
+			detection_area.monitoring = true
+		
+		if raycast:
+			raycast.enabled = true
+		
+		if has_node("SpringArmOffset/SpringArm3D/Camera3D"):
+			$SpringArmOffset/SpringArm3D/Camera3D.current = is_multiplayer_authority()
+
+func _switch_spectator_camera():
+	if not is_spectator or not is_multiplayer_authority():
+		return
+	
+	var lobby = get_tree().get_current_scene()
+	if lobby and lobby.has_method("switch_spectator_camera"):
+		lobby.switch_spectator_camera.rpc_id(1, int(name))
+
+func _switch_to_spectator_camera():
+	if not is_multiplayer_authority():
+		return
+	
+	if camera:
+		camera.current = false
+	
+	var all_players = get_tree().get_nodes_in_group("player")
+	
+	var alive_players = []
+	for player in all_players:
+		# Check if it's a CharacterBody3D, in player group, and alive
+		if (player is CharacterBody3D and 
+			player.is_in_group("player") and 
+			player != self and 
+			not player.sync_is_dead):
+			
+			# Also check if it has the camera node
+			if player.has_node("SpringArmOffset/SpringArm3D/Camera3D"):
+				alive_players.append(player)
+	
+	if alive_players.size() > 0:
+		var target_player = alive_players[0]
+		var target_camera = target_player.get_node("SpringArmOffset/SpringArm3D/Camera3D")
+		target_camera.current = true
+		print("Switched to spectator camera on player: ", target_player.name)
+	else:
+		print("No alive players found to switch camera to")
+		# Optional: Switch to a static map camera or keep current camera off
+
+# ============ UTILITY SYSTEMS ============
+func _update_look_target():
+	if not raycast:
+		has_look_target = false
+		return
+	
+	raycast.force_raycast_update()
+	
+	if raycast.is_colliding():
+		look_target = raycast.get_collision_point()
+		has_look_target = true
+	else:
+		var forward = -camera.global_transform.basis.z
+		look_target = camera.global_position + forward * 100.0
+		has_look_target = true
+
+func _check_stuck(delta):
+	if is_spectator:
+		return
+		
+	var input_vector = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	var is_trying_to_move = input_vector.length() > 0.1
+	
+	stuck_timer += delta
+	
+	if stuck_timer >= stuck_check_interval:
+		var distance_moved = global_position.distance_to(last_position)
+		var is_moving = distance_moved > stuck_distance_threshold
+				
+		if is_trying_to_move and not is_moving:
+			stuck_duration += stuck_check_interval
+			is_currently_stuck = true
+			
+			if stuck_duration >= stuck_trigger_duration:
+				_manual_unstuck()
+		else:
+			stuck_duration = 0.0
+			is_currently_stuck = false
+		
+		stuck_timer = 0.0
+		last_position = global_position
+
+func _manual_unstuck():
+	if not is_multiplayer_authority():
+		return
+	velocity.y = 3.0
+	position.y += 1.0
+	stuck_duration = 0.0
+	is_currently_stuck = false
+	last_position = global_position
+
+func freeze():
+	velocity.x = 0
+	velocity.z = 0
+	_current_speed = 0
+	if _body:
+		_body.animate(Vector3.ZERO, current_stance, false, false, Vector3.ZERO)
+	_stop_footstep_sounds()
+	
+	if is_spectator:
+		velocity.y = 0
+
+func _process(_delta):
+	if is_spectator and is_multiplayer_authority():
+		return
+		
+	if sync_is_dead:
+		if not is_multiplayer_authority():
+			queue_free()
+		return
+	
+	if not is_multiplayer_authority():
+		_sync_collision_from_exports()
+		_check_remote_audio()
+		_check_remote_audio_stop()
+		_sync_visibility_from_export()
+		_check_remote_melee()
+
+func _check_remote_melee():
+	if melee_counter != last_melee_counter:
+		if _body and _body.has_method("play_melee_animation"):
+			_body.play_melee_animation()
+		last_melee_counter = melee_counter
+
+func _check_remote_audio_stop():
+	if is_multiplayer_authority():
+		return
+	
+	var is_stopped_now = sync_velocity.length() < 0.1
+	
+	if is_stopped_now:
+		velocity_stopped_frames += 1
+	else:
+		velocity_stopped_frames = 0
+		last_sync_velocity = sync_velocity
+	
+	if velocity_stopped_frames >= required_stopped_frames:
+		_stop_remote_footstep_sounds()
+		velocity_stopped_frames = required_stopped_frames
+
+func _stop_remote_footstep_sounds():
+	if walk_sound and walk_sound.playing:
+		walk_sound.stop()
+	if run_sound and run_sound.playing:
+		run_sound.stop()
+
+func _sync_visibility_from_export():
+	if visible != sync_visible:
+		visible = sync_visible
+		if sync_visible:
+			show()
+		else:
+			hide()
+
+# ============ MISC SYSTEMS ============
+func set_god_mode(enabled: bool):
+	god_mode = enabled
+
+func play_victory_dance():
+	if not _body or not _body.animation_player:
+		return
+	
+	is_victory_dancing = true
+	god_mode = true
+	
+	freeze()
+	
+	if _body.has_method("play_victory_dance"):
+		await _body.play_victory_dance()
+	
+	is_victory_dancing = false
+
+func return_to_lobby():
+	if not is_multiplayer_authority():
+		return
+	
+	print("Player returning to lobby")
+
+@rpc("any_peer", "call_remote", "reliable")
+func _report_player_kill_to_lobby(killer_id: int, victim_id: int, weapon_type: String):
+	if multiplayer.is_server():
+		var lobby = get_tree().get_current_scene()
+		if lobby and lobby.has_method("report_kill"):
+			lobby.report_kill(killer_id, victim_id, weapon_type)
+
+func _spawn_impact_effect(position: Vector3, normal: Vector3, is_enemy: bool):
+	var effect = Node3D.new()
+	get_tree().root.add_child(effect)
+	effect.global_position = position
+	effect.look_at(position + normal, Vector3.UP)
+	
+	if is_enemy:
+		var damage_to_show = PLAYER_DAMAGE
+		if weapon_manager and current_weapon == WeaponType.GUN:
+			damage_to_show = weapon_manager.get_current_damage()
+			
+		_create_red_scatter(effect, damage_to_show)
+		# Keep effect alive for red particles
+		await get_tree().create_timer(0.5).timeout
+		if is_instance_valid(effect):
+			effect.queue_free()
+	else:
+		_create_black_dot(effect)
+		# Keep black dot visible longer
+		await get_tree().create_timer(0.5).timeout
+		if is_instance_valid(effect):
+			effect.queue_free()
+
+func _create_red_scatter(parent: Node3D, damage_value: int = PLAYER_DAMAGE):
+	var damage_label = Label.new()
+	damage_label.text = str(damage_value)
+	damage_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	damage_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	damage_label.add_theme_font_size_override("font_size", 26)
+	damage_label.add_theme_color_override("font_color", Color(1.0, 0.0, 0.0, 1.0))
+	damage_label.add_theme_color_override("font_outline_color", Color(1.0, 1.0, 1.0, 0.0))
+	damage_label.add_theme_constant_override("outline_size", 5)
+	
+	var canvas_layer = CanvasLayer.new()
+	get_tree().root.add_child(canvas_layer)
+	canvas_layer.add_child(damage_label)
+	
+	damage_label.position = get_viewport().get_visible_rect().size * 0.5 - damage_label.size * 0.5
+	
+	var label_tween = create_tween()
+	label_tween.set_parallel(true)
+	label_tween.tween_property(damage_label, "position:y", damage_label.position.y - 50, 0.5)
+	label_tween.tween_property(damage_label, "modulate:a", 0.0, 0.5)
+	label_tween.tween_callback(canvas_layer.queue_free).set_delay(0.5)
+	
+	for i in range(red_particle_count):
+		var particle = MeshInstance3D.new()
+		var sphere = SphereMesh.new()
+		sphere.radius = red_particle_size
+		sphere.height = red_particle_size * 2
+		particle.mesh = sphere
+		
+		var material = StandardMaterial3D.new()
+		material.albedo_color = Color(0.8, 0.1, 0.1, 1.0)
+		material.emission_enabled = true
+		material.emission = Color(1.0, 0.0, 0.0, 1.0)
+		material.emission_energy = 2.0
+		particle.material_override = material
+		
+		parent.add_child(particle)
+		
+		var random_dir = Vector3(
+			randf_range(-1, 1),
+			randf_range(-0.5, 1),
+			randf_range(-1, 1)
+		).normalized()
+		
+		particle.position = random_dir * randf_range(0.05, 0.15)
+		
+		var tween = create_tween()
+		tween.set_parallel(true)
+		var end_pos = particle.position + random_dir * 0.3
+		tween.tween_property(particle, "position", end_pos, 0.5)
+		tween.tween_property(particle, "scale", Vector3.ZERO, 0.5)
+
+func _create_black_dot(parent: Node3D):
+	var dot = MeshInstance3D.new()
+	var sphere = SphereMesh.new()
+	sphere.radius = black_dot_size
+	sphere.height = black_dot_size * 4  # Changed from 0.3 to make it more visible
+	dot.mesh = sphere
+	
+	var material = StandardMaterial3D.new()
+	material.albedo_color = Color(0.1, 0.1, 0.1, 1.0)
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED  # Make it always visible
+	dot.material_override = material
+	
+	parent.add_child(dot)
+	# Position slightly forward from the surface
+	dot.position = Vector3(0, 0, -0.02)
+	# Optional: Add a slight fade-in effect
+	dot.scale = Vector3.ZERO
+	var tween = create_tween()
+	tween.tween_property(dot, "scale", Vector3.ONE, 0.1)
+	
+# ============ COMBAT ROTATION SYSTEM ============
+func should_override_rotation() -> bool:
+	# Override rotation during any combat action
+	return (is_firing_held or is_aiming or is_melee_attacking or is_grenade_aiming) and current_weapon != WeaponType.NONE
+
+func get_spring_arm_offset() -> Node3D:
+	return _spring_arm_offset
+
+func show_interaction_prompt(text: String):
+	"""Show interaction prompt UI when near an interactive NPC"""
+	if not is_multiplayer_authority():
+		return
+	
+	is_near_interactive_npc = true
+	
+	# Create UI if it doesn't exist
+	if not interaction_prompt_ui:
+		interaction_prompt_ui = Control.new()
+		interaction_prompt_ui.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		interaction_prompt_ui.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		get_tree().root.add_child(interaction_prompt_ui)
+		
+		# Background panel
+		var panel = PanelContainer.new()
+		panel.custom_minimum_size = Vector2(300, 60)
+		panel.position = Vector2(-150, -120)  # Centered, above bottom
+		interaction_prompt_ui.add_child(panel)
+		
+		# Create style
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+		style.corner_radius_top_left = 10
+		style.corner_radius_top_right = 10
+		style.corner_radius_bottom_left = 10
+		style.corner_radius_bottom_right = 10
+		style.set_content_margin_all(15)
+		panel.add_theme_stylebox_override("panel", style)
+		
+		# Label
+		var label = Label.new()
+		label.name = "PromptLabel"
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 18)
+		label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+		panel.add_child(label)
+	
+	# Update text
+	var label = interaction_prompt_ui.find_child("PromptLabel", true, false)
+	if label:
+		label.text = text
+	
+	interaction_prompt_ui.visible = true
+
+func hide_interaction_prompt():
+	"""Hide interaction prompt UI"""
+	if not is_multiplayer_authority():
+		return
+	
+	is_near_interactive_npc = false
+	
+	if interaction_prompt_ui:
+		interaction_prompt_ui.visible = false
+
+func get_current_weapon_type():
+	return current_weapon
+
+func _on_weapon_changed(weapon_data: WeaponManager.WeaponData):
+	"""Handle weapon change from weapon manager"""
+	print("Weapon changed to: ", weapon_data.weapon_name)
+	# Update any UI elements here
+
+func _on_ammo_changed(current_mag: int, reserve_ammo: int):
+	"""Handle ammo change from weapon manager"""
+	print("Ammo updated: ", current_mag, "/", reserve_ammo)
+	# Update ammo UI here
+
+func _on_out_of_ammo():
+	"""Handle out of ammo signal"""
+	print("Current weapon is out of ammo!")
+	# Play click sound or show warning
+
+# ============ WEAPON MANAGER RPC METHODS ============
+@rpc("any_peer", "call_local", "reliable")
+func sync_gun_switch(index: int):
+	"""Sync gun switching from WeaponManager"""
+	if weapon_manager and weapon_manager.has_method("sync_gun_switch"):
+		weapon_manager.sync_gun_switch(index)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_reload_start(weapon_name: String):
+	"""Sync reload start from WeaponManager"""
+	if weapon_manager and weapon_manager.has_method("sync_reload_start"):
+		weapon_manager.sync_reload_start(weapon_name)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_ammo_state(weapon_name: String, mag: int, reserve: int):
+	"""Sync ammo state from WeaponManager"""
+	if weapon_manager and weapon_manager.has_method("sync_ammo_state"):
+		weapon_manager.sync_ammo_state(weapon_name, mag, reserve)
+
+# In player.gd - Add these effect methods
+
+func apply_smoke_effect(duration: float):
+	"""Apply smoke screen effect - reduces visibility"""
+	# Add fog/blur to camera
+	# Reduce view distance
+	# Muffled audio
+	print("Player in smoke for ", duration, "s")
+
+func apply_stun_effect(duration: float):
+	"""Apply stun/flashbang effect"""
+	# White screen flash
+	# Disable movement temporarily
+	# Disable shooting temporarily
+	# Ringing sound effect
+	print("Player stunned for ", duration, "s")
+`
     },
     
     zombie: {
@@ -2119,7 +3713,863 @@ func _apply_damage():
         description: "Smart zombie with obstacle avoidance, group detection, and combat AI.",
         filename: "Zombie.gd",
         // PASTE YOUR FULL Zombie.gd CODE HERE
-        code: ``
+        code: `# Zombie Script - Enhanced Smart Obstacle Avoidance System
+extends CharacterBody3D
+
+const ZOMBIE_DAMAGE = 15
+const MAX_HEALTH = 100
+const ROTATION_SPEED = 5.0
+const MOVE_SPEED = 2.0
+const PRIORITY_DISTANCE = 10.0  # If player within 15m, prioritize them
+const MAX_PATH_CHECK_DISTANCE = 20.0  # Check up to 20m for best path
+
+# Raycast exports - Assign these in the editor
+@export var raycast_front: RayCast3D
+@export var raycast_back: RayCast3D
+@export var raycast_left: RayCast3D
+@export var raycast_right: RayCast3D
+
+# New: Additional long-range raycasts for pathfinding
+@export var raycast_front_long: RayCast3D
+@export var raycast_diagonal_left: RayCast3D
+@export var raycast_diagonal_right: RayCast3D
+
+@export var sync_players_in_range: Array[int] = []  # Sync all tracked players
+
+var players_in_range: Array = []
+var player_distances: Dictionary = {}  # Track distances: {player: distance}
+var group_scan_timer: float = 0.0
+var group_scan_interval: float = 0.3  # Scan every 0.3 seconds
+var target_switch_timer: float = 0.0
+var target_switch_check_interval: float = 0.2  # Check for better targets frequently
+
+# Enhanced Obstacle avoidance state
+var current_avoidance_direction: Vector3 = Vector3.ZERO
+var is_avoiding_obstacle: bool = false
+var avoidance_timer: float = 0.0
+var max_avoidance_time: float = 3.0  # Increased timeout for longer detours
+
+# Smart pathfinding variables
+var smart_avoidance_direction: Vector3 = Vector3.ZERO
+var is_making_smart_turn: bool = false
+var original_target_position: Vector3 = Vector3.ZERO
+var last_path_check_time: float = 0.0
+var path_check_interval: float = 0.5  # Check for clear path every 0.5s
+var current_turn_side: String = "none"  # Track which side we turned to
+
+# Multiplayer sync variables
+@export var sync_health: int = MAX_HEALTH
+@export var sync_position: Vector3 = Vector3.ZERO
+@export var sync_rotation_y: float = 0.0
+@export var sync_velocity: Vector3 = Vector3.ZERO
+@export var sync_is_attacking: bool = false
+@export var sync_current_animation: String = "zombieidle"
+@export var sync_target_id: int = 0
+@export var sync_is_dead: bool = false 
+@export var sync_is_avoiding: bool = false
+@export var sync_turn_side: String = "none"
+
+@onready var health_label: Label3D = $HealthLabel3D
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var player_detector: Area3D = $PlayerDetector
+@onready var damage_hitbox: Area3D = $Zombie/Armature/Skeleton3D/Hitbox/Attack
+
+@export_category("Combat Settings")
+@export var detection_radius: float = 80.0
+@export var attack_range: float = 2
+@export var attack_cooldown: float = 1.0
+
+var current_health: int = MAX_HEALTH
+var target_player: CharacterBody3D = null
+var player_in_range: bool = false
+var is_attacking: bool = false
+var can_attack: bool = true
+var can_deal_damage: bool = false
+var is_dead: bool = false
+
+func _ready():
+	add_to_group("zombie")
+	set_multiplayer_authority(1)
+	_setup_collision()
+	_setup_detector()
+	_setup_damage_hitbox()
+	_setup_health_label()
+	_setup_animations()
+	_setup_raycasts()
+	print("Zombie ready on layer 4 with enhanced obstacle avoidance")
+	
+func _setup_collision():
+	# Zombie body collision
+	collision_layer = 0
+	set_collision_layer_value(4, true)  # Zombies on layer 4
+	collision_mask = 0
+	set_collision_mask_value(1, true)   # Detect world
+	set_collision_mask_value(2, true)   # Detect obstacles
+	set_collision_mask_value(3, true)   # Detect player
+	print("Zombie collision: Layer 4, Mask 1,2,3")
+
+func _setup_raycasts():
+	# Configure all raycasts for obstacle detection
+	_configure_raycast(raycast_front, MAX_PATH_CHECK_DISTANCE, 2)  # Obstacle layer
+	_configure_raycast(raycast_back, MAX_PATH_CHECK_DISTANCE, 2)
+	_configure_raycast(raycast_left, MAX_PATH_CHECK_DISTANCE, 2)
+	_configure_raycast(raycast_right, MAX_PATH_CHECK_DISTANCE, 2)
+	
+	# Configure long-range raycasts if they exist
+	if raycast_front_long:
+		_configure_raycast(raycast_front_long, MAX_PATH_CHECK_DISTANCE, 2)
+		print("Long front raycast configured")
+	if raycast_diagonal_left:
+		_configure_raycast(raycast_diagonal_left, MAX_PATH_CHECK_DISTANCE, 2)
+		print("Diagonal left raycast configured")
+	if raycast_diagonal_right:
+		_configure_raycast(raycast_diagonal_right, MAX_PATH_CHECK_DISTANCE, 2)
+		print("Diagonal right raycast configured")
+
+func _configure_raycast(raycast: RayCast3D, distance: float, mask_layer: int):
+	if raycast:
+		raycast.enabled = true
+		raycast.collision_mask = 0
+		raycast.set_collision_mask_value(mask_layer, true)  # Detect obstacles
+
+func _setup_detector():
+	if not player_detector:
+		player_detector = Area3D.new()
+		player_detector.name = "PlayerDetector"
+		add_child(player_detector)
+		
+		var collision_shape = CollisionShape3D.new()
+		var sphere = SphereShape3D.new()
+		sphere.radius = detection_radius
+		collision_shape.shape = sphere
+		player_detector.add_child(collision_shape)
+		print("Created PlayerDetector for zombie")
+	else:
+		# Update existing detector radius
+		var collision_shape = player_detector.get_child(0)
+		if collision_shape is CollisionShape3D:
+			var sphere_shape = collision_shape.shape as SphereShape3D
+			if sphere_shape:
+				sphere_shape.radius = detection_radius
+	
+	# Detector detects player's DetectionArea (layer 5)
+	player_detector.collision_layer = 0
+	player_detector.collision_mask = 0
+	player_detector.set_collision_mask_value(5, true)
+	player_detector.area_entered.connect(_on_detection_area_entered)
+	player_detector.area_exited.connect(_on_detection_area_exited)
+	print("Zombie PlayerDetector configured: Mask 5")
+
+func _setup_damage_hitbox():
+	if not damage_hitbox:
+		damage_hitbox = Area3D.new()
+		damage_hitbox.name = "DamageHitbox"
+		add_child(damage_hitbox)
+		
+		var collision_shape = CollisionShape3D.new()
+		var sphere = SphereShape3D.new()
+		sphere.radius = 1.2  # Attack reach
+		collision_shape.shape = sphere
+		collision_shape.position = Vector3(0, 1, -0.8)  # In front of zombie
+		damage_hitbox.add_child(collision_shape)
+			
+	damage_hitbox.collision_layer = 0
+	damage_hitbox.set_collision_layer_value(7, true)  # Zombie attack layer
+	damage_hitbox.collision_mask = 0
+	damage_hitbox.set_collision_mask_value(3, true)  # Players (CharacterBody3D)
+	damage_hitbox.monitoring = false  # Start disabled
+	
+	# Connect to body_entered instead of area_entered
+	damage_hitbox.body_entered.connect(_on_damage_hitbox_body_entered)
+
+func _setup_health_label():
+	if not health_label:
+		health_label = Label3D.new()
+		health_label.name = "HealthLabel3D"
+		add_child(health_label)
+		health_label.position = Vector3(0, 2.5, 0)
+		health_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		health_label.font_size = 32
+		print("Created HealthLabel3D for zombie")
+	_update_health_ui()
+
+func _setup_animations():
+	if animation_player:
+		if animation_player.has_animation("zombieidle"):
+			animation_player.play("zombieidle")
+		print("Zombie animations ready")
+
+func _physics_process(delta):
+	# Check death sync - ALL PEERS check this
+	if sync_is_dead:
+		if not is_multiplayer_authority() and not is_dead:
+			_die()
+			return
+		elif is_multiplayer_authority() and not is_dead:
+			_die()
+		return
+	
+	if is_dead:
+		return
+		
+	# CLIENT: Apply synced data from server
+	if not is_multiplayer_authority():
+		global_position = sync_position
+		rotation.y = sync_rotation_y
+		velocity = sync_velocity
+		current_health = sync_health
+		is_attacking = sync_is_attacking
+		is_avoiding_obstacle = sync_is_avoiding
+		current_turn_side = sync_turn_side
+		_apply_synced_animation()
+		_update_health_ui()
+		return
+	
+	# === HOST ONLY BELOW ===
+	
+	# Apply gravity
+	if not is_on_floor():
+		velocity.y -= 20.0 * delta
+	else:
+		velocity.y = 0
+	
+	# CONTINUOUS group-based scan (every 0.3s)
+	group_scan_timer += delta
+	if group_scan_timer >= group_scan_interval:
+		_scan_for_players_by_group()
+		_update_player_distances()
+		group_scan_timer = 0.0
+	
+	# Check for target switching based on priority (every 0.2s)
+	target_switch_timer += delta
+	if target_switch_timer >= target_switch_check_interval:
+		_check_for_priority_target_switch()
+		target_switch_timer = 0.0
+	
+	# Validate current target
+	_validate_current_target()
+	
+	# Acquire target if we don't have one
+	if players_in_range.size() > 0 and (target_player == null or not is_instance_valid(target_player) or not _is_target_valid(target_player)):
+		_acquire_best_target()
+	
+	# AI behavior
+	if target_player and is_instance_valid(target_player) and _is_target_valid(target_player):
+		_rotate_to_face_player(delta)
+		
+		var distance_to_player = global_position.distance_to(target_player.global_position)
+		
+		if distance_to_player <= attack_range:
+			velocity = Vector3.ZERO
+			is_avoiding_obstacle = false
+			is_making_smart_turn = false
+			if can_attack and not is_attacking:
+				_start_attack()
+		else:
+			if not is_attacking:
+				# Check for obstacles and move with smart avoidance
+				_move_with_smart_obstacle_avoidance(delta)
+				_play_animation("zombiewalk")
+	else:
+		# No target behavior
+		velocity = Vector3.ZERO
+		is_avoiding_obstacle = false
+		is_making_smart_turn = false
+		if not is_attacking:
+			_play_animation("zombieidle")
+	
+	move_and_slide()
+	
+	# HOST: Update ALL sync variables (including player list)
+	sync_position = global_position
+	sync_rotation_y = rotation.y
+	sync_velocity = velocity
+	sync_health = current_health
+	sync_is_attacking = is_attacking
+	sync_is_dead = (current_health <= 0)
+	sync_is_avoiding = is_avoiding_obstacle
+	sync_turn_side = current_turn_side
+	
+	# Sync the list of players in range
+	sync_players_in_range.clear()
+	for player in players_in_range:
+		if is_instance_valid(player):
+			sync_players_in_range.append(int(player.name))
+	
+	if animation_player and animation_player.current_animation != "":
+		sync_current_animation = animation_player.current_animation
+	
+	if target_player and is_instance_valid(target_player):
+		sync_target_id = int(target_player.name)
+	else:
+		sync_target_id = 0
+
+# ============================================================
+# ENHANCED SMART OBSTACLE AVOIDANCE SYSTEM
+# ============================================================
+
+func _move_with_smart_obstacle_avoidance(delta: float):
+	if not target_player or not is_instance_valid(target_player):
+		return
+	
+	var direction_to_player = (target_player.global_position - global_position).normalized()
+	direction_to_player.y = 0
+	
+	# Check if direct path to player is clear (using long front raycast if available)
+	var direct_path_clear = false
+	if raycast_front_long:
+		# Use long-range raycast for better path checking
+		direct_path_clear = not raycast_front_long.is_colliding()
+		if direct_path_clear:
+			var collision_point = raycast_front_long.get_collision_point()
+			var clear_distance = collision_point.distance_to(global_position) if raycast_front_long.is_colliding() else MAX_PATH_CHECK_DISTANCE
+	else:
+		# Fallback to regular front raycast
+		direct_path_clear = not raycast_front.is_colliding()
+	
+	# ====== DECISION LOGIC ======
+	
+	# 1. PERIODICALLY CHECK IF WE CAN RETURN TO DIRECT PATH
+	if is_making_smart_turn:
+		last_path_check_time += delta
+		if last_path_check_time >= path_check_interval:
+			# Check if direct path is now clear
+			if _is_direct_path_clear_to_player(MAX_PATH_CHECK_DISTANCE):
+				# Path is clear! Return to direct pursuit
+				is_making_smart_turn = false
+				is_avoiding_obstacle = false
+				current_turn_side = "none"
+				print("✓ Smart avoidance: Direct path cleared, returning to player")
+			last_path_check_time = 0.0
+	
+	# 2. DIRECT PATH IS CLEAR - MOVE TOWARD PLAYER
+	if direct_path_clear and not is_making_smart_turn:
+		is_avoiding_obstacle = false
+		is_making_smart_turn = false
+		current_turn_side = "none"
+		velocity.x = direction_to_player.x * MOVE_SPEED
+		velocity.z = direction_to_player.z * MOVE_SPEED
+		avoidance_timer = 0.0
+		return
+	
+	# 3. PATH IS BLOCKED - CHOOSE BEST AVOIDANCE DIRECTION
+	if not is_making_smart_turn:
+		# Store original player position when we started avoiding
+		original_target_position = target_player.global_position
+		
+		print("⚠️ Path blocked! Analyzing best direction...")
+		
+		# Analyze all available directions up to 20m
+		var best_direction_data = _analyze_best_direction(direction_to_player)
+		
+		if best_direction_data["available"]:
+			# Found a good direction
+			is_making_smart_turn = true
+			is_avoiding_obstacle = true
+			smart_avoidance_direction = best_direction_data["direction"]
+			current_turn_side = best_direction_data["side"]
+			avoidance_timer = 0.0
+			
+		else:
+			# All paths blocked - need to turn around
+			print("🚨 All paths blocked! Performing 180° turn")
+			_perform_180_turn()
+			return
+	
+	# 4. EXECUTE SMART AVOIDANCE MOVEMENT
+	if is_making_smart_turn:
+		# Move in the chosen avoidance direction
+		velocity.x = smart_avoidance_direction.x * MOVE_SPEED
+		velocity.z = smart_avoidance_direction.z * MOVE_SPEED
+		
+		# Gradually rotate toward player while moving sideways
+		var target_rotation = atan2(direction_to_player.x, direction_to_player.z)
+		rotation.y = lerp_angle(rotation.y, target_rotation, ROTATION_SPEED * delta * 0.5)
+		
+		# Track how long we've been avoiding
+		avoidance_timer += delta
+		
+		# Safety timeout
+		if avoidance_timer > max_avoidance_time:
+			print("⚠️ Smart avoidance timeout - reassessing...")
+			is_making_smart_turn = false
+			avoidance_timer = 0.0
+
+func _analyze_best_direction(player_direction: Vector3) -> Dictionary:
+	"""
+	Analyze left and right directions up to 20m to find the best path.
+	Returns dictionary with best direction data.
+	"""
+	var best_result = {
+		"available": false,
+		"direction": Vector3.ZERO,
+		"side": "none",
+		"distance": 0.0
+	}
+	
+	# Define directions to check
+	var directions_to_check = [
+		{"side": "left", "raycast": raycast_left, "direction_vector": -global_transform.basis.x},
+		{"side": "right", "raycast": raycast_right, "direction_vector": global_transform.basis.x},
+		{"side": "diagonal_left", "raycast": raycast_diagonal_left, "direction_vector": (-global_transform.basis.x + global_transform.basis.z).normalized()},
+		{"side": "diagonal_right", "raycast": raycast_diagonal_right, "direction_vector": (global_transform.basis.x + global_transform.basis.z).normalized()}
+	]
+	
+	var best_clearance = 0.0
+	var best_alignment = -1.0  # Dot product alignment with player direction
+	
+	for dir_data in directions_to_check:
+		var raycast = dir_data["raycast"]
+		var side = dir_data["side"]
+		var dir_vector = dir_data["direction_vector"]
+		
+		if not raycast:
+			continue
+		
+		# Check if this direction has a clear path
+		if raycast.is_colliding():
+			var collision_point = raycast.get_collision_point()
+			var clearance_distance = collision_point.distance_to(global_position)
+			
+			# Calculate alignment with player direction
+			var alignment = dir_vector.dot(player_direction)
+			
+			# Score this direction (prioritize both clearance AND alignment)
+			var score = clearance_distance * (1.0 + max(alignment, 0.0))
+			
+			if score > best_clearance:
+				best_clearance = score
+				best_result = {
+					"available": true,
+					"direction": dir_vector,
+					"side": side,
+					"distance": clearance_distance
+				}
+				best_alignment = alignment
+		else:
+			# Completely clear path - this is ideal!
+			var alignment = dir_vector.dot(player_direction)
+			
+			# This is the best possible path
+			best_result = {
+				"available": true,
+				"direction": dir_vector,
+				"side": side,
+				"distance": MAX_PATH_CHECK_DISTANCE
+			}
+			best_alignment = alignment
+			break  # Found completely clear path, stop checking
+	
+	# If we found a path with less than 2m clearance, it's not good enough
+	if best_result["available"] and best_result["distance"] < 2.0:
+		best_result["available"] = false
+	
+	return best_result
+
+func _is_direct_path_clear_to_player(check_distance: float = MAX_PATH_CHECK_DISTANCE) -> bool:
+	"""
+	Check if there's a direct path to the player without obstacles.
+	"""
+	if not target_player or not is_instance_valid(target_player):
+		return false
+	
+	# Use long front raycast if available
+	if raycast_front_long:
+		# Temporarily point the raycast at the player
+		var original_target = raycast_front_long.target_position
+		var dir_to_player = (target_player.global_position - global_position).normalized()
+		raycast_front_long.target_position = dir_to_player * check_distance
+		raycast_front_long.force_raycast_update()
+		
+		var is_clear = not raycast_front_long.is_colliding()
+		
+		# Restore original target
+		raycast_front_long.target_position = original_target
+		
+		return is_clear
+	
+	# Fallback: Simple front check
+	return not raycast_front.is_colliding()
+
+func _perform_180_turn():
+	"""
+	Perform a 180° turn when completely blocked.
+	"""
+	print("🔄 Performing 180° turn")
+	
+	# Rotate 180 degrees
+	rotation.y += deg_to_rad(180)
+	
+	# Move backward for a bit
+	var backward_direction = -global_transform.basis.z
+	smart_avoidance_direction = backward_direction
+	is_making_smart_turn = true
+	is_avoiding_obstacle = true
+	current_turn_side = "back_180"
+	avoidance_timer = 0.0
+	
+	# Set velocity to move backward
+	velocity.x = backward_direction.x * MOVE_SPEED
+	velocity.z = backward_direction.z * MOVE_SPEED
+
+# ============================================================
+# EXISTING FUNCTIONS (keep as is)
+# ============================================================
+
+func _apply_synced_animation():
+	if not animation_player:
+		return
+	
+	if sync_current_animation != "" and animation_player.current_animation != sync_current_animation:
+		if animation_player.has_animation(sync_current_animation):
+			animation_player.play(sync_current_animation)
+			# Apply 2x speed specifically for zombiewalk animation
+			if sync_current_animation == "zombiewalk":
+				animation_player.speed_scale = 2.0
+			else:
+				animation_player.speed_scale = 1.0
+		else:
+			push_warning("Zombie animation not found: ", sync_current_animation)
+
+func _rotate_to_face_player(delta: float):
+	if not target_player or is_avoiding_obstacle:
+		return
+	
+	var direction_to_player = target_player.global_position - global_position
+	direction_to_player.y = 0
+	direction_to_player = direction_to_player.normalized()
+	
+	if direction_to_player.length() > 0.01:
+		var target_rotation = atan2(direction_to_player.x, direction_to_player.z)
+		rotation.y = lerp_angle(rotation.y, target_rotation, ROTATION_SPEED * delta)
+
+func _start_attack():
+	if is_attacking or not can_attack or is_dead:
+		return
+	
+	is_attacking = true
+	sync_is_attacking = true  # Sync attack state
+	can_attack = false
+	can_deal_damage = false
+	is_avoiding_obstacle = false  # Stop avoiding during attack
+	is_making_smart_turn = false  # Stop smart avoidance
+	
+	# Choose random attack animation
+	var attack_animations = ["Attack1", "Attack2", "Attack3"]
+	var chosen_attack = attack_animations[randi() % attack_animations.size()]
+	_play_animation(chosen_attack)
+	
+	print("Zombie attacking with: ", chosen_attack)
+	
+	# Delay before damage can occur (animation windup)
+	await get_tree().create_timer(0.4).timeout
+	
+	if is_dead:
+		return
+	
+	# Enable damage hitbox
+	if damage_hitbox and is_attacking:
+		damage_hitbox.monitoring = true
+		can_deal_damage = true
+		print("Zombie damage hitbox enabled")
+	
+	# Keep hitbox active for attack duration
+	await get_tree().create_timer(1.5).timeout
+	
+	if is_dead:
+		return
+	
+	# Disable damage hitbox
+	if damage_hitbox:
+		damage_hitbox.monitoring = false
+		can_deal_damage = false
+		print("Zombie damage hitbox disabled")
+	
+	await get_tree().create_timer(0.3).timeout
+	
+	if is_dead:
+		return
+	
+	is_attacking = false
+	
+	# Cooldown before next attack
+	await get_tree().create_timer(attack_cooldown).timeout
+	
+	if is_dead:
+		return
+		
+	can_attack = true
+
+func _play_animation(anim_name: String):
+	if animation_player and animation_player.has_animation(anim_name):
+		if animation_player.current_animation != anim_name:
+			animation_player.play(anim_name)
+			# Apply 2x speed specifically for zombiewalk animation
+			if anim_name == "zombiewalk":
+				animation_player.speed_scale = 2.0
+			else:
+				animation_player.speed_scale = 1.0
+			sync_current_animation = anim_name
+
+func _on_damage_hitbox_body_entered(body: Node):
+	if is_dead or not can_deal_damage or not is_attacking:
+		return
+	
+	print("Zombie damage hitbox hit body: ", body.name, " in groups: ", body.get_groups())
+	
+	# Check if we hit a player CharacterBody3D directly
+	if body and body.is_in_group("player") and body.has_method("take_damage"):
+		body.take_damage(ZOMBIE_DAMAGE, 0, "melee")
+		can_deal_damage = false  # Prevent multiple hits in same attack
+		print("✓ Zombie dealt ", ZOMBIE_DAMAGE, " damage to player ", body.name, "!")
+
+func _on_detection_area_entered(area: Area3D):
+	if is_dead:
+		return
+		
+	if area.name == "DetectionArea":
+		var player = area.get_parent()
+		if player and player.is_in_group("player") and _is_target_valid(player):
+			# Calculate distance first
+			var distance = global_position.distance_to(player.global_position)
+			
+			if not players_in_range.has(player):
+				players_in_range.append(player)
+				print("✅ ZOMBIE AREA DETECTION: Player ", player.name, " entered range (distance: ", distance, ")")
+			
+			# If no current target or this player is closer, acquire immediately
+			if target_player == null or distance < PRIORITY_DISTANCE:
+				target_player = player
+				player_in_range = true
+				print("🎯 ZOMBIE IMMEDIATE TARGET: ", player.name)
+
+func _on_detection_area_exited(area: Area3D):
+	if area.name == "DetectionArea":
+		var player = area.get_parent()
+		if player and player.is_in_group("player") and players_in_range.has(player):
+			players_in_range.erase(player)
+			print("❌ ZOMBIE AREA DETECTION: Player ", player.name, " left range")
+			
+			if player == target_player:
+				target_player = null
+				player_in_range = false
+				_acquire_best_target()
+
+func take_damage(damage: int):
+	if sync_is_dead or is_dead:
+		return
+	
+	# IMPORTANT: Only host can modify synced variables
+	if not is_multiplayer_authority():
+		# Client detected hit - tell host via RPC
+		rpc_id(1, "_apply_damage_on_host", damage)
+		return
+	
+	# Host applies immediately
+	_apply_damage_on_host(damage)
+
+@rpc("any_peer", "call_local", "reliable")
+func _apply_damage_on_host(damage: int):
+	if sync_is_dead or is_dead:
+		return
+	
+	# Only host should execute this logic
+	if not is_multiplayer_authority():
+		return
+	
+	current_health -= damage
+	current_health = max(0, current_health)
+	sync_health = current_health  # MultiplayerSynchronizer auto-syncs this
+	_update_health_ui()
+	
+	print("Zombie took ", damage, " damage. Health: ", current_health)
+	
+	if current_health <= 0:
+		sync_is_dead = true  # MultiplayerSynchronizer auto-syncs this
+		print("Zombie died! (syncing to clients...)")
+		# Death cleanup happens in _physics_process -> _die()
+
+func _update_health_ui():
+	if health_label:
+		health_label.text = str(current_health)
+		var health_percent = float(current_health) / float(MAX_HEALTH)
+		if health_percent > 0.6:
+			health_label.modulate = Color(0, 1, 0)
+		elif health_percent > 0.3:
+			health_label.modulate = Color(1, 1, 0)
+		else:
+			health_label.modulate = Color(1, 0, 0)
+
+func _die():
+	if is_dead:
+		return
+	
+	is_dead = true
+	
+	if damage_hitbox:
+		damage_hitbox.monitoring = false
+	if player_detector:
+		player_detector.monitoring = false
+	
+	collision_layer = 0
+	collision_mask = 0
+	
+	if animation_player and animation_player.is_playing():
+		animation_player.stop(false)
+	
+	await get_tree().process_frame
+	
+	if animation_player:
+		animation_player.play("zombiedeath")
+		animation_player.speed_scale = 1.0
+		var anim_length = animation_player.get_animation("zombiedeath").length
+		await get_tree().create_timer(anim_length).timeout
+	
+	sync_is_dead = true
+	queue_free()
+
+func _scan_for_players_by_group():
+	var all_players = get_tree().get_nodes_in_group("player")
+	var players_found_this_scan: Array = []
+	
+	for player in all_players:
+		if is_instance_valid(player) and player is CharacterBody3D:
+			var distance = global_position.distance_to(player.global_position)
+			
+			# If player is within detection radius
+			if distance <= detection_radius and _is_target_valid(player):
+				players_found_this_scan.append(player)
+				
+				if not players_in_range.has(player):
+					players_in_range.append(player)
+					print("✅ ZOMBIE GROUP DETECTION: Player ", player.name, " entered range (distance: ", distance, ")")
+	
+	# Remove players that are no longer in range
+	for player in players_in_range.duplicate():
+		if not players_found_this_scan.has(player):
+			var distance = global_position.distance_to(player.global_position) if is_instance_valid(player) else INF
+			
+			if distance > detection_radius or not _is_target_valid(player):
+				players_in_range.erase(player)
+				print("❌ ZOMBIE GROUP DETECTION: Player ", player.name if is_instance_valid(player) else "invalid", " left range")
+				
+				# If this was our target, clear it
+				if player == target_player:
+					target_player = null
+					player_in_range = false
+					print("🎯 Zombie target lost, will acquire new target")
+
+func _update_player_distances():
+	player_distances.clear()
+	
+	for player in players_in_range:
+		if is_instance_valid(player):
+			var distance = global_position.distance_to(player.global_position)
+			player_distances[player] = distance
+
+func _check_for_priority_target_switch():
+	if players_in_range.size() <= 1:
+		return  # Only one or no players, no need to switch
+	
+	# Find closest player and check for attackable targets
+	var closest_player: CharacterBody3D = null
+	var closest_distance: float = INF
+	var priority_player: CharacterBody3D = null  # Player within 15m
+	
+	for player in players_in_range:
+		if is_instance_valid(player) and _is_target_valid(player):
+			var distance = player_distances.get(player, global_position.distance_to(player.global_position))
+			
+			# Check for priority target (within 15m)
+			if distance < PRIORITY_DISTANCE:
+				if priority_player == null or distance < global_position.distance_to(priority_player.global_position):
+					priority_player = player
+			
+			# Track closest regardless
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player
+	
+	# Prioritize close players
+	if priority_player:
+		if target_player != priority_player:
+			target_player = priority_player
+			player_in_range = true
+			print("🎯 ZOMBIE PRIORITY TARGET: ", priority_player.name, " (within 15m)")
+			# Interrupt current attack to retarget
+			if is_attacking:
+				is_attacking = false
+				can_attack = true
+	elif closest_player:
+		if target_player != closest_player:
+			target_player = closest_player
+			player_in_range = true
+			print("🎯 ZOMBIE TARGET ACQUIRED: ", closest_player.name, " at distance: ", closest_distance)
+
+func _acquire_best_target():
+	var closest_player: CharacterBody3D = null
+	var closest_distance: float = INF
+	var priority_player: CharacterBody3D = null  # Player within 15m
+	
+	for player in players_in_range:
+		if is_instance_valid(player) and _is_target_valid(player):
+			var distance = player_distances.get(player, global_position.distance_to(player.global_position))
+			
+			# Check for priority target (within 15m)
+			if distance < PRIORITY_DISTANCE:
+				if priority_player == null or distance < global_position.distance_to(priority_player.global_position):
+					priority_player = player
+			
+			# Track closest regardless
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player
+	
+	# Prioritize close players
+	if priority_player:
+		target_player = priority_player
+		player_in_range = true
+		print("🎯 ZOMBIE PRIORITY TARGET: ", priority_player.name, " (within 15m)")
+	elif closest_player:
+		target_player = closest_player
+		player_in_range = true
+		print("🎯 ZOMBIE TARGET ACQUIRED: ", closest_player.name, " at distance: ", closest_distance)
+	else:
+		target_player = null
+		player_in_range = false
+		print("⚠️ Zombie: No valid targets available")
+
+func _is_target_valid(player: CharacterBody3D) -> bool:
+	if not player or not is_instance_valid(player):
+		return false
+	
+	# Check if player is dead
+	if player.has_method("get") and player.get("sync_is_dead"):
+		if player.sync_is_dead:
+			return false
+	
+	# Check if player is in range
+	var distance = global_position.distance_to(player.global_position)
+	if distance > detection_radius:
+		return false
+	
+	# Check if player is a spectator
+	if player.has_method("get") and player.get("is_spectator"):
+		if player.is_spectator:
+			return false
+	
+	return true
+
+func _validate_current_target():
+	if target_player and is_instance_valid(target_player):
+		if not _is_target_valid(target_player):
+			print("⚠️ Zombie current target invalid: ", target_player.name)
+			target_player = null
+			player_in_range = false
+	else:
+		target_player = null
+		player_in_range = false
+`
     },
     
     grenade: {
@@ -2127,7 +4577,382 @@ func _apply_damage():
         description: "Physics-based grenade with explosion effects, damage, and friendly fire.",
         filename: "grenade.gd",
         // PASTE YOUR FULL grenade.gd CODE HERE
-        code: ``
+        code: `extends RigidBody3D
+
+# Grenade properties
+@export var damage: int = 50
+@export var blast_radius: float = 5.0
+@export var fuse_time: float = 3.0
+@export var friendly_fire_enabled: bool = true
+
+# References
+@onready var explosion_area: Area3D = $Area3D if has_node("Area3D") else null
+@onready var mesh_instance: Node3D = $Sketchfab_Scene if has_node("Sketchfab_Scene") else null
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D if has_node("CollisionShape3D") else null
+
+# Particle nodes (created in script)
+var explosion_particles: GPUParticles3D = null
+var blast_wave: MeshInstance3D = null
+
+# State
+var is_armed: bool = false
+var thrower_id: int = -1
+var explosion_timer: float = 0.0
+var has_exploded: bool = false
+
+# Store original transform for duplication
+var original_scale: Vector3 = Vector3.ONE
+var original_transform: Transform3D
+
+func _ready():
+	# Store original scale and transform
+	original_scale = scale
+	original_transform = transform
+	
+	# Initially hide and freeze
+	visible = false
+	freeze = true
+	
+	# Setup collision layers
+	collision_layer = 0
+	set_collision_layer_value(7, true)  # Grenade layer
+	collision_mask = 0
+	set_collision_mask_value(1, true)   # World/Ground
+	set_collision_mask_value(2, true)   # Obstacles
+	
+	# Setup explosion area
+	if explosion_area:
+		var sphere_shape = SphereShape3D.new()
+		# FIXED: Use much larger radius for proper detection
+		sphere_shape.radius = 150.0  # Large detection radius
+		if explosion_area.get_child_count() == 0:
+			var col_shape = CollisionShape3D.new()
+			col_shape.shape = sphere_shape
+			explosion_area.add_child(col_shape)
+		else:
+			var col_shape = explosion_area.get_child(0)
+			if col_shape is CollisionShape3D:
+				col_shape.shape = sphere_shape
+		
+		# Set up collision detection for ALL relevant layers
+		explosion_area.collision_layer = 0
+		explosion_area.collision_mask = 0
+		explosion_area.set_collision_mask_value(3, true)  # Players
+		explosion_area.set_collision_mask_value(4, true)  # Enemies/Zombies
+		explosion_area.set_collision_mask_value(6, true)  # Ranged enemies
+		explosion_area.monitorable = true
+		explosion_area.monitoring = false
+		
+		print("Explosion area setup - Detection Radius: 150.0, Damage Radius: ", blast_radius)
+	
+	# Create explosion particles in script
+	_create_explosion_particles()
+	
+	# Create blast wave effect
+	_create_blast_wave()
+
+func arm_grenade(throw_direction: Vector3, throw_force: float, player_id: int, dmg: int, radius: float, fuse: float, friendly_fire: bool):
+	"""Arms the grenade and throws it - called by player"""
+	damage = dmg
+	blast_radius = radius
+	fuse_time = fuse
+	friendly_fire_enabled = friendly_fire
+	thrower_id = player_id
+	
+	# Update explosion area radius if it exists
+	if explosion_area and explosion_area.get_child_count() > 0:
+		var col_shape = explosion_area.get_child(0)
+		if col_shape is CollisionShape3D and col_shape.shape is SphereShape3D:
+			# FIXED: Always use large detection radius
+			col_shape.shape.radius = 150.0  # Large detection radius
+			print("Updated explosion area detection radius to: 150.0, damage radius: ", blast_radius)
+	
+	# Make visible and enable physics
+	visible = true
+	if mesh_instance:
+		mesh_instance.visible = true
+	
+	# Reset to original scale to ensure proper size
+	scale = original_scale
+	
+	# Enable physics
+	freeze = false
+	if collision_shape:
+		collision_shape.disabled = false
+	
+	is_armed = true
+	explosion_timer = 0.0
+	
+	# Apply throw force
+	apply_central_impulse(throw_direction * throw_force)
+	
+	# Add some spin for realism
+	apply_torque_impulse(Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * 2.0)
+	
+	print("Grenade armed and thrown by player: ", player_id, " | Damage: ", damage, " | Radius: ", blast_radius, " | Friendly Fire: ", friendly_fire)
+
+func _create_explosion_particles():
+	"""Create particle system for explosion"""
+	explosion_particles = GPUParticles3D.new()
+	add_child(explosion_particles)
+	
+	explosion_particles.emitting = false
+	explosion_particles.one_shot = true
+	explosion_particles.explosiveness = 0.9
+	explosion_particles.amount = 80
+	explosion_particles.lifetime = 2.0
+	
+	# Create particle material
+	var particle_material = ParticleProcessMaterial.new()
+	
+	# Emission
+	particle_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	particle_material.emission_sphere_radius = 0.3
+	
+	# Direction and spread
+	particle_material.direction = Vector3(0, 1, 0)
+	particle_material.spread = 180.0
+	particle_material.initial_velocity_min = 5.0
+	particle_material.initial_velocity_max = 12.0
+	
+	# Gravity and damping
+	particle_material.gravity = Vector3(0, -9.8, 0)
+	particle_material.damping_min = 1.5
+	particle_material.damping_max = 3.0
+	
+	# Scale animation
+	particle_material.scale_min = 0.3
+	particle_material.scale_max = 0.8
+	var scale_curve = Curve.new()
+	scale_curve.add_point(Vector2(0.0, 1.0))
+	scale_curve.add_point(Vector2(0.5, 1.2))
+	scale_curve.add_point(Vector2(1.0, 0.0))
+	particle_material.scale_curve = scale_curve
+	
+	# Color gradient (fire/explosion colors)
+	var gradient = Gradient.new()
+	gradient.add_point(0.0, Color(1.0, 1.0, 0.8, 1.0))   # Bright white-yellow flash
+	gradient.add_point(0.1, Color(1.0, 0.7, 0.0, 1.0))   # Bright orange
+	gradient.add_point(0.3, Color(1.0, 0.3, 0.0, 1.0))   # Orange-red
+	gradient.add_point(0.5, Color(0.6, 0.1, 0.0, 0.8))   # Dark red
+	gradient.add_point(0.7, Color(0.2, 0.2, 0.2, 0.5))   # Smoke gray
+	gradient.add_point(1.0, Color(0.1, 0.1, 0.1, 0.0))   # Fade to transparent
+	particle_material.color_ramp = gradient
+	
+	explosion_particles.process_material = particle_material
+	
+	# Create mesh for particles (spheres)
+	var sphere_mesh = SphereMesh.new()
+	sphere_mesh.radius = 0.15
+	sphere_mesh.height = 0.3
+	explosion_particles.draw_pass_1 = sphere_mesh
+
+func _create_blast_wave():
+	"""Create expanding blast wave effect"""
+	blast_wave = MeshInstance3D.new()
+	add_child(blast_wave)
+	
+	# Create sphere mesh for blast wave
+	var sphere_mesh = SphereMesh.new()
+	sphere_mesh.radius = 0.5
+	sphere_mesh.height = 1.0
+	blast_wave.mesh = sphere_mesh
+	
+	# Create glowing material
+	var blast_material = StandardMaterial3D.new()
+	blast_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	blast_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	blast_material.albedo_color = Color(1.0, 0.5, 0.0, 0.6)
+	blast_material.emission_enabled = true
+	blast_material.emission = Color(1.0, 0.4, 0.0, 1.0)
+	blast_material.emission_energy_multiplier = 3.0
+	blast_wave.material_override = blast_material
+	
+	blast_wave.visible = false
+
+func _get_bodies_in_sphere(center: Vector3, radius: float) -> Array:
+	"""Manual sphere detection using groups - more reliable"""
+	var bodies = []
+	
+	# Get all players
+	var all_players = get_tree().get_nodes_in_group("player")
+	for player in all_players:
+		if player is CharacterBody3D and is_instance_valid(player):
+			var distance = center.distance_to(player.global_position)
+			if distance <= radius:
+				bodies.append(player)
+				print("Found player in radius: ", player.name, " at distance ", distance)
+	
+	# Get all zombies
+	var all_zombies = get_tree().get_nodes_in_group("zombie")
+	for zombie in all_zombies:
+		if is_instance_valid(zombie):
+			var distance = center.distance_to(zombie.global_position)
+			if distance <= radius:
+				bodies.append(zombie)
+				print("Found zombie in radius at distance ", distance)
+	
+	# Get all ranged enemies
+	var all_ranged = get_tree().get_nodes_in_group("ranged")
+	for ranged in all_ranged:
+		if is_instance_valid(ranged):
+			var distance = center.distance_to(ranged.global_position)
+			if distance <= radius:
+				bodies.append(ranged)
+				print("Found ranged enemy in radius at distance ", distance)
+	
+	return bodies
+
+func _physics_process(delta):
+	if not is_armed or has_exploded:
+		return
+	
+	explosion_timer += delta
+	
+	if explosion_timer >= fuse_time:
+		_explode()
+
+func _explode():
+	if has_exploded:
+		return
+	
+	has_exploded = true
+	
+	print("Grenade exploding at position: ", global_position)
+	
+	# Hide mesh
+	if mesh_instance:
+		mesh_instance.visible = false
+	
+	# Disable physics collision
+	if collision_shape:
+		collision_shape.disabled = true
+	
+	freeze = true
+	
+	# Trigger blast wave animation
+	if blast_wave:
+		blast_wave.visible = true
+		blast_wave.scale = Vector3.ONE * 0.1
+		_animate_blast_wave()
+	
+	# Trigger explosion particles
+	if explosion_particles:
+		explosion_particles.emitting = true
+		explosion_particles.restart()
+	
+	# Enable explosion area momentarily to detect hits
+	if explosion_area:
+		explosion_area.monitoring = true
+		# Wait longer for physics to update
+		await get_tree().create_timer(0.2).timeout
+		_apply_damage()
+		explosion_area.monitoring = false
+	else:
+		# No explosion area, use manual detection only
+		_apply_damage()
+	
+	# Wait for effects to finish, then cleanup
+	await get_tree().create_timer(0.5).timeout
+	if is_instance_valid(self):
+		queue_free()
+
+func _animate_blast_wave():
+	"""Animate the expanding blast wave"""
+	if not blast_wave:
+		return
+	
+	var tween = create_tween()
+	tween.set_parallel(true)
+	
+	# Expand the blast wave
+	var max_scale = blast_radius * 2.5
+	tween.tween_property(blast_wave, "scale", Vector3.ONE * max_scale, 0.5).set_ease(Tween.EASE_OUT)
+	
+	# Fade out the blast wave
+	var material = blast_wave.material_override as StandardMaterial3D
+	if material:
+		tween.tween_property(material, "albedo_color:a", 0.0, 0.5)
+		tween.tween_property(material, "emission_energy_multiplier", 0.0, 0.5)
+	
+	# Hide after animation
+	tween.tween_callback(func(): blast_wave.visible = false).set_delay(0.5)
+
+func _apply_damage():
+	if not explosion_area:
+		return
+	
+	var bodies_in_radius = explosion_area.get_overlapping_bodies()
+	
+	print("Grenade explosion - Area3D found ", bodies_in_radius.size(), " bodies in detection range")
+	
+	# FALLBACK: If no bodies detected via overlap, use manual sphere check with groups
+	if bodies_in_radius.size() == 0:
+		print("No bodies via Area3D - using manual sphere detection...")
+		bodies_in_radius = _get_bodies_in_sphere(global_position, 150.0)  # Use large detection radius
+		print("Manual detection found ", bodies_in_radius.size(), " bodies")
+	
+	var damaged_count = 0
+	
+	for body in bodies_in_radius:
+		if not is_instance_valid(body):
+			continue
+		
+		# Calculate distance for damage falloff
+		var distance = global_position.distance_to(body.global_position)
+		
+		# IMPORTANT: Only damage bodies within the actual blast_radius
+		if distance > blast_radius:
+			print("Body ", body.name if "name" in body else "unknown", " is outside damage radius (", distance, " > ", blast_radius, ")")
+			continue
+		
+		var damage_multiplier = 1.0 - (distance / blast_radius)
+		damage_multiplier = clamp(damage_multiplier, 0.0, 1.0)
+		
+		var actual_damage = int(damage * damage_multiplier)
+		
+		# Apply damage to players
+		if body.is_in_group("player"):
+			# FIXED: Get the player's actual ID instead of using name
+			var player_id = int(body.name)
+			
+			# Skip self if friendly fire is disabled
+			if not friendly_fire_enabled and player_id == thrower_id:
+				print("Grenade skipping self-damage (player ID: ", player_id, ")")
+				continue
+			
+			if body.has_method("take_damage"):
+				body.take_damage(actual_damage, thrower_id, "grenade")
+				print("✓ Grenade damaged player ", body.name, " (ID: ", player_id, ") for ", actual_damage, " damage at distance ", distance)
+				damaged_count += 1
+		
+		# Apply damage to enemies
+		elif body.is_in_group("zombie") or body.is_in_group("ranged") or body.is_in_group("npc"):
+			if body.has_method("take_damage"):
+				body.take_damage(actual_damage)
+				print("✓ Grenade damaged enemy for ", actual_damage, " damage at distance ", distance)
+				damaged_count += 1
+		
+		# Apply physics impulse for knockback
+		if body is RigidBody3D:
+			var direction = (body.global_position - global_position).normalized()
+			var impulse_strength = 10.0 * damage_multiplier
+			body.apply_central_impulse(direction * impulse_strength)
+		elif body is CharacterBody3D:
+			# Apply knockback to character bodies
+			var direction = (body.global_position - global_position).normalized()
+			var knockback_strength = 5.0 * damage_multiplier
+			if body.has_method("apply_knockback"):
+				body.apply_knockback(direction * knockback_strength)
+	
+	print("Grenade explosion complete - Damaged ", damaged_count, " entities")
+
+# Optional: Add bounce sound
+func _on_body_entered(body):
+	if is_armed and not has_exploded:
+		# Play bounce sound here if you have one
+		pass
+`
     },
     
     npc: {
@@ -2135,7 +4960,380 @@ func _apply_damage():
         description: "Wandering NPCs with fleeing behavior and damage response.",
         filename: "npccasual.gd",
         // PASTE YOUR FULL npccasual.gd CODE HERE
-        code: ``
+        code: `extends CharacterBody3D
+
+# ============ NPC SETTINGS ============
+@export var max_health: int = 100
+@export var walk_speed: float = 2.0
+@export var run_speed: float = 5.0
+@export var flee_duration: float = 3.0
+@export var gravity: float = 9.8
+@export var max_slope_angle: float = 45.0
+@export var sync_rotation: Vector3 = Vector3.ZERO
+# Obstacle detection
+@export var obstacle_raycast: RayCast3D
+@export var rotation_angle: float = 90.0  # Degrees to rotate when obstacle detected
+
+# State
+var current_health: int = max_health
+var is_running: bool = false
+var flee_timer: float = 0.0
+var is_active: bool = false
+var npc_is_on_floor: bool = false
+var death_handled: bool = false
+var current_animation: String = ""
+
+# Movement direction (set by initial rotation in editor)
+var move_direction: Vector3 = Vector3.ZERO
+var initial_rotation: Vector3 = Vector3.ZERO
+
+# Network sync
+@export var sync_velocity: Vector3 = Vector3.ZERO
+@export var sync_position: Vector3 = Vector3.ZERO
+@export var sync_health: int = max_health
+@export var sync_is_active: bool = false
+@export var sync_is_running: bool = false
+@export var sync_is_dead: bool = false
+@export var sync_npc_is_on_floor: bool = false
+
+# Animation reference
+@onready var animation_player: AnimationPlayer = $Cr1/AnimationPlayer
+
+func _ready():
+	add_to_group("npc")
+	add_to_group("npc_civilian")
+	
+	# Store initial rotation from editor
+	initial_rotation = global_rotation
+	
+	# Calculate movement direction from initial rotation (forward is -Z)
+	move_direction = -global_transform.basis.z.normalized()
+	move_direction.y = 0
+	move_direction = move_direction.normalized()
+	
+	_setup_collision()
+	
+	# Initially inactive
+	is_active = false
+	sync_is_active = false
+	
+	_safe_play_animation("Idle")
+	
+	if multiplayer.is_server():
+		sync_position = global_position
+		sync_health = current_health
+		sync_rotation = initial_rotation  # ADD THIS
+		_check_and_activate()
+
+func _setup_collision():
+	collision_layer = 0
+	set_collision_layer_value(6, true)
+	collision_mask = 0
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, true)
+	set_collision_mask_value(3, true) 
+
+func _check_and_activate():
+	var players = get_tree().get_nodes_in_group("player")
+	var has_players = false
+	
+	for player in players:
+		if player is CharacterBody3D and "sync_is_dead" in player:
+			if not player.sync_is_dead:
+				has_players = true
+				break
+	
+	if has_players and not is_active and not sync_is_dead:
+		_activate_npc()
+	elif not has_players and is_active:
+		_deactivate_npc()
+
+func _activate_npc():
+	if is_active or sync_is_dead:
+		return
+	
+	is_active = true
+	sync_is_active = true
+	_safe_play_animation("Walking")
+
+func _deactivate_npc():
+	if not is_active:
+		return
+	
+	is_active = false
+	sync_is_active = false
+	velocity = Vector3.ZERO
+	sync_velocity = Vector3.ZERO
+	_safe_play_animation("Idle")
+
+func _physics_process(delta):
+	if sync_is_dead:
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+			move_and_slide()
+		return
+	
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+	
+	npc_is_on_floor = is_on_floor()
+	
+	if multiplayer.is_server():
+		_server_process(delta)
+		sync_npc_is_on_floor = npc_is_on_floor
+	else:
+		_client_process(delta)
+		npc_is_on_floor = sync_npc_is_on_floor
+	
+	move_and_slide()
+	global_rotation = initial_rotation
+# Add this function anywhere in the class
+func sync_rotation_rpc(new_rotation: Vector3):
+	if not multiplayer.is_server():
+		rpc_id(1, "_sync_rotation_server", new_rotation)
+	else:
+		_sync_rotation_server(new_rotation)
+
+@rpc("any_peer", "call_local", "reliable")
+func _sync_rotation_server(new_rotation: Vector3):
+	initial_rotation = new_rotation
+	sync_rotation = new_rotation
+	
+	# Update movement direction
+	var rotation_transform = Transform3D()
+	rotation_transform = rotation_transform.rotated(Vector3.UP, initial_rotation.y)
+	move_direction = -rotation_transform.basis.z.normalized()
+	move_direction.y = 0
+	move_direction = move_direction.normalized()
+	
+func _server_process(delta):
+	_check_and_activate()
+	
+	if not is_active:
+		velocity = Vector3.ZERO
+		sync_velocity = Vector3.ZERO
+		sync_rotation = initial_rotation  # ADD THIS
+		return
+	
+	# Check for obstacles
+	if obstacle_raycast and obstacle_raycast.is_colliding():
+		_handle_obstacle()
+		sync_rotation = initial_rotation  # ADD THIS: Sync after obstacle avoidance
+	
+	if is_running:
+		flee_timer += delta
+		if flee_timer >= flee_duration:
+			is_running = false
+			sync_is_running = false
+			flee_timer = 0.0
+			_safe_play_animation("Walking")
+	
+	var speed = run_speed if is_running else walk_speed
+	
+	velocity.x = move_direction.x * speed
+	velocity.z = move_direction.z * speed
+	
+	if npc_is_on_floor:
+		var floor_normal = get_floor_normal()
+		var floor_angle = rad_to_deg(floor_normal.angle_to(Vector3.UP))
+		
+		if floor_angle > max_slope_angle:
+			var slide_vector = floor_normal.slide(Vector3.DOWN).normalized()
+			velocity += slide_vector * gravity * delta
+	
+	sync_velocity = velocity
+	sync_position = global_position
+	sync_is_running = is_running
+	sync_rotation = initial_rotation  # ADD THIS: Always sync rotation
+
+func _client_process(_delta):
+	if not sync_is_active:
+		velocity = Vector3.ZERO
+		return
+	
+	velocity.x = sync_velocity.x
+	velocity.z = sync_velocity.z
+	
+	# ADD THIS: Update rotation from server
+	if sync_rotation != Vector3.ZERO and abs(initial_rotation.y - sync_rotation.y) > 0.01:
+		initial_rotation = sync_rotation
+		
+		# Recalculate movement direction based on new rotation
+		var rotation_transform = Transform3D()
+		rotation_transform = rotation_transform.rotated(Vector3.UP, initial_rotation.y)
+		move_direction = -rotation_transform.basis.z.normalized()
+		move_direction.y = 0
+		move_direction = move_direction.normalized()
+	
+	if is_running != sync_is_running:
+		is_running = sync_is_running
+		if is_running:
+			_safe_play_animation("Running")
+		else:
+			_safe_play_animation("Walking")
+
+func _process(_delta):
+	if not multiplayer.is_server():
+		if sync_position != Vector3.ZERO:
+			global_position = global_position.lerp(sync_position, 0.15)
+		
+		# ADD THIS: Smoothly interpolate rotation
+		if sync_rotation != Vector3.ZERO and abs(global_rotation.y - sync_rotation.y) > 0.01:
+			global_rotation = global_rotation.lerp(sync_rotation, 0.15)
+	
+	if sync_is_active != is_active:
+		is_active = sync_is_active
+		if is_active and not sync_is_dead:
+			_safe_play_animation("Walking")
+		elif not is_active and not sync_is_dead:
+			_safe_play_animation("Idle")
+	
+	if sync_is_dead and not death_handled:
+		death_handled = true
+		_handle_death_on_client()
+
+# ============ DAMAGE SYSTEM ============
+func take_damage(damage: int, source_id: int = -1, weapon_type: String = ""):
+	if sync_is_dead:
+		return
+	
+	if not is_active:
+		_activate_npc()
+	
+	if not multiplayer.is_server():
+		rpc_id(1, "_take_damage_server", damage, source_id, weapon_type)
+		return
+	
+	_take_damage_server(damage, source_id, weapon_type)
+
+@rpc("any_peer", "call_local", "reliable")
+func _take_damage_server(damage: int, source_id: int, weapon_type: String):
+	if sync_is_dead:
+		return
+	
+	if not is_active:
+		_activate_npc()
+	
+	current_health -= damage
+	current_health = max(0, current_health)
+	sync_health = current_health
+	
+	if current_health <= 0:
+		_die()
+		return
+	
+	if not is_running:
+		is_running = true
+		sync_is_running = true
+		flee_timer = 0.0
+		_safe_play_animation("Running")
+
+func _die():
+	if sync_is_dead or death_handled:
+		return
+	
+	death_handled = true
+	
+	sync_is_dead = true
+	is_active = false
+	sync_is_active = false
+	is_running = false
+	sync_is_running = false
+	velocity = Vector3.ZERO
+	sync_velocity = Vector3.ZERO
+	
+	collision_layer = 0
+	collision_mask = 0
+	
+	var npc_manager = get_parent()
+	if npc_manager and npc_manager.has_method("register_npc_death"):
+		npc_manager.register_npc_death(name)
+	
+	await _play_death_animation()
+	_remove_npc()
+
+func _play_death_animation():
+	if not animation_player:
+		await get_tree().create_timer(1.0).timeout
+		return
+	
+	if animation_player.is_playing():
+		animation_player.stop(false)
+	
+	await get_tree().process_frame
+	
+	animation_player.play("Death")
+	animation_player.speed_scale = 1.0
+	current_animation = "Death"
+	
+	var anim_length = animation_player.get_animation("Death").length
+	await get_tree().create_timer(anim_length).timeout
+
+func _handle_death_on_client():
+	if is_queued_for_deletion():
+		return
+	
+	is_active = false
+	is_running = false
+	velocity = Vector3.ZERO
+	collision_layer = 0
+	collision_mask = 0
+	
+	if animation_player:
+		if animation_player.is_playing():
+			animation_player.stop(false)
+		
+		await get_tree().process_frame
+		
+		animation_player.play("Death")
+		animation_player.speed_scale = 1.0
+		current_animation = "Death"
+		
+		var anim_length = animation_player.get_animation("Death").length
+		await get_tree().create_timer(anim_length).timeout
+	
+	_remove_npc()
+
+func _remove_npc():
+	if is_instance_valid(self) and not is_queued_for_deletion():
+		queue_free()
+
+func _handle_obstacle():
+	# Randomly choose left or right rotation
+	var rotate_left = randf() > 0.5
+	var rotation_rad = deg_to_rad(rotation_angle)
+	
+	if not rotate_left:
+		rotation_rad = -rotation_rad
+	
+	# Rotate the NPC around Y axis
+	initial_rotation.y += rotation_rad
+	
+	# ADD THIS: Force immediate sync
+	if multiplayer.is_server():
+		sync_rotation = initial_rotation
+	
+	# Update movement direction based on new rotation
+	var rotation_transform = Transform3D()
+	rotation_transform = rotation_transform.rotated(Vector3.UP, initial_rotation.y)
+	move_direction = -rotation_transform.basis.z.normalized()
+	move_direction.y = 0
+	move_direction = move_direction.normalized()
+
+func _safe_play_animation(anim_name: String):
+	if not animation_player or sync_is_dead:
+		return
+	
+	if current_animation == anim_name:
+		return
+	
+	if animation_player.is_playing():
+		animation_player.stop(false)
+	
+	animation_player.play(anim_name)
+	animation_player.speed_scale = 1.0
+	current_animation = anim_name
+`
     },
     
     vehicle: {
@@ -2143,7 +5341,939 @@ func _apply_damage():
         description: "Complete car physics with driver/passenger seats and multiplayer.",
         filename: "car.gd",
         // PASTE YOUR FULL car.gd CODE HERE
-        code: ``
+        code: `extends CharacterBody3D
+
+# Movement settings
+@export var speed: float = 30.0
+@export var max_rotation_speed: float = 2.0
+@export var custom_gravity: float = 20.0
+@export var alignment_speed: float = 8.0
+
+# Smooth acceleration settings
+@export var acceleration: float = 5.0
+@export var deceleration: float = 8.0
+@export var handbrake_deceleration: float = 15.0
+
+# Turning settings
+@export var turn_angle: float = 30.0
+@export var turn_speed: float = 5.0
+
+# Audio settings
+@export var min_pitch: float = 0.8
+@export var max_pitch: float = 1.5
+
+# References
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var camera: Camera3D = $Camera3D
+@onready var car_visual: Node3D = $car
+@onready var car1_sound: AudioStreamPlayer3D = $Car1
+@onready var car2_sound: AudioStreamPlayer3D = $Car2
+
+# Camera settings
+var mouse_sensitivity: float = 0.002
+var camera_rotation: Vector2 = Vector2.ZERO
+var initial_visual_rotation: float = 0.0
+var mouse_locked: bool = false
+
+# Movement state
+var current_speed: float = 0.0
+var target_speed: float = 0.0
+var is_handbrake: bool = false
+var last_floor_normal: Vector3 = Vector3.UP
+var current_yaw: float = 0.0
+var last_position: Vector3 = Vector3.ZERO
+var actual_speed: float = 0.0
+
+# Turning state
+var current_turn_angle: float = 0.0
+var target_turn_angle: float = 0.0
+var is_turning: bool = false
+var is_actually_moving: bool = false
+
+# Audio state
+var is_car1_playing: bool = false
+var was_moving: bool = false
+
+# ============ DRIVER VARIABLES ============
+@export var enter_area: Area3D = null
+@export var seat_marker: Marker3D = null
+@export var is_driver_occupied: bool = false
+@export var driver_id: int = -1
+var current_driver: Node3D = null
+var driver_original_transform: Transform3D
+var seat_local_position: Vector3 = Vector3.ZERO
+var seat_local_rotation: Vector3 = Vector3.ZERO
+var is_processing_entry: bool = false
+var is_processing_exit: bool = false
+# ============ PASSENGER VARIABLES ============
+@export var passenger_enter_area: Area3D = null
+@export var passenger_seat_marker: Marker3D = null
+@export var is_passenger_occupied: bool = false
+@export var passenger_id: int = -1
+var current_passenger: Node3D = null
+var passenger_original_transform: Transform3D
+var passenger_local_position: Vector3 = Vector3.ZERO
+var passenger_local_rotation: Vector3 = Vector3.ZERO
+var is_processing_passenger_entry: bool = false
+
+func _ready():
+	if camera:
+		camera.current = false
+	_setup_input_actions()
+	_setup_engine_audio()
+	_setup_enter_area()
+	_setup_passenger_enter_area()
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
+	
+	initial_visual_rotation = car_visual.rotation_degrees.y
+	
+	if seat_marker:
+		seat_local_position = to_local(seat_marker.global_position)
+		seat_local_rotation = seat_marker.rotation
+		print("Seat local offset calculated: ", seat_local_position)
+		
+	if passenger_seat_marker:
+		passenger_local_position = to_local(passenger_seat_marker.global_position)
+		passenger_local_rotation = passenger_seat_marker.rotation
+		print("Passenger seat local offset calculated: ", passenger_local_position)
+		
+	floor_snap_length = 0.3
+	floor_stop_on_slope = true
+	floor_max_angle = deg_to_rad(46)
+	wall_min_slide_angle = deg_to_rad(15)
+	floor_constant_speed = true
+	floor_block_on_wall = false
+	max_slides = 6
+	
+	current_yaw = rotation.y
+	last_position = global_position
+	
+	set_process_input(false)
+	set_physics_process(false)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	print("Car initialized - disabled")
+func _on_peer_disconnected(peer_id: int):
+	# Handle driver disconnection
+	if driver_id == peer_id:
+		print("Driver disconnected! Resetting driver state.")
+		is_driver_occupied = false
+		current_driver = null
+		driver_id = -1
+		
+		# Reset car controls
+		set_process_input(false)
+		set_physics_process(false)
+		_stop_all_audio()
+		
+		# Show enter area
+		if enter_area:
+			enter_area.visible = true
+			enter_area.monitoring = true
+			enter_area.monitorable = true
+		if passenger_id == peer_id:
+			print("Passenger disconnected! Resetting passenger state.")
+			is_passenger_occupied = false
+			current_passenger = null
+			passenger_id = -1
+		
+		# Show passenger enter area
+		if passenger_enter_area:
+			passenger_enter_area.visible = true
+			passenger_enter_area.monitoring = true
+			passenger_enter_area.monitorable = true
+			
+func _setup_engine_audio():
+	if car1_sound and car1_sound.stream and car2_sound and car2_sound.stream:
+		car1_sound.finished.connect(_on_car1_finished)
+		car2_sound.finished.connect(_on_car2_finished)
+		if car1_sound.stream is AudioStreamWAV:
+			car1_sound.stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+		if car2_sound.stream is AudioStreamWAV:
+			car2_sound.stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+		car1_sound.max_distance = 15.0
+		car1_sound.unit_size = 10.0
+		car2_sound.max_distance = 15.0
+		car2_sound.unit_size = 10.0
+		print("Car audio ready")
+
+func _on_car1_finished():
+	is_car1_playing = false
+	if abs(current_speed) > 0.1 or abs(target_speed) > 0.1:
+		car2_sound.play()
+
+func _on_car2_finished():
+	if (abs(current_speed) > 0.1 or abs(target_speed) > 0.1) and not is_car1_playing:
+		car2_sound.play()
+
+func _setup_input_actions():
+	var actions = {
+		"move_forward": KEY_W,
+		"move_left": KEY_A,
+		"move_backward": KEY_S,
+		"move_right": KEY_D,
+		"door_open": KEY_F,
+		"handbrake": KEY_SPACE,
+		"toggle_mouse": KEY_M,
+		"exit_vehicle": KEY_P,
+		"map": KEY_N
+	}
+	for action_name in actions.keys():
+		if not InputMap.has_action(action_name):
+			InputMap.add_action(action_name)
+			var event = InputEventKey.new()
+			event.keycode = actions[action_name]
+			InputMap.action_add_event(action_name, event)
+
+func _input(event: InputEvent):
+	if event is InputEventMouseMotion and mouse_locked:
+		camera_rotation.x -= event.relative.y * mouse_sensitivity
+		camera_rotation.y -= event.relative.x * mouse_sensitivity
+		camera_rotation.x = clamp(camera_rotation.x, -PI/2, PI/2)
+				
+	if event is InputEventKey and event.keycode == KEY_M and event.pressed:
+		mouse_locked = !mouse_locked
+		if mouse_locked:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
+	if event.is_action_pressed("exit_vehicle") and not is_processing_exit:
+		if is_driver_occupied:
+			start_exit_sequence()
+
+func _physics_process(delta: float):
+	if is_processing_entry or is_processing_exit:
+		return
+	
+	if not is_on_floor():
+		velocity.y -= custom_gravity * delta
+	else:
+		if velocity.y < 0:
+			velocity.y = 0
+	
+	var current_position = global_position
+	actual_speed = (current_position - last_position).length() / delta
+	last_position = current_position
+	
+	is_actually_moving = actual_speed > 1.0
+	is_handbrake = Input.is_action_pressed("handbrake")
+
+	if is_handbrake:
+		target_speed = 0.0
+		current_speed = move_toward(current_speed, 0.0, handbrake_deceleration * delta)
+	else:
+		var forward_pressed = Input.is_action_pressed("move_backward")
+		var backward_pressed = Input.is_action_pressed("move_forward")
+		if forward_pressed:
+			target_speed = speed
+		elif backward_pressed:
+			target_speed = -speed
+		else:
+			target_speed = 0.0
+		if abs(target_speed) > 0.01:
+			current_speed = move_toward(current_speed, target_speed, acceleration * delta)
+		else:
+			current_speed = move_toward(current_speed, 0.0, deceleration * delta)
+
+	if is_actually_moving and abs(current_speed) > 1.0:
+		var turn_input = 0.0
+		if Input.is_action_pressed("move_left"):
+			turn_input += 1.0
+		if Input.is_action_pressed("move_right"):
+			turn_input -= 1.0
+		if Input.is_action_pressed("move_backward"):
+			turn_input = -turn_input
+		if abs(turn_input) > 0.01:
+			var speed_factor = abs(current_speed) / speed
+			var effective_rotation_speed = max_rotation_speed * speed_factor
+			current_yaw += turn_input * effective_rotation_speed * delta
+
+	_update_turn_animation()
+
+	if Input.is_action_just_pressed("door_open"):
+		play_car_animation_synced("DoorOpen", 1.0, 1.0)
+
+	_apply_movement()
+	move_and_slide()
+	_align_with_floor(delta)
+	_update_camera()
+	_update_engine_audio()
+	_update_driver_position()
+
+func _update_driver_position():
+	if is_driver_occupied and current_driver and seat_marker:
+		var car_basis = global_transform.basis
+		var visual_rotation_basis = Basis(Vector3.UP, deg_to_rad(car_visual.rotation_degrees.y))
+		var combined_basis = visual_rotation_basis * car_basis
+		var seat_world_position = global_transform.origin + combined_basis * seat_local_position
+		var seat_local_basis = Basis.from_euler(seat_local_rotation)
+		var final_basis = combined_basis * seat_local_basis
+		var seat_world_rotation = final_basis.get_euler()
+		
+		current_driver.global_position = seat_world_position
+		current_driver.global_rotation = seat_world_rotation
+		
+		if current_driver._body:
+			current_driver._body.rotation = Vector3.ZERO
+
+func _update_engine_audio():
+	if not car1_sound or not car1_sound.stream or not car2_sound or not car2_sound.stream:
+		return
+	var is_moving = abs(current_speed) > 0.1 or abs(target_speed) > 0.1
+	var speed_ratio = abs(current_speed) / speed
+	var target_pitch = lerp(min_pitch, max_pitch, speed_ratio)
+	car1_sound.pitch_scale = target_pitch
+	car2_sound.pitch_scale = 1.0
+	if is_moving:
+		if not was_moving and not car1_sound.playing and not car2_sound.playing:
+			is_car1_playing = true
+			car1_sound.play()
+		elif not is_car1_playing and not car2_sound.playing:
+			car2_sound.play()
+	else:
+		_stop_all_audio()
+	was_moving = is_moving
+
+func _stop_all_audio():
+	if car1_sound and car1_sound.playing:
+		car1_sound.stop()
+	if car2_sound and car2_sound.playing:
+		car2_sound.stop()
+	is_car1_playing = false
+	was_moving = false
+
+func _update_turn_animation():
+	var left_pressed = Input.is_action_pressed("move_left")
+	var right_pressed = Input.is_action_pressed("move_right")
+	var forward_pressed = Input.is_action_pressed("move_backward")
+	var backward_pressed = Input.is_action_pressed("move_forward")
+	var should_turn = (forward_pressed or backward_pressed) and (left_pressed or right_pressed) and is_actually_moving
+
+	if forward_pressed:
+		target_turn_angle = 0.0
+		is_turning = false
+	elif should_turn:
+		if right_pressed:
+			target_turn_angle = -turn_angle
+			is_turning = true
+		elif left_pressed:
+			target_turn_angle = turn_angle
+			is_turning = true
+	else:
+		target_turn_angle = 0.0
+		is_turning = false
+
+	current_turn_angle = lerp(current_turn_angle, target_turn_angle, turn_speed * get_physics_process_delta_time())
+	car_visual.rotation_degrees.y = initial_visual_rotation + current_turn_angle
+
+	if animation_player:
+		if should_turn:
+			if right_pressed:
+				play_car_animation_synced("Right", 4.0, 1.0)
+			elif left_pressed:
+				play_car_animation_synced("Left", 4.0, 1.0)
+		elif abs(current_speed) > 0.1:
+			if not is_turning:
+				play_car_animation_synced("Drive", 4.0, -sign(current_speed))
+		elif not (forward_pressed or backward_pressed) and animation_player.current_animation != "DoorOpen":
+			play_car_animation_synced("Idle", 1.0, 1.0)
+
+func _apply_movement():
+	var direction = Vector3(sin(current_yaw), 0, cos(current_yaw)).normalized()
+	var horizontal_velocity = direction * current_speed
+	velocity.x = horizontal_velocity.x
+	velocity.z = horizontal_velocity.z
+
+func _align_with_floor(delta: float):
+	if not is_on_floor():
+		last_floor_normal = last_floor_normal.lerp(Vector3.UP, 5.0 * delta)
+	else:
+		var space_state = get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(
+			global_position + Vector3(0, 0.5, 0),
+			global_position + Vector3.DOWN * 2.0
+		)
+		query.exclude = [self]
+		var result = space_state.intersect_ray(query)
+		if result:
+			last_floor_normal = last_floor_normal.lerp(result.normal, 15.0 * delta)
+
+	var target_basis = Basis()
+	target_basis.y = last_floor_normal
+	var forward_flat = Vector3(sin(current_yaw), 0, cos(current_yaw))
+	var forward_on_slope = forward_flat - last_floor_normal * forward_flat.dot(last_floor_normal)
+	forward_on_slope = forward_on_slope.normalized()
+	target_basis.z = forward_on_slope
+	target_basis.x = target_basis.y.cross(target_basis.z).normalized()
+	target_basis.z = target_basis.x.cross(target_basis.y).normalized()
+	target_basis = target_basis.orthonormalized()
+	transform.basis = transform.basis.slerp(target_basis, alignment_speed * delta)
+
+func _update_camera():
+	if camera:
+		camera.transform.basis = Basis()
+		camera.rotation.x = camera_rotation.x
+		camera.rotation.y = camera_rotation.y
+
+func _setup_enter_area():
+	if enter_area:
+		enter_area.body_entered.connect(_on_enter_area_body_entered)
+		enter_area.body_exited.connect(_on_enter_area_body_exited)
+		print("Enter area setup complete")
+		
+func _on_enter_area_body_entered(body: Node3D):
+	if is_driver_occupied or is_processing_entry or is_processing_exit:
+		return
+	if body.is_in_group("player"):
+		body.nearby_car = self
+		print("Car: Player ", body.name, " entered DRIVER area")
+
+func _on_enter_area_body_exited(body: Node3D):
+	if body.is_in_group("player"):
+		if body.nearby_car == self:
+			body.nearby_car = null
+		print("Car: Player ", body.name, " left DRIVER area")
+
+# ============ DRIVER ENTRY SEQUENCE ============
+
+func start_entry_sequence(player: Node3D):
+	if is_driver_occupied or is_processing_entry or is_processing_exit:
+		print("Car is already occupied or processing!")
+		return
+	
+	is_processing_entry = true
+	print("=== DRIVER ENTRY SEQUENCE STARTED ===")
+	
+	_entry_step1_save_transform(player)
+	await get_tree().create_timer(0.1).timeout
+	
+	_entry_step2_teleport_to_seat(player)
+	await get_tree().create_timer(0.1).timeout
+	
+	_entry_step3_play_animation(player)
+	await get_tree().create_timer(0.2).timeout
+	
+	_entry_step4_hide_enter_area()
+	
+	_entry_step5_enable_car(player)
+	
+	is_processing_entry = false
+	print("=== DRIVER ENTRY SEQUENCE COMPLETE ===")
+
+func _entry_step1_save_transform(player: Node3D):
+	driver_original_transform = player.global_transform
+	print("Entry Step 1: Saved player original transform")
+	sync_entry_step1.rpc(player.get_multiplayer_authority(), driver_original_transform)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_entry_step1(player_id: int, original_transform: Transform3D):
+	driver_original_transform = original_transform
+
+func _entry_step2_teleport_to_seat(player: Node3D):
+	if not seat_marker:
+		print("ERROR: No seat marker!")
+		return
+	var seat_world_position = global_transform.origin + global_transform.basis * seat_local_position
+	var seat_world_rotation = global_rotation + seat_local_rotation
+	player.global_position = seat_world_position
+	player.global_rotation = seat_world_rotation
+	print("Entry Step 2: Player teleported to seat")
+	sync_entry_step2.rpc(player.get_multiplayer_authority(), seat_world_position, seat_world_rotation)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_entry_step2(player_id: int, world_pos: Vector3, world_rot: Vector3):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			player.global_position = world_pos
+			player.global_rotation = world_rot
+			break
+
+func _entry_step3_play_animation(player: Node3D):
+	if player._body:
+		player._body.is_in_car = true
+	if player._body and player._body.animation_player:
+		if player._body.animation_player.has_animation("CarTP"):
+			player._body.animation_player.play("CarTP")
+	print("Entry Step 3: Playing CarTP animation")
+	sync_entry_step3.rpc(player.get_multiplayer_authority())
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_entry_step3(player_id: int):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			if player._body:
+				player._body.is_in_car = true
+			if player._body and player._body.animation_player:
+				if player._body.animation_player.has_animation("CarTP"):
+					player._body.animation_player.play("CarTP")
+			break
+
+func _entry_step4_hide_enter_area():
+	if enter_area:
+		enter_area.visible = false
+		enter_area.monitoring = false
+		enter_area.monitorable = false
+	is_driver_occupied = true
+	print("Entry Step 4: Enter area hidden")
+	sync_entry_step4.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_entry_step4():
+	if enter_area:
+		enter_area.visible = false
+		enter_area.monitoring = false
+		enter_area.monitorable = false
+	is_driver_occupied = true
+
+func _entry_step5_enable_car(player: Node3D):
+	current_driver = player
+	is_driver_occupied = true
+	driver_id = player.get_multiplayer_authority()
+	set_multiplayer_authority(driver_id)
+	set_process_input(true)
+	set_physics_process(true)
+	mouse_locked = true
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	if camera:
+		camera.current = true
+	print("Entry Step 5: Car enabled - Authority: ", driver_id)
+	sync_entry_step5.rpc(driver_id)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_entry_step5(new_driver_id: int):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == new_driver_id:
+			current_driver = player
+			break
+	is_driver_occupied = true
+	driver_id = new_driver_id
+	set_multiplayer_authority(new_driver_id)
+
+# ============ DRIVER EXIT SEQUENCE ============
+
+func start_exit_sequence():
+	if not is_driver_occupied or not current_driver or is_processing_exit or is_processing_entry:
+		return
+	
+	is_processing_exit = true
+	print("=== DRIVER EXIT SEQUENCE STARTED ===")
+	
+	var exiting_driver = current_driver
+	var exiting_driver_id = driver_id
+	
+	_exit_step1_stop_vehicle()
+	await get_tree().create_timer(0.1).timeout
+	
+	_exit_step2_camera_and_teleport(exiting_driver)
+	await get_tree().create_timer(0.1).timeout
+	
+	_exit_step3_clear_vehicle_state(exiting_driver)
+	await get_tree().create_timer(0.1).timeout
+	
+	_exit_step4_reset_animation(exiting_driver)
+	await get_tree().create_timer(0.1).timeout
+	
+	_exit_step5_enable_player(exiting_driver, exiting_driver_id)
+	await get_tree().create_timer(0.1).timeout
+	
+	_exit_step6_show_enter_area_and_cleanup()
+	
+	is_processing_exit = false
+	print("=== DRIVER EXIT SEQUENCE COMPLETE ===")
+
+func _exit_step1_stop_vehicle():
+	set_process_input(false)
+	set_physics_process(false)
+	
+	if animation_player:
+		animation_player.stop()
+	
+	_stop_all_audio()
+	
+	if car_visual:
+		car_visual.rotation_degrees.y = initial_visual_rotation
+	current_speed = 0.0
+	target_speed = 0.0
+	velocity = Vector3.ZERO
+	current_turn_angle = 0.0
+	target_turn_angle = 0.0
+	
+	mouse_locked = false
+	camera_rotation = Vector2.ZERO
+	
+	print("Exit Step 1: Vehicle stopped")
+	sync_exit_step1.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_exit_step1():
+	set_process_input(false)
+	set_physics_process(false)
+	if animation_player:
+		animation_player.stop()
+	_stop_all_audio()
+	if car_visual:
+		car_visual.rotation_degrees.y = initial_visual_rotation
+	current_speed = 0.0
+	target_speed = 0.0
+	velocity = Vector3.ZERO
+	current_turn_angle = 0.0
+	target_turn_angle = 0.0
+	mouse_locked = false
+	camera_rotation = Vector2.ZERO
+
+func _exit_step2_camera_and_teleport(player: Node3D):
+	if not player or not enter_area:
+		return
+	player.global_position = enter_area.global_position
+	
+	var original_rotation = driver_original_transform.basis.get_euler()
+	player.global_rotation = original_rotation
+	
+	if player._body:
+		player._body.rotation = Vector3.ZERO
+	
+	print("Exit Step 2: Camera switched, player teleported and rotation restored")
+	sync_exit_step2.rpc(player.get_multiplayer_authority(), enter_area.global_position, original_rotation)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_exit_step2(player_id: int, exit_pos: Vector3, original_rot: Vector3):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			player.global_position = exit_pos
+			player.global_rotation = original_rot
+			if player._body:
+				player._body.rotation = Vector3.ZERO
+			break
+
+func _exit_step3_clear_vehicle_state(player: Node3D):
+	if player:
+		player.is_in_vehicle = false
+		player.is_driver = false
+		player.nearby_car = null
+	
+	is_driver_occupied = false
+	
+	print("Exit Step 3: Vehicle state cleared")
+	sync_exit_step3.rpc(player.get_multiplayer_authority() if player else -1)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_exit_step3(player_id: int):
+	is_driver_occupied = false
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			player.is_in_vehicle = false
+			player.is_driver = false
+			player.nearby_car = null
+			break
+
+func _exit_step4_reset_animation(player: Node3D):
+	if not player:
+		return
+	
+	if player._body:
+		player._body.is_in_car = false
+		player._body.is_melee_attacking = false
+		player._body.is_dancing = false
+		
+		if player._body.animation_player:
+			player._body.animation_player.stop()
+			if player._body.animation_player.has_animation("RifleIdle"):
+				player._body.animation_player.play("RifleIdle")
+	
+	print("Exit Step 4: Animation reset")
+	sync_exit_step4.rpc(player.get_multiplayer_authority())
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_exit_step4(player_id: int):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			if player._body:
+				player._body.is_in_car = false
+				player._body.is_melee_attacking = false
+				player._body.is_dancing = false
+				player._body.is_grenade_aiming = false  # ADD THIS
+				player._body.is_throwing_grenade = false
+				if player._body.animation_player:
+					player._body.animation_player.stop()
+					if player._body.animation_player.has_animation("RifleIdle"):
+						player._body.animation_player.play("RifleIdle")
+			break
+
+func _exit_step5_enable_player(player: Node3D, player_id: int):
+	if not player:
+		return
+	
+	if player.has_method("_enable_after_vehicle_exit"):
+		player._enable_after_vehicle_exit()
+	
+	if player.is_multiplayer_authority():
+		if player.camera:
+			player.camera.current = true
+		player.mouse_locked = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	print("Exit Step 5: Player controls enabled")
+
+func _exit_step6_show_enter_area_and_cleanup():
+	if enter_area:
+		enter_area.visible = true
+		enter_area.monitoring = true
+		enter_area.monitorable = true
+	
+	current_driver = null
+	driver_id = -1
+	
+	set_multiplayer_authority(1)
+	
+	print("Exit Step 6: Enter area shown, driver cleared")
+	sync_exit_step6.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_exit_step6():
+	if enter_area:
+		enter_area.visible = true
+		enter_area.monitoring = true
+		enter_area.monitorable = true
+	current_driver = null
+	driver_id = -1
+	is_driver_occupied = false
+	set_multiplayer_authority(1)
+
+func _process(_delta):
+	if is_processing_entry or is_processing_exit:
+		return
+	
+	_update_passenger_position()
+
+func _update_passenger_position():
+	if is_passenger_occupied and current_passenger and passenger_seat_marker:
+		var car_basis = global_transform.basis
+		var visual_rotation_basis = Basis(Vector3.UP, deg_to_rad(car_visual.rotation_degrees.y))
+		var combined_basis = visual_rotation_basis * car_basis
+		var seat_world_position = global_transform.origin + combined_basis * passenger_local_position
+		var seat_local_basis = Basis.from_euler(passenger_local_rotation)
+		var final_basis = combined_basis * seat_local_basis
+		var seat_world_rotation = final_basis.get_euler()
+		
+		current_passenger.global_position = seat_world_position
+		current_passenger.global_rotation = seat_world_rotation
+		
+		if current_passenger._body:
+			current_passenger._body.rotation = Vector3.ZERO
+
+# ============ ANIMATION SYNC ============
+
+func play_car_animation_synced(anim_name: String, speed: float = 1.0, direction: float = 1.0):
+	_play_animation_local(anim_name, speed, direction)
+	sync_car_animation.rpc(anim_name, speed, direction)
+
+func _play_animation_local(anim_name: String, speed: float, direction: float):
+	if animation_player and animation_player.has_animation(anim_name):
+		animation_player.play(anim_name, -1, speed * direction)
+
+@rpc("any_peer", "call_remote", "reliable")
+func sync_car_animation(anim_name: String, speed: float, direction: float):
+	_play_animation_local(anim_name, speed, direction)
+
+func stop_car_animation_synced():
+	if animation_player:
+		animation_player.stop()
+	sync_stop_car_animation.rpc()
+
+@rpc("any_peer", "call_remote", "reliable")
+func sync_stop_car_animation():
+	if animation_player:
+		animation_player.stop()
+
+# ============ PASSENGER SETUP ============
+
+func _setup_passenger_enter_area():
+	if passenger_enter_area:
+		passenger_enter_area.body_entered.connect(_on_passenger_enter_area_body_entered)
+		passenger_enter_area.body_exited.connect(_on_passenger_enter_area_body_exited)
+		print("Passenger enter area setup complete")
+
+func _on_passenger_enter_area_body_entered(body: Node3D):
+	if is_passenger_occupied or is_processing_passenger_entry:
+		return
+	if body.is_in_group("player"):
+		body.nearby_passenger_car = self
+		print("Car: Player ", body.name, " entered PASSENGER area")
+
+func _on_passenger_enter_area_body_exited(body: Node3D):
+	if body.is_in_group("player"):
+		if body.nearby_passenger_car == self:
+			body.nearby_passenger_car = null
+		print("Car: Player ", body.name, " left PASSENGER area")
+
+# ============ PASSENGER ENTRY SEQUENCE ============
+
+func start_passenger_entry_sequence(player: Node3D):
+	if is_passenger_occupied or is_processing_passenger_entry:
+		print("Car passenger seat is already occupied or processing!")
+		return
+	
+	is_processing_passenger_entry = true
+	print("=== PASSENGER ENTRY SEQUENCE STARTED ===")
+	
+	_passenger_entry_step1_save_transform(player)
+	await get_tree().create_timer(0.1).timeout
+	
+	_passenger_entry_step2_teleport_to_seat(player)
+	await get_tree().create_timer(0.1).timeout
+	
+	_passenger_entry_step3_play_animation(player)
+	await get_tree().create_timer(0.2).timeout
+	
+	_passenger_entry_step4_hide_enter_area()
+	
+	_passenger_entry_step5_set_passenger(player)
+	
+	is_processing_passenger_entry = false
+	print("=== PASSENGER ENTRY SEQUENCE COMPLETE ===")
+
+func _passenger_entry_step1_save_transform(player: Node3D):
+	passenger_original_transform = player.global_transform
+	print("Passenger Entry Step 1: Saved passenger original transform")
+	sync_passenger_entry_step1.rpc(player.get_multiplayer_authority(), passenger_original_transform)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_passenger_entry_step1(player_id: int, original_transform: Transform3D):
+	passenger_original_transform = original_transform
+
+func _passenger_entry_step2_teleport_to_seat(player: Node3D):
+	if not passenger_seat_marker:
+		print("ERROR: No passenger seat marker!")
+		return
+	var seat_world_position = global_transform.origin + global_transform.basis * passenger_local_position
+	var seat_world_rotation = global_rotation + passenger_local_rotation
+	player.global_position = seat_world_position
+	player.global_rotation = seat_world_rotation
+	print("Passenger Entry Step 2: Passenger teleported to seat")
+	sync_passenger_entry_step2.rpc(player.get_multiplayer_authority(), seat_world_position, seat_world_rotation)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_passenger_entry_step2(player_id: int, world_pos: Vector3, world_rot: Vector3):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			player.global_position = world_pos
+			player.global_rotation = world_rot
+			break
+
+func _passenger_entry_step3_play_animation(player: Node3D):
+	if player._body:
+		player._body.is_in_car = true
+	if player._body and player._body.animation_player:
+		if player._body.animation_player.has_animation("CarTP"):
+			player._body.animation_player.play("CarTP")
+	print("Passenger Entry Step 3: Playing CarTP animation")
+	sync_passenger_entry_step3.rpc(player.get_multiplayer_authority())
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_passenger_entry_step3(player_id: int):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == player_id:
+			if player._body:
+				player._body.is_in_car = true
+			if player._body and player._body.animation_player:
+				if player._body.animation_player.has_animation("CarTP"):
+					player._body.animation_player.play("CarTP")
+			break
+
+func _passenger_entry_step4_hide_enter_area():
+	if passenger_enter_area:
+		passenger_enter_area.visible = false
+		passenger_enter_area.monitoring = false
+		passenger_enter_area.monitorable = false
+	is_passenger_occupied = true
+	print("Passenger Entry Step 4: Passenger enter area hidden")
+	sync_passenger_entry_step4.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_passenger_entry_step4():
+	if passenger_enter_area:
+		passenger_enter_area.visible = false
+		passenger_enter_area.monitoring = false
+		passenger_enter_area.monitorable = false
+	is_passenger_occupied = true
+
+func _passenger_entry_step5_set_passenger(player: Node3D):
+	current_passenger = player
+	is_passenger_occupied = true
+	passenger_id = player.get_multiplayer_authority()
+	
+	# Passenger keeps their camera and can look around
+	# But disable movement and combat
+	player.is_in_vehicle = true
+	player.is_passenger = true
+	player.set_physics_process(false)
+	player.can_shoot = false
+	player.can_melee = false
+	player.can_switch_weapon = false
+	
+	if player.gun_node:
+		player.gun_node.visible = false
+	if player.melee_node:
+		player.melee_node.visible = false
+	
+	# Keep their camera active and mouse control for looking around
+	if player.is_multiplayer_authority():
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		player.mouse_locked = true
+	
+	print("Passenger Entry Step 5: Passenger seated - Passenger ID: ", passenger_id)
+	sync_passenger_entry_step5.rpc(passenger_id)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_passenger_entry_step5(new_passenger_id: int):
+	var players = get_tree().get_nodes_in_group("player")
+	for player in players:
+		if player.get_multiplayer_authority() == new_passenger_id:
+			current_passenger = player
+			player.is_in_vehicle = true
+			player.is_passenger = true
+			break
+	is_passenger_occupied = true
+	passenger_id = new_passenger_id
+
+# ============ PASSENGER EXIT (CALLED FROM CHAMP.GD) ============
+
+func clear_passenger_seat():
+	"""Called by passenger when they exit via champ.gd"""
+	print("=== CLEARING PASSENGER SEAT ===")
+	
+	# Show passenger enter area
+	if passenger_enter_area:
+		passenger_enter_area.visible = true
+		passenger_enter_area.monitoring = true
+		passenger_enter_area.monitorable = true
+	
+	# Clear passenger references
+	current_passenger = null
+	passenger_id = -1
+	is_passenger_occupied = false
+	
+	print("Passenger seat cleared and area shown")
+	sync_clear_passenger_seat.rpc()
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_clear_passenger_seat():
+	if passenger_enter_area:
+		passenger_enter_area.visible = true
+		passenger_enter_area.monitoring = true
+		passenger_enter_area.monitorable = true
+	current_passenger = null
+	passenger_id = -1
+	is_passenger_occupied = false
+`
     },
     
     weapon: {
@@ -2151,7 +6281,721 @@ func _apply_damage():
         description: "Modular weapon system with guns, throwables, melee, and inventory.",
         filename: "weaponmanager.gd",
         // PASTE YOUR FULL weaponmanager.gd CODE HERE
-        code: ``
+        code: `# weaponmanager.gd
+extends Node3D
+class_name WeaponManager
+
+# ============ WEAPON DATA STRUCTURES ============
+class WeaponData:
+	var weapon_name: String
+	var damage: int
+	var fire_rate: float
+	var mag_size: int
+	var current_mag: int
+	var reserve_ammo: int
+	var mesh_node: Node3D
+	var is_reloading: bool = false
+	
+	func _init(name: String, dmg: int, fr: float, ms: int, ammo: int):
+		weapon_name = name
+		damage = dmg
+		fire_rate = fr
+		mag_size = ms
+		current_mag = ms
+		reserve_ammo = ammo
+
+class ThrowableData:
+	var throwable_name: String
+	var damage: int
+	var blast_radius: float
+	var fuse_time: float
+	var throw_force: float
+	var current_count: int
+	var max_count: int
+	var template: PackedScene
+	var icon: Texture2D
+	var mesh_node: Node3D
+	
+	func _init(name: String, dmg: int, radius: float, fuse: float, force: float, count: int, max_c: int):
+		throwable_name = name
+		damage = dmg
+		blast_radius = radius
+		fuse_time = fuse
+		throw_force = force
+		current_count = count
+		max_count = max_c
+
+class MeleeData:
+	var melee_name: String
+	var damage: int
+	var cooldown: float
+	var mesh_node: Node3D
+	
+	func _init(name: String, dmg: int, cd: float):
+		melee_name = name
+		damage = dmg
+		cooldown = cd
+
+# ============ GUN REFERENCES ============
+@export_category("Gun Mesh Nodes")
+@export var akm_node: Node3D = null
+@export var sniper_node: Node3D = null
+@export var scar_node: Node3D = null
+@export var sks_node: Node3D = null
+@export var m4_node: Node3D = null
+
+# ============ THROWABLE REFERENCES ============
+@export_category("Throwable Mesh Nodes")
+@export var grenade_node: Node3D = null
+@export var smoke_node: Node3D = null
+@export var molotov_node: Node3D = null
+@export var stun_node: Node3D = null
+
+@export_category("Throwable Templates (PackedScenes)")
+@export var grenade_template: PackedScene = null
+@export var smoke_template: PackedScene = null
+@export var molotov_template: PackedScene = null
+@export var stun_template: PackedScene = null
+
+@export_category("Throwable Icons")
+@export var grenade_icon: Texture2D = null
+@export var smoke_icon: Texture2D = null
+@export var molotov_icon: Texture2D = null
+@export var stun_icon: Texture2D = null
+
+# ============ MELEE REFERENCES ============
+@export_category("Melee Mesh Nodes")
+@export var sword_node: Node3D = null
+@export var bat_node: Node3D = null
+@export var pan_node: Node3D = null
+
+# ============ GUN STATS ============
+@export_category("Gun Stats - AKM")
+@export var akm_damage: int = 30
+@export var akm_fire_rate: float = 0.15
+@export var akm_mag_size: int = 25
+@export var akm_start_ammo: int = 100
+
+@export_category("Gun Stats - Sniper")
+@export var sniper_damage: int = 100
+@export var sniper_fire_rate: float = 1.0
+@export var sniper_mag_size: int = 5
+@export var sniper_start_ammo: int = 100
+
+@export_category("Gun Stats - SCAR")
+@export var scar_damage: int = 20
+@export var scar_fire_rate: float = 0.2
+@export var scar_mag_size: int = 30
+@export var scar_start_ammo: int = 100
+
+@export_category("Gun Stats - SKS")
+@export var sks_damage: int = 50
+@export var sks_fire_rate: float = 0.5
+@export var sks_mag_size: int = 10
+@export var sks_start_ammo: int = 100
+
+@export_category("Gun Stats - M4")
+@export var m4_damage: int = 25
+@export var m4_fire_rate: float = 0.3
+@export var m4_mag_size: int = 20
+@export var m4_start_ammo: int = 100
+
+# ============ THROWABLE STATS ============
+@export_category("Throwable Stats - Grenade")
+@export var grenade_damage: int = 50
+@export var grenade_blast_radius: float = 5.0
+@export var grenade_fuse_time: float = 3.0
+@export var grenade_throw_force: float = 15.0
+@export var grenade_start_count: int = 10
+@export var grenade_max_count: int = 10
+
+@export_category("Throwable Stats - Smoke")
+@export var smoke_damage: int = 0
+@export var smoke_blast_radius: float = 8.0
+@export var smoke_fuse_time: float = 2.0
+@export var smoke_throw_force: float = 15.0
+@export var smoke_start_count: int = 10
+@export var smoke_max_count: int = 10
+
+@export_category("Throwable Stats - Molotov")
+@export var molotov_damage: int = 50
+@export var molotov_blast_radius: float = 6.0
+@export var molotov_fuse_time: float = 0.5
+@export var molotov_throw_force: float = 12.0
+@export var molotov_start_count: int = 10
+@export var molotov_max_count: int = 10
+
+@export_category("Throwable Stats - Stun")
+@export var stun_damage: int = 0
+@export var stun_blast_radius: float = 7.0
+@export var stun_fuse_time: float = 1.5
+@export var stun_throw_force: float = 15.0
+@export var stun_start_count: int = 10
+@export var stun_max_count: int = 10
+
+# ============ MELEE STATS ============
+@export_category("Melee Stats")
+@export var sword_damage: int = 25
+@export var sword_cooldown: float = 1.0
+@export var bat_damage: int = 20
+@export var bat_cooldown: float = 1.0
+@export var pan_damage: int = 30
+@export var pan_cooldown: float = 1.2
+
+# ============ RELOAD SETTINGS ============
+@export_category("Reload Settings")
+@export var reload_time: float = 3.0
+
+# ============ WEAPON ARRAYS ============
+var gun_weapons: Array[WeaponData] = []
+var throwable_weapons: Array[ThrowableData] = []
+var melee_weapons: Array[MeleeData] = []
+
+var current_gun_index: int = 0
+var current_throwable_index: int = 0
+var current_melee_index: int = 0
+
+var can_fire: bool = true
+var is_any_gun_reloading: bool = false
+
+# Network sync
+@export var sync_current_gun_index: int = 0
+@export var sync_current_throwable_index: int = 0
+@export var sync_current_melee_index: int = 0
+@export var sync_is_reloading: bool = false
+
+# Signals for UI updates
+signal weapon_changed(weapon_data: WeaponData)
+signal ammo_changed(current_mag: int, reserve_ammo: int)
+signal reload_started(reload_time: float)
+signal reload_finished()
+signal out_of_ammo()
+signal gun_switched(gun_name: String)
+signal throwable_changed(throwable_data: ThrowableData)
+signal throwable_count_changed(current_count: int)
+signal melee_changed(melee_data: MeleeData)
+
+# Reference to player
+@export var player: CharacterBody3D = null
+
+# ============ INITIALIZATION ============
+func _ready():
+	_initialize_guns()
+	_initialize_throwables()
+	_initialize_melee()
+	_update_weapon_visibility()
+	emit_signal("weapon_changed", get_current_weapon())
+	emit_signal("ammo_changed", get_current_weapon().current_mag, get_current_weapon().reserve_ammo)
+	
+	print("WeaponManager initialized - Guns: ", gun_weapons.size(), " | Throwables: ", throwable_weapons.size(), " | Melee: ", melee_weapons.size())
+
+func _process(_delta):
+	# Only sync for remote players
+	if not player or player.is_multiplayer_authority():
+		return
+	
+	# Check if indices changed (from network sync)
+	if sync_current_gun_index != current_gun_index:
+		current_gun_index = sync_current_gun_index
+		_update_weapon_visibility()
+	
+	if sync_current_throwable_index != current_throwable_index:
+		current_throwable_index = sync_current_throwable_index
+		_update_weapon_visibility()
+	
+	if sync_current_melee_index != current_melee_index:
+		current_melee_index = sync_current_melee_index
+		_update_weapon_visibility()
+		
+func _initialize_guns():
+	"""Create weapon data for all guns"""
+	var akm = WeaponData.new("AKM", akm_damage, akm_fire_rate, akm_mag_size, akm_start_ammo)
+	akm.mesh_node = akm_node
+	gun_weapons.append(akm)
+	
+	var sniper = WeaponData.new("Sniper", sniper_damage, sniper_fire_rate, sniper_mag_size, sniper_start_ammo)
+	sniper.mesh_node = sniper_node
+	gun_weapons.append(sniper)
+	
+	var scar = WeaponData.new("SCAR", scar_damage, scar_fire_rate, scar_mag_size, scar_start_ammo)
+	scar.mesh_node = scar_node
+	gun_weapons.append(scar)
+	
+	var sks = WeaponData.new("SKS", sks_damage, sks_fire_rate, sks_mag_size, sks_start_ammo)
+	sks.mesh_node = sks_node
+	gun_weapons.append(sks)
+	
+	var m4 = WeaponData.new("M4", m4_damage, m4_fire_rate, m4_mag_size, m4_start_ammo)
+	m4.mesh_node = m4_node
+	gun_weapons.append(m4)
+	
+	for weapon in gun_weapons:
+		if weapon.mesh_node == null:
+			push_error("Weapon mesh not assigned for: " + weapon.weapon_name)
+	
+	print("Initialized ", gun_weapons.size(), " guns")
+
+func _initialize_throwables():
+	"""Create throwable data for all throwables"""
+	var grenade = ThrowableData.new("Grenade", grenade_damage, grenade_blast_radius, grenade_fuse_time, grenade_throw_force, grenade_start_count, grenade_max_count)
+	grenade.template = grenade_template
+	grenade.icon = grenade_icon
+	grenade.mesh_node = grenade_node
+	throwable_weapons.append(grenade)
+	
+	var smoke = ThrowableData.new("Smoke", smoke_damage, smoke_blast_radius, smoke_fuse_time, smoke_throw_force, smoke_start_count, smoke_max_count)
+	smoke.template = smoke_template
+	smoke.icon = smoke_icon
+	smoke.mesh_node = smoke_node
+	throwable_weapons.append(smoke)
+	
+	var molotov = ThrowableData.new("Molotov", molotov_damage, molotov_blast_radius, molotov_fuse_time, molotov_throw_force, molotov_start_count, molotov_max_count)
+	molotov.template = molotov_template
+	molotov.icon = molotov_icon
+	molotov.mesh_node = molotov_node
+	throwable_weapons.append(molotov)
+	
+	var stun = ThrowableData.new("Stun", stun_damage, stun_blast_radius, stun_fuse_time, stun_throw_force, stun_start_count, stun_max_count)
+	stun.template = stun_template
+	stun.icon = stun_icon
+	stun.mesh_node = stun_node
+	throwable_weapons.append(stun)
+	
+	for throwable in throwable_weapons:
+		if throwable.template == null:
+			push_warning("Throwable template not assigned for: " + throwable.throwable_name)
+		if throwable.mesh_node == null:
+			push_warning("Throwable mesh not assigned for: " + throwable.throwable_name)
+	
+	print("Initialized ", throwable_weapons.size(), " throwables")
+
+func _initialize_melee():
+	"""Create melee data for all melee weapons"""
+	var sword = MeleeData.new("Sword", sword_damage, sword_cooldown)
+	sword.mesh_node = sword_node
+	melee_weapons.append(sword)
+	
+	var bat = MeleeData.new("Bat", bat_damage, bat_cooldown)
+	bat.mesh_node = bat_node
+	melee_weapons.append(bat)
+	
+	var pan = MeleeData.new("Pan", pan_damage, pan_cooldown)
+	pan.mesh_node = pan_node
+	melee_weapons.append(pan)
+	
+	for melee in melee_weapons:
+		if melee.mesh_node == null:
+			push_warning("Melee mesh not assigned for: " + melee.melee_name)
+	
+	print("Initialized ", melee_weapons.size(), " melee weapons")
+
+# ============ INPUT HANDLING ============
+func _input(event):
+	if not player or not player.is_multiplayer_authority():
+		return
+	
+	# Check player's current weapon mode
+	var weapon_mode = _get_player_weapon_mode()
+	
+	# Handle number keys 1-5 based on weapon mode
+	for i in range(1, 6):
+		if event.is_action_pressed(str(i)):
+			match weapon_mode:
+				player.WeaponType.GUN:
+					if i - 1 < gun_weapons.size():
+						switch_to_gun(i - 1)
+				player.WeaponType.GRENADE:  # Throwable mode
+					if i - 1 < throwable_weapons.size():
+						switch_to_throwable(i - 1)
+				player.WeaponType.MELEE:
+					if i - 1 < melee_weapons.size():
+						switch_to_melee(i - 1)
+			return
+	
+	# Handle R key for reload (gun mode only)
+	if event.is_action_pressed("reload") and weapon_mode == player.WeaponType.GUN:
+		start_reload()
+
+func _get_player_weapon_mode() -> int:
+	"""Get current weapon mode from player"""
+	if player.has_method("get_current_weapon_type"):
+		return player.get_current_weapon_type()
+	return player.current_weapon
+
+# ============ GUN SYSTEM ============
+func cycle_gun():
+	"""Switch to next gun in arsenal"""
+	if is_any_gun_reloading:
+		print("Cannot switch weapon while reloading!")
+		return
+	
+	current_gun_index = (current_gun_index + 1) % gun_weapons.size()
+	_update_weapon_visibility()
+	_update_sync_vars()
+	
+	var current = get_current_weapon()
+	emit_signal("weapon_changed", current)
+	emit_signal("ammo_changed", current.current_mag, current.reserve_ammo)
+	emit_signal("gun_switched", current.weapon_name)
+	
+	print("Switched to: ", current.weapon_name)
+	
+	if player and player.has_method("sync_gun_switch"):
+		player.rpc("sync_gun_switch", current_gun_index)
+
+func switch_to_gun(index: int):
+	"""Switch to specific gun by index"""
+	if index < 0 or index >= gun_weapons.size():
+		return
+	
+	if is_any_gun_reloading:
+		print("Cannot switch weapon while reloading!")
+		return
+	
+	if current_gun_index == index:
+		return
+	
+	current_gun_index = index
+	_update_weapon_visibility()
+	_update_sync_vars()
+	
+	var current = get_current_weapon()
+	emit_signal("weapon_changed", current)
+	emit_signal("ammo_changed", current.current_mag, current.reserve_ammo)
+	emit_signal("gun_switched", current.weapon_name)
+	
+	print("Switched to: ", current.weapon_name)
+	
+	if player and player.has_method("sync_gun_switch"):
+		player.rpc("sync_gun_switch", current_gun_index)
+
+func try_fire() -> bool:
+	"""Attempt to fire current weapon. Returns true if fired successfully."""
+	var current = get_current_weapon()
+	
+	if current.is_reloading:
+		print(current.weapon_name, " is reloading, cannot fire!")
+		return false
+	
+	if not can_fire:
+		return false
+	
+	if current.current_mag <= 0:
+		if current.reserve_ammo > 0:
+			print(current.weapon_name, " magazine empty, starting auto-reload...")
+			start_reload()
+		else:
+			emit_signal("out_of_ammo")
+			print(current.weapon_name, " - Out of ammo!")
+		return false
+	
+	current.current_mag -= 1
+	can_fire = false
+	
+	emit_signal("ammo_changed", current.current_mag, current.reserve_ammo)
+	
+	get_tree().create_timer(current.fire_rate).timeout.connect(_reset_fire_cooldown)
+	
+	return true
+
+func _reset_fire_cooldown():
+	can_fire = true
+
+func start_reload():
+	"""Start reloading current weapon"""
+	var current = get_current_weapon()
+	
+	if current.is_reloading:
+		print(current.weapon_name, " is already reloading!")
+		return
+	
+	if current.current_mag >= current.mag_size:
+		print(current.weapon_name, " magazine already full!")
+		return
+	
+	if current.reserve_ammo <= 0:
+		print(current.weapon_name, " - No reserve ammo to reload!")
+		emit_signal("out_of_ammo")
+		return
+	
+	current.is_reloading = true
+	is_any_gun_reloading = true
+	sync_is_reloading = true
+	emit_signal("reload_started", reload_time)
+	
+	print(current.weapon_name, " reloading... (", reload_time, "s)")
+	
+	if player and player.has_method("sync_reload_start"):
+		player.rpc("sync_reload_start", current.weapon_name)
+	
+	await get_tree().create_timer(reload_time).timeout
+	
+	_complete_reload()
+
+func _complete_reload():
+	"""Complete the reload process"""
+	var current = get_current_weapon()
+	
+	if not current.is_reloading:
+		return
+	
+	var ammo_needed = current.mag_size - current.current_mag
+	var ammo_to_reload = min(ammo_needed, current.reserve_ammo)
+	
+	current.current_mag += ammo_to_reload
+	current.reserve_ammo -= ammo_to_reload
+	
+	current.is_reloading = false
+	is_any_gun_reloading = false
+	sync_is_reloading = false
+	
+	emit_signal("reload_finished")
+	emit_signal("ammo_changed", current.current_mag, current.reserve_ammo)
+	
+	print(current.weapon_name, " reload complete! Ammo: ", current.current_mag, "/", current.reserve_ammo)
+	
+	if player and player.has_method("sync_ammo_state"):
+		player.rpc("sync_ammo_state", current.weapon_name, current.current_mag, current.reserve_ammo)
+
+# ============ THROWABLE SYSTEM ============
+func switch_to_throwable(index: int):
+	"""Switch to specific throwable by index"""
+	if index < 0 or index >= throwable_weapons.size():
+		return
+	
+	if current_throwable_index == index:
+		return
+	
+	current_throwable_index = index
+	_update_weapon_visibility()
+	sync_current_throwable_index = index
+	
+	var current = get_current_throwable()
+	emit_signal("throwable_changed", current)
+	emit_signal("throwable_count_changed", current.current_count)
+	
+	print("Switched to throwable: ", current.throwable_name, " (Count: ", current.current_count, ")")
+	
+	# Sync to network
+	if player and player.is_multiplayer_authority():
+		rpc("sync_throwable_switch", current_throwable_index)
+
+func get_current_throwable() -> ThrowableData:
+	"""Get currently equipped throwable"""
+	if throwable_weapons.size() == 0:
+		push_error("No throwables initialized!")
+		return null
+	return throwable_weapons[current_throwable_index]
+
+func use_throwable() -> bool:
+	"""Use current throwable. Returns true if used successfully."""
+	var current = get_current_throwable()
+	
+	if current.current_count <= 0:
+		print(current.throwable_name, " - Out of stock!")
+		return false
+	
+	current.current_count -= 1
+	emit_signal("throwable_count_changed", current.current_count)
+	
+	print(current.throwable_name, " used! Remaining: ", current.current_count)
+	
+	return true
+
+func add_throwable(throwable_name: String, amount: int):
+	"""Add throwables to inventory"""
+	for throwable in throwable_weapons:
+		if throwable.throwable_name == throwable_name:
+			throwable.current_count = min(throwable.current_count + amount, throwable.max_count)
+			print("Added ", amount, " ", throwable_name, ". Total: ", throwable.current_count)
+			
+			if throwable == get_current_throwable():
+				emit_signal("throwable_count_changed", throwable.current_count)
+			return
+
+# ============ MELEE SYSTEM ============
+func switch_to_melee(index: int):
+	"""Switch to specific melee weapon by index"""
+	if index < 0 or index >= melee_weapons.size():
+		return
+	
+	if current_melee_index == index:
+		return
+	
+	current_melee_index = index
+	_update_weapon_visibility()
+	sync_current_melee_index = index
+	
+	var current = get_current_melee()
+	emit_signal("melee_changed", current)
+	
+	print("Switched to melee: ", current.melee_name, " (Damage: ", current.damage, ")")
+	
+	# Sync to network
+	if player and player.is_multiplayer_authority():
+		rpc("sync_melee_switch", current_melee_index)
+
+func get_current_melee() -> MeleeData:
+	"""Get currently equipped melee weapon"""
+	if melee_weapons.size() == 0:
+		push_error("No melee weapons initialized!")
+		return null
+	return melee_weapons[current_melee_index]
+
+func get_current_melee_damage() -> int:
+	"""Get damage of current melee weapon"""
+	return get_current_melee().damage
+
+# ============ VISIBILITY MANAGEMENT ============
+func _update_weapon_visibility():
+	"""Show only current weapon based on player's weapon mode"""
+	if not player:
+		return
+	
+	var weapon_mode = _get_player_weapon_mode()
+	
+	# Hide all guns
+	for weapon in gun_weapons:
+		if weapon.mesh_node:
+			weapon.mesh_node.visible = false
+			weapon.mesh_node.process_mode = Node.PROCESS_MODE_DISABLED
+	
+	# Hide all throwables
+	for throwable in throwable_weapons:
+		if throwable.mesh_node:
+			throwable.mesh_node.visible = false
+			throwable.mesh_node.process_mode = Node.PROCESS_MODE_DISABLED
+	
+	# Hide all melee
+	for melee in melee_weapons:
+		if melee.mesh_node:
+			melee.mesh_node.visible = false
+			melee.mesh_node.process_mode = Node.PROCESS_MODE_DISABLED
+	
+	# Show current weapon based on mode
+	match weapon_mode:
+		player.WeaponType.GUN:
+			var current_gun = get_current_weapon()
+			if current_gun.mesh_node:
+				current_gun.mesh_node.visible = true
+				current_gun.mesh_node.process_mode = Node.PROCESS_MODE_INHERIT
+		
+		player.WeaponType.GRENADE:  # Throwable mode
+			var current_throwable = get_current_throwable()
+			if current_throwable.mesh_node:
+				current_throwable.mesh_node.visible = true
+				current_throwable.mesh_node.process_mode = Node.PROCESS_MODE_INHERIT
+		
+		player.WeaponType.MELEE:
+			var current_melee = get_current_melee()
+			if current_melee.mesh_node:
+				current_melee.mesh_node.visible = true
+				current_melee.mesh_node.process_mode = Node.PROCESS_MODE_INHERIT
+
+func _update_sync_vars():
+	"""Update synchronization variables"""
+	sync_current_gun_index = current_gun_index
+	sync_current_throwable_index = current_throwable_index
+	sync_current_melee_index = current_melee_index
+
+# ============ GETTERS ============
+func get_current_weapon() -> WeaponData:
+	"""Get currently equipped gun"""
+	if gun_weapons.size() == 0:
+		push_error("No guns initialized!")
+		return null
+	return gun_weapons[current_gun_index]
+
+func get_current_weapon_name() -> String:
+	return get_current_weapon().weapon_name
+
+func get_current_damage() -> int:
+	"""Get damage of current gun"""
+	return get_current_weapon().damage
+
+func get_current_fire_rate() -> float:
+	"""Get fire rate of current gun"""
+	return get_current_weapon().fire_rate
+
+func is_reloading() -> bool:
+	return get_current_weapon().is_reloading
+
+func has_ammo() -> bool:
+	"""Check if current gun has ammo"""
+	var current = get_current_weapon()
+	return current.current_mag > 0 or current.reserve_ammo > 0
+
+# ============ NETWORK SYNC ============
+@rpc("any_peer", "call_local", "reliable")
+func sync_gun_switch(index: int):
+	"""Network sync for gun switching"""
+	if index < 0 or index >= gun_weapons.size():
+		return
+	
+	current_gun_index = index
+	_update_weapon_visibility()
+	sync_current_gun_index = index
+	
+	var current = get_current_weapon()
+	emit_signal("weapon_changed", current)
+	emit_signal("ammo_changed", current.current_mag, current.reserve_ammo)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_reload_start(weapon_name: String):
+	"""Network sync for reload start"""
+	for weapon in gun_weapons:
+		if weapon.weapon_name == weapon_name:
+			weapon.is_reloading = true
+			is_any_gun_reloading = true
+			sync_is_reloading = true
+			emit_signal("reload_started", reload_time)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_ammo_state(weapon_name: String, mag: int, reserve: int):
+	"""Network sync for ammo state"""
+	for weapon in gun_weapons:
+		if weapon.weapon_name == weapon_name:
+			weapon.current_mag = mag
+			weapon.reserve_ammo = reserve
+			weapon.is_reloading = false
+			is_any_gun_reloading = false
+			sync_is_reloading = false
+			
+			if weapon == get_current_weapon():
+				emit_signal("ammo_changed", mag, reserve)
+				emit_signal("reload_finished")
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_throwable_switch(index: int):
+	"""Network sync for throwable switching"""
+	if index < 0 or index >= throwable_weapons.size():
+		return
+	
+	current_throwable_index = index
+	sync_current_throwable_index = index
+	_update_weapon_visibility()  # Make sure visibility updates on all clients
+	
+	var current = get_current_throwable()
+	emit_signal("throwable_changed", current)
+	emit_signal("throwable_count_changed", current.current_count)
+	
+	print("[Net] Synced throwable switch to: ", current.throwable_name)
+
+@rpc("any_peer", "call_local", "reliable")
+func sync_melee_switch(index: int):
+	"""Network sync for melee switching"""
+	if index < 0 or index >= melee_weapons.size():
+		return
+	
+	current_melee_index = index
+	sync_current_melee_index = index
+	_update_weapon_visibility()  # Make sure visibility updates on all clients
+	
+	var current = get_current_melee()
+	emit_signal("melee_changed", current)
+	
+	print("[Net] Synced melee switch to: ", current.melee_name)
+`
     },
     
     ranged: {
@@ -2159,7 +7003,702 @@ func _apply_damage():
         description: "Shooting enemy with line-of-sight detection and projectile attacks.",
         filename: "Ranged.gd",
         // PASTE YOUR FULL Ranged.gd CODE HERE
-        code: ``
+        code: `extends CharacterBody3D
+
+const ENEMY_DAMAGE = 10
+const MAX_HEALTH = 100
+const ROTATION_SPEED = 5.0
+const PRIORITY_DISTANCE = 15.0  # If player within 5m, prioritize them
+
+@onready var raycast: RayCast3D = $ShootPosition/RayCast3D
+@onready var player_detector: Area3D = $PlayerDetector
+@onready var health_label: Label3D = $HealthLabel3D
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var line_of_sight: Area3D = $ShootPosition/LineOfSightArea
+
+# Audio nodes
+@onready var walk_sound: AudioStreamPlayer3D = $WalkSound
+@onready var fire_sound: AudioStreamPlayer3D = $FireSound
+@onready var hit_sound: AudioStreamPlayer3D = $HitSound
+
+# Multiplayer sync variables - MUST match MultiplayerSynchronizer properties
+@export var sync_health: int = MAX_HEALTH
+@export var sync_position: Vector3 = Vector3.ZERO
+@export var sync_rotation_y: float = 0.0
+@export var sync_is_shooting: bool = false
+@export var sync_target_id: int = 0
+@export var sync_is_dead: bool = false 
+@export var sync_current_animation: String = "RifleIdle"
+@export var sync_players_in_range: Array[int] = []  # NEW: Sync all tracked players
+
+# Audio sync counters - MUST be @export for MultiplayerSynchronizer
+@export var footstep_counter: int = 0
+@export var fire_counter: int = 0
+@export var hit_counter: int = 0
+@export var footstep_type: String = "walk"
+
+@export_category("Combat Settings")
+@export var fire_rate: float = 1.5
+@export var detection_radius: float = 80.0
+
+# Client-side tracking variables (NOT synced)
+var last_hit_counter: int = 0
+var last_fire_counter: int = 0
+var last_footstep_counter: int = 0
+var last_sync_position: Vector3 = Vector3.ZERO
+var velocity_stopped_frames: int = 0
+var required_stopped_frames: int = 2
+
+# Host-side variables (NOT synced)
+var footstep_timer: float = 0.0
+var walk_footstep_interval: float = 0.6
+var current_health: int = MAX_HEALTH
+var can_shoot: bool = true
+var player_in_range: bool = false
+var target_player: CharacterBody3D = null
+var is_shooting: bool = false
+var players_in_range: Array = []
+var player_distances: Dictionary = {}  # Track distances: {player: distance}
+var group_scan_timer: float = 0.0
+var group_scan_interval: float = 0.3  # Scan every 0.3 seconds for responsiveness
+var target_switch_timer: float = 0.0
+var target_switch_check_interval: float = 0.2  # Check for better targets frequently
+var is_dead: bool = false
+
+func _ready():
+	set_multiplayer_authority(1)
+	current_health = sync_health
+	_setup_collision()
+	_setup_raycast()
+	_setup_detector()
+	_setup_line_of_sight()
+	_setup_health_label()
+	_setup_audio_nodes()
+	
+	print("Ranged Enemy ready - Authority: ", get_multiplayer_authority(), " | Peer: ", multiplayer.get_unique_id())
+
+func _setup_collision():
+	collision_layer = 0
+	set_collision_layer_value(4, true)
+	collision_mask = 0
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, true)
+	set_collision_mask_value(3, true)
+	
+func _setup_raycast():
+	if not raycast:
+		return
+		
+	raycast.enabled = true
+	raycast.target_position = Vector3(0, 0, -50)
+	raycast.collision_mask = 0
+	raycast.set_collision_mask_value(4, true)
+	raycast.set_collision_mask_value(1, true)
+	raycast.set_collision_mask_value(2, true)
+	
+func _setup_line_of_sight():
+	if not line_of_sight:
+		return
+	
+	line_of_sight.collision_layer = 0
+	line_of_sight.collision_mask = 0
+	line_of_sight.set_collision_mask_value(4, true)
+
+func _setup_detector():
+	if not player_detector:
+		return
+		
+	var collision_shape = player_detector.get_child(0)
+	if collision_shape is CollisionShape3D:
+		var sphere_shape = collision_shape.shape as SphereShape3D
+		if sphere_shape:
+			sphere_shape.radius = detection_radius
+	
+	player_detector.collision_layer = 0
+	player_detector.collision_mask = 0
+	player_detector.set_collision_mask_value(4, true)
+	
+	# Only host handles detection signals
+	if is_multiplayer_authority():
+		player_detector.area_entered.connect(_on_detection_area_entered)
+		player_detector.area_exited.connect(_on_detection_area_exited)
+
+func _setup_health_label():
+	if not health_label:
+		health_label = Label3D.new()
+		health_label.name = "HealthLabel3D"
+		add_child(health_label)
+		health_label.position = Vector3(0, 2, 0)
+		health_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_update_health_ui()
+
+func _setup_audio_nodes():
+	if walk_sound:
+		walk_sound.bus = "SFX"
+		walk_sound.max_distance = 15.0
+		walk_sound.unit_size = 10.0
+		walk_sound.attenuation_filter_cutoff_hz = 5000
+		walk_sound.attenuation_filter_db = 24.0
+		
+	if fire_sound:
+		fire_sound.bus = "SFX"
+		fire_sound.max_distance = 60.0
+		fire_sound.unit_size = 20.0
+		fire_sound.attenuation_filter_cutoff_hz = 5000
+		fire_sound.attenuation_filter_db = 24.0
+		
+	if hit_sound:
+		hit_sound.bus = "SFX"
+		hit_sound.max_distance = 35.0
+		hit_sound.unit_size = 10.0
+		hit_sound.attenuation_filter_cutoff_hz = 5000
+		hit_sound.attenuation_filter_db = 24.0
+
+func _physics_process(delta):
+	# Check death sync - ALL PEERS check this
+	if sync_is_dead:
+		if not is_multiplayer_authority() and not is_dead:
+			_die()
+			return
+		elif is_multiplayer_authority() and not is_dead:
+			_die()
+		return
+	
+	if is_dead:
+		return
+	
+	# CLIENT: Apply synced data from server
+	if not is_multiplayer_authority():
+		global_position = sync_position
+		rotation.y = sync_rotation_y
+		current_health = sync_health
+		is_shooting = sync_is_shooting
+		_apply_synced_animation()
+		_update_health_ui()
+		return
+	
+	# === HOST ONLY BELOW ===
+	
+	# Apply gravity
+	if not is_on_floor():
+		velocity.y -= 20.0 * delta
+	else:
+		velocity.y = 0
+	move_and_slide()
+	
+	# CONTINUOUS group-based scan (every 0.3s)
+	group_scan_timer += delta
+	if group_scan_timer >= group_scan_interval:
+		_scan_for_players_by_group()
+		_update_player_distances()
+		group_scan_timer = 0.0
+	
+	# Check for target switching based on priority (every 0.2s)
+	target_switch_timer += delta
+	if target_switch_timer >= target_switch_check_interval:
+		_check_for_priority_target_switch()
+		target_switch_timer = 0.0
+	
+	# Validate current target
+	_validate_current_target()
+	
+	# Acquire target if we don't have one
+	if players_in_range.size() > 0 and (target_player == null or not is_instance_valid(target_player) or not _is_target_valid(target_player)):
+		_acquire_best_target()
+	
+	# AI behavior
+	if target_player and is_instance_valid(target_player) and _is_target_valid(target_player):
+		_rotate_to_face_player(delta)
+		
+		var can_see_player = _check_can_see_player()
+		
+		if can_see_player:
+			if not is_shooting:
+				_start_shooting_animation()
+			
+			if can_shoot:
+				_fire_at_player()
+		else:
+			if is_shooting:
+				_stop_shooting_animation()
+	else:
+		_stop_shooting_animation()
+	
+	# Update footstep audio
+	_update_footstep_audio(delta)
+	
+	# HOST: Update ALL sync variables (including player list)
+	sync_position = global_position
+	sync_rotation_y = rotation.y
+	sync_health = current_health
+	sync_is_shooting = is_shooting
+	sync_is_dead = (current_health <= 0)
+	
+	# Sync the list of players in range
+	sync_players_in_range.clear()
+	for player in players_in_range:
+		if is_instance_valid(player):
+			sync_players_in_range.append(int(player.name))
+	
+	if animation_player and animation_player.current_animation != "":
+		sync_current_animation = animation_player.current_animation
+	
+	if target_player and is_instance_valid(target_player):
+		sync_target_id = int(target_player.name)
+	else:
+		sync_target_id = 0
+
+func _process(_delta):
+	# ALL PEERS check death state
+	if sync_is_dead:
+		if not is_multiplayer_authority() and not is_dead:
+			_die()
+		return
+		
+	# CLIENT: Check for audio updates
+	if not is_multiplayer_authority():
+		_check_remote_audio()
+		_check_remote_audio_stop()
+		_update_health_ui()
+
+# ROBUST: Update distances for all tracked players
+func _update_player_distances():
+	player_distances.clear()
+	
+	for player in players_in_range:
+		if is_instance_valid(player):
+			var distance = global_position.distance_to(player.global_position)
+			player_distances[player] = distance
+
+# ROBUST: Check if we should switch to a priority target
+func _check_for_priority_target_switch():
+	if players_in_range.size() <= 1:
+		return  # Only one or no players, no need to switch
+	
+	# Check if current target has line of sight
+	var current_target_visible = false
+	if target_player and is_instance_valid(target_player) and _is_target_valid(target_player):
+		current_target_visible = _check_can_see_player()
+	
+	# Find closest player and check for firable targets
+	var closest_player: CharacterBody3D = null
+	var closest_distance: float = INF
+	var closest_firable_player: CharacterBody3D = null
+	var closest_firable_distance: float = INF
+	
+	for player in players_in_range:
+		if is_instance_valid(player) and _is_target_valid(player):
+			var distance = player_distances.get(player, global_position.distance_to(player.global_position))
+			
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player
+			
+			# Check if this player has line of sight
+			var temp_target = target_player
+			target_player = player  # Temporarily set to check LOS
+			var has_los = _check_can_see_player()
+			target_player = temp_target  # Restore original target
+			
+			if has_los and distance < closest_firable_distance:
+				closest_firable_distance = distance
+				closest_firable_player = player
+	
+	# CRITICAL: If current target is NOT visible but another player IS visible, switch immediately
+	if not current_target_visible and closest_firable_player:
+		if target_player != closest_firable_player:
+			print("🎯 IMMEDIATE SWITCH: Current target not visible, switching to firable player ", closest_firable_player.name)
+			target_player = closest_firable_player
+			player_in_range = true
+			if is_shooting:
+				_stop_shooting_animation()
+			return
+	
+	# Priority switch: If any player is within 5m, ALWAYS target them
+	if closest_player and closest_distance < PRIORITY_DISTANCE:
+		if target_player != closest_player:
+			print("⚠️ PRIORITY SWITCH: Player ", closest_player.name, " is within ", closest_distance, "m - switching target!")
+			target_player = closest_player
+			player_in_range = true
+			# Interrupt current shooting to retarget
+			if is_shooting:
+				_stop_shooting_animation()
+			return
+	
+	# If current target is dead or invalid, switch immediately
+	if target_player == null or not is_instance_valid(target_player) or not _is_target_valid(target_player):
+		if closest_player:
+			print("🎯 Target lost, switching to: ", closest_player.name)
+			target_player = closest_player
+			player_in_range = true
+
+# GROUP-BASED DETECTION SYSTEM (runs continuously)
+func _scan_for_players_by_group():
+	var all_players = get_tree().get_nodes_in_group("player")
+	var players_found_this_scan: Array = []
+	
+	for player in all_players:
+		if is_instance_valid(player) and player is CharacterBody3D:
+			var distance = global_position.distance_to(player.global_position)
+			
+			# If player is within detection radius
+			if distance <= detection_radius and _is_target_valid(player):
+				players_found_this_scan.append(player)
+				
+				if not players_in_range.has(player):
+					players_in_range.append(player)
+					print("✅ GROUP DETECTION: Player ", player.name, " entered range (distance: ", distance, ")")
+					
+					# Notify via RPC that player was detected
+					rpc("_sync_player_detected", int(player.name), distance)
+	
+	# Remove players that are no longer in range
+	for player in players_in_range.duplicate():
+		if not players_found_this_scan.has(player):
+			var distance = global_position.distance_to(player.global_position) if is_instance_valid(player) else INF
+			
+			if distance > detection_radius or not _is_target_valid(player):
+				players_in_range.erase(player)
+				print("❌ GROUP DETECTION: Player ", player.name if is_instance_valid(player) else "invalid", " left range")
+				
+				# If this was our target, clear it
+				if player == target_player:
+					target_player = null
+					player_in_range = false
+					print("🎯 Current target lost, will acquire new target")
+
+# RPC to notify all clients about player detection (for consistency)
+@rpc("authority", "call_local", "reliable")
+func _sync_player_detected(player_id: int, distance: float):
+	if not is_multiplayer_authority():
+		print("CLIENT: Received detection sync - Player ", player_id, " at distance ", distance)
+
+# AREA-BASED DETECTION SYSTEM (instant response)
+func _on_detection_area_entered(area: Area3D):
+	if not is_multiplayer_authority():
+		return
+	
+	var player = area.get_parent()
+	
+	if player and player.is_in_group("player") and _is_target_valid(player):
+		if not players_in_range.has(player):
+			players_in_range.append(player)
+			var distance = global_position.distance_to(player.global_position)
+			print("✅ AREA DETECTION: Player ", player.name, " entered range (distance: ", distance, ")")
+			
+			# If no current target or this player is closer, acquire immediately
+			if target_player == null or distance < PRIORITY_DISTANCE:
+				target_player = player
+				player_in_range = true
+				print("🎯 IMMEDIATE TARGET: ", player.name)
+
+func _on_detection_area_exited(area: Area3D):
+	if not is_multiplayer_authority():
+		return
+	
+	var player = area.get_parent()
+	
+	if player and player.is_in_group("player") and players_in_range.has(player):
+		players_in_range.erase(player)
+		print("❌ AREA DETECTION: Player ", player.name, " left range")
+		
+		if player == target_player:
+			target_player = null
+			player_in_range = false
+			_acquire_best_target()
+
+func _validate_current_target():
+	if target_player and is_instance_valid(target_player):
+		if not _is_target_valid(target_player):
+			print("⚠️ Current target invalid: ", target_player.name)
+			target_player = null
+	else:
+		target_player = null
+
+func _is_target_valid(player: CharacterBody3D) -> bool:
+	if not player or not is_instance_valid(player):
+		return false
+	
+	# Check if player is dead
+	if player.has_method("get") and player.get("sync_is_dead"):
+		if player.sync_is_dead:
+			return false
+	
+	# Check if player is in range
+	var distance = global_position.distance_to(player.global_position)
+	if distance > detection_radius:
+		return false
+	
+	# Check if player is a spectator
+	if player.has_method("get") and player.get("is_spectator"):
+		if player.is_spectator:
+			return false
+	
+	return true
+
+# ROBUST: Acquire the BEST target (closest or priority)
+func _acquire_best_target():
+	var closest_player: CharacterBody3D = null
+	var closest_distance: float = INF
+	var priority_player: CharacterBody3D = null  # Player within 5m
+	
+	for player in players_in_range:
+		if is_instance_valid(player) and _is_target_valid(player):
+			var distance = player_distances.get(player, global_position.distance_to(player.global_position))
+			
+			# Check for priority target (within 5m)
+			if distance < PRIORITY_DISTANCE:
+				if priority_player == null or distance < global_position.distance_to(priority_player.global_position):
+					priority_player = player
+			
+			# Track closest regardless
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_player = player
+	
+	# Prioritize close players
+	if priority_player:
+		target_player = priority_player
+		player_in_range = true
+		print("🎯 PRIORITY TARGET: ", priority_player.name, " (within 5m)")
+	elif closest_player:
+		target_player = closest_player
+		player_in_range = true
+		print("🎯 TARGET ACQUIRED: ", closest_player.name, " at distance: ", closest_distance)
+	else:
+		target_player = null
+		player_in_range = false
+		print("⚠️ No valid targets available")
+
+func _check_remote_audio():
+	if footstep_counter != last_footstep_counter:
+		_play_footstep_sound_client(footstep_type)
+		last_footstep_counter = footstep_counter
+	
+	if fire_counter != last_fire_counter:
+		_play_fire_sound_client()
+		last_fire_counter = fire_counter
+	
+	if hit_counter != last_hit_counter:
+		_play_hit_sound_client()
+		last_hit_counter = hit_counter
+
+func _check_remote_audio_stop():
+	if is_multiplayer_authority():
+		return
+	
+	var is_stopped_now = sync_position.distance_to(last_sync_position) < 0.1
+	
+	if is_stopped_now:
+		velocity_stopped_frames += 1
+	else:
+		velocity_stopped_frames = 0
+		last_sync_position = sync_position
+	
+	if velocity_stopped_frames >= required_stopped_frames:
+		_stop_footstep_sounds()
+		velocity_stopped_frames = required_stopped_frames
+
+func _stop_footstep_sounds():
+	if walk_sound and walk_sound.playing:
+		walk_sound.stop()
+
+func _apply_synced_animation():
+	if not animation_player:
+		return
+	
+	if sync_current_animation != "" and animation_player.current_animation != sync_current_animation:
+		if animation_player.has_animation(sync_current_animation):
+			animation_player.play(sync_current_animation)
+		else:
+			push_warning("Animation not found: ", sync_current_animation)
+
+func _rotate_to_face_player(delta: float):
+	if not target_player or not is_instance_valid(target_player):
+		return
+	
+	var direction_to_player = target_player.global_position - global_position
+	direction_to_player.y = 0
+	direction_to_player = direction_to_player.normalized()
+	
+	if direction_to_player.length() > 0.01:
+		var target_rotation = atan2(direction_to_player.x, direction_to_player.z)
+		rotation.y = lerp_angle(rotation.y, target_rotation, ROTATION_SPEED * delta)
+
+func _check_can_see_player() -> bool:
+	if not target_player or not is_instance_valid(target_player):
+		return false
+	
+	var space_state = get_world_3d().direct_space_state
+	var origin = global_position + Vector3(0, 1.5, 0)
+	var target_pos = target_player.global_position + Vector3(0, 1.0, 0)
+	
+	var query = PhysicsRayQueryParameters3D.create(origin, target_pos)
+	query.collision_mask = 1 | 2 | 4
+	query.exclude = [self]
+	
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		var collider = result.collider
+		if collider == target_player or (collider and collider.is_in_group("player")):
+			return true
+		else:
+			return false
+	
+	return false
+
+func take_damage(damage: int):
+	if sync_is_dead:
+		return
+	
+	if is_multiplayer_authority():
+		_apply_damage_on_host(damage)
+	else:
+		rpc_id(1, "_apply_damage_on_host", damage)
+
+@rpc("any_peer", "call_local", "reliable")
+func _apply_damage_on_host(damage: int):
+	if not is_multiplayer_authority():
+		return
+	
+	if sync_is_dead:
+		return
+	
+	current_health -= damage
+	current_health = max(0, current_health)
+	sync_health = current_health
+	hit_counter += 1
+	
+	_play_hit_sound_host()
+	_update_health_ui()
+	
+	print("HOST: Enemy health now: ", current_health)
+	
+	if current_health <= 0:
+		print("HOST: Enemy died!")
+		sync_is_dead = true
+		# Death cleanup happens in _physics_process -> _die()
+
+func _start_shooting_animation():
+	if animation_player and animation_player.has_animation("Firing"):
+		is_shooting = true
+		sync_is_shooting = true
+		animation_player.play("Firing")
+		animation_player.speed_scale = 1.0
+		sync_current_animation = "Firing"
+
+func _stop_shooting_animation():
+	if is_shooting:
+		is_shooting = false
+		sync_is_shooting = false
+		if animation_player and animation_player.has_animation("RifleIdle"):
+			animation_player.play("RifleIdle")
+			sync_current_animation = "RifleIdle"
+
+func _update_health_ui():
+	if health_label:
+		health_label.text = str(current_health)
+		var health_percent = float(current_health) / float(MAX_HEALTH)
+		if health_percent > 0.6:
+			health_label.modulate = Color(0, 1, 0)
+		elif health_percent > 0.3:
+			health_label.modulate = Color(1, 1, 0)
+		else:
+			health_label.modulate = Color(1, 0, 0)
+
+func _play_footstep_sound_host(step_type: String):
+	if walk_sound and walk_sound.stream:
+		if walk_sound.playing:
+			walk_sound.stop()
+		walk_sound.play()
+
+func _play_fire_sound_host():
+	if fire_sound and fire_sound.stream:
+		fire_sound.play()
+
+func _play_hit_sound_host():
+	if hit_sound and hit_sound.stream:
+		hit_sound.play()
+
+func _play_footstep_sound_client(step_type: String):
+	if walk_sound and walk_sound.stream:
+		if walk_sound.playing:
+			walk_sound.stop()
+		walk_sound.play()
+
+func _play_fire_sound_client():
+	if fire_sound and fire_sound.stream:
+		fire_sound.play()
+
+func _play_hit_sound_client():
+	if hit_sound and hit_sound.stream:
+		hit_sound.play()
+
+func _update_footstep_audio(delta):
+	if sync_is_dead:
+		_stop_footstep_sounds()
+		footstep_timer = 0.0
+		return
+	
+	var is_moving = velocity.length() > 0.1 and is_on_floor()
+	
+	if is_moving:
+		footstep_timer += delta
+		
+		if footstep_timer >= walk_footstep_interval:
+			footstep_type = "walk"
+			footstep_counter += 1
+			_play_footstep_sound_host(footstep_type)
+			footstep_timer = 0.0
+	else:
+		_stop_footstep_sounds()
+		footstep_timer = 0.0
+
+func _fire_at_player():
+	if not target_player or not is_instance_valid(target_player):
+		return
+	
+	can_shoot = false
+	fire_counter += 1
+	_play_fire_sound_host()
+	
+	print("🔫 HOST: Firing at player: ", target_player.name)
+	
+	if _check_can_see_player():
+		if target_player.has_method("take_damage"):
+			target_player.take_damage(ENEMY_DAMAGE)
+			print("💥 HOST: Dealt ", ENEMY_DAMAGE, " damage to player: ", target_player.name)
+			
+	await get_tree().create_timer(fire_rate).timeout
+	can_shoot = true
+
+func _die():
+	if is_dead:
+		return
+	
+	is_dead = true
+	
+	if player_detector:
+		player_detector.monitoring = false
+	
+	collision_layer = 0
+	collision_mask = 0
+	
+	if animation_player and animation_player.is_playing():
+		animation_player.stop(false)
+	
+	await get_tree().process_frame
+	
+	if animation_player:
+		animation_player.play("Death")
+		animation_player.speed_scale = 1.0
+		var anim_length = animation_player.get_animation("Death").length
+		await get_tree().create_timer(anim_length).timeout
+	
+	sync_is_dead = true
+	queue_free()
+`
     },
     
     animation: {
@@ -2167,7 +7706,301 @@ func _apply_damage():
         description: "Advanced animation system with stance management and smooth blending.",
         filename: "animation.gd",
         // PASTE YOUR FULL animation.gd CODE HERE
-        code: ``
+        code: `extends Node3D
+
+const LERP_VELOCITY: float = 0.15
+const LOOK_LERP_VELOCITY: float = 0.2
+
+@export_category("Objects")
+@export var _character: CharacterBody3D = null
+@export var animation_player: AnimationPlayer = null
+
+@export_category("Animation Settings")
+@export var idle_speed: float = 1.0
+@export var walk_speed: float = 1.0
+@export var run_speed: float = 1.0
+@export var jump_speed: float = 1.0
+@export var crouch_speed: float = 0.8
+@export var prone_speed: float = 0.6
+@export var melee_speed: float = 1.5
+@export var firing_speed: float = 1.0
+@export var aim_speed: float = 1.0
+@export var victory_dance_speed: float = 1
+
+# Animation state
+var is_melee_attacking: bool = false
+var is_dancing: bool = false
+var is_in_car: bool = false
+var is_grenade_aiming: bool = false  # Add this
+var is_throwing_grenade: bool = false
+# Server detection
+var is_headless_server: bool = false
+
+func _ready():
+	# Detect if running as headless server
+	is_headless_server = DisplayServer.get_name() == "headless"
+	
+	if is_headless_server:
+		print("[Animation] Running on headless server - animations disabled")
+		# Disable animation player on headless server for performance
+		if animation_player:
+			animation_player.active = false
+
+func apply_rotation(_velocity: Vector3) -> void:
+	if _velocity.length() < 0.1:
+		return
+	var new_rotation_y = lerp_angle(rotation.y, atan2(-_velocity.x, -_velocity.z), LERP_VELOCITY)
+	rotation.y = new_rotation_y
+	
+func _process(delta):
+	# Skip processing on headless server
+	if is_headless_server:
+		return
+	
+	# Copy SpringArmOffset rotation during combat actions
+	if _character and _character.has_method("should_override_rotation") and _character.should_override_rotation():
+		if _character.has_method("get_spring_arm_offset"):
+			var spring_arm_offset = _character.get_spring_arm_offset()
+			if spring_arm_offset:
+				# Directly copy Y rotation from SpringArmOffset to character body
+				rotation.y = spring_arm_offset.rotation.y + PI
+				
+func play_melee_animation():
+	if not animation_player or is_headless_server:
+		return
+	if animation_player.has_animation("Attack2"):
+		is_melee_attacking = true
+		animation_player.play("Attack2")
+		animation_player.speed_scale = melee_speed
+		await animation_player.animation_finished
+		is_melee_attacking = false
+		# Force reset animation state
+		animation_player.stop()
+
+func play_victory_dance():
+	if not animation_player or is_headless_server:
+		return
+	if animation_player.has_animation("Dance"):
+		is_dancing = true
+		animation_player.play("Dance")
+		animation_player.speed_scale = victory_dance_speed
+		await animation_player.animation_finished
+		is_dancing = false
+		# Force reset animation state
+		animation_player.stop()
+
+func play_grenade_throw_animation(stance: String = "normal"):
+	"""Play grenade throw animation - instance based with timeout safety"""
+	if not animation_player or is_headless_server:
+		return
+	is_throwing_grenade = true
+	# Try to find and play a grenade throw animation
+	var anim_name = ""
+	match stance:
+		"normal":
+			anim_name = "IdleGrenade"
+		"crouch":
+			anim_name = "CrThGrenade"
+		"prone":
+			anim_name = "ProneGrenade"
+		_:
+			anim_name = "IdleGrenade"
+	if animation_player.has_animation(anim_name):
+		animation_player.play(anim_name)
+		# Wait for animation to finish
+		await animation_player.animation_finished
+		
+	is_throwing_grenade = false
+	
+func animate(_velocity: Vector3, stance: String, is_firing: bool = false, is_aiming: bool = false, look_target: Vector3 = Vector3.ZERO) -> void:
+	# Skip on headless server
+	if is_headless_server:
+		return
+		
+	if not animation_player or not _character:
+		return
+	if is_throwing_grenade:
+		return
+	# Skip all animations if in car
+	if is_in_car:
+		return
+	
+	# Don't change animations during melee attack
+	if is_melee_attacking:
+		return
+	
+	# Don't change animations during dance
+	if is_dancing:
+		return
+	
+	# Rotation is handled in _process() for combat actions
+	
+	var anim_to_play = ""
+	var anim_speed = 1.0
+	var is_moving = _velocity.length() > 0.1
+	var is_running = _character.is_running() if _character.has_method("is_running") else false
+	var is_on_ground = _character.is_on_floor()
+	
+	# Handle different weapon types
+	match _character.current_weapon:
+		_character.WeaponType.GUN:
+			anim_to_play = _get_gun_animation(stance, is_firing, is_aiming, is_moving, is_running, is_on_ground)
+		_character.WeaponType.MELEE:
+			anim_to_play = _get_melee_animation(stance, is_moving, is_running, is_on_ground)
+		_character.WeaponType.GRENADE:
+			# For grenade weapon, just use no weapon animations
+			anim_to_play = _get_no_weapon_animation(stance, is_moving, is_running, is_on_ground)
+		_character.WeaponType.NONE:
+			anim_to_play = _get_no_weapon_animation(stance, is_moving, is_running, is_on_ground)
+	
+	# Set animation speed
+	anim_speed = _get_animation_speed(anim_to_play, stance)
+	
+	if animation_player.has_animation(anim_to_play):
+		if animation_player.current_animation != anim_to_play:
+			animation_player.play(anim_to_play)
+			animation_player.speed_scale = anim_speed
+		else:
+			animation_player.speed_scale = anim_speed
+
+func _get_gun_animation(stance: String, is_firing: bool, is_aiming: bool, is_moving: bool, is_running: bool, is_on_ground: bool) -> String:
+	match stance:
+		"normal":
+			if not is_on_ground:
+				return "RifleJump"
+			elif is_aiming:
+				return "RifleAim"
+			elif is_firing:
+				if is_running and is_moving:
+					return "RunFire"
+				elif is_moving:
+					return "WalkFire"
+				else:
+					return "Firing"
+			elif is_moving:
+				if is_running:
+					return "Run"
+				else:
+					return "Walk"
+			else:
+				return "RifleIdle"
+		
+		"crouch":
+			if is_aiming:
+				return "IdleCrAim"
+			elif is_firing:
+				if is_moving:
+					return "CrWFire"
+				else:
+					return "CrFire"
+			elif is_moving:
+				return "CrWalk"
+			else:
+				return "CrIdle"
+		
+		"prone":
+			if is_firing:
+				return "ProneFire"
+			elif is_moving:
+				return "ProneForward"
+			else:
+				return "ProneIdle"
+	
+	return "RifleIdle"
+
+func _get_melee_animation(stance: String, is_moving: bool, is_running: bool, is_on_ground: bool) -> String:
+	match stance:
+		"normal":
+			if not is_on_ground:
+				return "JumpSt"
+			elif is_moving:
+				if is_running:
+					return "Running"
+				else:
+					return "Walking"
+			else:
+				return "Idle"
+		
+		"crouch":
+			if is_moving:
+				return "CrWalk"
+			else:
+				return "CrIdle"
+		
+		"prone":
+			if is_moving:
+				return "ProneForward"
+			else:
+				return "ProneIdle"
+	
+	return "RifleIdle"
+
+func _get_grenade_animation(stance: String, is_moving: bool, is_running: bool, is_on_ground: bool) -> String:
+	# Use no weapon animations for grenade
+	return _get_no_weapon_animation(stance, is_moving, is_running, is_on_ground)
+
+func _get_no_weapon_animation(stance: String, is_moving: bool, is_running: bool, is_on_ground: bool) -> String:
+	match stance:
+		"normal":
+			if not is_on_ground:
+				return "JumpSt"
+			elif is_moving:
+				if is_running:
+					return "Running"
+				else:
+					return "Walking"
+			else:
+				return "Idle"
+		
+		"crouch":
+			if is_moving:
+				return "CrWalk"
+			else:
+				return "CrIdle"
+		
+		"prone":
+			if is_moving:
+				return "ProneForward"
+			else:
+				return "ProneIdle"
+	
+	return "Idle"
+
+func _get_animation_speed(anim_name: String, stance: String) -> float:
+	match stance:
+		"crouch":
+			return crouch_speed
+		"prone":
+			return prone_speed
+		_:
+			if "Run" in anim_name or "run" in anim_name:
+				return run_speed
+			elif "Walk" in anim_name or "walk" in anim_name:
+				return walk_speed
+			elif "Jump" in anim_name:
+				return jump_speed
+			elif "Attack" in anim_name:
+				return melee_speed
+			elif "Fire" in anim_name or "Aim" in anim_name:
+				return firing_speed
+			else:
+				return idle_speed
+
+func play_death_animation(stance: String):
+	if not animation_player or is_headless_server:
+		return
+	var death_anim = ""
+	match stance:
+		"crouch":
+			death_anim = "CrDeath"
+		"prone":
+			death_anim = "ProneDeath"
+		_:
+			death_anim = "Death"
+	if animation_player.has_animation(death_anim):
+		animation_player.play(death_anim)
+		animation_player.speed_scale = 1.0
+`
     }
 };
 
