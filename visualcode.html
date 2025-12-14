@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Godot Visual Script Editor - AI-Powered Block Coding</title>
@@ -10,11 +10,15 @@
         :root {
             --primary: #ff6b35;
             --secondary: #2a2a2a;
-            --accent: #00d9ff;
-            --accent-light: #4de7ff;
+            --accent: #ffa500;
+            --accent-light: #ffd166;
             --light: #f8f9fa;
             --dark: #1a1a1a;
             --darker: #121212;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * {
@@ -31,37 +35,55 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
         .main-header {
-            padding: 100px 0 40px;
+            padding: 80px 0 30px;
             text-align: center;
         }
 
         .main-header h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
         }
 
         .main-header p {
             color: var(--accent-light);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         /* Editor Layout */
         .editor-layout {
             display: grid;
-            grid-template-columns: 300px 1fr 350px;
+            grid-template-columns: 320px 1fr 400px;
             gap: 1.5rem;
-            height: 700px;
+            height: 750px;
             margin-bottom: 2rem;
         }
 
@@ -75,30 +97,79 @@
             overflow-y: auto;
         }
 
+        .palette-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
         .palette-title {
             color: var(--primary);
-            margin-bottom: 1.5rem;
             font-size: 1.3rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
+        .search-box {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
+        }
+
         .block-category {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .category-header:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .category-title {
             color: var(--accent);
-            margin-bottom: 0.8rem;
             font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-count {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .category-content {
+            margin-top: 0.8rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.5rem;
         }
 
         .block-type {
@@ -106,17 +177,19 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             padding: 0.8rem;
-            margin-bottom: 0.5rem;
             cursor: grab;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all 0.2s;
-            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .block-type:hover {
             background: rgba(255, 255, 255, 0.12);
             border-color: var(--accent);
-            transform: translateX(5px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.2);
         }
 
         .block-type:active {
@@ -125,7 +198,7 @@
 
         .block-icon {
             font-size: 1.2rem;
-            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
 
         /* Workspace */
@@ -133,7 +206,7 @@
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -155,7 +228,7 @@
             align-items: center;
             justify-content: center;
             color: var(--accent-light);
-            border: 2px dashed rgba(0, 217, 255, 0.3);
+            border: 2px dashed rgba(255, 165, 0, 0.3);
             border-radius: 12px;
             padding: 2rem;
             text-align: center;
@@ -165,16 +238,17 @@
             display: none;
         }
 
-        /* Extends Block (Fixed at Top) */
+        /* Extends Block */
         .extends-container {
-            background: rgba(255, 107, 53, 0.1);
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 165, 0, 0.1));
             border: 2px solid var(--primary);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             position: sticky;
             top: 0;
             z-index: 10;
+            backdrop-filter: blur(5px);
         }
 
         .extends-header {
@@ -189,9 +263,9 @@
         .extends-select {
             width: 100%;
             padding: 0.8rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             font-size: 1rem;
             font-family: inherit;
@@ -209,18 +283,20 @@
         }
 
         .block-instance {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
             padding: 1.2rem;
             margin-bottom: 1rem;
             position: relative;
             transition: all 0.3s;
+            backdrop-filter: blur(5px);
         }
 
         .block-instance:hover {
             border-color: var(--accent);
-            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.1);
+            box-shadow: 0 6px 20px rgba(255, 165, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .block-header {
@@ -246,11 +322,11 @@
         }
 
         .block-btn {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
@@ -260,13 +336,14 @@
         }
 
         .block-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--accent);
             border-color: var(--accent);
+            transform: scale(1.1);
         }
 
         .block-config {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -285,10 +362,10 @@
 
         .config-input {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             font-family: inherit;
             font-size: 0.9rem;
@@ -297,56 +374,52 @@
         .config-input:focus {
             outline: none;
             border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
         }
 
         .config-select {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.7rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             font-family: inherit;
             font-size: 0.9rem;
         }
 
-        /* Block Connections */
-        .block-connector {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            z-index: 5;
+        .config-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.4);
         }
 
-        .connector-top {
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
+        /* Special Input for MPSyncer */
+        .mpsyncer-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px dashed rgba(255, 165, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
         }
 
-        .connector-bottom {
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
+        .mpsyncer-input textarea {
+            width: 100%;
+            min-height: 80px;
+            background: transparent;
+            border: none;
+            color: var(--accent-light);
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
         }
 
-        .connection-line {
-            position: absolute;
-            background: var(--accent);
-            height: 2px;
-            pointer-events: none;
-            z-index: 1;
+        .mpsyncer-input textarea:focus {
+            outline: none;
         }
 
-        /* Panel Right - AI Generation */
+        /* Generation Panel */
         .generation-panel {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -360,6 +433,9 @@
             color: var(--primary);
             margin-bottom: 1.5rem;
             font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .ai-config {
@@ -378,7 +454,7 @@
 
         .config-row {
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-bottom: 1rem;
         }
@@ -405,8 +481,8 @@
             color: #e0e0ff;
             font-size: 0.9rem;
             line-height: 1.5;
-            min-height: 200px;
-            max-height: 300px;
+            min-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             white-space: pre-wrap;
             margin-bottom: 1rem;
@@ -433,6 +509,19 @@
             display: block;
         }
 
+        .sync-vars-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .sync-vars-container.active {
+            display: block;
+        }
+
         /* Controls */
         .editor-controls {
             display: flex;
@@ -446,7 +535,7 @@
             background: linear-gradient(135deg, var(--primary), #e55a2b);
             color: white;
             padding: 1rem 2rem;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
             cursor: pointer;
             font-weight: bold;
@@ -458,8 +547,8 @@
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
         }
 
         .btn:disabled {
@@ -470,11 +559,11 @@
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, var(--accent), #00b8d4);
+            background: linear-gradient(135deg, var(--accent), #ff8c00);
         }
 
         .btn-secondary:hover {
-            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 10px 25px rgba(255, 165, 0, 0.4);
         }
 
         .btn-clear {
@@ -482,7 +571,7 @@
         }
 
         .btn-clear:hover {
-            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
+            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.4);
         }
 
         /* Loading */
@@ -498,12 +587,12 @@
         }
 
         .spinner {
-            border: 4px solid rgba(0, 217, 255, 0.1);
+            border: 4px solid rgba(255, 165, 0, 0.1);
             border-top: 4px solid var(--accent);
             border-right: 4px solid var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
         }
@@ -528,14 +617,20 @@
 
         .error-message {
             background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
-            border: 1px solid #dc3545;
+            border: 1px solid var(--danger);
             color: #ff6b6b;
         }
 
         .success-message {
             background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1));
-            border: 1px solid #28a745;
+            border: 1px solid var(--success);
             color: #6bff88;
+        }
+
+        .warning-message {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+            border: 1px solid var(--warning);
+            color: #ffd166;
         }
 
         @keyframes slideIn {
@@ -544,20 +639,20 @@
         }
 
         /* Mobile Responsive */
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .editor-layout {
                 grid-template-columns: 1fr;
                 height: auto;
             }
             
             .workspace {
-                min-height: 500px;
+                min-height: 600px;
             }
         }
 
         @media (max-width: 768px) {
             .main-header {
-                padding: 80px 0 30px;
+                padding: 60px 0 20px;
             }
             
             .main-header h1 {
@@ -576,6 +671,16 @@
             .block-config {
                 grid-template-columns: 1fr;
             }
+            
+            .config-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
@@ -584,6 +689,20 @@
         <div class="main-header">
             <h1>🧱 Godot Visual Block Editor</h1>
             <p>Drag blocks to design your script. AI generates production-ready Godot 4.4 GDScript.</p>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span>📊</span>
+                    <span id="block-count">0</span> Blocks Added
+                </div>
+                <div class="stat-item">
+                    <span>⚡</span>
+                    AI-Powered Generation
+                </div>
+                <div class="stat-item">
+                    <span>🎮</span>
+                    Multiplayer Ready
+                </div>
+            </div>
         </div>
 
         <!-- Editor Controls -->
@@ -600,127 +719,307 @@
             <button class="btn btn-secondary" id="export-blocks">
                 <span>💾</span> Export Blocks
             </button>
+            <button class="btn btn-secondary" id="import-blocks">
+                <span>📤</span> Import Blocks
+            </button>
         </div>
 
         <!-- Main Editor Layout -->
         <div class="editor-layout">
             <!-- Left: Block Palette -->
             <div class="block-palette" id="block-palette">
-                <h3 class="palette-title">📦 Block Library</h3>
+                <div class="palette-header">
+                    <h3 class="palette-title">📦 Block Library</h3>
+                    <div class="category-count" id="total-blocks">52 blocks</div>
+                </div>
                 
-                <div class="block-category">
-                    <h4 class="category-title">🎮 Input Blocks</h4>
-                    <div class="block-type" data-type="input" draggable="true">
-                        <span class="block-icon">🎮</span> Input Detection
+                <input type="text" class="search-box" id="block-search" placeholder="🔍 Search blocks...">
+                
+                <!-- Category: Input -->
+                <div class="block-category" data-category="input">
+                    <div class="category-header" onclick="toggleCategory('input')">
+                        <h4 class="category-title">
+                            <span>🎮</span> Input Blocks
+                        </h4>
+                        <div class="category-count">5</div>
                     </div>
-                    <div class="block-type" data-type="keyboard" draggable="true">
-                        <span class="block-icon">⌨️</span> Keyboard Input
-                    </div>
-                    <div class="block-type" data-type="mouse" draggable="true">
-                        <span class="block-icon">🖱️</span> Mouse Input
-                    </div>
-                    <div class="block-type" data-type="touch" draggable="true">
-                        <span class="block-icon">👆</span> Touch Input
-                    </div>
-                </div>
-
-                <div class="block-category">
-                    <h4 class="category-title">🚶 Movement Blocks</h4>
-                    <div class="block-type" data-type="movement" draggable="true">
-                        <span class="block-icon">🚶</span> Basic Movement
-                    </div>
-                    <div class="block-type" data-type="jump" draggable="true">
-                        <span class="block-icon">🦘</span> Jump
-                    </div>
-                    <div class="block-type" data-type="gravity" draggable="true">
-                        <span class="block-icon">⬇️</span> Gravity
-                    </div>
-                    <div class="block-type" data-type="physics" draggable="true">
-                        <span class="block-icon">⚛️</span> Physics Movement
+                    <div class="category-content" id="category-input">
+                        <div class="block-type" data-type="input_action" draggable="true">
+                            <span class="block-icon">🎮</span> Input Action
+                        </div>
+                        <div class="block-type" data-type="keyboard" draggable="true">
+                            <span class="block-icon">⌨️</span> Keyboard Input
+                        </div>
+                        <div class="block-type" data-type="mouse" draggable="true">
+                            <span class="block-icon">🖱️</span> Mouse Input
+                        </div>
+                        <div class="block-type" data-type="touch" draggable="true">
+                            <span class="block-icon">👆</span> Touch Input
+                        </div>
+                        <div class="block-type" data-type="joypad" draggable="true">
+                            <span class="block-icon">🎮</span> Joypad Input
+                        </div>
                     </div>
                 </div>
 
-                <div class="block-category">
-                    <h4 class="category-title">🎬 Animation Blocks</h4>
-                    <div class="block-type" data-type="animation" draggable="true">
-                        <span class="block-icon">🎬</span> Play Animation
+                <!-- Category: Movement -->
+                <div class="block-category" data-category="movement">
+                    <div class="category-header" onclick="toggleCategory('movement')">
+                        <h4 class="category-title">
+                            <span>🚶</span> Movement Blocks
+                        </h4>
+                        <div class="category-count">6</div>
                     </div>
-                    <div class="block-type" data-type="animation-state" draggable="true">
-                        <span class="block-icon">🔄</span> Animation State
-                    </div>
-                    <div class="block-type" data-type="blend" draggable="true">
-                        <span class="block-icon">🎭</span> Blend Animations
-                    </div>
-                </div>
-
-                <div class="block-category">
-                    <h4 class="category-title">🔊 Audio Blocks</h4>
-                    <div class="block-type" data-type="sound" draggable="true">
-                        <span class="block-icon">🔊</span> Play Sound
-                    </div>
-                    <div class="block-type" data-type="music" draggable="true">
-                        <span class="block-icon">🎵</span> Play Music
-                    </div>
-                    <div class="block-type" data-type="volume" draggable="true">
-                        <span class="block-icon">🔈</span> Volume Control
-                    </div>
-                </div>
-
-                <div class="block-category">
-                    <h4 class="category-title">⚙️ Function Blocks</h4>
-                    <div class="block-type" data-type="function" draggable="true">
-                        <span class="block-icon">⚙️</span> Create Function
-                    </div>
-                    <div class="block-type" data-type="variable" draggable="true">
-                        <span class="block-icon">📊</span> Variable
-                    </div>
-                    <div class="block-type" data-type="return" draggable="true">
-                        <span class="block-icon">↩️</span> Return Value
+                    <div class="category-content" id="category-movement">
+                        <div class="block-type" data-type="movement_3d" draggable="true">
+                            <span class="block-icon">🚶</span> 3D Movement
+                        </div>
+                        <div class="block-type" data-type="movement_2d" draggable="true">
+                            <span class="block-icon">🧍</span> 2D Movement
+                        </div>
+                        <div class="block-type" data-type="jump" draggable="true">
+                            <span class="block-icon">🦘</span> Jump
+                        </div>
+                        <div class="block-type" data-type="gravity" draggable="true">
+                            <span class="block-icon">⬇️</span> Gravity
+                        </div>
+                        <div class="block-type" data-type="physics_movement" draggable="true">
+                            <span class="block-icon">⚛️</span> Physics Movement
+                        </div>
+                        <div class="block-type" data-type="path_follow" draggable="true">
+                            <span class="block-icon">🛤️</span> Path Follow
+                        </div>
                     </div>
                 </div>
 
-                <div class="block-category">
-                    <h4 class="category-title">📡 Signal Blocks</h4>
-                    <div class="block-type" data-type="signal" draggable="true">
-                        <span class="block-icon">📡</span> Define Signal
+                <!-- Category: UI -->
+                <div class="block-category" data-category="ui">
+                    <div class="category-header" onclick="toggleCategory('ui')">
+                        <h4 class="category-title">
+                            <span>🖥️</span> UI Blocks
+                        </h4>
+                        <div class="category-count">5</div>
                     </div>
-                    <div class="block-type" data-type="emit" draggable="true">
-                        <span class="block-icon">📤</span> Emit Signal
-                    </div>
-                    <div class="block-type" data-type="connect" draggable="true">
-                        <span class="block-icon">🔗</span> Connect Signal
-                    </div>
-                </div>
-
-                <div class="block-category">
-                    <h4 class="category-title">❓ Logic Blocks</h4>
-                    <div class="block-type" data-type="if" draggable="true">
-                        <span class="block-icon">❓</span> If Condition
-                    </div>
-                    <div class="block-type" data-type="for" draggable="true">
-                        <span class="block-icon">🔄</span> For Loop
-                    </div>
-                    <div class="block-type" data-type="while" draggable="true">
-                        <span class="block-icon">∞</span> While Loop
-                    </div>
-                    <div class="block-type" data-type="comparison" draggable="true">
-                        <span class="block-icon">⚖️</span> Comparison
+                    <div class="category-content" id="category-ui">
+                        <div class="block-type" data-type="label" draggable="true">
+                            <span class="block-icon">🏷️</span> Label
+                        </div>
+                        <div class="block-type" data-type="button" draggable="true">
+                            <span class="block-icon">🔘</span> Button
+                        </div>
+                        <div class="block-type" data-type="text_edit" draggable="true">
+                            <span class="block-icon">📝</span> Text Edit
+                        </div>
+                        <div class="block-type" data-type="progress_bar" draggable="true">
+                            <span class="block-icon">📊</span> Progress Bar
+                        </div>
+                        <div class="block-type" data-type="panel" draggable="true">
+                            <span class="block-icon">🟦</span> Panel
+                        </div>
                     </div>
                 </div>
 
-                <div class="block-category">
-                    <h4 class="category-title">🎯 Gameplay Blocks</h4>
-                    <div class="block-type" data-type="health" draggable="true">
-                        <span class="block-icon">❤️</span> Health System
+                <!-- Category: Animation -->
+                <div class="block-category" data-category="animation">
+                    <div class="category-header" onclick="toggleCategory('animation')">
+                        <h4 class="category-title">
+                            <span>🎬</span> Animation Blocks
+                        </h4>
+                        <div class="category-count">4</div>
                     </div>
-                    <div class="block-type" data-type="damage" draggable="true">
-                        <span class="block-icon">💥</span> Damage System
+                    <div class="category-content" id="category-animation">
+                        <div class="block-type" data-type="animation_play" draggable="true">
+                            <span class="block-icon">🎬</span> Play Animation
+                        </div>
+                        <div class="block-type" data-type="animation_state" draggable="true">
+                            <span class="block-icon">🔄</span> Animation State
+                        </div>
+                        <div class="block-type" data-type="blend_tree" draggable="true">
+                            <span class="block-icon">🎭</span> Blend Tree
+                        </div>
+                        <div class="block-type" data-type="sprite_anim" draggable="true">
+                            <span class="block-icon">🖼️</span> Sprite Animation
+                        </div>
                     </div>
-                    <div class="block-type" data-type="collision" draggable="true">
-                        <span class="block-icon">💥</span> Collision Detection
+                </div>
+
+                <!-- Category: Audio -->
+                <div class="block-category" data-category="audio">
+                    <div class="category-header" onclick="toggleCategory('audio')">
+                        <h4 class="category-title">
+                            <span>🔊</span> Audio Blocks
+                        </h4>
+                        <div class="category-count">4</div>
                     </div>
-                    <div class="block-type" data-type="area" draggable="true">
-                        <span class="block-icon">🎯</span> Area Detection
+                    <div class="category-content" id="category-audio">
+                        <div class="block-type" data-type="sound_play" draggable="true">
+                            <span class="block-icon">🔊</span> Play Sound
+                        </div>
+                        <div class="block-type" data-type="music_play" draggable="true">
+                            <span class="block-icon">🎵</span> Play Music
+                        </div>
+                        <div class="block-type" data-type="volume_control" draggable="true">
+                            <span class="block-icon">🔈</span> Volume Control
+                        </div>
+                        <div class="block-type" data-type="audio_bus" draggable="true">
+                            <span class="block-icon">🎚️</span> Audio Bus
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Logic -->
+                <div class="block-category" data-category="logic">
+                    <div class="category-header" onclick="toggleCategory('logic')">
+                        <h4 class="category-title">
+                            <span>🧠</span> Logic Blocks
+                        </h4>
+                        <div class="category-count">6</div>
+                    </div>
+                    <div class="category-content" id="category-logic">
+                        <div class="block-type" data-type="if_condition" draggable="true">
+                            <span class="block-icon">❓</span> If Condition
+                        </div>
+                        <div class="block-type" data-type="for_loop" draggable="true">
+                            <span class="block-icon">🔄</span> For Loop
+                        </div>
+                        <div class="block-type" data-type="while_loop" draggable="true">
+                            <span class="block-icon">∞</span> While Loop
+                        </div>
+                        <div class="block-type" data-type="switch" draggable="true">
+                            <span class="block-icon">🔀</span> Switch
+                        </div>
+                        <div class="block-type" data-type="comparison" draggable="true">
+                            <span class="block-icon">⚖️</span> Comparison
+                        </div>
+                        <div class="block-type" data-type="timer" draggable="true">
+                            <span class="block-icon">⏱️</span> Timer
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Gameplay -->
+                <div class="block-category" data-category="gameplay">
+                    <div class="category-header" onclick="toggleCategory('gameplay')">
+                        <h4 class="category-title">
+                            <span>🎯</span> Gameplay Blocks
+                        </h4>
+                        <div class="category-count">6</div>
+                    </div>
+                    <div class="category-content" id="category-gameplay">
+                        <div class="block-type" data-type="health_system" draggable="true">
+                            <span class="block-icon">❤️</span> Health System
+                        </div>
+                        <div class="block-type" data-type="damage_system" draggable="true">
+                            <span class="block-icon">💥</span> Damage System
+                        </div>
+                        <div class="block-type" data-type="collision" draggable="true">
+                            <span class="block-icon">💥</span> Collision
+                        </div>
+                        <div class="block-type" data-type="area_detection" draggable="true">
+                            <span class="block-icon">🎯</span> Area Detection
+                        </div>
+                        <div class="block-type" data-type="score_system" draggable="true">
+                            <span class="block-icon">🏆</span> Score System
+                        </div>
+                        <div class="block-type" data-type="inventory" draggable="true">
+                            <span class="block-icon">🎒</span> Inventory
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Multiplayer -->
+                <div class="block-category" data-category="multiplayer">
+                    <div class="category-header" onclick="toggleCategory('multiplayer')">
+                        <h4 class="category-title">
+                            <span>🌐</span> Multiplayer Blocks
+                        </h4>
+                        <div class="category-count">4</div>
+                    </div>
+                    <div class="category-content" id="category-multiplayer">
+                        <div class="block-type" data-type="rpc_generator" draggable="true">
+                            <span class="block-icon">📡</span> RPC Generator
+                        </div>
+                        <div class="block-type" data-type="mpsyncer" draggable="true">
+                            <span class="block-icon">🔄</span> MPSyncer
+                        </div>
+                        <div class="block-type" data-type="network_spawn" draggable="true">
+                            <span class="block-icon">🧍‍♂️</span> Network Spawn
+                        </div>
+                        <div class="block-type" data-type="sync_var" draggable="true">
+                            <span class="block-icon">🔄</span> Sync Variables
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Scene Management -->
+                <div class="block-category" data-category="scene">
+                    <div class="category-header" onclick="toggleCategory('scene')">
+                        <h4 class="category-title">
+                            <span>🎭</span> Scene Blocks
+                        </h4>
+                        <div class="category-count">4</div>
+                    </div>
+                    <div class="category-content" id="category-scene">
+                        <div class="block-type" data-type="load_scene" draggable="true">
+                            <span class="block-icon">📂</span> Load Scene
+                        </div>
+                        <div class="block-type" data-type="change_scene" draggable="true">
+                            <span class="block-icon">🔄</span> Change Scene
+                        </div>
+                        <div class="block-type" data-type="instantiate" draggable="true">
+                            <span class="block-icon">➕</span> Instantiate
+                        </div>
+                        <div class="block-type" data-type="scene_tree" draggable="true">
+                            <span class="block-icon">🌳</span> Scene Tree
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Data -->
+                <div class="block-category" data-category="data">
+                    <div class="category-header" onclick="toggleCategory('data')">
+                        <h4 class="category-title">
+                            <span>💾</span> Data Blocks
+                        </h4>
+                        <div class="category-count">5</div>
+                    </div>
+                    <div class="category-content" id="category-data">
+                        <div class="block-type" data-type="variable" draggable="true">
+                            <span class="block-icon">📊</span> Variable
+                        </div>
+                        <div class="block-type" data-type="function" draggable="true">
+                            <span class="block-icon">⚙️</span> Function
+                        </div>
+                        <div class="block-type" data-type="signal" draggable="true">
+                            <span class="block-icon">📡</span> Signal
+                        </div>
+                        <div class="block-type" data-type="array" draggable="true">
+                            <span class="block-icon">📋</span> Array
+                        </div>
+                        <div class="block-type" data-type="dictionary" draggable="true">
+                            <span class="block-icon">📚</span> Dictionary
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Advanced -->
+                <div class="block-category" data-category="advanced">
+                    <div class="category-header" onclick="toggleCategory('advanced')">
+                        <h4 class="category-title">
+                            <span>⚡</span> Advanced Blocks
+                        </h4>
+                        <div class="category-count">3</div>
+                    </div>
+                    <div class="category-content" id="category-advanced">
+                        <div class="block-type" data-type="shader" draggable="true">
+                            <span class="block-icon">🎨</span> Shader
+                        </div>
+                        <div class="block-type" data-type="particle" draggable="true">
+                            <span class="block-icon">✨</span> Particle System
+                        </div>
+                        <div class="block-type" data-type="custom_resource" draggable="true">
+                            <span class="block-icon">📦</span> Custom Resource
+                        </div>
                     </div>
                 </div>
             </div>
@@ -739,8 +1038,10 @@
                             <option value="Node3D">Node3D</option>
                             <option value="Area3D">Area3D</option>
                             <option value="RigidBody3D">RigidBody3D</option>
-                            <option value="Node2D">Node2D</option>
                             <option value="CharacterBody2D">CharacterBody2D</option>
+                            <option value="Node2D">Node2D</option>
+                            <option value="Area2D">Area2D</option>
+                            <option value="RigidBody2D">RigidBody2D</option>
                             <option value="Control">Control (UI)</option>
                             <option value="Node">Node</option>
                         </select>
@@ -748,9 +1049,14 @@
 
                     <!-- Drop Zone -->
                     <div class="workspace-dropzone" id="workspace-dropzone">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🧱</div>
+                        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.7;">🧱</div>
                         <h3>Drag blocks here to build your script</h3>
-                        <p style="margin-top: 1rem; color: #aaa;">Start by dragging blocks from the left panel</p>
+                        <p style="margin-top: 1rem; color: #aaa; max-width: 400px;">
+                            Start by dragging blocks from the left panel. Each block will generate specific GDScript code.
+                        </p>
+                        <div style="margin-top: 2rem; color: var(--accent);">
+                            <small>💡 Tip: Use multiplayer blocks for network games</small>
+                        </div>
                     </div>
 
                     <!-- Block Stack (where blocks go) -->
@@ -760,7 +1066,7 @@
 
             <!-- Right: AI Generation Panel -->
             <div class="generation-panel">
-                <h3 class="panel-title">🤖 AI Generation</h3>
+                <h3 class="panel-title">🤖 AI Generation Panel</h3>
                 
                 <div class="ai-config">
                     <h4>AI Configuration</h4>
@@ -770,6 +1076,7 @@
                             <select class="config-select" id="ai-provider">
                                 <option value="groq">Groq (Fast)</option>
                                 <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
                             </select>
                         </div>
                         <div class="config-group">
@@ -777,7 +1084,24 @@
                             <select class="config-select" id="ai-model">
                                 <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Best)</option>
                                 <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
                                 <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-group">
+                            <label class="config-label">Temperature</label>
+                            <input type="range" class="config-input" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                            <span style="font-size: 0.8rem; color: var(--accent-light);" id="temp-value">0.7</span>
+                        </div>
+                        <div class="config-group">
+                            <label class="config-label">Code Quality</label>
+                            <select class="config-select" id="code-quality">
+                                <option value="balanced">Balanced</option>
+                                <option value="optimized">Optimized</option>
+                                <option value="commented">Heavily Commented</option>
+                                <option value="minimal">Minimal</option>
                             </select>
                         </div>
                     </div>
@@ -789,17 +1113,30 @@
                         <!-- AI prompt will appear here -->
                         Add blocks to generate AI prompt...
                     </div>
-                    <button class="btn btn-secondary" id="copy-prompt" style="width: 100%;">
-                        📋 Copy Prompt
+                    <button class="btn btn-secondary" id="copy-prompt" style="width: 100%; margin-top: 0.5rem;">
+                        📋 Copy Prompt to Clipboard
                     </button>
                 </div>
 
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
                     <p>AI is generating your GDScript...</p>
+                    <p style="font-size: 0.9rem; color: var(--accent-light); margin-top: 0.5rem;">
+                        This may take 10-30 seconds depending on complexity
+                    </p>
                 </div>
 
                 <div id="message-container"></div>
+
+                <div class="sync-vars-container" id="sync-vars-container">
+                    <h4>🔄 Generated Sync Variables</h4>
+                    <div class="generated-prompt" id="sync-vars-output">
+                        <!-- Sync variables will appear here -->
+                    </div>
+                    <button class="btn btn-secondary" id="copy-sync-vars" style="width: 100%; margin-top: 0.5rem;">
+                        📋 Copy Sync Variables
+                    </button>
+                </div>
 
                 <div class="code-output" id="code-output">
                     <!-- Generated code will appear here -->
@@ -807,13 +1144,24 @@
 
                 <div style="margin-top: 1rem; display: none;" id="code-actions">
                     <button class="btn btn-secondary" id="copy-code" style="width: 100%; margin-bottom: 0.5rem;">
-                        📋 Copy GDScript
+                        📋 Copy GDScript to Clipboard
                     </button>
-                    <button class="btn" id="download-code" style="width: 100%;">
+                    <button class="btn" id="download-code" style="width: 100%; margin-bottom: 0.5rem;">
                         💾 Download .gd File
+                    </button>
+                    <button class="btn btn-secondary" id="preview-code" style="width: 100%;">
+                        👁️ Preview in Full Screen
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 2rem 0; color: #aaa; font-size: 0.9rem;">
+            <p>Godot Visual Block Editor v2.0 | Supports Godot 4.4 | Multiplayer Ready | AI-Powered</p>
+            <p style="margin-top: 0.5rem;">
+                <small>Blocks: <span id="total-blocks-added">0</span> | Last Generated: <span id="last-generated">Never</span></small>
+            </p>
         </div>
     </div>
 
@@ -821,7 +1169,8 @@
         // ========== CONFIGURATION ==========
         const API_KEYS = {
             groq: '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',
-            gemini: 'AIzaSyCScOCC90fh1L2LybA3NYd63rAgb38M5j0'
+            gemini: 'AIzaSyCScOCC90fh1L2LybA3NYd63rAgb38M5j0',
+            openai: 'your-openai-key-here' // Add your OpenAI key
         };
 
         const MODELS = {
@@ -833,186 +1182,718 @@
             gemini: [
                 { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
                 { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+            ],
+            openai: [
+                { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+                { value: 'gpt-4o', label: 'GPT-4o' },
+                { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
             ]
         };
 
-        // ========== BLOCK DEFINITIONS ==========
+        // ========== ENHANCED BLOCK DEFINITIONS ==========
         const BLOCK_CONFIGS = {
             // INPUT BLOCKS
-            input: {
-                name: "Input Detection",
+            input_action: {
+                name: "Input Action",
                 icon: "🎮",
+                category: "input",
+                description: "Detect input actions from InputMap",
                 config: {
-                    type: { label: "Input Type", type: "select", options: ["Action", "Key", "Mouse", "Touch"] },
-                    name: { label: "Input Name", type: "text", placeholder: "move_right" },
-                    event: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"] }
-                }
+                    action_name: { label: "Action Name", type: "text", placeholder: "move_right", required: true },
+                    event_type: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"], default: "pressed" },
+                    strength: { label: "Strength", type: "range", min: "0", max: "1", step: "0.1", default: "1.0" }
+                },
+                template: "if Input.is_action_{event_type}(\"{action_name}\"):"
             },
             
             keyboard: {
-    name: "Keyboard Input",
-    icon: "⌨️",
-    config: {
-        key: { 
-            label: "Key", 
-            type: "select", 
-            options: [
-                // Alphabet
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-                
-                // Numbers
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                
-                // Function Keys
-                "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
-                
-                // Modifier Keys
-                "Shift", "Ctrl", "Alt", "Meta", "Super", "Hyper", "AltGr",
-                
-                // Navigation Keys
-                "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
-                "Home", "End", "PageUp", "PageDown",
-                
-                // Special Keys
-                "Space", "Enter", "Tab", "Backspace", "Delete", "Insert",
-                "Escape", "CapsLock", "NumLock", "ScrollLock", "PrintScreen",
-                "Pause", "Menu", "ContextMenu",
-                
-                // Numpad
-                "NumPad0", "NumPad1", "NumPad2", "NumPad3", "NumPad4",
-                "NumPad5", "NumPad6", "NumPad7", "NumPad8", "NumPad9",
-                "NumPadMultiply", "NumPadAdd", "NumPadSubtract", 
-                "NumPadDecimal", "NumPadDivide", "NumPadEnter",
-                
-                // Symbols
-                "Backtick", "Minus", "Equal", "BracketLeft", "BracketRight",
-                "Backslash", "Semicolon", "Apostrophe", "Comma", "Period", 
-                "Slash", "IntlBackslash",
-                
-                // Media Keys
-                "AudioVolumeUp", "AudioVolumeDown", "AudioVolumeMute",
-                "MediaPlayPause", "MediaStop", "MediaNextTrack", "MediaPreviousTrack",
-                
-                // Special Characters
-                "At", "Colon", "Caret", "Underscore", "Dollar", "Exclam", "Question",
-                "Ampersand", "Asterisk", "ParenLeft", "ParenRight", "QuoteDbl",
-                "Less", "Greater", "Bar", "Tilde", "Section", "Plus", "Percent",
-                
-                // System Keys
-                "Sleep", "WakeUp", "Power", "Help", "Undo", "Redo", "Cut", "Copy", "Paste"
-            ] 
-        },
-        event: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"] }
-    }
-},
+                name: "Keyboard Input",
+                icon: "⌨️",
+                category: "input",
+                description: "Detect keyboard key presses",
+                config: {
+                    key: { 
+                        label: "Key", 
+                        type: "select", 
+                        options: [
+                            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                            "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+                            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                            "Space", "Enter", "Tab", "Backspace", "Delete", "Insert",
+                            "Escape", "Shift", "Ctrl", "Alt", "Meta",
+                            "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+                            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
+                        ],
+                        default: "Space"
+                    },
+                    event_type: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"], default: "pressed" }
+                },
+                template: "if Input.is_key_{event_type}(KEY_{key}):"
+            },
+            
+            mouse: {
+                name: "Mouse Input",
+                icon: "🖱️",
+                category: "input",
+                description: "Detect mouse events",
+                config: {
+                    button: { label: "Mouse Button", type: "select", options: ["Left", "Right", "Middle", "XButton1", "XButton2"], default: "Left" },
+                    event_type: { label: "Event Type", type: "select", options: ["pressed", "released", "just_pressed", "just_released"], default: "pressed" },
+                    get_position: { label: "Get Position", type: "checkbox", default: true }
+                }
+            },
+            
+            // UI BLOCKS
+            label: {
+                name: "Label",
+                icon: "🏷️",
+                category: "ui",
+                description: "Create a text label",
+                config: {
+                    text: { label: "Text", type: "text", placeholder: "Score: 0" },
+                    node_path: { label: "Node Path", type: "text", placeholder: "$Label" },
+                    font_size: { label: "Font Size", type: "number", placeholder: "16", min: "8", max: "72", default: "16" },
+                    align: { label: "Alignment", type: "select", options: ["Left", "Center", "Right"], default: "Left" }
+                }
+            },
+            
+            button: {
+                name: "Button",
+                icon: "🔘",
+                category: "ui",
+                description: "Create a clickable button",
+                config: {
+                    text: { label: "Button Text", type: "text", placeholder: "Start Game" },
+                    node_path: { label: "Node Path", type: "text", placeholder: "$Button" },
+                    signal: { label: "Connect Signal", type: "checkbox", default: true },
+                    signal_name: { label: "Signal Name", type: "text", placeholder: "pressed" },
+                    callback: { label: "Callback Function", type: "text", placeholder: "_on_button_pressed" }
+                }
+            },
+            
+            // MULTIPLAYER BLOCKS
+            rpc_generator: {
+                name: "RPC Generator",
+                icon: "📡",
+                category: "multiplayer",
+                description: "Generate RPC functions for multiplayer",
+                config: {
+                    function_name: { label: "Function Name", type: "text", placeholder: "update_position", required: true },
+                    rpc_type: { label: "RPC Type", type: "select", options: ["any_peer", "authority", "server", "reliable", "unreliable"], default: "any_peer" },
+                    parameters: { label: "Parameters", type: "text", placeholder: "position: Vector3, rotation: float" },
+                    sync_interval: { label: "Sync Interval (ms)", type: "number", placeholder: "100", min: "10", max: "1000", default: "100" }
+                }
+            },
+            
+            mpsyncer: {
+                name: "MPSyncer",
+                icon: "🔄",
+                category: "multiplayer",
+                description: "Auto-generate multiplayer sync variables",
+                config: {
+                    sync_variables: { 
+                        label: "Sync Variables", 
+                        type: "textarea", 
+                        placeholder: "// AI will generate sync variables here\n// Variables that need to be synchronized across network\n// Example: position, health, score, etc.",
+                        customClass: "mpsyncer-input"
+                    }
+                }
+            },
             
             // MOVEMENT BLOCKS
-            movement: {
-                name: "Basic Movement",
+            movement_3d: {
+                name: "3D Movement",
                 icon: "🚶",
+                category: "movement",
+                description: "Basic 3D character movement",
                 config: {
-                    direction: { label: "Direction", type: "select", options: ["Forward", "Backward", "Left", "Right", "Up", "Down", "Custom"] },
-                    speed: { label: "Speed", type: "number", placeholder: "5.0", min: "0", max: "100", step: "0.1" },
-                    method: { label: "Movement Method", type: "select", options: ["velocity", "position", "translate"] }
+                    speed: { label: "Movement Speed", type: "number", placeholder: "5.0", min: "0.1", max: "50", step: "0.1", default: "5.0" },
+                    acceleration: { label: "Acceleration", type: "number", placeholder: "10.0", min: "0.1", max: "100", step: "0.1", default: "10.0" },
+                    deceleration: { label: "Deceleration", type: "number", placeholder: "8.0", min: "0.1", max: "100", step: "0.1", default: "8.0" },
+                    input_actions: { label: "Input Actions", type: "text", placeholder: "move_forward, move_back, move_left, move_right" }
+                }
+            },
+            
+            movement_2d: {
+                name: "2D Movement",
+                icon: "🧍",
+                category: "movement",
+                description: "Basic 2D character movement",
+                config: {
+                    speed: { label: "Movement Speed", type: "number", placeholder: "200.0", min: "10", max: "1000", step: "10", default: "200.0" },
+                    input_actions: { label: "Input Actions", type: "text", placeholder: "move_up, move_down, move_left, move_right" },
+                    use_physics: { label: "Use Physics", type: "checkbox", default: true }
+                }
+            },
+            
+            // LOGIC BLOCKS
+            if_condition: {
+                name: "If Condition",
+                icon: "❓",
+                category: "logic",
+                description: "Conditional statement",
+                config: {
+                    condition: { label: "Condition", type: "text", placeholder: "health > 0", required: true },
+                    operator: { label: "Operator", type: "select", options: ["==", "!=", ">", "<", ">=", "<=", "and", "or"], default: ">" },
+                    else_branch: { label: "Add Else", type: "checkbox", default: false }
+                }
+            },
+            
+            timer: {
+                name: "Timer",
+                icon: "⏱️",
+                category: "logic",
+                description: "Create a timer",
+                config: {
+                    wait_time: { label: "Wait Time (seconds)", type: "number", placeholder: "1.0", min: "0.1", max: "60", step: "0.1", default: "1.0" },
+                    one_shot: { label: "One Shot", type: "checkbox", default: false },
+                    autostart: { label: "Auto Start", type: "checkbox", default: false },
+                    callback: { label: "Timeout Function", type: "text", placeholder: "_on_timer_timeout" }
+                }
+            },
+            
+            // GAMEPLAY BLOCKS
+            health_system: {
+                name: "Health System",
+                icon: "❤️",
+                category: "gameplay",
+                description: "Health management system",
+                config: {
+                    max_health: { label: "Max Health", type: "number", placeholder: "100", min: "1", max: "1000", default: "100" },
+                    current_health: { label: "Current Health", type: "number", placeholder: "100", min: "0", max: "1000", default: "100" },
+                    regen_rate: { label: "Regen Rate", type: "number", placeholder: "0", min: "0", max: "10", step: "0.1", default: "0" },
+                    regen_interval: { label: "Regen Interval", type: "number", placeholder: "1.0", min: "0.1", max: "10", step: "0.1", default: "1.0" },
+                    death_action: { label: "On Death Action", type: "select", options: ["queue_free", "respawn", "game_over", "custom"], default: "queue_free" }
+                }
+            },
+            
+            // SCENE MANAGEMENT
+            load_scene: {
+                name: "Load Scene",
+                icon: "📂",
+                category: "scene",
+                description: "Load a scene from path",
+                config: {
+                    scene_path: { label: "Scene Path", type: "text", placeholder: "res://scenes/level_1.tscn", required: true },
+                    as_packed: { label: "As PackedScene", type: "checkbox", default: true },
+                    async_load: { label: "Async Load", type: "checkbox", default: false }
+                }
+            },
+            
+            // DATA BLOCKS
+            variable: {
+                name: "Variable",
+                icon: "📊",
+                category: "data",
+                description: "Define a variable",
+                config: {
+                    name: { label: "Variable Name", type: "text", placeholder: "player_speed", required: true },
+                    type: { label: "Type", type: "select", options: ["float", "int", "String", "bool", "Vector3", "Vector2", "Array", "Dictionary", "Object"], default: "float" },
+                    value: { label: "Initial Value", type: "text", placeholder: "5.0" },
+                    export: { label: "@export", type: "checkbox", default: false },
+                    setget: { label: "setget", type: "checkbox", default: false }
+                }
+            },
+            
+            function: {
+                name: "Function",
+                icon: "⚙️",
+                category: "data",
+                description: "Define a function",
+                config: {
+                    name: { label: "Function Name", type: "text", placeholder: "_process", required: true },
+                    return_type: { label: "Return Type", type: "select", options: ["void", "int", "float", "String", "bool", "Vector3", "Array", "Dictionary", "Variant"], default: "void" },
+                    parameters: { label: "Parameters", type: "text", placeholder: "delta: float" },
+                    virtual: { label: "Virtual", type: "checkbox", default: false },
+                    override: { label: "Override", type: "checkbox", default: false }
+                }
+            },
+            
+            // Add more blocks as needed...
+            joypad: {
+                name: "Joypad Input",
+                icon: "🎮",
+                category: "input",
+                description: "Game controller input",
+                config: {
+                    axis: { label: "Axis", type: "select", options: ["Left X", "Left Y", "Right X", "Right Y", "Left Trigger", "Right Trigger"], default: "Left X" },
+                    button: { label: "Button", type: "select", options: ["A", "B", "X", "Y", "Start", "Back", "Guide", "Left Shoulder", "Right Shoulder", "Left Stick", "Right Stick", "DPad Up", "DPad Down", "DPad Left", "DPad Right"], default: "A" },
+                    deadzone: { label: "Deadzone", type: "range", min: "0", max: "1", step: "0.01", default: "0.15" }
+                }
+            },
+            
+            path_follow: {
+                name: "Path Follow",
+                icon: "🛤️",
+                category: "movement",
+                description: "Follow a predefined path",
+                config: {
+                    path_node: { label: "Path Node", type: "text", placeholder: "$Path3D/PathFollow3D" },
+                    speed: { label: "Speed", type: "number", placeholder: "2.0", min: "0.1", max: "20", step: "0.1", default: "2.0" },
+                    loop: { label: "Loop", type: "checkbox", default: true },
+                    look_ahead: { label: "Look Ahead", type: "checkbox", default: true }
+                }
+            },
+            
+            text_edit: {
+                name: "Text Edit",
+                icon: "📝",
+                category: "ui",
+                description: "Text input field",
+                config: {
+                    placeholder: { label: "Placeholder Text", type: "text", placeholder: "Enter text here..." },
+                    node_path: { label: "Node Path", type: "text", placeholder: "$TextEdit" },
+                    editable: { label: "Editable", type: "checkbox", default: true },
+                    max_length: { label: "Max Length", type: "number", placeholder: "100", min: "0", max: "1000", default: "100" }
+                }
+            },
+            
+            progress_bar: {
+                name: "Progress Bar",
+                icon: "📊",
+                category: "ui",
+                description: "Progress/loading bar",
+                config: {
+                    min_value: { label: "Min Value", type: "number", placeholder: "0", default: "0" },
+                    max_value: { label: "Max Value", type: "number", placeholder: "100", default: "100" },
+                    value: { label: "Current Value", type: "number", placeholder: "50", default: "50" },
+                    show_percentage: { label: "Show Percentage", type: "checkbox", default: true }
+                }
+            },
+            
+            for_loop: {
+                name: "For Loop",
+                icon: "🔄",
+                category: "logic",
+                description: "Iterate over a range",
+                config: {
+                    iterator: { label: "Iterator", type: "text", placeholder: "i", default: "i" },
+                    start: { label: "Start", type: "number", placeholder: "0", default: "0" },
+                    end: { label: "End", type: "number", placeholder: "10", default: "10" },
+                    step: { label: "Step", type: "number", placeholder: "1", default: "1" },
+                    iterate_array: { label: "Iterate Array", type: "checkbox", default: false },
+                    array_name: { label: "Array Name", type: "text", placeholder: "items" }
+                }
+            },
+            
+            switch: {
+                name: "Switch Statement",
+                icon: "🔀",
+                category: "logic",
+                description: "Match expression to multiple cases",
+                config: {
+                    expression: { label: "Expression", type: "text", placeholder: "current_state", required: true },
+                    cases: { label: "Cases (comma separated)", type: "text", placeholder: "IDLE, RUNNING, JUMPING, ATTACKING" },
+                    default_case: { label: "Default Case", type: "checkbox", default: true }
+                }
+            },
+            
+            damage_system: {
+                name: "Damage System",
+                icon: "💥",
+                category: "gameplay",
+                description: "Handle damage dealing and receiving",
+                config: {
+                    damage_amount: { label: "Damage Amount", type: "number", placeholder: "10", min: "1", max: "100", default: "10" },
+                    damage_type: { label: "Damage Type", type: "select", options: ["physical", "magic", "fire", "ice", "lightning", "poison", "true"], default: "physical" },
+                    resistance: { label: "Damage Resistance", type: "checkbox", default: false },
+                    invulnerability_time: { label: "Invulnerability Time", type: "number", placeholder: "1.0", min: "0", max: "10", step: "0.1", default: "1.0" }
+                }
+            },
+            
+            collision: {
+                name: "Collision",
+                icon: "💥",
+                category: "gameplay",
+                description: "Collision detection and response",
+                config: {
+                    collision_layer: { label: "Collision Layer", type: "number", placeholder: "1", min: "1", max: "32", default: "1" },
+                    collision_mask: { label: "Collision Mask", type: "number", placeholder: "1", min: "1", max: "32", default: "1" },
+                    shape_type: { label: "Collision Shape", type: "select", options: ["Box", "Sphere", "Capsule", "ConvexPolygon", "ConcavePolygon"], default: "Box" },
+                    monitorable: { label: "Monitorable", type: "checkbox", default: true },
+                    monitoring: { label: "Monitoring", type: "checkbox", default: true }
+                }
+            },
+            
+            area_detection: {
+                name: "Area Detection",
+                icon: "🎯",
+                category: "gameplay",
+                description: "Detect bodies/areas entering/exiting",
+                config: {
+                    detection_type: { label: "Detection Type", type: "select", options: ["body_entered", "body_exited", "area_entered", "area_exited"], default: "body_entered" },
+                    target_type: { label: "Target Type", type: "select", options: ["player", "enemy", "item", "projectile", "all"], default: "all" },
+                    signal_name: { label: "Signal Name", type: "text", placeholder: "body_entered" },
+                    callback: { label: "Callback Function", type: "text", placeholder: "_on_body_entered" }
+                }
+            },
+            
+            score_system: {
+                name: "Score System",
+                icon: "🏆",
+                category: "gameplay",
+                description: "Track and display score",
+                config: {
+                    initial_score: { label: "Initial Score", type: "number", placeholder: "0", default: "0" },
+                    score_increment: { label: "Score Increment", type: "number", placeholder: "10", default: "10" },
+                    high_score: { label: "Track High Score", type: "checkbox", default: true },
+                    display_node: { label: "Display Node", type: "text", placeholder: "$HUD/ScoreLabel" }
+                }
+            },
+            
+            inventory: {
+                name: "Inventory",
+                icon: "🎒",
+                category: "gameplay",
+                description: "Item inventory system",
+                config: {
+                    max_slots: { label: "Max Slots", type: "number", placeholder: "10", min: "1", max: "100", default: "10" },
+                    max_stack: { label: "Max Stack Size", type: "number", placeholder: "99", min: "1", max: "999", default: "99" },
+                    save_inventory: { label: "Save to File", type: "checkbox", default: false },
+                    ui_display: { label: "UI Display Node", type: "text", placeholder: "$HUD/InventoryGrid" }
+                }
+            },
+            
+            network_spawn: {
+                name: "Network Spawn",
+                icon: "🧍‍♂️",
+                category: "multiplayer",
+                description: "Spawn objects over network",
+                config: {
+                    prefab_path: { label: "Prefab Path", type: "text", placeholder: "res://prefabs/player.tscn", required: true },
+                    authority: { label: "Authority", type: "select", options: ["server", "client", "peer"], default: "server" },
+                    spawn_limit: { label: "Spawn Limit", type: "number", placeholder: "0", min: "0", max: "100", default: "0" },
+                    sync_transform: { label: "Sync Transform", type: "checkbox", default: true }
+                }
+            },
+            
+            sync_var: {
+                name: "Sync Variables",
+                icon: "🔄",
+                category: "multiplayer",
+                description: "Synchronize variables over network",
+                config: {
+                    variables: { label: "Variables to Sync", type: "text", placeholder: "position, rotation, health, score", required: true },
+                    sync_rate: { label: "Sync Rate (Hz)", type: "number", placeholder: "10", min: "1", max: "60", default: "10" },
+                    interpolation: { label: "Interpolation", type: "checkbox", default: true },
+                    reliable: { label: "Reliable", type: "checkbox", default: false }
+                }
+            },
+            
+            load_scene: {
+                name: "Load Scene",
+                icon: "📂",
+                category: "scene",
+                description: "Load a scene",
+                config: {
+                    scene_path: { label: "Scene Path", type: "text", placeholder: "res://scenes/level.tscn", required: true },
+                    async: { label: "Async Load", type: "checkbox", default: false },
+                    show_loading: { label: "Show Loading Screen", type: "checkbox", default: true }
+                }
+            },
+            
+            change_scene: {
+                name: "Change Scene",
+                icon: "🔄",
+                category: "scene",
+                description: "Change current scene",
+                config: {
+                    scene_path: { label: "Scene Path", type: "text", placeholder: "res://scenes/menu.tscn", required: true },
+                    fade_out: { label: "Fade Out Time", type: "number", placeholder: "0.5", min: "0", max: "5", step: "0.1", default: "0.5" },
+                    fade_in: { label: "Fade In Time", type: "number", placeholder: "0.5", min: "0", max: "5", step: "0.1", default: "0.5" }
+                }
+            },
+            
+            instantiate: {
+                name: "Instantiate",
+                icon: "➕",
+                category: "scene",
+                description: "Instantiate a scene instance",
+                config: {
+                    scene_path: { label: "Scene Path", type: "text", placeholder: "res://prefabs/bullet.tscn", required: true },
+                    parent_path: { label: "Parent Path", type: "text", placeholder: ".", default: "." },
+                    position: { label: "Position", type: "text", placeholder: "Vector3.ZERO" },
+                    rotation: { label: "Rotation", type: "text", placeholder: "Vector3.ZERO" }
+                }
+            },
+            
+            scene_tree: {
+                name: "Scene Tree",
+                icon: "🌳",
+                category: "scene",
+                description: "Scene tree operations",
+                config: {
+                    operation: { label: "Operation", type: "select", options: ["get_root", "get_current_scene", "create_timer", "quit"], default: "get_root" },
+                    params: { label: "Parameters", type: "text", placeholder: "" }
+                }
+            },
+            
+            array: {
+                name: "Array",
+                icon: "📋",
+                category: "data",
+                description: "Create and manipulate arrays",
+                config: {
+                    name: { label: "Array Name", type: "text", placeholder: "items", required: true },
+                    type: { label: "Array Type", type: "select", options: ["Array", "PackedStringArray", "PackedInt32Array", "PackedFloat32Array", "PackedVector2Array", "PackedVector3Array", "PackedColorArray"], default: "Array" },
+                    initial_values: { label: "Initial Values", type: "text", placeholder: "1, 2, 3, 4, 5" },
+                    fixed_size: { label: "Fixed Size", type: "checkbox", default: false }
+                }
+            },
+            
+            dictionary: {
+                name: "Dictionary",
+                icon: "📚",
+                category: "data",
+                description: "Create and manipulate dictionaries",
+                config: {
+                    name: { label: "Dictionary Name", type: "text", placeholder: "player_data", required: true },
+                    initial_pairs: { label: "Initial Key-Value Pairs", type: "text", placeholder: "\"health\": 100, \"score\": 0" },
+                    typed: { label: "Typed Dictionary", type: "checkbox", default: false },
+                    key_type: { label: "Key Type", type: "select", options: ["String", "int", "float"], default: "String" },
+                    value_type: { label: "Value Type", type: "select", options: ["Variant", "int", "float", "String", "bool", "Array", "Dictionary"], default: "Variant" }
+                }
+            },
+            
+            signal: {
+                name: "Signal",
+                icon: "📡",
+                category: "data",
+                description: "Define and emit signals",
+                config: {
+                    name: { label: "Signal Name", type: "text", placeholder: "health_changed", required: true },
+                    parameters: { label: "Parameters", type: "text", placeholder: "new_health: int, old_health: int" },
+                    connect_to: { label: "Connect To", type: "text", placeholder: "_on_health_changed" },
+                    autoconnect: { label: "Auto Connect", type: "checkbox", default: false }
+                }
+            },
+            
+            animation_play: {
+                name: "Play Animation",
+                icon: "🎬",
+                category: "animation",
+                description: "Play an animation",
+                config: {
+                    animation_name: { label: "Animation Name", type: "text", placeholder: "run", required: true },
+                    player_path: { label: "Animation Player", type: "text", placeholder: "$AnimationPlayer", required: true },
+                    speed: { label: "Speed", type: "number", placeholder: "1.0", min: "0.1", max: "5", step: "0.1", default: "1.0" },
+                    blend_time: { label: "Blend Time", type: "number", placeholder: "0.2", min: "0", max: "5", step: "0.1", default: "0.2" }
+                }
+            },
+            
+            animation_state: {
+                name: "Animation State",
+                icon: "🔄",
+                category: "animation",
+                description: "Animation state machine",
+                config: {
+                    states: { label: "States", type: "text", placeholder: "idle, run, jump, attack", required: true },
+                    initial_state: { label: "Initial State", type: "text", placeholder: "idle", default: "idle" },
+                    transitions: { label: "Transitions", type: "text", placeholder: "idle->run: speed>0.1, run->idle: speed<0.1" },
+                    blend_tree: { label: "Use Blend Tree", type: "checkbox", default: false }
+                }
+            },
+            
+            blend_tree: {
+                name: "Blend Tree",
+                icon: "🎭",
+                category: "animation",
+                description: "Animation blend tree",
+                config: {
+                    blend_type: { label: "Blend Type", type: "select", options: ["1D", "2D", "Direct"], default: "1D" },
+                    parameter: { label: "Blend Parameter", type: "text", placeholder: "speed", required: true },
+                    animations: { label: "Animations", type: "text", placeholder: "idle:0, walk:0.5, run:1.0", required: true },
+                    sync: { label: "Sync Animations", type: "checkbox", default: false }
+                }
+            },
+            
+            sprite_anim: {
+                name: "Sprite Animation",
+                icon: "🖼️",
+                category: "animation",
+                description: "2D sprite animation",
+                config: {
+                    sprite_frames: { label: "SpriteFrames Resource", type: "text", placeholder: "res://animations/player.tres", required: true },
+                    animation_name: { label: "Animation Name", type: "text", placeholder: "walk", required: true },
+                    fps: { label: "FPS", type: "number", placeholder: "10", min: "1", max: "60", default: "10" },
+                    loop: { label: "Loop", type: "checkbox", default: true }
+                }
+            },
+            
+            sound_play: {
+                name: "Play Sound",
+                icon: "🔊",
+                category: "audio",
+                description: "Play a sound effect",
+                config: {
+                    stream_path: { label: "Audio Stream", type: "text", placeholder: "res://sounds/jump.wav", required: true },
+                    player_path: { label: "Audio Player", type: "text", placeholder: "$AudioStreamPlayer", required: true },
+                    volume_db: { label: "Volume (dB)", type: "number", placeholder: "0", min: "-80", max: "24", default: "0" },
+                    pitch_scale: { label: "Pitch Scale", type: "number", placeholder: "1.0", min: "0.1", max: "4", step: "0.1", default: "1.0" }
+                }
+            },
+            
+            music_play: {
+                name: "Play Music",
+                icon: "🎵",
+                category: "audio",
+                description: "Play background music",
+                config: {
+                    stream_path: { label: "Music Stream", type: "text", placeholder: "res://music/bgm.ogg", required: true },
+                    player_path: { label: "Audio Player", type: "text", placeholder: "$MusicPlayer", required: true },
+                    volume_db: { label: "Volume (dB)", type: "number", placeholder: "-10", min: "-80", max: "24", default: "-10" },
+                    loop: { label: "Loop", type: "checkbox", default: true },
+                    fade_in: { label: "Fade In Time", type: "number", placeholder: "2.0", min: "0", max: "10", step: "0.1", default: "2.0" }
+                }
+            },
+            
+            volume_control: {
+                name: "Volume Control",
+                icon: "🔈",
+                category: "audio",
+                description: "Control audio volume",
+                config: {
+                    bus_name: { label: "Audio Bus", type: "text", placeholder: "Master", default: "Master" },
+                    volume_db: { label: "Volume (dB)", type: "number", placeholder: "0", min: "-80", max: "24", default: "0" },
+                    mute: { label: "Mute", type: "checkbox", default: false },
+                    solo: { label: "Solo", type: "checkbox", default: false }
+                }
+            },
+            
+            audio_bus: {
+                name: "Audio Bus",
+                icon: "🎚️",
+                category: "audio",
+                description: "Audio bus configuration",
+                config: {
+                    bus_name: { label: "Bus Name", type: "text", placeholder: "SFX", required: true },
+                    effects: { label: "Effects", type: "select", options: ["None", "Reverb", "EQ", "Compressor", "BandLimit", "Chorus", "Delay", "Distortion", "PitchShift"], default: "None" },
+                    send: { label: "Send to Bus", type: "text", placeholder: "" }
+                }
+            },
+            
+            while_loop: {
+                name: "While Loop",
+                icon: "∞",
+                category: "logic",
+                description: "While loop with condition",
+                config: {
+                    condition: { label: "Condition", type: "text", placeholder: "counter < 10", required: true },
+                    break_condition: { label: "Break Condition", type: "text", placeholder: "" },
+                    max_iterations: { label: "Max Iterations", type: "number", placeholder: "1000", min: "1", max: "10000", default: "1000" }
+                }
+            },
+            
+            comparison: {
+                name: "Comparison",
+                icon: "⚖️",
+                category: "logic",
+                description: "Compare two values",
+                config: {
+                    left_value: { label: "Left Value", type: "text", placeholder: "health", required: true },
+                    operator: { label: "Operator", type: "select", options: ["==", "!=", ">", "<", ">=", "<="], default: "==" },
+                    right_value: { label: "Right Value", type: "text", placeholder: "0", required: true }
+                }
+            },
+            
+            gravity: {
+                name: "Gravity",
+                icon: "⬇️",
+                category: "movement",
+                description: "Apply gravity to object",
+                config: {
+                    gravity_scale: { label: "Gravity Scale", type: "number", placeholder: "1.0", min: "0", max: "10", step: "0.1", default: "1.0" },
+                    custom_gravity: { label: "Custom Gravity", type: "checkbox", default: false },
+                    gravity_vector: { label: "Gravity Vector", type: "text", placeholder: "Vector3(0, -9.8, 0)", default: "Vector3(0, -9.8, 0)" }
                 }
             },
             
             jump: {
                 name: "Jump",
                 icon: "🦘",
+                category: "movement",
+                description: "Jump action",
                 config: {
-                    height: { label: "Jump Height", type: "number", placeholder: "4.0", min: "0", max: "20", step: "0.1" },
-                    input: { label: "Input Method", type: "select", options: ["Space Key", "Action", "Touch"] },
-                    gravity: { label: "Apply Gravity", type: "checkbox", default: true }
+                    jump_height: { label: "Jump Height", type: "number", placeholder: "4.0", min: "0.1", max: "20", step: "0.1", default: "4.0" },
+                    input_action: { label: "Input Action", type: "text", placeholder: "jump", default: "jump" },
+                    coyote_time: { label: "Coyote Time", type: "number", placeholder: "0.1", min: "0", max: "1", step: "0.01", default: "0.1" },
+                    jump_buffer: { label: "Jump Buffer", type: "number", placeholder: "0.1", min: "0", max: "0.5", step: "0.01", default: "0.1" }
                 }
             },
             
-            // ANIMATION BLOCKS
-            animation: {
-                name: "Play Animation",
-                icon: "🎬",
+            physics_movement: {
+                name: "Physics Movement",
+                icon: "⚛️",
+                category: "movement",
+                description: "Physics-based movement",
                 config: {
-                    name: { label: "Animation Name", type: "text", placeholder: "run" },
-                    player: { label: "Animation Player", type: "text", placeholder: "$AnimationPlayer" },
-                    speed: { label: "Speed", type: "number", placeholder: "1.0", min: "0.1", max: "5", step: "0.1" },
-                    direction: { label: "Direction", type: "select", options: ["Forward", "Reverse"] }
+                    movement_type: { label: "Movement Type", type: "select", options: ["velocity", "force", "impulse"], default: "velocity" },
+                    mass: { label: "Mass", type: "number", placeholder: "1.0", min: "0.1", max: "100", step: "0.1", default: "1.0" },
+                    linear_damp: { label: "Linear Damp", type: "number", placeholder: "0.1", min: "0", max: "10", step: "0.1", default: "0.1" },
+                    angular_damp: { label: "Angular Damp", type: "number", placeholder: "0.1", min: "0", max: "10", step: "0.1", default: "0.1" }
                 }
             },
             
-            // AUDIO BLOCKS
-            sound: {
-                name: "Play Sound",
-                icon: "🔊",
+            panel: {
+                name: "Panel",
+                icon: "🟦",
+                category: "ui",
+                description: "UI panel container",
                 config: {
-                    player: { label: "Audio Player", type: "text", placeholder: "$AudioStreamPlayer" },
-                    file: { label: "Sound File", type: "text", placeholder: "res://sounds/jump.wav" },
-                    volume: { label: "Volume", type: "range", min: "0", max: "100", step: "1", default: "100" }
+                    node_path: { label: "Node Path", type: "text", placeholder: "$Panel" },
+                    size: { label: "Size", type: "text", placeholder: "Vector2(200, 100)" },
+                    color: { label: "Color", type: "color", default: "#2a2a2a" },
+                    border_width: { label: "Border Width", type: "number", placeholder: "2", min: "0", max: "10", default: "2" },
+                    border_color: { label: "Border Color", type: "color", default: "#ff6b35" }
                 }
             },
             
-            // FUNCTION BLOCKS
-            function: {
-                name: "Create Function",
-                icon: "⚙️",
+            shader: {
+                name: "Shader",
+                icon: "🎨",
+                category: "advanced",
+                description: "Custom shader material",
                 config: {
-                    name: { label: "Function Name", type: "text", placeholder: "_process" },
-                    type: { label: "Function Type", type: "select", options: ["_ready", "_process", "_physics_process", "_input", "custom"] },
-                    params: { label: "Parameters", type: "text", placeholder: "delta: float" }
+                    shader_type: { label: "Shader Type", type: "select", options: ["spatial", "canvas_item", "particles", "sky"], default: "spatial" },
+                    uniforms: { label: "Uniforms", type: "text", placeholder: "color:Color=#ffffff, intensity:float=1.0" },
+                    shader_code: { label: "Shader Code", type: "textarea", placeholder: "// Custom shader code here" }
                 }
             },
             
-            variable: {
-                name: "Variable",
-                icon: "📊",
+            particle: {
+                name: "Particle System",
+                icon: "✨",
+                category: "advanced",
+                description: "Particle system configuration",
                 config: {
-                    name: { label: "Variable Name", type: "text", placeholder: "speed" },
-                    type: { label: "Type", type: "select", options: ["float", "int", "String", "bool", "Vector3", "Array", "Dictionary"] },
-                    value: { label: "Initial Value", type: "text", placeholder: "5.0" },
-                    export: { label: "@export", type: "checkbox", default: false }
+                    amount: { label: "Amount", type: "number", placeholder: "100", min: "1", max: "1000", default: "100" },
+                    lifetime: { label: "Lifetime", type: "number", placeholder: "2.0", min: "0.1", max: "10", step: "0.1", default: "2.0" },
+                    emission_shape: { label: "Emission Shape", type: "select", options: ["point", "sphere", "box", "ring", "mesh"], default: "sphere" },
+                    one_shot: { label: "One Shot", type: "checkbox", default: false }
                 }
             },
             
-            // LOGIC BLOCKS
-            if: {
-                name: "If Condition",
-                icon: "❓",
+            custom_resource: {
+                name: "Custom Resource",
+                icon: "📦",
+                category: "advanced",
+                description: "Create custom resource",
                 config: {
-                    condition: { label: "Condition", type: "text", placeholder: "health > 0" },
-                    operator: { label: "Operator", type: "select", options: ["==", "!=", ">", "<", ">=", "<=", "and", "or"] }
+                    class_name: { label: "Class Name", type: "text", placeholder: "PlayerData", required: true },
+                    properties: { label: "Properties", type: "text", placeholder: "health:int, score:int, name:String" },
+                    script_path: { label: "Script Path", type: "text", placeholder: "res://scripts/player_data.gd" }
                 }
             },
             
-            // GAMEPLAY BLOCKS
-            health: {
-                name: "Health System",
-                icon: "❤️",
+            touch: {
+                name: "Touch Input",
+                icon: "👆",
+                category: "input",
+                description: "Touch screen input",
                 config: {
-                    max: { label: "Max Health", type: "number", placeholder: "100", min: "1", max: "1000" },
-                    current: { label: "Current Health", type: "number", placeholder: "100", min: "0", max: "1000" },
-                    regen: { label: "Regeneration", type: "checkbox", default: false },
-                    regen_rate: { label: "Regen Rate", type: "number", placeholder: "1", min: "0", max: "10" }
-                }
-            },
-            
-            damage: {
-                name: "Damage System",
-                icon: "💥",
-                config: {
-                    amount: { label: "Damage Amount", type: "number", placeholder: "10", min: "1", max: "100" },
-                    type: { label: "Damage Type", type: "select", options: ["melee", "ranged", "explosion", "environment"] },
-                    source: { label: "Damage Source", type: "text", placeholder: "enemy" }
-                }
-            },
-            
-            // AREA DETECTION
-            area: {
-                name: "Area Detection",
-                icon: "🎯",
-                config: {
-                    type: { label: "Detection Type", type: "select", options: ["body_entered", "body_exited", "area_entered", "area_exited"] },
-                    target: { label: "Target Type", type: "select", options: ["player", "enemy", "item", "bullet", "all"] },
-                    response: { label: "Response", type: "text", placeholder: "take_damage(10)" }
+                    touch_index: { label: "Touch Index", type: "number", placeholder: "0", min: "0", max: "10", default: "0" },
+                    gesture: { label: "Gesture", type: "select", options: ["tap", "double_tap", "long_press", "drag", "pinch", "swipe"], default: "tap" },
+                    multi_touch: { label: "Multi Touch", type: "checkbox", default: false }
                 }
             }
         };
@@ -1021,6 +1902,7 @@
         let blocks = [];
         let currentBlockId = 0;
         let selectedExtends = "CharacterBody3D";
+        let syncVariables = [];
 
         // ========== DOM ELEMENTS ==========
         const workspace = document.getElementById('workspace');
@@ -1033,17 +1915,36 @@
         const loading = document.getElementById('loading');
         const messageContainer = document.getElementById('message-container');
         const codeActions = document.getElementById('code-actions');
+        const syncVarsContainer = document.getElementById('sync-vars-container');
+        const syncVarsOutput = document.getElementById('sync-vars-output');
+        const blockCountElement = document.getElementById('block-count');
+        const totalBlocksAdded = document.getElementById('total-blocks-added');
+        const lastGenerated = document.getElementById('last-generated');
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', function() {
             initializeDragAndDrop();
             initializeEventListeners();
             updateModelOptions();
+            setupSearch();
+            updateStats();
             
             // Set default extends value
             extendsSelect.addEventListener('change', function() {
                 selectedExtends = this.value;
                 updatePrompt();
+            });
+            
+            // Temperature slider
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temp-value');
+            tempSlider.addEventListener('input', function() {
+                tempValue.textContent = this.value;
+            });
+            
+            // Initialize all categories as expanded
+            document.querySelectorAll('.block-category').forEach(cat => {
+                cat.dataset.expanded = 'true';
             });
         });
 
@@ -1064,32 +1965,44 @@
             const blockType = e.target.dataset.type;
             e.dataTransfer.setData('block-type', blockType);
             e.dataTransfer.effectAllowed = 'copy';
+            e.target.style.opacity = '0.5';
         }
 
         function handleDragOver(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
             workspace.style.borderColor = 'var(--accent)';
+            workspace.style.boxShadow = '0 0 20px rgba(255, 165, 0, 0.3)';
         }
 
         function handleDragLeave(e) {
             workspace.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            workspace.style.boxShadow = 'none';
         }
 
         function handleDrop(e) {
             e.preventDefault();
             workspace.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            workspace.style.boxShadow = 'none';
             
             const blockType = e.dataTransfer.getData('block-type');
             if (blockType) {
                 addBlock(blockType);
             }
+            
+            // Reset opacity of dragged element
+            document.querySelectorAll('.block-type').forEach(block => {
+                block.style.opacity = '1';
+            });
         }
 
         // ========== BLOCK MANAGEMENT ==========
         function addBlock(type) {
             const blockConfig = BLOCK_CONFIGS[type];
-            if (!blockConfig) return;
+            if (!blockConfig) {
+                showMessage('error', `Unknown block type: ${type}`);
+                return;
+            }
             
             currentBlockId++;
             const blockId = `block-${currentBlockId}`;
@@ -1104,6 +2017,7 @@
             blockElement.className = 'block-instance';
             blockElement.id = blockId;
             blockElement.dataset.type = type;
+            blockElement.dataset.category = blockConfig.category;
             
             // Block header
             const header = document.createElement('div');
@@ -1112,11 +2026,14 @@
                 <div class="block-title">
                     <span>${blockConfig.icon}</span>
                     <span>${blockConfig.name}</span>
+                    <small style="color: var(--accent-light); font-size: 0.8rem; margin-left: 0.5rem;">
+                        ${blockConfig.category}
+                    </small>
                 </div>
                 <div class="block-actions">
-                    <button class="block-btn" onclick="moveBlockUp('${blockId}')">↑</button>
-                    <button class="block-btn" onclick="moveBlockDown('${blockId}')">↓</button>
-                    <button class="block-btn" onclick="removeBlock('${blockId}')">×</button>
+                    <button class="block-btn" onclick="moveBlockUp('${blockId}')" title="Move Up">↑</button>
+                    <button class="block-btn" onclick="moveBlockDown('${blockId}')" title="Move Down">↓</button>
+                    <button class="block-btn" onclick="removeBlock('${blockId}')" title="Remove">×</button>
                 </div>
             `;
             
@@ -1132,6 +2049,9 @@
                     const label = document.createElement('label');
                     label.className = 'config-label';
                     label.textContent = config.label;
+                    if (config.required) {
+                        label.innerHTML += ' <span style="color: var(--primary);">*</span>';
+                    }
                     
                     let input;
                     
@@ -1143,6 +2063,7 @@
                                 const opt = document.createElement('option');
                                 opt.value = option;
                                 opt.textContent = option;
+                                if (config.default === option) opt.selected = true;
                                 input.appendChild(opt);
                             });
                             break;
@@ -1153,10 +2074,11 @@
                             input.type = config.type;
                             input.className = 'config-input';
                             input.placeholder = config.placeholder || '';
+                            if (config.default) input.value = config.default;
                             if (config.min) input.min = config.min;
                             if (config.max) input.max = config.max;
                             if (config.step) input.step = config.step;
-                            if (config.default) input.value = config.default;
+                            if (config.required) input.required = true;
                             break;
                             
                         case 'range':
@@ -1175,31 +2097,93 @@
                             input.className = 'config-input';
                             if (config.default) input.checked = config.default;
                             break;
+                            
+                        case 'color':
+                            input = document.createElement('input');
+                            input.type = 'color';
+                            input.className = 'config-input';
+                            if (config.default) input.value = config.default;
+                            break;
+                            
+                        case 'textarea':
+                            input = document.createElement('textarea');
+                            input.className = 'config-input';
+                            input.placeholder = config.placeholder || '';
+                            input.rows = 4;
+                            if (config.customClass) {
+                                input.classList.add(config.customClass.split(' '));
+                            }
+                            break;
                     }
                     
-                    input.dataset.configKey = key;
-                    input.addEventListener('input', () => updateBlockConfig(blockId, key, input.value));
-                    input.addEventListener('change', () => updateBlockConfig(blockId, key, input.type === 'checkbox' ? input.checked : input.value));
-                    
-                    group.appendChild(label);
-                    group.appendChild(input);
-                    configDiv.appendChild(group);
+                    if (input) {
+                        input.dataset.configKey = key;
+                        input.addEventListener('input', () => handleBlockConfigChange(blockId, key, input));
+                        input.addEventListener('change', () => handleBlockConfigChange(blockId, key, input));
+                        
+                        // Special handling for MPSyncer
+                        if (type === 'mpsyncer' && key === 'sync_variables') {
+                            input.addEventListener('focus', () => {
+                                if (!input.value || input.value.includes('AI will generate')) {
+                                    showMessage('info', 'MPSyncer: Leave blank for AI to generate sync variables. Add variables manually if needed.');
+                                }
+                            });
+                        }
+                        
+                        group.appendChild(label);
+                        group.appendChild(input);
+                        configDiv.appendChild(group);
+                    }
                 });
             }
             
             blockElement.appendChild(header);
+            if (blockConfig.description) {
+                const desc = document.createElement('div');
+                desc.style.color = 'var(--accent-light)';
+                desc.style.fontSize = '0.85rem';
+                desc.style.marginBottom = '1rem';
+                desc.style.fontStyle = 'italic';
+                desc.textContent = blockConfig.description;
+                blockElement.appendChild(desc);
+            }
             blockElement.appendChild(configDiv);
             blockStack.appendChild(blockElement);
             
             // Add to blocks array
-            blocks.push({
+            const blockData = {
                 id: blockId,
                 type: type,
+                name: blockConfig.name,
+                category: blockConfig.category,
                 config: {},
                 order: blocks.length
-            });
+            };
+            
+            // Set default values
+            if (blockConfig.config) {
+                Object.entries(blockConfig.config).forEach(([key, config]) => {
+                    if (config.default !== undefined) {
+                        blockData.config[key] = config.default;
+                    }
+                });
+            }
+            
+            blocks.push(blockData);
             
             updatePrompt();
+            updateStats();
+            
+            // Show success message
+            showMessage('success', `✅ Added ${blockConfig.name} block`);
+            
+            // Scroll to new block
+            blockElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function handleBlockConfigChange(blockId, key, input) {
+            const value = input.type === 'checkbox' ? input.checked : input.value;
+            updateBlockConfig(blockId, key, value);
         }
 
         function updateBlockConfig(blockId, key, value) {
@@ -1213,6 +2197,7 @@
         function removeBlock(blockId) {
             const blockIndex = blocks.findIndex(b => b.id === blockId);
             if (blockIndex > -1) {
+                const block = blocks[blockIndex];
                 blocks.splice(blockIndex, 1);
                 document.getElementById(blockId).remove();
                 
@@ -1222,6 +2207,9 @@
                 }
                 
                 updatePrompt();
+                updateStats();
+                
+                showMessage('warning', `Removed ${block.name} block`);
             }
         }
 
@@ -1257,42 +2245,140 @@
             updatePrompt();
         }
 
-        // ========== PROMPT GENERATION ==========
+        // ========== SEARCH FUNCTIONALITY ==========
+        function setupSearch() {
+            const searchInput = document.getElementById('block-search');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                document.querySelectorAll('.block-type').forEach(block => {
+                    const blockText = block.textContent.toLowerCase();
+                    const blockType = block.dataset.type;
+                    const blockConfig = BLOCK_CONFIGS[blockType];
+                    
+                    const matches = blockText.includes(searchTerm) || 
+                                   (blockConfig && blockConfig.description && 
+                                    blockConfig.description.toLowerCase().includes(searchTerm)) ||
+                                   (blockConfig && blockConfig.category &&
+                                    blockConfig.category.toLowerCase().includes(searchTerm));
+                    
+                    block.style.display = matches ? 'flex' : 'none';
+                });
+            });
+        }
+
+        // ========== CATEGORY MANAGEMENT ==========
+        function toggleCategory(categoryId) {
+            const category = document.querySelector(`[data-category="${categoryId}"]`);
+            const content = document.getElementById(`category-${categoryId}`);
+            const isExpanded = category.dataset.expanded === 'true';
+            
+            if (isExpanded) {
+                content.style.display = 'none';
+                category.dataset.expanded = 'false';
+            } else {
+                content.style.display = 'grid';
+                category.dataset.expanded = 'true';
+            }
+        }
+
+        // ========== ENHANCED PROMPT GENERATION ==========
         function updatePrompt() {
             if (blocks.length === 0) {
                 generatedPrompt.textContent = "Add blocks to generate AI prompt...";
                 return;
             }
             
-            let prompt = `Create Godot 4.4 GDScript for a ${selectedExtends} node with the following specifications:\n\n`;
+            let prompt = `Create a complete Godot 4.4 GDScript for a ${selectedExtends} node.\n\n`;
+            prompt += `SCRIPT DETAILS:\n`;
+            prompt += `- EXTENDS: ${selectedExtends}\n`;
+            prompt += `- BLOCKS USED: ${blocks.length} blocks\n\n`;
             
-            prompt += `EXTENDS: ${selectedExtends}\n\n`;
-            
-            prompt += "BLOCK SPECIFICATIONS:\n";
+            prompt += `BLOCK SPECIFICATIONS:\n`;
+            prompt += `=====================\n\n`;
             
             blocks.forEach((block, index) => {
                 const config = BLOCK_CONFIGS[block.type];
-                prompt += `${index + 1}. ${config.name}:\n`;
+                prompt += `${index + 1}. ${config.name} (${config.category}):\n`;
+                prompt += `   Description: ${config.description}\n`;
                 
                 if (Object.keys(block.config).length > 0) {
+                    prompt += `   Configuration:\n`;
                     Object.entries(block.config).forEach(([key, value]) => {
                         const configDef = config.config[key];
                         if (configDef && value !== undefined && value !== '') {
                             prompt += `   - ${configDef.label}: ${value}\n`;
                         }
                     });
-                } else {
-                    prompt += `   - (Default settings)\n`;
                 }
+                
+                // Special handling for MPSyncer
+                if (block.type === 'mpsyncer') {
+                    prompt += `   SPECIAL INSTRUCTION: This is an MPSyncer block. Based on other blocks in the script, generate appropriate sync variables for multiplayer synchronization.\n`;
+                    if (block.config.sync_variables && !block.config.sync_variables.includes('AI will generate')) {
+                        prompt += `   User-provided sync variables: ${block.config.sync_variables}\n`;
+                    }
+                }
+                
+                // Special handling for RPC Generator
+                if (block.type === 'rpc_generator') {
+                    prompt += `   RPC FUNCTION: Create an RPC function with @rpc annotation\n`;
+                }
+                
+                prompt += `\n`;
             });
             
-            prompt += `\nGENERATION RULES:\n`;
-            prompt += `1. Use Godot 4.4 syntax and best practices\n`;
-            prompt += `2. Include proper type hints\n`;
-            prompt += `3. Add comments explaining logic\n`;
-            prompt += `4. Make code modular and reusable\n`;
-            prompt += `5. Include error handling where appropriate\n`;
-            prompt += `6. Optimize for performance\n`;
+            prompt += `GENERATION INSTRUCTIONS:\n`;
+            prompt += `=======================\n`;
+            prompt += `1. Use Godot 4.4 syntax and follow official documentation\n`;
+            prompt += `2. Include proper type hints for all variables and functions\n`;
+            prompt += `3. Add comprehensive comments explaining the logic\n`;
+            prompt += `4. Follow Godot naming conventions and best practices\n`;
+            prompt += `5. Use @export for important properties where appropriate\n`;
+            prompt += `6. Include error handling and edge cases\n`;
+            prompt += `7. Make the code modular and reusable\n`;
+            prompt += `8. Optimize for performance\n`;
+            prompt += `9. For multiplayer blocks, implement proper networking\n`;
+            prompt += `10. Include signal connections and callbacks where needed\n\n`;
+            
+            prompt += `SPECIAL REQUIREMENTS:\n`;
+            prompt += `=====================\n`;
+            
+            // Check for MPSyncer block
+            const hasMPSyncer = blocks.some(b => b.type === 'mpsyncer');
+            if (hasMPSyncer) {
+                prompt += `- Include MPSyncer functionality: Generate sync variables based on script context\n`;
+                prompt += `- Create @sync variables for multiplayer synchronization\n`;
+                prompt += `- Add appropriate network synchronization logic\n`;
+            }
+            
+            // Check for RPC blocks
+            const hasRPC = blocks.some(b => b.type === 'rpc_generator');
+            if (hasRPC) {
+                prompt += `- Include proper @rpc annotations for multiplayer functions\n`;
+                prompt += `- Add network authority checks where needed\n`;
+            }
+            
+            // Check for UI blocks
+            const hasUI = blocks.some(b => BLOCK_CONFIGS[b.type].category === 'ui');
+            if (hasUI) {
+                prompt += `- Create UI scene structure with proper anchors and margins\n`;
+                prompt += `- Include signal connections for UI elements\n`;
+            }
+            
+            // Check for 2D vs 3D
+            const has2D = blocks.some(b => b.type.includes('2d') || b.type === 'sprite_anim');
+            const has3D = blocks.some(b => b.type.includes('3d') || !b.type.includes('2d'));
+            
+            if (has2D && !has3D) {
+                prompt += `- Use 2D nodes and Vector2 for coordinates\n`;
+            } else if (has3D && !has2D) {
+                prompt += `- Use 3D nodes and Vector3 for coordinates\n`;
+            }
+            
+            prompt += `\nRETURN FORMAT:\n`;
+            prompt += `=============\n`;
+            prompt += `Return ONLY the complete GDScript code. Do not include markdown formatting, explanations, or additional text.`;
             
             generatedPrompt.textContent = prompt;
         }
@@ -1300,23 +2386,33 @@
         // ========== AI GENERATION ==========
         async function generateGDScript() {
             if (blocks.length === 0) {
-                showMessage('error', 'Add at least one block to generate code.');
+                showMessage('error', '❌ Add at least one block to generate code.');
                 return;
             }
             
             const provider = document.getElementById('ai-provider').value;
             const model = document.getElementById('ai-model').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const quality = document.getElementById('code-quality').value;
             const prompt = generatedPrompt.textContent;
             
             // Show loading
             loading.classList.add('active');
             codeOutput.classList.remove('active');
             codeActions.style.display = 'none';
+            syncVarsContainer.classList.remove('active');
             
             try {
-                const code = await callAI(prompt, provider, model);
+                const { code, syncVars } = await callAI(prompt, provider, model, temperature, quality);
                 displayCode(code);
+                
+                // Display sync variables if generated
+                if (syncVars && syncVars.length > 0) {
+                    displaySyncVariables(syncVars);
+                }
+                
                 showMessage('success', '✅ GDScript generated successfully!');
+                updateLastGenerated();
             } catch (error) {
                 showMessage('error', `❌ Error: ${error.message}`);
             } finally {
@@ -1324,93 +2420,217 @@
             }
         }
 
-        async function callAI(prompt, provider, model) {
-            const systemPrompt = `You are an expert Godot 4.4 game developer. Generate clean, production-ready GDScript 4.4 code following these STRICT rules:
+        async function callAI(prompt, provider, model, temperature, quality) {
+            let systemPrompt = `You are an expert Godot 4.4 game developer. Generate clean, production-ready GDScript 4.4 code following these STRICT rules:
 
 IMPORTANT RULES:
 1. Use ONLY Godot 4.4 OFFICIAL syntax from the official documentation
-2. ALWAYS use 3D nodes and systems unless SPECIFICALLY asked for 2D
-3. Use proper type hints for ALL variables and functions
-4. Include comprehensive comments explaining logic
-5. Follow Godot best practices and naming conventions
-6. Use @export for important properties
-7. Include proper error handling
-8. Make the code modular and reusable
-9. DO NOT include markdown code blocks or explanations
-10. Return ONLY the GDScript code
+2. Use proper type hints for ALL variables and functions
+3. Include comprehensive comments explaining logic
+4. Follow Godot best practices and naming conventions
+5. Use @export for important properties
+6. Include proper error handling
+7. Make the code modular and reusable
+8. DO NOT include markdown code blocks or explanations
+9. Return ONLY the GDScript code
 
-DEFAULT TO 3D:
-- Use CharacterBody3D for player characters
-- Use Node3D for 3D nodes
-- Use Vector3 for 3D vectors
-- Use 3D physics and collisions
+CODE QUALITY: ${quality.toUpperCase()}
+- Balanced: Good mix of comments and code
+- Optimized: Focus on performance and efficiency
+- Commented: Extensive comments for learning
+- Minimal: Clean, minimal code
 
-ONLY use 2D if user explicitly asks for "2D" in their request.
+USER REQUEST:
+${prompt}
 
-User request: ${prompt}
+GENERATE ONLY THE GDScript code.`;
 
-Generate ONLY the GDScript code.`;
+            // Add sync variables extraction instruction if MPSyncer is present
+            if (prompt.includes('MPSyncer')) {
+                systemPrompt += `
 
-            if (provider === 'groq') {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${API_KEYS.groq}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: prompt }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 4000
-                    })
-                });
+ADDITIONAL REQUIREMENT FOR MPSyncer:
+- Extract all sync variables and list them separately at the end
+- Format sync variables as: @sync var variable_name: type = default_value
+- Add a comment above each sync variable explaining its purpose
+- Include network synchronization logic`;
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error?.message || 'API Error');
+                // Modify to return both code and sync variables
+                systemPrompt += `
+
+RETURN FORMAT:
+[CODE START]
+// GDScript code here
+[CODE END]
+
+[SYNC VARS START]
+// Sync variables for multiplayer
+@sync var health: int = 100
+// Add more sync variables as needed
+[SYNC VARS END]`;
+            }
+
+            try {
+                let response;
+                let code = '';
+                let syncVars = [];
+
+                if (provider === 'groq') {
+                    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_KEYS.groq}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: prompt }
+                            ],
+                            temperature: temperature,
+                            max_tokens: 8000
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API Error');
+                    }
+
+                    const data = await response.json();
+                    code = data.choices[0].message.content.trim();
+                    
+                } else if (provider === 'gemini') {
+                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEYS.gemini}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: systemPrompt + '\n\n' + prompt }]
+                            }],
+                            generationConfig: {
+                                temperature: temperature,
+                                maxOutputTokens: 8000
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API Error');
+                    }
+
+                    const data = await response.json();
+                    code = data.candidates[0].content.parts[0].text.trim();
+                    
+                } else if (provider === 'openai') {
+                    // OpenAI implementation (requires API key)
+                    if (!API_KEYS.openai || API_KEYS.openai === 'your-openai-key-here') {
+                        throw new Error('Please add your OpenAI API key to the configuration');
+                    }
+                    
+                    response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_KEYS.openai}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: prompt }
+                            ],
+                            temperature: temperature,
+                            max_tokens: 8000
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error?.message || 'API Error');
+                    }
+
+                    const data = await response.json();
+                    code = data.choices[0].message.content.trim();
                 }
 
-                const data = await response.json();
-                return data.choices[0].message.content.trim();
-            } else { // gemini
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEYS.gemini}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: systemPrompt }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 4000
-                        }
-                    })
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error?.message || 'API Error');
+                // Extract sync variables if present
+                if (code.includes('[SYNC VARS START]')) {
+                    const syncVarsMatch = code.match(/\[SYNC VARS START\]([\s\S]*?)\[SYNC VARS END\]/);
+                    if (syncVarsMatch) {
+                        syncVars = syncVarsMatch[1].trim();
+                        code = code.replace(/\[SYNC VARS START\][\s\S]*?\[SYNC VARS END\]/, '').trim();
+                    }
                 }
 
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text.trim();
+                // Clean up code
+                code = code.replace(/```(?:gdscript|tscn)?\n?/g, '').replace(/```/g, '').trim();
+
+                return { code, syncVars };
+
+            } catch (error) {
+                console.error('AI Generation Error:', error);
+                throw error;
             }
         }
 
         function displayCode(code) {
-            code = code.replace(/```(?:gdscript|tscn)?\n?/g, '').replace(/```/g, '').trim();
             codeOutput.textContent = code;
             codeOutput.classList.add('active');
             codeActions.style.display = 'block';
             
+            // Syntax highlighting (basic)
+            highlightCode();
+            
             // Scroll to code output
             codeOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function displaySyncVariables(syncVars) {
+            syncVarsOutput.textContent = syncVars;
+            syncVarsContainer.classList.add('active');
+            syncVariables = syncVars.split('\n').filter(line => line.trim().startsWith('@sync'));
+            
+            showMessage('info', `🔄 Generated ${syncVariables.length} sync variables for multiplayer`);
+        }
+
+        function highlightCode() {
+            const code = codeOutput.textContent;
+            let highlighted = code;
+            
+            // Simple syntax highlighting
+            const keywords = ['extends', 'class_name', 'func', 'var', 'const', 'if', 'else', 'elif', 'for', 'while', 'match', 'return', 'pass', 'break', 'continue', 'true', 'false', 'null'];
+            const types = ['int', 'float', 'String', 'bool', 'Array', 'Dictionary', 'Vector2', 'Vector3', 'Color', 'Node', 'Object'];
+            const decorators = ['@export', '@onready', '@warning_ignore', '@rpc', '@sync'];
+            
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
+                highlighted = highlighted.replace(regex, `<span class="keyword">$1</span>`);
+            });
+            
+            types.forEach(type => {
+                const regex = new RegExp(`\\b(${type})\\b`, 'g');
+                highlighted = highlighted.replace(regex, `<span class="type">$1</span>`);
+            });
+            
+            decorators.forEach(decorator => {
+                const regex = new RegExp(`(${decorator})`, 'g');
+                highlighted = highlighted.replace(regex, `<span class="decorator">$1</span>`);
+            });
+            
+            // Comments
+            highlighted = highlighted.replace(/(".*?"|'.*?')/g, `<span class="string">$1</span>`);
+            highlighted = highlighted.replace(/(#.*$)/gm, `<span class="comment">$1</span>`);
+            highlighted = highlighted.replace(/(\/\/.*$)/gm, `<span class="comment">$1</span>`);
+            
+            // Numbers
+            highlighted = highlighted.replace(/\b(\d+\.?\d*)\b/g, `<span class="number">$1</span>`);
+            
+            codeOutput.innerHTML = highlighted;
         }
 
         // ========== UTILITY FUNCTIONS ==========
@@ -1440,32 +2660,71 @@ Generate ONLY the GDScript code.`;
                 model.innerHTML = '';
                 const models = MODELS[this.value];
                 
-                models.forEach(m => {
-                    const option = document.createElement('option');
-                    option.value = m.value;
-                    option.textContent = m.label;
-                    model.appendChild(option);
-                });
+                if (models) {
+                    models.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.value;
+                        option.textContent = m.label;
+                        model.appendChild(option);
+                    });
+                }
             });
         }
 
+        function updateStats() {
+            const blockCount = blocks.length;
+            blockCountElement.textContent = blockCount;
+            totalBlocksAdded.textContent = blockCount;
+            
+            // Update category counts
+            document.querySelectorAll('.category-count').forEach(el => {
+                const category = el.closest('.block-category').dataset.category;
+                const count = document.querySelectorAll(`[data-category="${category}"] .block-type`).length;
+                el.textContent = count;
+            });
+        }
+
+        function updateLastGenerated() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            lastGenerated.textContent = timeString;
+        }
+
         function clearWorkspace() {
-            if (confirm('Are you sure you want to clear all blocks?')) {
+            if (blocks.length === 0) {
+                showMessage('info', 'Workspace is already empty.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to clear all ${blocks.length} blocks?`)) {
                 blocks = [];
                 blockStack.innerHTML = '';
                 workspaceDropzone.classList.remove('hidden');
                 updatePrompt();
                 codeOutput.classList.remove('active');
+                syncVarsContainer.classList.remove('active');
                 codeActions.style.display = 'none';
+                updateStats();
                 showMessage('success', 'Workspace cleared.');
             }
         }
 
         function exportBlocks() {
+            if (blocks.length === 0) {
+                showMessage('error', 'No blocks to export.');
+                return;
+            }
+            
             const exportData = {
                 extends: selectedExtends,
-                blocks: blocks,
-                timestamp: new Date().toISOString()
+                blocks: blocks.map(block => ({
+                    type: block.type,
+                    name: block.name,
+                    config: block.config,
+                    order: block.order
+                })),
+                timestamp: new Date().toISOString(),
+                version: '2.0'
             };
             
             const dataStr = JSON.stringify(exportData, null, 2);
@@ -1478,7 +2737,71 @@ Generate ONLY the GDScript code.`;
             linkElement.setAttribute('download', exportFileDefaultName);
             linkElement.click();
             
-            showMessage('success', 'Blocks exported successfully!');
+            showMessage('success', `Exported ${blocks.length} blocks successfully!`);
+        }
+
+        function importBlocks() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        // Clear current workspace
+                        blocks = [];
+                        blockStack.innerHTML = '';
+                        
+                        // Set extends
+                        if (data.extends) {
+                            selectedExtends = data.extends;
+                            extendsSelect.value = selectedExtends;
+                        }
+                        
+                        // Add blocks
+                        if (data.blocks && Array.isArray(data.blocks)) {
+                            data.blocks.forEach(blockData => {
+                                addBlock(blockData.type);
+                                
+                                // Set config values
+                                const blockId = `block-${currentBlockId}`;
+                                const block = blocks.find(b => b.id === blockId);
+                                
+                                if (block && blockData.config) {
+                                    Object.entries(blockData.config).forEach(([key, value]) => {
+                                        block.config[key] = value;
+                                        
+                                        // Update UI
+                                        const input = document.querySelector(`#${blockId} [data-config-key="${key}"]`);
+                                        if (input) {
+                                            if (input.type === 'checkbox') {
+                                                input.checked = value;
+                                            } else {
+                                                input.value = value;
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            
+                            updatePrompt();
+                            showMessage('success', `Imported ${data.blocks.length} blocks successfully!`);
+                        }
+                    } catch (error) {
+                        showMessage('error', 'Error importing blocks: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
         }
 
         // ========== EVENT LISTENERS ==========
@@ -1495,6 +2818,9 @@ Generate ONLY the GDScript code.`;
             // Export Blocks
             document.getElementById('export-blocks').addEventListener('click', exportBlocks);
             
+            // Import Blocks
+            document.getElementById('import-blocks').addEventListener('click', importBlocks);
+            
             // Copy Prompt
             document.getElementById('copy-prompt').addEventListener('click', function() {
                 navigator.clipboard.writeText(generatedPrompt.textContent).then(() => {
@@ -1506,6 +2832,13 @@ Generate ONLY the GDScript code.`;
             document.getElementById('copy-code').addEventListener('click', function() {
                 navigator.clipboard.writeText(codeOutput.textContent).then(() => {
                     showMessage('success', '✅ GDScript copied to clipboard!');
+                });
+            });
+            
+            // Copy Sync Variables
+            document.getElementById('copy-sync-vars').addEventListener('click', function() {
+                navigator.clipboard.writeText(syncVarsOutput.textContent).then(() => {
+                    showMessage('success', '✅ Sync variables copied to clipboard!');
                 });
             });
             
@@ -1525,6 +2858,44 @@ Generate ONLY the GDScript code.`;
                 
                 showMessage('success', '✅ GDScript downloaded!');
             });
+            
+            // Preview Code
+            document.getElementById('preview-code').addEventListener('click', function() {
+                const code = codeOutput.textContent;
+                const previewWindow = window.open('', '_blank');
+                previewWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>GDScript Preview</title>
+                        <style>
+                            body {
+                                background: #1a1a2e;
+                                color: #e0e0ff;
+                                font-family: 'Cascadia Code', 'Consolas', monospace;
+                                padding: 2rem;
+                                margin: 0;
+                            }
+                            pre {
+                                font-size: 14px;
+                                line-height: 1.5;
+                                white-space: pre-wrap;
+                            }
+                            .keyword { color: #ff6b35; }
+                            .type { color: #00d9ff; }
+                            .string { color: #6bff88; }
+                            .number { color: #ffd166; }
+                            .comment { color: #888; }
+                            .decorator { color: #ffa500; }
+                        </style>
+                    </head>
+                    <body>
+                        <pre>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                    </body>
+                    </html>
+                `);
+                previewWindow.document.close();
+            });
         }
 
         // ========== GLOBAL FUNCTIONS ==========
@@ -1532,6 +2903,19 @@ Generate ONLY the GDScript code.`;
         window.moveBlockDown = moveBlockDown;
         window.removeBlock = removeBlock;
         window.updateBlockConfig = updateBlockConfig;
+        window.toggleCategory = toggleCategory;
+
+        // Add syntax highlighting styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .keyword { color: #ff6b35; font-weight: bold; }
+            .type { color: #00d9ff; }
+            .string { color: #6bff88; }
+            .number { color: #ffd166; }
+            .comment { color: #888; font-style: italic; }
+            .decorator { color: #ffa500; font-weight: bold; }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
