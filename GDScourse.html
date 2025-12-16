@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production-Ready GDScript in Hindi | Real Game Code + AI Script Generator</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Course-specific styles */
+        .course-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a1a3a 0%, var(--dark) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="%23ff6b35" opacity="0.1"/></svg>');
+            background-size: cover;
+        }
+        
+        .course-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .hero-headline {
+            font-size: 3.2rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            color: #ddd;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .price-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 2rem 0;
+            border: 2px solid var(--primary);
+        }
+        
+        .current-price {
+            font-size: 3.5rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .original-price {
+            font-size: 1.8rem;
+            color: #ccc;
+            text-decoration: line-through;
+            margin-left: 1rem;
+        }
+        
+        .urgency-banner {
+            background: rgba(255, 107, 53, 0.15);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--primary);
+            animation: glow 3s infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.5); }
+        }
+        
+        .whatsapp-button {
+            background: #25D366;
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.3rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        
+        .whatsapp-button:hover {
+            background: #128C7E;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .whatsapp-icon {
+            font-size: 1.5rem;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+        
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .module-section {
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+        
+        .module-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+        
+        .module-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(10px);
+        }
+        
+        .module-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .ai-showcase {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 3rem;
+            border-radius: 15px;
+            margin: 3rem 0;
+            border: 2px solid var(--accent);
+            text-align: center;
+        }
+        
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: '"';
+            font-size: 5rem;
+            color: var(--primary);
+            opacity: 0.3;
+            position: absolute;
+            top: -20px;
+            left: 10px;
+        }
+        
+        .faq-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .guarantee-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            margin: 3rem 0;
+        }
+        
+        .course-cta {
+            padding: 100px 0;
+            text-align: center;
+            background: var(--secondary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-headline {
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .current-price {
+                font-size: 2.8rem;
+            }
+            
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ai-showcase {
+                padding: 2rem 1rem;
+            }
+            
+            .testimonial-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .whatsapp-button {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-headline {
+                font-size: 1.8rem;
+            }
+            
+            .course-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .price-section {
+                padding: 1rem;
+            }
+            
+            .current-price {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#buy-now" class="cta-button">Enroll Now</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#buy-now" class="cta-button" onclick="closeMobileMenu()">Enroll Now</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="course-hero">
+        <div class="container">
+            <div class="course-badge">
+                🚀 LIMITED TIME OFFER
+            </div>
+            
+            <h1 class="hero-headline">
+                Production-Ready GDScript in Hindi
+            </h1>
+            
+            <p class="hero-subtitle">
+                <strong>I don't just teach GDScript. I give you the same scripts I use in my multiplayer game, and show you how to modify them for your own game.</strong>
+            </p>
+            
+            <div class="price-section">
+                <span class="current-price">₹199</span>
+                <span class="original-price">₹1999</span>
+                <div style="margin-top: 0.5rem; color: #25D366; font-weight: bold;">
+                    90% OFF - Ends Soon!
+                </div>
+            </div>
+            
+            <div class="urgency-banner">
+                ⚡ <strong>BONUS:</strong> AI Script Generator Addon included FREE (Worth ₹999)
+            </div>
+            
+            <a href="#buy-now" class="whatsapp-button" id="hero-whatsapp-btn">
+                <span class="whatsapp-icon">💬</span>
+                Enroll Now via WhatsApp
+            </a>
+            
+            <p style="margin-top: 1rem; color: #ccc; font-size: 0.9rem;">
+                No payment gateway. Direct WhatsApp enrollment. Get instant access.
+            </p>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Stop Copy-Pasting Tutorials.<br>Start Using Production Code.</h2>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">💎</div>
+                    <h3>Real Game Code</h3>
+                    <p>Get the exact scripts from my multiplayer game. Tested, optimized, and ready to use.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🤖</div>
+                    <h3>AI Script Generator</h3>
+                    <p>My custom Godot addon that generates scripts instantly. Included FREE with the course.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔄</div>
+                    <h3>Adapt, Don't Just Copy</h3>
+                    <p>Learn how to modify scripts for your specific game needs. FPS to TPS, PC to Mobile, etc.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🇮🇳</div>
+                    <h3>Hindi + English</h3>
+                    <p>Videos in Hindi, code in English. Perfect for Indian developers who think in Hindi.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Modules -->
+    <section class="module-section">
+        <div class="container">
+            <h2 class="section-title">What You'll Get in This Course</h2>
+            <p style="text-align: center; margin-bottom: 3rem; color: #ccc; max-width: 800px; margin-left: auto; margin-right: auto;">
+                6 Modules • 30+ Videos • Working Code • AI Tool • Lifetime Access
+            </p>
+            
+            <div class="curriculum-grid">
+                <div class="module-card">
+                    <div class="module-number">1</div>
+                    <h3>Module 1: How Real Godot Code Works</h3>
+                    <p>Scene → Script → Data flow. How professionals structure scripts. Why most tutorials fail in real games.</p>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-number">2</div>
+                    <h3>Module 2: Core GDScript (Using Real Code)</h3>
+                    <p>Player movement, weapon logic, health & damage systems - all production code from my game.</p>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-number">3</div>
+                    <h3>Module 3: Adapt Any Script to Your Game</h3>
+                    <p><strong>🔥 BIG VALUE:</strong> Turn FPS logic into TPS. Change stats, inputs, mobile controls. Reuse scripts.</p>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-number">4</div>
+                    <h3>Module 4: Debugging Like a Developer</h3>
+                    <p>Fix multiplayer sync issues, AI bugs, mobile-specific problems. Real debugging scenarios.</p>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-number">5</div>
+                    <h3>Module 5: AI Script Generator Addon</h3>
+                    <p><strong>UNIQUE USP:</strong> Use my AI addon to generate player scripts, enemy logic, utility functions. Edit AI code properly.</p>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-number">6</div>
+                    <h3>Module 6: Advanced Patterns (Bonus)</h3>
+                    <p>State machines, clean code habits, multiplayer logic separation, performance tips.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Showcase -->
+    <section class="ai-showcase">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem; color: var(--accent);">The AI Script Generator - Your Secret Weapon</h2>
+            <p style="font-size: 1.3rem; margin-bottom: 2rem;">
+                This addon alone saves you <strong>hours of coding time</strong>. Generate scripts instantly, then customize them.
+            </p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-top: 3rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;">⚡</div>
+                    <h4>Instant Script Generation</h4>
+                    <p>Player controllers, AI logic, UI systems in seconds</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;">🔧</div>
+                    <h4>Godot 4 Optimized</h4>
+                    <p>Generates clean, efficient GDScript 2.0 code</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;">🎯</div>
+                    <h4>Beginner Friendly</h4>
+                    <p>Perfect for those new to coding or Godot</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="services-section">
+        <div class="container">
+            <h2 class="section-title">What Developers Say About Our Approach</h2>
+            
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <p>"Isne sirf sikhaya nahi, real code diya. (He didn't just teach, he gave real code.) This changed how I build games."</p>
+                    <div style="margin-top: 1.5rem; font-weight: bold; color: var(--accent);">
+                        - Mobile Game Developer
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p>"The AI addon saves me 3-4 hours per week. Worth 10x the course price. Hindi explanation made complex concepts easy."</p>
+                    <div style="margin-top: 1.5rem; font-weight: bold; color: var(--accent);">
+                        - Solo Indie Developer
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p>"Finally a course that gives working code, not just theory. The multiplayer scripts work perfectly in my project."</p>
+                    <div style="margin-top: 1.5rem; font-weight: bold; color: var(--accent);">
+                        - Computer Science Student
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee -->
+    <section class="guarantee-banner">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Risk-Free Enrollment</h2>
+            <p style="font-size: 1.3rem; max-width: 800px; margin: 0 auto;">
+                If you don't find the course valuable within 7 days, I'll personally help you adapt one of my scripts to your game - FREE.
+            </p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is this course only for Hindi speakers?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Videos are in Hindi, but all code is in English. Perfect if you think in Hindi but code in English. Subtitles available.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What if I know nothing about Godot?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Start with Module 1. I explain everything from scratch. The AI addon helps beginners generate working code immediately.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Can I use the code in commercial games?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>YES!</strong> All code is yours to use in any project, personal or commercial. No restrictions.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How do I get the course after payment?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Message me on WhatsApp. I'll send you the course access + AI addon immediately. Usually within 5 minutes.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What's included in ₹199?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Full course (6 modules, 30+ videos), AI Script Generator Addon, all source code, lifetime access, future updates.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="course-cta" id="buy-now">
+        <div class="container">
+            <h2 class="section-title">Ready to Stop Struggling with Code?</h2>
+            
+            <div class="price-section" style="margin: 3rem auto;">
+                <span class="current-price">₹199</span>
+                <span class="original-price">₹1999</span>
+            </div>
+            
+            <div class="urgency-banner" style="max-width: 600px; margin: 2rem auto;">
+                ⏳ <strong>OFFER ENDS SOON:</strong> Next 50 students get the AI Addon FREE
+            </div>
+            
+            <h3 style="font-size: 1.8rem; margin: 3rem 0 1rem; color: var(--accent);">Enroll in 3 Simple Steps:</h3>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin: 2rem 0 3rem;">
+                <div style="text-align: center; flex: 1; min-width: 200px;">
+                    <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">1️⃣</div>
+                    <h4>Click WhatsApp Button</h4>
+                    <p>Send pre-filled message</p>
+                </div>
+                
+                <div style="text-align: center; flex: 1; min-width: 200px;">
+                    <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">2️⃣</div>
+                    <h4>Make Payment</h4>
+                    <p>₹199 via UPI/GPay/PhonePe</p>
+                </div>
+                
+                <div style="text-align: center; flex: 1; min-width: 200px;">
+                    <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">3️⃣</div>
+                    <h4>Get Instant Access</h4>
+                    <p>Course + AI addon in 5 mins</p>
+                </div>
+            </div>
+            
+            <!-- WhatsApp Button -->
+            <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20enroll%20in%20your%20Production-Ready%20GDScript%20course%20for%20%E2%82%B9199.%20Please%20send%20me%20payment%20details%20and%20course%20access." 
+               class="whatsapp-button" 
+               target="_blank"
+               style="font-size: 1.5rem; padding: 1.5rem 4rem;">
+                <span class="whatsapp-icon">📱</span>
+                Message on WhatsApp to Enroll
+            </a>
+            
+            <p style="margin-top: 2rem; color: #ccc; font-size: 1rem;">
+                Direct enrollment • No middleman • Get help directly from me
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Production-Ready GDScript Course • Real Code + AI Script Generator</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">
+                WhatsApp: +91 75047 04502 • Email: sanjay@example.com
+            </p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                answer.classList.toggle('active');
+                question.querySelector('span:last-child').textContent = 
+                    answer.classList.contains('active') ? '−' : '+';
+            });
+        });
+
+        // WhatsApp Button Tracking
+        document.querySelectorAll('.whatsapp-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // You can add analytics here
+                console.log('WhatsApp enrollment clicked');
+            });
+        });
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        // Current Page Highlight
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            navLinks.forEach(link => {
+                if (link.href === window.location.href) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Animate elements on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe elements for animation
+            document.querySelectorAll('.benefit-card, .module-card, .testimonial-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
+
+        // WhatsApp pre-filled message for all buttons
+        const whatsappMessage = encodeURIComponent(
+            "Hi Sanjay, I want to enroll in your Production-Ready GDScript course for ₹199. Please send me payment details and course access."
+        );
+        const whatsappNumber = "917504704502";
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+        
+        // Set all WhatsApp buttons
+        document.querySelectorAll('.whatsapp-button').forEach(btn => {
+            btn.href = whatsappUrl;
+            btn.target = "_blank";
+        });
+    </script>
+</body>
+</html>
