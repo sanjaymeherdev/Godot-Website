@@ -610,17 +610,23 @@
             if (isServerStarting || isInCooldown) return;
             
             // Create a hidden iframe to load the server URL in background
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = 'https://renderserver-ymjo.onrender.com';
-            document.body.appendChild(iframe);
-            
-            // Remove iframe after 5 seconds to clean up
-            setTimeout(() => {
-                if (iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
-                }
-            }, 5000);
+            // Send a fetch request to wake up the Render server
+fetch('https://renderserver-ymjo.onrender.com', {
+    mode: 'no-cors',
+    cache: 'no-store',
+    credentials: 'omit'
+}).then(() => {
+    console.log('Server wake-up request sent');
+}).catch(() => {
+    console.log('Request sent (CORS blocked but server woken)');
+});
+
+// Optional: Also try with an image request as backup
+const img = new Image();
+img.src = 'https://renderserver-ymjo.onrender.com';
+img.onload = img.onerror = () => {
+    console.log('Backup request completed');
+};
             
             // Start the 30-second server timer
             isServerStarting = true;
