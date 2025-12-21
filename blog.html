@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Development Blog - Tutorials, Tips & Game Dev Insights</title>
+    <meta name="description" content="Latest Godot Engine tutorials, optimization tips, and game development insights. Learn from production-tested systems.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* Blog Page Specific Styles */
+        .blog-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .blog-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .blog-hero p {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #ccc;
+        }
+        
+        .blog-grid-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .blog-filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Blog Grid Container */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+        
+        .blog-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .blog-thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .blog-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .blog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .blog-category {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .blog-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: white;
+            line-height: 1.4;
+        }
+        
+        .blog-excerpt {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .read-more-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s;
+            width: fit-content;
+        }
+        
+        .read-more-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .blog-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+        
+        .page-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover {
+            background: var(--primary);
+        }
+        
+        .page-btn.active {
+            background: var(--primary);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Subscribe Section */
+        .subscribe-section {
+            padding: 80px 0;
+            background: var(--secondary);
+            text-align: center;
+        }
+        
+        .subscribe-box {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .subscribe-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .subscribe-input {
+            flex-grow: 1;
+            padding: 1rem;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .blog-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .blog-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .blog-hero p {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+            
+            .blog-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+                padding: 0 1rem;
+            }
+            
+            .blog-filters {
+                padding: 0 1rem;
+            }
+            
+            .subscribe-form {
+                flex-direction: column;
+            }
+            
+            .subscribe-box {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .blog-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .blog-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .blog-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (Same as index.html) -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="blog.html" class="active">Blog</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="course.html">Course</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#offer" class="cta-button">Get Assets</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="blog.html" onclick="closeMobileMenu()">Blog</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="course.html">Course</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#offer" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Blog Hero Section -->
+    <section class="blog-hero">
+        <div class="container">
+            <h1>Godot Development Blog</h1>
+            <p>Latest tutorials, optimization tips, and insights from building production-ready Godot systems. Learn from real projects.</p>
+            <a href="#blog-grid" class="cta-button">Start Reading →</a>
+        </div>
+    </section>
+
+    <!-- Blog Grid Section -->
+    <section class="blog-grid-section" id="blog-grid">
+        <div class="container">
+            <div class="blog-filters">
+                <button class="filter-btn active" data-category="all">All Posts</button>
+                <button class="filter-btn" data-category="tutorials">Tutorials</button>
+                <button class="filter-btn" data-category="optimization">Optimization</button>
+                <button class="filter-btn" data-category="multiplayer">Multiplayer</button>
+                <button class="filter-btn" data-category="mobile">Mobile</button>
+            </div>
+            
+            <div class="blog-grid" id="blogPostsContainer">
+                <!-- Blog posts will be loaded here by JavaScript -->
+                <!-- Fallback content for SEO -->
+                <article class="blog-card">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600" 
+                         alt="Godot Multiplayer Setup" class="blog-thumbnail">
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="blog-category">Multiplayer</span>
+                            <span class="blog-date">Dec 21, 2024</span>
+                        </div>
+                        <h3 class="blog-title">Complete Guide to Godot 4 Multiplayer Setup</h3>
+                        <p class="blog-excerpt">Learn how to set up reliable multiplayer games in Godot 4 with production-tested code examples and troubleshooting tips.</p>
+                        <a href="blog/godot-multiplayer-guide.html" class="read-more-btn">Read More</a>
+                    </div>
+                </article>
+            </div>
+            
+            <div class="blog-pagination">
+                <button class="page-btn" id="prevPage" disabled>← Previous</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn" id="nextPage">Next →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscribe Section -->
+    <section class="subscribe-section">
+        <div class="container">
+            <div class="subscribe-box">
+                <h2>Get Godot Tips Directly</h2>
+                <p>Subscribe to get the latest tutorials, free scripts, and optimization tips for Godot development.</p>
+                
+                <form class="subscribe-form" id="subscribeForm">
+                    <input type="email" class="subscribe-input" placeholder="Enter your email" required>
+                    <button type="submit" class="cta-button">Subscribe</button>
+                </form>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">No spam. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+    
+    <!-- Blog JavaScript -->
+    <script>
+        // Sample blog data - you can replace this with real data from a JSON file or API
+        const blogPosts = [
+            {
+                id: 1,
+                title: "Complete Guide to Godot 4 Multiplayer Setup",
+                excerpt: "Learn how to set up reliable multiplayer games in Godot 4 with production-tested code examples and troubleshooting tips.",
+                category: "multiplayer",
+                date: "Dec 21, 2024",
+                readTime: "8 min read",
+                thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600",
+                url: "blog/godot-multiplayer-guide.html"
+            },
+            {
+                id: 2,
+                title: "Optimizing Godot Games for Mobile Performance",
+                excerpt: "Essential techniques to optimize your Godot games for mobile devices, including draw call reduction and memory management.",
+                category: "mobile",
+                date: "Dec 18, 2024",
+                readTime: "6 min read",
+                thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600",
+                url: "blog/mobile-optimization.html"
+            },
+            {
+                id: 3,
+                title: "GDScript Best Practices for Beginners",
+                excerpt: "Learn the essential GDScript coding patterns and best practices that will make your Godot development faster and cleaner.",
+                category: "tutorials",
+                date: "Dec 15, 2024",
+                readTime: "10 min read",
+                thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600",
+                url: "blog/gdscript-best-practices.html"
+            },
+            {
+                id: 4,
+                title: "Building AI Enemies in Godot 4",
+                excerpt: "Step-by-step guide to creating intelligent enemy AI with pathfinding, behavior trees, and state machines in Godot 4.",
+                category: "tutorials",
+                date: "Dec 12, 2024",
+                readTime: "12 min read",
+                thumbnail: "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=600",
+                url: "blog/ai-enemies-godot.html"
+            },
+            {
+                id: 5,
+                title: "Godot's VisualShader Editor: A Complete Guide",
+                excerpt: "Master Godot's VisualShader Editor to create stunning visual effects without writing shader code.",
+                category: "tutorials",
+                date: "Dec 10, 2024",
+                readTime: "7 min read",
+                thumbnail: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600",
+                url: "blog/visual-shader-guide.html"
+            },
+            {
+                id: 6,
+                title: "Memory Management in Godot Games",
+                excerpt: "Advanced techniques for efficient memory management in large-scale Godot projects to prevent crashes and slowdowns.",
+                category: "optimization",
+                date: "Dec 8, 2024",
+                readTime: "9 min read",
+                thumbnail: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=600",
+                url: "blog/memory-management.html"
+            },
+            {
+                id: 7,
+                title: "Creating Vehicle Physics in Godot",
+                excerpt: "Build realistic vehicle physics with suspension, traction control, and customizable driving mechanics.",
+                category: "tutorials",
+                date: "Dec 5, 2024",
+                readTime: "11 min read",
+                thumbnail: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=600",
+                url: "blog/vehicle-physics.html"
+            },
+            {
+                id: 8,
+                title: "Godot 4 vs Unity: Performance Comparison",
+                excerpt: "Detailed performance analysis comparing Godot 4 and Unity for 2D and 3D game development.",
+                category: "optimization",
+                date: "Dec 2, 2024",
+                readTime: "14 min read",
+                thumbnail: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=600",
+                url: "blog/godot-vs-unity.html"
+            }
+        ];
+
+        // Mobile Menu Functionality (same as index.html)
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        // Event Listeners for mobile menu
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Blog functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const blogContainer = document.getElementById('blogPostsContainer');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const prevPageBtn = document.getElementById('prevPage');
+            const nextPageBtn = document.getElementById('nextPage');
+            const pageButtons = document.querySelectorAll('.page-btn:not(#prevPage):not(#nextPage)');
+            
+            let currentCategory = 'all';
+            let currentPage = 1;
+            const postsPerPage = 8;
+            
+            // Render blog posts
+            function renderBlogPosts(posts) {
+                blogContainer.innerHTML = '';
+                
+                posts.forEach(post => {
+                    const postElement = document.createElement('article');
+                    postElement.className = 'blog-card';
+                    postElement.innerHTML = `
+                        <img src="${post.thumbnail}" 
+                             alt="${post.title}" 
+                             class="blog-thumbnail"
+                             loading="lazy">
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-category">${post.category.charAt(0).toUpperCase() + post.category.slice(1)}</span>
+                                <span class="blog-date">${post.date}</span>
+                            </div>
+                            <h3 class="blog-title">${post.title}</h3>
+                            <p class="blog-excerpt">${post.excerpt}</p>
+                            <a href="${post.url}" class="read-more-btn">Read More</a>
+                        </div>
+                    `;
+                    blogContainer.appendChild(postElement);
+                });
+            }
+            
+            // Filter posts by category
+            function filterPostsByCategory(category) {
+                if (category === 'all') {
+                    return blogPosts;
+                }
+                return blogPosts.filter(post => post.category === category);
+            }
+            
+            // Get paginated posts
+            function getPaginatedPosts(posts, page) {
+                const startIndex = (page - 1) * postsPerPage;
+                const endIndex = startIndex + postsPerPage;
+                return posts.slice(startIndex, endIndex);
+            }
+            
+            // Update pagination
+            function updatePagination(totalPosts) {
+                const totalPages = Math.ceil(totalPosts / postsPerPage);
+                
+                // Update page buttons
+                pageButtons.forEach((btn, index) => {
+                    if (index < totalPages) {
+                        btn.textContent = index + 1;
+                        btn.style.display = 'inline-block';
+                        btn.classList.toggle('active', (index + 1) === currentPage);
+                    } else {
+                        btn.style.display = 'none';
+                    }
+                });
+                
+                // Update prev/next buttons
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+            }
+            
+            // Initial render
+            function updateDisplay() {
+                const filteredPosts = filterPostsByCategory(currentCategory);
+                const paginatedPosts = getPaginatedPosts(filteredPosts, currentPage);
+                
+                renderBlogPosts(paginatedPosts);
+                updatePagination(filteredPosts.length);
+                
+                // Add fade-in animation
+                const blogCards = document.querySelectorAll('.blog-card');
+                blogCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                });
+            }
+            
+            // Filter button click handlers
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active filter
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update category and reset to page 1
+                    currentCategory = this.dataset.category;
+                    currentPage = 1;
+                    
+                    // Update display
+                    updateDisplay();
+                });
+            });
+            
+            // Pagination button click handlers
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateDisplay();
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                const filteredPosts = filterPostsByCategory(currentCategory);
+                const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+                
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateDisplay();
+                }
+            });
+            
+            // Page number button click handlers
+            pageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const pageNumber = parseInt(this.textContent);
+                    if (!isNaN(pageNumber)) {
+                        currentPage = pageNumber;
+                        updateDisplay();
+                    }
+                });
+            });
+            
+            // Subscribe form handler
+            const subscribeForm = document.getElementById('subscribeForm');
+            if (subscribeForm) {
+                subscribeForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const emailInput = this.querySelector('.subscribe-input');
+                    const email = emailInput.value;
+                    
+                    // Simple validation
+                    if (email && email.includes('@')) {
+                        alert(`Thank you for subscribing! We'll send Godot tips to ${email}`);
+                        emailInput.value = '';
+                    } else {
+                        alert('Please enter a valid email address.');
+                    }
+                });
+            }
+            
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        closeMobileMenu();
+                    }
+                });
+            });
+            
+            // Initial render
+            updateDisplay();
+            
+            // Close mobile menu when clicking on links
+            const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        });
+    </script>
+</body>
+</html>
