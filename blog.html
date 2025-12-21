@@ -64,6 +64,28 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 2rem;
+            min-height: 400px;
+        }
+        
+        .loading-spinner {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .blog-card {
@@ -74,7 +96,26 @@
             transition: transform 0.3s, border-color 0.3s;
             display: flex;
             flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
         }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .blog-card:nth-child(1) { animation-delay: 0.1s; }
+        .blog-card:nth-child(2) { animation-delay: 0.2s; }
+        .blog-card:nth-child(3) { animation-delay: 0.3s; }
+        .blog-card:nth-child(4) { animation-delay: 0.4s; }
+        .blog-card:nth-child(5) { animation-delay: 0.5s; }
+        .blog-card:nth-child(6) { animation-delay: 0.6s; }
+        .blog-card:nth-child(7) { animation-delay: 0.7s; }
+        .blog-card:nth-child(8) { animation-delay: 0.8s; }
         
         .blog-card:hover {
             transform: translateY(-5px);
@@ -145,12 +186,20 @@
             color: white;
         }
         
+        .no-posts {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: #aaa;
+        }
+        
         .blog-pagination {
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
             margin-top: 3rem;
+            flex-wrap: wrap;
         }
         
         .page-btn {
@@ -161,6 +210,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
+            min-width: 45px;
         }
         
         .page-btn:hover {
@@ -174,6 +224,10 @@
         .page-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        
+        .page-btn.page-number {
+            font-weight: normal;
         }
         
         /* Subscribe Section */
@@ -243,6 +297,10 @@
                 padding: 2rem 1.5rem;
                 margin: 0 1rem;
             }
+            
+            .blog-pagination {
+                padding: 0 1rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -261,11 +319,20 @@
             .blog-card {
                 max-width: 100%;
             }
+            
+            .blog-pagination {
+                gap: 0.3rem;
+            }
+            
+            .page-btn {
+                padding: 0.6rem 0.8rem;
+                min-width: 40px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header (Same as index.html) -->
+    <!-- Header -->
     <header>
         <div class="container">
             <nav>
@@ -279,12 +346,12 @@
                     <a href="minicourses.html">Mini Courses</a>
                     <a href="services.html">Services</a>
                     <a href="pvp-game.html">PVP Game Course</a>
-                    <a href="course.html">Course</a>
+                    <a href="course.html">Login</a>
                     <a href="index.html#contact">Contact</a>
                 </div>
                 
                 <!-- Desktop CTA Button -->
-                <a href="#offer" class="cta-button">Get Assets</a>
+                <a href="scripts.html" class="cta-button">Get Assets</a>
                 
                 <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
@@ -305,10 +372,10 @@
                 <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
                 <a href="services.html" onclick="closeMobileMenu()">Services</a>
                 <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
-                <a href="course.html">Course</a>
+                <a href="course.html">Login</a>
                 <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
                 
-                <a href="#offer" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
+                <a href="scripts.html" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
             </div>
         </div>
         
@@ -337,29 +404,18 @@
             </div>
             
             <div class="blog-grid" id="blogPostsContainer">
-                <!-- Blog posts will be loaded here by JavaScript -->
-                <!-- Fallback content for SEO -->
-                <article class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600" 
-                         alt="Godot Multiplayer Setup" class="blog-thumbnail">
-                    <div class="blog-content">
-                        <div class="blog-meta">
-                            <span class="blog-category">Multiplayer</span>
-                            <span class="blog-date">Dec 21, 2024</span>
-                        </div>
-                        <h3 class="blog-title">Complete Guide to Godot 4 Multiplayer Setup</h3>
-                        <p class="blog-excerpt">Learn how to set up reliable multiplayer games in Godot 4 with production-tested code examples and troubleshooting tips.</p>
-                        <a href="blog/godot-multiplayer-guide.html" class="read-more-btn">Read More</a>
-                    </div>
-                </article>
+                <!-- Loading spinner - shown while posts load -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading blog posts...</p>
+                </div>
             </div>
             
-            <div class="blog-pagination">
-                <button class="page-btn" id="prevPage" disabled>← Previous</button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn" id="nextPage">Next →</button>
+            <!-- Pagination - automatically generated -->
+            <div class="blog-pagination" id="blogPagination">
+                <button class="page-btn" id="prevPage" disabled>←</button>
+                <!-- Page numbers will be inserted here automatically -->
+                <button class="page-btn" id="nextPage">→</button>
             </div>
         </div>
     </section>
@@ -403,298 +459,303 @@
     
     <!-- Blog JavaScript -->
     <script>
-        // Sample blog data - you can replace this with real data from a JSON file or API
-        const blogPosts = [
-            {
-                id: 1,
-                title: "Complete Guide to Godot 4 Multiplayer Setup",
-                excerpt: "Learn how to set up reliable multiplayer games in Godot 4 with production-tested code examples and troubleshooting tips.",
-                category: "multiplayer",
-                date: "Dec 21, 2024",
-                readTime: "8 min read",
-                thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600",
-                url: "blog/godot-multiplayer-guide.html"
-            },
-            {
-                id: 2,
-                title: "Optimizing Godot Games for Mobile Performance",
-                excerpt: "Essential techniques to optimize your Godot games for mobile devices, including draw call reduction and memory management.",
-                category: "mobile",
-                date: "Dec 18, 2024",
-                readTime: "6 min read",
-                thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600",
-                url: "blog/mobile-optimization.html"
-            },
-            {
-                id: 3,
-                title: "GDScript Best Practices for Beginners",
-                excerpt: "Learn the essential GDScript coding patterns and best practices that will make your Godot development faster and cleaner.",
-                category: "tutorials",
-                date: "Dec 15, 2024",
-                readTime: "10 min read",
-                thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600",
-                url: "blog/gdscript-best-practices.html"
-            },
-            {
-                id: 4,
-                title: "Building AI Enemies in Godot 4",
-                excerpt: "Step-by-step guide to creating intelligent enemy AI with pathfinding, behavior trees, and state machines in Godot 4.",
-                category: "tutorials",
-                date: "Dec 12, 2024",
-                readTime: "12 min read",
-                thumbnail: "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=600",
-                url: "blog/ai-enemies-godot.html"
-            },
-            {
-                id: 5,
-                title: "Godot's VisualShader Editor: A Complete Guide",
-                excerpt: "Master Godot's VisualShader Editor to create stunning visual effects without writing shader code.",
-                category: "tutorials",
-                date: "Dec 10, 2024",
-                readTime: "7 min read",
-                thumbnail: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600",
-                url: "blog/visual-shader-guide.html"
-            },
-            {
-                id: 6,
-                title: "Memory Management in Godot Games",
-                excerpt: "Advanced techniques for efficient memory management in large-scale Godot projects to prevent crashes and slowdowns.",
-                category: "optimization",
-                date: "Dec 8, 2024",
-                readTime: "9 min read",
-                thumbnail: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=600",
-                url: "blog/memory-management.html"
-            },
-            {
-                id: 7,
-                title: "Creating Vehicle Physics in Godot",
-                excerpt: "Build realistic vehicle physics with suspension, traction control, and customizable driving mechanics.",
-                category: "tutorials",
-                date: "Dec 5, 2024",
-                readTime: "11 min read",
-                thumbnail: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=600",
-                url: "blog/vehicle-physics.html"
-            },
-            {
-                id: 8,
-                title: "Godot 4 vs Unity: Performance Comparison",
-                excerpt: "Detailed performance analysis comparing Godot 4 and Unity for 2D and 3D game development.",
-                category: "optimization",
-                date: "Dec 2, 2024",
-                readTime: "14 min read",
-                thumbnail: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=600",
-                url: "blog/godot-vs-unity.html"
-            }
-        ];
-
-        // Mobile Menu Functionality (same as index.html)
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-        const body = document.body;
-
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            body.classList.add('menu-open');
-        }
-
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            body.classList.remove('menu-open');
-        }
-
-        // Event Listeners for mobile menu
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-        // Blog functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const blogContainer = document.getElementById('blogPostsContainer');
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            const prevPageBtn = document.getElementById('prevPage');
-            const nextPageBtn = document.getElementById('nextPage');
-            const pageButtons = document.querySelectorAll('.page-btn:not(#prevPage):not(#nextPage)');
-            
-            let currentCategory = 'all';
-            let currentPage = 1;
-            const postsPerPage = 8;
-            
-            // Render blog posts
-            function renderBlogPosts(posts) {
-                blogContainer.innerHTML = '';
+        class BlogManager {
+            constructor() {
+                this.blogPosts = [];
+                this.currentCategory = 'all';
+                this.currentPage = 1;
+                this.postsPerPage = 8;
+                this.totalPages = 0;
                 
-                posts.forEach(post => {
-                    const postElement = document.createElement('article');
-                    postElement.className = 'blog-card';
-                    postElement.innerHTML = `
-                        <img src="${post.thumbnail}" 
-                             alt="${post.title}" 
-                             class="blog-thumbnail"
-                             loading="lazy">
-                        <div class="blog-content">
-                            <div class="blog-meta">
-                                <span class="blog-category">${post.category.charAt(0).toUpperCase() + post.category.slice(1)}</span>
-                                <span class="blog-date">${post.date}</span>
-                            </div>
-                            <h3 class="blog-title">${post.title}</h3>
-                            <p class="blog-excerpt">${post.excerpt}</p>
-                            <a href="${post.url}" class="read-more-btn">Read More</a>
-                        </div>
-                    `;
-                    blogContainer.appendChild(postElement);
-                });
+                this.elements = {
+                    container: document.getElementById('blogPostsContainer'),
+                    pagination: document.getElementById('blogPagination'),
+                    prevBtn: document.getElementById('prevPage'),
+                    nextBtn: document.getElementById('nextPage'),
+                    filterButtons: document.querySelectorAll('.filter-btn'),
+                    subscribeForm: document.getElementById('subscribeForm')
+                };
+                
+                this.init();
             }
             
-            // Filter posts by category
-            function filterPostsByCategory(category) {
-                if (category === 'all') {
-                    return blogPosts;
+            async init() {
+                await this.loadBlogPosts();
+                this.setupEventListeners();
+                this.setupMobileMenu();
+                this.setupSmoothScrolling();
+            }
+            
+            async loadBlogPosts() {
+                try {
+                    const response = await fetch('data/blog-posts.json');
+                    const data = await response.json();
+                    this.blogPosts = data.posts;
+                    
+                    // Sort by date (newest first)
+                    this.blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    this.renderBlogPosts();
+                } catch (error) {
+                    console.error('Error loading blog posts:', error);
+                    this.showError();
                 }
-                return blogPosts.filter(post => post.category === category);
             }
             
-            // Get paginated posts
-            function getPaginatedPosts(posts, page) {
-                const startIndex = (page - 1) * postsPerPage;
-                const endIndex = startIndex + postsPerPage;
+            renderBlogPosts() {
+                const filteredPosts = this.filterPostsByCategory();
+                const paginatedPosts = this.getPaginatedPosts(filteredPosts);
+                
+                this.elements.container.innerHTML = '';
+                
+                if (paginatedPosts.length === 0) {
+                    this.showNoPosts();
+                    return;
+                }
+                
+                paginatedPosts.forEach((post, index) => {
+                    const postElement = this.createPostElement(post, index);
+                    this.elements.container.appendChild(postElement);
+                });
+                
+                this.updatePagination(filteredPosts.length);
+            }
+            
+            createPostElement(post, index) {
+                const article = document.createElement('article');
+                article.className = 'blog-card';
+                article.style.animationDelay = `${index * 0.1}s`;
+                
+                article.innerHTML = `
+                    <img src="${post.thumbnail}" 
+                         alt="${post.title}" 
+                         class="blog-thumbnail"
+                         loading="lazy">
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="blog-category">${this.capitalizeFirstLetter(post.category)}</span>
+                            <span class="blog-date">${this.formatDate(post.date)}</span>
+                        </div>
+                        <h3 class="blog-title">${post.title}</h3>
+                        <p class="blog-excerpt">${post.excerpt}</p>
+                        <a href="${post.url}" class="read-more-btn">Read More</a>
+                    </div>
+                `;
+                
+                return article;
+            }
+            
+            filterPostsByCategory() {
+                if (this.currentCategory === 'all') {
+                    return this.blogPosts;
+                }
+                return this.blogPosts.filter(post => post.category === this.currentCategory);
+            }
+            
+            getPaginatedPosts(posts) {
+                const startIndex = (this.currentPage - 1) * this.postsPerPage;
+                const endIndex = startIndex + this.postsPerPage;
                 return posts.slice(startIndex, endIndex);
             }
             
-            // Update pagination
-            function updatePagination(totalPosts) {
-                const totalPages = Math.ceil(totalPosts / postsPerPage);
+            updatePagination(totalPosts) {
+                this.totalPages = Math.ceil(totalPosts / this.postsPerPage);
                 
-                // Update page buttons
-                pageButtons.forEach((btn, index) => {
-                    if (index < totalPages) {
-                        btn.textContent = index + 1;
-                        btn.style.display = 'inline-block';
-                        btn.classList.toggle('active', (index + 1) === currentPage);
-                    } else {
-                        btn.style.display = 'none';
-                    }
-                });
+                // Clear existing page number buttons
+                const existingNumbers = document.querySelectorAll('.page-number');
+                existingNumbers.forEach(btn => btn.remove());
+                
+                // Hide pagination if only 1 page
+                if (this.totalPages <= 1) {
+                    this.elements.pagination.style.display = 'none';
+                    return;
+                }
+                
+                this.elements.pagination.style.display = 'flex';
+                
+                // Create page number buttons
+                for (let i = 1; i <= this.totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `page-btn page-number ${i === this.currentPage ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    
+                    pageBtn.addEventListener('click', () => {
+                        this.currentPage = i;
+                        this.renderBlogPosts();
+                        this.scrollToBlogGrid();
+                    });
+                    
+                    // Insert before next button
+                    this.elements.prevBtn.parentNode.insertBefore(pageBtn, this.elements.nextBtn);
+                }
                 
                 // Update prev/next buttons
-                prevPageBtn.disabled = currentPage === 1;
-                nextPageBtn.disabled = currentPage === totalPages;
+                this.elements.prevBtn.disabled = this.currentPage === 1;
+                this.elements.nextBtn.disabled = this.currentPage === this.totalPages;
             }
             
-            // Initial render
-            function updateDisplay() {
-                const filteredPosts = filterPostsByCategory(currentCategory);
-                const paginatedPosts = getPaginatedPosts(filteredPosts, currentPage);
-                
-                renderBlogPosts(paginatedPosts);
-                updatePagination(filteredPosts.length);
-                
-                // Add fade-in animation
-                const blogCards = document.querySelectorAll('.blog-card');
-                blogCards.forEach(card => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                    
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 100);
+            setupEventListeners() {
+                // Filter buttons
+                this.elements.filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        this.currentCategory = button.dataset.category;
+                        this.currentPage = 1;
+                        this.renderBlogPosts();
+                    });
                 });
-            }
-            
-            // Filter button click handlers
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Update active filter
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update category and reset to page 1
-                    currentCategory = this.dataset.category;
-                    currentPage = 1;
-                    
-                    // Update display
-                    updateDisplay();
-                });
-            });
-            
-            // Pagination button click handlers
-            prevPageBtn.addEventListener('click', function() {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updateDisplay();
-                }
-            });
-            
-            nextPageBtn.addEventListener('click', function() {
-                const filteredPosts = filterPostsByCategory(currentCategory);
-                const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
                 
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    updateDisplay();
-                }
-            });
-            
-            // Page number button click handlers
-            pageButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const pageNumber = parseInt(this.textContent);
-                    if (!isNaN(pageNumber)) {
-                        currentPage = pageNumber;
-                        updateDisplay();
+                // Pagination buttons
+                this.elements.prevBtn.addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderBlogPosts();
+                        this.scrollToBlogGrid();
                     }
                 });
-            });
-            
-            // Subscribe form handler
-            const subscribeForm = document.getElementById('subscribeForm');
-            if (subscribeForm) {
-                subscribeForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const emailInput = this.querySelector('.subscribe-input');
-                    const email = emailInput.value;
-                    
-                    // Simple validation
-                    if (email && email.includes('@')) {
-                        alert(`Thank you for subscribing! We'll send Godot tips to ${email}`);
-                        emailInput.value = '';
-                    } else {
-                        alert('Please enter a valid email address.');
+                
+                this.elements.nextBtn.addEventListener('click', () => {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                        this.renderBlogPosts();
+                        this.scrollToBlogGrid();
                     }
+                });
+                
+                // Subscribe form
+                if (this.elements.subscribeForm) {
+                    this.elements.subscribeForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const emailInput = this.elements.subscribeForm.querySelector('.subscribe-input');
+                        const email = emailInput.value;
+                        
+                        if (email && email.includes('@')) {
+                            alert(`Thank you for subscribing! We'll send Godot tips to ${email}`);
+                            emailInput.value = '';
+                        } else {
+                            alert('Please enter a valid email address.');
+                        }
+                    });
+                }
+            }
+            
+            showError() {
+                this.elements.container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <p style="color: #ff6b35; margin-bottom: 1rem;">Unable to load blog posts.</p>
+                        <p style="margin-bottom: 1.5rem;">Please check back later or refresh the page.</p>
+                        <button onclick="location.reload()" class="cta-button" style="margin: 0 auto;">Refresh Page</button>
+                    </div>
+                `;
+            }
+            
+            showNoPosts() {
+                this.elements.container.innerHTML = `
+                    <div class="no-posts">
+                        <p>No blog posts found in this category.</p>
+                        <button class="filter-btn active" data-category="all" style="margin-top: 1rem;">
+                            Show All Posts
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to the button
+                const showAllBtn = this.elements.container.querySelector('.filter-btn');
+                if (showAllBtn) {
+                    showAllBtn.addEventListener('click', () => {
+                        this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+                        document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
+                        
+                        this.currentCategory = 'all';
+                        this.currentPage = 1;
+                        this.renderBlogPosts();
+                    });
+                }
+                
+                this.elements.pagination.style.display = 'none';
+            }
+            
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
                 });
             }
             
-            // Smooth scrolling
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-                    
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
+            capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+            
+            scrollToBlogGrid() {
+                document.getElementById('blog-grid').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
+            setupMobileMenu() {
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+                const mobileMenu = document.getElementById('mobileMenu');
+                const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+                const body = document.body;
+
+                const openMobileMenu = () => {
+                    mobileMenu.classList.add('active');
+                    mobileMenuOverlay.classList.add('active');
+                    body.classList.add('menu-open');
+                };
+
+                const closeMobileMenu = () => {
+                    mobileMenu.classList.remove('active');
+                    mobileMenuOverlay.classList.remove('active');
+                    body.classList.remove('menu-open');
+                };
+
+                mobileMenuBtn.addEventListener('click', openMobileMenu);
+                mobileCloseBtn.addEventListener('click', closeMobileMenu);
+                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+                // Close menu when clicking on links
+                const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', closeMobileMenu);
+                });
+
+                // Close menu on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
                         closeMobileMenu();
                     }
                 });
-            });
+            }
             
-            // Initial render
-            updateDisplay();
-            
-            // Close mobile menu when clicking on links
-            const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', closeMobileMenu);
-            });
+            setupSmoothScrolling() {
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href');
+                        if (targetId === '#') return;
+                        
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        // Initialize the blog when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.blogManager = new BlogManager();
         });
     </script>
 </body>
