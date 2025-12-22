@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBUG vs RELEASE Keystores - Which One Are You Using?</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        .keystore-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .keystore-hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .critical-box {
+            background: rgba(255, 107, 53, 0.2);
+            border: 3px solid var(--primary);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .comparison-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug {
+            background: rgba(255, 193, 7, 0.1);
+        }
+        
+        .release {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .success {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .danger {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .path-box {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .step-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .step-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .step-arrow {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+        
+        .step-1 { background: #f44336; color: white; }
+        .step-2 { background: #ff9800; color: white; }
+        .step-3 { background: #4caf50; color: white; }
+        
+        .export-screenshot {
+            max-width: 100%;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .test-box {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .quick-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .terminal-output {
+            background: #000;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .action-button.debug-btn {
+            background: #ff9800;
+        }
+        
+        .action-button.release-btn {
+            background: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="course.html">Course</a>
+                    <a href="admob-guide.html">AdMob Guide</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#test" class="cta-button">Test Your APK</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="course.html" onclick="closeMobileMenu()">Course</a>
+                <a href="admob-guide.html" onclick="closeMobileMenu()">AdMob Guide</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#test" class="cta-button" onclick="closeMobileMenu()">Test Your APK</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="keystore-hero">
+        <div class="container">
+            <h1>You're Using DEBUG Keystore!</h1>
+            <p class="guide-subtitle">Godot auto-creates a debug keystore. Here's why it won't work for stores.</p>
+            <a href="#difference" class="cta-button">Understand the Difference →</a>
+        </div>
+    </section>
+
+    <!-- Critical Alert -->
+    <section class="step-container">
+        <div class="container">
+            <div class="critical-box">
+                <h2>🚨 IMPORTANT: You CANNOT Use Debug APK for Stores!</h2>
+                <p>The "signed" APK you're seeing is signed with <span class="warning">DEBUG keystore</span>.</p>
+                <p>Stores like Amazon and AdMob require <span class="success">RELEASE keystore</span>.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Difference -->
+    <section class="step-container" id="difference">
+        <div class="container">
+            <h2 class="section-title">DEBUG vs RELEASE Keystore</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th class="debug">DEBUG Keystore (What you have)</th>
+                        <th class="release">RELEASE Keystore (What you need)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Who creates it?</strong></td>
+                        <td class="debug">Godot automatically</td>
+                        <td class="release">YOU create it manually</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Where is it?</strong></td>
+                        <td class="debug">Hidden in Godot cache</td>
+                        <td class="release">Your specified location</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Password</strong></td>
+                        <td class="debug">"android" (default)</td>
+                        <td class="release">Your custom password</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Validity</strong></td>
+                        <td class="debug">1 year (expires!)</td>
+                        <td class="release">25+ years (your choice)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>For Amazon Store?</strong></td>
+                        <td class="debug danger">❌ NO - Rejected</td>
+                        <td class="release success">✅ YES - Accepted</td>
+                    </tr>
+                    <tr>
+                        <td><strong>For AdMob?</strong></td>
+                        <td class="debug danger">❌ NO - Rejected</td>
+                        <td class="release success">✅ YES - Accepted</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Can you update app?</strong></td>
+                        <td class="debug danger">❌ NO - Different each time</td>
+                        <td class="release success">✅ YES - Same keystore</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="step-visual">
+                <div class="step-circle step-1">Debug</div>
+                <div class="step-arrow">→</div>
+                <div class="step-circle step-2">Auto-created</div>
+                <div class="step-arrow">→</div>
+                <div class="step-circle step-3">❌ For Stores</div>
+            </div>
+            
+            <div class="step-visual">
+                <div class="step-circle step-1">Release</div>
+                <div class="step-arrow">→</div>
+                <div class="step-circle step-2">You Create</div>
+                <div class="step-arrow">→</div>
+                <div class="step-circle step-3">✅ For Stores</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Where is Debug Keystore -->
+    <section class="step-container">
+        <div class="container">
+            <h2 class="section-title">📍 Where Godot Hides Debug Keystore</h2>
+            
+            <div class="path-box">
+                <strong>Windows:</strong><br>
+                C:\Users\[YourUsername]\AppData\Roaming\Godot\android\debug.keystore
+            </div>
+            
+            <div class="path-box">
+                <strong>macOS:</strong><br>
+                ~/.godot/android/debug.keystore
+            </div>
+            
+            <div class="path-box">
+                <strong>Linux:</strong><br>
+                ~/.godot/android/debug.keystore
+            </div>
+            
+            <div class="warning-box">
+                <h3>⚠️ Problems with Debug Keystore:</h3>
+                <ul class="features-list">
+                    <li><strong>Different for each computer</strong> - Can't share with team</li>
+                    <li><strong>Expires in 1 year</strong> - APK stops working</li>
+                    <li><strong>Password is "android"</strong> - Not secure</li>
+                    <li><strong>Changes when you reinstall Godot</strong> - Can't update app</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- How to Check -->
+    <section class="step-container" id="test">
+        <div class="container">
+            <h2 class="section-title">🔍 Check What Type of APK You Have</h2>
+            
+            <div class="quick-test">
+                <div class="test-card">
+                    <h3>Method 1: Check in Godot</h3>
+                    <p>Go to <strong>Project → Export → Android</strong></p>
+                    <p>Look at Keystore/Release field:</p>
+                    <ul>
+                        <li><strong>Empty</strong> = Using debug keystore</li>
+                        <li><strong>Has path</strong> = Using release keystore</li>
+                    </ul>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Method 2: Command Line</h3>
+                    <div class="terminal-output">
+                        keytool -list -v -keystore your_app.apk
+                    </div>
+                    <p>If it shows "CN=Android Debug" = DEBUG</p>
+                    <p>If it shows YOUR name = RELEASE</p>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Method 3: Try Uploading</h3>
+                    <p>Try uploading to Amazon App Store:</p>
+                    <ul>
+                        <li><strong>DEBUG APK:</strong> Will be rejected</li>
+                        <li><strong>RELEASE APK:</strong> Will be accepted</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="test-box">
+                <h3>Quick Test Script for Windows:</h3>
+                <div class="terminal-output">
+                    @echo off<br>
+                    echo Checking APK signature...<br>
+                    keytool -list -printcert -jarfile "your_app.apk"<br>
+                    pause
+                </div>
+                <p>Save as <strong>check_apk.bat</strong> and run</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fix It -->
+    <section class="step-container">
+        <div class="container">
+            <h2 class="section-title">🛠️ How to Fix - Create Release Keystore</h2>
+            
+            <div class="button-group">
+                <a href="#step1" class="action-button debug-btn">You Have: DEBUG</a>
+                <div class="step-arrow">→</div>
+                <a href="#step2" class="action-button">Fix It</a>
+                <div class="step-arrow">→</div>
+                <a href="#step3" class="action-button release-btn">You Need: RELEASE</a>
+            </div>
+            
+            <div class="step-card" id="step1">
+                <div class="step-number">1</div>
+                <h3>Step 1: Generate Release Keystore in Godot</h3>
+                
+                <div class="terminal-output">
+                    1. Project → Export...<br>
+                    2. Select Android preset<br>
+                    3. Scroll to <strong>Keystore/Release</strong><br>
+                    4. Click <strong>"..." button</strong><br>
+                    5. Select <strong>"New Keystore..."</strong><br>
+                    6. Fill details (25 years!)<br>
+                    7. Save to SAFE location<br>
+                    8. Remember password!
+                </div>
+                
+                <div class="path-box">
+                    <strong>Save to:</strong> D:\GameDev\Keystores\mygame_release.keystore
+                </div>
+            </div>
+            
+            <div class="step-card" id="step2">
+                <div class="step-number">2</div>
+                <h3>Step 2: Export RELEASE APK (Not Debug)</h3>
+                
+                <div class="terminal-output">
+                    CRITICAL: When exporting:<br>
+                    <br>
+                    ✅ DO:<br>
+                    1. Select <strong>Android</strong> preset<br>
+                    2. Click <strong>"Export Project"</strong><br>
+                    3. Choose <strong>"Release"</strong> mode<br>
+                    4. Save as: mygame_release.apk<br>
+                    <br>
+                    ❌ DON'T:<br>
+                    - Don't use "One-click deploy"<br>
+                    - Don't export as Debug<br>
+                    - Don't use "Export & Run"
+                </div>
+                
+                <img src="https://via.placeholder.com/800x400/2d1b69/ffffff?text=Godot+Export+Dialog+Showing+Release+Mode" alt="Godot Export Release Mode" class="export-screenshot">
+            </div>
+            
+            <div class="step-card" id="step3">
+                <div class="step-number">3</div>
+                <h3>Step 3: Verify Your New APK</h3>
+                
+                <div class="test-box">
+                    <h4>Check if it's Release:</h4>
+                    <div class="terminal-output">
+                        keytool -list -printcert -jarfile "mygame_release.apk"<br>
+                        <br>
+                        Expected output:<br>
+                        Owner: CN=Your Name, OU=Development, O=Your Company...<br>
+                        NOT: CN=Android Debug
+                    </div>
+                </div>
+                
+                <div class="success-box">
+                    <h3>🎉 Congratulations!</h3>
+                    <p>You now have a <strong>RELEASE APK</strong> that can be submitted to:</p>
+                    <ul class="features-list">
+                        <li>✅ Amazon App Store</li>
+                        <li>✅ AdMob (for approval)</li>
+                        <li>✅ Any app store</li>
+                        <li>✅ Direct distribution</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Common Mistake -->
+    <section class="step-container">
+        <div class="container">
+            <h2 class="section-title">🚫 Common Mistake: Exporting as Debug</h2>
+            
+            <div class="critical-box">
+                <h3>Are you doing this?</h3>
+                <p>Clicking <strong>"Export & Run"</strong> or <strong>"One-Click Deploy"</strong>?</p>
+                <p class="danger">That creates DEBUG APK automatically!</p>
+            </div>
+            
+            <div class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>What you might be doing</th>
+                        <th>What it creates</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Export & Run</strong> button</td>
+                        <td class="danger">DEBUG APK</td>
+                        <td>Use <strong>"Export Project"</strong> instead</td>
+                    </tr>
+                    <tr>
+                        <td><strong>One-click deploy</strong> to phone</td>
+                        <td class="danger">DEBUG APK</td>
+                        <td>Export manually and copy APK</td>
+                    </tr>
+                    <tr>
+                        <td>Using default export</td>
+                        <td class="danger">DEBUG APK</td>
+                        <td>Configure release settings first</td>
+                    </tr>
+                </tbody>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Checklist -->
+    <section class="step-container">
+        <div class="container">
+            <h2 class="section-title">✅ Your 5-Minute Fix Checklist</h2>
+            
+            <div class="quick-test">
+                <div class="test-card">
+                    <h3>1. Create Keystore</h3>
+                    <p>Godot → Export → Android → New Keystore</p>
+                    <p>Save password: _______________</p>
+                </div>
+                
+                <div class="test-card">
+                    <h3>2. Configure Export</h3>
+                    <p>Set Keystore path in export settings</p>
+                    <p>Mode: <strong>Release</strong> (not Debug)</p>
+                </div>
+                
+                <div class="test-card">
+                    <h3>3. Export APK</h3>
+                    <p>Click "Export Project"</p>
+                    <p>Save as: mygame_release.apk</p>
+                </div>
+                
+                <div class="test-card">
+                    <h3>4. Test APK</h3>
+                    <p>Install on phone</p>
+                    <p>Should work like before</p>
+                </div>
+                
+                <div class="test-card">
+                    <h3>5. Submit</h3>
+                    <p>Upload to Amazon</p>
+                    <p>Submit to AdMob</p>
+                </div>
+            </div>
+            
+            <div class="button-group" style="justify-content: center;">
+                <a href="#" class="action-button" onclick="downloadChecklist()">📥 Download Checklist PDF</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. Debug ≠ Release - Know the difference!
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+    
+    <script>
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        // Download checklist
+        function downloadChecklist() {
+            const checklist = `
+DEBUG vs RELEASE Keystore Checklist
+====================================
+
+✅ COMPLETE THESE STEPS:
+
+1. CREATE RELEASE KEYSTORE:
+   - Open Godot → Project → Export
+   - Select Android preset
+   - Click "..." next to Keystore/Release
+   - Choose "New Keystore..."
+   - Fill details (25 years validity)
+   - Save to: D:\\GameDev\\Keystores\\mygame.keystore
+   - Password: [Write it down!]
+
+2. CONFIGURE EXPORT:
+   - Keystore path: Set to your new .keystore file
+   - Keystore User: mygame_alias (or your alias)
+   - Keystore Password: [Your password]
+   - Mode: RELEASE (not Debug)
+
+3. EXPORT APK:
+   - Click "Export Project" (NOT "Export & Run")
+   - Choose "Release" mode
+   - Save as: mygame_release.apk
+
+4. TEST:
+   - Install on phone
+   - Should work normally
+   - Verify: Not showing "debug" in signature
+
+5. SUBMIT:
+   - Upload to Amazon App Store
+   - Submit to AdMob for approval
+
+⚠️ REMEMBER:
+- Debug APK = Auto-signed by Godot = ❌ For stores
+- Release APK = Signed by YOU = ✅ For stores
+- Keep keystore safe!
+- Same keystore for updates
+
+Need help? Contact: sanjay@godotassets.com
+`;
+            
+            const blob = new Blob([checklist], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'godot_release_checklist.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            alert('Checklist downloaded! Save it with your keystore.');
+        }
+
+        // Show debug keystore path based on OS
+        document.addEventListener('DOMContentLoaded', function() {
+            const isWindows = navigator.platform.indexOf('Win') > -1;
+            const isMac = navigator.platform.indexOf('Mac') > -1;
+            const isLinux = navigator.platform.indexOf('Linux') > -1;
+            
+            let path = '';
+            if (isWindows) {
+                path = 'C:\\\\Users\\\\[YourUsername]\\\\AppData\\\\Roaming\\\\Godot\\\\android\\\\debug.keystore';
+            } else if (isMac) {
+                path = '/Users/[YourUsername]/.godot/android/debug.keystore';
+            } else if (isLinux) {
+                path = '/home/[YourUsername]/.godot/android/debug.keystore';
+            }
+            
+            document.querySelector('.path-box').innerHTML = `<strong>Your OS (${navigator.platform}):</strong><br>${path}`;
+        });
+    </script>
+</body>
+</html>
