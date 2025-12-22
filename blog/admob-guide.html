@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot 4.4 AdMob Integration Guide - Complete Implementation</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* Additional CSS for Guide Page */
+        .guide-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .guide-hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .guide-subtitle {
+            font-size: 1.3rem;
+            color: #ccc;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .step-container {
+            padding: 80px 0;
+        }
+        
+        .step-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .step-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-card h3 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            color: #f8f8f2;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .code-title {
+            background: #333;
+            padding: 0.5rem 1rem;
+            margin: -1.5rem -1.5rem 1rem -1.5rem;
+            border-radius: 8px 8px 0 0;
+            font-family: monospace;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+        
+        .warning-box {
+            background: rgba(255, 107, 53, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: rgba(0, 200, 83, 0.1);
+            border-left: 4px solid #00c853;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .note-box {
+            background: rgba(33, 150, 243, 0.1);
+            border-left: 4px solid #2196f3;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .file-structure {
+            background: rgba(0, 217, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: monospace;
+        }
+        
+        .file-structure .folder {
+            color: var(--accent);
+        }
+        
+        .file-structure .file {
+            color: #f8f8f2;
+        }
+        
+        .test-ids-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .test-ids-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .test-ids-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-ids-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .highlight {
+            background: rgba(255, 107, 53, 0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 3rem 0;
+        }
+        
+        .quick-nav {
+            position: sticky;
+            top: 100px;
+            background: rgba(45, 27, 105, 0.9);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-nav h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .quick-nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .quick-nav li {
+            margin: 0.5rem 0;
+        }
+        
+        .quick-nav a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .quick-nav a:hover {
+            color: var(--primary);
+        }
+        
+        .download-section {
+            text-align: center;
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+        
+        .download-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .guide-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .step-card {
+                padding: 1.5rem;
+            }
+            
+            .code-block {
+                padding: 1rem;
+            }
+            
+            .code-title {
+                margin: -1rem -1rem 1rem -1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="course.html">Course</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="#download" class="cta-button">Get Complete Scripts</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="course.html" onclick="closeMobileMenu()">Course</a>
+                <a href="index.html#contact" onclick="closeMobileMenu()">Contact</a>
+                
+                <a href="#download" class="cta-button" onclick="closeMobileMenu()">Get Complete Scripts</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="guide-hero">
+        <div class="container">
+            <h1>Complete AdMob Integration Guide for Godot 4.4</h1>
+            <p class="guide-subtitle">
+                Step-by-step implementation with production-ready scripts, export settings, and approval process
+            </p>
+            <a href="#step1" class="cta-button">Start Implementation →</a>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="quick-nav">
+            <h4>Quick Navigation</h4>
+            <ul>
+                <li><a href="#prerequisites">1. Prerequisites</a></li>
+                <li><a href="#export-settings">2. Export Settings</a></li>
+                <li><a href="#plugin-setup">3. Plugin Setup</a></li>
+                <li><a href="#test-ads">4. Test Ads Implementation</a></li>
+                <li><a href="#production-ads">5. Production Ads</a></li>
+                <li><a href="#approval-process">6. Approval Process</a></li>
+                <li><a href="#troubleshooting">7. Troubleshooting</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Step 1: Prerequisites -->
+    <section class="step-container" id="prerequisites">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Prerequisites & Setup</h3>
+                
+                <div class="warning-box">
+                    <strong>Important:</strong> Complete these before starting implementation
+                </div>
+                
+                <h4>Required Accounts:</h4>
+                <ul class="features-list">
+                    <li><strong>Google AdMob Account</strong> (free: <a href="https://admob.google.com" target="_blank">admob.google.com</a>)</li>
+                    <li><strong>Android Keystore</strong> (for signing APK)</li>
+                    <li><strong>Firebase Account</strong> (optional, for analytics)</li>
+                </ul>
+                
+                <h4>Software Requirements:</h4>
+                <div class="file-structure">
+                    <div class="folder">Godot 4.4</div>
+                    <div class="folder">Android Studio</div>
+                    <div class="folder">JDK 17+</div>
+                    <div class="folder">Android SDK</div>
+                    <div class="folder">AdMob Plugin for Godot</div>
+                </div>
+                
+                <div class="note-box">
+                    <strong>Note:</strong> Your app doesn't need to be published in any store for AdMob approval!
+                    You can use direct APK distribution.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 2: Export Settings -->
+    <section class="step-container" id="export-settings">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Godot 4.4 Android Export Settings</h3>
+                
+                <div class="code-block">
+                    <div class="code-title">Project Settings → Export → Android Preset</div>
+<pre>
+// REQUIRED Settings:
+[x] Custom Build
+[x] Use Custom Build Template
+
+// Android Permissions (Add these):
+[x] ACCESS_NETWORK_STATE
+[x] INTERNET
+
+// Graphics Settings:
+Max Swap Chain Images: 2
+Use 32 Bits Display Buffer: Disabled
+Use Debranding: Enabled
+
+// XR Mode: Regular
+
+// Screen Settings:
+Support Small: Yes
+Support Normal: Yes
+Support Large: Yes
+Support Xlarge: Yes
+
+// Orientation:
+Screen Orientation: Landscape
+
+// Keystore:
+Keystore/Release: Your keystore file
+Keystore/Release User: Your alias
+Keystore/Release Password: Your password
+
+// APK Settings:
+APK Expansion: Disabled
+Export AAB: Enabled (for Play Store)
+Export APK: Enabled (for direct distribution)
+</pre>
+                </div>
+                
+                <div class="code-block">
+                    <div class="code-title">gradle/build.gradle.kts modifications</div>
+<pre>
+// In android/build.gradle.kts
+dependencies {
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
+    // Godot AdMob plugin will add necessary dependencies
+}
+
+android {
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+    
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"))
+        }
+    }
+}
+</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 3: Plugin Setup -->
+    <section class="step-container" id="plugin-setup">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>AdMob Plugin Installation</h3>
+                
+                <h4>Recommended Plugin:</h4>
+                <p>Use: <strong>Godot Android Admob Plugin</strong> (Godot 4.x compatible)</p>
+                <p>GitHub: <a href="https://github.com/Poing-Studios/godot-admob-plugin" target="_blank">github.com/Poing-Studios/godot-admob-plugin</a></p>
+                
+                <div class="code-block">
+                    <div class="code-title">Installation Steps</div>
+<pre>
+1. Download the plugin from GitHub
+2. Extract to: res://android/plugins/
+3. Project Structure:
+
+res://
+├── android/
+│   ├── plugins/
+│   │   ├── GodotAdmob-4.2.0/
+│   │   │   ├── godot-lib.admob.aar
+│   │   │   └── GodotAdMob.gdap
+│   │   └── GodotAdmob-4.2.0.gdap
+
+4. Enable in Project → Export → Android → Gradle Build
+5. Add to Custom Template
+</pre>
+                </div>
+                
+                <div class="code-block">
+                    <div class="code-title">Project Settings → Android → Plugins</div>
+<pre>
+[x] Use Gradle Build
+[x] Use Custom Build Template
+[x] Enable Plugins
+
+// In the plugins list:
+[x] GodotAdmob-4.2.0
+
+// Configure:
+Config/Admob → App ID: (leave empty for now)
+Config/Admob → Delay App Measurement: false
+</pre>
+                </div>
+                
+                <div class="success-box">
+                    <strong>Verification:</strong> After installing, check if Engine.has_singleton("AdMob") returns true in your scripts.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 4: Test Ads Implementation -->
+    <section class="step-container" id="test-ads">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>Test Ad Implementation (Development)</h3>
+                
+                <h4>Official Google Test Ad Unit IDs:</h4>
+                
+                <table class="test-ids-table">
+                    <thead>
+                        <tr>
+                            <th>Ad Type</th>
+                            <th>Test ID</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Test App ID</strong></td>
+                            <td><code>ca-app-pub-3940256099942544~3347511713</code></td>
+                            <td>App identifier for testing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Banner Ad</strong></td>
+                            <td><code>ca-app-pub-3940256099942544/6300978111</code></td>
+                            <td>Bottom/Top banner ads</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Interstitial Ad</strong></td>
+                            <td><code>ca-app-pub-3940256099942544/1033173712</code></td>
+                            <td>Full-screen between levels</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rewarded Ad</strong></td>
+                            <td><code>ca-app-pub-3940256099942544/5224354917</code></td>
+                            <td>Video ads with rewards</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Native Advanced</strong></td>
+                            <td><code>ca-app-pub-3940256099942544/2247696110</code></td>
+                            <td>Custom native ads</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="code-block">
+                    <div class="code-title">AdManager.gd - Complete Test Implementation</div>
+<pre>
+extends Node
+class_name AdManager
+
+signal banner_loaded
+signal interstitial_loaded
+signal rewarded_loaded
+signal reward_earned(amount, currency)
+signal ad_failed_to_load(error_code)
+
+var admob = null
+var is_initialized = false
+
+# TEST IDs - USE ONLY DURING DEVELOPMENT
+const TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713"
+const TEST_BANNER_ID = "ca-app-pub-3940256099942544/6300978111"
+const TEST_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712"
+const TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917"
+
+func _ready():
+    if Engine.has_singleton("AdMob"):
+        admob = Engine.get_singleton("AdMob")
+        print("AdMob plugin found")
+        initialize_test_ads()
+    else:
+        print("AdMob plugin NOT found!")
+
+func initialize_test_ads():
+    # Always use TRUE for test mode during development
+    var use_test_ads = true
+    
+    # Initialize AdMob
+    admob.init(use_test_ads, TEST_APP_ID)
+    
+    # Set banner position (BOTTOM or TOP)
+    admob.setBannerPosition(admob.BANNER.BOTTOM)
+    
+    # Load all ads (preload)
+    admob.loadBanner(TEST_BANNER_ID, admob.BANNER)
+    admob.loadInterstitial(TEST_INTERSTITIAL_ID)
+    admob.loadRewardedVideo(TEST_REWARDED_ID)
+    
+    # Connect signals
+    admob.connect("banner_loaded", Callable(self, "_on_banner_loaded"))
+    admob.connect("interstitial_loaded", Callable(self, "_on_interstitial_loaded"))
+    admob.connect("rewarded_video_loaded", Callable(self, "_on_rewarded_loaded"))
+    admob.connect("rewarded", Callable(self, "_on_reward_earned"))
+    admob.connect("banner_failed_to_load", Callable(self, "_on_ad_failed"))
+    
+    is_initialized = true
+    print("AdMob initialized in TEST mode")
+
+func show_banner():
+    if is_initialized:
+        admob.showBanner()
+
+func hide_banner():
+    if is_initialized:
+        admob.hideBanner()
+
+func show_interstitial():
+    if is_initialized and admob.isInterstitialLoaded():
+        admob.showInterstitial()
+    else:
+        print("Interstitial not loaded yet")
+
+func show_rewarded_video():
+    if is_initialized and admob.isRewardedVideoLoaded():
+        admob.showRewardedVideo()
+    else:
+        print("Rewarded video not loaded yet")
+
+# Signal handlers
+func _on_banner_loaded():
+    emit_signal("banner_loaded")
+    print("Banner ad loaded")
+
+func _on_interstitial_loaded():
+    emit_signal("interstitial_loaded")
+    print("Interstitial ad loaded")
+
+func _on_rewarded_loaded():
+    emit_signal("rewarded_loaded")
+    print("Rewarded video loaded")
+
+func _on_reward_earned(currency, amount):
+    emit_signal("reward_earned", amount, currency)
+    print("Reward earned: ", amount, " ", currency)
+    # Give reward to player here
+
+func _on_ad_failed(error_code):
+    emit_signal("ad_failed_to_load", error_code)
+    print("Ad failed to load: ", error_code)
+</pre>
+                </div>
+                
+                <div class="code-block">
+                    <div class="code-title">GameScene.gd - Using Ads in Game</div>
+<pre>
+extends Node
+
+@onready var ad_manager = $AdManager
+
+func _ready():
+    # Show banner when level starts
+    ad_manager.show_banner()
+    
+    # Connect to reward signal
+    ad_manager.connect("reward_earned", Callable(self, "_on_reward_earned"))
+
+func _on_level_completed():
+    # Show interstitial between levels
+    ad_manager.show_interstitial()
+    
+    # Wait for ad to close, then proceed
+    await get_tree().create_timer(1.0).timeout
+    load_next_level()
+
+func _on_player_died():
+    # Offer rewarded ad for continue
+    show_revive_option()
+
+func show_revive_option():
+    # Show UI with "Watch ad to revive" button
+    # When clicked:
+    ad_manager.show_rewarded_video()
+
+func _on_reward_earned(amount, currency):
+    if currency == "revive":
+        revive_player()
+    
+    if currency == "coins":
+        add_coins(amount)
+
+func add_coins(amount):
+    var current_coins = get_coins()
+    set_coins(current_coins + amount)
+</pre>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>Important:</strong> ALWAYS use test ads during development. Never click your own test ads excessively.
+                    Look for "Test Ad" label to verify test mode is working.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 5: Production Ads -->
+    <section class="step-container" id="production-ads">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <h3>Production Ads & AdMob Setup</h3>
+                
+                <h4>Getting Real Ad Unit IDs:</h4>
+                <ol>
+                    <li>Go to <a href="https://admob.google.com" target="_blank">admob.google.com</a></li>
+                    <li>Click "Apps" → "Add App"</li>
+                    <li>Select "No, it's not listed on an app store" (for APK distribution)</li>
+                    <li>Fill app details and upload APK</li>
+                    <li>Create ad units for:
+                        <ul>
+                            <li>Banner</li>
+                            <li>Interstitial</li>
+                            <li>Rewarded (optional)</li>
+                        </ul>
+                    </li>
+                    <li>Copy the generated IDs</li>
+                </ol>
+                
+                <div class="code-block">
+                    <div class="code-title">AdConfig.gd - Configuration File</div>
+<pre>
+# Store your AdMob IDs here (separate from main code)
+extends Node
+class_name AdConfig
+
+# ========================================
+# PRODUCTION IDs (Replace with your real IDs)
+# ========================================
+
+const PRODUCTION_APP_ID = "ca-app-pub-XXXXXXXXXXXXXX~XXXXXXXXXX"
+const PRODUCTION_BANNER_ID = "ca-app-pub-XXXXXXXXXXXXXX/XXXXXXXXXX"
+const PRODUCTION_INTERSTITIAL_ID = "ca-app-pub-XXXXXXXXXXXXXX/XXXXXXXXXX"
+const PRODUCTION_REWARDED_ID = "ca-app-pub-XXXXXXXXXXXXXX/XXXXXXXXXX"
+
+# ========================================
+# TEST IDs (For development)
+# ========================================
+
+const TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713"
+const TEST_BANNER_ID = "ca-app-pub-3940256099942544/6300978111"
+const TEST_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712"
+const TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917"
+
+# ========================================
+# Settings
+# ========================================
+
+static func get_app_id() -> String:
+    if OS.is_debug_build():
+        return TEST_APP_ID
+    else:
+        return PRODUCTION_APP_ID
+
+static func get_banner_id() -> String:
+    if OS.is_debug_build():
+        return TEST_BANNER_ID
+    else:
+        return PRODUCTION_BANNER_ID
+
+static func get_interstitial_id() -> String:
+    if OS.is_debug_build():
+        return TEST_INTERSTITIAL_ID
+    else:
+        return PRODUCTION_INTERSTITIAL_ID
+
+static func get_rewarded_id() -> String:
+    if OS.is_debug_build():
+        return TEST_REWARDED_ID
+    else:
+        return PRODUCTION_REWARDED_ID
+
+static func is_test_mode() -> bool:
+    return OS.is_debug_build()
+</pre>
+                </div>
+                
+                <div class="code-block">
+                    <div class="code-title">Updated AdManager.gd - Production Ready</div>
+<pre>
+extends Node
+class_name AdManager
+
+# ... [Previous code remains same] ...
+
+func initialize_ads():
+    # Use AdConfig to get IDs
+    var app_id = AdConfig.get_app_id()
+    var is_test_mode = AdConfig.is_test_mode()
+    
+    # Initialize AdMob
+    admob.init(is_test_mode, app_id)
+    
+    # Load ads with correct IDs
+    admob.loadBanner(AdConfig.get_banner_id(), admob.BANNER)
+    admob.loadInterstitial(AdConfig.get_interstitial_id())
+    admob.loadRewardedVideo(AdConfig.get_rewarded_id())
+    
+    # ... rest of initialization ...
+</pre>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>Critical:</strong> Never submit to AdMob with test IDs. Always switch to production IDs 
+                    before building the final APK for submission.
+                </div>
+                
+                <h4>Privacy Policy Requirement:</h4>
+                <div class="code-block">
+                    <div class="code-title">PrivacyPolicy.gd - In-App Privacy Policy</div>
+<pre>
+extends Control
+
+@onready var web_view = $WebView
+
+func _ready():
+    # Load privacy policy from URL or local HTML
+    var privacy_policy_url = "https://yourdomain.com/privacy-policy.html"
+    web_view.load_url(privacy_policy_url)
+
+# Alternative: Load local HTML
+func load_local_policy():
+    var html_content = """
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Privacy Policy&lt;/h1&gt;
+        &lt;p&gt;Our app uses AdMob for ads...&lt;/p&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+    """
+    web_view.load_html(html_content)
+</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 6: Approval Process -->
+    <section class="step-container" id="approval-process">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <h3>AdMob Approval Process</h3>
+                
+                <h4>Checklist Before Submission:</h4>
+                <ul class="features-list">
+                    <li><input type="checkbox"> App is complete (not demo/placeholder)</li>
+                    <li><input type="checkbox"> All test IDs replaced with real IDs</li>
+                    <li><input type="checkbox"> Privacy policy accessible in-app</li>
+                    <li><input type="checkbox"> Ads don't cover gameplay</li>
+                    <li><input type="checkbox"> No auto-clicking or fraud</li>
+                    <li><input type="checkbox"> Content appropriate for age rating</li>
+                    <li><input type="checkbox"> App tested on multiple devices</li>
+                </ul>
+                
+                <h4>Submission Steps:</h4>
+                <ol>
+                    <li><strong>Build release APK</strong> with production AdMob IDs</li>
+                    <li><strong>Test thoroughly</strong> on 3+ devices</li>
+                    <li><strong>Go to AdMob dashboard</strong> → Apps → Your App</li>
+                    <li><strong>Click "Complete setup"</strong> or "Get started"</li>
+                    <li><strong>Upload your APK</strong> (they'll test it)</li>
+                    <li><strong>Wait 2-5 days</strong> for review</li>
+                </ol>
+                
+                <div class="note-box">
+                    <strong>Timeline:</strong>
+                    <ul>
+                        <li>AdMob Review: 2-5 business days</li>
+                        <li>If rejected: Fix issues and resubmit (2-3 days)</li>
+                        <li>Initial limited ad serving: First 30 days (normal)</li>
+                        <li>Full ad serving: After establishing good traffic</li>
+                    </ul>
+                </div>
+                
+                <h4>Common Rejection Reasons & Solutions:</h4>
+                <div class="code-block">
+<pre>
+1. "Placeholder app" → Add more content/levels
+2. "Poor user experience" → Reduce ad frequency
+3. "Missing privacy policy" → Add accessible policy
+4. "Non-functional ads" → Test with real IDs briefly
+5. "Policy violation" → Review AdMob policies
+</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Step 7: Troubleshooting -->
+    <section class="step-container" id="troubleshooting">
+        <div class="container">
+            <div class="step-card">
+                <div class="step-number">7</div>
+                <h3>Troubleshooting & Common Issues</h3>
+                
+                <div class="code-block">
+                    <div class="code-title">Common Issues and Solutions</div>
+<pre>
+1. Ads not showing:
+   - Check internet connection
+   - Verify AdMob initialization
+   - Check if test mode is enabled
+   - Verify ad unit IDs are correct
+
+2. "AdMob plugin not found":
+   - Check plugin installation
+   - Verify in Android export settings
+   - Rebuild custom template
+
+3. App crashes with ads:
+   - Check Android permissions
+   - Verify minSdk version (21+)
+   - Check ProGuard rules
+
+4. Test ads not showing "Test Ad" label:
+   - Ensure admob.init(true) is called
+   - Check test device configuration
+
+5. Banner ads not positioning correctly:
+   - Call setBannerPosition() after init
+   - Check screen orientation settings
+</pre>
+                </div>
+                
+                <div class="code-block">
+                    <div class="code-title">Debug Helper Script</div>
+<pre>
+extends Node
+class_name AdDebugger
+
+func check_admob_status():
+    if not Engine.has_singleton("AdMob"):
+        print("ERROR: AdMob plugin not found")
+        return false
+    
+    var admob = Engine.get_singleton("AdMob")
+    
+    print("AdMob Status Check:")
+    print("==================")
+    print("Plugin available: Yes")
+    print("Banner loaded: ", admob.isBannerLoaded())
+    print("Interstitial loaded: ", admob.isInterstitialLoaded())
+    print("Rewarded loaded: ", admob.isRewardedVideoLoaded())
+    
+    # Check permissions
+    var perms = OS.get_granted_permissions()
+    print("Granted permissions: ", perms)
+    
+    return true
+
+func test_ad_flow():
+    # Test ad loading sequence
+    var admob = Engine.get_singleton("AdMob")
+    
+    print("Testing ad flow...")
+    admob.loadBanner(AdConfig.get_banner_id(), admob.BANNER)
+    await get_tree().create_timer(2.0).timeout
+    
+    if admob.isBannerLoaded():
+        print("✓ Banner loads successfully")
+        admob.showBanner()
+    else:
+        print("✗ Banner failed to load")
+</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download-section" id="download">
+        <div class="container">
+            <div class="download-card">
+                <h2 class="section-title">Ready-to-Use AdMob System</h2>
+                <p>Get our complete AdMob integration package for Godot 4.4:</p>
+                
+                <ul class="features-list">
+                    <li>Complete AdManager script with signals</li>
+                    <li>AdConfig with auto test/production switching</li>
+                    <li>Privacy policy template</li>
+                    <li>Debug and testing tools</li>
+                    <li>Export preset configurations</li>
+                    <li>Step-by-step documentation</li>
+                </ul>
+                
+                <div style="margin: 2rem 0;">
+                    <a href="#" class="cta-button">Download Complete Package ($49)</a>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">Includes free updates and support</p>
+                </div>
+                
+                <div class="note-box">
+                    <strong>Free Alternative:</strong> You can copy all code from this guide for free.
+                    The paid package includes additional features like mediation, analytics, 
+                    and priority support.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. This guide is for educational purposes.
+                AdMob and Google are trademarks of Google LLC.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+    
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        // Copy code blocks on click
+        document.querySelectorAll('.code-block').forEach(block => {
+            block.addEventListener('click', function() {
+                const code = this.querySelector('pre').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    const originalTitle = this.querySelector('.code-title').textContent;
+                    this.querySelector('.code-title').textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        this.querySelector('.code-title').textContent = originalTitle;
+                    }, 2000);
+                });
+            });
+        });
+
+        // Add highlight to code on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Highlight.js-like syntax highlighting (simplified)
+            document.querySelectorAll('pre code').forEach(block => {
+                let html = block.innerHTML;
+                html = html.replace(/(".*?")/g, '<span style="color: #ce9178">$1</span>');
+                html = html.replace(/(\b\d+\b)/g, '<span style="color: #b5cea8">$1</span>');
+                html = html.replace(/(\b(func|var|const|extends|class_name|if|else|for|while|return)\b)/g, 
+                                   '<span style="color: #569cd6">$1</span>');
+                html = html.replace(/(#.*)/g, '<span style="color: #6a9955">$1</span>');
+                block.innerHTML = html;
+            });
+        });
+    </script>
+</body>
+</html>
