@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Assets Store - Buy Ready-Made Scripts & Systems</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Store Page Styles */
+        .store-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .store-header {
+            text-align: center;
+            padding: 60px 0 40px;
+            background: linear-gradient(135deg, var(--dark) 0%, #2d1b69 100%);
+            color: white;
+            margin-bottom: 40px;
+            border-radius: 15px;
+        }
+        
+        .store-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .store-header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #ccc;
+        }
+        
+        .filters-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .filter-btn {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            color: var(--accent);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        .product-title {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            min-height: 60px;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .product-price s {
+            color: #999;
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+        
+        .product-desc {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            min-height: 120px;
+        }
+        
+        .product-features {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        
+        .product-features li {
+            padding: 5px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #aaa;
+        }
+        
+        .product-features li:before {
+            content: "✓";
+            color: var(--success);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .product-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .buy-button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .buy-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+        }
+        
+        .expandable-section {
+            margin-top: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .product-card.expanded .expandable-section {
+            max-height: 500px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .expand-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .expand-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--dark);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 2px solid var(--primary);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        /* Search Bar */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 50px 0;
+            flex-wrap: wrap;
+        }
+        
+        .page-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover, .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .store-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .product-title {
+                font-size: 1.3rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Simple Header -->
+    <header style="background: var(--dark); padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="store-container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" style="font-size: 1.5rem; color: var(--primary);">GODOT ASSETS STORE</div>
+            <div>
+                <a href="index.html" class="cta-button" style="padding: 10px 20px; font-size: 0.9rem;">🏠 Home</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Store Header -->
+    <section class="store-header">
+        <div class="store-container">
+            <h1>🎮 Godot Assets Store</h1>
+            <p>Ready-made scripts, systems, and bundles for Godot 4. Everything you need to build games faster!</p>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="🔍 Search products..." id="searchInput">
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="store-container">
+        <div class="filters-section">
+            <button class="filter-btn active" data-filter="all">All Products</button>
+            <button class="filter-btn" data-filter="scripts">Scripts</button>
+            <button class="filter-btn" data-filter="bundles">Bundles</button>
+            <button class="filter-btn" data-filter="systems">Systems</button>
+            <button class="filter-btn" data-filter="mobile">Mobile</button>
+            <button class="filter-btn" data-filter="multiplayer">Multiplayer</button>
+            <button class="filter-btn" data-filter="ai">AI Systems</button>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="store-container">
+        <div id="productsGrid" class="products-grid">
+            <!-- Products will be dynamically loaded here -->
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be dynamically generated -->
+        </div>
+    </section>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">✕</button>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <h2 id="modalTitle"></h2>
+            <div id="modalPrice" class="product-price"></div>
+            <p id="modalDesc" style="color: #ccc; line-height: 1.6; margin: 20px 0;"></p>
+            
+            <div id="modalFeatures"></div>
+            
+            <div style="margin-top: 30px;">
+                <h3 style="color: var(--accent); margin-bottom: 15px;">What You Get:</h3>
+                <div id="modalIncludes"></div>
+            </div>
+            
+            <a href="#" id="modalBuyButton" class="buy-button" style="margin-top: 30px;">Buy Now</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: var(--dark); padding: 40px 0; margin-top: 50px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="store-container" style="text-align: center;">
+            <p style="color: #ccc;">© 2024 Godot Assets Store. All rights reserved.</p>
+            <p style="color: #999; margin-top: 10px; font-size: 0.9rem;">Ready-made Godot scripts & systems for faster game development</p>
+        </div>
+    </footer>
+<script>
+    // Configuration
+    const productsPerPage = 6;
+    let currentPage = 1;
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let allProducts = [];
+    let filteredProducts = [];
+
+    // DOM Elements
+    const productsGrid = document.getElementById('productsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productModal = document.getElementById('productModal');
+    const closeModal = document.getElementById('closeModal');
+
+    // Format currency
+    function formatCurrency(amount) {
+        return `₹${amount.toFixed(0)}`;
+    }
+
+    // Generate star rating HTML
+    function generateRatingStars(rating) {
+        let stars = '';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+                stars += '★';
+            } else if (i === fullStars + 1 && hasHalfStar) {
+                stars += '½';
+            } else {
+                stars += '☆';
+            }
+        }
+        
+        return `<span style="color: gold; font-size: 1.1rem;">${stars}</span> <span style="color: #ccc; font-size: 0.9rem;">(${rating})</span>`;
+    }
+
+    // Generate product card HTML
+    function generateProductCard(product) {
+        const discountPercentage = product.originalPrice > product.price 
+            ? Math.round((1 - product.price / product.originalPrice) * 100)
+            : 0;
+        
+        return `
+            <div class="product-card" data-id="${product.id}" data-category="${product.category.join(' ')}">
+                ${discountPercentage > 0 ? `<div class="product-badge">${discountPercentage}% OFF</div>` : ''}
+                
+                <img src="${product.image}" alt="${product.title}" class="product-image" onerror="this.src='products/default.jpg'">
+                
+                <div class="product-content">
+                    <h3 class="product-title">${product.title}</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                        ${product.rating ? generateRatingStars(product.rating) : ''}
+                        ${product.sales ? `<span style="color: #00d9ff; font-size: 0.9rem;">${product.sales} sold</span>` : ''}
+                    </div>
+                    
+                    <div class="product-price">
+                        ${product.originalPrice > product.price ? `<s>${formatCurrency(product.originalPrice)}</s>` : ''}
+                        ${formatCurrency(product.price)}
+                    </div>
+                    
+                    <p class="product-desc">${product.description}</p>
+                    
+                    <div style="margin: 10px 0; display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${product.category.map(cat => `<span style="background: rgba(0, 217, 255, 0.1); padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; color: #00d9ff;">${cat}</span>`).join('')}
+                    </div>
+                    
+                    <ul class="product-features">
+                        ${product.features.slice(0, 3).map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                    
+                    <div class="product-footer">
+                        <button class="expand-btn" onclick="expandProduct(${product.id})">View Details</button>
+                        <a href="${product.buyUrl}" class="buy-button" onclick="event.stopPropagation(); trackPurchase(${product.id}, '${product.title}')">
+                            🛒 Buy Now
+                        </a>
+                    </div>
+                    
+                    <div class="expandable-section">
+                        <h4 style="color: var(--accent); margin-bottom: 10px;">Features:</h4>
+                        <ul class="product-features">
+                            ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                        
+                        <h4 style="color: var(--accent); margin-top: 20px;">Includes:</h4>
+                        <ul class="product-features">
+                            ${product.includes.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                        
+                        ${product.rating ? `
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 8px;">
+                                <h4 style="color: var(--accent); margin-bottom: 5px;">Customer Reviews</h4>
+                                <div>${generateRatingStars(product.rating)} • ${product.sales || 0} sales</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Generate pagination HTML
+    function generatePagination(totalPages) {
+        let paginationHTML = '';
+        
+        if (totalPages > 1) {
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">← Previous</button>`;
+            }
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = startPage + maxVisiblePages - 1;
+            
+            if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">Next →</button>`;
+            }
+        }
+        
+        return paginationHTML;
+    }
+
+    // Filter products
+    function filterProducts() {
+        filteredProducts = allProducts.filter(product => {
+            // Apply category filter
+            if (currentFilter !== 'all' && !product.category.includes(currentFilter)) {
+                return false;
+            }
+            
+            // Apply search filter
+            if (currentSearch) {
+                const searchTerm = currentSearch.toLowerCase();
+                const inTitle = product.title.toLowerCase().includes(searchTerm);
+                const inDesc = product.description.toLowerCase().includes(searchTerm);
+                const inFeatures = product.features.some(f => f.toLowerCase().includes(searchTerm));
+                const inCategory = product.category.some(c => c.toLowerCase().includes(searchTerm));
+                
+                if (!inTitle && !inDesc && !inFeatures && !inCategory) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        renderProducts();
+    }
+
+    // Render products
+    function renderProducts() {
+        const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+        const startIndex = (currentPage - 1) * productsPerPage;
+        const endIndex = startIndex + productsPerPage;
+        const productsToShow = filteredProducts.slice(startIndex, endIndex);
+        
+        // Update products grid
+        productsGrid.innerHTML = productsToShow.map(product => generateProductCard(product)).join('');
+        
+        // Update pagination
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = generatePagination(totalPages);
+        
+        // If no products found
+        if (filteredProducts.length === 0) {
+            productsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                    <h3 style="color: var(--accent); margin-bottom: 20px;">No products found</h3>
+                    <p style="color: #ccc;">Try changing your search or filter criteria</p>
+                    <button class="filter-btn active" onclick="resetFilters()" style="margin-top: 20px;">
+                        Reset Filters
+                    </button>
+                </div>
+            `;
+            pagination.innerHTML = '';
+        }
+        
+        // Update results count
+        const resultsCount = document.getElementById('resultsCount');
+        if (resultsCount) {
+            resultsCount.textContent = `Showing ${productsToShow.length} of ${filteredProducts.length} products`;
+        }
+    }
+
+    // Expand product details
+    function expandProduct(productId) {
+        const productCard = document.querySelector(`[data-id="${productId}"]`);
+        const isExpanded = productCard.classList.contains('expanded');
+        
+        // Close all other expanded cards
+        document.querySelectorAll('.product-card.expanded').forEach(card => {
+            if (card.dataset.id !== productId.toString()) {
+                card.classList.remove('expanded');
+            }
+        });
+        
+        // Toggle current card
+        productCard.classList.toggle('expanded');
+        
+        // Scroll to expanded card if it's being opened
+        if (!isExpanded) {
+            setTimeout(() => {
+                productCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    }
+
+    // Show product modal
+    function showProductModal(productId) {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product) return;
+        
+        // Update modal content
+        document.getElementById('modalImage').src = product.image;
+        document.getElementById('modalTitle').textContent = product.title;
+        
+        let priceHTML = product.originalPrice > product.price 
+            ? `<s>${formatCurrency(product.originalPrice)}</s> ${formatCurrency(product.price)}`
+            : formatCurrency(product.price);
+        document.getElementById('modalPrice').innerHTML = priceHTML;
+        
+        document.getElementById('modalDesc').textContent = product.description;
+        
+        // Update features
+        document.getElementById('modalFeatures').innerHTML = `
+            <h3 style="color: var(--accent); margin: 20px 0 10px;">Key Features:</h3>
+            <ul class="product-features">
+                ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+            </ul>
+        `;
+        
+        // Update includes
+        document.getElementById('modalIncludes').innerHTML = `
+            <ul class="product-features">
+                ${product.includes.map(item => `<li>${item}</li>`).join('')}
+            </ul>
+        `;
+        
+        // Add rating if available
+        if (product.rating) {
+            document.getElementById('modalIncludes').innerHTML += `
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 8px;">
+                    <h4 style="color: var(--accent); margin-bottom: 5px;">Customer Reviews</h4>
+                    <div>${generateRatingStars(product.rating)} • ${product.sales || 0} sales</div>
+                </div>
+            `;
+        }
+        
+        // Update buy button
+        const buyButton = document.getElementById('modalBuyButton');
+        buyButton.href = product.buyUrl;
+        buyButton.onclick = () => trackPurchase(product.id, product.title);
+        
+        // Show modal
+        productModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close modal
+    function closeProductModal() {
+        productModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Change page
+    function changePage(page) {
+        currentPage = page;
+        renderProducts();
+        
+        // Scroll to top of products
+        window.scrollTo({
+            top: productsGrid.offsetTop - 100,
+            behavior: 'smooth'
+        });
+    }
+
+    // Reset filters
+    function resetFilters() {
+        currentFilter = 'all';
+        currentSearch = '';
+        currentPage = 1;
+        searchInput.value = '';
+        
+        // Update filter buttons
+        filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.filter === 'all') {
+                btn.classList.add('active');
+            }
+        });
+        
+        filterProducts();
+    }
+
+    // Track purchase (analytics placeholder)
+    function trackPurchase(productId, productName) {
+        console.log(`Purchase initiated: ${productName} (ID: ${productId})`);
+        
+        // Store in localStorage for analytics
+        const purchases = JSON.parse(localStorage.getItem('godotStorePurchases') || '[]');
+        purchases.push({
+            id: productId,
+            name: productName,
+            timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('godotStorePurchases', JSON.stringify(purchases));
+        
+        // You can integrate with actual analytics here
+        // Example: Google Analytics event
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'purchase', {
+                'transaction_id': productId,
+                'value': allProducts.find(p => p.id === productId)?.price || 0,
+                'currency': 'INR',
+                'items': [{
+                    'id': productId,
+                    'name': productName
+                }]
+            });
+        }
+    }
+
+    // Load products from JSON file
+    async function loadProducts() {
+        try {
+            const response = await fetch('data/products.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            allProducts = data.products;
+            filteredProducts = [...allProducts];
+            
+            console.log(`✅ Loaded ${allProducts.length} products from JSON file`);
+            renderProducts();
+            
+        } catch (error) {
+            console.error('❌ Error loading products:', error);
+            
+            // Fallback: Use hardcoded products if JSON fails
+            allProducts = [
+                {
+                    id: 1,
+                    title: "Mobile Touch Controls Bundle",
+                    category: ["bundles", "mobile", "systems"],
+                    price: 499,
+                    originalPrice: 1999,
+                    image: "products/1.jpg",
+                    description: "Complete touch control system for mobile games.",
+                    features: ["All keyboard keys", "Virtual joystick", "Touch camera"],
+                    includes: ["Scripts", "Documentation", "Tutorials"],
+                    buyUrl: "#",
+                    rating: 4.9,
+                    sales: 128
+                }
+            ];
+            filteredProducts = [...allProducts];
+            renderProducts();
+            
+            // Show error message
+            const errorMsg = document.createElement('div');
+            errorMsg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                z-index: 1000;
+            `;
+            errorMsg.innerHTML = `
+                <strong>⚠️ Data Loading Error</strong><br>
+                Using fallback data. Check console for details.
+            `;
+            document.body.appendChild(errorMsg);
+            setTimeout(() => errorMsg.remove(), 5000);
+        }
+    }
+
+    // Initialize
+    async function initStore() {
+        // Load products
+        await loadProducts();
+        
+        // Add click listeners to filter buttons
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active filter
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Apply filter
+                currentFilter = button.dataset.filter;
+                currentPage = 1;
+                filterProducts();
+            });
+        });
+        
+        // Add search functionality
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value;
+                currentPage = 1;
+                filterProducts();
+            }, 300); // Debounce for 300ms
+        });
+        
+        // Add modal close listeners
+        closeModal.addEventListener('click', closeProductModal);
+        productModal.addEventListener('click', (e) => {
+            if (e.target === productModal) {
+                closeProductModal();
+            }
+        });
+        
+        // Add keyboard listener for modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && productModal.style.display === 'flex') {
+                closeProductModal();
+            }
+        });
+        
+        // Add click listeners to product cards for modal
+        document.addEventListener('click', (e) => {
+            const productCard = e.target.closest('.product-card');
+            if (productCard && !e.target.closest('.expand-btn') && !e.target.closest('.buy-button')) {
+                const productId = parseInt(productCard.dataset.id);
+                showProductModal(productId);
+            }
+        });
+        
+        // Log initialization
+        console.log('🎮 Godot Assets Store initialized!');
+    }
+
+    // Start the store when page loads
+    document.addEventListener('DOMContentLoaded', initStore);
+</script>
