@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Godot Game Assets Marketplace</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Contact Page Styles */
+        .contact-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .contact-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .contact-hero p {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+        
+        .contact-section {
+            padding: 80px 0;
+            background: var(--dark);
+        }
+        
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+        
+        .contact-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .contact-method {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(0, 217, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            transition: transform 0.3s;
+        }
+        
+        .contact-method:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 217, 255, 0.1);
+        }
+        
+        .contact-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            border-radius: 50%;
+            color: white;
+        }
+        
+        .contact-details h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-details p {
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+        
+        .contact-form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .form-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .form-submit:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .response-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .response-message.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #4CAF50;
+        }
+        
+        .response-message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #f44336;
+        }
+        
+        .business-hours {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(45, 27, 105, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .business-hours h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .hours-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .hours-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .hours-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .hours-list .day {
+            color: var(--accent);
+        }
+        
+        .hours-list .time {
+            color: #ccc;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .contact-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .contact-hero p {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 0 1rem;
+            }
+            
+            .contact-info, .contact-form {
+                padding: 2rem;
+            }
+            
+            .contact-method {
+                padding: 1.2rem;
+            }
+            
+            .contact-icon {
+                font-size: 1.5rem;
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .contact-hero {
+                padding: 130px 0 60px;
+            }
+            
+            .contact-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .contact-method {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .contact-icon {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <!-- Desktop Navigation -->
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="scripts.html">Scripts</a>
+                    <a href="minicourses.html">Mini Courses</a>
+                    <a href="services.html">Services</a>
+                    <a href="pvp-game.html">PVP Game Course</a>
+                    <a href="cgstore.html">Store</a>
+                    <a href="contact.html" class="active">Contact</a>
+                </div>
+                
+                <!-- Desktop CTA Button -->
+                <a href="scripts.html" class="cta-button">Get Assets</a>
+                
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href="index.html" onclick="closeMobileMenu()">Home</a>
+                <a href="blog.html" onclick="closeMobileMenu()">Blog</a>
+                <a href="scripts.html" onclick="closeMobileMenu()">Scripts</a>
+                <a href="minicourses.html" onclick="closeMobileMenu()">Mini Courses</a>
+                <a href="cgstore.html" onclick="closeMobileMenu()">Store</a>
+                <a href="pvp-game.html" onclick="closeMobileMenu()">PVP Game Course</a>
+                <a href="services.html" onclick="closeMobileMenu()">Services</a>
+                <a href="contact.html" onclick="closeMobileMenu()" class="active">Contact</a>
+                
+                <a href="scripts.html" class="cta-button" onclick="closeMobileMenu()">Get Assets</a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="container">
+            <h1>Contact Us</h1>
+            <p>Have questions about our Godot assets? Need help with your purchase? Want to discuss custom development? We're here to help!</p>
+            <p>We typically respond within 24 hours on business days.</p>
+            <a href="#contact-methods" class="cta-button">Contact Options →</a>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact-methods">
+        <div class="contact-container">
+            <div class="contact-grid">
+                <!-- Contact Methods -->
+                <div class="contact-info">
+                    <h2 class="section-title">Get In Touch</h2>
+                    <p>Choose your preferred method to reach out to us:</p>
+                    
+                    <div class="contact-methods">
+                        <!-- Instagram -->
+                        <div class="contact-method">
+                            <div class="contact-icon">📱</div>
+                            <div class="contact-details">
+                                <h4>Instagram</h4>
+                                <p>For quick updates and messages</p>
+                                <a href="https://instagram.com/freelance.sanjay" target="_blank" style="color: var(--primary); font-weight: bold;">@freelance.sanjay</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="contact-method">
+                            <div class="contact-icon">✉️</div>
+                            <div class="contact-details">
+                                <h4>Email</h4>
+                                <p>For detailed inquiries and support</p>
+                                <a href="mailto:graphicyin@gmail.com" style="color: var(--primary); font-weight: bold;">graphicyin@gmail.com</a>
+                            </div>
+                        </div>
+                        
+                        <!-- WhatsApp -->
+                        <div class="contact-method">
+                            <div class="contact-icon">💬</div>
+                            <div class="contact-details">
+                                <h4>WhatsApp (Business)</h4>
+                                <p>For urgent support during business hours</p>
+                                <a href="https://wa.me/917504704502" target="_blank" style="color: var(--primary); font-weight: bold;">+91 75047 04502</a>
+                                <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">WhatsApp only, no calls</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Business Hours -->
+                    <div class="business-hours">
+                        <h4>📅 Business Hours (IST)</h4>
+                        <ul class="hours-list">
+                            <li>
+                                <span class="day">Monday - Friday</span>
+                                <span class="time">10:00 AM - 6:00 PM</span>
+                            </li>
+                            <li>
+                                <span class="day">Saturday</span>
+                                <span class="time">10:00 AM - 2:00 PM</span>
+                            </li>
+                            <li>
+                                <span class="day">Sunday</span>
+                                <span class="time">Closed</span>
+                            </li>
+                        </ul>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: #ccc;">Response time: Usually within 24 hours during business days</p>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h2 class="section-title">Send Message</h2>
+                    <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+                    
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name *</label>
+                            <input type="text" id="name" class="form-control" placeholder="Enter your name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <select id="subject" class="form-control" required>
+                                <option value="">Select a topic</option>
+                                <option value="support">Technical Support</option>
+                                <option value="purchase">Purchase Inquiry</option>
+                                <option value="custom">Custom Development</option>
+                                <option value="partnership">Partnership</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea id="message" class="form-control" placeholder="Describe your inquiry in detail..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="form-submit">Send Message →</button>
+                        
+                        <div id="formResponse" class="response-message"></div>
+                    </form>
+                    
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+                        <p style="font-size: 0.9rem; color: #ccc;">
+                            <strong>Note:</strong> For faster response, please include:
+                        </p>
+                        <ul style="font-size: 0.9rem; color: #ccc; margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Product name (if applicable)</li>
+                            <li>Order reference (if applicable)</li>
+                            <li>Detailed description of your issue or request</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="highlight-section" style="padding: 60px 0;">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="highlight-grid" style="margin-top: 2rem;">
+                <div class="highlight-card">
+                    <h3>📧 What's the best way to contact you?</h3>
+                    <p>For technical support: Email is best<br>
+                    For quick questions: Instagram DM<br>
+                    For urgent issues: WhatsApp</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <h3>⏱️ How fast will you respond?</h3>
+                    <p>We typically respond within 24 hours during business days. For weekend inquiries, expect a response on Monday.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <h3>🛒 Need help with a purchase?</h3>
+                    <p>Include your order reference number in your message for faster resolution of purchase-related queries.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
+            <div class="footer-links">
+                <a href="legal/content-rating.html" class="footer-link">Content Rating</a>
+                <a href="legal/copyright.html" class="footer-link">Copyright</a>
+                <a href="legal/data-privacy.html" class="footer-link">Data Privacy</a>
+                <a href="legal/privacy-policy.html" class="footer-link">Privacy Policy</a>
+                <a href="legal/terms-of-service.html" class="footer-link">Terms of Service</a>
+                <a href="shipping-policy.html" class="footer-link">Shipping Policy</a>
+                <a href="refund-policy.html" class="footer-link">Refund Policy</a>
+            </div>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat widget will be injected here by chat-loader.js -->
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+    
+    <!-- Main Script -->
+    <script>
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const body = document.body;
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Contact Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            const responseDiv = document.getElementById('formResponse');
+            
+            // Simple validation
+            if (!name || !email || !subject || !message) {
+                responseDiv.textContent = 'Please fill in all required fields.';
+                responseDiv.className = 'response-message error';
+                responseDiv.style.display = 'block';
+                return;
+            }
+            
+            // In a real application, you would send this data to a server
+            // For demo purposes, we'll simulate a successful submission
+            responseDiv.textContent = 'Thank you! Your message has been sent. We\'ll get back to you within 24 hours.';
+            responseDiv.className = 'response-message success';
+            responseDiv.style.display = 'block';
+            
+            // Reset form
+            document.getElementById('contactForm').reset();
+            
+            // Scroll to response
+            responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Hide response after 10 seconds
+            setTimeout(() => {
+                responseDiv.style.display = 'none';
+            }, 10000);
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        // Set active page
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === 'contact.html') {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
