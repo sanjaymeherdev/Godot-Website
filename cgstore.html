@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - Godot Game Assets</title>
+    <link rel="icon" type="image/jpg" sizes="32x32" href="images/logo.jpg">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Store-specific styles */
+        .store-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        }
+        
+        .store-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .filter-section {
+            padding: 2rem 0;
+            background: var(--secondary);
+            position: sticky;
+            top: 76px;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.1);
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 0.9rem;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .products-section {
+            padding: 80px 0;
+            min-height: 60vh;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #2d1b69 0%, var(--dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .featured-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .product-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-category {
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .product-title {
+            font-size: 1.3rem;
+            color: var(--light);
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .product-description {
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+        
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-price {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .product-price-currency {
+            font-size: 1rem;
+            color: #ccc;
+        }
+        
+        .buy-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .buy-button:hover {
+            background: #e55a2b;
+            transform: scale(1.05);
+        }
+        
+        .no-products {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #ccc;
+        }
+        
+        .no-products-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--primary);
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 107, 53, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Email Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .email-modal {
+            background: var(--secondary);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-product-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-product-name {
+            font-size: 1.1rem;
+            color: var(--light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-product-price {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .modal-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-button-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .modal-button-primary:hover {
+            background: #e55a2b;
+        }
+        
+        .modal-button-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+        
+        .modal-button-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-note {
+            font-size: 0.85rem;
+            color: #ccc;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .store-hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">GODOT ASSETS</div>
+                
+                <div class="nav-links">
+                    <a href='/'>Home</a>
+                </div>
+                
+                <a href="#products" class="cta-button">Browse Products</a>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            </nav>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
+            </div>
+            
+            <div class="mobile-nav-links">
+                <a href='/' onclick='closeMobileMenu()'>Home</a>
+            </div>
+        </div>
+        
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="store-hero">
+        <div class="container">
+            <h1>🎮 Godot Assets Store</h1>
+            <p>Production-tested scripts and systems for Godot 4</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section" id="filters">
+        <div class="container">
+            <div class="filter-container">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">All Products</button>
+                    <button class="filter-btn" data-category="Scripts">Scripts</button>
+                    <button class="filter-btn" data-category="Systems">Systems</button>
+                    <button class="filter-btn" data-category="UI">UI</button>
+                    <button class="filter-btn" data-category="Backend">Backend</button>
+                    <button class="filter-btn" data-category="featured">Featured</button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Search products...">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <div class="container">
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p>Loading awesome products...</p>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid" style="display: none;">
+                <!-- Products will be injected here by JavaScript -->
+            </div>
+            
+            <!-- No Products State -->
+            <div class="no-products" id="noProductsState" style="display: none;">
+                <div class="no-products-icon">🔍</div>
+                <h3>No products found</h3>
+                <p>Try adjusting your filters or search terms</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Email Modal -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="email-modal">
+            <button class="modal-close" onclick="closeEmailModal()">✕</button>
+            <h2 class="modal-title">Enter Your Email</h2>
+            
+            <div class="modal-product-info">
+                <div class="modal-product-name" id="modalProductName"></div>
+                <div class="modal-product-price" id="modalProductPrice"></div>
+            </div>
+            
+            <input 
+                type="email" 
+                class="email-input" 
+                id="customerEmail" 
+                placeholder="your@email.com"
+                required
+            >
+            
+            <div class="modal-buttons">
+                <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
+                    Cancel
+                </button>
+                <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
+                    Continue to Payment
+                </button>
+            </div>
+            
+            <p class="modal-note">
+                We'll check if you already own this product and send the download link to this email.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
+            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
+            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
+                © 2024 Godot Game Assets Marketplace. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <!-- Load store.js (we'll create this next) -->
+    <script src="js/store.js"></script>
+</body>
+</html>
