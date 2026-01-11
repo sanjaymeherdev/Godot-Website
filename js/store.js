@@ -196,16 +196,44 @@ function openPaymentLink(paymentLinkData, email) {
     if (paymentLinkData.paymentLinkUrl) {
         closeEmailModal();
         
-        // Create and click a link element - opens in new tab
-        const link = document.createElement('a');
-        link.href = paymentLinkData.paymentLinkUrl;
-        link.target = '_blank';
-        link.click();
-        
-        // Show confirmation message
-        setTimeout(() => {
-            alert('Payment page opened in new tab. Complete payment to receive download link at: ' + email);
-        }, 100);
+        // Show payment link directly on page (no popups/redirects)
+        document.body.innerHTML = `
+            <div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
+                <h2 style="color: #ff6b35;">Payment Link Ready</h2>
+                
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>Product:</strong> ${selectedProduct.name}</p>
+                    <p><strong>Amount:</strong> ₹${selectedProduct.price}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                </div>
+                
+                <p>Click the button below to complete payment:</p>
+                
+                <a href="${paymentLinkData.paymentLinkUrl}" 
+                   target="_blank"
+                   style="display: inline-block; background: #ff6b35; color: white; 
+                          padding: 15px 30px; border-radius: 5px; text-decoration: none;
+                          font-size: 16px; font-weight: bold; margin: 20px 0;">
+                    Open Payment Page
+                </a>
+                
+                <div style="margin-top: 30px; text-align: left;">
+                    <p><strong>Alternative:</strong> Copy this link manually:</p>
+                    <input type="text" value="${paymentLinkData.paymentLinkUrl}" 
+                           readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                           onclick="this.select()">
+                    <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                        After payment, download link will be sent to ${email}
+                    </p>
+                </div>
+                
+                <button onclick="location.reload()" 
+                        style="background: #666; color: white; border: none; 
+                               padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer;">
+                    Back to Store
+                </button>
+            </div>
+        `;
         
     } else {
         alert('Error: Could not generate payment link');
