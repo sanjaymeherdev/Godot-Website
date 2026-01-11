@@ -2,7 +2,7 @@
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
     // Updated with your latest deployment URL
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxxRZEbyRxbev9wV_HQJJ3lMnCT1m2wC8Uw-ZELFtAVstOq026b19KCozZrnv_0NZSAKA/exec'};
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzR2WkJVxJ93JXhRWfXAbofHsuc7mR2Ya9WbKwebo2LFCWOrsBJHT2Br_FEpOh-aX53/exec'};
 
 // Global variables
 let allProducts = [];
