@@ -57,6 +57,17 @@ function displayProducts(products) {
                 <div class="product-category">${product.category}</div>
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description.replace(/\n/g, '<br>')}</p>
+                
+                ${product.youtubeUrl ? `
+                    <a href="${product.youtubeUrl}" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="youtube-link"
+                       onclick="event.stopPropagation()">
+                        🎥 Watch Demo Video
+                    </a>
+                ` : ''}
+                
                 <div class="product-footer">
                     <div class="product-price">
                         <span class="product-price-currency">₹</span>${product.price}
