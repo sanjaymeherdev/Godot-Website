@@ -161,14 +161,14 @@ async function proceedToPayment() {
             return;
         }
         
-        // 2. Create Payment Link (FIXED: Changed from 'createOrder' to 'createPaymentLink')
+        // 2. Create Payment Link
         continueButton.textContent = 'Creating Payment Link...';
         const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-                action: 'createPaymentLink', // CHANGED THIS LINE
+                action: 'createPaymentLink',
                 productId: selectedProduct.id,
                 amount: selectedProduct.price,
                 email: email
@@ -182,7 +182,7 @@ async function proceedToPayment() {
         }
         
         // 3. Open Payment Link
-        openPaymentLink(paymentLinkData, email);
+        showPaymentPage(paymentLinkData, email, selectedProduct);
         
     } catch (error) {
         console.error('Process Error:', error);
@@ -192,57 +192,62 @@ async function proceedToPayment() {
     }
 }
 
-function openPaymentLink(paymentLinkData, email) {
-    if (paymentLinkData.paymentLinkUrl) {
-        closeEmailModal();
-        
-        // Show payment link directly on page (no popups/redirects)
-        document.body.innerHTML = `
-            <div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
-                <h2 style="color: #ff6b35;">Payment Link Ready</h2>
-                
-                <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                    <p><strong>Product:</strong> ${selectedProduct.name}</p>
-                    <p><strong>Amount:</strong> ₹${selectedProduct.price}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                </div>
-                
-                <p>Click the button below to complete payment:</p>
-                
-                <a href="${paymentLinkData.paymentLinkUrl}" 
-                   target="_blank"
-                   style="display: inline-block; background: #ff6b35; color: white; 
-                          padding: 15px 30px; border-radius: 5px; text-decoration: none;
-                          font-size: 16px; font-weight: bold; margin: 20px 0;">
-                    Open Payment Page
-                </a>
-                
-                <div style="margin-top: 30px; text-align: left;">
-                    <p><strong>Alternative:</strong> Copy this link manually:</p>
-                    <input type="text" value="${paymentLinkData.paymentLinkUrl}" 
-                           readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
-                           onclick="this.select()">
-                    <p style="font-size: 14px; color: #666; margin-top: 10px;">
-                        After payment, download link will be sent to ${email}
-                    </p>
-                </div>
-                
-                <button onclick="location.reload()" 
-                        style="background: #666; color: white; border: none; 
-                               padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer;">
-                    Back to Store
-                </button>
-            </div>
-        `;
-        
-    } else {
+function showPaymentPage(paymentLinkData, email, product) {
+    if (!paymentLinkData.paymentLinkUrl || !product) {
         alert('Error: Could not generate payment link');
         const continueButton = document.querySelector('.modal-button-primary');
         if (continueButton) {
             continueButton.disabled = false;
             continueButton.textContent = 'Continue to Payment';
         }
+        return;
     }
+    
+    // Store product data before closing modal
+    const productName = product.name;
+    const productPrice = product.price;
+    
+    // Close modal
+    closeEmailModal();
+    
+    // Show payment page
+    document.body.innerHTML = `
+        <div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
+            <h2 style="color: #ff6b35;">Payment Link Ready</h2>
+            
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <p><strong>Product:</strong> ${productName}</p>
+                <p><strong>Amount:</strong> ₹${productPrice}</p>
+                <p><strong>Email:</strong> ${email}</p>
+            </div>
+            
+            <p>Click the button below to complete payment:</p>
+            
+            <a href="${paymentLinkData.paymentLinkUrl}" 
+               target="_blank"
+               style="display: inline-block; background: #ff6b35; color: white; 
+                      padding: 15px 30px; border-radius: 5px; text-decoration: none;
+                      font-size: 16px; font-weight: bold; margin: 20px 0;">
+                Open Payment Page
+            </a>
+            
+            <div style="margin-top: 30px; text-align: left;">
+                <p><strong>Alternative:</strong> Copy this link manually:</p>
+                <input type="text" value="${paymentLinkData.paymentLinkUrl}" 
+                       readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                       onclick="this.select()">
+                <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                    After payment, download link will be sent to ${email}
+                </p>
+            </div>
+            
+            <button onclick="location.reload()" 
+                    style="background: #666; color: white; border: none; 
+                           padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer;">
+                Back to Store
+            </button>
+        </div>
+    `;
 }
 
 // UI Helpers
