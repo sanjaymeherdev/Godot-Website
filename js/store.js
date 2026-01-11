@@ -1,8 +1,8 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    // Updated with your latest deployment URL
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwhC7GCx704qJ94Fy_YLe_M9G-kB9PwaR6dO7Z4niF-oUFPv0Hb2RErnmMeJuzV4OpnwA/exec'};
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwhC7GCx704qJ94Fy_YLe_M9G-kB9PwaR6dO7Z4niF-oUFPv0Hb2RErnmMeJuzV4OpnwA/exec'
+};
 
 // Global variables
 let allProducts = [];
@@ -113,6 +113,7 @@ function openEmailModal(productId) {
     document.getElementById('modalProductPrice').textContent = `₹${selectedProduct.price}`;
     document.getElementById('customerEmail').value = '';
     document.getElementById('emailModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeEmailModal() {
@@ -149,111 +150,102 @@ async function proceedToPayment() {
         });
         
         const checkData = await checkResponse.json();
+        
+        if (!checkData.success) {
+            throw new Error(checkData.message || 'Failed to check purchase status');
+        }
+        
         if (checkData.purchased) {
             alert('You already own this product! We have re-sent the download link to your email.');
             closeEmailModal();
             return;
         }
         
-        // 2. Create Order
-        continueButton.textContent = 'Opening Razorpay...';
-        const orderResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+        // 2. Create Payment Link (NOT Order)
+        continueButton.textContent = 'Creating Payment Link...';
+        const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-                action: 'createOrder',
+                action: 'createPaymentLink', // CHANGED: createOrder → createPaymentLink
                 productId: selectedProduct.id,
                 amount: selectedProduct.price,
                 email: email
             })
         });
         
-        const orderData = await orderResponse.json();
+        const paymentLinkData = await paymentLinkResponse.json();
 
-        if (!orderData.success) {
-            throw new Error(orderData.message || 'Order creation failed on server');
+        if (!paymentLinkData.success) {
+            throw new Error(paymentLinkData.message || 'Failed to create payment link');
         }
         
-        // Pass data to Razorpay Checkout
-        startRazorpay(orderData, email);
+        // 3. Open Payment Link (No Razorpay JS SDK needed)
+        openPaymentLink(paymentLinkData, email);
         
     } catch (error) {
         console.error('Process Error:', error);
-        alert('Connection Error: ' + error.message);
+        alert('Error: ' + error.message);
         continueButton.disabled = false;
         continueButton.textContent = 'Continue to Payment';
     }
 }
 
-function startRazorpay(orderData, email) {
-    const options = {
-        "key": orderData.key, // Your Apps Script returns "key"
-        "amount": orderData.amount,
-        "currency": "INR",
-        "name": "Godot Game Assets",
-        "description": selectedProduct.name,
-        "order_id": orderData.orderId,
-        "prefill": { "email": email },
-        "theme": { "color": "#ff6b35" },
-        "handler": function (response) {
-            // This runs after successful payment
-            closeEmailModal();
-            verifyPayment(response, email);
-        },
-        "modal": {
-            "ondismiss": function() {
-                // Reset button if user closes the Razorpay window
-                const btn = document.querySelector('.modal-button-primary');
-                if(btn) {
-                    btn.disabled = false;
-                    btn.textContent = 'Continue to Payment';
-                }
-            }
-        }
-    };
-
-    const rzp = new Razorpay(options);
-    rzp.open();
-}
-
-async function verifyPayment(paymentResponse, email) {
-    // Show a basic processing alert or overlay here if desired
-    try {
-        const verifyResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                action: 'verifyPayment',
-                orderId: paymentResponse.razorpay_order_id,
-                paymentId: paymentResponse.razorpay_payment_id,
-                signature: paymentResponse.razorpay_signature,
-                productId: selectedProduct.id,
-                email: email
-            })
-        });
+function openPaymentLink(paymentLinkData, email) {
+    // Payment Links: Simply redirect to the Razorpay payment page
+    if (paymentLinkData.paymentLinkUrl) {
+        // Open in new tab
+        window.open(paymentLinkData.paymentLinkUrl, '_blank');
         
-        const result = await verifyResponse.json();
-        if (result.success) {
-            alert('Payment Successful! The download link has been sent to ' + email);
-        } else {
-            alert('Verification Error: ' + result.message);
-        }
-    } catch (error) {
-        alert('Verification failed. Please contact support with your Payment ID.');
+        // Close modal
+        closeEmailModal();
+        
+        // Show success message
+        alert('Payment page opened! Complete your payment on the Razorpay page. The download link will be sent to ' + email + ' after successful payment.');
+    } else {
+        alert('Error: Could not generate payment link');
+        const continueButton = document.querySelector('.modal-button-primary');
+        continueButton.disabled = false;
+        continueButton.textContent = 'Continue to Payment';
     }
 }
 
+// Remove the old Razorpay SDK functions - they're not needed for Payment Links
+
 // UI Helpers
-function showLoading() { document.getElementById('loadingState').style.display = 'block'; }
-function hideLoading() { document.getElementById('loadingState').style.display = 'none'; }
-function showError() { document.getElementById('loadingState').innerHTML = '<h3>Error Loading Products</h3>'; }
+function showLoading() { 
+    document.getElementById('loadingState').style.display = 'block'; 
+}
+
+function hideLoading() { 
+    document.getElementById('loadingState').style.display = 'none'; 
+}
+
+function showError() { 
+    document.getElementById('loadingState').innerHTML = '<h3>Error Loading Products</h3>'; 
+}
 
 function initializeMobileMenu() {
     const btn = document.getElementById('mobileMenuBtn');
     const menu = document.getElementById('mobileMenu');
     const close = document.getElementById('mobileCloseBtn');
-    if(btn) btn.onclick = () => menu.classList.add('active');
-    if(close) close.onclick = () => menu.classList.remove('active');
+    
+    if (btn) btn.onclick = () => menu.classList.add('active');
+    if (close) close.onclick = () => menu.classList.remove('active');
 }
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('emailModal');
+    if (event.target === modal) {
+        closeEmailModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEmailModal();
+    }
+});
