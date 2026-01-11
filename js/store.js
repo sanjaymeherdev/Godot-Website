@@ -1,7 +1,7 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz2do3opRkaMZmYypAFjR704y3D97J6tJYjmps918WEg5oU4ueJhnAAeGiQw8XqVsCRbg/exec'
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwYcuvpmScEPHyOIfbtWWeDOILbO8kyaUudhVNFpTjDnvkxDeeoZBeKcEV41WfZO6EfRg/exec'
 };
 
 // Global variables
