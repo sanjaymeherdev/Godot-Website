@@ -1,7 +1,7 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwhC7GCx704qJ94Fy_YLe_M9G-kB9PwaR6dO7Z4niF-oUFPv0Hb2RErnmMeJuzV4OpnwA/exec'
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw6OKsgvbuCtehScCHE66wqfR4qM3tWvxoowOdUi9CFAKqdQuIBiA4h9Wp8M1gdDauYMQ/exec'
 };
 
 // Global variables
@@ -161,14 +161,14 @@ async function proceedToPayment() {
             return;
         }
         
-        // 2. Create Payment Link (NOT Order)
+        // 2. Create Payment Link (FIXED: Changed from 'createOrder' to 'createPaymentLink')
         continueButton.textContent = 'Creating Payment Link...';
         const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
-                action: 'createPaymentLink', // CHANGED: createOrder → createPaymentLink
+                action: 'createPaymentLink', // CHANGED THIS LINE
                 productId: selectedProduct.id,
                 amount: selectedProduct.price,
                 email: email
@@ -181,7 +181,7 @@ async function proceedToPayment() {
             throw new Error(paymentLinkData.message || 'Failed to create payment link');
         }
         
-        // 3. Open Payment Link (No Razorpay JS SDK needed)
+        // 3. Open Payment Link
         openPaymentLink(paymentLinkData, email);
         
     } catch (error) {
@@ -193,25 +193,29 @@ async function proceedToPayment() {
 }
 
 function openPaymentLink(paymentLinkData, email) {
-    // Payment Links: Simply redirect to the Razorpay payment page
     if (paymentLinkData.paymentLinkUrl) {
-        // Open in new tab
-        window.open(paymentLinkData.paymentLinkUrl, '_blank');
-        
-        // Close modal
         closeEmailModal();
         
-        // Show success message
-        alert('Payment page opened! Complete your payment on the Razorpay page. The download link will be sent to ' + email + ' after successful payment.');
+        // Create and click a link element - opens in new tab
+        const link = document.createElement('a');
+        link.href = paymentLinkData.paymentLinkUrl;
+        link.target = '_blank';
+        link.click();
+        
+        // Show confirmation message
+        setTimeout(() => {
+            alert('Payment page opened in new tab. Complete payment to receive download link at: ' + email);
+        }, 100);
+        
     } else {
         alert('Error: Could not generate payment link');
         const continueButton = document.querySelector('.modal-button-primary');
-        continueButton.disabled = false;
-        continueButton.textContent = 'Continue to Payment';
+        if (continueButton) {
+            continueButton.disabled = false;
+            continueButton.textContent = 'Continue to Payment';
+        }
     }
 }
-
-// Remove the old Razorpay SDK functions - they're not needed for Payment Links
 
 // UI Helpers
 function showLoading() { 
