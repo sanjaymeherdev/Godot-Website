@@ -481,38 +481,165 @@
 
     <!-- Email Modal -->
     <div class="modal-overlay" id="emailModal">
-        <div class="email-modal">
-            <button class="modal-close" onclick="closeEmailModal()">✕</button>
-            <h2 class="modal-title">Enter Your Email</h2>
-            
-            <div class="modal-product-info">
-                <div class="modal-product-name" id="modalProductName"></div>
-                <div class="modal-product-price" id="modalProductPrice"></div>
+    <div class="email-modal">
+        <button class="modal-close" onclick="closeEmailModal()">✕</button>
+        <h2 class="modal-title">Enter Your Email</h2>
+        
+        <div class="modal-product-info">
+            <div class="modal-product-name" id="modalProductName"></div>
+            <div class="modal-product-price">
+                <span id="modalProductPrice"></span>
+                <span id="discountedPrice" style="display: none; color: #10b981; margin-left: 10px;"></span>
             </div>
-            
-            <input 
-                type="email" 
-                class="email-input" 
-                id="customerEmail" 
-                placeholder="your@email.com"
-                required
-            >
-            
-            <div class="modal-buttons">
-                <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
-                    Cancel
-                </button>
-                <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
-                    Continue to Payment
-                </button>
-            </div>
-            
-            <p class="modal-note">
-                We'll check if you already own this product and send the download link to this email.
-            </p>
         </div>
+        
+        <input 
+            type="email" 
+            class="email-input" 
+            id="customerEmail" 
+            placeholder="your@email.com"
+            required
+        >
+        
+        <!-- Coupon Section -->
+        <div class="coupon-section">
+            <div class="coupon-input-group">
+                <input 
+                    type="text" 
+                    class="coupon-input" 
+                    id="couponCode" 
+                    placeholder="Enter coupon code (optional)"
+                >
+                <button class="apply-coupon-btn" id="applyCouponBtn" onclick="applyCoupon()">
+                    Apply
+                </button>
+            </div>
+            <div class="coupon-status" id="couponStatus"></div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
+                Cancel
+            </button>
+            <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
+                Continue to Payment
+            </button>
+        </div>
+        
+        <p class="modal-note">
+            We'll check if you already own this product and send the download link to this email.
+        </p>
     </div>
+</div>
 
+<style>
+/* Coupon Section Styles */
+.coupon-section {
+    margin: 1rem 0;
+}
+
+.coupon-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.coupon-input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--light);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.coupon-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.apply-coupon-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--light);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.apply-coupon-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.apply-coupon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.coupon-status {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    display: none;
+}
+
+.coupon-status.valid {
+    display: block;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid #10b981;
+}
+
+.coupon-status.invalid {
+    display: block;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.coupon-status.expired {
+    display: block;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid #fbbf24;
+}
+
+.coupon-status.loading {
+    display: block;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+}
+
+#discountedPrice {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Strikethrough original price when discount applied */
+.price-strikethrough {
+    text-decoration: line-through;
+    opacity: 0.6;
+    font-size: 1.3rem !important;
+}
+
+@media (max-width: 480px) {
+    .coupon-input-group {
+        flex-direction: column;
+    }
+    
+    .apply-coupon-btn {
+        width: 100%;
+    }
+}
+</style>
     <!-- Footer -->
      <footer>
         <div class="container">
