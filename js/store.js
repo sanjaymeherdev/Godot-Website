@@ -2,13 +2,97 @@
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyKUH2gF2XIvskcVGS8Qa4QU_zsVsIpyj7H30BoCyFXcbi56J2mFahDiCJ04MelsHVU4Q/exec'
+    COUPON_SCRIPT_URL: 'YOUR_NEW_COUPON_SCRIPT_URL_HERE'
 };
-
+let appliedCoupon = null;
+let discountedAmount = null;
 // Global variables
 let allProducts = [];
 let currentFilter = 'all';
 let currentSearch = '';
 let selectedProduct = null;
+// Add this function - Coupon validation
+async function applyCoupon() {
+    const couponInput = document.getElementById('couponCode');
+    const couponCode = couponInput.value.trim().toUpperCase();
+    const statusDiv = document.getElementById('couponStatus');
+    const applyBtn = document.getElementById('applyCouponBtn');
+    
+    if (!couponCode) {
+        statusDiv.className = 'coupon-status invalid';
+        statusDiv.textContent = '⚠️ Please enter a coupon code';
+        return;
+    }
+    
+    // Show loading state
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Checking...';
+    statusDiv.className = 'coupon-status loading';
+    statusDiv.textContent = '🔄 Validating coupon...';
+    
+    try {
+        const response = await fetch(CONFIG.COUPON_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                action: 'validateCoupon',
+                couponCode: couponCode,
+                productId: selectedProduct.id,
+                amount: selectedProduct.price
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Valid coupon
+            appliedCoupon = couponCode;
+            discountedAmount = result.discountedAmount;
+            
+            statusDiv.className = 'coupon-status valid';
+            statusDiv.textContent = `✅ ${result.message}`;
+            
+            // Update price display
+            const originalPrice = document.getElementById('modalProductPrice');
+            const discountedPrice = document.getElementById('discountedPrice');
+            
+            originalPrice.classList.add('price-strikethrough');
+            discountedPrice.style.display = 'inline';
+            discountedPrice.textContent = `₹${result.discountedAmount}`;
+            
+            // Disable further coupon changes
+            couponInput.disabled = true;
+            applyBtn.disabled = true;
+            applyBtn.textContent = 'Applied ✓';
+            
+        } else {
+            // Invalid/Expired coupon
+            appliedCoupon = null;
+            discountedAmount = null;
+            
+            if (result.expired) {
+                statusDiv.className = 'coupon-status expired';
+                statusDiv.textContent = `⏰ ${result.message}`;
+            } else {
+                statusDiv.className = 'coupon-status invalid';
+                statusDiv.textContent = `❌ ${result.message}`;
+            }
+            
+            applyBtn.disabled = false;
+            applyBtn.textContent = 'Apply';
+        }
+        
+    } catch (error) {
+        console.error('Coupon validation error:', error);
+        statusDiv.className = 'coupon-status invalid';
+        statusDiv.textContent = '❌ Error validating coupon';
+        
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+    }
+}
+
 
 // Initialize store on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -120,20 +204,33 @@ function setupSearch() {
 function openEmailModal(productId) {
     selectedProduct = allProducts.find(p => p.id === productId);
     if (!selectedProduct) return;
+    
+    // Reset coupon state
+    appliedCoupon = null;
+    discountedAmount = null;
+    
     document.getElementById('modalProductName').textContent = selectedProduct.name;
     document.getElementById('modalProductPrice').textContent = `₹${selectedProduct.price}`;
+    
+    // Reset price display
+    document.getElementById('modalProductPrice').classList.remove('price-strikethrough');
+    document.getElementById('discountedPrice').style.display = 'none';
+    document.getElementById('discountedPrice').textContent = '';
+    
+    // Reset coupon input
+    document.getElementById('couponCode').value = '';
+    document.getElementById('couponCode').disabled = false;
+    document.getElementById('applyCouponBtn').disabled = false;
+    document.getElementById('applyCouponBtn').textContent = 'Apply';
+    document.getElementById('couponStatus').className = 'coupon-status';
+    document.getElementById('couponStatus').textContent = '';
+    
     document.getElementById('customerEmail').value = '';
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
-function closeEmailModal() {
-    document.getElementById('emailModal').classList.remove('active');
-    document.body.style.overflow = 'auto';
-    selectedProduct = null;
-}
-
-// --- CORE PAYMENT LOGIC ---
+// Update your proceedToPayment function
 async function proceedToPayment() {
     const emailInput = document.getElementById('customerEmail');
     const email = emailInput.value.trim().toLowerCase();
@@ -172,7 +269,10 @@ async function proceedToPayment() {
             return;
         }
         
-        // 2. Create Payment Link
+        // 2. Determine final amount (with or without discount)
+        const finalAmount = discountedAmount || selectedProduct.price;
+        
+        // 3. Create Payment Link
         continueButton.textContent = 'Creating Payment Link...';
         const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
@@ -181,8 +281,9 @@ async function proceedToPayment() {
             body: JSON.stringify({
                 action: 'createPaymentLink',
                 productId: selectedProduct.id,
-                amount: selectedProduct.price,
-                email: email
+                amount: finalAmount,
+                email: email,
+                couponCode: appliedCoupon || '' // Pass coupon code for logging
             })
         });
         
@@ -192,8 +293,8 @@ async function proceedToPayment() {
             throw new Error(paymentLinkData.message || 'Failed to create payment link');
         }
         
-        // 3. Open Payment Link
-        showPaymentPage(paymentLinkData, email, selectedProduct);
+        // 4. Open Payment Link
+        showPaymentPage(paymentLinkData, email, selectedProduct, finalAmount, appliedCoupon);
         
     } catch (error) {
         console.error('Process Error:', error);
@@ -203,7 +304,7 @@ async function proceedToPayment() {
     }
 }
 
-function showPaymentPage(paymentLinkData, email, product) {
+function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCode) {
     if (!paymentLinkData.paymentLinkUrl || !product) {
         alert('Error: Could not generate payment link');
         const continueButton = document.querySelector('.modal-button-primary');
@@ -214,9 +315,8 @@ function showPaymentPage(paymentLinkData, email, product) {
         return;
     }
     
-    // Store product data before closing modal
     const productName = product.name;
-    const productPrice = product.price;
+    const originalPrice = product.price;
     
     // Close modal
     closeEmailModal();
@@ -228,7 +328,13 @@ function showPaymentPage(paymentLinkData, email, product) {
             
             <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
                 <p><strong>Product:</strong> ${productName}</p>
-                <p><strong>Amount:</strong> ₹${productPrice}</p>
+                <p><strong>Amount:</strong> 
+                    ${couponCode ? 
+                        `<span style="text-decoration: line-through; color: #999;">₹${originalPrice}</span> 
+                         <span style="color: #10b981; font-size: 1.2em;">₹${finalAmount}</span>` 
+                        : `₹${finalAmount}`}
+                </p>
+                ${couponCode ? `<p style="color: #10b981;"><strong>✅ Coupon Applied:</strong> ${couponCode}</p>` : ''}
                 <p><strong>Email:</strong> ${email}</p>
             </div>
             
@@ -260,7 +366,6 @@ function showPaymentPage(paymentLinkData, email, product) {
         </div>
     `;
 }
-
 // UI Helpers
 function showLoading() { 
     document.getElementById('loadingState').style.display = 'block'; 
