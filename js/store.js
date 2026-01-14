@@ -229,7 +229,35 @@ function openEmailModal(productId) {
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
-
+function closeEmailModal() {
+    document.getElementById('emailModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('customerEmail').value = '';
+    document.getElementById('couponCode').value = '';
+    document.getElementById('couponCode').disabled = false;
+    document.getElementById('applyCouponBtn').disabled = false;
+    document.getElementById('applyCouponBtn').textContent = 'Apply';
+    document.getElementById('couponStatus').className = 'coupon-status';
+    document.getElementById('couponStatus').textContent = '';
+    
+    // Reset price display
+    document.getElementById('modalProductPrice').classList.remove('price-strikethrough');
+    document.getElementById('discountedPrice').style.display = 'none';
+    
+    // Reset coupon state
+    appliedCoupon = null;
+    discountedAmount = null;
+    selectedProduct = null;
+    
+    // Reset continue button
+    const continueButton = document.querySelector('.modal-button-primary');
+    if (continueButton) {
+        continueButton.disabled = false;
+        continueButton.textContent = 'Continue to Payment';
+    }
+}
 // Update your proceedToPayment function
 async function proceedToPayment() {
     const emailInput = document.getElementById('customerEmail');
