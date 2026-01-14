@@ -1,7 +1,7 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyKUH2gF2XIvskcVGS8Qa4QU_zsVsIpyj7H30BoCyFXcbi56J2mFahDiCJ04MelsHVU4Q/exec'
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyKUH2gF2XIvskcVGS8Qa4QU_zsVsIpyj7H30BoCyFXcbi56J2mFahDiCJ04MelsHVU4Q/exec',  // <-- ADDED COMMA
     COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzXOMtif8V3GAXKMGq4q11n-m9TMmpdlnnBg1Sjad7l5K9i4ylv3PcgS2hhqrYKnRh5/exec'
 };
 let appliedCoupon = null;
