@@ -14,10 +14,21 @@ let selectedProduct = null;
 // Add this function - Coupon validation
 async function applyCoupon() {
     const couponInput = document.getElementById('couponCode');
+    const emailInput = document.getElementById('customerEmail');
     const couponCode = couponInput.value.trim().toUpperCase();
+    const email = emailInput.value.trim().toLowerCase();
     const statusDiv = document.getElementById('couponStatus');
     const applyBtn = document.getElementById('applyCouponBtn');
     
+    // Validate email first
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        statusDiv.className = 'coupon-status invalid';
+        statusDiv.textContent = '⚠️ Please enter your email address first';
+        emailInput.focus();
+        return;
+    }
+    
+    // Validate coupon code
     if (!couponCode) {
         statusDiv.className = 'coupon-status invalid';
         statusDiv.textContent = '⚠️ Please enter a coupon code';
@@ -39,7 +50,8 @@ async function applyCoupon() {
                 action: 'validateCoupon',
                 couponCode: couponCode,
                 productId: selectedProduct.id,
-                amount: selectedProduct.price
+                amount: selectedProduct.price,
+                email: email  // ✅ NOW PASSING EMAIL
             })
         });
         
@@ -63,17 +75,21 @@ async function applyCoupon() {
             
             // Disable further coupon changes
             couponInput.disabled = true;
+            emailInput.disabled = true;  // ✅ Also disable email input
             applyBtn.disabled = true;
             applyBtn.textContent = 'Applied ✓';
             
         } else {
-            // Invalid/Expired coupon
+            // Invalid/Expired/Already Used coupon
             appliedCoupon = null;
             discountedAmount = null;
             
             if (result.expired) {
                 statusDiv.className = 'coupon-status expired';
                 statusDiv.textContent = `⏰ ${result.message}`;
+            } else if (result.alreadyUsed) {
+                statusDiv.className = 'coupon-status invalid';
+                statusDiv.textContent = `🚫 ${result.message}`;
             } else {
                 statusDiv.className = 'coupon-status invalid';
                 statusDiv.textContent = `❌ ${result.message}`;
@@ -86,13 +102,12 @@ async function applyCoupon() {
     } catch (error) {
         console.error('Coupon validation error:', error);
         statusDiv.className = 'coupon-status invalid';
-        statusDiv.textContent = '❌ Error validating coupon';
+        statusDiv.textContent = '❌ Error validating coupon. Please try again.';
         
         applyBtn.disabled = false;
         applyBtn.textContent = 'Apply';
     }
 }
-
 
 // Initialize store on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -217,7 +232,9 @@ function openEmailModal(productId) {
     document.getElementById('discountedPrice').style.display = 'none';
     document.getElementById('discountedPrice').textContent = '';
     
-    // Reset coupon input
+    // Reset email and coupon inputs
+    document.getElementById('customerEmail').value = '';
+    document.getElementById('customerEmail').disabled = false;  // ✅ Ensure email is enabled
     document.getElementById('couponCode').value = '';
     document.getElementById('couponCode').disabled = false;
     document.getElementById('applyCouponBtn').disabled = false;
@@ -225,16 +242,17 @@ function openEmailModal(productId) {
     document.getElementById('couponStatus').className = 'coupon-status';
     document.getElementById('couponStatus').textContent = '';
     
-    document.getElementById('customerEmail').value = '';
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
+
 function closeEmailModal() {
     document.getElementById('emailModal').classList.remove('active');
     document.body.style.overflow = 'auto';
     
     // Reset form
     document.getElementById('customerEmail').value = '';
+    document.getElementById('customerEmail').disabled = false;  // ✅ Re-enable email
     document.getElementById('couponCode').value = '';
     document.getElementById('couponCode').disabled = false;
     document.getElementById('applyCouponBtn').disabled = false;
@@ -258,6 +276,7 @@ function closeEmailModal() {
         continueButton.textContent = 'Continue to Payment';
     }
 }
+
 // Update your proceedToPayment function
 async function proceedToPayment() {
     const emailInput = document.getElementById('customerEmail');
