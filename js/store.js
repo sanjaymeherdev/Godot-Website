@@ -2,7 +2,7 @@
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyKUH2gF2XIvskcVGS8Qa4QU_zsVsIpyj7H30BoCyFXcbi56J2mFahDiCJ04MelsHVU4Q/exec',  // <-- ADDED COMMA
-    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzXOMtif8V3GAXKMGq4q11n-m9TMmpdlnnBg1Sjad7l5K9i4ylv3PcgS2hhqrYKnRh5/exec'
+    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyplZ24JpGqze7y_IO3Ui9nsZQ8ceE1my7gLQR7I8bZDO1UXy5RM5IoN5jcipumv-e4nA/exec'
 };
 let appliedCoupon = null;
 let discountedAmount = null;
