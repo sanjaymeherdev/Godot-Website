@@ -135,6 +135,7 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            position: relative;
         }
         
         .modal-header {
@@ -162,6 +163,7 @@
             font-size: 2rem;
             cursor: pointer;
             transition: color 0.3s;
+            z-index: 1;
         }
         
         .modal-close:hover {
@@ -223,19 +225,62 @@
             transform: none;
         }
         
+        /* Success State */
+        .success-state {
+            display: none;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .success-state.active {
+            display: block;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+        
+        .success-state h3 {
+            color: var(--success);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .success-state p {
+            color: #ccc;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .final-download-btn {
+            background: var(--success);
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .final-download-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+        
         .form-message {
             margin-top: 1rem;
             padding: 1rem;
             border-radius: 8px;
             text-align: center;
             display: none;
-        }
-        
-        .form-message.success {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid var(--success);
-            color: var(--success);
-            display: block;
         }
         
         .form-message.error {
@@ -283,6 +328,15 @@
             
             .modal-content {
                 padding: 1.5rem;
+            }
+            
+            .success-state h3 {
+                font-size: 1.5rem;
+            }
+            
+            .final-download-btn {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -356,33 +410,47 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeDownloadModal()">×</button>
             
-            <div class="modal-header">
-                <h2 id="modalAssetTitle">Download Asset</h2>
-                <p>Enter your details to download this free asset</p>
+            <!-- Form State -->
+            <div id="formState">
+                <div class="modal-header">
+                    <h2 id="modalAssetTitle">Download Asset</h2>
+                    <p>Enter your details to download this free asset</p>
+                </div>
+                
+                <form id="downloadForm" onsubmit="handleDownload(event)">
+                    <div class="form-group">
+                        <label for="userName">Your Name *</label>
+                        <input type="text" id="userName" name="name" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userEmail">Email Address *</label>
+                        <input type="email" id="userEmail" name="email" placeholder="john@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPhone">WhatsApp Number *</label>
+                        <input type="tel" id="userPhone" name="phone" placeholder="+91 9876543210" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Continue to Download
+                    </button>
+                    
+                    <div class="form-message" id="formMessage"></div>
+                </form>
             </div>
             
-            <form id="downloadForm" onsubmit="handleDownload(event)">
-                <div class="form-group">
-                    <label for="userName">Your Name *</label>
-                    <input type="text" id="userName" name="name" placeholder="John Doe" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="userEmail">Email Address *</label>
-                    <input type="email" id="userEmail" name="email" placeholder="john@example.com" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="userPhone">WhatsApp Number *</label>
-                    <input type="tel" id="userPhone" name="phone" placeholder="+91 9876543210" required>
-                </div>
-                
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    Download Now
+            <!-- Success State with Download Button -->
+            <div class="success-state" id="successState">
+                <div class="success-icon">✅</div>
+                <h3>Details Submitted!</h3>
+                <p>Your download is ready. Click the button below to get your free asset.</p>
+                <button class="final-download-btn" id="finalDownloadBtn" onclick="downloadAsset()">
+                    <span>📥</span>
+                    <span>Download Now</span>
                 </button>
-                
-                <div class="form-message" id="formMessage"></div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -408,7 +476,7 @@
         // Configuration
         const CONFIG = {
             FREE_ASSETS_JSON: 'data/free-assets.json',
-            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec' // Your coupon script URL
+            GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec'
         };
 
         let selectedAsset = null;
@@ -465,7 +533,9 @@
             document.getElementById('downloadModal').classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Reset form
+            // Reset to form state
+            document.getElementById('formState').style.display = 'block';
+            document.getElementById('successState').classList.remove('active');
             document.getElementById('downloadForm').reset();
             document.getElementById('formMessage').style.display = 'none';
         }
@@ -512,15 +582,9 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Show success message
-                    formMessage.className = 'form-message success';
-                    formMessage.textContent = '✅ Success! Redirecting to download...';
-                    
-                    // Redirect to download URL after 1.5 seconds
-                    setTimeout(() => {
-                        window.open(selectedAsset.downloadUrl, '_blank');
-                        closeDownloadModal();
-                    }, 1500);
+                    // Hide form and show success state with download button
+                    document.getElementById('formState').style.display = 'none';
+                    document.getElementById('successState').classList.add('active');
                 } else {
                     throw new Error(result.message || 'Failed to process download');
                 }
@@ -531,7 +595,14 @@
                 formMessage.textContent = '❌ Error: ' + error.message;
                 
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Download Now';
+                submitBtn.textContent = 'Continue to Download';
+            }
+        }
+
+        // Download asset function
+        function downloadAsset() {
+            if (selectedAsset && selectedAsset.downloadUrl) {
+                window.open(selectedAsset.downloadUrl, '_blank');
             }
         }
 
