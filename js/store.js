@@ -1,7 +1,7 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyKUH2gF2XIvskcVGS8Qa4QU_zsVsIpyj7H30BoCyFXcbi56J2mFahDiCJ04MelsHVU4Q/exec',  // <-- ADDED COMMA
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby_b4m9HihDqE_Kv-Tm8HZs5-yhkST_FLmzpaSzPh3psFBCs7ayhU71vo-DTTDUbOVFZg/exec',  // <-- ADDED COMMA
     COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec'
 };
 let appliedCoupon = null;
@@ -51,7 +51,8 @@ async function applyCoupon() {
                 couponCode: couponCode,
                 productId: selectedProduct.id,
                 amount: selectedProduct.price,
-                email: email  // ✅ NOW PASSING EMAIL
+                email: email,  // ✅ NOW PASSING EMAIL
+                couponCode: appliedCoupon || '' 
             })
         });
         
