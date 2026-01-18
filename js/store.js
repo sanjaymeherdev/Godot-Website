@@ -1,17 +1,21 @@
 // Store Configuration
 const CONFIG = {
     PRODUCTS_JSON_PATH: 'data/products.json',
-    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby_b4m9HihDqE_Kv-Tm8HZs5-yhkST_FLmzpaSzPh3psFBCs7ayhU71vo-DTTDUbOVFZg/exec',  // <-- ADDED COMMA
-    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec'
+    GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwQayBpHK2M3rndlxTQeyPbzUNpzUKSV6-Sani2wUI20sbr5Nh2tYYLJX9zcmH_HXA4ug/exec',
+    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby89oeq6ANrY9EY_Bhv6mN6fXIqrDMYMlMTwt4VBzN3teixSf_D4nBhI8OA-oKvXHISgw/exec'
 };
+
 let appliedCoupon = null;
 let discountedAmount = null;
-// Global variables
 let allProducts = [];
 let currentFilter = 'all';
 let currentSearch = '';
 let selectedProduct = null;
-// Add this function - Coupon validation
+
+// ============================================
+// COUPON VALIDATION
+// ============================================
+
 async function applyCoupon() {
     const couponInput = document.getElementById('couponCode');
     const emailInput = document.getElementById('customerEmail');
@@ -20,7 +24,6 @@ async function applyCoupon() {
     const statusDiv = document.getElementById('couponStatus');
     const applyBtn = document.getElementById('applyCouponBtn');
     
-    // Validate email first
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         statusDiv.className = 'coupon-status invalid';
         statusDiv.textContent = '⚠️ Please enter your email address first';
@@ -28,14 +31,12 @@ async function applyCoupon() {
         return;
     }
     
-    // Validate coupon code
     if (!couponCode) {
         statusDiv.className = 'coupon-status invalid';
         statusDiv.textContent = '⚠️ Please enter a coupon code';
         return;
     }
     
-    // Show loading state
     applyBtn.disabled = true;
     applyBtn.textContent = 'Checking...';
     statusDiv.className = 'coupon-status loading';
@@ -51,22 +52,19 @@ async function applyCoupon() {
                 couponCode: couponCode,
                 productId: selectedProduct.id,
                 amount: selectedProduct.price,
-                email: email,  // ✅ NOW PASSING EMAIL
-                couponCode: appliedCoupon || '' 
+                email: email
             })
         });
         
         const result = await response.json();
         
         if (result.success) {
-            // Valid coupon
             appliedCoupon = couponCode;
             discountedAmount = result.discountedAmount;
             
             statusDiv.className = 'coupon-status valid';
             statusDiv.textContent = `✅ ${result.message}`;
             
-            // Update price display
             const originalPrice = document.getElementById('modalProductPrice');
             const discountedPrice = document.getElementById('discountedPrice');
             
@@ -74,14 +72,12 @@ async function applyCoupon() {
             discountedPrice.style.display = 'inline';
             discountedPrice.textContent = `₹${result.discountedAmount}`;
             
-            // Disable further coupon changes
             couponInput.disabled = true;
-            emailInput.disabled = true;  // ✅ Also disable email input
+            emailInput.disabled = true;
             applyBtn.disabled = true;
             applyBtn.textContent = 'Applied ✓';
             
         } else {
-            // Invalid/Expired/Already Used coupon
             appliedCoupon = null;
             discountedAmount = null;
             
@@ -110,7 +106,10 @@ async function applyCoupon() {
     }
 }
 
-// Initialize store on page load
+// ============================================
+// INITIALIZATION
+// ============================================
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeMobileMenu();
     loadProducts();
@@ -118,7 +117,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupSearch();
 });
 
-// Load products from JSON
+// ============================================
+// PRODUCT LOADING & DISPLAY
+// ============================================
+
 async function loadProducts() {
     try {
         showLoading();
@@ -133,7 +135,6 @@ async function loadProducts() {
     }
 }
 
-// Display products in grid
 function displayProducts(products) {
     const grid = document.getElementById('productsGrid');
     const noProductsState = document.getElementById('noProductsState');
@@ -181,7 +182,10 @@ function displayProducts(products) {
     `).join('');
 }
 
-// Filter and Search Logic
+// ============================================
+// FILTER & SEARCH
+// ============================================
+
 function filterProducts() {
     let filtered = allProducts;
     if (currentFilter !== 'all') {
@@ -216,26 +220,26 @@ function setupSearch() {
     }
 }
 
-// Modal Functions
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+
 function openEmailModal(productId) {
     selectedProduct = allProducts.find(p => p.id === productId);
     if (!selectedProduct) return;
     
-    // Reset coupon state
     appliedCoupon = null;
     discountedAmount = null;
     
     document.getElementById('modalProductName').textContent = selectedProduct.name;
     document.getElementById('modalProductPrice').textContent = `₹${selectedProduct.price}`;
     
-    // Reset price display
     document.getElementById('modalProductPrice').classList.remove('price-strikethrough');
     document.getElementById('discountedPrice').style.display = 'none';
     document.getElementById('discountedPrice').textContent = '';
     
-    // Reset email and coupon inputs
     document.getElementById('customerEmail').value = '';
-    document.getElementById('customerEmail').disabled = false;  // ✅ Ensure email is enabled
+    document.getElementById('customerEmail').disabled = false;
     document.getElementById('couponCode').value = '';
     document.getElementById('couponCode').disabled = false;
     document.getElementById('applyCouponBtn').disabled = false;
@@ -251,9 +255,8 @@ function closeEmailModal() {
     document.getElementById('emailModal').classList.remove('active');
     document.body.style.overflow = 'auto';
     
-    // Reset form
     document.getElementById('customerEmail').value = '';
-    document.getElementById('customerEmail').disabled = false;  // ✅ Re-enable email
+    document.getElementById('customerEmail').disabled = false;
     document.getElementById('couponCode').value = '';
     document.getElementById('couponCode').disabled = false;
     document.getElementById('applyCouponBtn').disabled = false;
@@ -261,16 +264,13 @@ function closeEmailModal() {
     document.getElementById('couponStatus').className = 'coupon-status';
     document.getElementById('couponStatus').textContent = '';
     
-    // Reset price display
     document.getElementById('modalProductPrice').classList.remove('price-strikethrough');
     document.getElementById('discountedPrice').style.display = 'none';
     
-    // Reset coupon state
     appliedCoupon = null;
     discountedAmount = null;
     selectedProduct = null;
     
-    // Reset continue button
     const continueButton = document.querySelector('.modal-button-primary');
     if (continueButton) {
         continueButton.disabled = false;
@@ -278,7 +278,10 @@ function closeEmailModal() {
     }
 }
 
-// Update your proceedToPayment function
+// ============================================
+// PAYMENT PROCESSING
+// ============================================
+
 async function proceedToPayment() {
     const emailInput = document.getElementById('customerEmail');
     const email = emailInput.value.trim().toLowerCase();
@@ -293,7 +296,6 @@ async function proceedToPayment() {
     continueButton.textContent = 'Contacting Server...';
     
     try {
-        // 1. Check if already purchased
         const checkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
@@ -317,10 +319,8 @@ async function proceedToPayment() {
             return;
         }
         
-        // 2. Determine final amount (with or without discount)
         const finalAmount = discountedAmount || selectedProduct.price;
         
-        // 3. Create Payment Link
         continueButton.textContent = 'Creating Payment Link...';
         const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
@@ -331,7 +331,7 @@ async function proceedToPayment() {
                 productId: selectedProduct.id,
                 amount: finalAmount,
                 email: email,
-                couponCode: appliedCoupon || '' // Pass coupon code for logging
+                couponCode: appliedCoupon || ''
             })
         });
         
@@ -341,7 +341,6 @@ async function proceedToPayment() {
             throw new Error(paymentLinkData.message || 'Failed to create payment link');
         }
         
-        // 4. Open Payment Link
         showPaymentPage(paymentLinkData, email, selectedProduct, finalAmount, appliedCoupon);
         
     } catch (error) {
@@ -366,10 +365,8 @@ function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCod
     const productName = product.name;
     const originalPrice = product.price;
     
-    // Close modal
     closeEmailModal();
     
-    // Show payment page
     document.body.innerHTML = `
         <div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
             <h2 style="color: #ff6b35;">Payment Link Ready</h2>
@@ -414,7 +411,11 @@ function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCod
         </div>
     `;
 }
-// UI Helpers
+
+// ============================================
+// UI HELPERS
+// ============================================
+
 function showLoading() { 
     document.getElementById('loadingState').style.display = 'block'; 
 }
@@ -436,7 +437,10 @@ function initializeMobileMenu() {
     if (close) close.onclick = () => menu.classList.remove('active');
 }
 
-// Close modal when clicking outside
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
 document.addEventListener('click', function(event) {
     const modal = document.getElementById('emailModal');
     if (event.target === modal) {
@@ -444,7 +448,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeEmailModal();
