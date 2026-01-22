@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Store</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { 
+            text-align: center; 
+            color: white; 
+            margin-bottom: 40px; 
+            font-size: 2.5em; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); 
+        }
+        .loading { 
+            text-align: center; 
+            color: white; 
+            font-size: 1.3em; 
+            padding: 40px; 
+        }
+        .error { 
+            background: #e74c3c; 
+            color: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0; 
+            text-align: center; 
+        }
+        .products { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 30px; 
+            margin-bottom: 40px; 
+        }
+        .product { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            transition: transform 0.3s ease; 
+        }
+        .product:hover { transform: translateY(-5px); }
+        .product h2 { 
+            color: #333; 
+            margin-bottom: 10px; 
+            font-size: 1.5em; 
+        }
+        .product-id { 
+            color: #999; 
+            font-size: 0.85em; 
+            margin-bottom: 15px; 
+        }
+        .product-image { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: contain; 
+            margin-bottom: 15px; 
+            background: #f5f5f5; 
+            border-radius: 10px; 
+        }
+        .product .price { 
+            font-size: 1.8em; 
+            color: #667eea; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+        }
+        .buy-btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            transition: opacity 0.3s ease; 
+        }
+        .buy-btn:hover { opacity: 0.9; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            max-width: 500px; 
+            width: 90%; 
+        }
+        .modal h2 { color: #333; margin-bottom: 20px; }
+        .modal input { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 1em; 
+            margin-bottom: 20px; 
+        }
+        .modal input:focus { outline: none; border-color: #667eea; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons button { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1em; 
+            cursor: pointer; 
+        }
+        .continue-btn { background: #667eea; color: white; }
+        .cancel-btn { background: #ddd; color: #333; }
+        .error-msg { color: #e74c3c; margin-top: 10px; display: none; }
+        .error-msg.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Game Store</h1>
+        <div id="loadingIndicator" class="loading">Loading products...</div>
+        <div id="errorContainer"></div>
+        <div id="productsContainer" class="products"></div>
+    </div>
+    
+    <div class="modal" id="purchaseModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Purchase Item</h2>
+            <input type="email" id="emailInput" placeholder="Enter your email" />
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="continue-btn" onclick="processPurchase()">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvEQUxzd1KeNNYKl7n1dAAvkXR5ZYmNh5Dh6OB1KiBFIfnFR7ibEWuILhOWXsRDNxSaQ/exec';
+
+let products = [];
+let currentProduct = null;
+
+window.addEventListener('DOMContentLoaded', loadProducts);
+
+async function loadProducts() {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load products');
+        
+        const data = await response.json();
+        products = data.map(p => ({
+            id: p.itemid || p.ItemID,
+            name: p.itemname || p.ItemName,
+            price: p.price || p.Price,
+            image: p.texture || '',
+            type: p.type || p.Type
+        }));
+        
+        displayProducts();
+    } catch (error) {
+        showError('Failed to load products. Please refresh.');
+    }
+}
+
+function displayProducts() {
+    const container = document.getElementById('productsContainer');
+    const loading = document.getElementById('loadingIndicator');
+    loading.style.display = 'none';
+    
+    if (products.length === 0) {
+        showError('No products available.');
+        return;
+    }
+    
+    container.innerHTML = products.map(product => `
+        <div class="product">
+            <h2>${escapeHtml(product.name)}</h2>
+            <div class="product-id">ID: ${escapeHtml(product.id)}</div>
+            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" 
+                 class="product-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\"%3E%3Crect fill=\"%23ddd\" width=\"200\" height=\"200\"/%3E%3Ctext x=\"50%25\" y=\"50%25\" dominant-baseline=\"middle\" text-anchor=\"middle\" fill=\"%23999\"%3ENo Image%3C/text%3E%3C/svg%3E'">
+            <div class="price">₹${escapeHtml(product.price)}/-</div>
+            <button class="buy-btn" onclick="openPurchaseModal('${escapeHtml(product.id)}', '${escapeHtml(product.name)}', ${escapeHtml(product.price)})">
+                Buy Now
+            </button>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showError(message) {
+    document.getElementById('errorContainer').innerHTML = `<div class="error">${message}</div>`;
+    document.getElementById('loadingIndicator').style.display = 'none';
+}
+
+function openPurchaseModal(itemId, itemName, price) {
+    currentProduct = { id: itemId, name: itemName, price: price };
+    document.getElementById('modalTitle').textContent = `Purchase ${itemName}`;
+    document.getElementById('purchaseModal').classList.add('active');
+    document.getElementById('emailInput').value = '';
+    document.getElementById('errorMsg').classList.remove('active');
+}
+
+function closeModal() {
+    document.getElementById('purchaseModal').classList.remove('active');
+}
+
+function processPurchase() {
+    const email = document.getElementById('emailInput').value.trim();
+    const errorMsg = document.getElementById('errorMsg');
+    
+    if (!email || !email.includes('@')) {
+        errorMsg.textContent = 'Please enter a valid email address';
+        errorMsg.classList.add('active');
+        return;
+    }
+    
+    // Open AppScript in new tab with GET parameters
+    const params = new URLSearchParams({
+        function: 'processPurchase',
+        email: email,
+        itemId: currentProduct.id,
+        itemName: currentProduct.name,
+        price: currentProduct.price
+    });
+    
+    const url = `${APPSCRIPT_URL}?${params.toString()}`;
+    window.open(url, '_blank', 'width=600,height=500');
+    
+    // Close modal and show confirmation
+    closeModal();
+    setTimeout(() => {
+        alert('Check the new window for your redeem code!\n\nSave the code and use it in the game.');
+    }, 500);
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
