@@ -84,6 +84,10 @@
             transition: opacity 0.3s ease; 
         }
         .buy-btn:hover { opacity: 0.9; }
+        .buy-btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
         .modal { 
             display: none; 
             position: fixed; 
@@ -150,18 +154,45 @@
     </div>
 
 <script>
-const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvEQUxzd1KeNNYKl7n1dAAvkXR5ZYmNh5Dh6OB1KiBFIfnFR7ibEWuILhOWXsRDNxSaQ/exec';
+// Load configuration from external JSON file
+let CONFIG = null;
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+let APPSCRIPT_URL = '';
 
 let products = [];
 let currentProduct = null;
 
-window.addEventListener('DOMContentLoaded', loadProducts);
+// Load config first, then initialize
+async function loadConfig() {
+    try {
+        const response = await fetch('config.json');
+        if (!response.ok) throw new Error('Config file not found');
+        
+        CONFIG = await response.json();
+        SUPABASE_URL = CONFIG.supabase.url;
+        SUPABASE_KEY = CONFIG.supabase.anon_key;
+        APPSCRIPT_URL = CONFIG.appscript.url;
+        
+        console.log('✅ Config loaded');
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to load config:', error);
+        showError('Failed to load configuration. Please check config.json file.');
+        return false;
+    }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    const configLoaded = await loadConfig();
+    if (configLoaded) {
+        loadProducts();
+    }
+});
 
 async function loadProducts() {
     try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&enabled=eq.true`, {
             headers: {
                 'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -172,16 +203,18 @@ async function loadProducts() {
         
         const data = await response.json();
         products = data.map(p => ({
-            id: p.itemid || p.ItemID,
-            name: p.itemname || p.ItemName,
-            price: p.price || p.Price,
-            image: p.texture || '',
-            type: p.type || p.Type
+            id: p.itemid,
+            name: p.itemname,
+            price: p.price,
+            image: p.texture_preview || '',
+            type: p.type,
+            category: p.category
         }));
         
         displayProducts();
     } catch (error) {
         showError('Failed to load products. Please refresh.');
+        console.error(error);
     }
 }
 
@@ -232,7 +265,7 @@ function closeModal() {
     document.getElementById('purchaseModal').classList.remove('active');
 }
 
-function processPurchase() {
+async function processPurchase() {
     const email = document.getElementById('emailInput').value.trim();
     const errorMsg = document.getElementById('errorMsg');
     
@@ -242,23 +275,83 @@ function processPurchase() {
         return;
     }
     
-    // Open AppScript in new tab with GET parameters
-    const params = new URLSearchParams({
-        function: 'processPurchase',
-        email: email,
-        itemId: currentProduct.id,
-        itemName: currentProduct.name,
-        price: currentProduct.price
-    });
+    // Disable button and show loading
+    const buyBtn = event.target;
+    buyBtn.disabled = true;
+    buyBtn.textContent = 'Checking...';
     
-    const url = `${APPSCRIPT_URL}?${params.toString()}`;
-    window.open(url, '_blank', 'width=600,height=500');
-    
-    // Close modal and show confirmation
-    closeModal();
-    setTimeout(() => {
-        alert('Check the new window for your redeem code!\n\nSave the code and use it in the game.');
-    }, 500);
+    try {
+        // Step 1: Check if user is registered
+        const checkUserResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_user_registered`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_email: email })
+        });
+        
+        const userData = await checkUserResponse.json();
+        
+        if (!userData.registered) {
+            errorMsg.textContent = 'Please register in the game first';
+            errorMsg.classList.add('active');
+            buyBtn.disabled = false;
+            buyBtn.textContent = 'Buy Now';
+            return;
+        }
+        
+        // Step 2: Check if already owns the item
+        const checkOwnershipResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_item_ownership`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                p_email: email, 
+                p_item_id: currentProduct.id 
+            })
+        });
+        
+        const ownershipData = await checkOwnershipResponse.json();
+        
+        if (ownershipData.already_owned) {
+            errorMsg.textContent = 'You already own this item! Check your email or contact support.';
+            errorMsg.classList.add('active');
+            buyBtn.disabled = false;
+            buyBtn.textContent = 'Buy Now';
+            return;
+        }
+        
+        // Step 3: Proceed to payment
+        const params = new URLSearchParams({
+            function: 'processPurchase',
+            email: email,
+            itemId: currentProduct.id,
+            itemName: currentProduct.name,
+            price: currentProduct.price
+        });
+        
+        const url = `${APPSCRIPT_URL}?${params.toString()}`;
+        window.open(url, '_blank', 'width=600,height=500');
+        
+        // Close modal and show confirmation
+        closeModal();
+        setTimeout(() => {
+            alert('Check the new window for your redeem code!\n\nSave the code and use it in the game.');
+        }, 500);
+        
+    } catch (error) {
+        console.error('Purchase error:', error);
+        errorMsg.textContent = 'An error occurred. Please try again.';
+        errorMsg.classList.add('active');
+    } finally {
+        buyBtn.disabled = false;
+        buyBtn.textContent = 'Buy Now';
+    }
 }
 
 // Close modal on ESC key
