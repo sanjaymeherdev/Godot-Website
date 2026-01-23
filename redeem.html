@@ -129,8 +129,30 @@
         }
         .continue-btn { background: #667eea; color: white; }
         .cancel-btn { background: #ddd; color: #333; }
-        .error-msg { color: #e74c3c; margin-top: 10px; display: none; }
-        .error-msg.active { display: block; }
+        .error-msg, .success-msg, .info-msg { 
+            margin-top: 10px; 
+            display: none; 
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error-msg.active { 
+            display: block; 
+            background: #fee; 
+            color: #e74c3c; 
+            border: 1px solid #e74c3c;
+        }
+        .success-msg.active { 
+            display: block; 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb;
+        }
+        .info-msg.active { 
+            display: block; 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb;
+        }
         
         /* Payment Processing Overlay */
         .payment-overlay {
@@ -173,6 +195,16 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.02); }
         }
+        .resend-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .resend-btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -189,6 +221,9 @@
             <h2 id="modalTitle">Purchase Item</h2>
             <input type="email" id="emailInput" placeholder="Enter your email" />
             <div class="error-msg" id="errorMsg"></div>
+            <div class="success-msg" id="successMsg"></div>
+            <div class="info-msg" id="infoMsg"></div>
+            <div id="resendBtnContainer"></div>
             <div class="modal-buttons">
                 <button class="cancel-btn" onclick="closeModal()">Cancel</button>
                 <button class="continue-btn" id="buyNowBtn" onclick="processPurchase()">Buy Now</button>
@@ -314,6 +349,10 @@ function openPurchaseModal(itemId, itemName, price) {
     document.getElementById('purchaseModal').classList.add('active');
     document.getElementById('emailInput').value = '';
     document.getElementById('errorMsg').classList.remove('active');
+    document.getElementById('successMsg').classList.remove('active');
+    document.getElementById('infoMsg').classList.remove('active');
+    document.getElementById('resendBtnContainer').innerHTML = '';
+    document.getElementById('buyNowBtn').style.display = 'block';
 }
 
 function closeModal() {
@@ -323,7 +362,16 @@ function closeModal() {
 async function processPurchase() {
     const email = document.getElementById('emailInput').value.trim();
     const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const infoMsg = document.getElementById('infoMsg');
     const buyBtn = document.getElementById('buyNowBtn');
+    const resendContainer = document.getElementById('resendBtnContainer');
+    
+    // Clear all messages
+    errorMsg.classList.remove('active');
+    successMsg.classList.remove('active');
+    infoMsg.classList.remove('active');
+    resendContainer.innerHTML = '';
     
     if (!email || !email.includes('@')) {
         errorMsg.textContent = 'Please enter a valid email address';
@@ -336,7 +384,46 @@ async function processPurchase() {
     buyBtn.textContent = 'Checking...';
     
     try {
-        // Step 1: Check if user is registered
+        // STEP 1: Check if user already purchased this item
+        buyBtn.textContent = 'Checking purchase history...';
+        
+        const checkPurchaseResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_item_ownership`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                p_email: email, 
+                p_item_id: currentProduct.id 
+            })
+        });
+        
+        const purchaseData = await checkPurchaseResponse.json();
+        
+        if (purchaseData.already_owned) {
+            // User already owns this item
+            if (purchaseData.is_redeemed) {
+                // Case: Bought and redeemed
+                infoMsg.innerHTML = '✅ You already purchased and redeemed this item!<br><strong>Need help?</strong> Please contact support.';
+                infoMsg.classList.add('active');
+                buyBtn.style.display = 'none';
+            } else {
+                // Case: Bought but not redeemed - show resend option
+                successMsg.innerHTML = '✅ You already own this item!<br>Check your email for the redeem code.';
+                successMsg.classList.add('active');
+                resendContainer.innerHTML = '<button class="resend-btn" onclick="resendCode()">📧 Resend Code</button>';
+                buyBtn.style.display = 'none';
+            }
+            buyBtn.disabled = false;
+            buyBtn.textContent = 'Buy Now';
+            return;
+        }
+        
+        // STEP 2: Check if user is registered in profiles table
+        buyBtn.textContent = 'Verifying registration...';
+        
         const checkUserResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_user_registered`, {
             method: 'POST',
             headers: {
@@ -350,53 +437,28 @@ async function processPurchase() {
         const userData = await checkUserResponse.json();
         
         if (!userData.registered) {
-            errorMsg.textContent = '❌ Please register in the game first';
+            // Case: User not registered
+            errorMsg.textContent = '❌ Please register in the game first using this email address.';
             errorMsg.classList.add('active');
             buyBtn.disabled = false;
             buyBtn.textContent = 'Buy Now';
             return;
         }
         
-        // Step 2: Check if already owns the item (DUPLICATE CHECK)
-        buyBtn.textContent = 'Verifying ownership...';
-        
-        const checkOwnershipResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_item_ownership`, {
-            method: 'POST',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                p_email: email, 
-                p_item_id: currentProduct.id 
-            })
-        });
-        
-        const ownershipData = await checkOwnershipResponse.json();
-        
-        if (ownershipData.already_owned) {
-            errorMsg.textContent = '⚠️ You already own this item! Check your email for the redeem code or contact support.';
-            errorMsg.classList.add('active');
-            buyBtn.disabled = false;
-            buyBtn.textContent = 'Buy Now';
-            return;
-        }
-        
-        // Step 3: Create payment link
+        // STEP 3: Create payment link
         buyBtn.textContent = 'Creating payment link...';
         
         const paymentResponse = await fetch(APPSCRIPT_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
+                'Content-Type': 'text/plain;charset=utf-8'  // FIXED: Use text/plain to avoid CORS
             },
             body: JSON.stringify({
                 action: 'createPaymentLink',
                 itemId: currentProduct.id,
                 itemName: currentProduct.name,
                 amount: currentProduct.price,
-                email: email
+                email: email  // Email captured from modal
             })
         });
         
@@ -410,7 +472,7 @@ async function processPurchase() {
             return;
         }
         
-        // Step 4: Open payment link and show warning overlay
+        // STEP 4: Open payment link and show warning overlay
         closeModal();
         
         paymentWindow = window.open(paymentData.paymentLinkUrl, '_blank', 'width=800,height=600');
@@ -433,6 +495,43 @@ async function processPurchase() {
     } finally {
         buyBtn.disabled = false;
         buyBtn.textContent = 'Buy Now';
+    }
+}
+
+async function resendCode() {
+    const email = document.getElementById('emailInput').value.trim();
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+    
+    successMsg.classList.remove('active');
+    errorMsg.classList.remove('active');
+    
+    try {
+        const response = await fetch(APPSCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({
+                action: 'resendEmail',
+                email: email,
+                itemId: currentProduct.id
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            successMsg.textContent = '✅ Code resent! Check your email.';
+            successMsg.classList.add('active');
+        } else {
+            errorMsg.textContent = '❌ Failed to resend: ' + result.message;
+            errorMsg.classList.add('active');
+        }
+    } catch (error) {
+        console.error('Resend error:', error);
+        errorMsg.textContent = '❌ Error resending code. Please try again.';
+        errorMsg.classList.add('active');
     }
 }
 
