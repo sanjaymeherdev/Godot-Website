@@ -778,11 +778,21 @@ footer {
     }
 }
 /* ============================================
-   ADD THESE STYLES TO YOUR cgstyles.css
-   Replace existing .product-description style
+   CARD FIX - Add to cgstyles.css
    ============================================ */
 
-/* All cards same height */
+/* --- REMOVE this old rule from cgstyles.css ---
+.product-description {
+    color: #ccc;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;           <-- THIS was causing unequal heights
+}
+*/
+
+/* --- ADD these new rules --- */
+
 .product-card {
     display: flex;
     flex-direction: column;
@@ -794,49 +804,26 @@ footer {
     flex: 1;
 }
 
-/* Description wrapper */
 .description-wrapper {
+    flex: 1;
     margin-bottom: 1rem;
 }
 
-/* Collapsed - fixed height with fade out effect */
-.product-description.collapsed {
-    max-height: 100px;
-    overflow: hidden;
-    position: relative;
+.product-description {
     color: #ccc;
     font-size: 0.9rem;
     line-height: 1.6;
-    margin-bottom: 0;
+    margin-bottom: 0.4rem;
 }
 
-/* Fade effect at bottom */
-.product-description.collapsed::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: linear-gradient(transparent, rgba(42, 42, 42, 0.95));
-    pointer-events: none;
+.short-desc {
+    /* Short description - always 3 lines max via content control in JSON */
 }
 
-/* Expanded - show everything */
-.product-description.expanded {
-    max-height: 2000px;
-    overflow: visible;
-    color: #ccc;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
+.full-desc {
+    /* Full description shown on Read More */
 }
 
-.product-description.expanded::after {
-    display: none;
-}
-
-/* Read More button */
 .read-more-btn {
     background: none;
     border: none;
@@ -844,9 +831,8 @@ footer {
     font-size: 0.82rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 4px 0;
-    margin-top: 4px;
-    display: block;
+    padding: 0;
+    display: inline-block;
     transition: color 0.2s;
 }
 
@@ -854,7 +840,9 @@ footer {
     color: var(--primary);
 }
 
-/* Push footer always to bottom */
+/* Footer always at bottom */
 .product-footer {
     margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
 }
