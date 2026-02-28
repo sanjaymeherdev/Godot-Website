@@ -148,7 +148,12 @@ function displayProducts(products) {
     grid.style.display = 'grid';
     noProductsState.style.display = 'none';
     
-    grid.innerHTML = products.map(product => `
+    grid.innerHTML = products.map(product => {
+        const descriptionHtml = product.description.replace(/\n/g, '<br>');
+        const descId = `desc-${product.id}`;
+        const btnId = `readmore-${product.id}`;
+        
+        return `
         <div class="product-card" data-product-id="${product.id}">
             <div class="product-image">
                 <img src="${product.image}" alt="${product.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='🎮'">
@@ -157,7 +162,13 @@ function displayProducts(products) {
             <div class="product-content">
                 <div class="product-category">${product.category}</div>
                 <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description.replace(/\n/g, '<br>')}</p>
+                
+                <div class="description-wrapper">
+                    <p class="product-description collapsed" id="${descId}">${descriptionHtml}</p>
+                    <button class="read-more-btn" id="${btnId}" onclick="toggleReadMore('${descId}', '${btnId}')">
+                        Read More ▾
+                    </button>
+                </div>
                 
                 ${product.youtubeUrl ? `
                     <a href="${product.youtubeUrl}" 
@@ -179,7 +190,26 @@ function displayProducts(products) {
                 </div>
             </div>
         </div>
-    `).join('');
+    `}).join('');
+}
+
+// ============================================
+// READ MORE TOGGLE
+// ============================================
+
+function toggleReadMore(descId, btnId) {
+    const desc = document.getElementById(descId);
+    const btn = document.getElementById(btnId);
+    
+    if (desc.classList.contains('collapsed')) {
+        desc.classList.remove('collapsed');
+        desc.classList.add('expanded');
+        btn.textContent = 'Read Less ▴';
+    } else {
+        desc.classList.remove('expanded');
+        desc.classList.add('collapsed');
+        btn.textContent = 'Read More ▾';
+    }
 }
 
 // ============================================
