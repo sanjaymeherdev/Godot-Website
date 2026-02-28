@@ -151,7 +151,7 @@ function displayProducts(products) {
     grid.innerHTML = products.map(product => {
         const descriptionHtml = product.description.replace(/\n/g, '<br>');
         const descId = `desc-${product.id}`;
-        const btnId = `readmore-${product.id}`;
+        const btnId = `btn-${product.id}`;
         
         return `
         <div class="product-card" data-product-id="${product.id}">
@@ -164,7 +164,7 @@ function displayProducts(products) {
                 <h3 class="product-title">${product.name}</h3>
                 
                 <div class="description-wrapper">
-                    <p class="product-description collapsed" id="${descId}">${descriptionHtml}</p>
+                    <div class="product-description collapsed" id="${descId}">${descriptionHtml}</div>
                     <button class="read-more-btn" id="${btnId}" onclick="toggleReadMore('${descId}', '${btnId}')">
                         Read More ▾
                     </button>
