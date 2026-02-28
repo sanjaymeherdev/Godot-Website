@@ -779,10 +779,10 @@ footer {
 }
 /* ============================================
    ADD THESE STYLES TO YOUR cgstyles.css
-   Inside the store-specific styles section
+   Replace existing .product-description style
    ============================================ */
 
-/* Fix card height - all cards same size */
+/* All cards same height */
 .product-card {
     display: flex;
     flex-direction: column;
@@ -796,33 +796,44 @@ footer {
 
 /* Description wrapper */
 .description-wrapper {
-    flex: 1;
     margin-bottom: 1rem;
 }
 
-/* Collapsed state - fixed height with fade */
+/* Collapsed - fixed height with fade out effect */
 .product-description.collapsed {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;          /* Show only 4 lines */
-    -webkit-box-orient: vertical;
+    max-height: 100px;
     overflow: hidden;
     position: relative;
-    max-height: 6.4em;              /* 4 lines × 1.6 line-height */
     color: #ccc;
     font-size: 0.9rem;
     line-height: 1.6;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
 }
 
-/* Expanded state - show all */
+/* Fade effect at bottom */
+.product-description.collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, rgba(42, 42, 42, 0.95));
+    pointer-events: none;
+}
+
+/* Expanded - show everything */
 .product-description.expanded {
-    display: block;
-    max-height: none;
+    max-height: 2000px;
     overflow: visible;
     color: #ccc;
     font-size: 0.9rem;
     line-height: 1.6;
     margin-bottom: 0.5rem;
+}
+
+.product-description.expanded::after {
+    display: none;
 }
 
 /* Read More button */
@@ -833,8 +844,9 @@ footer {
     font-size: 0.82rem;
     font-weight: bold;
     cursor: pointer;
-    padding: 0;
-    margin-bottom: 0.8rem;
+    padding: 4px 0;
+    margin-top: 4px;
+    display: block;
     transition: color 0.2s;
 }
 
@@ -842,11 +854,7 @@ footer {
     color: var(--primary);
 }
 
-/* Push footer to bottom always */
+/* Push footer always to bottom */
 .product-footer {
     margin-top: auto;
-}
-/* Prevent body scroll when menu is open */
-body.menu-open {
-    overflow: hidden;
 }
