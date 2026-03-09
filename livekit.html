@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; media-src * blob:; connect-src * wss:;"/>
+  <title>LiveKit Voice</title>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0f1117;color:#fff;font-family:'Segoe UI',sans-serif;padding:20px;max-width:600px;margin:0 auto}
+    h2{color:#6c63ff;margin-bottom:4px}
+    .sub{color:#9094a8;font-size:13px;margin-bottom:20px}
+    .card{background:#1a1d27;border:1px solid #2a2e42;border-radius:14px;padding:18px;margin-bottom:14px}
+    .card h3{font-size:12px;color:#9094a8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+    label{font-size:12px;color:#9094a8;display:block;margin-bottom:3px}
+    input{width:100%;padding:9px 12px;background:#22263a;border:1px solid #2a2e42;border-radius:10px;color:#fff;font-size:13px;outline:none;margin-bottom:9px}
+    input:focus{border-color:#6c63ff}
+    .row{display:flex;gap:8px;margin-bottom:9px}
+    button{padding:10px 18px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;flex:1;transition:opacity .2s}
+    button:active{opacity:.8}
+    .p{background:#6c63ff;color:#fff}
+    .r{background:#ef4444;color:#fff}
+    .y{background:#ca8a04;color:#fff}
+    .g{background:#16a34a;color:#fff}
+    .t{background:#0d9488;color:#fff}
+    button:disabled{opacity:.4;cursor:not-allowed}
+    .perm-box{background:#22263a;border-radius:10px;padding:12px;text-align:center;margin-bottom:10px;font-size:13px}
+    .perm-box.granted{color:#22c55e;border:1px solid #22c55e}
+    .perm-box.denied{color:#ef4444;border:1px solid #ef4444}
+    .perm-box.pending{color:#f59e0b;border:1px solid #f59e0b}
+    .logbox{background:#0a0c12;border:1px solid #2a2e42;border-radius:10px;padding:12px;height:200px;overflow-y:auto;font-family:monospace;font-size:11px;line-height:1.6}
+    .i{color:#9094a8}.s{color:#22c55e}.e{color:#ef4444}.v{color:#6c63ff}.w{color:#f59e0b}
+    .srow{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:10px}
+    .dot{width:9px;height:9px;border-radius:50%;background:#ef4444}
+    .dot.on{background:#22c55e;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:28px}
+    .chip{background:#22263a;border:1px solid #2a2e42;border-radius:20px;padding:4px 12px;font-size:11px;display:flex;align-items:center;gap:4px}
+    .chip.spk{border-color:#22c55e}
+  </style>
+</head>
+<body>
+
+<h2>🎙️ LiveKit Voice</h2>
+<p class="sub">Tap permission → create or join a room</p>
+
+<!-- Mic Permission -->
+<div class="card">
+  <h3>🎤 Microphone Permission</h3>
+  <div class="perm-box pending" id="permBox">Checking...</div>
+  <button class="p" id="permBtn" onclick="requestPermission()" style="width:100%;padding:13px">
+    Request Microphone Permission
+  </button>
+</div>
+
+<!-- Room -->
+<div class="card">
+  <h3>Username</h3>
+  <input id="username" value="Player" placeholder="Your name"/>
+
+  <h3 style="margin-top:8px">Create Room</h3>
+  <input id="roomName" value="Game Room" placeholder="Room name"/>
+  <div class="row">
+    <button class="p" onclick="createRoom()">＋ Create</button>
+    <button class="g" onclick="listRooms()">📋 List Rooms</button>
+  </div>
+
+  <h3 style="margin-top:4px">Join Room</h3>
+  <input id="joinRoomId" placeholder="ROOM-XXXX"/>
+  <button class="p" onclick="joinRoom()" style="width:100%">→ Join</button>
+</div>
+
+<!-- Controls -->
+<div class="card">
+  <h3>Controls</h3>
+  <div class="srow">
+    <div class="dot" id="dot"></div>
+    <span id="stxt">Disconnected</span>
+  </div>
+  <div class="row">
+    <button class="y" id="btnMute" onclick="toggleMute()" disabled>🎤 Mute</button>
+    <button class="r" id="btnLeave" onclick="leaveRoom()" disabled>✕ Leave</button>
+    <button class="t" id="btnUnlock" onclick="unlockAudio()" style="display:none">🔓 Unlock Audio</button>
+  </div>
+  <div style="font-size:11px;color:#9094a8;margin:10px 0 4px">Participants:</div>
+  <div class="chips" id="chips"><span style="color:#9094a8;font-size:11px">Not connected</span></div>
+</div>
+
+<!-- Log -->
+<div class="card">
+  <h3>Log</h3>
+  <div class="logbox" id="log"></div>
+</div>
+
+<script>
+// ── Hardcoded credentials ─────────────────────────────────────────────────────
+const EDGE_URL   = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/livekit';
+const ANON_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';
+const DEVICE_UID = 'device-' + Math.random().toString(36).slice(2, 8); // unique per session
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let room           = null;
+let muted          = false;
+let cur            = null;
+let hasPermission  = false;
+let permStream     = null; // held mic stream — never released until leave
+
+// ── Logging ───────────────────────────────────────────────────────────────────
+function log(m, t='i') {
+  const b = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = t;
+  d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + m;
+  b.appendChild(d);
+  b.scrollTop = b.scrollHeight;
+  console.log('[' + t + '] ' + m);
+}
+
+// ── Permission — GodotBridge first, browser fallback ─────────────────────────
+async function requestPermission() {
+  const box = document.getElementById('permBox');
+  const btn = document.getElementById('permBtn');
+
+  // Android WebView via GodotBridge plugin
+  if (window.GodotBridge) {
+    log('GodotBridge found — using plugin permission', 'i');
+    try {
+      const already = window.GodotBridge.hasMicrophonePermission();
+      if (already) {
+        await _acquireStream();
+        return;
+      }
+      // Request and poll
+      window.GodotBridge.requestMicrophonePermission();
+      box.className = 'perm-box pending';
+      box.textContent = '⏳ Requesting permission...';
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        if (window.GodotBridge.hasMicrophonePermission()) {
+          clearInterval(poll);
+          await _acquireStream();
+        } else if (attempts >= 20) {
+          clearInterval(poll);
+          box.className = 'perm-box denied';
+          box.textContent = '❌ Permission denied — enable mic in phone settings';
+          log('Permission denied after 20 attempts', 'e');
+        }
+      }, 500);
+    } catch(e) {
+      log('GodotBridge error: ' + e.message + ' — falling back to browser', 'w');
+      await _browserPermission();
+    }
+  } else {
+    // Desktop browser or non-plugin WebView
+    log('No GodotBridge — using browser getUserMedia', 'i');
+    await _browserPermission();
+  }
+}
+
+async function _browserPermission() {
+  try {
+    await _acquireStream();
+  } catch(e) {
+    const box = document.getElementById('permBox');
+    box.className = 'perm-box denied';
+    box.textContent = '❌ ' + e.message;
+    log('Permission failed: ' + e.message, 'e');
+  }
+}
+
+// Acquire mic stream once and hold it
+async function _acquireStream() {
+  const box = document.getElementById('permBox');
+  const btn = document.getElementById('permBtn');
+  try {
+    permStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    });
+    hasPermission = true;
+    box.className  = 'perm-box granted';
+    box.textContent = '✅ Microphone ready';
+    btn.textContent = '✅ Permission Granted';
+    btn.disabled    = true;
+    log('✅ Mic stream acquired and held', 's');
+  } catch(e) {
+    throw e;
+  }
+}
+
+// Check on load (handles case where permission was already granted)
+window.addEventListener('load', () => {
+  // GodotBridge check
+  if (window.GodotBridge) {
+    log('GodotBridge detected', 's');
+    if (window.GodotBridge.hasMicrophonePermission()) {
+      _acquireStream().catch(() => {});
+    }
+  } else {
+    // Try silently — no prompt, just check
+    navigator.permissions && navigator.permissions.query({ name: 'microphone' }).then(result => {
+      if (result.state === 'granted') {
+        _acquireStream().catch(() => {});
+      }
+    }).catch(() => {});
+  }
+  // Wait for GodotBridge to be injected (it can be async)
+  let bridgeWait = 0;
+  const bridgeCheck = setInterval(() => {
+    bridgeWait++;
+    if (window.GodotBridge) {
+      clearInterval(bridgeCheck);
+      log('GodotBridge injected after ' + bridgeWait + ' checks', 's');
+      if (window.GodotBridge.hasMicrophonePermission()) {
+        _acquireStream().catch(() => {});
+      }
+    }
+    if (bridgeWait >= 30) clearInterval(bridgeCheck);
+  }, 100);
+});
+
+// ── Edge API ──────────────────────────────────────────────────────────────────
+async function api(body) {
+  const res = await fetch(EDGE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  return data;
+}
+
+// ── Room operations ───────────────────────────────────────────────────────────
+async function listRooms() {
+  log('Fetching rooms...', 'i');
+  try {
+    const d = await api({ action: 'list_rooms' });
+    if (!d.rooms || !d.rooms.length) { log('No active rooms', 'w'); return; }
+    log('Found ' + d.rooms.length + ' room(s):', 's');
+    d.rooms.forEach(r => log('  ' + r.emoji + ' ' + r.name + ' [' + r.room_id + '] — ' + r.participant_count + ' member(s)', 'i'));
+  } catch(e) { log('list_rooms: ' + e.message, 'e'); }
+}
+
+async function createRoom() {
+  if (!hasPermission) { log('Grant mic permission first', 'e'); requestPermission(); return; }
+  const name = document.getElementById('roomName').value.trim();
+  const user = document.getElementById('username').value.trim();
+  if (!name) { log('Enter a room name', 'e'); return; }
+  log('Creating "' + name + '"...', 'i');
+  try {
+    const d = await api({ action: 'create_room', device_uid: DEVICE_UID, username: user, name, emoji: '🎮' });
+    log('✅ Created: ' + d.room_id, 's');
+    document.getElementById('joinRoomId').value = d.room_id;
+    cur = { ...d, is_host: true };
+    await connect(d.livekit_url, d.token);
+  } catch(e) { log('create_room: ' + e.message, 'e'); }
+}
+
+async function joinRoom() {
+  if (!hasPermission) { log('Grant mic permission first', 'e'); requestPermission(); return; }
+  const rid = document.getElementById('joinRoomId').value.trim().toUpperCase();
+  const user = document.getElementById('username').value.trim();
+  if (!rid) { log('Enter a Room ID', 'e'); return; }
+  log('Joining ' + rid + '...', 'i');
+  try {
+    const d = await api({ action: 'join_room', room_id: rid, device_uid: DEVICE_UID, username: user });
+    log('✅ Joined: ' + d.name + ' [' + d.room_id + ']', 's');
+    cur = { ...d, is_host: false };
+    await connect(d.livekit_url, d.token);
+  } catch(e) { log('join_room: ' + e.message, 'e'); }
+}
+
+// ── LiveKit connect ───────────────────────────────────────────────────────────
+async function connect(wsUrl, token) {
+  if (room) await room.disconnect();
+  log('Connecting to LiveKit...', 'i');
+
+  room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
+
+  room.on(LivekitClient.RoomEvent.Connected, async () => {
+    log('✅ LiveKit connected!', 's');
+    setConn(true);
+    redraw();
+    try {
+      if (permStream) {
+        // Use already-held stream — no new getUserMedia, safe on Android
+        const audioTrack = await LivekitClient.createLocalAudioTrack({
+          mediaStreamTrack: permStream.getAudioTracks()[0]
+        });
+        await room.localParticipant.publishTrack(audioTrack);
+        log('🎤 Mic published from held stream', 's');
+      } else {
+        // Desktop fallback
+        await room.localParticipant.setMicrophoneEnabled(true);
+        log('🎤 Mic enabled', 's');
+      }
+    } catch(e) {
+      log('❌ Mic publish failed: ' + e.message, 'e');
+    }
+  });
+
+  room.on(LivekitClient.RoomEvent.Disconnected, () => {
+    log('Disconnected', 'w');
+    setConn(false);
+  });
+
+  room.on(LivekitClient.RoomEvent.ParticipantConnected, p => {
+    log('👋 ' + p.identity + ' joined', 'v');
+    redraw();
+  });
+
+  room.on(LivekitClient.RoomEvent.ParticipantDisconnected, p => {
+    log('👋 ' + p.identity + ' left', 'w');
+    redraw();
+  });
+
+  room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, spk => redraw(spk.map(s => s.identity)));
+
+  room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, p) => {
+    log('🔊 Audio from ' + p.identity, 'v');
+    if (track.kind === LivekitClient.Track.Kind.Audio) {
+      const el = track.attach();
+      el.volume   = 1.0;
+      el.muted    = false;
+      el.setAttribute('playsinline', '');
+      el.setAttribute('autoplay', '');
+      document.body.appendChild(el);
+      el.play().catch(() => {
+        log('Autoplay blocked — tap Unlock Audio', 'w');
+        document.getElementById('btnUnlock').style.display = 'inline-block';
+      });
+    }
+  });
+
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, t => t.detach());
+
+  try {
+    await room.connect(wsUrl, token);
+  } catch(e) {
+    log('Connect failed: ' + e.message, 'e');
+    room = null;
+    setConn(false);
+  }
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+async function toggleMute() {
+  if (!room) return;
+  muted = !muted;
+  await room.localParticipant.setMicrophoneEnabled(!muted);
+  document.getElementById('btnMute').textContent = muted ? '🔇 Unmute' : '🎤 Mute';
+  log(muted ? 'Muted' : 'Unmuted', 'i');
+}
+
+async function leaveRoom() {
+  if (!room) return;
+  log('Leaving...', 'i');
+  if (cur) {
+    try {
+      await api({ action: 'leave_room', room_id: cur.room_id, device_uid: DEVICE_UID, is_host: cur.is_host });
+    } catch(e) { log('Server notify failed: ' + e.message, 'w'); }
+  }
+  // Release held stream on leave
+  if (permStream) {
+    permStream.getTracks().forEach(t => t.stop());
+    permStream     = null;
+    hasPermission  = false;
+    document.getElementById('permBox').className  = 'perm-box pending';
+    document.getElementById('permBox').textContent = 'Permission released — request again to rejoin';
+    document.getElementById('permBtn').disabled   = false;
+    document.getElementById('permBtn').textContent = 'Request Microphone Permission';
+  }
+  await room.disconnect();
+  room = null; cur = null;
+  setConn(false);
+}
+
+function unlockAudio() {
+  document.querySelectorAll('audio').forEach(a => {
+    a.muted  = false;
+    a.volume = 1.0;
+    a.play().then(() => log('Audio unlocked!', 's')).catch(e => log('Still blocked: ' + e.message, 'e'));
+  });
+  document.getElementById('btnUnlock').style.display = 'none';
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+function setConn(on) {
+  document.getElementById('dot').className       = 'dot' + (on ? ' on' : '');
+  document.getElementById('stxt').textContent    = on ? 'Connected' : 'Disconnected';
+  document.getElementById('btnMute').disabled    = !on;
+  document.getElementById('btnLeave').disabled   = !on;
+  if (!on) document.getElementById('chips').innerHTML = '<span style="color:#9094a8;font-size:11px">Not connected</span>';
+}
+
+function redraw(spk = []) {
+  if (!room) return;
+  const w = document.getElementById('chips');
+  w.innerHTML = '';
+  const lc = document.createElement('div');
+  lc.className = 'chip' + (spk.includes(room.localParticipant.identity) ? ' spk' : '');
+  lc.innerHTML = '<span>' + (muted ? '🔇' : '🎤') + '</span>' + (room.localParticipant.name || room.localParticipant.identity) + ' (you)';
+  w.appendChild(lc);
+  room.remoteParticipants.forEach(p => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (spk.includes(p.identity) ? ' spk' : '');
+    c.innerHTML = '<span>🎧</span>' + (p.name || p.identity);
+    w.appendChild(c);
+  });
+}
+
+log('Ready — tap "Request Microphone Permission" first', 'i');
+</script>
+</body>
+</html>
