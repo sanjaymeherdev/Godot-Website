@@ -284,20 +284,34 @@ async function connect(wsUrl, token) {
     setConn(true);
     redraw();
     try {
-      if (permStream) {
-        // Use already-held stream — no new getUserMedia, safe on Android
+      const isAndroid = /android/i.test(navigator.userAgent);
+      if (isAndroid && permStream && permStream.getAudioTracks().length > 0) {
+        // Android WebView — stop held stream first to release hardware,
+        // then clone track so LiveKit gets a fresh handle
+        const originalTrack = permStream.getAudioTracks()[0];
+        const clonedTrack   = originalTrack.clone();
+        originalTrack.stop(); // release hardware lock
+        permStream = null;
+
         const audioTrack = await LivekitClient.createLocalAudioTrack({
-          mediaStreamTrack: permStream.getAudioTracks()[0]
+          mediaStreamTrack: clonedTrack
         });
         await room.localParticipant.publishTrack(audioTrack);
-        log('🎤 Mic published from held stream', 's');
+        log('🎤 Mic published via cloned track (Android)', 's');
       } else {
-        // Desktop fallback
+        // Desktop / iOS — let LiveKit call getUserMedia itself
         await room.localParticipant.setMicrophoneEnabled(true);
         log('🎤 Mic enabled', 's');
       }
     } catch(e) {
       log('❌ Mic publish failed: ' + e.message, 'e');
+      // Last resort — try setMicrophoneEnabled anyway
+      try {
+        await room.localParticipant.setMicrophoneEnabled(true);
+        log('🎤 Mic enabled via fallback', 's');
+      } catch(e2) {
+        log('❌ Fallback also failed: ' + e2.message, 'e');
+      }
     }
   });
 
