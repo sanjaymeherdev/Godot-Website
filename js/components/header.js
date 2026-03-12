@@ -21,10 +21,6 @@ const HeaderComponent = {
                         
                         <!-- Currency Toggle & CTA -->
                         <div style="display: flex; align-items: center;">
-                            <div class="currency-toggle" id="currencyToggle">
-                                <span class="currency-option active" data-currency="inr">₹ INR</span>
-                                <span class="currency-option" data-currency="usd">$ USD</span>
-                            </div>
                             <a href="${basePath}cgstore.html" class="cta-button" style="margin-left: 1rem;">Store</a>
                         </div>
                         
