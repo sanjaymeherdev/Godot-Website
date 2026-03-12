@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
-    <title>Store - Godot Game Assets</title>
+    <title>Store - SanjayAIDev Godot Assets</title>
     <link rel="icon" type="image/jpg" sizes="32x32" href="images/logo.jpg">
     <link rel="stylesheet" href="css/cgstyles.css">
     <style>
@@ -32,38 +32,120 @@
         
         .filter-container {
             display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .filter-row {
+            display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
         }
         
-        .filter-buttons {
+        .category-buttons {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
         }
         
-        .filter-btn {
+        .category-btn {
             background: rgba(255, 255, 255, 0.05);
             color: var(--light);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.6rem 1.2rem;
+            padding: 0.8rem 1.5rem;
             border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .category-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 53, 0.1);
+        }
+        
+        .category-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .subcategory-container {
+            padding: 1rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .subcategory-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .subcategory-label {
+            color: var(--accent);
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .subcategory-btn {
+            background: rgba(255, 255, 255, 0.03);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.9rem;
         }
         
-        .filter-btn:hover {
-            border-color: var(--primary);
-            background: rgba(255, 107, 53, 0.1);
+        .subcategory-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
         
-        .filter-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
+        .subcategory-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
             color: white;
+        }
+        
+        .active-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        .active-filter-badge {
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .clear-filter {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+        }
+        
+        .clear-filter:hover {
+            color: var(--error);
         }
         
         .search-box {
@@ -365,14 +447,110 @@
             text-align: center;
         }
         
-        /* Responsive */
+        /* Coupon Section */
+        .coupon-section {
+            margin: 1rem 0;
+        }
+        
+        .coupon-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .coupon-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .coupon-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .apply-coupon-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .apply-coupon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .apply-coupon-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .coupon-status {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+        
+        .coupon-status.valid {
+            display: block;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        
+        .coupon-status.invalid {
+            display: block;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .coupon-status.expired {
+            display: block;
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid #fbbf24;
+        }
+        
+        .coupon-status.loading {
+            display: block;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+        }
+        
+        #discountedPrice {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .price-strikethrough {
+            text-decoration: line-through;
+            opacity: 0.6;
+            font-size: 1.3rem !important;
+        }
+        
         @media (max-width: 768px) {
             .store-hero h1 {
                 font-size: 2.2rem;
             }
             
-            .filter-container {
+            .filter-row {
                 flex-direction: column;
+                align-items: flex-start;
             }
             
             .search-box {
@@ -386,6 +564,24 @@
             .filter-section {
                 top: 60px;
             }
+            
+            .subcategory-buttons {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .coupon-input-group {
+                flex-direction: column;
+            }
+            
+            .apply-coupon-btn {
+                width: 100%;
+            }
+            
+            .category-buttons {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -394,17 +590,24 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">GODOT ASSETS</div>
+                <div class="logo">SanjayAIDev</div>
                 
                 <div class="nav-links">
                     <a href='/'>Home</a>
-                     <a href="cgstore.html">Store</a>
+                    <a href="cgstore.html" class="active">Store</a>
                     <a href="freegodotassets.html">Free Assets</a>
+                    <a href="services.html">Services</a>
+                    <a href="blog.html">Blog</a>
                     <a href="contact.html">Contact</a>
-        
                 </div>
                 
-                <a href="#products" class="cta-button">Browse Products</a>
+                <div style="display: flex; align-items: center;">
+                    <div class="currency-toggle" id="currencyToggle">
+                        <span class="currency-option active" data-currency="inr">₹ INR</span>
+                        <span class="currency-option" data-currency="usd">$ USD</span>
+                    </div>
+                    <a href="#products" class="cta-button" style="margin-left: 1rem;">Browse</a>
+                </div>
                 
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
             </nav>
@@ -413,17 +616,18 @@
         <!-- Mobile Menu -->
         <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-header">
-                <div class="mobile-menu-logo">GODOT ASSETS</div>
+                <div class="mobile-menu-logo">SanjayAIDev</div>
                 <button class="mobile-close-btn" id="mobileCloseBtn">✕</button>
             </div>
             
             <div class="mobile-nav-links">
-                <a href='/' onclick='closeMobileMenu()'>Home</a>
-                <a href="cgstore.html" onclick="closeMobileMenu()">Store</a>
-                <a href="freegodotassets.html" onclick="closeMobileMenu()">Free Assets</a>
-                <a href="contact.html" onclick="closeMobileMenu()">Contact</a>
-                
-                <a href="#products" class="cta-button" onclick="closeMobileMenu()">Browse Products</a>
+                <a href='/'>Home</a>
+                <a href="cgstore.html">Store</a>
+                <a href="freegodotassets.html">Free Assets</a>
+                <a href="services.html">Services</a>
+                <a href="blog.html">Blog</a>
+                <a href="contact.html">Contact</a>
+                <a href="#products" class="cta-button">Browse Products</a>
             </div>
         </div>
         
@@ -434,7 +638,7 @@
     <section class="store-hero">
         <div class="container">
             <h1>🎮 Godot Assets Store</h1>
-            <p>Production-tested scripts and systems for Godot 4</p>
+            <p>40+ production-tested systems, scripts, and game frameworks for Godot 4</p>
         </div>
     </section>
 
@@ -442,17 +646,49 @@
     <section class="filter-section" id="filters">
         <div class="container">
             <div class="filter-container">
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-category="all">All Products</button>
-                    <button class="filter-btn" data-category="Scripts">Scripts</button>
-                    <button class="filter-btn" data-category="Systems">Systems</button>
-                    <button class="filter-btn" data-category="UI">UI</button>
-                    <button class="filter-btn" data-category="Backend">Backend</button>
-                    <button class="filter-btn" data-category="featured">Featured</button>
+                <!-- First Row: Main Categories -->
+                <div class="filter-row">
+                    <div class="category-buttons">
+                        <button class="category-btn active" data-category="all">All Products</button>
+                        <button class="category-btn" data-category="course">🎓 Courses</button>
+                        <button class="category-btn" data-category="script">📝 Scripts</button>
+                        <button class="category-btn" data-category="system">⚙️ Systems</button>
+                        <button class="category-btn" data-category="game">🎮 Games</button>
+                        <button class="category-btn" data-category="ai-tool">🤖 AI Tools</button>
+                        <button class="category-btn" data-category="app">📱 Apps</button>
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="🔍 Search products...">
+                    </div>
                 </div>
                 
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="🔍 Search products...">
+                <!-- Second Row: Subcategories (Dynamic based on main category) -->
+                <div class="subcategory-container" id="subcategoryContainer">
+                    <div class="subcategory-buttons">
+                        <span class="subcategory-label">Filter by:</span>
+                        <button class="subcategory-btn active" data-subcategory="all">All</button>
+                        <button class="subcategory-btn" data-subcategory="featured">⭐ Featured</button>
+                        <button class="subcategory-btn" data-subcategory="ui">🎨 UI</button>
+                        <button class="subcategory-btn" data-subcategory="multiplayer">🌐 Multiplayer</button>
+                        <button class="subcategory-btn" data-subcategory="ai">🤖 AI</button>
+                        <button class="subcategory-btn" data-subcategory="mobile">📱 Mobile</button>
+                        <button class="subcategory-btn" data-subcategory="backend">🔧 Backend</button>
+                        <button class="subcategory-btn" data-subcategory="template">📄 Template</button>
+                    </div>
+                </div>
+                
+                <!-- Active Filters Display -->
+                <div class="active-filters" id="activeFilters">
+                    <span>Active filters:</span>
+                    <div class="active-filter-badge" id="activeCategoryBadge">
+                        Category: All
+                        <button class="clear-filter" onclick="clearCategoryFilter()">✕</button>
+                    </div>
+                    <div class="active-filter-badge" id="activeSubcategoryBadge">
+                        Subcategory: All
+                        <button class="clear-filter" onclick="clearSubcategoryFilter()">✕</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -483,223 +719,143 @@
 
     <!-- Email Modal -->
     <div class="modal-overlay" id="emailModal">
-    <div class="email-modal">
-        <button class="modal-close" onclick="closeEmailModal()">✕</button>
-        <h2 class="modal-title">Enter Your Email</h2>
-        
-        <div class="modal-product-info">
-            <div class="modal-product-name" id="modalProductName"></div>
-            <div class="modal-product-price">
-                <span id="modalProductPrice"></span>
-                <span id="discountedPrice" style="display: none; color: #10b981; margin-left: 10px;"></span>
+        <div class="email-modal">
+            <button class="modal-close" onclick="closeEmailModal()">✕</button>
+            <h2 class="modal-title">Enter Your Email</h2>
+            
+            <div class="modal-product-info">
+                <div class="modal-product-name" id="modalProductName"></div>
+                <div class="modal-product-price">
+                    <span id="modalProductPrice"></span>
+                    <span id="discountedPrice" style="display: none; color: #10b981; margin-left: 10px;"></span>
+                </div>
             </div>
-        </div>
-        
-        <input 
-            type="email" 
-            class="email-input" 
-            id="customerEmail" 
-            placeholder="your@email.com"
-            required
-        >
-        
-        <!-- Coupon Section -->
-        <div class="coupon-section">
-            <div class="coupon-input-group">
-                <input 
-                    type="text" 
-                    class="coupon-input" 
-                    id="couponCode" 
-                    placeholder="Enter coupon code (optional)"
-                >
-                <button class="apply-coupon-btn" id="applyCouponBtn" onclick="applyCoupon()">
-                    Apply
+            
+            <input 
+                type="email" 
+                class="email-input" 
+                id="customerEmail" 
+                placeholder="your@email.com"
+                required
+            >
+            
+            <!-- Coupon Section -->
+            <div class="coupon-section">
+                <div class="coupon-input-group">
+                    <input 
+                        type="text" 
+                        class="coupon-input" 
+                        id="couponCode" 
+                        placeholder="Enter coupon code (optional)"
+                    >
+                    <button class="apply-coupon-btn" id="applyCouponBtn" onclick="applyCoupon()">
+                        Apply
+                    </button>
+                </div>
+                <div class="coupon-status" id="couponStatus"></div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
+                    Cancel
+                </button>
+                <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
+                    Continue to Payment
                 </button>
             </div>
-            <div class="coupon-status" id="couponStatus"></div>
+            
+            <p class="modal-note">
+                We'll check if you already own this product and send the download link to this email.
+            </p>
         </div>
-        
-        <div class="modal-buttons">
-            <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
-                Cancel
-            </button>
-            <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
-                Continue to Payment
-            </button>
-        </div>
-        
-        <p class="modal-note">
-            We'll check if you already own this product and send the download link to this email.
-        </p>
     </div>
-</div>
 
-<style>
-/* Coupon Section Styles */
-.coupon-section {
-    margin: 1rem 0;
-}
-
-.coupon-input-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.coupon-input {
-    flex: 1;
-    padding: 0.8rem;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--light);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-}
-
-.coupon-input:focus {
-    outline: none;
-    border-color: var(--primary);
-}
-
-.apply-coupon-btn {
-    padding: 0.8rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--light);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    white-space: nowrap;
-}
-
-.apply-coupon-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.apply-coupon-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.coupon-status {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: center;
-    display: none;
-}
-
-.coupon-status.valid {
-    display: block;
-    background: rgba(16, 185, 129, 0.2);
-    color: #10b981;
-    border: 1px solid #10b981;
-}
-
-.coupon-status.invalid {
-    display: block;
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    border: 1px solid #ef4444;
-}
-
-.coupon-status.expired {
-    display: block;
-    background: rgba(251, 191, 36, 0.2);
-    color: #fbbf24;
-    border: 1px solid #fbbf24;
-}
-
-.coupon-status.loading {
-    display: block;
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
-}
-
-#discountedPrice {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-/* Strikethrough original price when discount applied */
-.price-strikethrough {
-    text-decoration: line-through;
-    opacity: 0.6;
-    font-size: 1.3rem !important;
-}
-
-@media (max-width: 480px) {
-    .coupon-input-group {
-        flex-direction: column;
-    }
-    
-    .apply-coupon-btn {
-        width: 100%;
-    }
-}
-</style>
     <!-- Footer -->
-     <footer>
+    <footer>
         <div class="container">
-            <div class="logo" style="margin-bottom: 1rem;">GODOT ASSETS</div>
-            <p>Ready-made Godot Scripts & Systems for Faster Game Development</p>
-            <div style="margin-top: 2rem; font-size: 0.9rem; color: #ccc;">
-                © 2024 Godot Game Assets Marketplace. All rights reserved.
+            <div class="logo" style="margin-bottom: 1rem;">SanjayAIDev</div>
+            <p>40+ Production-Ready Godot Systems • AI Tools • Game Frameworks</p>
+            <p style="color: #ccc; margin-bottom: 2rem;">Built in India, for the world 🌏</p>
+            
+            <div class="footer-links-compact" style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin: 2rem 0;">
+                <div class="footer-category" style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">Products</h4>
+                    <a href="cgstore.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Store</a>
+                    <a href="freegodotassets.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Free Assets</a>
+                    <a href="minicourses.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Mini-Courses</a>
+                </div>
+                <div class="footer-category" style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">Services</h4>
+                    <a href="services.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Custom Dev</a>
+                    <a href="contact.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Contact</a>
+                    <a href="blog.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Blog</a>
+                </div>
+                <div class="footer-category" style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">Legal</h4>
+                    <a href="legal/privacy-policy.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Privacy</a>
+                    <a href="legal/terms-of-service.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Terms</a>
+                    <a href="legal/refund.html" style="color: #ccc; text-decoration: none; display: block; margin: 0.5rem 0;">Refunds</a>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem; margin-top: 2rem;">
+                <p>© 2026 SanjayAIDev. All rights reserved.</p>
             </div>
         </div>
-        <!-- Add this CSS to your footer section or main CSS file -->
-<style>
-    .footer-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        justify-content: center;
-        margin: 2rem 0 1.5rem 0;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .footer-link {
-        color: #ccc;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: color 0.3s;
-    }
-    
-    .footer-link:hover {
-        color: var(--primary);
-        text-decoration: underline;
-    }
-    
-    @media (max-width: 768px) {
-        .footer-links {
-            gap: 1rem;
-            flex-direction: column;
-            align-items: center;
-        }
-    }
-</style>
-
-<!-- Add this HTML inside your footer, before the closing </div> of the container -->
-<div class="footer-links">
-    <a href="legal/content-rating.html" class="footer-link">Content Rating</a>
-    <a href="legal/copyright.html" class="footer-link">Copyright</a>
-    <a href="legal/data-privacy.html" class="footer-link">Data Privacy</a>
-    <a href="legal/privacy-policy.html" class="footer-link">Privacy Policy</a>
-    <a href="legal/terms-of-service.html" class="footer-link">Terms of Service</a>
-    <a href="legal/shipping_policy.html" class="footer-link">Shipping Policy</a>
-    <a href="legal/refund.html" class="footer-link">Cancellation & Refunds</a>
-</div>
     </footer>
 
     <!-- Load Razorpay SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
-    <!-- Load store.js (we'll create this next) -->
+    <!-- Load store.js -->
     <script src="js/store.js"></script>
+    
+    <script>
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            document.body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+        // Filter Functions (to be implemented in store.js)
+        function clearCategoryFilter() {
+            // This will be handled by store.js
+            document.querySelector('.category-btn[data-category="all"]').click();
+        }
+
+        function clearSubcategoryFilter() {
+            // This will be handled by store.js
+            document.querySelector('.subcategory-btn[data-subcategory="all"]').click();
+        }
+
+        // Currency Toggle (to be enhanced in store.js)
+        const currencyOptions = document.querySelectorAll('.currency-option');
+        currencyOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                currencyOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                // Currency change will be handled by store.js
+                if (typeof updatePricesForCurrency === 'function') {
+                    updatePricesForCurrency(opt.dataset.currency);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
