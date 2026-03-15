@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGRelay Developer Guide - How to Use the Relay System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .guide-hero {
+            padding: 150px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at center, #1b2d69 0%, var(--dark) 70%);
+        }
+        .guide-hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .guide-hero p {
+            color: #ccc;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .guide-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 20px;
+            align-items: start;
+        }
+
+        /* Sidebar TOC */
+        .toc-sidebar {
+            position: sticky;
+            top: 90px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-right: 2rem;
+        }
+        .toc-sidebar h3 {
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        .toc-sidebar a {
+            display: block;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.88rem;
+            padding: 0.35rem 0;
+            border-left: 2px solid transparent;
+            padding-left: 0.8rem;
+            transition: all 0.2s;
+        }
+        .toc-sidebar a:hover {
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+        .toc-sidebar a.sub {
+            padding-left: 1.6rem;
+            font-size: 0.82rem;
+        }
+
+        /* Guide content */
+        .guide-content {
+            min-width: 0;
+        }
+        .guide-section {
+            margin-bottom: 4rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .guide-section h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-top: 1rem;
+        }
+        .guide-section h3 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin: 2rem 0 0.8rem;
+        }
+        .guide-section h4 {
+            color: #ddd;
+            font-size: 1rem;
+            margin: 1.5rem 0 0.5rem;
+        }
+        .guide-section p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .guide-section ul, .guide-section ol {
+            color: #ccc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .guide-section li {
+            margin-bottom: 0.4rem;
+            line-height: 1.7;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: #0d0d1a;
+            border: 1px solid rgba(0,217,255,0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88rem;
+            color: #e8e8e8;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            line-height: 1.7;
+            white-space: pre;
+        }
+        .code-block .c  { color: #555; }       /* comment */
+        .code-block .k  { color: #ff6b35; }    /* keyword */
+        .code-block .f  { color: #00d9ff; }    /* function */
+        .code-block .s  { color: #98c379; }    /* string */
+        .code-block .n  { color: #e5c07b; }    /* number/const */
+        .code-label {
+            background: rgba(0,217,255,0.1);
+            color: var(--accent);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px 4px 0 0;
+            display: inline-block;
+            margin-bottom: -1px;
+            font-family: monospace;
+        }
+
+        /* Callout boxes */
+        .callout {
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+        .callout.info    { background: rgba(0,217,255,0.08);  border-color: var(--accent);   color: #cce8f4; }
+        .callout.warning { background: rgba(255,193,7,0.08);  border-color: #ffc107;         color: #f4e3b2; }
+        .callout.success { background: rgba(40,167,69,0.08);  border-color: var(--success);  color: #b2f4c0; }
+        .callout.error   { background: rgba(220,53,69,0.08);  border-color: #dc3545;         color: #f4b2b8; }
+        .callout strong  { display: block; margin-bottom: 0.4rem; }
+
+        /* Table */
+        .guide-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+        .guide-table th {
+            background: rgba(255,107,53,0.15);
+            color: var(--primary);
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(255,107,53,0.3);
+        }
+        .guide-table td {
+            padding: 0.75rem 1rem;
+            color: #ccc;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .guide-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .guide-table code { color: var(--accent); font-family: monospace; font-size: 0.85rem; }
+
+        /* Step badges */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+        }
+        .step-row p { margin: 0; padding-top: 3px; }
+
+        /* Signal list */
+        .signal-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .signal-card .sig-name { color: var(--accent); font-family: monospace; font-size: 0.95rem; font-weight: bold; }
+        .signal-card .sig-args { color: #888; font-family: monospace; font-size: 0.85rem; }
+        .signal-card .sig-desc { color: #ccc; font-size: 0.9rem; margin-top: 0.4rem; }
+
+        /* Reason table pill */
+        .pill-ok      { background: rgba(40,167,69,0.2);  color: #6fcf97; padding: 0.1rem 0.6rem; border-radius: 10px; font-size: 0.8rem; }
+        .pill-err     { background: rgba(220,53,69,0.2);  color: #eb5757; padding: 0.1rem 0.6rem; border-radius: 10px; font-size: 0.8rem; }
+
+        @media (max-width: 900px) {
+            .guide-layout { grid-template-columns: 1fr; }
+            .toc-sidebar  { display: none; }
+            .guide-hero h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ HERO -->
+<section class="guide-hero">
+    <div class="container">
+        <span class="hero-badge">📖 Developer Guide</span>
+        <h1>CGRelay — Complete Implementation Guide</h1>
+        <p>Everything you need to add multiplayer to your Godot 4 game using the CGRelay system. Read top to bottom on your first integration.</p>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════ BODY -->
+<div class="guide-layout">
+
+    <!-- SIDEBAR TOC -->
+    <aside class="toc-sidebar">
+        <h3>Contents</h3>
+        <a href="#overview">1. Overview</a>
+        <a href="#setup">2. Setup</a>
+        <a class="sub" href="#setup-script">Add CGClient.gd</a>
+        <a class="sub" href="#setup-constants">Set constants</a>
+        <a class="sub" href="#setup-scene">Scene setup</a>
+        <a href="#connection">3. Connecting</a>
+        <a class="sub" href="#join">join()</a>
+        <a class="sub" href="#join-result">Join results</a>
+        <a href="#sending">4. Sending Data</a>
+        <a class="sub" href="#realtime">Realtime tier</a>
+        <a class="sub" href="#onchange">On Change tier</a>
+        <a class="sub" href="#once">Once tier</a>
+        <a class="sub" href="#direct">Direct to peer</a>
+        <a href="#receiving">5. Receiving Data</a>
+        <a class="sub" href="#signals">All signals</a>
+        <a class="sub" href="#on-relay">on_relay</a>
+        <a class="sub" href="#delta">Delta & snapshots</a>
+        <a href="#peers">6. Peer Events</a>
+        <a href="#zones">7. Zones</a>
+        <a href="#package">8. Package JSON</a>
+        <a href="#gametypes">9. Game Types</a>
+        <a href="#patterns">10. Game Patterns</a>
+        <a class="sub" href="#pattern-turnbased">Turn-based</a>
+        <a class="sub" href="#pattern-casual">Casual co-op</a>
+        <a class="sub" href="#pattern-lobby">Lobby system</a>
+        <a href="#errors">11. Error Handling</a>
+        <a href="#checklist">12. Checklist</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="guide-content">
+
+        <!-- ─── 1. OVERVIEW ─── -->
+        <section class="guide-section" id="overview">
+            <h2>1. Overview</h2>
+            <p>CGRelay is a <strong>game-agnostic WebSocket relay server</strong> running on Render. It does not run your game logic — it only routes messages between connected players. Your game logic lives entirely in your Godot client.</p>
+            <p>The relay works like this: every player connects to the server. When a player sends data, the server forwards it to all other players in the same game and zone. That's it.</p>
+
+            <table class="guide-table">
+                <tr><th>What the relay does</th><th>What you do in your game</th></tr>
+                <tr><td>Accepts WebSocket connections</td><td>Connect using CGClient.gd</td></tr>
+                <tr><td>Validates game ID and version</td><td>Set correct VERSION and GAME_ID</td></tr>
+                <tr><td>Routes messages between peers</td><td>Send data with send_realtime / send_once / send_on_change</td></tr>
+                <tr><td>Manages zones and peer lists</td><td>Listen to signals and react to peer events</td></tr>
+                <tr><td>Stores "once" data for late joiners</td><td>Send setup data with send_once()</td></tr>
+                <tr><td>Handles kicks and bans</td><td>Listen to on_kicked signal</td></tr>
+            </table>
+
+            <div class="callout info">
+                <strong>Important</strong>
+                CGRelay is designed for casual games. There is no server-side authority — your game client is responsible for all game logic. This is perfect for turn-based games, party games, and simple co-op. It is not suitable for competitive games where cheat prevention is required.
+            </div>
+        </section>
+
+        <!-- ─── 2. SETUP ─── -->
+        <section class="guide-section" id="setup">
+            <h2>2. Setup</h2>
+
+            <h3 id="setup-script">Step 1 — Add CGClient.gd to your project</h3>
+            <p>You receive one file: <code>CGClient.gd</code>. Place it anywhere in your project — <code>res://scripts/CGClient.gd</code> is recommended.</p>
+            <p>Add it as an <strong>Autoload</strong> in Project Settings → Autoload so it's accessible from anywhere in your game:</p>
+            <div class="code-block"><span class="c"># Project Settings → Autoload
+# Name: CGClient
+# Path: res://scripts/CGClient.gd</span></div>
+
+            <div class="callout warning">
+                <strong>Do NOT add CGClient as a child node manually in each scene.</strong>
+                It must be an Autoload so it persists across scene changes and keeps the connection alive.
+            </div>
+
+            <h3 id="setup-constants">Step 2 — Set your constants</h3>
+            <p>Open <code>CGClient.gd</code> and set the two constants at the top:</p>
+            <div class="code-label">CGClient.gd</div>
+            <div class="code-block"><span class="k">const</span> <span class="n">VERSION</span> = <span class="s">"0.0.1"</span>   <span class="c"># Must exactly match the version in your package JSON</span>
+<span class="k">const</span> <span class="n">GAME_ID</span>  = <span class="s">"your_game_id"</span>  <span class="c"># Your game ID given by CGRelay</span>
+<span class="k">const</span> <span class="n">SERVER_URL</span> = <span class="s">"wss://godotgameserver.onrender.com"</span></div>
+
+            <div class="callout warning">
+                <strong>VERSION must match exactly.</strong>
+                If your package JSON says <code>"version": "0.0.1"</code> then VERSION in CGClient must also be <code>"0.0.1"</code>. A mismatch will cause every join to be rejected with UPDATE_REQUIRED.
+            </div>
+
+            <h3 id="setup-scene">Step 3 — Remove the auto-join from _ready()</h3>
+            <p>By default CGClient calls <code>join()</code> in <code>_ready()</code>. You probably want to control when the player connects — for example after a menu screen. Comment out or remove the auto-join:</p>
+            <div class="code-label">CGClient.gd</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_ready</span>():
+    <span class="c"># join(SERVER_URL)   ← comment this out</span>
+    <span class="k">pass</span></div>
+            <p>Then call it yourself when the player is ready to connect:</p>
+            <div class="code-label">your_menu.gd or game.gd</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_on_play_button_pressed</span>():
+    CGClient.join(CGClient.SERVER_URL)</div>
+        </section>
+
+        <!-- ─── 3. CONNECTING ─── -->
+        <section class="guide-section" id="connection">
+            <h2>3. Connecting to the Server</h2>
+
+            <h3 id="join">join(url, zone_name)</h3>
+            <p>Connects to the relay and joins your game. After calling this, CGClient automatically sends <code>request_join</code> once the WebSocket connects.</p>
+
+            <table class="guide-table">
+                <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+                <tr><td><code>url</code></td><td>String</td><td>—</td><td>The server URL. Always use <code>CGClient.SERVER_URL</code></td></tr>
+                <tr><td><code>zone_name</code></td><td>String</td><td>"default"</td><td>The zone to join. Leave as "default" unless your game uses zones.</td></tr>
+            </table>
+
+            <div class="code-label">Example</div>
+            <div class="code-block"><span class="c"># Simple join</span>
+CGClient.join(CGClient.SERVER_URL)
+
+<span class="c"># Join a specific zone (advanced)</span>
+CGClient.join(CGClient.SERVER_URL, <span class="s">"lobby_1"</span>)</div>
+
+            <h3 id="join-result">Handling the join result</h3>
+            <p>After calling join(), connect to these two signals to know if the player was accepted or rejected:</p>
+
+            <div class="code-label">your_game.gd</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.join_accepted.connect(<span class="f">_on_joined</span>)
+    CGClient.join_rejected.connect(<span class="f">_on_rejected</span>)
+    CGClient.join(CGClient.SERVER_URL)
+
+<span class="f">func</span> <span class="f">_on_joined</span>(peer_list: Array):
+    <span class="c"># peer_list = array of peer IDs already in your zone</span>
+    print(<span class="s">"Joined! Other peers: "</span>, peer_list)
+    <span class="c"># Start your game, show the game scene, etc.</span>
+    get_tree().change_scene_to_file(<span class="s">"res://scenes/game.tscn"</span>)
+
+<span class="f">func</span> <span class="f">_on_rejected</span>(reason: String, server_version: String, game_id: String):
+    <span class="c"># Show error to player based on reason</span>
+    match reason:
+        <span class="s">"UPDATE_REQUIRED"</span>:
+            show_popup(<span class="s">"Please update your game to version "</span> + server_version)
+        <span class="s">"SERVER_FULL"</span>:
+            show_popup(<span class="s">"Server is full. Try again later."</span>)
+        <span class="s">"UNKNOWN_GAME"</span>:
+            show_popup(<span class="s">"Game not found. Contact support."</span>)
+        <span class="s">"MAINTENANCE"</span>:
+            show_popup(<span class="s">"Server is under maintenance. Try later."</span>)
+        <span class="s">"BANNED"</span>:
+            show_popup(<span class="s">"You have been banned."</span>)</div>
+
+            <h3>All rejection reasons</h3>
+            <table class="guide-table">
+                <tr><th>Reason</th><th>Cause</th><th>Fix</th></tr>
+                <tr><td><code>UNKNOWN_GAME</code></td><td>GAME_ID not found on server</td><td>Check GAME_ID matches your package exactly</td></tr>
+                <tr><td><code>UPDATE_REQUIRED</code></td><td>VERSION mismatch</td><td>Update VERSION in CGClient to match server package</td></tr>
+                <tr><td><code>SERVER_FULL</code></td><td>max_peers reached</td><td>Increase max_peers in package or wait for a slot</td></tr>
+                <tr><td><code>MAINTENANCE</code></td><td>Server in maintenance mode</td><td>Wait for maintenance to end</td></tr>
+                <tr><td><code>BANNED</code></td><td>User ID is banned</td><td>Player is banned by admin</td></tr>
+            </table>
+        </section>
+
+        <!-- ─── 4. SENDING ─── -->
+        <section class="guide-section" id="sending">
+            <h2>4. Sending Data</h2>
+            <p>CGRelay has three send functions, each for a different type of data. Understanding which one to use is the most important part of your integration.</p>
+
+            <h3 id="realtime">send_realtime(data, position)</h3>
+            <p>Use for <strong>data that changes every frame</strong> — player position, rotation, animation state. The server may throttle this based on your game type profile. Delta compression is applied automatically — only changed values are forwarded to other peers.</p>
+
+            <table class="guide-table">
+                <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                <tr><td><code>data</code></td><td>Dictionary</td><td>Yes</td><td>Any key-value data. Keep keys short.</td></tr>
+                <tr><td><code>position</code></td><td>Vector3</td><td>No</td><td>Player world position. Used for proximity filtering if enabled.</td></tr>
+            </table>
+
+            <div class="code-label">Example — syncing player transform</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_process</span>(_delta):
+    <span class="c"># Send position, rotation and animation state every frame</span>
+    CGClient.send_realtime({
+        <span class="s">"px"</span>: position.x,
+        <span class="s">"py"</span>: position.y,
+        <span class="s">"pz"</span>: position.z,
+        <span class="s">"ry"</span>: rotation.y,
+        <span class="s">"anim"</span>: current_animation
+    }, position)  <span class="c"># pass position for proximity filtering</span></div>
+
+            <div class="callout info">
+                <strong>Keep dictionary keys short.</strong>
+                Use <code>"px"</code> not <code>"position_x"</code>. Every byte in a realtime packet is sent many times per second. Short keys reduce bandwidth significantly.
+            </div>
+
+            <h3 id="onchange">send_on_change(data)</h3>
+            <p>Use for <strong>data that changes occasionally</strong> — health, ammo, score, game state flags. Send this only when the value actually changes, not every frame.</p>
+
+            <div class="code-label">Example — syncing health when it changes</div>
+            <div class="code-block"><span class="k">var</span> _last_sent_health = -<span class="n">1</span>
+
+<span class="f">func</span> <span class="f">take_damage</span>(amount: int):
+    health -= amount
+    health = clamp(health, <span class="n">0</span>, <span class="n">100</span>)
+
+    <span class="c"># Only send if value actually changed</span>
+    if health != _last_sent_health:
+        CGClient.send_on_change({<span class="s">"hp"</span>: health, <span class="s">"uid"</span>: my_user_id})
+        _last_sent_health = health</div>
+
+            <h3 id="once">send_once(data)</h3>
+            <p>Use for <strong>data that is set once and must be received by all peers</strong>, including players who join later. The server stores this data and automatically sends it to any new joiner.</p>
+            <p>Perfect for: map state, item pickups that have been collected, spawn point assignments, game setup data.</p>
+
+            <div class="code-label">Example — broadcasting spawn points at game start</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_on_joined</span>(peer_list: Array):
+    <span class="c"># If I am the first player (host), I set up the game state</span>
+    if peer_list.is_empty():
+        var spawn_data = {
+            <span class="s">"spawns"</span>: [
+                {<span class="s">"x"</span>: <span class="n">10</span>, <span class="s">"z"</span>: <span class="n">5</span>},
+                {<span class="s">"x"</span>: -<span class="n">10</span>, <span class="s">"z"</span>: <span class="n">5</span>},
+                {<span class="s">"x"</span>: <span class="n">0</span>, <span class="s">"z"</span>: -<span class="n">10</span>}
+            ],
+            <span class="s">"map"</span>: <span class="s">"forest"</span>,
+            <span class="s">"seed"</span>: randi()
+        }
+        CGClient.send_once(spawn_data)
+        <span class="c"># Any player who joins after this will receive spawn_data automatically</span></div>
+
+            <div class="callout warning">
+                <strong>send_once data persists until the server restarts.</strong>
+                If you call send_once with the same key twice, the second call overwrites the first. Use this to update persistent game state.
+            </div>
+
+            <h3 id="direct">send_to(target_id, tier, data)</h3>
+            <p>Sends data directly to a specific peer only. Other players do not receive it. Use for private messages, direct challenges, or peer-specific data.</p>
+
+            <div class="code-label">Example — sending a private message to one player</div>
+            <div class="code-block"><span class="c"># Send a trade request directly to peer with ID 12345</span>
+CGClient.send_to(<span class="n">12345</span>, <span class="s">"on_change"</span>, {
+    <span class="s">"action"</span>: <span class="s">"trade_request"</span>,
+    <span class="s">"item"</span>: <span class="s">"sword"</span>
+})</div>
+        </section>
+
+        <!-- ─── 5. RECEIVING ─── -->
+        <section class="guide-section" id="receiving">
+            <h2>5. Receiving Data</h2>
+
+            <h3 id="signals">All CGClient signals</h3>
+            <p>Connect to these signals anywhere in your game. They fire automatically when the server sends data.</p>
+
+            <div class="signal-card">
+                <div class="sig-name">join_accepted <span class="sig-args">(peer_list: Array)</span></div>
+                <div class="sig-desc">Fired when the server accepts your join request. <code>peer_list</code> contains the IDs of all other peers already in your zone.</div>
+            </div>
+            <div class="signal-card">
+                <div class="sig-name">join_rejected <span class="sig-args">(reason: String, server_version: String, game_id: String)</span></div>
+                <div class="sig-desc">Fired when the server rejects your join. See rejection reasons table above.</div>
+            </div>
+            <div class="signal-card">
+                <div class="sig-name">peer_joined <span class="sig-args">(id: int)</span></div>
+                <div class="sig-desc">A new player joined your zone. Use this to spawn their character in your game.</div>
+            </div>
+            <div class="signal-card">
+                <div class="sig-name">peer_left <span class="sig-args">(id: int)</span></div>
+                <div class="sig-desc">A player disconnected or left your zone. Use this to remove their character.</div>
+            </div>
+            <div class="signal-card">
+                <div class="sig-name">relay_received <span class="sig-args">(sender_id: int, tier: String, data: Dictionary)</span></div>
+                <div class="sig-desc">The main data signal. Fired whenever any peer sends realtime, on_change, or once data. <code>sender_id</code> is who sent it. <code>tier</code> tells you which send function they used. <code>data</code> is their dictionary.</div>
+            </div>
+            <div class="signal-card">
+                <div class="sig-name">snapshot_received <span class="sig-args">(sender_id: int, data: Dictionary)</span></div>
+                <div class="sig-desc">Fired specifically when a full snapshot is received (when delta compression is active). <code>data</code> contains the complete state, not just changed values.</div>
+            </div>
+
+            <h3 id="on-relay">Handling relay_received</h3>
+            <p>This is the main signal you'll use. It fires for all three tiers.</p>
+
+            <div class="code-label">your_game.gd</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.relay_received.connect(<span class="f">_on_data</span>)
+    CGClient.peer_joined.connect(<span class="f">_on_peer_joined</span>)
+    CGClient.peer_left.connect(<span class="f">_on_peer_left</span>)
+
+<span class="f">func</span> <span class="f">_on_data</span>(sender_id: int, tier: String, data: Dictionary):
+    match tier:
+        <span class="s">"realtime"</span>:
+            <span class="c"># Update the visual position of the remote player</span>
+            if remote_players.has(sender_id):
+                remote_players[sender_id].update_from_data(data)
+
+        <span class="s">"on_change"</span>:
+            <span class="c"># Update a non-visual game state</span>
+            if data.has(<span class="s">"hp"</span>):
+                update_health_bar(sender_id, data[<span class="s">"hp"</span>])
+
+        <span class="s">"once"</span>:
+            <span class="c"># Setup data arrived — this could be from a late join</span>
+            if data.has(<span class="s">"spawns"</span>):
+                setup_spawn_points(data[<span class="s">"spawns"</span>])</div>
+
+            <h3 id="delta">Delta compression and snapshots</h3>
+            <p>When delta compression is active (fps, br, mmo, casual game types), the server only forwards keys that have changed since the last frame. This means your <code>relay_received</code> data dictionary may be <strong>incomplete</strong> — it only contains the changed fields.</p>
+            <p>CGClient automatically merges incoming delta data with the last known full state for each peer in <code>_peer_states</code>. The <code>relay_received</code> signal already gives you the <strong>merged full state</strong>, not just the delta. You do not need to handle merging yourself.</p>
+            <p>Every 60 frames (configurable), the server sends a full snapshot with all fields. When this happens, <code>snapshot_received</code> fires instead of <code>relay_received</code>. You can use this to fully re-sync a peer's state.</p>
+
+            <div class="code-label">Handling snapshots for full re-sync</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.snapshot_received.connect(<span class="f">_on_snapshot</span>)
+    CGClient.relay_received.connect(<span class="f">_on_data</span>)
+
+<span class="f">func</span> <span class="f">_on_snapshot</span>(sender_id: int, data: Dictionary):
+    <span class="c"># Full state — safe to reset the peer's entire visual state</span>
+    if remote_players.has(sender_id):
+        remote_players[sender_id].full_reset(data)
+
+<span class="f">func</span> <span class="f">_on_data</span>(sender_id: int, tier: String, data: Dictionary):
+    if tier == <span class="s">"realtime"</span>:
+        <span class="c"># data is already the merged full state (CGClient handles merging)</span>
+        if remote_players.has(sender_id):
+            remote_players[sender_id].update_position(
+                Vector3(data.get(<span class="s">"px"</span>, <span class="n">0</span>), data.get(<span class="s">"py"</span>, <span class="n">0</span>), data.get(<span class="s">"pz"</span>, <span class="n">0</span>))
+            )</div>
+        </section>
+
+        <!-- ─── 6. PEER EVENTS ─── -->
+        <section class="guide-section" id="peers">
+            <h2>6. Peer Events — Spawning and Removing Players</h2>
+            <p>When a player joins or leaves, you need to create or remove their representation in your game world.</p>
+
+            <div class="code-label">multiplayer_manager.gd — full peer lifecycle example</div>
+            <div class="code-block"><span class="k">var</span> remote_players: Dictionary = {}  <span class="c"># peer_id -> Node</span>
+<span class="k">var</span> my_peer_id: int = <span class="n">0</span>
+
+<span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.join_accepted.connect(<span class="f">_on_joined</span>)
+    CGClient.peer_joined.connect(<span class="f">_on_peer_joined</span>)
+    CGClient.peer_left.connect(<span class="f">_on_peer_left</span>)
+    CGClient.relay_received.connect(<span class="f">_on_data</span>)
+
+<span class="f">func</span> <span class="f">_on_joined</span>(peer_list: Array):
+    <span class="c"># My own peer ID — Godot assigns this automatically</span>
+    my_peer_id = multiplayer.get_unique_id()
+
+    <span class="c"># Spawn all players already in the zone</span>
+    for id in peer_list:
+        _spawn_remote_player(id)
+
+<span class="f">func</span> <span class="f">_on_peer_joined</span>(id: int):
+    <span class="c"># A new player arrived after me</span>
+    _spawn_remote_player(id)
+
+<span class="f">func</span> <span class="f">_on_peer_left</span>(id: int):
+    <span class="c"># Player disconnected</span>
+    if remote_players.has(id):
+        remote_players[id].queue_free()
+        remote_players.erase(id)
+
+<span class="f">func</span> <span class="f">_spawn_remote_player</span>(id: int):
+    <span class="k">var</span> player = REMOTE_PLAYER_SCENE.instantiate()
+    player.name = str(id)
+    add_child(player)
+    remote_players[id] = player
+
+<span class="f">func</span> <span class="f">_on_data</span>(sender_id: int, tier: String, data: Dictionary):
+    if tier == <span class="s">"realtime"</span> and remote_players.has(sender_id):
+        remote_players[sender_id].apply_state(data)</div>
+
+            <div class="callout info">
+                <strong>Get your own peer ID with:</strong>
+                <code>multiplayer.get_unique_id()</code> — available after join_accepted fires.
+            </div>
+        </section>
+
+        <!-- ─── 7. ZONES ─── -->
+        <section class="guide-section" id="zones">
+            <h2>7. Zones</h2>
+            <p>Zones let you split players within the same game into groups. Players in different zones do not receive each other's relay messages.</p>
+            <p>Zones are optional. If your game type has <code>use_zones: false</code> (like <code>turnbased</code>), everyone is in the <code>"default"</code> zone regardless of what you pass.</p>
+
+            <h3>When to use zones</h3>
+            <ul>
+                <li>Multiple game rooms or lobbies running simultaneously</li>
+                <li>Large world split into regions — only players in the same region sync</li>
+                <li>Matchmaking — each match is a zone</li>
+            </ul>
+
+            <h3>How to use zones</h3>
+            <p>Pass a zone name when joining. All players who pass the same zone name end up together:</p>
+            <div class="code-label">Example — room-based multiplayer</div>
+            <div class="code-block"><span class="c"># Player joins room "room_abc123"</span>
+CGClient.join(CGClient.SERVER_URL, <span class="s">"room_abc123"</span>)
+
+<span class="c"># All players who call join() with "room_abc123" are in the same zone</span>
+<span class="c"># Players in "room_xyz456" never see their messages</span></div>
+
+            <h3>Zone overflow</h3>
+            <p>If a zone reaches <code>zone_max</code> peers (defined in your package), the server automatically assigns new players to <code>zone_name_overflow</code>, then <code>zone_name_overflow2</code>. You don't need to handle this — it happens automatically. Just be aware that players may end up in an overflow zone if yours is full.</p>
+
+            <div class="callout info">
+                <strong>Zone names are arbitrary strings.</strong>
+                Use any naming convention — <code>"lobby_1"</code>, <code>"match_abc"</code>, <code>"region_north"</code>. The server treats them as opaque identifiers.
+            </div>
+        </section>
+
+        <!-- ─── 8. PACKAGE JSON ─── -->
+        <section class="guide-section" id="package">
+            <h2>8. The Package JSON</h2>
+            <p>The package JSON tells the server about your game. You create it using the CGRelay Feeder tool and push it to the server once before launch (and again when you update).</p>
+
+            <div class="code-label">Example package JSON</div>
+            <div class="code-block">{
+    <span class="s">"game_id"</span>: <span class="s">"my_party_game_v1"</span>,
+    <span class="s">"game_type"</span>: <span class="s">"casual"</span>,
+    <span class="s">"version"</span>: <span class="s">"0.0.1"</span>,
+    <span class="s">"max_peers"</span>: <span class="n">10</span>,
+    <span class="s">"sync"</span>: {
+        <span class="s">"radius"</span>: <span class="n">0</span>,
+        <span class="s">"realtime"</span>: [<span class="s">"position"</span>, <span class="s">"rotation"</span>],
+        <span class="s">"on_change"</span>: [<span class="s">"health"</span>, <span class="s">"score"</span>],
+        <span class="s">"once"</span>: [<span class="s">"spawns"</span>, <span class="s">"map_seed"</span>]
+    }
+}</div>
+
+            <table class="guide-table">
+                <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+                <tr><td><code>game_id</code></td><td>Yes</td><td>Unique ID for your game. Must match GAME_ID in CGClient.</td></tr>
+                <tr><td><code>game_type</code></td><td>Yes</td><td>One of: fps, br, mmo, casual, turnbased, custom. Sets relay behavior.</td></tr>
+                <tr><td><code>version</code></td><td>Yes</td><td>Must match VERSION in CGClient exactly.</td></tr>
+                <tr><td><code>max_peers</code></td><td>Yes</td><td>Maximum concurrent players. Must match your subscription peer count.</td></tr>
+                <tr><td><code>sync.radius</code></td><td>No</td><td>Proximity radius in units. 0 = disabled. Players beyond radius don't receive realtime updates.</td></tr>
+                <tr><td><code>sync.realtime</code></td><td>No</td><td>Field names you plan to send with send_realtime (documentation only).</td></tr>
+                <tr><td><code>sync.on_change</code></td><td>No</td><td>Field names for send_on_change (documentation only).</td></tr>
+                <tr><td><code>sync.once</code></td><td>No</td><td>Field names for send_once (documentation only).</td></tr>
+            </table>
+
+            <div class="callout warning">
+                <strong>Whenever you change version in your package, update VERSION in CGClient too.</strong>
+                Both must match or every player gets UPDATE_REQUIRED on join.
+            </div>
+        </section>
+
+        <!-- ─── 9. GAME TYPES ─── -->
+        <section class="guide-section" id="gametypes">
+            <h2>9. Game Types and What They Do</h2>
+            <p>The <code>game_type</code> in your package sets the server-side relay profile — how often realtime data is forwarded, whether delta compression is on, and whether zones are used.</p>
+
+            <table class="guide-table">
+                <tr><th>Game Type</th><th>Realtime Interval</th><th>Delta</th><th>Zones</th><th>Best For</th></tr>
+                <tr><td><code>fps</code></td><td>Every frame</td><td>Yes</td><td>Yes (30 max)</td><td>First-person shooters</td></tr>
+                <tr><td><code>br</code></td><td>Every frame</td><td>Yes</td><td>Yes (50 max)</td><td>Battle royale</td></tr>
+                <tr><td><code>mmo</code></td><td>Every 3 frames</td><td>Yes</td><td>Yes (50 max)</td><td>Open world, MMO</td></tr>
+                <tr><td><code>casual</code></td><td>Every 3 frames</td><td>Yes</td><td>Yes (50 max)</td><td>Casual co-op, party games</td></tr>
+                <tr><td><code>turnbased</code></td><td>Never (999)</td><td>No</td><td>No</td><td>Turn-based, card games, board games</td></tr>
+                <tr><td><code>custom</code></td><td>Configurable</td><td>Configurable</td><td>Configurable</td><td>Custom requirements</td></tr>
+            </table>
+
+            <div class="callout success">
+                <strong>For most casual games, use "casual" or "turnbased".</strong>
+                "casual" gives you zones + delta compression + 3-frame throttle. "turnbased" turns off all realtime sync — perfect if your game only needs on_change and once.
+            </div>
+        </section>
+
+        <!-- ─── 10. GAME PATTERNS ─── -->
+        <section class="guide-section" id="patterns">
+            <h2>10. Common Game Patterns</h2>
+
+            <h3 id="pattern-turnbased">Pattern — Turn-Based Game</h3>
+            <p>A card game, chess, or board game where players take turns. No realtime sync needed. Use <code>game_type: turnbased</code> and only <code>send_on_change</code>.</p>
+
+            <div class="code-label">turn_game.gd</div>
+            <div class="code-block"><span class="k">var</span> current_turn: int = <span class="n">0</span>  <span class="c"># peer ID whose turn it is</span>
+<span class="k">var</span> my_id: int = <span class="n">0</span>
+
+<span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.join_accepted.connect(<span class="f">_on_joined</span>)
+    CGClient.relay_received.connect(<span class="f">_on_data</span>)
+
+<span class="f">func</span> <span class="f">_on_joined</span>(peer_list: Array):
+    my_id = multiplayer.get_unique_id()
+    <span class="c"># If I'm the first player, I go first</span>
+    if peer_list.is_empty():
+        current_turn = my_id
+        CGClient.send_on_change({<span class="s">"turn"</span>: my_id, <span class="s">"state"</span>: get_board_state()})
+
+<span class="f">func</span> <span class="f">end_my_turn</span>():
+    if current_turn != my_id:
+        return  <span class="c"># not my turn</span>
+    CGClient.send_on_change({
+        <span class="s">"turn"</span>: next_player_id(),
+        <span class="s">"state"</span>: get_board_state(),
+        <span class="s">"last_move"</span>: last_move
+    })
+
+<span class="f">func</span> <span class="f">_on_data</span>(sender_id: int, tier: String, data: Dictionary):
+    if tier == <span class="s">"on_change"</span>:
+        if data.has(<span class="s">"turn"</span>):
+            current_turn = data[<span class="s">"turn"</span>]
+        if data.has(<span class="s">"state"</span>):
+            apply_board_state(data[<span class="s">"state"</span>])</div>
+
+            <h3 id="pattern-casual">Pattern — Casual Co-op (Moving Characters)</h3>
+            <p>Players can see each other moving around. Use <code>game_type: casual</code> with realtime for movement and on_change for stats.</p>
+
+            <div class="code-label">player.gd — my own player</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">_process</span>(_delta):
+    <span class="c"># Handle input and move</span>
+    var dir = Input.get_vector(<span class="s">"left"</span>, <span class="s">"right"</span>, <span class="s">"up"</span>, <span class="s">"down"</span>)
+    velocity = dir * speed
+    move_and_slide()
+
+    <span class="c"># Send my state to others</span>
+    CGClient.send_realtime({
+        <span class="s">"x"</span>: position.x,
+        <span class="s">"y"</span>: position.y,
+        <span class="s">"fx"</span>: int(dir.x > <span class="n">0</span>) - int(dir.x < <span class="n">0</span>),  <span class="c"># facing direction</span>
+        <span class="s">"a"</span>: current_anim
+    })</div>
+
+            <div class="code-label">remote_player.gd — other players</div>
+            <div class="code-block"><span class="f">func</span> <span class="f">apply_state</span>(data: Dictionary):
+    <span class="c"># Smoothly move to reported position</span>
+    var target = Vector2(data.get(<span class="s">"x"</span>, position.x), data.get(<span class="s">"y"</span>, position.y))
+    position = position.lerp(target, <span class="n">0.3</span>)
+
+    <span class="c"># Update animation</span>
+    if data.has(<span class="s">"a"</span>):
+        animation_player.play(data[<span class="s">"a"</span>])</div>
+
+            <h3 id="pattern-lobby">Pattern — Lobby System (Wait for all players)</h3>
+            <p>Show a lobby screen where players see who is connected, then one player starts the game.</p>
+
+            <div class="code-label">lobby.gd</div>
+            <div class="code-block"><span class="k">var</span> players_ready: Dictionary = {}  <span class="c"># peer_id -> name</span>
+
+<span class="f">func</span> <span class="f">_ready</span>():
+    CGClient.join_accepted.connect(<span class="f">_on_joined</span>)
+    CGClient.peer_joined.connect(<span class="f">_on_peer_joined</span>)
+    CGClient.peer_left.connect(<span class="f">_on_peer_left</span>)
+    CGClient.relay_received.connect(<span class="f">_on_data</span>)
+    CGClient.join(CGClient.SERVER_URL, <span class="s">"lobby_main"</span>)
+
+<span class="f">func</span> <span class="f">_on_joined</span>(peer_list: Array):
+    <span class="k">var</span> my_id = multiplayer.get_unique_id()
+    players_ready[my_id] = player_name
+    <span class="c"># Announce myself to others</span>
+    CGClient.send_on_change({<span class="s">"joined"</span>: player_name, <span class="s">"id"</span>: my_id})
+    _update_lobby_ui()
+
+<span class="f">func</span> <span class="f">_on_peer_joined</span>(id: int):
+    <span class="c"># Introduce myself to the newcomer</span>
+    CGClient.send_to(id, <span class="s">"on_change"</span>, {<span class="s">"joined"</span>: player_name, <span class="s">"id"</span>: multiplayer.get_unique_id()})
+
+<span class="f">func</span> <span class="f">_on_peer_left</span>(id: int):
+    players_ready.erase(id)
+    _update_lobby_ui()
+
+<span class="f">func</span> <span class="f">_on_data</span>(sender_id: int, tier: String, data: Dictionary):
+    if data.has(<span class="s">"joined"</span>):
+        players_ready[data[<span class="s">"id"</span>]] = data[<span class="s">"joined"</span>]
+        _update_lobby_ui()
+    if data.has(<span class="s">"start_game"</span>):
+        get_tree().change_scene_to_file(<span class="s">"res://scenes/game.tscn"</span>)
+
+<span class="f">func</span> <span class="f">_on_start_pressed</span>():
+    <span class="c"># Only the first player (lowest ID) can start</span>
+    if multiplayer.get_unique_id() == players_ready.keys().min():
+        CGClient.send_on_change({<span class="s">"start_game"</span>: true})</div>
+        </section>
+
+        <!-- ─── 11. ERRORS ─── -->
+        <section class="guide-section" id="errors">
+            <h2>11. Error Handling</h2>
+
+            <h3>on_kicked</h3>
+            <p>You must implement <code>on_kicked</code> in your client script (it's already in CGClient as an RPC stub). Listen to it to handle being kicked:</p>
+            <div class="code-label">CGClient.gd — already included</div>
+            <div class="code-block"><span class="c"># This is already in CGClient.gd — add your handling here</span>
+@rpc(<span class="s">"authority"</span>, <span class="s">"reliable"</span>)
+<span class="f">func</span> <span class="f">on_kicked</span>(reason: String):
+    print(<span class="s">"Kicked: "</span>, reason)
+    <span class="c"># Disconnect and go back to menu</span>
+    multiplayer.multiplayer_peer = null
+    get_tree().change_scene_to_file(<span class="s">"res://scenes/menu.tscn"</span>)</div>
+
+            <h3>Connection lost</h3>
+            <p>Handle server disconnection in your game:</p>
+            <div class="code-label">your_game.gd</div>
+            <div class="code-block">CGClient._peer.connection_closed.connect(<span class="f">_on_disconnected</span>)
+
+<span class="f">func</span> <span class="f">_on_disconnected</span>():
+    <span class="c"># Server dropped the connection</span>
+    show_popup(<span class="s">"Disconnected from server"</span>)
+    get_tree().change_scene_to_file(<span class="s">"res://scenes/menu.tscn"</span>)</div>
+
+            <h3>Common mistakes</h3>
+            <table class="guide-table">
+                <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+                <tr><td>Always get UNKNOWN_GAME</td><td>GAME_ID doesn't match package</td><td>Copy game_id from your package JSON exactly</td></tr>
+                <tr><td>Always get UPDATE_REQUIRED</td><td>VERSION mismatch</td><td>Match VERSION in CGClient to package version field</td></tr>
+                <tr><td>RPC checksum error in console</td><td>on_kicked missing from client</td><td>Add on_kicked RPC stub to CGClient</td></tr>
+                <tr><td>No data received from others</td><td>Not connected to relay_received signal</td><td>Connect the signal in _ready()</td></tr>
+                <tr><td>Data received but position is wrong</td><td>Using delta without merging</td><td>Use _peer_states[id] from CGClient or use snapshot_received</td></tr>
+                <tr><td>send_once data not received by late joiners</td><td>game_type doesn't have once enabled</td><td>Add "once" key to sync in package JSON</td></tr>
+            </table>
+        </section>
+
+        <!-- ─── 12. CHECKLIST ─── -->
+        <section class="guide-section" id="checklist">
+            <h2>12. Pre-Launch Checklist</h2>
+            <p>Go through this before you share your game with players.</p>
+
+            <div class="step-row"><div class="step-badge">1</div><p>CGClient.gd is added as an <strong>Autoload</strong> in Project Settings</p></div>
+            <div class="step-row"><div class="step-badge">2</div><p>GAME_ID in CGClient matches <code>game_id</code> in your package JSON exactly (case sensitive)</p></div>
+            <div class="step-row"><div class="step-badge">3</div><p>VERSION in CGClient matches <code>version</code> in your package JSON exactly</p></div>
+            <div class="step-row"><div class="step-badge">4</div><p>Package JSON has been pushed to the server using the Feeder tool</p></div>
+            <div class="step-row"><div class="step-badge">5</div><p>join_accepted and join_rejected signals are connected and handled</p></div>
+            <div class="step-row"><div class="step-badge">6</div><p>peer_joined and peer_left signals are connected — remote players spawn and despawn</p></div>
+            <div class="step-row"><div class="step-badge">7</div><p>relay_received signal is connected and all tiers are handled</p></div>
+            <div class="step-row"><div class="step-badge">8</div><p>on_kicked RPC stub is in CGClient with actual handling code</p></div>
+            <div class="step-row"><div class="step-badge">9</div><p>max_peers in package matches your CGRelay subscription peer count</p></div>
+            <div class="step-row"><div class="step-badge">10</div><p>Tested with at least 2 devices or instances simultaneously</p></div>
+
+            <div class="callout success">
+                <strong>You're ready to launch.</strong>
+                If all 10 boxes are checked and two instances can connect and exchange data, your integration is complete.
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- CTA -->
+<section style="background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%); padding: 4rem 0; text-align: center;">
+    <div class="container">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Ready to get your Game ID?</h2>
+        <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem;">Contact to get set up with CGRelay. Rs. 50/month base + Rs. 10 per peer.</p>
+        <a href="contact.html" style="background:white; color:var(--primary); padding: 1rem 2.5rem; border-radius:5px; text-decoration:none; font-weight:bold;">Get Started →</a>
+        <a href="cgrelay.html" style="margin-left: 1.5rem; color: rgba(255,255,255,0.9);">Back to CGRelay →</a>
+    </div>
+</section>
+
+<script src="js/load-components.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
