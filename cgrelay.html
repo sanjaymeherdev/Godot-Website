@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="CGRelay - Godot Multiplayer Server for Casual Games">
+    <meta property="og:description" content="Add multiplayer to your Godot game in one afternoon. No server knowledge needed. Rs. 50/month + Rs. 10 per peer.">
+    <meta property="og:url" content="https://sanjayaidev.netlify.app/cgrelay.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>CGRelay - Godot Multiplayer Relay Server</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ── Hero ── */
+        .relay-hero {
+            padding: 150px 0 100px;
+            text-align: center;
+            background: radial-gradient(circle at center, #1b2d69 0%, var(--dark) 70%);
+        }
+        .relay-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .relay-hero p {
+            font-size: 1.3rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── How it works ── */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .step-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .step-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        .step-card h3 { color: var(--accent); margin-bottom: 0.5rem; }
+        .step-card p  { color: #ccc; font-size: 0.95rem; }
+
+        /* ── Features ── */
+        .feature-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        .feature-item {
+            background: rgba(255,255,255,0.04);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .feature-item h4 { color: var(--accent); margin-bottom: 0.5rem; }
+        .feature-item p  { color: #ccc; font-size: 0.9rem; }
+
+        /* ── Pricing ── */
+        .pricing-section {
+            padding: 100px 0;
+            background: var(--secondary);
+            text-align: center;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 3rem auto;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 2.5rem;
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .pricing-card.featured {
+            border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(255,107,53,0.2);
+            position: relative;
+        }
+        .pricing-card.featured::before {
+            content: "MOST POPULAR";
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .pricing-card h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .pricing-price {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 1rem 0 0.3rem;
+        }
+        .pricing-price small {
+            font-size: 1rem;
+            color: #ccc;
+            font-weight: normal;
+        }
+        .pricing-sub { color: #aaa; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .pricing-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        .pricing-list li {
+            padding: 0.4rem 0;
+            padding-left: 1.6rem;
+            position: relative;
+            color: #ddd;
+            font-size: 0.95rem;
+        }
+        .pricing-list li::before { content: "✓"; color: var(--success); position: absolute; left: 0; }
+
+        /* ── Bundles ── */
+        .bundle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .bundle-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid rgba(0,217,255,0.2);
+            transition: all 0.3s;
+        }
+        .bundle-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,217,255,0.1);
+        }
+        .bundle-card h3 { color: var(--accent); margin-bottom: 0.5rem; }
+        .bundle-card p  { color: #ccc; font-size: 0.9rem; margin-bottom: 1rem; }
+        .bundle-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        .bundle-tag {
+            background: rgba(0,217,255,0.15);
+            color: var(--accent);
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        /* ── FAQ ── */
+        .faq-section { padding: 100px 0; background: var(--dark); }
+        .faq-list { max-width: 800px; margin: 3rem auto; }
+        .faq-item { margin-bottom: 1rem; }
+        .faq-question {
+            background: rgba(255,255,255,0.05);
+            padding: 1.2rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: border-color 0.3s;
+        }
+        .faq-question:hover { border-color: var(--primary); }
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s;
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+        .faq-answer.active { max-height: 300px; padding: 1rem 1.5rem; }
+
+        /* ── CTA banner ── */
+        .cta-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            padding: 4rem 0;
+            text-align: center;
+        }
+        .cta-banner h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .cta-banner p  { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; }
+        .cta-button-light {
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .cta-button-light:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
+        /* ── Code block ── */
+        .code-block {
+            background: #111;
+            border: 1px solid rgba(0,217,255,0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+            overflow-x: auto;
+            margin: 1rem 0;
+            text-align: left;
+        }
+        .code-comment { color: #666; }
+
+        /* ── Proof tags ── */
+        .proof-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .proof-tag {
+            background: rgba(40,167,69,0.15);
+            border: 1px solid rgba(40,167,69,0.4);
+            color: var(--success);
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .relay-hero h1 { font-size: 2.2rem; }
+            .pricing-grid   { grid-template-columns: 1fr; }
+            .bundle-grid    { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header loaded by components -->
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="relay-hero">
+    <div class="container">
+        <span class="hero-badge">🎮 Built for Godot 4 Casual Games</span>
+        <h1>Add Multiplayer to Your<br>Godot Game This Afternoon</h1>
+        <p>No server knowledge. No infrastructure. No headache.<br>
+           One script drop-in. Your friends are online in minutes.</p>
+
+        <div class="proof-row">
+            <span class="proof-tag">✓ Game-agnostic relay</span>
+            <span class="proof-tag">✓ Always online — never spins down</span>
+            <span class="proof-tag">✓ Godot 4.x ready</span>
+            <span class="proof-tag">✓ Indian developer</span>
+            <span class="proof-tag">✓ Rs. 50/month base</span>
+        </div>
+
+        <div style="margin-top: 2.5rem;">
+            <a href="#pricing" class="cta-button">See Pricing →</a>
+            <a href="#how" style="margin-left: 1.5rem; color: var(--light);">How it works ↓</a>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PROBLEM
+══════════════════════════════════════════ -->
+<section class="features" style="padding: 80px 0;">
+    <div class="container">
+        <h2 class="section-title">Multiplayer Shouldn't Take Weeks</h2>
+        <p style="text-align:center; color:#ccc; max-width:700px; margin: 0 auto 3rem;">
+            You built a fun game. Your friends want to play together. But setting up a multiplayer server means
+            learning Linux, networking, WebSockets, relay logic, and praying it stays online.
+            <strong style="color:var(--primary)">CGRelay handles all of that.</strong>
+        </p>
+
+        <div class="feature-row">
+            <div class="feature-item">
+                <h4>🔌 Drop-in Client Script</h4>
+                <p>Get one GDScript file. Set your Game ID. Call <code style="color:var(--accent)">join()</code>. That's it — you're connected to the relay.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🌐 Always Online</h4>
+                <p>Server never spins down. Self-pinging keeps it alive 24/7 on Render's infrastructure.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🎮 Built for Casual Games</h4>
+                <p>Turn-based, party games, simple co-op. Low-frequency sync by design. Perfect fit for casual multiplayer.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🛡️ Zone & Game Isolation</h4>
+                <p>Each game ID is fully isolated. Your players only see your game's traffic. No cross-game bleed.</p>
+            </div>
+            <div class="feature-item">
+                <h4>📦 Package-based Setup</h4>
+                <p>Register your game with a simple JSON package. Update it live without restarting the server.</p>
+            </div>
+            <div class="feature-item">
+                <h4>🔒 Kick, Ban, Maintenance</h4>
+                <p>Full admin controls. Kick players, ban users, toggle maintenance mode — all from the feeder dashboard.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════ -->
+<section class="curriculum" id="how">
+    <div class="container">
+        <h2 class="section-title">⚡ Up in 4 Steps</h2>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Buy a Slot</h3>
+                <p>Pick your peer count. Pay once per month. Get your Game ID and server URL.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Drop in the Script</h3>
+                <p>Add <code style="color:var(--accent)">CGClient.gd</code> to your Godot project. Set your Game ID. Done.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Call join()</h3>
+                <p>One function call connects your player to the relay and announces them to all peers in your game.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>Send & Receive</h3>
+                <p>Use <code style="color:var(--accent)">send_realtime()</code>, <code style="color:var(--accent)">send_once()</code>, or <code style="color:var(--accent)">send_on_change()</code> to sync your game state.</p>
+            </div>
+        </div>
+
+        <div style="max-width: 700px; margin: 3rem auto 0;">
+            <p style="color:#aaa; margin-bottom: 0.5rem; font-size: 0.85rem;">Your entire multiplayer connection — 6 lines:</p>
+            <div class="code-block">
+<span class="code-comment"># In your autoload or player script</span>
+var client = CGClient.new()
+
+<span class="code-comment"># Connect to the relay</span>
+client.join("wss://godotgameserver.onrender.com")
+
+<span class="code-comment"># Send position every frame</span>
+client.send_realtime({"pos": position, "rot": rotation})
+
+<span class="code-comment"># Receive from others</span>
+client.relay_received.connect(_on_peer_data)
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SYNC TIERS
+══════════════════════════════════════════ -->
+<section class="features" style="padding: 80px 0;">
+    <div class="container">
+        <h2 class="section-title">🔄 Three Sync Modes</h2>
+        <p style="text-align:center; color:#ccc; margin-bottom: 3rem;">Pick the right sync mode for each piece of your game state</p>
+
+        <div class="feature-row">
+            <div class="feature-item" style="border-left-color: var(--primary);">
+                <h4 style="color:var(--primary)">Realtime</h4>
+                <p>High-frequency updates. Position, rotation, animation state. Delta-compressed — only changed values are sent. Built-in frame rate throttling.</p>
+                <code style="color:var(--accent); font-size:0.85rem;">send_realtime({"pos": position})</code>
+            </div>
+            <div class="feature-item" style="border-left-color: var(--success);">
+                <h4 style="color:var(--success)">On Change</h4>
+                <p>Sent only when something changes. Health, ammo, score, game state. Efficient for values that rarely update.</p>
+                <code style="color:var(--accent); font-size:0.85rem;">send_on_change({"hp": health})</code>
+            </div>
+            <div class="feature-item" style="border-left-color: var(--accent);">
+                <h4>Once</h4>
+                <p>Sent once, stored on the server. Late joiners automatically receive it. Perfect for map pickups, spawn points, game setup.</p>
+                <code style="color:var(--accent); font-size:0.85rem;">send_once({"spawns": spawn_list})</code>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PRICING
+══════════════════════════════════════════ -->
+<section class="pricing-section" id="pricing">
+    <div class="container">
+        <h2 class="section-title">💰 Simple Pricing</h2>
+        <p style="color:#ccc; margin-bottom: 1rem;">Pay for what you use. Scale with your players.</p>
+        <p style="color: var(--accent); font-size: 1.1rem; font-weight: bold;">Rs. 50 base + Rs. 10 per peer / month</p>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="pricing-price">Rs. 100 <small>/mo</small></div>
+                <div class="pricing-sub">You + 5 friends</div>
+                <ul class="pricing-list">
+                    <li>6 concurrent peers</li>
+                    <li>1 Game ID</li>
+                    <li>All sync modes</li>
+                    <li>CGClient.gd included</li>
+                    <li>Always online server</li>
+                </ul>
+                <a href="contact.html" class="cta-button full-width">Get Started</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <h3>Small Group</h3>
+                <div class="pricing-price">Rs. 200 <small>/mo</small></div>
+                <div class="pricing-sub">Up to 16 players</div>
+                <ul class="pricing-list">
+                    <li>16 concurrent peers</li>
+                    <li>1 Game ID</li>
+                    <li>All sync modes</li>
+                    <li>Zone support</li>
+                    <li>CGClient.gd included</li>
+                    <li>Admin kick & ban</li>
+                    <li>Always online server</li>
+                </ul>
+                <a href="contact.html" class="cta-button full-width">Get Started</a>
+            </div>
+
+            <div class="pricing-card">
+                <h3>Custom</h3>
+                <div class="pricing-price">Rs. 50 <small>+ Rs.10/peer</small></div>
+                <div class="pricing-sub">Any peer count you need</div>
+                <ul class="pricing-list">
+                    <li>You choose peer count</li>
+                    <li>1 Game ID</li>
+                    <li>All sync modes</li>
+                    <li>Zone support</li>
+                    <li>CGClient.gd included</li>
+                    <li>Admin controls</li>
+                    <li>Always online server</li>
+                </ul>
+                <a href="contact.html" class="cta-button full-width">Contact Me</a>
+            </div>
+        </div>
+
+        <p style="color:#aaa; font-size: 0.9rem; margin-top: 1rem;">
+            Example: 10 peers = Rs. 150/mo &nbsp;|&nbsp; 20 peers = Rs. 250/mo &nbsp;|&nbsp; 50 peers = Rs. 550/mo
+        </p>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SCRIPT BUNDLES
+══════════════════════════════════════════ -->
+<section class="curriculum" style="padding: 80px 0;">
+    <div class="container">
+        <h2 class="section-title">📦 Script Bundles</h2>
+        <p style="text-align:center; color:#ccc; max-width:650px; margin: 0 auto 3rem;">
+            CGRelay handles the relay. These bundles handle your game logic —
+            RPC calls, sync, and game-specific multiplayer systems, all pre-built for CGRelay.
+        </p>
+
+        <div class="bundle-grid">
+            <div class="bundle-card">
+                <span class="bundle-tag">BUNDLE</span>
+                <h3>Basic Sync Bundle</h3>
+                <p>Position, rotation, animation state synced out of the box. Plug in and play.</p>
+                <div class="bundle-price">Rs. 199 <span style="font-size:0.9rem; color:#aaa;">one-time</span></div>
+                <a href="contact.html" class="cta-button full-width">Buy Bundle</a>
+            </div>
+
+            <div class="bundle-card">
+                <span class="bundle-tag">BUNDLE</span>
+                <h3>Party Game Bundle</h3>
+                <p>Lobby system, ready-up screen, turn manager, score sync. Drop into any party game.</p>
+                <div class="bundle-price">Rs. 299 <span style="font-size:0.9rem; color:#aaa;">one-time</span></div>
+                <a href="contact.html" class="cta-button full-width">Buy Bundle</a>
+            </div>
+
+            <div class="bundle-card">
+                <span class="bundle-tag">COMING SOON</span>
+                <h3>FPS Bundle</h3>
+                <p>Shooting sync, health, respawn, kill feed — all wired to CGRelay's realtime tier.</p>
+                <div class="bundle-price">Rs. 499 <span style="font-size:0.9rem; color:#aaa;">one-time</span></div>
+                <a href="contact.html" class="cta-button full-width" style="opacity:0.6; pointer-events:none;">Coming Soon</a>
+            </div>
+
+            <div class="bundle-card">
+                <span class="bundle-tag">COMING SOON</span>
+                <h3>Card / Board Game Bundle</h3>
+                <p>Turn-based game state sync, hand management, deck sync using the Once tier.</p>
+                <div class="bundle-price">Rs. 299 <span style="font-size:0.9rem; color:#aaa;">one-time</span></div>
+                <a href="contact.html" class="cta-button full-width" style="opacity:0.6; pointer-events:none;">Coming Soon</a>
+            </div>
+        </div>
+
+        <p style="text-align:center; color:#aaa; margin-top: 1rem; font-size:0.9rem;">
+            Bundles are built specifically for CGRelay. They work out of the box with your Game ID.
+        </p>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FAQ
+══════════════════════════════════════════ -->
+<section class="faq-section">
+    <div class="container">
+        <h2 class="section-title">❓ Common Questions</h2>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Will the server go offline while my friends are playing?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    No. The server self-pings every 4 minutes so Render never spins it down. It stays online 24/7.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Do I need to know anything about servers or networking?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    No. You get one GDScript file. Set your Game ID, call join(), and start sending data. That's the entire setup.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is this suitable for competitive or FPS games?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    CGRelay is designed for casual games — party games, turn-based, simple co-op. For competitive FPS with sub-100ms authority you'd need a dedicated server. If your game is casual and fun among friends, this is perfect.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What happens if two of my players are far apart — do they still sync?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    Yes. CGRelay supports proximity filtering — you can set a radius so only nearby players receive each other's updates. Or disable it and everyone syncs with everyone.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I have multiple games on the same relay?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    Each game gets its own Game ID and is fully isolated from others. You pay per game ID + peer count. Multiple games are supported.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How do I pay?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    Contact me via the contact page or WhatsApp. We'll set up your Game ID and payment monthly. UPI, bank transfer accepted.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What Godot version does this support?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    Godot 4.x. Tested on 4.4.1. The client script uses standard WebSocketMultiplayerPeer which is built into Godot 4.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FINAL CTA
+══════════════════════════════════════════ -->
+<section class="cta-banner">
+    <div class="container">
+        <h2>Your Friends Are Waiting</h2>
+        <p>Rs. 100/month. 6 players. Your game. Online today.</p>
+        <a href="contact.html" class="cta-button-light">Get Your Game ID →</a>
+        <div style="margin-top: 1.5rem;">
+            <a href="cgstore.html" style="color: rgba(255,255,255,0.8); margin-right: 1.5rem;">Browse Store</a>
+            <a href="contact.html" style="color: rgba(255,255,255,0.8);">Contact Me</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer loaded by components -->
+
+<script src="js/load-components.js"></script>
+<script src="js/auth.js"></script>
+<script>
+    function toggleFaq(el) {
+        const answer = el.nextElementSibling;
+        const icon   = el.querySelector('span:last-child');
+        answer.classList.toggle('active');
+        icon.textContent = answer.classList.contains('active') ? '−' : '+';
+    }
+</script>
+</body>
+</html>
