@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta property="og:title" content="CGLive - Mobile Live Streaming App for Android">
+    <meta property="og:description" content="Multi-platform live streaming app for Android. Stream to YouTube, Facebook, and Twitch simultaneously with camera PiP, GIF overlays, and real-time dashboard.">
+    <meta property="og:image" content="https://sanjayaidev.netlify.app/images/og-cglive.jpg">
+    <meta property="og:url" content="https://sanjayaidev.netlify.app/cglive-about.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGLive - Android Live Streaming App | SanjayAIDev</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        /* CGLive specific styles */
+        .app-hero {
+            background: linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(0,0,0,0.9) 100%);
+            padding: 4rem 0;
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .app-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .platform-icons {
+            display: flex;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .platform-icon {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .platform-icon.youtube { color: #FF0000; }
+        .platform-icon.facebook { color: #1877F2; }
+        .platform-icon.twitch { color: #9146FF; }
+        .platform-icon.rtmp { color: var(--accent); }
+        
+        .feature-grid-detailed {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-detailed-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        
+        .feature-detailed-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .tech-specs {
+            background: rgba(0,217,255,0.05);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        
+        .spec-tag {
+            background: rgba(0,217,255,0.1);
+            color: var(--accent);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0.3rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0,217,255,0.3);
+        }
+        
+        .permission-group {
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .permission-title {
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .permission-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.8rem;
+        }
+        
+        .permission-item {
+            color: #ccc;
+            font-size: 0.9rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .permission-item:before {
+            content: "✓";
+            color: var(--success);
+            position: absolute;
+            left: 0;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #e55a2b 100%);
+            padding: 4rem 0;
+            text-align: center;
+            color: white;
+            border-radius: 20px;
+            margin: 3rem 0;
+        }
+        
+        .version-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+        
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .screenshot-placeholder {
+            background: rgba(255,255,255,0.05);
+            aspect-ratio: 9/16;
+            border-radius: 15px;
+            border: 2px solid rgba(255,107,53,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1.5rem 0;
+        }
+        
+        .faq-question {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .faq-answer {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .app-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .platform-icons {
+                justify-content: center;
+            }
+            
+            .feature-grid-detailed {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded by components -->
+    
+    <!-- App Hero Section -->
+    <section class="app-hero">
+        <div class="container">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <span class="app-badge">Version 1.0.0</span>
+                <span class="app-badge" style="background: var(--accent); color: #000;">Android 8.0+</span>
+                <span class="app-badge" style="background: var(--success);">Free</span>
+            </div>
+            
+            <h1>CGLive <span style="color: var(--primary);">Mobile Live Streaming</span></h1>
+            <p style="font-size: 1.2rem; max-width: 800px;">Professional live streaming app for Android with multi-platform support, picture-in-picture camera, and real-time engagement tracking.</p>
+            
+            <div class="platform-icons">
+                <div class="platform-icon youtube">
+                    <span style="font-size: 2rem;">▶</span>
+                    <span>YouTube</span>
+                </div>
+                <div class="platform-icon facebook">
+                    <span style="font-size: 2rem;">f</span>
+                    <span>Facebook</span>
+                </div>
+                <div class="platform-icon twitch">
+                    <span style="font-size: 2rem;">⚡</span>
+                    <span>Twitch</span>
+                </div>
+                <div class="platform-icon rtmp">
+                    <span style="font-size: 2rem;">🔴</span>
+                    <span>RTMP</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <a href="https://github.com/sanjaymeherdev/Godot-Website/releases/download/V1.0.0/CGLive-v1.0.0.apk" class="cta-button" style="font-size: 1.2rem; padding: 1rem 3rem;">📲 Download APK (32 MB)</a>
+                <p style="margin-top: 1rem; color: #ccc;">Direct download • No registration required</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Quick Overview -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">🎯 What is CGLive?</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto; color: #ccc; font-size: 1.1rem;">CGLive is a feature-rich Android live streaming application that enables seamless multi-platform broadcasting directly from your mobile device. Stream simultaneously to YouTube, Facebook, and Twitch with a single tap.</p>
+            
+            <div class="tech-specs">
+                <h3 style="color: var(--accent); margin-bottom: 1rem;">⚡ Powered By</h3>
+                <span class="spec-tag">RootEncoder (pedroSG94)</span>
+                <span class="spec-tag">MediaProjection API</span>
+                <span class="spec-tag">OpenGL ES</span>
+                <span class="spec-tag">RTMP Protocol</span>
+                <span class="spec-tag">WebSocket</span>
+                <span class="spec-tag">Hardware Encoding</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Key Features -->
+    <section class="features" style="background: rgba(0,0,0,0.3);">
+        <div class="container">
+            <h2 class="section-title">✨ Key Features</h2>
+            
+            <div class="feature-grid-detailed">
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">🎮</div>
+                    <div class="feature-title">Game Screen Capture</div>
+                    <p style="color: #ccc;">Stream your gameplay using Android's MediaProjection API with hardware-accelerated encoding. Capture smooth 60fps gameplay with minimal performance impact.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">📷</div>
+                    <div class="feature-title">Camera Picture-in-Picture</div>
+                    <p style="color: #ccc;">Floating camera overlay that stays on top of your gameplay. Orientation-aware rendering with adjustable size and position.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">🎞️</div>
+                    <div class="feature-title">GIF Overlay Support</div>
+                    <p style="color: #ccc;">Add animated GIF banners directly in the GL pipeline. Perfect for logos, alerts, or donation goals. Composite seamlessly with your stream.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">🖼️</div>
+                    <div class="feature-title">Stream Scenes</div>
+                    <p style="color: #ccc;">Professional looking Starting, BRB (Be Right Back), and Ending scenes. Support for images, videos, and animated GIFs.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Live Dashboard</div>
+                    <p style="color: #ccc;">Real-time chat, viewer count, likes, donations, and subscriptions from YouTube, Twitch, and Facebook - all in one place.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">🎚️</div>
+                    <div class="feature-title">Floating Stream Controls</div>
+                    <p style="color: #ccc;">Control your stream from anywhere with a floating bubble overlay. Toggle mic, camera, adjust bitrate, or activate BRB mode without leaving your app.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">🔴</div>
+                    <div class="feature-title">Multi-destination RTMP</div>
+                    <p style="color: #ccc;">Stream to up to 4 platforms simultaneously. Custom RTMP URLs supported for custom streaming servers.</p>
+                </div>
+                
+                <div class="feature-detailed-card">
+                    <div class="feature-icon">💬</div>
+                    <div class="feature-title">StreamElements Integration</div>
+                    <p style="color: #ccc;">WebSocket connection for StreamElements alerts. Get real-time notifications for follows, subs, tips, and more.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- App Screenshots (Placeholders) -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">📱 App Preview</h2>
+            
+            <div class="screenshots-grid">
+                <div class="screenshot-placeholder">Main Dashboard</div>
+                <div class="screenshot-placeholder">Stream Setup</div>
+                <div class="screenshot-placeholder">Camera PiP</div>
+                <div class="screenshot-placeholder">GIF Overlay</div>
+                <div class="screenshot-placeholder">Live Chat</div>
+                <div class="screenshot-placeholder">Floating Controls</div>
+            </div>
+            
+            <p style="text-align: center; color: #ccc; margin-top: 1rem;">*Screenshots will be added soon</p>
+        </div>
+    </section>
+    
+    <!-- Technical Details & Permissions -->
+    <section class="features" style="background: rgba(0,0,0,0.3);">
+        <div class="container">
+            <h2 class="section-title">🔧 Technical Details</h2>
+            
+            <div class="permission-group">
+                <div class="permission-title">📡 Network & Connectivity</div>
+                <div class="permission-list">
+                    <div class="permission-item">Internet access for streaming</div>
+                    <div class="permission-item">Network state monitoring</div>
+                    <div class="permission-item">RTMP connections to platforms</div>
+                </div>
+            </div>
+            
+            <div class="permission-group">
+                <div class="permission-title">🎥 Camera & Audio</div>
+                <div class="permission-list">
+                    <div class="permission-item">Camera access for PiP overlay</div>
+                    <div class="permission-item">Microphone for commentary</div>
+                    <div class="permission-item">Audio output capture (game sounds)</div>
+                    <div class="permission-item">Audio settings modification</div>
+                </div>
+            </div>
+            
+            <div class="permission-group">
+                <div class="permission-title">💾 Storage</div>
+                <div class="permission-list">
+                    <div class="permission-item">Read images for overlays</div>
+                    <div class="permission-item">Read videos for scenes</div>
+                    <div class="permission-item">Read GIF files for banners</div>
+                </div>
+            </div>
+            
+            <div class="permission-group">
+                <div class="permission-title">⚙️ System</div>
+                <div class="permission-list">
+                    <div class="permission-item">Screen capture (MediaProjection)</div>
+                    <div class="permission-item">Floating overlay window</div>
+                    <div class="permission-item">Foreground service (camera/mic/screen)</div>
+                    <div class="permission-item">Wake lock to prevent sleep</div>
+                    <div class="permission-item">Post notifications</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <h3 style="color: var(--accent); margin-bottom: 1rem;">📋 Requirements</h3>
+                <ul style="color: #ccc; list-style: none; padding: 0;">
+                    <li style="margin: 0.5rem 0;">✓ Android 8.0 (Oreo) or higher</li>
+                    <li style="margin: 0.5rem 0;">✓ Minimum 2GB RAM recommended</li>
+                    <li style="margin: 0.5rem 0;">✓ Stable internet connection (upload speed: 1-5 Mbps depending on quality)</li>
+                    <li style="margin: 0.5rem 0;">✓ Stream keys from YouTube/Facebook/Twitch (free to obtain)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">Is CGLive completely free?</div>
+                <div class="faq-answer">Yes, CGLive is completely free to use with no hidden costs or in-app purchases. You only need your own stream keys from YouTube, Facebook, or Twitch (which are free to obtain).</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I stream to multiple platforms at once?</div>
+                <div class="faq-answer">Absolutely! CGLive supports simultaneous streaming to YouTube, Facebook, Twitch, and custom RTMP servers. You can stream to up to 4 platforms at the same time.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Does it affect game performance?</div>
+                <div class="faq-answer">CGLive uses hardware-accelerated encoding and is optimized for minimal performance impact. On modern devices, you can expect 60fps streaming with minimal battery drain.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I use my own overlays?</div>
+                <div class="faq-answer">Yes! You can add your own images, GIFs, and videos as overlays. The app supports custom BRB screens, starting soon scenes, and animated GIF banners.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Do I need a powerful phone?</div>
+                <div class="faq-answer">CGLive runs on any Android 8.0+ device, but for smooth 1080p60 streaming, we recommend devices with at least 4GB RAM and modern processors (Snapdragon 700 series or equivalent).</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How do I get stream keys?</div>
+                <div class="faq-answer">Each platform provides stream keys in your creator dashboard. YouTube: Creator Studio → Go Live → Stream Key. Facebook: Creator Studio → Live Dashboard. Twitch: Creator Dashboard → Stream Key.</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Download Section -->
+    <section class="download-section">
+        <div class="container">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Start Streaming Today</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Download CGLive and go live in minutes</p>
+            
+            <div class="version-badge">Version 1.0.0 • 32 MB • Updated March 2025</div>
+            
+            <div style="margin: 2rem 0;">
+                <a href="https://github.com/sanjaymeherdev/Godot-Website/releases/download/V1.0.0/CGLive-v1.0.0.apk" class="cta-button-light" style="font-size: 1.5rem; padding: 1rem 4rem;">📲 Download APK</a>
+            </div>
+            
+            <p style="color: rgba(255,255,255,0.9);">Also available on: 
+                <a href="#" style="color: white; text-decoration: underline;">GitHub Releases</a>
+            </p>
+            
+            <div style="margin-top: 2rem; display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                <span>✅ No Ads</span>
+                <span>✅ No Tracking</span>
+                <span>✅ Open Source Friendly</span>
+                <span>✅ Regular Updates</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Related Links -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">🔗 Important Links</h2>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="cglive-privacy.html" class="cta-button" style="background: transparent; border: 2px solid var(--primary);">Privacy Policy</a>
+                <a href="cglive-terms.html" class="cta-button" style="background: transparent; border: 2px solid var(--primary);">Terms of Service</a>
+                <a href="https://github.com/sanjaymeherdev/CGLive" class="cta-button" style="background: transparent; border: 2px solid var(--accent);">GitHub Repository</a>
+                <a href="contact.html" class="cta-button" style="background: transparent; border: 2px solid var(--accent);">Support</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer will be loaded by components -->
+    
+    <!-- Chat Widget -->
+    <div class="chat-widget"></div>
+    
+    <script src="js/load-components.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+</body>
+</html>
