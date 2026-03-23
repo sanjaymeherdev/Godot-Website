@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CGRelay Free Trial — Try Multiplayer Today</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --green: #22c55e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Nav (matches site) ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent);
+    color: #000 !important;
+    padding: 0.45rem 1.1rem;
+    border-radius: 4px;
+    font-weight: 700 !important;
+  }
+
+  /* ── Grid bg ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  main { position: relative; z-index: 1; }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding: 5rem 2rem 3.5rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 0.3rem 0.9rem;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.2rem;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Trial card ── */
+  .trial-card {
+    max-width: 680px;
+    margin: 2rem auto 4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .trial-card-header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .trial-card-header h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .free-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--green);
+    color: #000;
+    padding: 0.3rem 0.8rem;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── What's included ── */
+  .includes {
+    padding: 1.8rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .includes h3 {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 1.2rem;
+  }
+  .includes ul { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+  .includes li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .includes li::before {
+    content: '→';
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .includes li span { color: var(--muted); font-size: 0.85rem; display: block; margin-top: 0.15rem; }
+
+  /* ── Limits ── */
+  .limits {
+    padding: 1.5rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(124,58,237,0.05);
+  }
+  .limits h3 {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 1rem;
+  }
+  .limits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  .limit-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .limit-item .val {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .limit-item .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  /* ── Download ── */
+  .download-section {
+    padding: 2rem 2.5rem;
+  }
+  .download-section h3 {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 1.2rem;
+  }
+  .download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--accent);
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-bottom: 1.2rem;
+  }
+  .download-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .download-btn .btn-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .download-note {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 0.9rem 1rem;
+    border-left: 2px solid var(--border);
+  }
+
+  /* ── Guide CTA ── */
+  .guide-cta {
+    max-width: 680px;
+    margin: 0 auto 3rem;
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(0,229,255,0.08));
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 8px;
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .guide-cta-text h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+  }
+  .guide-cta-text p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .guide-btn {
+    display: inline-block;
+    background: var(--accent2);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .guide-btn:hover { opacity: 0.85; }
+
+  /* ── Next steps ── */
+  .next-section {
+    max-width: 680px;
+    margin: 0 auto 4rem;
+  }
+  .next-section h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.2s;
+  }
+  .step:last-child { border-bottom: none; }
+  .step:hover { background: #16161f; }
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .step-body strong { font-size: 0.95rem; display: block; margin-bottom: 0.2rem; }
+  .step-body p { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
+  .step-body code {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    background: rgba(0,229,255,0.08);
+    color: var(--accent);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+  }
+
+  /* ── Upgrade nudge ── */
+  .upgrade-nudge {
+    max-width: 680px;
+    margin: 0 auto 5rem;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+  .upgrade-nudge p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+  }
+  .upgrade-nudge a {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.7rem 1.6rem;
+    border-radius: 5px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .upgrade-nudge a:hover { background: var(--accent); color: #000; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  @media(max-width:560px){
+    .trial-card-header, .includes, .limits, .download-section { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .guide-cta { padding: 1.5rem; }
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="/">GODOT ASSETS</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/cgstore">Store</a>
+    <a href="/freegodotassets">Free Assets</a>
+    <a href="/contact">Contact</a>
+    <a href="/cgstore" class="nav-cta">Go To Store</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge">Free Trial</div>
+    <h1>Try <span>CGRelay</span><br/>Before You Buy</h1>
+    <p>Download a working Godot 4 project wired to the live relay server.<br/>
+    Run it with friends, see the sync in action — no payment, no Game ID needed.</p>
+  </section>
+
+  <!-- Trial Card -->
+  <div class="trial-card">
+    <div class="trial-card-header">
+      <h2>CGRelay Trial Project</h2>
+      <span class="free-badge">FREE</span>
+    </div>
+
+    <div class="includes">
+      <h3>What's Inside</h3>
+      <ul>
+        <li>
+          <div>
+            <strong>CGClient.gd</strong> — the full relay client script
+            <span>Pre-configured with the trial Game ID. Drop it into any project.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>2D multiplayer demo scene</strong>
+            <span>Players spawn at a radius, move with WASD, sync position in realtime.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>match.gd + match_player.gd</strong>
+            <span>Clean lobby + player scripts you can study and adapt directly.</span>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Inline comments throughout</strong>
+            <span>Every signal and send call is explained — learn while you play.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="limits">
+      <h3>Trial Limits</h3>
+      <div class="limits-grid">
+        <div class="limit-item">
+          <span class="val">4</span>
+          <span class="label">Max concurrent peers</span>
+        </div>
+        <div class="limit-item">
+          <span class="val">shared</span>
+          <span class="label">Game ID (public zone)</span>
+        </div>
+        <div class="limit-item">
+          <span class="val">no</span>
+          <span class="label">Admin / kick controls</span>
+        </div>
+        <div class="limit-item">
+          <span class="val">∞</span>
+          <span class="label">No time limit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="download-section">
+      <h3>Download</h3>
+      <!-- REPLACE href WITH YOUR ACTUAL DOWNLOAD LINK -->
+      <a class="download-btn" href="YOUR_DOWNLOAD_LINK_HERE" download>
+        <span>⬇ CGRelay Trial Project — Godot 4</span>
+        <span class="btn-right">.zip · Godot 4.x</span>
+      </a>
+      <p class="download-note">
+        Open the project in Godot 4.4+, hit Play, and share it with a friend.
+        Both of you will appear on the same map in seconds.
+        The trial Game ID is pre-set — nothing to configure.
+      </p>
+    </div>
+  </div>
+
+  <!-- Guide CTA -->
+  <div class="guide-cta">
+    <div class="guide-cta-text">
+      <h3>📖 Read the Full Integration Guide</h3>
+      <p>Step-by-step walkthrough — from a blank Godot project to live multiplayer.
+      Covers all three sync modes, zone setup, and common patterns.</p>
+    </div>
+    <a class="guide-btn" href="/cgrelay-guide">View Guide →</a>
+  </div>
+
+  <!-- Next steps -->
+  <div class="next-section">
+    <h2>After the trial — what next</h2>
+    <div class="steps-list">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div class="step-body">
+          <strong>Swap the Game ID</strong>
+          <p>In <code>CGClient.gd</code>, change <code>GAME_ID</code> to your own. That's your private zone — no strangers.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div class="step-body">
+          <strong>Pick a plan</strong>
+          <p>Rs. 100/mo for 6 peers. Rs. 200/mo for 16. Or go custom — Rs. 50 + Rs. 10 per peer.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div class="step-body">
+          <strong>Contact to activate</strong>
+          <p>Message on WhatsApp or email. You'll get your Game ID and server URL same day.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <div class="step-body">
+          <strong>Plug into your game</strong>
+          <p>The same <code>CGClient.gd</code> from the trial works in your real project. No rewrite needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrade nudge -->
+  <div class="upgrade-nudge">
+    <p>Ready to go live with your own Game ID and private zone?<br/>
+    Plans start at <strong style="color:var(--text)">Rs. 100/month</strong> — you're live the same day.</p>
+    <a href="/cgrelay#pricing">See Pricing →</a>
+  </div>
+
+</main>
+
+<footer>
+  <p style="margin-bottom:0.75rem">
+    <a href="/legal/privacy-policy">Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="/legal/terms-of-service">Terms of Service</a> &nbsp;·&nbsp;
+    <a href="/legal/refund">Refund Policy</a> &nbsp;·&nbsp;
+    <a href="/contact">Contact</a>
+  </p>
+  <p>© 2024 Godot Game Assets Marketplace. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
