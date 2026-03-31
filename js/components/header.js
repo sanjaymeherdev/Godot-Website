@@ -7,7 +7,7 @@ const HeaderComponent = {
             <header>
                 <div class="container">
                     <nav>
-                        <div class="logo">SanjayAIDev</div>
+                        <div class="logo">SanjayMeherDev</div>
                         
                         <!-- Desktop Navigation -->
                         <div class="nav-links">
