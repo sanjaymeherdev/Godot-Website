@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GodotVisualCoder — Visual GDScript Generator for Godot 4</title>
+<meta name="description" content="Generate clean GDScript 4 code visually. Free and Pro generators for movement, combat, UI, inventory and more.">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+
+/* ── HEADER ── */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(14,15,17,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:32px;}
+.hdr-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-icon{width:32px;height:32px;border-radius:8px;object-fit:contain;}
+.hdr-icon-svg{width:32px;height:32px;border-radius:8px;background:var(--green-dim);border:1px solid var(--green2);display:flex;align-items:center;justify-content:center;}
+.hdr-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.hdr-nav{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-link{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:color 0.15s,background 0.15s;}
+.nav-link:hover{color:var(--text);background:var(--bg3);}
+.nav-link.active{color:var(--green);}
+.hdr-cta{margin-left:auto;padding:8px 18px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
+.hdr-cta:hover{background:rgba(74,222,128,0.2);}
+.hdr-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hdr-burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;}
+
+/* ── HERO ── */
+.hero{min-height:calc(100vh - 60px);display:flex;align-items:center;padding:80px 24px 64px;max-width:1200px;margin:0 auto;width:100%;gap:64px;}
+.hero-left{flex:1;min-width:0;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;padding:5px 14px;font-size:11px;font-family:var(--mono);color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:28px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;}
+.hero-title{font-size:clamp(36px,5vw,62px);font-weight:800;letter-spacing:-0.03em;line-height:1.06;margin-bottom:20px;}
+.hero-title .accent{color:var(--green);}
+.hero-sub{font-size:clamp(14px,1.5vw,17px);color:var(--text2);line-height:1.7;margin-bottom:40px;max-width:480px;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{padding:13px 26px;background:var(--green-dim);border:1px solid var(--green2);border-radius:12px;color:var(--green);font-size:14px;font-weight:700;letter-spacing:0.03em;text-decoration:none;transition:background 0.15s;white-space:nowrap;}
+.btn-primary:hover{background:rgba(74,222,128,0.2);}
+.btn-outline{padding:13px 26px;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--text2);font-size:14px;font-weight:600;text-decoration:none;transition:all 0.15s;white-space:nowrap;}
+.btn-outline:hover{border-color:var(--green2);color:var(--green);}
+.hero-right{flex:0 0 460px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.hero-mock{width:100%;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.hero-mock p{font-size:11px;color:var(--text3);font-family:var(--mono);text-align:center;}
+.hero-img{width:100%;display:block;}
+
+/* ── STATS ── */
+.stats-bar{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stats-inner{max-width:1200px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:repeat(4,1fr);}
+.stat{padding:0 24px;text-align:center;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-n{font-size:30px;font-weight:800;color:var(--green);letter-spacing:-0.02em;}
+.stat-l{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px;}
+
+/* ── SHARED SECTION ── */
+.sec{padding:80px 24px;}
+.sec-inner{max-width:1200px;margin:0 auto;}
+.sec-ey{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.sec-h{font-size:clamp(22px,3vw,38px);font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;}
+.sec-d{font-size:15px;color:var(--text2);line-height:1.7;max-width:580px;margin-bottom:48px;}
+
+/* ── TIER CARDS ── */
+.tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.tier-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;display:flex;flex-direction:column;gap:20px;position:relative;overflow:hidden;}
+.tier-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0;}
+.tc-free::before{background:var(--green);}
+.tc-pro::before{background:linear-gradient(90deg,var(--blue),var(--purple));}
+.tc-pro{border-color:rgba(96,165,250,0.25);}
+.t-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;width:fit-content;}
+.tb-free{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.tb-pro{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+.t-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;}
+.t-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-top:6px;}
+.t-features{display:flex;flex-direction:column;gap:8px;}
+.t-feat{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);font-family:var(--mono);line-height:1.5;}
+.feat-icon{width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.feat-icon.check{background:var(--green-dim);border:1px solid var(--green2);}
+.feat-icon.lock{background:var(--bg3);border:1px solid var(--border2);}
+.t-feat.locked{color:var(--text3);}
+.t-cta-row{display:flex;gap:10px;margin-top:auto;}
+.t-cta{padding:13px;text-align:center;border-radius:12px;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;transition:background 0.15s;flex:1;}
+.tc-free-btn{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.tc-free-btn:hover{background:rgba(74,222,128,0.2);}
+.tc-pro-btn{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+.tc-pro-btn:hover{background:rgba(96,165,250,0.2);}
+.t-cta-sm{padding:13px 14px;flex:0 0 auto;white-space:nowrap;}
+
+/* ── WHY ── */
+.why-bg{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.why-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;}
+.why-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.why-name{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.why-desc{font-size:12px;color:var(--text2);line-height:1.65;font-family:var(--mono);}
+
+/* ── GALLERY ── */
+.gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.gal-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;aspect-ratio:16/10;position:relative;display:flex;align-items:center;justify-content:center;}
+.gal-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.gal-ph{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text3);font-family:var(--mono);font-size:10px;text-align:center;padding:16px;}
+.gal-label{position:absolute;bottom:0;left:0;right:0;background:rgba(14,15,17,0.92);padding:8px 12px;font-size:11px;font-family:var(--mono);color:var(--text2);}
+.gal-badge{position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:10px;font-size:9px;font-family:var(--mono);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
+.gb-free{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.gb-pro{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+
+/* ── ABOUT ── */
+.about-bg{background:var(--bg2);border-top:1px solid var(--border);}
+.about-inner{max-width:1200px;margin:0 auto;padding:80px 24px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.about-text p{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:14px;}
+.about-text a{color:var(--green);text-decoration:none;font-weight:600;}
+.about-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:16px;}
+.about-card-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;}
+.about-stack{display:flex;flex-direction:column;gap:8px;}
+.a-tag{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:12px;color:var(--text2);}
+.a-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── CTA ── */
+.cta-sec{padding:80px 24px;text-align:center;}
+.cta-box{max-width:560px;margin:0 auto;background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:48px 32px;}
+.cta-box h2{font-size:28px;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;}
+.cta-box p{font-size:14px;color:var(--text2);margin-bottom:28px;line-height:1.6;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+.site-footer{background:#0a0b0d;border-top:1px solid var(--border);margin-top:auto;}
+.ftr-inner{max-width:1200px;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:1fr auto;gap:48px;}
+.ftr-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:12px;}
+.ftr-logo span{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.ftr-tag{font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;margin-bottom:12px;}
+.ftr-dev{font-size:12px;color:var(--text3);}
+.ftr-dev a{color:var(--green);text-decoration:none;}
+.ftr-cols{display:flex;gap:48px;}
+.ftr-col{display:flex;flex-direction:column;gap:10px;}
+.ftr-col-h{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:4px;}
+.ftr-link{font-size:13px;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.ftr-link:hover{color:var(--text2);}
+.ftr-bottom{max-width:1200px;margin:0 auto;padding:16px 24px;border-top:1px solid var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:11px;color:var(--text3);flex-wrap:wrap;}
+
+/* MOBILE */
+@media(max-width:860px){
+  .hero{flex-direction:column;padding:48px 20px 40px;min-height:auto;gap:32px;}
+  .hero-right{flex:none;width:100%;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:0;}
+  .stat{border-right:none;border-bottom:1px solid var(--border);padding:16px 0;}
+  .stat:nth-child(odd){border-right:1px solid var(--border);}
+  .stat:nth-last-child(-n+2){border-bottom:none;}
+  .tier-grid{grid-template-columns:1fr;}
+  .why-grid{grid-template-columns:1fr 1fr;}
+  .gal-grid{grid-template-columns:1fr 1fr;}
+  .about-inner{grid-template-columns:1fr;gap:32px;padding:48px 20px;}
+  .ftr-inner{grid-template-columns:1fr;gap:32px;padding:32px 20px 24px;}
+  .ftr-cols{flex-wrap:wrap;gap:28px;}
+  .hdr-nav{display:none;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 0;z-index:99;}
+  .hdr-nav.open{display:flex;}
+  .hdr-burger{display:flex;}
+  .hdr-cta{display:none;}
+  .hdr-inner{gap:16px;}
+}
+@media(max-width:560px){
+  .sec{padding:48px 20px;}
+  .why-grid{grid-template-columns:1fr;}
+  .gal-grid{grid-template-columns:1fr;}
+  .ftr-bottom{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="hdr-inner">
+    <a class="hdr-brand" href="index.html">
+      <img src="demo.png" class="hdr-icon" alt="GodotVisualCoder" onerror="this.style.display='none';document.getElementById('hdr-icon-fb').style.display='flex'">
+      <div id="hdr-icon-fb" class="hdr-icon-svg" style="display:none">
+        <svg viewBox="0 0 22 22" fill="none" width="18" height="18"><path d="M11 2L19 6.5V15.5L11 20L3 15.5V6.5L11 2Z" stroke="#4ade80" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="#4ade80"/></svg>
+      </div>
+      <span class="hdr-name">GodotVisualCoder</span>
+    </a>
+    <nav class="hdr-nav" id="hdrNav">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="free.html" class="nav-link">Free Tools</a>
+      <a href="pro.html" class="nav-link">Pro Tools</a>
+      <a href="#about" class="nav-link">About</a>
+    </nav>
+    <a href="pricing.html" class="hdr-cta">Get Pro</a>
+    <button class="hdr-burger" onclick="document.getElementById('hdrNav').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main style="flex:1;display:flex;flex-direction:column;">
+
+<!-- HERO -->
+<div style="flex:1;display:flex;align-items:center;">
+<div class="hero">
+  <div class="hero-left">
+    <div class="eyebrow"><span class="dot"></span>Godot 4.x · GDScript · No Install</div>
+    <h1 class="hero-title">Godot Visual<br><span class="accent">Advanced</span><br>Code Generator</h1>
+    <p class="hero-sub">Stop searching docs. Fill a form, get clean paste-ready GDScript instantly. Movement, combat, UI, inventory — built for beginners and pros.</p>
+    <div class="hero-btns">
+      <a href="free.html" class="btn-primary">Try Free Generators</a>
+      <a href="pro.html" class="btn-outline">View Pro Tools</a>
+      <a href="pricing.html" class="btn-outline">Pricing</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <!-- Replace with: <img src="hero-screenshot.png" class="hero-img" alt="Generator preview"> -->
+    <div class="hero-mock">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" opacity=".35"><path d="M28 4L50 17V39L28 52L6 39V17L28 4Z" stroke="#4ade80" stroke-width="1.8"/><circle cx="28" cy="28" r="8" fill="#4ade80" opacity=".3"/><circle cx="28" cy="28" r="4" fill="#4ade80"/></svg>
+      <p>Add hero screenshot here<br><span style="color:#343b45">hero-screenshot.png</span></p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-n">5</div><div class="stat-l">Free generators</div></div>
+    <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Pro generators</div></div>
+    <div class="stat"><div class="stat-n">3</div><div class="stat-l">Pro tiers</div></div>
+    <div class="stat"><div class="stat-n">0</div><div class="stat-l">Install required</div></div>
+  </div>
+</div>
+
+<!-- TIERS -->
+<section class="sec">
+<div class="sec-inner">
+  <div class="sec-ey">Plans</div>
+  <h2 class="sec-h">Free & Pro Generators</h2>
+  <p class="sec-d">Start free with 5 essential generators. Upgrade to Pro for the full toolkit — advanced params, multiplayer, RPC, state machines and more.</p>
+
+  <div class="tier-grid">
+    <div class="tier-card tc-free">
+      <div class="t-badge tb-free"><span class="dot"></span>Free — Always</div>
+      <div><div class="t-title">5 Basic Generators</div><div class="t-desc">Everything a beginner needs to start building. Clean, correct GDScript — no experience needed.</div></div>
+      <div class="t-features">
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Movement — CharacterBody2D, walk/run/jump</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Combat — detection, damage, cooldown</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>UI Elements — Label, Button, TextureRect…</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Signals & Variables — declare + connect</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Custom Function — if/elif/else, return</div>
+      </div>
+      <div class="t-cta-row">
+        <a href="free.html" class="t-cta tc-free-btn">Try Free Generators →</a>
+      </div>
+    </div>
+
+    <div class="tier-card tc-pro">
+      <div class="t-badge tb-pro">⚡ Pro</div>
+      <div><div class="t-title">10+ Advanced Generators</div><div class="t-desc">For developers who need real architecture — multiplayer, RPC sync, state machines, full inventory systems.</div></div>
+      <div class="t-features">
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Movement Pro — 3D, stances, multiplayer</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Combat Pro — RPC, enums, server-authoritative</div>
+        <div class="t-feat"><div class="feat-icon check"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Inventory System — 4 scripts + drag & drop</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>RPC Function Builder — @rpc decorators</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>State Machine — enum, match, transitions</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>Autoload/Singleton — signals, save/load</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>Animation Controller — stance × weapon</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>Item Spawner — rarity, zones, relations</div>
+        <div class="t-feat locked"><div class="feat-icon lock"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>+ More added monthly</div>
+      </div>
+      <div class="t-cta-row">
+        <a href="pro.html" class="t-cta tc-pro-btn">Check Pro Tools →</a>
+        <a href="pricing.html" class="t-cta tc-pro-btn t-cta-sm">Pricing</a>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- WHY CHOOSE -->
+<section class="sec why-bg" style="padding:80px 24px;">
+<div class="sec-inner">
+  <div class="sec-ey">Why GodotVisualCoder</div>
+  <h2 class="sec-h">Built different</h2>
+  <p class="sec-d">Not just a snippet site. A visual builder that generates correct, paste-ready GDScript matched to your exact setup.</p>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--green-dim);border:1px solid var(--green2)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><polyline points="4,11 8,15 18,7"/></svg></div>
+      <div class="why-name">Always correct GDScript 4</div>
+      <div class="why-desc">Uses the right API calls and syntax. Not outdated Godot 3 snippets copied from forums.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--blue-dim);border:1px solid var(--blue2)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="12" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="12" width="7" height="7" rx="1.5"/><rect x="12" y="12" width="7" height="7" rx="1.5"/></svg></div>
+      <div class="why-name">Form-based, no typing</div>
+      <div class="why-desc">Fill dropdowns, tap Generate. No memorising function names, no typos, no doc searching.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"><rect x="5" y="2" width="12" height="18" rx="2"/><path d="M8 6h6M8 10h6M8 14h4"/></svg></div>
+      <div class="why-name">Mobile-first</div>
+      <div class="why-desc">Works on phone. Reference on mobile while coding on PC — or use directly on any device.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--coral-dim);border:1px solid rgba(248,113,113,0.4)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><path d="M11 3v4M17.2 4.8l-2.8 2.8M19 11h-4M17.2 17.2l-2.8-2.8M11 19v-4M4.8 17.2l2.8-2.8M3 11h4M4.8 4.8l2.8 2.8"/></svg></div>
+      <div class="why-name">Beginner to advanced</div>
+      <div class="why-desc">Free tier starts simple. Pro matches real game architecture — multiplayer, RPC, state machines.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round"><path d="M4 6h14M4 11h10M4 16h6"/></svg></div>
+      <div class="why-name">Separate output panels</div>
+      <div class="why-desc">Variables and functions always split into separate panels — paste exactly where needed.</div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon" style="background:var(--green-dim);border:1px solid var(--green2)"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><path d="M7 8l3 3-3 3M13 14h3"/><rect x="3" y="3" width="16" height="16" rx="2"/></svg></div>
+      <div class="why-name">Syntax highlighted output</div>
+      <div class="why-desc">Single-pass tokenizer highlights keywords, types, functions and strings correctly every time.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- GALLERY -->
+<section class="sec">
+<div class="sec-inner">
+  <div class="sec-ey">Gallery</div>
+  <h2 class="sec-h">See what gets generated</h2>
+  <p class="sec-d">Screenshots of the generators in action. Free tools for everyone. Pro tools unlocked by subscription.</p>
+  <div class="gal-grid">
+    <div class="gal-item">
+      <!-- <img src="ss-movement.png" alt="Movement Generator"> -->
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="10" stroke="#4ade80" stroke-width="1.4"/><path d="M9 14h10M14 9v10" stroke="#4ade80" stroke-width="1.4" stroke-linecap="round"/></svg><span>Movement Generator</span></div>
+      <div class="gal-label">Movement Generator</div><span class="gal-badge gb-free">Free</span>
+    </div>
+    <div class="gal-item">
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M7 21L21 7M18 5l5 5-3 3-5-5z" stroke="#f87171" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="18" r="3" stroke="#f87171" stroke-width="1.4"/></svg><span>Combat Generator</span></div>
+      <div class="gal-label">Combat Generator</div><span class="gal-badge gb-free">Free</span>
+    </div>
+    <div class="gal-item">
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="5" width="20" height="6" rx="2" stroke="#60a5fa" stroke-width="1.4"/><rect x="4" y="14" width="13" height="5" rx="2" stroke="#60a5fa" stroke-width="1.4"/><rect x="4" y="22" width="9" height="4" rx="2" stroke="#60a5fa" stroke-width="1.4"/></svg><span>UI Elements Generator</span></div>
+      <div class="gal-label">UI Elements Generator</div><span class="gal-badge gb-free">Free</span>
+    </div>
+    <div class="gal-item">
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 9.5V20.5L14 27L3 20.5V9.5L14 3Z" stroke="#c084fc" stroke-width="1.4"/><circle cx="14" cy="14" r="4" fill="#c084fc" opacity=".25"/></svg><span>Movement Pro<br>Add screenshot</span></div>
+      <div class="gal-label">Movement Pro — 3D + Multiplayer</div><span class="gal-badge gb-pro">Pro</span>
+    </div>
+    <div class="gal-item">
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="16" rx="2" stroke="#fbbf24" stroke-width="1.4"/><path d="M10 8V6h8v2" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/><path d="M14 13v6M11 16h6" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/></svg><span>Inventory System<br>Add screenshot</span></div>
+      <div class="gal-label">Inventory System — 4 scripts</div><span class="gal-badge gb-pro">Pro</span>
+    </div>
+    <div class="gal-item">
+      <div class="gal-ph"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M9 9l4-4 4 4M19 19l-4 4-4-4M9 17l-4-4 4-4M19 11l4 4-4 4" stroke="#60a5fa" stroke-width="1.4" stroke-linecap="round"/></svg><span>RPC Builder<br>Add screenshot</span></div>
+      <div class="gal-label">RPC Function Builder</div><span class="gal-badge gb-pro">Pro</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ABOUT -->
+<section class="sec about-bg" id="about" style="padding:0;">
+<div class="about-inner">
+  <div class="about-text">
+    <div class="sec-ey" style="margin-bottom:10px">About</div>
+    <h2 class="sec-h" style="margin-bottom:20px">Built by a Godot developer,<br>for Godot developers</h2>
+    <p>GodotVisualCoder was built out of frustration — spending more time looking up API docs than actually coding. Every generator reflects real patterns used in a real Godot 4 multiplayer game.</p>
+    <p>Free tools cover the most common beginner pain points. Pro tools go deeper — matching real game architecture: multiplayer authority, RPC sync, resource-based systems, state machines.</p>
+    <p>No install. No account needed for free tools. Open in any browser on any device.</p>
+    <p>Created by <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener">Champ Gaming</a> — check out the YouTube channel for Godot tutorials and game dev content.</p>
+  </div>
+  <div class="about-card">
+    <div class="about-card-title">Tech stack</div>
+    <div class="about-stack">
+      <div class="a-tag"><div class="a-dot" style="background:var(--green)"></div>Godot 4.x · GDScript</div>
+      <div class="a-tag"><div class="a-dot" style="background:var(--blue)"></div>Pure HTML · CSS · JavaScript</div>
+      <div class="a-tag"><div class="a-dot" style="background:var(--amber)"></div>No frameworks · No dependencies</div>
+      <div class="a-tag"><div class="a-dot" style="background:var(--coral)"></div>Mobile-first · Works offline</div>
+      <div class="a-tag"><div class="a-dot" style="background:var(--purple)"></div>Single-pass syntax highlighter</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="cta-box">
+    <h2>Ready to build faster?</h2>
+    <p>Start free — no account, no install. Upgrade to Pro when you need the advanced toolkit.</p>
+    <div class="cta-btns">
+      <a href="free.html" class="btn-primary">Try Free Now</a>
+      <a href="pricing.html" class="btn-outline">View Pricing</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="ftr-inner">
+    <div>
+      <a class="ftr-logo" href="index.html">
+        <img src="demo.png" class="hdr-icon" alt="" onerror="this.style.display='none'">
+        <span>GodotVisualCoder</span>
+      </a>
+      <p class="ftr-tag">Visual GDScript generators for Godot 4.x.<br>Build faster, learn better.</p>
+      <p class="ftr-dev">Dev: <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener">Champ Gaming</a></p>
+    </div>
+    <div class="ftr-cols">
+      <div class="ftr-col">
+        <div class="ftr-col-h">Tools</div>
+        <a href="free.html" class="ftr-link">Free Generators</a>
+        <a href="pro.html" class="ftr-link">Pro Generators</a>
+        <a href="pricing.html" class="ftr-link">Pricing</a>
+      </div>
+      <div class="ftr-col">
+        <div class="ftr-col-h">Legal</div>
+        <a href="terms.html" class="ftr-link">Terms of Use</a>
+        <a href="privacy.html" class="ftr-link">Privacy Policy</a>
+        <a href="refund.html" class="ftr-link">Refund Policy</a>
+      </div>
+      <div class="ftr-col">
+        <div class="ftr-col-h">Links</div>
+        <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" class="ftr-link">YouTube</a>
+        <a href="#about" class="ftr-link">About</a>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-bottom">
+    <span>© <span id="yr"></span> GodotVisualCoder. All rights reserved.</span>
+    <span>Godot 4.x · GDScript · Made by Champ Gaming</span>
+  </div>
+</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body>
+</html>
