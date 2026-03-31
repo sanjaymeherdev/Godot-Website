@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Custom Function Generator · GodotVisualCoder</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+    --border:#2a2f37;--border2:#343b45;
+    --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+    --purple:#c084fc;--purple2:rgba(192,132,252,0.5);
+    --purple-dim:rgba(192,132,252,0.10);--purple-dim2:rgba(192,132,252,0.06);
+    --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);
+    --blue:#60a5fa;--amber:#fbbf24;--coral:#f87171;
+    --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+    --tap:52px;--r:10px;--rl:14px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+  /* HEADER */
+  .header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+  .back-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:20px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+  .back-btn:active{background:var(--bg4);}
+  .header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+  .header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--purple);background:var(--purple-dim);border:1px solid var(--purple2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+  /* PAGE */
+  .page{padding:16px 16px 100px;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+  /* CARD */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;}
+  .card-dot.green{background:var(--green);}
+  .card-dot.blue{background:var(--blue);}
+  .card-dot.amber{background:var(--amber);}
+  .card-dot.coral{background:var(--coral);}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+  .card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+  /* FIELDS */
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .key-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .key-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+  select,input[type="text"]{
+    width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);
+    border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;
+    padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;
+  }
+  select:focus,input:focus{border-color:var(--purple2);}
+
+  /* PARAM ROWS */
+  .param-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .param-row-top{display:flex;align-items:center;gap:8px;}
+  .param-num{font-size:10px;font-family:var(--mono);color:var(--text3);flex-shrink:0;width:20px;}
+  .param-enabled{width:20px;height:20px;accent-color:var(--purple);cursor:pointer;flex-shrink:0;}
+  .param-label{font-size:13px;font-weight:500;color:var(--text2);flex:1;}
+  .param-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .param-fields select,.param-fields input{height:42px;font-size:13px;}
+  .param-row.disabled{opacity:0.4;}
+
+  /* BRANCH ROWS */
+  .branch-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+  .branch-head{padding:10px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+  .branch-type{font-size:11px;font-family:var(--mono);font-weight:600;padding:2px 8px;border-radius:6px;}
+  .bt-if{background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
+  .bt-elif{background:rgba(251,191,36,0.10);color:var(--amber);border:1px solid rgba(251,191,36,0.3);}
+  .bt-else{background:rgba(74,222,128,0.10);color:var(--green);border:1px solid var(--green2);}
+  .branch-body{padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .cond-row{display:grid;grid-template-columns:1fr 80px 1fr;gap:6px;}
+  .cond-row select,.cond-row input{height:44px;font-size:12px;padding:0 8px;}
+  .action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .action-row select,.action-row input{height:44px;font-size:13px;}
+
+  /* HINT */
+  .hint{background:var(--bg4);border-left:2px solid var(--purple2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+
+  /* TOGGLE */
+  .toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+  .toggle-item.active{background:var(--purple-dim2);border-color:var(--purple2);}
+  .toggle-item:active{background:var(--bg4);}
+  .toggle-item input[type="checkbox"]{display:none;}
+  .chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .toggle-item.active .chk-box{background:var(--purple);border-color:var(--purple);}
+  .chk-mark{display:none;}
+  .toggle-item.active .chk-mark{display:block;}
+  .toggle-label{flex:1;font-size:14px;font-weight:500;}
+  .toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  .sub{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;}
+
+  /* GEN BTN */
+  .gen-btn{width:100%;height:56px;background:var(--purple-dim);border:1px solid var(--purple2);border-radius:var(--rl);color:var(--purple);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .gen-btn:active{background:rgba(192,132,252,0.2);transform:scale(0.99);}
+
+  /* OUTPUT */
+  .out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple2);}
+  .out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .copy-btn{margin-left:auto;padding:8px 14px;min-height:36px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .copy-btn:active{background:var(--bg3);}
+  .copy-btn.copied{color:var(--green);border-color:var(--green2);}
+  .out-code{padding:14px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+  .out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+  /* SYNTAX */
+  .kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
+
+  .hidden{display:none!important;}
+
+  @media(min-width:560px){.page{padding:24px 24px 80px;}}
+  @media(min-width:768px){
+    .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+    .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+    .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="free.html">‹</a>
+  <div>
+    <div class="header-title">Custom Function</div>
+    <div class="header-sub">func · parameters · if/elif/else · return</div>
+  </div>
+  <span class="header-badge">Free · GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- FUNCTION SIGNATURE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Function Signature</span></div>
+    <div class="card-body">
+      <div class="field">
+        <div class="field-label">function name</div>
+        <input type="text" id="funcName" value="my_function" placeholder="my_function">
+      </div>
+      <div class="field">
+        <div class="field-label">return type</div>
+        <select id="returnType">
+          <option value="void">void</option>
+          <option value="bool">bool</option>
+          <option value="int">int</option>
+          <option value="float">float</option>
+          <option value="String">String</option>
+          <option value="Vector2">Vector2</option>
+          <option value="Vector3">Vector3</option>
+          <option value="Dictionary">Dictionary</option>
+          <option value="Array">Array</option>
+          <option value="Variant">Variant</option>
+        </select>
+      </div>
+      <div class="toggle-item" id="tog-static" onclick="togItem('static')">
+        <input type="checkbox" id="useStatic">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Static function</span>
+        <span class="toggle-hint">static func</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARAMETERS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Parameters (up to 3)</span></div>
+    <div class="card-body">
+      <div class="hint">Enable each parameter you need. Disabled ones are skipped in the signature.</div>
+
+      <!-- Param 1 -->
+      <div class="param-row" id="prow-1">
+        <div class="param-row-top">
+          <input type="checkbox" class="param-enabled" id="pen-1" checked onchange="syncParam(1)">
+          <span class="param-num">p1</span>
+          <span class="param-label">Parameter 1</span>
+        </div>
+        <div class="param-fields" id="pfields-1">
+          <div class="field"><div class="field-label">name</div><input type="text" id="pname-1" value="value"></div>
+          <div class="field"><div class="field-label">type</div>
+            <select id="ptype-1">
+              <option>int</option><option>float</option><option selected>String</option><option>bool</option>
+              <option>Vector2</option><option>Vector3</option><option>Dictionary</option><option>Array</option><option>Node</option><option>Variant</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1"><div class="field-label">default value (optional, empty = required)</div><input type="text" id="pdefault-1" placeholder='e.g. 0 or "" or false'></div>
+        </div>
+      </div>
+
+      <!-- Param 2 -->
+      <div class="param-row disabled" id="prow-2">
+        <div class="param-row-top">
+          <input type="checkbox" class="param-enabled" id="pen-2" onchange="syncParam(2)">
+          <span class="param-num">p2</span>
+          <span class="param-label">Parameter 2</span>
+        </div>
+        <div class="param-fields hidden" id="pfields-2">
+          <div class="field"><div class="field-label">name</div><input type="text" id="pname-2" value="amount"></div>
+          <div class="field"><div class="field-label">type</div>
+            <select id="ptype-2">
+              <option>int</option><option selected>float</option><option>String</option><option>bool</option>
+              <option>Vector2</option><option>Vector3</option><option>Dictionary</option><option>Array</option><option>Node</option><option>Variant</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1"><div class="field-label">default value (optional)</div><input type="text" id="pdefault-2" placeholder='e.g. 1.0'></div>
+        </div>
+      </div>
+
+      <!-- Param 3 -->
+      <div class="param-row disabled" id="prow-3">
+        <div class="param-row-top">
+          <input type="checkbox" class="param-enabled" id="pen-3" onchange="syncParam(3)">
+          <span class="param-num">p3</span>
+          <span class="param-label">Parameter 3</span>
+        </div>
+        <div class="param-fields hidden" id="pfields-3">
+          <div class="field"><div class="field-label">name</div><input type="text" id="pname-3" value="flag"></div>
+          <div class="field"><div class="field-label">type</div>
+            <select id="ptype-3">
+              <option>int</option><option>float</option><option>String</option><option selected>bool</option>
+              <option>Vector2</option><option>Vector3</option><option>Dictionary</option><option>Array</option><option>Node</option><option>Variant</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1"><div class="field-label">default value (optional)</div><input type="text" id="pdefault-3" placeholder='e.g. false'></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IF BRANCH -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">if Branch</span></div>
+    <div class="card-body">
+      <div class="field-label" style="font-size:11px;color:var(--text3);font-family:var(--mono);">condition</div>
+      <div class="cond-row">
+        <input type="text" id="if_left" placeholder="variable or value" value="value">
+        <select id="if_op">
+          <option>==</option><option>!=</option><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option><option>and</option><option>or</option><option>not</option><option>is</option><option>in</option>
+        </select>
+        <input type="text" id="if_right" placeholder="compare to" value='""'>
+      </div>
+      <div class="field-label" style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px;">action</div>
+      <div class="action-row">
+        <select id="if_action" onchange="syncAction('if')">
+          <option value="return">return value</option>
+          <option value="emit">emit_signal</option>
+          <option value="call">call function</option>
+          <option value="assign">assign variable</option>
+          <option value="pass">pass</option>
+          <option value="custom">custom code</option>
+        </select>
+        <input type="text" id="if_action_val" placeholder='e.g. true or "done"'>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELIF -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">elif Branch (optional)</span></div>
+    <div class="card-body">
+      <div class="toggle-item" id="tog-elif" onclick="togItem('elif')">
+        <input type="checkbox" id="useElif">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Include elif</span>
+        <span class="toggle-hint">adds elif block</span>
+      </div>
+      <div class="sub hidden" id="elif-sub">
+        <div class="field-label" style="font-size:11px;color:var(--text3);font-family:var(--mono);">condition</div>
+        <div class="cond-row">
+          <input type="text" id="elif_left" placeholder="variable or value" value="value">
+          <select id="elif_op">
+            <option>==</option><option>!=</option><option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option><option>and</option><option>or</option><option>not</option><option>is</option><option>in</option>
+          </select>
+          <input type="text" id="elif_right" placeholder="compare to" value="0">
+        </div>
+        <div class="field-label" style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px;">action</div>
+        <div class="action-row">
+          <select id="elif_action" onchange="syncAction('elif')">
+            <option value="return">return value</option>
+            <option value="emit">emit_signal</option>
+            <option value="call">call function</option>
+            <option value="assign">assign variable</option>
+            <option value="pass">pass</option>
+            <option value="custom">custom code</option>
+          </select>
+          <input type="text" id="elif_action_val" placeholder='e.g. false'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELSE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot green"></div><span class="card-title">else Branch (optional)</span></div>
+    <div class="card-body">
+      <div class="toggle-item" id="tog-else" onclick="togItem('else')">
+        <input type="checkbox" id="useElse">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Include else</span>
+        <span class="toggle-hint">fallback branch</span>
+      </div>
+      <div class="sub hidden" id="else-sub">
+        <div class="field-label" style="font-size:11px;color:var(--text3);font-family:var(--mono);">action</div>
+        <div class="action-row">
+          <select id="else_action" onchange="syncAction('else')">
+            <option value="return">return value</option>
+            <option value="emit">emit_signal</option>
+            <option value="call">call function</option>
+            <option value="assign">assign variable</option>
+            <option value="pass">pass</option>
+            <option value="custom">custom code</option>
+          </select>
+          <input type="text" id="else_action_val" placeholder='e.g. null'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETURN STATEMENT -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Return Statement</span></div>
+    <div class="card-body">
+      <div class="toggle-item" id="tog-return" onclick="togItem('return')">
+        <input type="checkbox" id="useReturn">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Final return</span>
+        <span class="toggle-hint">after all branches</span>
+      </div>
+      <div class="sub hidden" id="return-sub">
+        <div class="field"><div class="field-label">return value</div><input type="text" id="returnVal" placeholder='e.g. false or "" or null'></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate GDScript</button>
+</div><!-- form-col -->
+
+<div class="out-col">
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag">Function</span>
+      <span class="out-sub">paste into your script</span>
+      <button class="copy-btn" onclick="copyOut('funcOut',this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="funcOut"># tap Generate to produce code</div>
+  </div>
+</div>
+</div><!-- page -->
+
+<script>
+const $=id=>document.getElementById(id);
+const togStates={};
+
+function togItem(id){
+  togStates[id]=!togStates[id];
+  $('tog-'+id).classList.toggle('active',togStates[id]);
+  const sub=$(''+id+'-sub')||$('sub-'+id);
+  if(sub) sub.classList.toggle('hidden',!togStates[id]);
+}
+function tog(id){return !!togStates[id];}
+
+function syncParam(n){
+  const checked=$('pen-'+n).checked;
+  $('prow-'+n).classList.toggle('disabled',!checked);
+  $('pfields-'+n).classList.toggle('hidden',!checked);
+}
+
+function syncAction(branch){
+  const action=$(`${branch}_action`).value;
+  const valInput=$(`${branch}_action_val`);
+  const placeholders={
+    return:'e.g. true or null or 0',
+    emit:'signal_name("arg")',
+    call:'function_name(args)',
+    assign:'variable = value',
+    pass:'',
+    custom:'your code here'
+  };
+  valInput.placeholder=placeholders[action]||'';
+  valInput.classList.toggle('hidden',action==='pass');
+}
+
+function v(id,fb=''){const el=$(id);return el&&el.value.trim()?el.value.trim():fb;}
+
+function buildAction(branch){
+  const action=v(`${branch}_action`,'pass');
+  const val=v(`${branch}_action_val`,'');
+  switch(action){
+    case 'return': return `\t\treturn${val?' '+val:''}`;
+    case 'emit':   return `\t\temit_signal(${val||'"signal_name"'})`;
+    case 'call':   return `\t\t${val||'function_name()'}`;
+    case 'assign': return `\t\t${val||'variable = value'}`;
+    case 'pass':   return `\t\tpass`;
+    case 'custom': return `\t\t${val||'# your code here'}`;
+    default:       return `\t\tpass`;
+  }
+}
+
+function generate(){
+  const name=v('funcName','my_function').replace(/\s+/g,'_');
+  const ret=v('returnType','void');
+  const isStatic=tog('static');
+  const useElif=tog('elif');
+  const useElse=tog('else');
+  const useReturn=tog('return');
+
+  const params=[];
+  for(let n=1;n<=3;n++){
+    if(!$('pen-'+n).checked) continue;
+    const pname=v('pname-'+n,'param'+n);
+    const ptype=v('ptype-'+n,'Variant');
+    const pdef=v('pdefault-'+n,'');
+    params.push(pdef?`${pname}: ${ptype} = ${pdef}`:`${pname}: ${ptype}`);
+  }
+
+  const lines=[];
+  lines.push(`${isStatic?'static ':''}func ${name}(${params.join(', ')}) -> ${ret}:`);
+
+  const ifLeft=v('if_left','condition');
+  const ifOp=v('if_op','==');
+  const ifRight=v('if_right','value');
+  lines.push(`\tif ${ifLeft} ${ifOp} ${ifRight}:`);
+  lines.push(buildAction('if'));
+
+  if(useElif){
+    const elLeft=v('elif_left','condition');
+    const elOp=v('elif_op','==');
+    const elRight=v('elif_right','value');
+    lines.push(`\telif ${elLeft} ${elOp} ${elRight}:`);
+    lines.push(buildAction('elif'));
+  }
+
+  if(useElse){
+    lines.push(`\telse:`);
+    lines.push(buildAction('else'));
+  }
+
+  if(useReturn){
+    const rv=v('returnVal','');
+    lines.push(`\treturn${rv?' '+rv:''}`);
+  } else if(ret==='void'){
+    // no return needed
+  }
+
+  renderCode('funcOut',lines.join('\n'));
+}
+
+/* TOKENIZER */
+function highlight(code){
+  const KW=new Set(['func','static','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','is','emit_signal']);
+  const TYPE=new Set(['int','float','bool','String','Vector2','Vector3','Dictionary','Array','Node','Variant','void']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tl(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'||line[i]==="'"){
+        const q=line[i];let j=i+1;
+        while(j<line.length&&line[j]!==q)j++;
+        out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;
+      }
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/\w/.test(line[j]))j++;out+=`<span class="kw">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){
+        let j=i;while(j<line.length&&/\w/.test(line[j]))j++;
+        const w=line.slice(i,j);
+        out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:esc(w);
+        i=j;continue;
+      }
+      if(/\d/.test(line[i])||(line[i]==='-'&&/\d/.test(line[i+1]||''))){
+        let j=i+(line[i]==='-'?1:0);while(j<line.length&&/[\d.]/.test(line[j]))j++;
+        out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;
+      }
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tl).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id,btn){
+  const el=$(id);const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+
+// init action val visibility
+['if','elif','else'].forEach(b=>{
+  const el=$(`${b}_action`);
+  if(el) el.addEventListener('change',()=>syncAction(b));
+});
+</script>
+</body>
+</html>

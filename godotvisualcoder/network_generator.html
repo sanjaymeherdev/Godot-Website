@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Network Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --tap:52px;--r:10px;--rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.back-btn:active{background:var(--bg4);}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--blue);background:var(--blue-dim);border:1px solid var(--blue2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-dot.purple{background:var(--purple);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+
+/* NETWORK TYPE SELECTOR */
+.net-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.net-tab{padding:16px 12px;border-radius:var(--rl);border:1px solid var(--border);background:var(--bg3);cursor:pointer;text-align:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;user-select:none;}
+.net-tab:active{background:var(--bg4);}
+.net-tab.active-enet{background:var(--green-dim2);border-color:var(--green2);}
+.net-tab.active-render{background:var(--blue-dim);border-color:var(--blue2);}
+.net-tab-icon{font-size:1.6rem;margin-bottom:8px;}
+.net-tab-name{font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px;}
+.net-tab-sub{font-size:10px;font-family:var(--mono);color:var(--text3);line-height:1.5;}
+.net-tab.active-enet .net-tab-name{color:var(--green);}
+.net-tab.active-enet .net-tab-sub{color:var(--green);}
+.net-tab.active-render .net-tab-name{color:var(--blue);}
+.net-tab.active-render .net-tab-sub{color:var(--blue);}
+
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.blue{border-left-color:var(--blue2);}
+.hint.amber{border-left-color:var(--amber);}
+
+.gen-btn{width:100%;height:56px;background:var(--green-dim);border:1px solid var(--green2);border-radius:var(--rl);color:var(--green);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(74,222,128,0.2);transform:scale(0.99);}
+.gen-btn.blue{background:var(--blue-dim);border-color:var(--blue2);color:var(--blue);}
+.gen-btn.blue:active{background:rgba(96,165,250,0.2);}
+
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.green{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+.out-tag.blue{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+.out-tag.amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.4);}
+.out-tag.coral{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(248,113,113,0.4);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;min-height:36px;transition:all 0.15s;}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+.hidden{display:none!important;}
+
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="free.html">‹</a>
+  <div>
+    <div class="header-title">Network Generator</div>
+    <div class="header-sub">ENet P2P or Render WebSocket relay</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- NETWORK TYPE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Network Type</span></div>
+    <div class="card-body">
+      <div class="net-tabs">
+        <div class="net-tab active-enet" id="tab-enet" onclick="setNet('enet')">
+          <div class="net-tab-icon">⚡</div>
+          <div class="net-tab-name">ENet P2P</div>
+          <div class="net-tab-sub">1 script · direct peer connection · no server needed · Netbird / LAN</div>
+        </div>
+        <div class="net-tab" id="tab-render" onclick="setNet('render')">
+          <div class="net-tab-icon">☁️</div>
+          <div class="net-tab-name">Render WebSocket</div>
+          <div class="net-tab-sub">3 scripts · WebSocket server + health ping + client · hosted on Render.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENET OPTIONS -->
+  <div id="enet-options">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Config</span></div>
+      <div class="card-body">
+        <div class="grid2">
+          <div class="field"><div class="field-label">server_port</div><input type="number" id="e_port" value="7777"></div>
+          <div class="field"><div class="field-label">default_nick</div><input type="text" id="e_nick" value="Player"></div>
+          <div class="field"><div class="field-label">default_character</div><input type="text" id="e_char" value="player"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENDER OPTIONS -->
+  <div id="render-options" class="hidden">
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Server Config</span></div>
+      <div class="card-body">
+        <div class="hint blue">Server binds WebSocket on 0.0.0.0. In headless mode it auto-starts on _ready. HTTP node serves a status dashboard on port 8080.</div>
+        <div class="grid2">
+          <div class="field"><div class="field-label">ws_port</div><input type="number" id="r_wsport" value="10000"></div>
+          <div class="field"><div class="field-label">health_port</div><input type="number" id="r_httpport" value="8080"></div>
+          <div class="field"><div class="field-label">max_players</div><input type="number" id="r_max" value="10"></div>
+          <div class="field"><div class="field-label">default_nick</div><input type="text" id="r_nick" value="Player"></div>
+          <div class="field"><div class="field-label">default_character</div><input type="text" id="r_char" value="player"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Features</span></div>
+      <div class="card-body">
+        <div class="toggle-item active" id="tog-r-headless" onclick="tog('r_headless')">
+          <input type="checkbox" checked>
+          <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Headless Auto-start</span>
+          <span class="toggle-hint">auto start_host on _ready when running headless</span>
+        </div>
+        <div class="toggle-item active" id="tog-r-debug" onclick="tog('r_debug')">
+          <input type="checkbox" checked>
+          <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Debug Quit (Escape)</span>
+          <span class="toggle-hint">editor/debug builds only</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Status Dashboard</span></div>
+      <div class="card-body">
+        <div class="hint amber">Shown at your Render app URL in browser. Auto-refreshes every 5 seconds.</div>
+        <div class="field"><div class="field-label">app_name (shown in dashboard title)</div><input type="text" id="r_appname" value="Godot Game Server"></div>
+        <div class="field"><div class="field-label">render_url (wss://your-app.onrender.com)</div><input type="text" id="r_url" value="wss://your-app.onrender.com"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">▶ Generate Script</button>
+
+</div><!-- end form-col -->
+<div class="out-col">
+
+  <!-- ENET output - 1 script -->
+  <div id="out-enet">
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag green">Network.gd</span>
+        <span class="out-sub">AutoLoad · ENet host/client</span>
+        <button class="copy-btn" onclick="copyOut('outEnet',this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="outEnet"># tap Generate to produce code</div>
+    </div>
+  </div>
+
+  <!-- RENDER output - 3 scripts -->
+  <div id="out-render" class="hidden">
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag blue">Network.gd</span>
+        <span class="out-sub">Server · WebSocket · 0.0.0.0 · headless auto-start</span>
+        <button class="copy-btn" onclick="copyOut('outNetwork',this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="outNetwork"># tap Generate to produce code</div>
+    </div>
+    <div class="out-card" style="margin-top:12px">
+      <div class="out-head">
+        <span class="out-tag amber">HttpServer.gd</span>
+        <span class="out-sub">HTML status dashboard · port 8080 · auto-refresh</span>
+        <button class="copy-btn" onclick="copyOut('outHttp',this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="outHttp"># tap Generate to produce code</div>
+    </div>
+    <div class="out-card" style="margin-top:12px">
+      <div class="out-head">
+        <span class="out-tag coral">NetworkClient.gd</span>
+        <span class="out-sub">Client · mirrors Network.gd RPC signatures</span>
+        <button class="copy-btn" onclick="copyOut('outMain',this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="outMain"># tap Generate to produce code</div>
+    </div>
+  </div>
+
+</div><!-- end out-col -->
+</div><!-- end page -->
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el&&el.value.trim()?el.value.trim():fb; };
+let netType = 'enet';
+const feats = { r_headless:true, r_debug:true };
+
+function setNet(t) {
+  netType = t;
+  $('tab-enet').className   = 'net-tab' + (t==='enet'   ? ' active-enet'   : '');
+  $('tab-render').className = 'net-tab' + (t==='render' ? ' active-render' : '');
+  show('enet-options',   t==='enet');
+  show('render-options', t==='render');
+  show('out-enet',   t==='enet');
+  show('out-render', t==='render');
+  $('genBtn').className = 'gen-btn' + (t==='render' ? ' blue' : '');
+  $('genBtn').textContent = t==='enet' ? '▶ Generate Script' : '▶ Generate 3 Scripts';
+}
+
+function tog(f) {
+  feats[f] = !feats[f];
+  $('tog-'+f).classList.toggle('active', feats[f]);
+}
+
+function show(id, v) { const el=$(id); if(el) el.classList.toggle('hidden', !v); }
+
+/* ── GENERATE ── */
+function generate() {
+  if (netType === 'enet') {
+    renderCode('outEnet', buildEnet());
+  } else {
+    renderCode('outNetwork', buildNetwork());
+    renderCode('outHttp',    buildHttp());
+    renderCode('outMain',    buildMain());
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ENET — Network.gd
+══════════════════════════════════════════════════════════════ */
+function buildEnet() {
+  const port = v('e_port', '7777');
+  const nick = v('e_nick', 'Player');
+  const char = v('e_char', 'player');
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push('const SERVER_PORT: int = ' + port);
+  L.push('');
+  L.push('var players = {}');
+  L.push('var player_info = {');
+  L.push('\t"nick": "' + nick + '",');
+  L.push('\t"character": "' + char + '"');
+  L.push('}');
+  L.push('');
+  L.push('signal player_connected(peer_id, player_info)');
+  L.push('signal server_disconnected');
+  L.push('');
+  L.push('var _peer: ENetMultiplayerPeer = null');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\tmultiplayer.server_disconnected.connect(_on_server_disconnected)');
+  L.push('\tmultiplayer.connection_failed.connect(_on_connection_failed)');
+  L.push('\tmultiplayer.peer_disconnected.connect(_on_player_disconnected)');
+  L.push('\tmultiplayer.peer_connected.connect(_on_player_connected)');
+  L.push('\tmultiplayer.connected_to_server.connect(_on_connected_ok)');
+  L.push('');
+  L.push('func start_host(nickname: String, character: String):');
+  L.push('\t_peer = ENetMultiplayerPeer.new()');
+  L.push('\tvar error = _peer.create_server(SERVER_PORT)');
+  L.push('\tif error: print("❌ Error starting server: ", error); return error');
+  L.push('\tmultiplayer.multiplayer_peer = _peer');
+  L.push('\tprint("✅ ENet server started on port ", SERVER_PORT)');
+  L.push('\tplayer_info["nick"]      = nickname');
+  L.push('\tplayer_info["character"] = character');
+  L.push('');
+  L.push('func join_game(nickname: String, character: String, address: String):');
+  L.push('\t_peer = ENetMultiplayerPeer.new()');
+  L.push('\tvar error = _peer.create_client(address, SERVER_PORT)');
+  L.push('\tif error: print("❌ Error connecting: ", error); return error');
+  L.push('\tmultiplayer.multiplayer_peer = _peer');
+  L.push('\tprint("🔄 Connecting to: ", address)');
+  L.push('\tif not nickname or nickname.strip_edges() == "":');
+  L.push('\t\tnickname = "Player_" + str(multiplayer.get_unique_id())');
+  L.push('\tplayer_info["nick"]      = nickname');
+  L.push('\tplayer_info["character"] = character');
+  L.push('');
+  L.push('func _on_connected_ok():');
+  L.push('\tif multiplayer.is_server(): return');
+  L.push('\tvar peer_id = multiplayer.get_unique_id()');
+  L.push('\tplayers[peer_id] = player_info.duplicate()');
+  L.push('\tplayer_connected.emit(peer_id, player_info)');
+  L.push('\tprint("✅ Connected to server!")');
+  L.push('');
+  L.push('func _on_player_connected(id: int):');
+  L.push('\tif id == 1: return');
+  L.push('\tif multiplayer.is_server() and id == multiplayer.get_unique_id(): return');
+  L.push('\tplayers[id] = {"id": id, "connected_at": Time.get_unix_time_from_system(), "info": {}}');
+  L.push('\tprint("Player connected: ", id)');
+  L.push('\t_register_player.rpc_id(id, player_info)');
+  L.push('');
+  L.push('@rpc("any_peer", "reliable")');
+  L.push('func _register_player(new_player_info):');
+  L.push('\tvar new_player_id = multiplayer.get_remote_sender_id()');
+  L.push('\tif players.has(new_player_id):');
+  L.push('\t\tplayers[new_player_id]["info"] = new_player_info');
+  L.push('\telse:');
+  L.push('\t\tplayers[new_player_id] = {"id": new_player_id, "connected_at": Time.get_unix_time_from_system(), "info": new_player_info}');
+  L.push('\tplayer_connected.emit(new_player_id, new_player_info)');
+  L.push('\tprint("📝 Registered: ", new_player_info.get("nick", "Unknown"), " (ID: ", new_player_id, ")")');
+  L.push('');
+  L.push('func _on_player_disconnected(id: int):');
+  L.push('\tvar nick = players.get(id, {}).get("info", {}).get("nick", "Unknown")');
+  L.push('\tplayers.erase(id)');
+  L.push('\tprint("👋 Disconnected: ", nick, " (ID: ", id, ")")');
+  L.push('');
+  L.push('func _on_connection_failed():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tprint("❌ Connection failed!")');
+  L.push('');
+  L.push('func _on_server_disconnected():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tplayers.clear()');
+  L.push('\tserver_disconnected.emit()');
+  L.push('\tprint("🔌 Disconnected from server!")');
+  L.push('');
+  L.push('func disconnect_from_game():');
+  L.push('\tif multiplayer.multiplayer_peer:');
+  L.push('\t\tmultiplayer.multiplayer_peer.close()');
+  L.push('\t\tmultiplayer.multiplayer_peer = null');
+  L.push('\tplayers.clear()');
+  L.push('');
+  L.push('func get_player_count(): return players.size()');
+
+  return L.join('\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — Network.gd  (WebSocket server + client)
+══════════════════════════════════════════════════════════════ */
+function buildNetwork() {
+  const wsport   = v('r_wsport','10000');
+  const auth = feats.r_auth;
+  const kick = feats.r_kick;
+  const maxp     = v('r_max','10');
+  const defNick  = v('r_nick','Player');
+  const defChar  = v('r_char','player');
+  const headless = feats.r_headless;
+  const debug    = feats.r_debug;
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push(`const SERVER_PORT: int = ${wsport}`);
+  L.push(`const MAX_PLAYERS: int = ${maxp}`);
+  L.push('');
+  L.push('var players = {}');
+  L.push('var player_info = {');
+  L.push(`\t"nick": "${defNick}",`);
+  L.push(`\t"character": "${defChar}"`);
+  L.push('}');
+  L.push('');
+  L.push('signal player_connected(peer_id, player_info)');
+  L.push('signal server_disconnected');
+  L.push('');
+
+  if (headless) {
+    L.push('func is_server_build() -> bool:');
+    L.push('\treturn OS.has_feature("server") or DisplayServer.get_name() == "headless"');
+    L.push('');
+  }
+
+  if (debug) {
+    L.push('func _process(_delta):');
+    L.push('\tif OS.is_debug_build() and Input.is_action_just_pressed("ui_cancel"):');
+    L.push('\t\tget_tree().quit(0)');
+    L.push('');
+  }
+
+  L.push('func _ready() -> void:');
+  L.push('\tmultiplayer.server_disconnected.connect(_on_server_disconnected)');
+  L.push('\tmultiplayer.connection_failed.connect(_on_connection_failed)');
+  L.push('\tmultiplayer.peer_disconnected.connect(_on_player_disconnected)');
+  L.push('\tmultiplayer.peer_connected.connect(_on_player_connected)');
+  L.push('\tmultiplayer.connected_to_server.connect(_on_connected_ok)');
+  if (headless) {
+    L.push('\tif is_server_build():');
+    L.push('\t\tprint("🖥️ Running as HEADLESS SERVER")');
+    L.push('\t\tstart_host("DedicatedServer", "player")');
+  }
+  L.push('');
+
+  L.push('func start_host(nickname: String, character: String):');
+  L.push('\tvar peer = WebSocketMultiplayerPeer.new()');
+  L.push('\tvar error = peer.create_server(SERVER_PORT, "0.0.0.0")');
+  L.push('\tif error: print("❌ Error starting server: ", error); return error');
+  L.push('\tmultiplayer.multiplayer_peer = peer');
+  L.push('\tprint("✅ WebSocket server started on port ", SERVER_PORT)');
+  L.push('\tplayer_info["nick"]      = nickname');
+  L.push('\tplayer_info["character"] = character');
+  L.push('');
+
+  L.push('func join_game(nickname: String, character: String, address: String = ""):');
+  if (headless) {
+    L.push('\tif is_server_build(): print("⚠️ Server cannot join games"); return');
+  }
+  L.push('\tvar peer = WebSocketMultiplayerPeer.new()');
+  L.push('\tvar connection_url = "wss://" + address');
+  L.push('\tvar error = peer.create_client(connection_url)');
+  L.push('\tif error: print("❌ Error connecting: ", error); return error');
+  L.push('\tmultiplayer.multiplayer_peer = peer');
+  L.push('\tprint("🔄 Connecting to: ", connection_url)');
+  L.push('\tif not nickname or nickname.strip_edges() == "":');
+  L.push('\t\tnickname = "Player_" + str(multiplayer.get_unique_id())');
+  L.push('\tplayer_info["nick"]      = nickname');
+  L.push('\tplayer_info["character"] = character');
+  L.push('');
+
+  L.push('func _on_connected_ok():');
+  L.push('\tif multiplayer.is_server(): return');
+  L.push('\tvar peer_id = multiplayer.get_unique_id()');
+  L.push('\tplayers[peer_id] = player_info.duplicate()');
+  L.push('\tplayer_connected.emit(peer_id, player_info)');
+  L.push('\tprint("✅ Connected to server!")');
+  L.push('');
+
+  L.push('func _on_player_connected(id: int):');
+  L.push('\tif id == 1: return');
+  L.push('\tif multiplayer.is_server() and id == multiplayer.get_unique_id(): return');
+  L.push('\tplayers[id] = {"id": id, "connected_at": Time.get_unix_time_from_system(), "info": {}}');
+  L.push('\tprint("Player connected: ", id)');
+  L.push('\t_register_player.rpc_id(id, player_info)');
+  L.push('');
+
+  L.push('@rpc("any_peer", "reliable")');
+  L.push('func _register_player(new_player_info):');
+  L.push('\tvar new_player_id = multiplayer.get_remote_sender_id()');
+  L.push('\tif players.has(new_player_id):');
+  L.push('\t\tplayers[new_player_id]["info"] = new_player_info');
+  L.push('\telse:');
+  L.push('\t\tplayers[new_player_id] = {"id": new_player_id, "connected_at": Time.get_unix_time_from_system(), "info": new_player_info}');
+  L.push('\tplayer_connected.emit(new_player_id, new_player_info)');
+  L.push('\tprint("📝 Registered: ", new_player_info.get("nick", "Unknown"), " (ID: ", new_player_id, ")")');
+  L.push('');
+
+  L.push('func _on_player_disconnected(id: int):');
+  L.push('\tvar nick = players.get(id, {}).get("info", {}).get("nick", "Unknown")');
+  L.push('\tplayers.erase(id)');
+  L.push('\tprint("👋 Disconnected: ", nick, " (ID: ", id, ")")');
+  L.push('');
+
+  L.push('func _on_connection_failed():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tprint("❌ Connection failed!")');
+  L.push('');
+
+  L.push('func _on_server_disconnected():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tplayers.clear()');
+  L.push('\tserver_disconnected.emit()');
+  L.push('\tprint("🔌 Disconnected from server!")');
+  L.push('');
+
+  L.push('func get_player_count(): return players.size()');
+
+  return L.join('\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — HttpServer.gd  (HTML status dashboard on port 8080)
+══════════════════════════════════════════════════════════════ */
+function buildHttp() {
+  const httpport = v('r_httpport','8080');
+  const wsport   = v('r_wsport','10000');
+  const appname  = v('r_appname','Godot Game Server');
+  const appurl   = v('r_url','wss://your-app.onrender.com');
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push('const HTTP_PORT = ' + httpport);
+  L.push('var server = TCPServer.new()');
+  L.push('var start_time = 0');
+  L.push('');
+  L.push('@onready var network = $"../Network"');
+  L.push('');
+  L.push('func _ready():');
+  L.push('\tstart_time = Time.get_unix_time_from_system()');
+  L.push('\tvar error = server.listen(HTTP_PORT, "0.0.0.0")');
+  L.push('\tif error != OK: print("Error starting HTTP server: ", error); return');
+  L.push('\tprint("✅ HTTP status server started on port ", HTTP_PORT)');
+  L.push('');
+  L.push('func _process(_delta):');
+  L.push('\tif server.is_connection_available():');
+  L.push('\t\tvar connection = server.take_connection()');
+  L.push('\t\tvar request = connection.get_utf8_string(connection.get_available_bytes())');
+  L.push('\t\tif request.begins_with("GET"):');
+  L.push('\t\t\tvar response = generate_html()');
+  L.push('\t\t\tvar http_response = "HTTP/1.1 200 OK\\r\\n"');
+  L.push('\t\t\thttp_response += "Content-Type: text/html\\r\\n"');
+  L.push('\t\t\thttp_response += "Content-Length: " + str(response.length()) + "\\r\\n"');
+  L.push('\t\t\thttp_response += "\\r\\n"');
+  L.push('\t\t\thttp_response += response');
+  L.push('\t\t\tconnection.put_data(http_response.to_utf8_buffer())');
+  L.push('\t\tconnection.disconnect_from_host()');
+  L.push('');
+  L.push('func generate_html() -> String:');
+  L.push('\tvar uptime = Time.get_unix_time_from_system() - start_time');
+  L.push('\tvar player_count = network.get_player_count() if network else 0');
+  // Build HTML using GDScript string concatenation
+  const lines2 = [
+    '\tvar h := ""',
+    '\th += "<!DOCTYPE html><html><head>"',
+    '\th += "<title>' + appname + '</title>"',
+    '\th += "<style>body{font-family:Arial;background:#1a1a1a;color:#fff;padding:20px}.c{max-width:600px;margin:0 auto}.box{background:#2a2a2a;padding:20px;border-radius:8px;margin:10px 0}.row{margin:10px 0;padding:10px;background:#333;border-radius:4px}.lbl{color:#888;font-size:14px}.val{color:#4CAF50;font-size:18px;font-weight:bold}h1{color:#4CAF50}.warn{color:#ff9800;font-size:14px;margin-top:20px}</style>"',
+    '\th += "<scr" + "ipt>setTimeout(function(){location.reload();},5000);</" + "script>"',
+    '\th += "</head><body><div class=\\"c\\">"',
+    '\th += "<h1>&#127918; ' + appname + '</h1><div class=\\"box\\">"',
+    '\th += "<div class=\\"row\\"><div class=\\"lbl\\">WebSocket URL</div><div class=\\"val\\">' + appurl + '</div></div>"',
+    '\th += "<div class=\\"row\\"><div class=\\"lbl\\">Game Port</div><div class=\\"val\\">' + wsport + '</div></div>"',
+    '\th += "<div class=\\"row\\"><div class=\\"lbl\\">Players Connected</div><div class=\\"val\\">" + str(player_count) + "</div></div>"',
+    '\th += "<div class=\\"row\\"><div class=\\"lbl\\">Uptime</div><div class=\\"val\\">" + str(int(uptime)) + " seconds</div></div>"',
+    '\th += "<div class=\\"row\\"><div class=\\"lbl\\">Status</div><div class=\\"val\\" style=\\"color:#4CAF50\\">&#128994; ONLINE</div></div>"',
+    '\th += "</div><div class=\\"warn\\">Free tier: spins down after 15 min. Cold start ~60s.</div>"',
+    '\th += "</div></body></html>"',
+    '\treturn h',
+  ];
+  lines2.forEach(line => L.push(line));
+
+  return L.join('\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER — NetworkClient.gd  (client mirrors server exactly)
+══════════════════════════════════════════════════════════════ */
+function buildMain() {
+  const defNick = v('r_nick','Player');
+  const auth = feats.r_auth;
+  const kick = feats.r_kick;
+  const defChar = v('r_char','player');
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push('# Client-side mirror of Network.gd');
+  L.push('# @rpc signatures must match server exactly.');
+  L.push('');
+  L.push('var players = {}');
+  L.push('var player_info = {');
+  L.push(`\t"nick": "${defNick}",`);
+  L.push(`\t"character": "${defChar}"`);
+  L.push('}');
+  L.push('');
+  L.push('signal player_connected(peer_id, player_info)');
+  L.push('signal server_disconnected');
+  L.push('');
+  L.push('var _peer: WebSocketMultiplayerPeer = null');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\tmultiplayer.server_disconnected.connect(_on_server_disconnected)');
+  L.push('\tmultiplayer.connection_failed.connect(_on_connection_failed)');
+  L.push('\tmultiplayer.peer_disconnected.connect(_on_player_disconnected)');
+  L.push('\tmultiplayer.connected_to_server.connect(_on_connected_ok)');
+  L.push('');
+  L.push('func join_game(nickname: String, character: String, address: String):');
+  L.push('\t_peer = WebSocketMultiplayerPeer.new()');
+  L.push('\tvar connection_url = "wss://" + address');
+  L.push('\tvar error = _peer.create_client(connection_url)');
+  L.push('\tif error: print("❌ Error connecting: ", error); return error');
+  L.push('\tmultiplayer.multiplayer_peer = _peer');
+  L.push('\tprint("🔄 Connecting to: ", connection_url)');
+  L.push('\tif not nickname or nickname.strip_edges() == "":');
+  L.push('\t\tnickname = "Player_" + str(randi())');
+  L.push('\tplayer_info["nick"]      = nickname');
+  L.push('\tplayer_info["character"] = character');
+  L.push('');
+  L.push('func _on_connected_ok():');
+  L.push('\tvar peer_id = multiplayer.get_unique_id()');
+  L.push('\tplayers[peer_id] = player_info.duplicate()');
+  L.push('\tplayer_connected.emit(peer_id, player_info)');
+  L.push('\tprint("✅ Connected! peer_id=", peer_id)');
+  L.push('\t_register_player.rpc_id(1, player_info)');
+  L.push('');
+  L.push('func _on_player_disconnected(id: int):');
+  L.push('\tplayers.erase(id)');
+  L.push('');
+  L.push('func _on_connection_failed():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tprint("❌ Connection failed!")');
+  L.push('');
+  L.push('func _on_server_disconnected():');
+  L.push('\tmultiplayer.multiplayer_peer = null');
+  L.push('\tplayers.clear()');
+  L.push('\tserver_disconnected.emit()');
+  L.push('\tprint("🔌 Disconnected from server!")');
+  L.push('');
+  L.push('func disconnect_from_game():');
+  L.push('\tif multiplayer.multiplayer_peer:');
+  L.push('\t\tmultiplayer.multiplayer_peer.close()');
+  L.push('\t\tmultiplayer.multiplayer_peer = null');
+  L.push('\tplayers.clear()');
+  L.push('');
+  L.push('func get_players(): return players');
+  L.push('');
+  L.push('# ── RPC — must match Network.gd server exactly ──');
+  L.push('@rpc("any_peer", "reliable")');
+  L.push('func _register_player(new_player_info):');
+  L.push('\tvar new_player_id = multiplayer.get_remote_sender_id()');
+  L.push('\tif players.has(new_player_id):');
+  L.push('\t\tplayers[new_player_id]["info"] = new_player_info');
+  L.push('\telse:');
+  L.push('\t\tplayers[new_player_id] = {"id": new_player_id, "connected_at": Time.get_unix_time_from_system(), "info": new_player_info}');
+  L.push('\tplayer_connected.emit(new_player_id, new_player_info)');
+  L.push('\tprint("📝 Registered: ", new_player_info.get("nick","Unknown"), " (ID: ", new_player_id, ")")');
+
+  return L.join('\n');
+}
+/* ── TOKENIZER ── */
+function highlight(code) {
+  const KW   = new Set(['extends','class_name','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','while','break','signal','@rpc','@onready','@export','static']);
+  const TYPE = new Set(['float','int','bool','String','Vector3','void','Dictionary','Array','Node','Callable','PackedStringArray','PackedByteArray','StreamPeerTCP','TCPServer','HTTPRequest','Timer','WebSocketMultiplayerPeer','ENetMultiplayerPeer']);
+  const FN   = new Set(['_ready','_process','emit','connect','push_error','push_warning','print','rpc_id','rpc','is_server','get_unique_id','get_remote_sender_id','create_server','create_client','disconnect_peer','close','has_meta','get_meta','set_meta','has_method','get_node_or_null','change_scene_to_file','is_empty','has','erase','append','get','size','keys','duplicate','clear','pop_front','split','trim_prefix','trim_suffix','begins_with','ends_with','uri_decode','get_string_from_utf8','get_utf8_string','get_available_bytes','put_data','disconnect_from_host','take_connection','listen','is_connection_available','stringify','parse_string','get_data','parse','to_utf8_buffer','request','error_string','get_environment','has_feature','get_unix_time_from_system','get_datetime_string_from_system','dir_exists_absolute','make_dir_absolute','open','list_dir_begin','list_dir_end','get_next','file_exists','remove_absolute','create_timer','get_tree','distance_to']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])){let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id, btn){
+  const el=$(id);
+  const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

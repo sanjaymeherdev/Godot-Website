@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Movement Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0e0f11;
+    --bg2:     #15171a;
+    --bg3:     #1c1f23;
+    --bg4:     #23272d;
+    --border:  #2a2f37;
+    --border2: #343b45;
+    --text:    #e8eaed;
+    --text2:   #8b95a1;
+    --text3:   #555f6d;
+    --green:   #4ade80;
+    --green2:  #22c55e;
+    --green-dim:  rgba(74,222,128,0.10);
+    --green-dim2: rgba(74,222,128,0.06);
+    --blue:    #60a5fa;
+    --amber:   #fbbf24;
+    --coral:   #f87171;
+    --purple:  #c084fc;
+    --sans: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --tap: 52px;
+    --r: 10px;
+    --rl: 14px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+  }
+  .back-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    color: var(--text2); text-decoration: none; font-size: 18px;
+    -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+  }
+  .back-btn:active { background: var(--bg4); }
+  .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+  .header-sub   { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+  .header-badge {
+    margin-left: auto; font-size: 10px; font-family: var(--mono);
+    color: var(--green); background: var(--green-dim);
+    border: 1px solid var(--green2); padding: 3px 8px; border-radius: 20px; white-space: nowrap;
+  }
+
+  /* ── LAYOUT ── */
+  .page { padding: 16px 16px 100px; max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── SECTION CARD ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--rl); overflow: hidden;
+  }
+  .card-head {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); font-family: var(--mono); }
+  .card-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── FIELD ROW ── */
+  .field {
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+  .field-row { display: flex; align-items: center; gap: 8px; }
+
+  select, input[type="text"], input[type="number"] {
+    width: 100%; height: var(--tap);
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text);
+    font-family: var(--mono); font-size: 14px;
+    padding: 0 12px; outline: none;
+    -webkit-appearance: none; appearance: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus { border-color: var(--green2); }
+  input[type="number"] { width: 100%; }
+  .field-row select, .field-row input { flex: 1; }
+
+  /* ── INPUT TYPE TABS ── */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px; background: var(--bg3); padding: 4px;
+    border-radius: var(--r); border: 1px solid var(--border);
+  }
+  .tab {
+    padding: 10px 4px; text-align: center;
+    font-size: 10px; font-family: var(--mono); font-weight: 500;
+    background: transparent; border: none; border-radius: 8px;
+    color: var(--text2); cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s; line-height: 1.4;
+  }
+  .tab:active { background: var(--bg4); }
+  .tab.active { background: var(--bg4); color: var(--green); border: 1px solid var(--border2); }
+
+  .tab-pane { display: none; flex-direction: column; gap: 10px; }
+  .tab-pane.active { display: flex; }
+
+  /* ── KEY GRID ── */
+  .key-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── HINT ── */
+  .hint {
+    background: var(--bg4); border-left: 2px solid var(--green2);
+    padding: 10px 12px; border-radius: 0 var(--r) var(--r) 0;
+    font-size: 11px; color: var(--text2); font-family: var(--mono); line-height: 1.6;
+  }
+
+  /* ── TOGGLE ITEMS ── */
+  .toggle-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px;
+    min-height: var(--tap); cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .toggle-item.active { background: var(--green-dim2); border-color: var(--green2); }
+  .toggle-item:active { background: var(--bg4); }
+  .toggle-item input[type="checkbox"] { display: none; }
+
+  .chk-box {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border: 1px solid var(--border2); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .toggle-item.active .chk-box { background: var(--green); border-color: var(--green); }
+  .chk-mark { display: none; }
+  .toggle-item.active .chk-mark { display: block; }
+
+  .toggle-label { flex: 1; font-size: 14px; font-weight: 500; }
+  .toggle-hint  { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* ── SUB SECTION ── */
+  .sub { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── GENERATE BTN ── */
+  .gen-btn {
+    width: 100%; height: 56px;
+    background: var(--green-dim); border: 1px solid var(--green2);
+    border-radius: var(--rl); color: var(--green);
+    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+  .gen-btn:active { background: rgba(74,222,128,0.2); transform: scale(0.99); }
+
+  /* ── OUTPUT ── */
+  .out-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; }
+  .out-head {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .out-tag {
+    font-size: 10px; font-family: var(--mono); font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .out-tag.vars { background: rgba(96,165,250,0.12); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
+  .out-tag.func { background: var(--green-dim); color: var(--green); border: 1px solid var(--green2); }
+  .out-sub { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+  .copy-btn {
+    margin-left: auto; padding: 8px 14px;
+    background: var(--bg4); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text2);
+    font-family: var(--mono); font-size: 12px;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    min-height: 36px; transition: all 0.15s;
+  }
+  .copy-btn:active { background: var(--bg3); color: var(--text); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+
+  .out-code {
+    padding: 14px; font-family: var(--mono); font-size: 13px;
+    line-height: 1.8; color: var(--text);
+    white-space: pre; overflow-x: auto; min-height: 60px;
+  }
+  .out-code.empty { color: var(--text3); font-style: italic; font-size: 12px; }
+
+  /* syntax */
+  .kw   { color: #c792ea; }
+  .fn   { color: #82aaff; }
+  .str  { color: #c3e88d; }
+  .num  { color: #f78c6c; }
+  .cmt  { color: #546e7a; font-style: italic; }
+  .typ  { color: var(--amber); }
+
+  .hidden { display: none !important; }
+
+  @media (min-width: 560px) {
+    .page { padding: 24px 24px 80px; }
+    .key-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (min-width: 768px) {
+    .page { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+    .form-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 12px; }
+    .out-col  { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="index.html">‹</a>
+  <div>
+    <div class="header-title">Movement Generator</div>
+    <div class="header-sub">CharacterBody2D / 3D</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- Node Type -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Node Type</span></div>
+    <div class="card-body">
+      <div class="field">
+        <div class="field-label">extends</div>
+        <select id="nodeType" onchange="sync()">
+          <option value="2d">CharacterBody2D</option>
+          <option value="3d">CharacterBody3D</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Type -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Input Type</span></div>
+    <div class="card-body">
+      <div class="tabs">
+        <button class="tab active" data-tab="action" onclick="switchTab('action')">is_action<br>_pressed</button>
+        <button class="tab" data-tab="key" onclick="switchTab('key')">is_key<br>_pressed</button>
+        <button class="tab" data-tab="ui" onclick="switchTab('ui')">UI<br>Buttons</button>
+      </div>
+
+      <!-- Action tab -->
+      <div class="tab-pane active" id="tab-action">
+        <div class="hint">Uses Input Map. Supports keyboard + gamepad. Define actions in Project Settings → Input Map.</div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">Move Left</div><input type="text" id="a_left" value="ui_left"></div>
+          <div class="field"><div class="field-label">Move Right</div><input type="text" id="a_right" value="ui_right"></div>
+          <div id="a_fwd" class="field hidden"><div class="field-label">Forward</div><input type="text" id="a_forward" value="ui_up"></div>
+          <div id="a_bck" class="field hidden"><div class="field-label">Back</div><input type="text" id="a_back" value="ui_down"></div>
+          <div id="a_jmp" class="field hidden"><div class="field-label">Jump</div><input type="text" id="a_jump" value="ui_accept"></div>
+          <div id="a_run" class="field hidden"><div class="field-label">Run</div><input type="text" id="a_run_key" value="run"></div>
+        </div>
+      </div>
+
+      <!-- Key tab -->
+      <div class="tab-pane" id="tab-key">
+        <div class="hint">Raw keycode — no Input Map needed. Use KEY_* constants e.g. KEY_W, KEY_SPACE, KEY_SHIFT.</div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">Move Left</div><input type="text" id="k_left" value="KEY_A"></div>
+          <div class="field"><div class="field-label">Move Right</div><input type="text" id="k_right" value="KEY_D"></div>
+          <div id="k_fwd" class="field hidden"><div class="field-label">Forward</div><input type="text" id="k_forward" value="KEY_W"></div>
+          <div id="k_bck" class="field hidden"><div class="field-label">Back</div><input type="text" id="k_back" value="KEY_S"></div>
+          <div id="k_jmp" class="field hidden"><div class="field-label">Jump</div><input type="text" id="k_jump" value="KEY_SPACE"></div>
+          <div id="k_run" class="field hidden"><div class="field-label">Run</div><input type="text" id="k_run_key" value="KEY_SHIFT"></div>
+        </div>
+      </div>
+
+      <!-- UI Buttons tab -->
+      <div class="tab-pane" id="tab-ui">
+        <div class="hint">On-screen buttons. Generates bool variables — wire them to button signals in _ready().</div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">Left var</div><input type="text" id="u_left" value="btn_left"></div>
+          <div class="field"><div class="field-label">Right var</div><input type="text" id="u_right" value="btn_right"></div>
+          <div id="u_fwd" class="field hidden"><div class="field-label">Forward var</div><input type="text" id="u_forward" value="btn_forward"></div>
+          <div id="u_bck" class="field hidden"><div class="field-label">Back var</div><input type="text" id="u_back" value="btn_back"></div>
+          <div id="u_jmp" class="field hidden"><div class="field-label">Jump var</div><input type="text" id="u_jump" value="btn_jump"></div>
+          <div id="u_run" class="field hidden"><div class="field-label">Run var</div><input type="text" id="u_run_key" value="btn_run"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speed -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Speed</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">walk_speed</div><input type="number" id="walkSpeed" value="200"></div>
+      <div class="field hidden" id="runSpeedField"><div class="field-label">run_speed</div><input type="number" id="runSpeed" value="400"></div>
+      <div class="field hidden" id="jumpVelField"><div class="field-label">jump_velocity</div><input type="number" id="jumpVel" value="400"></div>
+      <div class="field hidden" id="gravityField"><div class="field-label">gravity</div><input type="number" id="gravityVal" value="980"></div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Features</span></div>
+    <div class="card-body">
+
+      <div class="toggle-item" id="tog-jump" onclick="toggleFeature('jump')">
+        <input type="checkbox" id="useJump">
+        <div class="chk-box">
+          <svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg>
+        </div>
+        <span class="toggle-label">Jump</span>
+        <span class="toggle-hint">is_on_floor() + gravity</span>
+      </div>
+
+      <div class="toggle-item" id="tog-run" onclick="toggleFeature('run')">
+        <input type="checkbox" id="useRun">
+        <div class="chk-box">
+          <svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg>
+        </div>
+        <span class="toggle-label">Run</span>
+        <span class="toggle-hint">hold / toggle</span>
+      </div>
+
+      <div class="sub hidden" id="runModeSub">
+        <div class="field">
+          <div class="field-label">Run mode</div>
+          <select id="runMode" onchange="sync()">
+            <option value="hold">Hold button to run</option>
+            <option value="toggle">Toggle on / off</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggle-item" id="tog-anim" onclick="toggleFeature('anim')">
+        <input type="checkbox" id="useAnim">
+        <div class="chk-box">
+          <svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg>
+        </div>
+        <span class="toggle-label">Animation</span>
+        <span class="toggle-hint">AnimationPlayer</span>
+      </div>
+
+      <div class="sub hidden" id="animSub">
+        <div class="field"><div class="field-label">AnimationPlayer var</div><input type="text" id="animVar" value="anim_player"></div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">idle</div><input type="text" id="animIdle" value="idle"></div>
+          <div class="field"><div class="field-label">walk</div><input type="text" id="animWalk" value="walk"></div>
+          <div class="field hidden" id="animRunField"><div class="field-label">run</div><input type="text" id="animRun" value="run"></div>
+          <div class="field hidden" id="animJumpField"><div class="field-label">jump</div><input type="text" id="animJump" value="jump"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate GDScript</button>
+
+</div><!-- end form-col -->
+<div class="out-col">
+
+  <!-- Variables Output -->
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag vars">Variables</span>
+      <span class="out-sub">paste at top of script</span>
+      <button class="copy-btn" onclick="copyOut('varOut', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="varOut"># tap Generate to produce code</div>
+  </div>
+
+  <!-- Function Output -->
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag func">Function</span>
+      <span class="out-sub">paste below variables</span>
+      <button class="copy-btn" onclick="copyOut('funcOut', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="funcOut"># tap Generate to produce code</div>
+  </div>
+
+</div><!-- end out-col -->
+</div><!-- end page -->
+
+<script>
+const $ = id => document.getElementById(id);
+let activeTab = 'action';
+const feats = { jump: false, run: false, anim: false };
+
+function switchTab(t) {
+  activeTab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + t));
+  sync();
+}
+
+function toggleFeature(f) {
+  feats[f] = !feats[f];
+  $('tog-' + f).classList.toggle('active', feats[f]);
+  sync();
+}
+
+function show(id, v) { $(id).classList.toggle('hidden', !v); }
+
+function sync() {
+  const is3d = $('nodeType').value === '3d';
+  const { jump, run, anim } = feats;
+
+  ['a','k','u'].forEach(p => {
+    show(p+'_fwd', is3d); show(p+'_bck', is3d);
+    show(p+'_jmp', jump); show(p+'_run', run);
+  });
+
+  show('runSpeedField', run);
+  show('jumpVelField', jump);
+  show('gravityField', jump);
+  show('runModeSub', run);
+  show('animSub', anim);
+  show('animRunField', anim && run);
+  show('animJumpField', anim && jump);
+}
+
+function v(id, fb) { const el = $(id); return el && el.value.trim() ? el.value.trim() : fb; }
+
+function generate() {
+  const is3d = $('nodeType').value === '3d';
+  const { jump, run, anim } = feats;
+  const runToggle = $('runMode').value === 'toggle';
+
+  const walkSpd = v('walkSpeed','200'), runSpd = v('runSpeed','400');
+  const jumpVel = v('jumpVel','400'),   grav   = v('gravityVal','980');
+  const animVar  = v('animVar','anim_player'), animIdle = v('animIdle','idle');
+  const animWalk = v('animWalk','walk'),        animRunV = v('animRun','run');
+  const animJumpV = v('animJump','jump');
+
+  let L, R, Fw, Bk, Jmp, Run;
+  if (activeTab === 'action') {
+    L=v('a_left','ui_left'); R=v('a_right','ui_right');
+    Fw=v('a_forward','ui_up'); Bk=v('a_back','ui_down');
+    Jmp=v('a_jump','ui_accept'); Run=v('a_run_key','run');
+  } else if (activeTab === 'key') {
+    L=v('k_left','KEY_A'); R=v('k_right','KEY_D');
+    Fw=v('k_forward','KEY_W'); Bk=v('k_back','KEY_S');
+    Jmp=v('k_jump','KEY_SPACE'); Run=v('k_run_key','KEY_SHIFT');
+  } else {
+    L=v('u_left','btn_left'); R=v('u_right','btn_right');
+    Fw=v('u_forward','btn_forward'); Bk=v('u_back','btn_back');
+    Jmp=v('u_jump','btn_jump'); Run=v('u_run_key','btn_run');
+  }
+
+  const vars = [];
+  vars.push(`var walk_speed: float = ${walkSpd}`);
+  if (run)  vars.push(`var run_speed: float = ${runSpd}`);
+  if (jump) { vars.push(`var jump_velocity: float = -${jumpVel}`); vars.push(`var gravity: float = ${grav}`); }
+  if (run && runToggle) vars.push(`var is_running: bool = false`);
+  if (activeTab === 'ui') {
+    vars.push(`var ${L}: bool = false`);
+    vars.push(`var ${R}: bool = false`);
+    if (is3d) { vars.push(`var ${Fw}: bool = false`); vars.push(`var ${Bk}: bool = false`); }
+    if (jump) vars.push(`var ${Jmp}: bool = false`);
+    if (run && !runToggle) vars.push(`var ${Run}: bool = false`);
+  }
+  if (anim) vars.push(`@onready var ${animVar}: AnimationPlayer = $AnimationPlayer`);
+
+  const lines = [];
+  lines.push(`func _physics_process(delta: float) -> void:`);
+  lines.push(``);
+
+  if (jump) {
+    lines.push(`\t# Apply gravity`);
+    lines.push(`\tif not is_on_floor():`);
+    lines.push(`\t\tvelocity.y += gravity * delta`);
+    lines.push(``);
+    lines.push(`\t# Jump`);
+    const jc = activeTab==='action' ? `Input.is_action_just_pressed("${Jmp}")`
+             : activeTab==='key'    ? `Input.is_key_pressed(${Jmp})`
+             : Jmp;
+    lines.push(`\tif ${jc} and is_on_floor():`);
+    lines.push(`\t\tvelocity.y = jump_velocity`);
+    if (activeTab==='ui') lines.push(`\t\t${Jmp} = false`);
+    lines.push(``);
+  }
+
+  if (run && runToggle) {
+    lines.push(`\t# Run toggle`);
+    const rc = activeTab==='action' ? `Input.is_action_just_pressed("${Run}")`
+             : activeTab==='key'    ? `Input.is_key_pressed(${Run})`
+             : Run;
+    lines.push(`\tif ${rc}:`);
+    lines.push(`\t\tis_running = !is_running`);
+    lines.push(``);
+  }
+
+  let runCond = '';
+  if (run) {
+    runCond = runToggle ? `is_running`
+      : activeTab==='action' ? `Input.is_action_pressed("${Run}")`
+      : activeTab==='key'    ? `Input.is_key_pressed(${Run})`
+      : Run;
+  }
+  const spd = run ? `run_speed if ${runCond} else walk_speed` : `walk_speed`;
+
+  lines.push(`\t# Movement`);
+  if (is3d) {
+    if (activeTab==='action') {
+      lines.push(`\tvar dir := Vector3.ZERO`);
+      lines.push(`\tdir.x = Input.get_axis("${L}", "${R}")`);
+      lines.push(`\tdir.z = Input.get_axis("${Fw}", "${Bk}")`);
+    } else if (activeTab==='key') {
+      lines.push(`\tvar dir := Vector3.ZERO`);
+      lines.push(`\tdir.x = (1.0 if Input.is_key_pressed(${R}) else 0.0) - (1.0 if Input.is_key_pressed(${L}) else 0.0)`);
+      lines.push(`\tdir.z = (1.0 if Input.is_key_pressed(${Bk}) else 0.0) - (1.0 if Input.is_key_pressed(${Fw}) else 0.0)`);
+    } else {
+      lines.push(`\tvar dir := Vector3.ZERO`);
+      lines.push(`\tdir.x = (1.0 if ${R} else 0.0) - (1.0 if ${L} else 0.0)`);
+      lines.push(`\tdir.z = (1.0 if ${Bk} else 0.0) - (1.0 if ${Fw} else 0.0)`);
+    }
+    lines.push(`\tif dir.length() > 0.0:`);
+    lines.push(`\t\tdir = dir.normalized()`);
+    lines.push(`\t\tvelocity.x = dir.x * (${spd})`);
+    lines.push(`\t\tvelocity.z = dir.z * (${spd})`);
+    lines.push(`\telse:`);
+    lines.push(`\t\tvelocity.x = move_toward(velocity.x, 0.0, ${spd})`);
+    lines.push(`\t\tvelocity.z = move_toward(velocity.z, 0.0, ${spd})`);
+  } else {
+    if (activeTab==='action') {
+      lines.push(`\tvar direction := Input.get_axis("${L}", "${R}")`);
+    } else if (activeTab==='key') {
+      lines.push(`\tvar direction := (1.0 if Input.is_key_pressed(${R}) else 0.0) - (1.0 if Input.is_key_pressed(${L}) else 0.0)`);
+    } else {
+      lines.push(`\tvar direction := (1.0 if ${R} else 0.0) - (1.0 if ${L} else 0.0)`);
+    }
+    lines.push(`\tif direction != 0.0:`);
+    lines.push(`\t\tvelocity.x = direction * (${spd})`);
+    lines.push(`\telse:`);
+    lines.push(`\t\tvelocity.x = move_toward(velocity.x, 0.0, ${spd})`);
+  }
+
+  lines.push(``);
+
+  if (anim) {
+    lines.push(`\t# Animation`);
+    const moving = is3d ? `dir.length() > 0.0` : `direction != 0.0`;
+    if (jump) {
+      lines.push(`\tif not is_on_floor():`);
+      lines.push(`\t\t${animVar}.play("${animJumpV}")`);
+      lines.push(`\telif ${moving}:`);
+    } else {
+      lines.push(`\tif ${moving}:`);
+    }
+    if (run) {
+      lines.push(`\t\tif ${runCond}:`);
+      lines.push(`\t\t\t${animVar}.play("${animRunV}")`);
+      lines.push(`\t\telse:`);
+      lines.push(`\t\t\t${animVar}.play("${animWalk}")`);
+    } else {
+      lines.push(`\t\t${animVar}.play("${animWalk}")`);
+    }
+    lines.push(`\telse:`);
+    lines.push(`\t\t${animVar}.play("${animIdle}")`);
+    lines.push(``);
+  }
+
+  lines.push(`\tmove_and_slide()`);
+
+  renderCode('varOut', vars.join('\n'));
+  renderCode('funcOut', lines.join('\n'));
+}
+
+/* ── TOKENIZER ── */
+function highlight(code) {
+  const KW   = new Set(['func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass']);
+  const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void']);
+  const FN   = new Set(['is_on_floor','move_and_slide','move_toward','get_axis','is_action_just_pressed','is_action_pressed','is_key_pressed','play','normalized','length']);
+
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function tokenLine(line) {
+    let out = '', i = 0;
+    while (i < line.length) {
+      if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+      if (line[i] === '"') {
+        let j = i+1; while (j < line.length && line[j] !== '"') j++;
+        out += `<span class="str">${esc(line.slice(i, j+1))}</span>`; i = j+1; continue;
+      }
+      if (line[i] === '@') {
+        let j = i+1; while (j < line.length && /\w/.test(line[j])) j++;
+        out += `<span class="kw">${esc(line.slice(i,j))}</span>`; i = j; continue;
+      }
+      if (/[a-zA-Z_]/.test(line[i])) {
+        let j = i; while (j < line.length && /\w/.test(line[j])) j++;
+        const w = line.slice(i,j);
+        out += KW.has(w) ? `<span class="kw">${esc(w)}</span>`
+             : TYPE.has(w) ? `<span class="typ">${esc(w)}</span>`
+             : FN.has(w)   ? `<span class="fn">${esc(w)}</span>`
+             : esc(w);
+        i = j; continue;
+      }
+      if (/\d/.test(line[i]) || (line[i]==='-' && /\d/.test(line[i+1]||''))) {
+        let j = i + (line[i]==='-'?1:0);
+        while (j < line.length && /[\d.]/.test(line[j])) j++;
+        out += `<span class="num">${esc(line.slice(i,j))}</span>`; i = j; continue;
+      }
+      out += esc(line[i]); i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code) {
+  const el = $(id);
+  el.classList.remove('empty');
+  el.innerHTML = highlight(code);
+}
+
+function copyOut(id, btn) {
+  const el = $(id);
+  const text = el.innerText || el.textContent;
+  if (!text.trim() || text.includes('tap Generate')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+}
+
+sync();
+</script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Generators — GodotVisualCoder</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;--border:#2a2f37;--border2:#343b45;--text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;--green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);--amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);--coral:#f87171;--coral-dim:rgba(248,113,113,0.10);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);--sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(14,15,17,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:32px;}
+.hdr-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-icon{width:32px;height:32px;border-radius:8px;object-fit:contain;}
+.hdr-icon-svg{width:32px;height:32px;border-radius:8px;background:var(--green-dim);border:1px solid var(--green2);display:none;align-items:center;justify-content:center;}
+.hdr-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.hdr-nav{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-link{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:color 0.15s,background 0.15s;}
+.nav-link:hover{color:var(--text);background:var(--bg3);}
+.nav-link.active{color:var(--green);}
+.hdr-cta{margin-left:auto;padding:8px 18px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
+.hdr-cta:hover{background:rgba(74,222,128,0.2);}
+.hdr-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hdr-burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;}
+
+.page-hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 24px 48px;}
+.page-hero-inner{max-width:1200px;margin:0 auto;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;padding:5px 14px;font-size:11px;font-family:var(--mono);color:var(--green);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:20px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;}
+.page-hero h1{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-0.03em;margin-bottom:12px;}
+.page-hero p{font-size:15px;color:var(--text2);line-height:1.7;max-width:560px;}
+
+.main{flex:1;padding:48px 24px 80px;}
+.main-inner{max-width:1200px;margin:0 auto;}
+
+.gen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+
+.gen-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:16px;text-decoration:none;color:inherit;transition:border-color 0.18s,transform 0.15s;position:relative;overflow:hidden;}
+.gen-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;opacity:0;transition:opacity 0.18s;}
+.gen-card:hover{transform:translateY(-2px);}
+.gen-card:hover::before{opacity:1;}
+.gen-card:active{transform:scale(0.99);}
+
+.gc-green{--c:var(--green);--cd:var(--green-dim);--cb:var(--green2);}
+.gc-coral{--c:var(--coral);--cd:var(--coral-dim);--cb:#ef4444;}
+.gc-blue{--c:var(--blue);--cd:var(--blue-dim);--cb:var(--blue2);}
+.gc-amber{--c:var(--amber);--cd:var(--amber-dim);--cb:#d97706;}
+.gc-purple{--c:var(--purple);--cd:var(--purple-dim);--cb:rgba(192,132,252,0.5);}
+
+.gen-card:hover{border-color:var(--cb);}
+.gen-card::before{background:var(--c);}
+
+.card-icon{width:48px;height:48px;border-radius:14px;background:var(--cd);border:1px solid var(--cb);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-num{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px;}
+.card-name{font-size:18px;font-weight:700;letter-spacing:-0.01em;}
+.card-desc{font-size:13px;color:var(--text2);line-height:1.6;font-family:var(--mono);flex:1;}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:6px;border:1px solid var(--cb);color:var(--c);background:var(--cd);}
+.card-btn{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--cd);border:1px solid var(--cb);border-radius:10px;color:var(--c);font-size:13px;font-weight:700;margin-top:4px;}
+.card-btn svg{flex-shrink:0;}
+
+.upgrade-banner{margin-top:48px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+.ub-text h2{font-size:20px;font-weight:700;letter-spacing:-0.01em;margin-bottom:6px;}
+.ub-text p{font-size:13px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.ub-btns{display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.ub-btn{padding:11px 20px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;transition:background 0.15s;}
+.ub-btn.pro{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+.ub-btn.pro:hover{background:rgba(96,165,250,0.2);}
+.ub-btn.price{background:transparent;border:1px solid var(--border2);color:var(--text2);}
+.ub-btn.price:hover{border-color:var(--green2);color:var(--green);}
+
+.site-footer{background:#0a0b0d;border-top:1px solid var(--border);}
+.ftr-inner{max-width:1200px;margin:0 auto;padding:40px 24px 24px;display:grid;grid-template-columns:1fr auto;gap:40px;}
+.ftr-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:10px;}
+.ftr-logo span{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.ftr-tag{font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;margin-bottom:10px;}
+.ftr-dev{font-size:12px;color:var(--text3);}
+.ftr-dev a{color:var(--green);text-decoration:none;}
+.ftr-cols{display:flex;gap:40px;}
+.ftr-col{display:flex;flex-direction:column;gap:8px;}
+.ftr-col-h{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:2px;}
+.ftr-link{font-size:12px;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.ftr-link:hover{color:var(--text2);}
+.ftr-bottom{max-width:1200px;margin:0 auto;padding:14px 24px;border-top:1px solid var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--text3);flex-wrap:wrap;}
+
+@media(max-width:680px){
+  .hdr-nav{display:none;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 0;z-index:99;}
+  .hdr-nav.open{display:flex;}
+  .hdr-burger{display:flex;}
+  .hdr-cta{display:none;}
+  .hdr-inner{gap:16px;}
+  .ftr-inner{grid-template-columns:1fr;gap:24px;padding:28px 20px 20px;}
+  .ftr-cols{flex-wrap:wrap;gap:24px;}
+  .ftr-bottom{flex-direction:column;align-items:flex-start;}
+  .upgrade-banner{flex-direction:column;gap:20px;}
+  .ub-btns{width:100%;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="hdr-inner">
+    <a class="hdr-brand" href="index.html">
+      <img src="demo.png" class="hdr-icon" alt="GodotVisualCoder" onerror="this.style.display='none';document.getElementById('hif').style.display='flex'">
+      <div id="hif" class="hdr-icon-svg"><svg viewBox="0 0 22 22" fill="none" width="18" height="18"><path d="M11 2L19 6.5V15.5L11 20L3 15.5V6.5L11 2Z" stroke="#4ade80" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="#4ade80"/></svg></div>
+      <span class="hdr-name">GodotVisualCoder</span>
+    </a>
+    <nav class="hdr-nav" id="hdrNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="free.html" class="nav-link active">Free Tools</a>
+      <a href="pro.html" class="nav-link">Pro Tools</a>
+      <a href="index.html#about" class="nav-link">About</a>
+    </nav>
+    <a href="pricing.html" class="hdr-cta">Get Pro</a>
+    <button class="hdr-burger" onclick="document.getElementById('hdrNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow"><span class="dot"></span>Free · No Account · No Install</div>
+    <h1>Free Generators</h1>
+    <p>5 essential GDScript generators — open to everyone. Fill the form, get clean code, paste it into Godot. That's it.</p>
+  </div>
+</div>
+
+<main class="main">
+<div class="main-inner">
+  <div class="gen-grid">
+
+    <a class="gen-card gc-green" href="freemovement.html">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/><path d="M12 8l-2-2M12 8l2-2"/>
+        </svg>
+      </div>
+      <div><div class="card-num">01 / 05</div><div class="card-name">Movement</div></div>
+      <div class="card-desc">CharacterBody2D — walk, run, jump. Three input types: action, key press, UI buttons. Optional animation.</div>
+      <div class="card-tags"><span class="tag">_physics_process</span><span class="tag">move_and_slide</span><span class="tag">gravity</span></div>
+      <div class="card-btn">Try Generator <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </a>
+
+    <a class="gen-card gc-coral" href="freecombat.html">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 18L18 6M15 4l5 5-2.5 2.5L13 7z"/><circle cx="8.5" cy="15.5" r="2.5"/>
+        </svg>
+      </div>
+      <div><div class="card-num">02 / 05</div><div class="card-name">Combat</div></div>
+      <div class="card-desc">Detection type, trigger input, damage, cooldown. Generates dealer + victim + setup — 3 panels, each with a copy button.</div>
+      <div class="card-tags"><span class="tag">take_damage</span><span class="tag">area / body / ray</span><span class="tag">signals</span></div>
+      <div class="card-btn">Try Generator <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </a>
+
+    <a class="gen-card gc-blue" href="freeui.html">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="5" rx="1.5"/><rect x="3" y="11" width="11" height="4" rx="1.5"/><rect x="3" y="17" width="7" height="4" rx="1.5"/><circle cx="20" cy="19" r="2.5"/>
+        </svg>
+      </div>
+      <div><div class="card-num">03 / 05</div><div class="card-name">UI Elements</div></div>
+      <div class="card-desc">12 node types in scrollable tabs — Label, Button, TextureRect, LineEdit and more. Generates @onready vars, setup_ui() and signal stubs.</div>
+      <div class="card-tags"><span class="tag">Label</span><span class="tag">Button</span><span class="tag">OptionButton</span><span class="tag">TextEdit</span></div>
+      <div class="card-btn">Try Generator <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </a>
+
+    <a class="gen-card gc-amber" href="freeinventory.html">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="7" width="16" height="13" rx="1.5"/><path d="M9 7V5h6v2"/><path d="M12 11v4M10 13h4"/>
+        </svg>
+      </div>
+      <div><div class="card-num">04 / 05</div><div class="card-name">Inventory</div></div>
+      <div class="card-desc">Full grid inventory — Item.gd resource, Inventory.gd autoload, InventoryUI.gd, SlotPanel.gd with complete drag & drop. 4 scripts, copy each separately.</div>
+      <div class="card-tags"><span class="tag">Resource</span><span class="tag">Autoload</span><span class="tag">drag & drop</span><span class="tag">.tres</span></div>
+      <div class="card-btn">Try Generator <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </a>
+
+    <a class="gen-card gc-purple" href="freecustom.html">
+      <div class="card-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 6l4-4 4 4M16 18l-4 4-4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/>
+        </svg>
+      </div>
+      <div><div class="card-num">05 / 05</div><div class="card-name">Custom Function</div></div>
+      <div class="card-desc">Name your function, add up to 3 typed parameters, set return type, and build a basic if/elif/else branch visually.</div>
+      <div class="card-tags"><span class="tag">func</span><span class="tag">if / elif / else</span><span class="tag">return</span><span class="tag">any type</span></div>
+      <div class="card-btn">Try Generator <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+    </a>
+
+  </div>
+
+  <div class="upgrade-banner">
+    <div class="ub-text">
+      <h2>Need something more advanced?</h2>
+      <p>Movement with 3D + stances + multiplayer · Combat with RPC + server-authoritative · Full inventory system · State machines · Autoloads · and more.</p>
+    </div>
+    <div class="ub-btns">
+      <a href="pro.html" class="ub-btn pro">View Pro Tools →</a>
+      <a href="pricing.html" class="ub-btn price">See Pricing</a>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="ftr-inner">
+    <div>
+      <a class="ftr-logo" href="index.html"><img src="demo.png" class="hdr-icon" alt="" onerror="this.style.display='none'"><span>GodotVisualCoder</span></a>
+      <p class="ftr-tag">Visual GDScript generators for Godot 4.x.</p>
+      <p class="ftr-dev">Dev: <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener">Champ Gaming</a></p>
+    </div>
+    <div class="ftr-cols">
+      <div class="ftr-col"><div class="ftr-col-h">Tools</div><a href="free.html" class="ftr-link">Free Generators</a><a href="pro.html" class="ftr-link">Pro Generators</a><a href="pricing.html" class="ftr-link">Pricing</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Legal</div><a href="terms.html" class="ftr-link">Terms of Use</a><a href="privacy.html" class="ftr-link">Privacy Policy</a><a href="refund.html" class="ftr-link">Refund Policy</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Links</div><a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" class="ftr-link">YouTube</a><a href="index.html#about" class="ftr-link">About</a></div>
+    </div>
+  </div>
+  <div class="ftr-bottom">
+    <span>© <span id="yr"></span> GodotVisualCoder. All rights reserved.</span>
+    <span>Godot 4.x · Made by Champ Gaming</span>
+  </div>
+</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body>
+</html>

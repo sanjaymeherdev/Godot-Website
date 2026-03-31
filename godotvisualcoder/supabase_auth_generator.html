@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Supabase Auth Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --tap:52px;--r:10px;--rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.back-btn:active{background:var(--bg4);}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--green);background:var(--green-dim);border:1px solid var(--green2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-dot.purple{background:var(--purple);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.amber{border-left-color:var(--amber);}
+.hint.blue{border-left-color:var(--blue2);}
+.gen-btn{width:100%;height:56px;background:var(--green-dim);border:1px solid var(--green2);border-radius:var(--rl);color:var(--green);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(74,222,128,0.2);transform:scale(0.99);}
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.green{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+.out-tag.blue{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;min-height:36px;transition:all 0.15s;}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+.kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
+.hidden{display:none!important;}
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="pro.html">‹</a>
+  <div>
+    <div class="header-title">Supabase Auth Generator</div>
+    <div class="header-sub">AutoLoad + Auth Scene · 2 scripts</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- SUPABASE CONFIG -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Supabase Config</span></div>
+    <div class="card-body">
+      <div class="hint amber">URL and Key are @export vars — set them in the Inspector on the AutoLoad node. Never hardcode secrets.</div>
+      <div class="field"><div class="field-label">autoload_name</div><input type="text" id="autoloadName" value="SupabaseClient"></div>
+      <div class="field"><div class="field-label">profiles_table</div><input type="text" id="profilesTable" value="profiles"></div>
+    </div>
+  </div>
+
+  <!-- SCENES -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Scene Paths</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">home_scene (after login)</div><input type="text" id="homeScene" value="res://scenes/playerlobby.tscn"></div>
+      <div class="field"><div class="field-label">auth_scene (on session expire)</div><input type="text" id="authScene" value="res://scenes/AuthScene.tscn"></div>
+      <div class="field"><div class="field-label">reset_scene (forgot password)</div><input type="text" id="resetScene" value="res://scenes/PasswordResetScene.tscn"></div>
+    </div>
+  </div>
+
+  <!-- NODE PATHS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Auth Scene Node Paths</span></div>
+    <div class="card-body">
+      <div class="hint">Match these to your scene's node names.</div>
+      <div class="grid2">
+        <div class="field"><div class="field-label">email_input</div><input type="text" id="emailNode" value="VBoxContainer/EmailInput"></div>
+        <div class="field"><div class="field-label">password_input</div><input type="text" id="passNode" value="VBoxContainer/PasswordInput"></div>
+        <div class="field"><div class="field-label">login_button</div><input type="text" id="loginBtn" value="VBoxContainer/VBoxContainer/LoginButton"></div>
+        <div class="field"><div class="field-label">register_button</div><input type="text" id="regBtn" value="VBoxContainer/VBoxContainer/RegisterButton"></div>
+        <div class="field"><div class="field-label">forgot_button</div><input type="text" id="forgotBtn" value="VBoxContainer/VBoxContainer/ForgotButton"></div>
+        <div class="field"><div class="field-label">message_label</div><input type="text" id="msgLabel" value="VBoxContainer/MessageLabel"></div>
+        <div class="field"><div class="field-label">tab_container</div><input type="text" id="tabNode" value="VBoxContainer/TabContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Features</span></div>
+    <div class="card-body">
+      <div class="toggle-item active" id="tog-profiles" onclick="tog('profiles')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">User Profiles</span>
+        <span class="toggle-hint">create / get / update username + IP</span>
+      </div>
+      <div class="toggle-item active" id="tog-ban" onclick="tog('ban')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Ban System</span>
+        <span class="toggle-hint">check_if_banned · ban · unban · history</span>
+      </div>
+      <div class="toggle-item active" id="tog-store" onclick="tog('store')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Store / Purchases</span>
+        <span class="toggle-hint">products · purchases · redeem · download</span>
+      </div>
+      <div class="toggle-item active" id="tog-reset" onclick="tog('reset')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Forgot Password Button</span>
+        <span class="toggle-hint">navigates to reset scene</span>
+      </div>
+      <div class="toggle-item active" id="tog-tabs" onclick="tog('tabs')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Login / Register Tabs</span>
+        <span class="toggle-hint">TabContainer with login on 0 register on 1</span>
+      </div>
+      <div class="toggle-item active" id="tog-autologin" onclick="tog('autologin')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Save Login Credentials</span>
+        <span class="toggle-hint">GameManager.save_login_credentials()</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate 2 Scripts</button>
+
+</div>
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag green">SupabaseClient.gd</span>
+      <span class="out-sub">AutoLoad · @export URL + Key</span>
+      <button class="copy-btn" onclick="copyOut('outClient', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outClient"># tap Generate to produce code</div>
+  </div>
+
+  <div class="out-card" style="margin-top:12px">
+    <div class="out-head">
+      <span class="out-tag blue">auth_scene.gd</span>
+      <span class="out-sub">extends Control · attach to auth scene root</span>
+      <button class="copy-btn" onclick="copyOut('outAuth', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outAuth"># tap Generate to produce code</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el && el.value.trim() ? el.value.trim() : fb; };
+const feats = { profiles:true, ban:true, store:true, reset:true, tabs:true, autologin:true };
+
+function tog(f) {
+  feats[f] = !feats[f];
+  $('tog-' + f).classList.toggle('active', feats[f]);
+}
+
+function generate() {
+  const aln      = v('autoloadName',  'SupabaseClient');
+  const ptable   = v('profilesTable', 'profiles');
+  const homeScn  = v('homeScene',  'res://scenes/playerlobby.tscn');
+  const authScn  = v('authScene',  'res://scenes/AuthScene.tscn');
+  const resetScn = v('resetScene', 'res://scenes/PasswordResetScene.tscn');
+  const emailN   = v('emailNode',  'VBoxContainer/EmailInput');
+  const passN    = v('passNode',   'VBoxContainer/PasswordInput');
+  const loginB   = v('loginBtn',   'VBoxContainer/VBoxContainer/LoginButton');
+  const regB     = v('regBtn',     'VBoxContainer/VBoxContainer/RegisterButton');
+  const forgotB  = v('forgotBtn',  'VBoxContainer/VBoxContainer/ForgotButton');
+  const msgL     = v('msgLabel',   'VBoxContainer/MessageLabel');
+  const tabN     = v('tabNode',    'VBoxContainer/TabContainer');
+  const { profiles, ban, store, reset, tabs, autologin } = feats;
+
+  renderCode('outClient', buildClient(aln, ptable, profiles, ban, store));
+  renderCode('outAuth',   buildAuth(aln, homeScn, authScn, resetScn, emailN, passN, loginB, regB, forgotB, msgL, tabN, profiles, reset, tabs, autologin));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SupabaseClient.gd
+══════════════════════════════════════════════════════════════ */
+function buildClient(aln, ptable, profiles, ban, store) {
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push('# ================================================================');
+  L.push('# ' + aln + '.gd — AutoLoad');
+  L.push('# Set SUPABASE_URL and SUPABASE_KEY in the Inspector.');
+  L.push('# ================================================================');
+  L.push('');
+  L.push('@export var SUPABASE_URL: String = ""');
+  L.push('@export var SUPABASE_KEY: String = ""');
+  L.push('');
+  L.push('var current_user: Dictionary = {}');
+  L.push('');
+  L.push('signal supabase_response(purpose: String, result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray)');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\tif SUPABASE_URL.is_empty() or SUPABASE_KEY.is_empty():');
+  L.push('\t\tpush_error("[' + aln + '] SUPABASE_URL and SUPABASE_KEY must be set in the Inspector")');
+  L.push('');
+  L.push('# ── HTTP helper — each request gets its own node, freed on completion ──');
+  L.push('func _make_request(purpose: String, url: String, headers: Array, method: int, body: String = "") -> int:');
+  L.push('\tvar http = HTTPRequest.new()');
+  L.push('\tadd_child(http)');
+  L.push('\thttp.request_completed.connect(');
+  L.push('\t\tfunc(result: int, response_code: int, resp_headers: PackedStringArray, resp_body: PackedByteArray):');
+  L.push('\t\t\temit_signal("supabase_response", purpose, result, response_code, resp_headers, resp_body)');
+  L.push('\t\t\thttp.queue_free()');
+  L.push('\t)');
+  L.push('\tvar error = http.request(url, headers, method, body)');
+  L.push('\tif error != OK:');
+  L.push('\t\tpush_error("[' + aln + '] Request failed for \\"" + purpose + "\\": " + error_string(error))');
+  L.push('\t\thttp.queue_free()');
+  L.push('\treturn error');
+  L.push('');
+  L.push('# ── Auth ─────────────────────────────────────────────────────────');
+  L.push('func sign_up_no_confirm(email: String, password: String) -> int:');
+  L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY]');
+  L.push('\tvar body = {"email": email, "password": password, "email_confirm": true}');
+  L.push('\treturn _make_request("signup", SUPABASE_URL + "/auth/v1/signup", headers, HTTPClient.METHOD_POST, JSON.stringify(body))');
+  L.push('');
+  L.push('func sign_in_with_email(email: String, password: String) -> int:');
+  L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY]');
+  L.push('\tvar body = {"email": email, "password": password}');
+  L.push('\treturn _make_request("login", SUPABASE_URL + "/auth/v1/token?grant_type=password", headers, HTTPClient.METHOD_POST, JSON.stringify(body))');
+  L.push('');
+  L.push('func reset_password(email: String) -> int:');
+  L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY]');
+  L.push('\tvar body = {"email": email}');
+  L.push('\treturn _make_request("reset_password", SUPABASE_URL + "/auth/v1/recover", headers, HTTPClient.METHOD_POST, JSON.stringify(body))');
+  L.push('');
+  L.push('func update_password(new_password: String) -> int:');
+  L.push('\tvar access_token = current_user.get("access_token", "")');
+  L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+  L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+  L.push('\treturn _make_request("update_password", SUPABASE_URL + "/auth/v1/user", headers, HTTPClient.METHOD_PUT, JSON.stringify({"password": new_password}))');
+  L.push('');
+  L.push('func sign_out() -> int:');
+  L.push('\tvar access_token = current_user.get("access_token", "")');
+  L.push('\tif access_token.is_empty(): current_user = {}; return OK');
+  L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+  L.push('\tvar result = _make_request("logout", SUPABASE_URL + "/auth/v1/logout", headers, HTTPClient.METHOD_POST)');
+  L.push('\tcurrent_user = {}');
+  L.push('\treturn result');
+  L.push('');
+
+  if (profiles) {
+    L.push('# ── Profiles ─────────────────────────────────────────────────────');
+    L.push('func create_user_profile(user_id: String, username: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token, "Prefer: return=representation"]');
+    L.push('\tvar body = {"id": user_id, "email": current_user.get("user", {}).get("email", ""), "username": username, "display_name": username}');
+    L.push('\treturn _make_request("create_profile", SUPABASE_URL + "/rest/v1/' + ptable + '", headers, HTTPClient.METHOD_POST, JSON.stringify(body))');
+    L.push('');
+    L.push('func get_user_profile(user_id: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", SUPABASE_KEY)');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\treturn _make_request("get_profile", SUPABASE_URL + "/rest/v1/' + ptable + '?id=eq." + user_id + "&select=*", headers, HTTPClient.METHOD_GET)');
+    L.push('');
+    L.push('func check_username_exists(username: String) -> int:');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + SUPABASE_KEY]');
+    L.push('\treturn _make_request("check_username", SUPABASE_URL + "/rest/v1/' + ptable + '?username=eq." + username + "&select=id", headers, HTTPClient.METHOD_GET)');
+    L.push('');
+    L.push('func update_username(user_id: String, new_username: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token, "Prefer: return=minimal"]');
+    L.push('\tvar body = {"username": new_username, "display_name": new_username}');
+    L.push('\treturn _make_request("update_username", SUPABASE_URL + "/rest/v1/' + ptable + '?id=eq." + user_id, headers, HTTPClient.METHOD_PATCH, JSON.stringify(body))');
+    L.push('');
+    L.push('func update_player_ip(user_id: String, ip_address: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\treturn _make_request("update_ip", SUPABASE_URL + "/rest/v1/' + ptable + '?id=eq." + user_id, headers, HTTPClient.METHOD_PATCH, JSON.stringify({"last_ip": ip_address}))');
+    L.push('');
+  }
+
+  if (ban) {
+    L.push('# ── Ban System ───────────────────────────────────────────────────');
+    L.push('func check_if_banned(ip_address: String = "", email: String = "") -> int:');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + SUPABASE_KEY]');
+    L.push('\tvar query_parts = []');
+    L.push('\tif not ip_address.is_empty(): query_parts.append("last_ip=eq." + ip_address)');
+    L.push('\tif not email.is_empty(): query_parts.append("email=eq." + email)');
+    L.push('\tif query_parts.is_empty(): return ERR_INVALID_PARAMETER');
+    L.push('\treturn _make_request("check_banned", SUPABASE_URL + "/rest/v1/' + ptable + '?player_status=eq.banned&" + "&".join(query_parts) + "&select=id,email,last_ip", headers, HTTPClient.METHOD_GET)');
+    L.push('');
+    L.push('func ban_player(target_user_id: String, reason: String = "Banned by administrator") -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token, "Prefer: params=single-object"]');
+    L.push('\tvar body = {"target_user_id": target_user_id, "banned_by_id": current_user.get("user", {}).get("id", ""), "ban_reason": reason}');
+    L.push('\treturn _make_request("ban_player", SUPABASE_URL + "/rest/v1/rpc/ban_player", headers, HTTPClient.METHOD_POST, JSON.stringify(body))');
+    L.push('');
+    L.push('func unban_player(target_user_id: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token, "Prefer: params=single-object"]');
+    L.push('\treturn _make_request("unban_player", SUPABASE_URL + "/rest/v1/rpc/unban_player", headers, HTTPClient.METHOD_POST, JSON.stringify({"target_user_id": target_user_id}))');
+    L.push('');
+    L.push('func get_ban_history(user_id: String) -> int:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return ERR_UNAUTHORIZED');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\treturn _make_request("get_ban_history", SUPABASE_URL + "/rest/v1/ban_history?user_id=eq." + user_id + "&order=banned_at.desc", headers, HTTPClient.METHOD_GET)');
+    L.push('');
+  }
+
+  if (store) {
+    L.push('# ── Store / Purchases ────────────────────────────────────────────');
+    L.push('func get_all_products() -> Dictionary:');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + SUPABASE_KEY]');
+    L.push('\tvar http = HTTPRequest.new(); add_child(http)');
+    L.push('\tvar error = http.request(SUPABASE_URL + "/rest/v1/products?enabled=eq.true&order=category.asc", headers, HTTPClient.METHOD_GET)');
+    L.push('\tif error != OK: http.queue_free(); return {"success": false, "message": "Request failed"}');
+    L.push('\tvar response = await http.request_completed; http.queue_free()');
+    L.push('\tif response[1] == 200:');
+    L.push('\t\tvar json = JSON.new()');
+    L.push('\t\tif json.parse(response[3].get_string_from_utf8()) == OK:');
+    L.push('\t\t\treturn {"success": true, "products": json.get_data()}');
+    L.push('\treturn {"success": false, "message": "Failed to load products"}');
+    L.push('');
+    L.push('func get_user_purchases(user_id: String) -> Dictionary:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return {"success": false, "message": "Not authenticated"}');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\tvar http = HTTPRequest.new(); add_child(http)');
+    L.push('\tvar error = http.request(SUPABASE_URL + "/rest/v1/purchases?user_id=eq." + user_id + "&select=*", headers, HTTPClient.METHOD_GET)');
+    L.push('\tif error != OK: http.queue_free(); return {"success": false, "message": "Request failed"}');
+    L.push('\tvar response = await http.request_completed; http.queue_free()');
+    L.push('\tif response[1] == 200:');
+    L.push('\t\tvar json = JSON.new()');
+    L.push('\t\tif json.parse(response[3].get_string_from_utf8()) == OK:');
+    L.push('\t\t\treturn {"success": true, "purchases": json.get_data()}');
+    L.push('\treturn {"success": false, "message": "Failed to load purchases"}');
+    L.push('');
+    L.push('func redeem_item(user_id: String, item_id: String, code: String) -> Dictionary:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return {"success": false, "message": "Not authenticated"}');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\tvar http = HTTPRequest.new(); add_child(http)');
+    L.push('\tvar error = http.request(SUPABASE_URL + "/rest/v1/rpc/redeem_item", headers, HTTPClient.METHOD_POST, JSON.stringify({"p_user_id": user_id, "p_item_id": item_id, "p_code": code}))');
+    L.push('\tif error != OK: http.queue_free(); return {"success": false, "message": "Request failed"}');
+    L.push('\tvar response = await http.request_completed; http.queue_free()');
+    L.push('\tif response[1] == 200:');
+    L.push('\t\tvar json = JSON.new()');
+    L.push('\t\tif json.parse(response[3].get_string_from_utf8()) == OK: return json.get_data()');
+    L.push('\treturn {"success": false, "message": "Redemption failed"}');
+    L.push('');
+    L.push('func get_redeemed_items(user_id: String) -> Dictionary:');
+    L.push('\tvar access_token = current_user.get("access_token", "")');
+    L.push('\tif access_token.is_empty(): return {"success": false, "message": "Not authenticated"}');
+    L.push('\tvar headers = ["Content-Type: application/json", "apikey: " + SUPABASE_KEY, "Authorization: Bearer " + access_token]');
+    L.push('\tvar http = HTTPRequest.new(); add_child(http)');
+    L.push('\tvar error = http.request(SUPABASE_URL + "/rest/v1/rpc/get_redeemed_items", headers, HTTPClient.METHOD_POST, JSON.stringify({"p_user_id": user_id}))');
+    L.push('\tif error != OK: http.queue_free(); return {"success": false, "message": "Request failed"}');
+    L.push('\tvar response = await http.request_completed; http.queue_free()');
+    L.push('\tif response[1] == 200:');
+    L.push('\t\tvar json = JSON.new()');
+    L.push('\t\tif json.parse(response[3].get_string_from_utf8()) == OK: return {"success": true, "items": json.get_data()}');
+    L.push('\treturn {"success": false, "message": "Failed to get redeemed items"}');
+  }
+
+  return L.join('\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   auth_scene.gd
+══════════════════════════════════════════════════════════════ */
+function buildAuth(aln, homeScn, authScn, resetScn, emailN, passN, loginB, regB, forgotB, msgL, tabN, profiles, reset, tabs, autologin) {
+  const L = [];
+
+  L.push('extends Control');
+  L.push('');
+  L.push('@onready var email_input:     LineEdit      = $"' + emailN + '"');
+  L.push('@onready var password_input:  LineEdit      = $"' + passN + '"');
+  L.push('@onready var login_button:    Button        = $"' + loginB + '"');
+  L.push('@onready var register_button: Button        = $"' + regB + '"');
+  if (reset) L.push('@onready var forgot_button:   Button        = $"' + forgotB + '"');
+  L.push('@onready var message_label:   Label         = $"' + msgL + '"');
+  if (tabs) L.push('@onready var auth_tabs:       TabContainer  = $"' + tabN + '"');
+  L.push('');
+  L.push('var is_login_only: bool = false');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\tis_login_only = GameManager.get_came_from_login()');
+  L.push('\tlogin_button.pressed.connect(_on_login_pressed)');
+  L.push('\tregister_button.pressed.connect(_on_register_pressed)');
+  if (reset) L.push('\tforgot_button.pressed.connect(_on_forgot_pressed)');
+  L.push('\tif not ' + aln + '.supabase_response.is_connected(_on_supabase_response):');
+  L.push('\t\t' + aln + '.supabase_response.connect(_on_supabase_response)');
+  if (tabs) {
+    L.push('\tauth_tabs.tab_changed.connect(_on_tab_changed)');
+    L.push('\tif is_login_only:');
+    L.push('\t\tauth_tabs.current_tab = 0');
+    L.push('\t\tregister_button.visible = false');
+    if (reset) L.push('\t\tforgot_button.visible = true');
+    L.push('\telse:');
+    L.push('\t\t_on_tab_changed(0)');
+  }
+  L.push('');
+  if (tabs) {
+    L.push('func _on_tab_changed(tab: int) -> void:');
+    L.push('\tif is_login_only: auth_tabs.current_tab = 0; return');
+    L.push('\tlogin_button.visible    = (tab == 0)');
+    L.push('\tregister_button.visible = (tab == 1)');
+    if (reset) L.push('\tforgot_button.visible   = (tab == 0)');
+    L.push('\temail_input.text    = ""');
+    L.push('\tpassword_input.text = ""');
+    L.push('\tmessage_label.text  = ""');
+    L.push('');
+  }
+  L.push('func _on_login_pressed() -> void:');
+  L.push('\tvar email    = email_input.text.strip_edges()');
+  L.push('\tvar password = password_input.text');
+  L.push('\tif email.is_empty() or password.is_empty():');
+  L.push('\t\tshow_message("Please fill all fields", Color.RED); return');
+  L.push('\tif not _is_valid_email(email):');
+  L.push('\t\tshow_message("Please enter a valid email address", Color.RED); return');
+  L.push('\tshow_message("Logging in...", Color.YELLOW)');
+  L.push('\t' + aln + '.sign_in_with_email(email, password)');
+  L.push('');
+  L.push('func _on_register_pressed() -> void:');
+  L.push('\tvar email    = email_input.text.strip_edges()');
+  L.push('\tvar password = password_input.text');
+  L.push('\tif email.is_empty() or password.is_empty():');
+  L.push('\t\tshow_message("Please fill all fields", Color.RED); return');
+  L.push('\tif password.length() < 6:');
+  L.push('\t\tshow_message("Password must be at least 6 characters", Color.RED); return');
+  L.push('\tif not _is_valid_email(email):');
+  L.push('\t\tshow_message("Please enter a valid email address", Color.RED); return');
+  L.push('\tshow_message("Creating account...", Color.YELLOW)');
+  L.push('\t' + aln + '.sign_up_no_confirm(email, password)');
+  L.push('');
+  if (reset) {
+    L.push('func _on_forgot_pressed() -> void:');
+    L.push('\tget_tree().change_scene_to_file("' + resetScn + '")');
+    L.push('');
+  }
+  L.push('func show_message(text: String, color: Color = Color.WHITE) -> void:');
+  L.push('\tmessage_label.text     = text');
+  L.push('\tmessage_label.modulate = color');
+  L.push('');
+  L.push('func _is_valid_email(email: String) -> bool:');
+  L.push('\tvar re = RegEx.new()');
+  L.push('\tre.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$")');
+  L.push('\treturn re.search(email) != null');
+  L.push('');
+  L.push('func _on_supabase_response(purpose: String, _result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:');
+  L.push('\tvar response_body = body.get_string_from_utf8()');
+  L.push('\tmatch purpose:');
+  L.push('\t\t"login":         _handle_login(response_code, response_body)');
+  L.push('\t\t"signup":        _handle_signup(response_code, response_body)');
+  if (profiles) {
+    L.push('\t\t"get_profile":   _handle_profile_check(response_code, response_body)');
+    L.push('\t\t"create_profile": _handle_profile_created(response_code, response_body)');
+  }
+  L.push('');
+  L.push('func _handle_login(response_code: int, response_body: String) -> void:');
+  L.push('\tif response_code != 200: _handle_error(response_body, response_code); return');
+  L.push('\tvar json = JSON.new()');
+  L.push('\tif json.parse(response_body) != OK: show_message("Login failed: Invalid response", Color.RED); return');
+  L.push('\tvar response = json.get_data()');
+  L.push('\tif not response.has("access_token"): show_message("Login failed: No access token", Color.RED); return');
+  L.push('\t' + aln + '.current_user = response');
+  L.push('\tvar user_id = response.get("user", {}).get("id", "")');
+  L.push('\tvar email   = response.get("user", {}).get("email", "")');
+  L.push('\tif user_id.is_empty(): show_message("Login failed: Invalid user data", Color.RED); return');
+  if (autologin) {
+    L.push('\tvar password = password_input.text');
+    L.push('\tif not email.is_empty() and not password.is_empty():');
+    L.push('\t\tGameManager.save_login_credentials(email, password)');
+  }
+  if (profiles) {
+    L.push('\tshow_message("Loading profile...", Color.YELLOW)');
+    L.push('\t' + aln + '.get_user_profile(user_id)');
+  } else {
+    L.push('\tshow_message("Success! Logged in.", Color.GREEN)');
+    L.push('\t_go_home()');
+  }
+  L.push('');
+  L.push('func _handle_signup(response_code: int, response_body: String) -> void:');
+  L.push('\tif response_code != 200: _handle_error(response_body, response_code); return');
+  L.push('\tvar json = JSON.new()');
+  L.push('\tif json.parse(response_body) != OK: show_message("Registration failed: Invalid response", Color.RED); return');
+  L.push('\tvar response = json.get_data()');
+  L.push('\tvar user_id = response.get("user", {}).get("id", "") if response.has("user") else response.get("id", "")');
+  L.push('\tvar email   = response.get("user", {}).get("email", "") if response.has("user") else response.get("email", "")');
+  L.push('\tif user_id.is_empty(): show_message("Registration failed: No user ID", Color.RED); return');
+  L.push('\t' + aln + '.current_user = response');
+  if (autologin) {
+    L.push('\tvar password = password_input.text');
+    L.push('\tif not email.is_empty() and not password.is_empty():');
+    L.push('\t\tGameManager.save_login_credentials(email, password)');
+  }
+  if (profiles) {
+    L.push('\tshow_message("Account created!", Color.GREEN)');
+    L.push('\tcall_deferred("_create_profile_after_signup", user_id, email)');
+  } else {
+    L.push('\tshow_message("Account created!", Color.GREEN)');
+    L.push('\t_go_home()');
+  }
+  L.push('');
+  if (profiles) {
+    L.push('func _create_profile_after_signup(user_id: String, email: String) -> void:');
+    L.push('\tvar username = email.split("@")[0]');
+    L.push('\tshow_message("Creating your profile...", Color.YELLOW)');
+    L.push('\t' + aln + '.create_user_profile(user_id, username)');
+    L.push('');
+    L.push('func _handle_profile_check(response_code: int, response_body: String) -> void:');
+    L.push('\tif response_code == 401 or response_code == 403:');
+    L.push('\t\tshow_message("Session expired. Please login again.", Color.RED)');
+    L.push('\t\tcall_deferred("_delayed_go_login"); return');
+    L.push('\tif response_code != 200: show_message("Failed to load profile", Color.RED); return');
+    L.push('\tvar json = JSON.new()');
+    L.push('\tif json.parse(response_body) != OK: show_message("Failed to load profile", Color.RED); return');
+    L.push('\tvar data = json.get_data()');
+    L.push('\tvar user_id = ' + aln + '.current_user.get("user", {}).get("id", "")');
+    L.push('\tvar email   = ' + aln + '.current_user.get("user", {}).get("email", "")');
+    L.push('\tif data is Array and data.size() > 0:');
+    L.push('\t\tvar profile = data[0]');
+    L.push('\t\tvar player_data = {"user_id": user_id, "email": email, "username": profile.get("username", profile.get("display_name", "Player")), "supabase_session": ' + aln + '.current_user}');
+    L.push('\t\tGameManager.save_player_data(player_data)');
+    L.push('\t\tshow_message("Welcome back!", Color.GREEN)');
+    L.push('\t\t_go_home()');
+    L.push('\telse:');
+    L.push('\t\tvar username = email.split("@")[0]');
+    L.push('\t\tshow_message("Creating your profile...", Color.YELLOW)');
+    L.push('\t\t' + aln + '.create_user_profile(user_id, username)');
+    L.push('');
+    L.push('func _handle_profile_created(response_code: int, response_body: String) -> void:');
+    L.push('\tif response_code == 201 or response_code == 200 or response_code == 409:');
+    L.push('\t\tvar user_id  = ' + aln + '.current_user.get("user", {}).get("id", "")');
+    L.push('\t\tvar email    = ' + aln + '.current_user.get("user", {}).get("email", "")');
+    L.push('\t\tvar username = email.split("@")[0]');
+    L.push('\t\tvar player_data = {"user_id": user_id, "email": email, "username": username, "supabase_session": ' + aln + '.current_user}');
+    L.push('\t\tGameManager.save_player_data(player_data)');
+    L.push('\t\tshow_message("Profile ready!", Color.GREEN)');
+    L.push('\t\t_go_home(); return');
+    L.push('\tvar json = JSON.new()');
+    L.push('\tvar error_msg = "Failed to create profile"');
+    L.push('\tif json.parse(response_body) == OK:');
+    L.push('\t\terror_msg = json.get_data().get("message", error_msg)');
+    L.push('\tshow_message("Error: " + error_msg, Color.RED)');
+    L.push('\tcall_deferred("_delayed_go_login")');
+    L.push('');
+  }
+  L.push('func _handle_error(response_body: String, _code: int) -> void:');
+  L.push('\tif response_body.is_empty(): show_message("Authentication failed", Color.RED); return');
+  L.push('\tvar json = JSON.new()');
+  L.push('\tif json.parse(response_body) != OK: show_message("Error parsing response", Color.RED); return');
+  L.push('\tvar r = json.get_data()');
+  L.push('\tvar msg = r.get("error_description", r.get("msg", r.get("message", r.get("error", "Authentication failed"))))');
+  L.push('\tif "Invalid login credentials" in msg or "invalid_grant" in msg:');
+  L.push('\t\tshow_message("Invalid email or password", Color.RED)');
+  L.push('\telif "already registered" in msg or "already exists" in msg:');
+  L.push('\t\tshow_message("Account already exists. Please login instead.", Color.RED)');
+  L.push('\telif "User not found" in msg or "does not exist" in msg:');
+  L.push('\t\tshow_message("No account found with this email", Color.RED)');
+  L.push('\telse:');
+  L.push('\t\tshow_message("Error: " + msg, Color.RED)');
+  L.push('');
+  L.push('func _go_home() -> void:');
+  L.push('\tcall_deferred("_deferred_go_home")');
+  L.push('');
+  L.push('func _deferred_go_home() -> void:');
+  L.push('\tget_tree().change_scene_to_file("' + homeScn + '")');
+  L.push('');
+  L.push('func _delayed_go_login() -> void:');
+  L.push('\tawait get_tree().create_timer(2.0).timeout');
+  L.push('\tGameManager.set_came_from_login(false)');
+  L.push('\tget_tree().change_scene_to_file("' + authScn + '")');
+
+  return L.join('\n');
+}
+
+/* ── TOKENIZER ── */
+function highlight(code) {
+  const KW  = new Set(['extends','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','signal','@export','@onready','call_deferred']);
+  const TYPE = new Set(['float','int','bool','String','void','Dictionary','Array','PackedStringArray','PackedByteArray','Color','LineEdit','Button','Label','TabContainer','Control','RegEx','HTTPRequest','HTTPClient']);
+  const FN  = new Set(['_ready','sign_up_no_confirm','sign_in_with_email','reset_password','update_password','sign_out','create_user_profile','get_user_profile','check_username_exists','update_username','update_player_ip','check_if_banned','ban_player','unban_player','get_ban_history','get_all_products','get_user_purchases','redeem_item','get_redeemed_items','show_message','_is_valid_email','_on_supabase_response','_handle_login','_handle_signup','_handle_profile_check','_handle_profile_created','_handle_error','_go_home','_deferred_go_home','_delayed_go_login','_create_profile_after_signup','_on_tab_changed','_on_login_pressed','_on_register_pressed','_on_forgot_pressed','emit_signal','push_error','error_string','is_empty','get','has','append','join','split','parse','stringify','get_data','get_string_from_utf8','change_scene_to_file','create_timer','queue_free','request','add_child','connect','search','compile','strip_edges']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])){let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id, btn){
+  const el=$(id);
+  const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

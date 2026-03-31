@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inventory Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+    --border:#2a2f37;--border2:#343b45;
+    --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+    --amber:#fbbf24;--amber2:#d97706;
+    --amber-dim:rgba(251,191,36,0.10);--amber-dim2:rgba(251,191,36,0.06);
+    --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);
+    --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+    --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+    --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+    --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+    --tap:52px;--r:10px;--rl:14px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+  .header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+  .back-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:20px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+  .back-btn:active{background:var(--bg4);}
+  .header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+  .header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--amber);background:var(--amber-dim);border:1px solid var(--amber2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+  .page{padding:16px 16px 100px;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+  /* FILE TABS */
+  .file-tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+  .file-tabs{display:flex;gap:6px;min-width:max-content;padding:2px;}
+  .file-tab{padding:10px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .file-tab .tab-file{font-size:10px;color:var(--text3);}
+  .file-tab:active{background:var(--bg3);}
+  .file-tab.active{background:var(--amber-dim2);border-color:var(--amber2);color:var(--amber);}
+  .file-tab.active .tab-file{color:var(--amber);}
+
+  .file-pane{display:none;flex-direction:column;gap:12px;}
+  .file-pane.active{display:flex;}
+
+  /* CARD */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+  .card-dot.green{background:var(--green);}
+  .card-dot.blue{background:var(--blue);}
+  .card-dot.coral{background:var(--coral);}
+  .card-dot.purple{background:var(--purple);}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+  .card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .key-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  select,input[type="text"],input[type="number"]{
+    width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);
+    border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;
+    padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;
+  }
+  select:focus,input:focus{border-color:var(--amber2);}
+
+  .toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+  .toggle-item.active{background:var(--amber-dim2);border-color:var(--amber2);}
+  .toggle-item:active{background:var(--bg4);}
+  .toggle-item input[type="checkbox"]{display:none;}
+  .chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .toggle-item.active .chk-box{background:var(--amber);border-color:var(--amber);}
+  .chk-mark{display:none;}
+  .toggle-item.active .chk-mark{display:block;}
+  .toggle-label{flex:1;font-size:14px;font-weight:500;}
+  .toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  .sub{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;}
+
+  .hint{background:var(--bg4);border-left:2px solid var(--amber2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+  .hint.green{border-left-color:var(--green2);}
+  .hint.blue{border-left-color:var(--blue2);}
+  .hint.coral{border-left-color:var(--coral);}
+
+  /* CUSTOM FIELD ROWS */
+  .custom-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:grid;gap:6px;}
+  .custom-row-top{display:grid;grid-template-columns:1fr 110px 36px;gap:6px;align-items:center;}
+  .custom-row-top input,.custom-row-top select{height:44px;font-size:13px;}
+  .custom-row-extra{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .custom-row-extra input,.custom-row-extra select{height:40px;font-size:12px;}
+
+  .remove-btn{width:36px;height:44px;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--coral);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .remove-btn:active{background:var(--coral-dim);}
+  .add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border:1px dashed var(--border2);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;width:100%;}
+  .add-btn:active{background:var(--bg4);border-color:var(--amber2);color:var(--amber);}
+
+  /* UI FIELD ROWS */
+  .ui-field-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+  .ui-field-top{display:grid;grid-template-columns:1fr 1fr 36px;gap:6px;align-items:center;}
+  .ui-field-top input,.ui-field-top select{height:44px;font-size:13px;}
+  .ui-field-header{display:grid;grid-template-columns:1fr 1fr 36px;gap:6px;padding:0 2px;}
+  .ui-field-header span{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  .gen-btn{width:100%;height:56px;background:var(--amber-dim);border:1px solid var(--amber2);border-radius:var(--rl);color:var(--amber);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .gen-btn:active{background:rgba(251,191,36,0.2);transform:scale(0.99);}
+
+  /* OUTPUT */
+  .out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+  .out-tag.item{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber2);}
+  .out-tag.inv{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+  .out-tag.ui{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+  .out-tag.slot{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(192,132,252,0.4);}
+  .out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .copy-btn{margin-left:auto;padding:8px 14px;min-height:36px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .copy-btn:active{background:var(--bg3);}
+  .copy-btn.copied{color:var(--green);border-color:var(--green2);}
+  .out-code{padding:14px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+  .out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+  .kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
+
+  .hidden{display:none!important;}
+
+  @media(min-width:560px){.page{padding:24px 24px 80px;}}
+  @media(min-width:800px){
+    .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+    .form-col{flex:0 0 360px;display:flex;flex-direction:column;gap:12px;}
+    .out-col{flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="index.html">‹</a>
+  <div>
+    <div class="header-title">Inventory Generator</div>
+    <div class="header-sub">Item.gd · Inventory.gd · InventoryUI.gd · SlotPanel.gd</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- FILE TABS -->
+  <div class="file-tabs-wrap">
+    <div class="file-tabs">
+      <button class="file-tab active" data-pane="item"  onclick="switchFile('item')">Item Resource<span class="tab-file">Item.gd</span></button>
+      <button class="file-tab"        data-pane="inv"   onclick="switchFile('inv')">Inventory<span class="tab-file">Inventory.gd</span></button>
+      <button class="file-tab"        data-pane="ui"    onclick="switchFile('ui')">UI<span class="tab-file">InventoryUI.gd</span></button>
+      <button class="file-tab"        data-pane="slot"  onclick="switchFile('slot')">Slot Panel<span class="tab-file">SlotPanel.gd</span></button>
+    </div>
+  </div>
+
+  <!-- ══ ITEM RESOURCE TAB ══ -->
+  <div class="file-pane active" id="pane-item">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Item Resource — Core Fields</span></div>
+      <div class="card-body">
+        <div class="hint">These are the built-in fields every item has. All become @export vars in Item.gd so you can fill them in the Godot inspector per .tres file.</div>
+        <div class="field"><div class="field-label">class name</div><input type="text" id="item_class" value="Item"></div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">id field name</div><input type="text" id="item_id" value="id"></div>
+          <div class="field"><div class="field-label">name field name</div><input type="text" id="item_name" value="item_name"></div>
+        </div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">texture field name</div><input type="text" id="item_tex" value="texture"></div>
+          <div class="field"><div class="field-label">stack capacity field</div><input type="text" id="item_stack" value="stack_capacity"></div>
+        </div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">space occupied field</div><input type="text" id="item_space" value="space_occupied"></div>
+          <div class="field"><div class="field-label">default stack capacity</div><input type="number" id="item_stack_default" value="1"></div>
+        </div>
+        <div class="toggle-item" id="tog-item_3d" onclick="togItem('item_3d')">
+          <input type="checkbox" id="item_3d">
+          <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">3D model field</span>
+          <span class="toggle-hint">PackedScene (optional)</span>
+        </div>
+        <div class="sub hidden" id="sub-item_3d">
+          <div class="field"><div class="field-label">3D model field name</div><input type="text" id="item_model" value="model_3d"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Remove Mode</span></div>
+      <div class="card-body">
+        <div class="hint">When a stack is dragged out of the inventory — remove the whole stack, or just deduct one item.</div>
+        <div class="field">
+          <div class="field-label">remove_mode field name</div>
+          <input type="text" id="item_remove_mode" value="remove_mode">
+        </div>
+        <div class="field">
+          <div class="field-label">enum values</div>
+          <div class="key-grid">
+            <input type="text" id="rm_full" value="FULL_STACK" placeholder="full stack value">
+            <input type="text" id="rm_one"  value="ONE_BY_ONE" placeholder="one by one value">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Custom Item Fields</span></div>
+      <div class="card-body">
+        <div class="hint">Extra @export fields added to Item.gd — e.g. category, description, damage, weight.</div>
+        <div id="customItemFields"></div>
+        <button class="add-btn" onclick="addItemField()">+ Add Custom Field</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INVENTORY TAB ══ -->
+  <div class="file-pane" id="pane-inv">
+    <div class="card">
+      <div class="card-head"><div class="card-dot green"></div><span class="card-title">Inventory Settings</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">autoload name (in Project Settings)</div><input type="text" id="inv_autoload" value="Inventory"></div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">slot count</div><input type="number" id="inv_slots" value="20"></div>
+          <div class="field"><div class="field-label">slots array name</div><input type="text" id="inv_arr" value="slots"></div>
+        </div>
+        <div class="hint green">Each slot is a Dictionary: { "item": Item, "quantity": int } or null if empty.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot green"></div><span class="card-title">Signals</span></div>
+      <div class="card-body">
+        <div class="key-grid">
+          <div class="field"><div class="field-label">item_added signal</div><input type="text" id="sig_added" value="item_added"></div>
+          <div class="field"><div class="field-label">item_removed signal</div><input type="text" id="sig_removed" value="item_removed"></div>
+        </div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">inventory_full signal</div><input type="text" id="sig_full" value="inventory_full"></div>
+          <div class="field"><div class="field-label">slot_updated signal</div><input type="text" id="sig_updated" value="slot_updated"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ UI TAB ══ -->
+  <div class="file-pane" id="pane-ui">
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">InventoryUI — Export Vars</span></div>
+      <div class="card-body">
+        <div class="hint blue">These become @export vars on the InventoryUI root node. Assign them in the Godot inspector — no hardcoded paths in code.</div>
+        <div class="field"><div class="field-label">script class name</div><input type="text" id="ui_class" value="InventoryUI"></div>
+        <div class="field"><div class="field-label">GridContainer export var name</div><input type="text" id="ui_grid" value="grid"></div>
+        <div class="field"><div class="field-label">Slot template PackedScene export var name</div><input type="text" id="ui_template" value="slot_template"></div>
+        <div class="field"><div class="field-label">Texture NodePath export var name</div><input type="text" id="ui_tex_path" value="texture_path"></div>
+        <div class="field"><div class="field-label">Quantity Label NodePath export var name</div><input type="text" id="ui_qty_path" value="quantity_path"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Custom UI Field Bindings</span></div>
+      <div class="card-body">
+        <div class="hint blue">Each binding is an @export NodePath on InventoryUI. Assign the label/node in inspector. The generator wires it to the matching item field.</div>
+        <div class="ui-field-header"><span>export var name</span><span>item field it shows</span><span></span></div>
+        <div id="uiFieldRows"></div>
+        <button class="add-btn" onclick="addUIField()">+ Add UI Field Binding</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SLOT PANEL TAB ══ -->
+  <div class="file-pane" id="pane-slot">
+    <div class="card">
+      <div class="card-head"><div class="card-dot purple"></div><span class="card-title">SlotPanel — Drag & Drop</span></div>
+      <div class="card-body">
+        <div class="hint coral">SlotPanel.gd is attached to each duplicated panel node. It handles all drag and drop logic using Godot 4's built-in system.</div>
+        <div class="field"><div class="field-label">script class name</div><input type="text" id="slot_class" value="SlotPanel"></div>
+        <div class="field"><div class="field-label">slot index var name</div><input type="text" id="slot_idx" value="slot_index"></div>
+        <div class="field"><div class="field-label">inventory UI parent var name</div><input type="text" id="slot_ui_ref" value="inventory_ui"></div>
+        <div class="field"><div class="field-label">drag preview scene export var</div><input type="text" id="slot_preview" value="drag_preview"></div>
+        <div class="hint">Drop outside inventory area respects item's remove_mode — FULL_STACK removes all, ONE_BY_ONE deducts 1.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate All 4 Scripts</button>
+
+</div><!-- form-col -->
+
+<div class="out-col">
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag item">Item.gd</span><span class="out-sub">save as Resource, make .tres</span><button class="copy-btn" onclick="copyOut('itemOut',this)">Copy</button></div>
+    <div class="out-code empty" id="itemOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag inv">Inventory.gd</span><span class="out-sub">add as Autoload singleton</span><button class="copy-btn" onclick="copyOut('invOut',this)">Copy</button></div>
+    <div class="out-code empty" id="invOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag ui">InventoryUI.gd</span><span class="out-sub">attach to inventory scene root</span><button class="copy-btn" onclick="copyOut('uiOut',this)">Copy</button></div>
+    <div class="out-code empty" id="uiOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag slot">SlotPanel.gd</span><span class="out-sub">attach to slot template scene root</span><button class="copy-btn" onclick="copyOut('slotOut',this)">Copy</button></div>
+    <div class="out-code empty" id="slotOut"># tap Generate to produce code</div>
+  </div>
+</div>
+</div><!-- page -->
+
+<script>
+const $=id=>document.getElementById(id);
+let activeFile='item';
+const togStates={};
+let itemFieldCount=0, uiFieldCount=0;
+
+function switchFile(f){
+  activeFile=f;
+  document.querySelectorAll('.file-tab').forEach(t=>t.classList.toggle('active',t.dataset.pane===f));
+  document.querySelectorAll('.file-pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+f));
+}
+
+function togItem(id){
+  togStates[id]=!togStates[id];
+  $('tog-'+id).classList.toggle('active',togStates[id]);
+  const sub=$('sub-'+id);
+  if(sub) sub.classList.toggle('hidden',!togStates[id]);
+}
+function tog(id){return !!togStates[id];}
+
+/* CUSTOM ITEM FIELDS */
+function addItemField(){
+  const id=++itemFieldCount;
+  const div=document.createElement('div');
+  div.className='custom-row'; div.id='ifield-'+id;
+  div.innerHTML=`
+    <div class="custom-row-top">
+      <input type="text" placeholder="field_name" id="ifname-${id}">
+      <select id="iftype-${id}">
+        <option>String</option><option>int</option><option>float</option><option>bool</option><option>Texture2D</option><option>PackedScene</option>
+      </select>
+      <button class="remove-btn" onclick="removeEl('ifield-${id}')">×</button>
+    </div>
+    <div class="custom-row-extra">
+      <div class="field"><div class="field-label" style="font-size:10px">default value (optional)</div><input type="text" id="ifdefault-${id}" placeholder="e.g. 0 or &quot;sword&quot;"></div>
+      <div class="field"><div class="field-label" style="font-size:10px">@export hint (optional)</div><input type="text" id="ifhint-${id}" placeholder='e.g. MULTILINE_TEXT'></div>
+    </div>
+  `;
+  $('customItemFields').appendChild(div);
+}
+
+/* UI FIELD BINDINGS */
+function addUIField(){
+  const id=++uiFieldCount;
+  const div=document.createElement('div');
+  div.className='ui-field-row'; div.id='uifield-'+id;
+  div.innerHTML=`
+    <div class="ui-field-top">
+      <input type="text" placeholder="export var name e.g. name_path" id="uiexport-${id}">
+      <input type="text" placeholder="item field e.g. item_name" id="uiitemfield-${id}">
+      <button class="remove-btn" onclick="removeEl('uifield-${id}')">×</button>
+    </div>
+    <div class="field"><div class="field-label" style="font-size:10px">value type (for correct assignment)</div>
+      <select id="uifieldtype-${id}" style="height:40px;font-size:12px">
+        <option value="text">String — .text = item.field</option>
+        <option value="texture">Texture2D — .texture = item.field</option>
+        <option value="int">int/float — .text = str(item.field)</option>
+        <option value="bool">bool — .visible = item.field</option>
+      </select>
+    </div>
+  `;
+  $('uiFieldRows').appendChild(div);
+}
+
+function removeEl(id){const el=$(id);if(el)el.remove();}
+
+function v(id,fb){const el=$(id);return el&&el.value.trim()?el.value.trim():fb;}
+
+function getItemFields(){
+  const fields=[];
+  document.querySelectorAll('[id^="ifield-"]').forEach(r=>{
+    const id=r.id.replace('ifield-','');
+    const name=$('ifname-'+id)?.value.trim();
+    if(!name)return;
+    fields.push({name,type:$('iftype-'+id)?.value||'String',def:$('ifdefault-'+id)?.value.trim(),hint:$('ifhint-'+id)?.value.trim()});
+  });
+  return fields;
+}
+
+function getUIFields(){
+  const fields=[];
+  document.querySelectorAll('[id^="uifield-"]').forEach(r=>{
+    const id=r.id.replace('uifield-','');
+    const exp=$('uiexport-'+id)?.value.trim();
+    const itemf=$('uiitemfield-'+id)?.value.trim();
+    if(!exp||!itemf)return;
+    fields.push({export:exp,itemField:itemf,vtype:$('uifieldtype-'+id)?.value||'text'});
+  });
+  return fields;
+}
+
+function generate(){
+  const itemClass  = v('item_class','Item');
+  const fId        = v('item_id','id');
+  const fName      = v('item_name','item_name');
+  const fTex       = v('item_tex','texture');
+  const fStack     = v('item_stack','stack_capacity');
+  const fSpace     = v('item_space','space_occupied');
+  const stackDef   = v('item_stack_default','1');
+  const fModel     = v('item_model','model_3d');
+  const fRemMode   = v('item_remove_mode','remove_mode');
+  const rmFull     = v('rm_full','FULL_STACK');
+  const rmOne      = v('rm_one','ONE_BY_ONE');
+  const has3d      = tog('item_3d');
+  const customFields = getItemFields();
+
+  const autoload   = v('inv_autoload','Inventory');
+  const slots      = v('inv_slots','20');
+  const arr        = v('inv_arr','slots');
+  const sigAdded   = v('sig_added','item_added');
+  const sigRemoved = v('sig_removed','item_removed');
+  const sigFull    = v('sig_full','inventory_full');
+  const sigUpdated = v('sig_updated','slot_updated');
+
+  const uiClass    = v('ui_class','InventoryUI');
+  const uiGrid     = v('ui_grid','grid');
+  const uiTemplate = v('ui_template','slot_template');
+  const uiTexPath  = v('ui_tex_path','texture_path');
+  const uiQtyPath  = v('ui_qty_path','quantity_path');
+  const uiFields   = getUIFields();
+
+  const slotClass  = v('slot_class','SlotPanel');
+  const slotIdx    = v('slot_idx','slot_index');
+  const slotUIRef  = v('slot_ui_ref','inventory_ui');
+  const slotPrev   = v('slot_preview','drag_preview');
+
+  /* ── ITEM.GD ── */
+  const il=[];
+  il.push(`# Item.gd — extend this as a Resource, save instances as .tres`);
+  il.push(`class_name ${itemClass}`);
+  il.push(`extends Resource`);
+  il.push(``);
+  il.push(`enum RemoveMode { ${rmFull}, ${rmOne} }`);
+  il.push(``);
+  il.push(`# Core fields`);
+  il.push(`@export var ${fId}: String = ""`);
+  il.push(`@export var ${fName}: String = ""`);
+  il.push(`@export var ${fTex}: Texture2D`);
+  if(has3d) il.push(`@export var ${fModel}: PackedScene`);
+  il.push(`@export var ${fStack}: int = ${stackDef}`);
+  il.push(`@export var ${fSpace}: int = 1`);
+  il.push(`@export var ${fRemMode}: RemoveMode = RemoveMode.${rmFull}`);
+  if(customFields.length>0){
+    il.push(``);
+    il.push(`# Custom fields`);
+    customFields.forEach(f=>{
+      let line=`@export`;
+      if(f.hint) line+=` @export_enum("${f.hint}")`;
+      line+=` var ${f.name}: ${f.type}`;
+      if(f.def) line+=` = ${f.def}`;
+      il.push(line);
+    });
+  }
+
+  /* ── INVENTORY.GD ── */
+  const inv=[];
+  inv.push(`# Inventory.gd — add to AutoLoad in Project Settings as "${autoload}"`);
+  inv.push(`extends Node`);
+  inv.push(``);
+  inv.push(`signal ${sigAdded}(item: ${itemClass}, quantity: int)`);
+  inv.push(`signal ${sigRemoved}(item: ${itemClass}, quantity: int)`);
+  inv.push(`signal ${sigFull}`);
+  inv.push(`signal ${sigUpdated}(slot_index: int)`);
+  inv.push(``);
+  inv.push(`const SLOT_COUNT: int = ${slots}`);
+  inv.push(`var ${arr}: Array = []`);
+  inv.push(``);
+  inv.push(`func _ready() -> void:`);
+  inv.push(`\t${arr}.resize(SLOT_COUNT)`);
+  inv.push(`\tfor i in SLOT_COUNT:`);
+  inv.push(`\t\t${arr}[i] = null`);
+  inv.push(``);
+  inv.push(`# Returns true if item was fully added, false if inventory is full`);
+  inv.push(`func add_item(item: ${itemClass}, quantity: int = 1) -> bool:`);
+  inv.push(`\tvar remaining := quantity`);
+  inv.push(`\t# Try to stack onto existing slots first`);
+  inv.push(`\tfor i in SLOT_COUNT:`);
+  inv.push(`\t\tif remaining <= 0:`);
+  inv.push(`\t\t\tbreak`);
+  inv.push(`\t\tif ${arr}[i] != null and ${arr}[i]["item"].${fId} == item.${fId}:`);
+  inv.push(`\t\t\tvar space := item.${fStack} - ${arr}[i]["quantity"]`);
+  inv.push(`\t\t\tif space > 0:`);
+  inv.push(`\t\t\t\tvar add := min(remaining, space)`);
+  inv.push(`\t\t\t\t${arr}[i]["quantity"] += add`);
+  inv.push(`\t\t\t\tremaining -= add`);
+  inv.push(`\t\t\t\temit_signal("${sigUpdated}", i)`);
+  inv.push(`\t# Fill empty slots`);
+  inv.push(`\tfor i in SLOT_COUNT:`);
+  inv.push(`\t\tif remaining <= 0:`);
+  inv.push(`\t\t\tbreak`);
+  inv.push(`\t\tif ${arr}[i] == null:`);
+  inv.push(`\t\t\tvar add := min(remaining, item.${fStack})`);
+  inv.push(`\t\t\t${arr}[i] = { "item": item, "quantity": add }`);
+  inv.push(`\t\t\tremaining -= add`);
+  inv.push(`\t\t\temit_signal("${sigUpdated}", i)`);
+  inv.push(`\tif remaining > 0:`);
+  inv.push(`\t\temit_signal("${sigFull}")`);
+  inv.push(`\t\treturn false`);
+  inv.push(`\temit_signal("${sigAdded}", item, quantity)`);
+  inv.push(`\treturn true`);
+  inv.push(``);
+  inv.push(`# Returns true if item was found and removed`);
+  inv.push(`func remove_item(item_id: String, quantity: int = 1) -> bool:`);
+  inv.push(`\tfor i in SLOT_COUNT:`);
+  inv.push(`\t\tif ${arr}[i] == null:`);
+  inv.push(`\t\t\tcontinue`);
+  inv.push(`\t\tif ${arr}[i]["item"].${fId} == item_id:`);
+  inv.push(`\t\t\tvar item: ${itemClass} = ${arr}[i]["item"]`);
+  inv.push(`\t\t\tif item.${fRemMode} == ${itemClass}.RemoveMode.${rmFull}:`);
+  inv.push(`\t\t\t\temit_signal("${sigRemoved}", item, ${arr}[i]["quantity"])`);
+  inv.push(`\t\t\t\t${arr}[i] = null`);
+  inv.push(`\t\t\telse:`);
+  inv.push(`\t\t\t\t${arr}[i]["quantity"] -= quantity`);
+  inv.push(`\t\t\t\tif ${arr}[i]["quantity"] <= 0:`);
+  inv.push(`\t\t\t\t\t${arr}[i] = null`);
+  inv.push(`\t\t\t\temit_signal("${sigRemoved}", item, quantity)`);
+  inv.push(`\t\t\temit_signal("${sigUpdated}", i)`);
+  inv.push(`\t\t\treturn true`);
+  inv.push(`\treturn false`);
+  inv.push(``);
+  inv.push(`func has_item(item_id: String) -> bool:`);
+  inv.push(`\tfor slot in ${arr}:`);
+  inv.push(`\t\tif slot != null and slot["item"].${fId} == item_id:`);
+  inv.push(`\t\t\treturn true`);
+  inv.push(`\treturn false`);
+  inv.push(``);
+  inv.push(`func get_item(item_id: String) -> Dictionary:`);
+  inv.push(`\tfor slot in ${arr}:`);
+  inv.push(`\t\tif slot != null and slot["item"].${fId} == item_id:`);
+  inv.push(`\t\t\treturn slot`);
+  inv.push(`\treturn {}`);
+  inv.push(``);
+  inv.push(`func get_slot(index: int) -> Dictionary:`);
+  inv.push(`\tif index < 0 or index >= SLOT_COUNT:`);
+  inv.push(`\t\treturn {}`);
+  inv.push(`\treturn ${arr}[index] if ${arr}[index] != null else {}`);
+  inv.push(``);
+  inv.push(`func is_full() -> bool:`);
+  inv.push(`\tfor slot in ${arr}:`);
+  inv.push(`\t\tif slot == null:`);
+  inv.push(`\t\t\treturn false`);
+  inv.push(`\treturn true`);
+  inv.push(``);
+  inv.push(`func move_slot(from: int, to: int) -> void:`);
+  inv.push(`\tif from == to:`);
+  inv.push(`\t\treturn`);
+  inv.push(`\tvar temp = ${arr}[to]`);
+  inv.push(`\t${arr}[to] = ${arr}[from]`);
+  inv.push(`\t${arr}[from] = temp`);
+  inv.push(`\temit_signal("${sigUpdated}", from)`);
+  inv.push(`\temit_signal("${sigUpdated}", to)`);
+  inv.push(``);
+  inv.push(`func clear_slot(index: int) -> void:`);
+  inv.push(`\t${arr}[index] = null`);
+  inv.push(`\temit_signal("${sigUpdated}", index)`);
+
+  /* ── INVENTORYUI.GD ── */
+  const ui=[];
+  ui.push(`# InventoryUI.gd — attach to your inventory scene root node`);
+  ui.push(`# Assign all @export vars in the Godot inspector`);
+  ui.push(`class_name ${uiClass}`);
+  ui.push(`extends Control`);
+  ui.push(``);
+  ui.push(`@export var ${uiGrid}: GridContainer`);
+  ui.push(`@export var ${uiTemplate}: PackedScene`);
+  ui.push(`@export var ${uiTexPath}: NodePath`);
+  ui.push(`@export var ${uiQtyPath}: NodePath`);
+  if(uiFields.length>0){
+    ui.push(``);
+    ui.push(`# Custom UI field bindings — assign NodePaths in inspector`);
+    uiFields.forEach(f=>{
+      ui.push(`@export var ${f.export}: NodePath`);
+    });
+  }
+  ui.push(``);
+  ui.push(`var _slot_nodes: Array = []`);
+  ui.push(``);
+  ui.push(`func _ready() -> void:`);
+  ui.push(`\t${autoload}.${sigUpdated}.connect(_on_slot_updated)`);
+  ui.push(`\t${autoload}.${sigAdded}.connect(_on_inventory_changed)`);
+  ui.push(`\t${autoload}.${sigRemoved}.connect(_on_inventory_changed)`);
+  ui.push(`\tsetup_inventory_ui()`);
+  ui.push(``);
+  ui.push(`func setup_inventory_ui() -> void:`);
+  ui.push(`\t# Clear existing slots`);
+  ui.push(`\tfor child in ${uiGrid}.get_children():`);
+  ui.push(`\t\tchild.queue_free()`);
+  ui.push(`\t_slot_nodes.clear()`);
+  ui.push(`\t# Spawn one panel per slot`);
+  ui.push(`\tfor i in ${autoload}.SLOT_COUNT:`);
+  ui.push(`\t\tvar slot_node = ${uiTemplate}.instantiate()`);
+  ui.push(`\t\t${uiGrid}.add_child(slot_node)`);
+  ui.push(`\t\tslot_node.${slotIdx} = i`);
+  ui.push(`\t\tslot_node.${slotUIRef} = self`);
+  ui.push(`\t\t_slot_nodes.append(slot_node)`);
+  ui.push(`\t\t_update_slot_node(slot_node, i)`);
+  ui.push(``);
+  ui.push(`func _update_slot_node(slot_node: Node, index: int) -> void:`);
+  ui.push(`\tvar slot := ${autoload}.get_slot(index)`);
+  ui.push(`\tvar tex_node := slot_node.get_node_or_null(${uiTexPath})`);
+  ui.push(`\tvar qty_node := slot_node.get_node_or_null(${uiQtyPath})`);
+  ui.push(`\tif slot.is_empty():`);
+  ui.push(`\t\tif tex_node: tex_node.texture = null`);
+  ui.push(`\t\tif qty_node: qty_node.text = ""`);
+  uiFields.forEach(f=>{
+    ui.push(`\t\tvar node_${f.export} := slot_node.get_node_or_null(${f.export})`);
+    ui.push(`\t\tif node_${f.export}: node_${f.export}.${f.vtype==='bool'?'visible = false':f.vtype==='texture'?'texture = null':'text = ""'}`);
+  });
+  ui.push(`\telse:`);
+  ui.push(`\t\tvar item: ${itemClass} = slot["item"]`);
+  ui.push(`\t\tif tex_node: tex_node.texture = item.${fTex}`);
+  ui.push(`\t\tif qty_node: qty_node.text = str(slot["quantity"])`);
+  uiFields.forEach(f=>{
+    ui.push(`\t\tvar node_${f.export} := slot_node.get_node_or_null(${f.export})`);
+    if(f.vtype==='text')       ui.push(`\t\tif node_${f.export}: node_${f.export}.text = str(item.${f.itemField})`);
+    else if(f.vtype==='texture') ui.push(`\t\tif node_${f.export}: node_${f.export}.texture = item.${f.itemField}`);
+    else if(f.vtype==='int')   ui.push(`\t\tif node_${f.export}: node_${f.export}.text = str(item.${f.itemField})`);
+    else if(f.vtype==='bool')  ui.push(`\t\tif node_${f.export}: node_${f.export}.visible = item.${f.itemField}`);
+  });
+  ui.push(``);
+  ui.push(`func refresh_slot(index: int) -> void:`);
+  ui.push(`\tif index < _slot_nodes.size():`);
+  ui.push(`\t\t_update_slot_node(_slot_nodes[index], index)`);
+  ui.push(``);
+  ui.push(`func _on_slot_updated(index: int) -> void:`);
+  ui.push(`\trefresh_slot(index)`);
+  ui.push(``);
+  ui.push(`func _on_inventory_changed(_item, _quantity) -> void:`);
+  ui.push(`\tfor i in _slot_nodes.size():`);
+  ui.push(`\t\t_update_slot_node(_slot_nodes[i], i)`);
+
+  /* ── SLOTPANEL.GD ── */
+  const sp=[];
+  sp.push(`# SlotPanel.gd — attach to your slot template scene root`);
+  sp.push(`# The template scene should have: TextureRect, Label (qty), any custom labels`);
+  sp.push(`class_name ${slotClass}`);
+  sp.push(`extends PanelContainer`);
+  sp.push(``);
+  sp.push(`@export var ${slotPrev}: PackedScene`);
+  sp.push(``);
+  sp.push(`var ${slotIdx}: int = -1`);
+  sp.push(`var ${slotUIRef}: Node = null`);
+  sp.push(``);
+  sp.push(`# Called by Godot when drag starts from this slot`);
+  sp.push(`func _get_drag_data(_at_position: Vector2) -> Variant:`);
+  sp.push(`\tvar slot := ${autoload}.get_slot(${slotIdx})`);
+  sp.push(`\tif slot.is_empty():`);
+  sp.push(`\t\treturn null`);
+  sp.push(`\t# Show preview`);
+  sp.push(`\tif ${slotPrev}:`);
+  sp.push(`\t\tvar preview := ${slotPrev}.instantiate()`);
+  sp.push(`\t\tset_drag_preview(preview)`);
+  sp.push(`\treturn { "from_index": ${slotIdx}, "item": slot["item"], "quantity": slot["quantity"] }`);
+  sp.push(``);
+  sp.push(`# Called on potential drop targets`);
+  sp.push(`func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:`);
+  sp.push(`\treturn data is Dictionary and data.has("from_index")`);
+  sp.push(``);
+  sp.push(`# Called when data is dropped onto this slot`);
+  sp.push(`func _drop_data(_at_position: Vector2, data: Variant) -> void:`);
+  sp.push(`\tif not data is Dictionary:`);
+  sp.push(`\t\treturn`);
+  sp.push(`\tvar from: int = data["from_index"]`);
+  sp.push(`\tif from == ${slotIdx}:`);
+  sp.push(`\t\treturn`);
+  sp.push(`\t${autoload}.move_slot(from, ${slotIdx})`);
+  sp.push(``);
+  sp.push(`# Call this from a drop zone node OUTSIDE the inventory`);
+  sp.push(`# to handle dropping items out of the inventory`);
+  sp.push(`static func handle_drop_outside(data: Variant) -> void:`);
+  sp.push(`\tif not data is Dictionary:`);
+  sp.push(`\t\treturn`);
+  sp.push(`\tvar item: ${itemClass} = data["item"]`);
+  sp.push(`\tvar index: int = data["from_index"]`);
+  sp.push(`\tif item.${fRemMode} == ${itemClass}.RemoveMode.${rmFull}:`);
+  sp.push(`\t\t${autoload}.clear_slot(index)`);
+  sp.push(`\telse:`);
+  sp.push(`\t\t${autoload}.remove_item(item.${fId}, 1)`);
+
+  renderCode('itemOut', il.join('\n'));
+  renderCode('invOut',  inv.join('\n'));
+  renderCode('uiOut',   ui.join('\n'));
+  renderCode('slotOut', sp.join('\n'));
+}
+
+/* TOKENIZER */
+function highlight(code){
+  const KW=new Set(['class_name','extends','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','static','break','continue','signal','enum','await','is']);
+  const TYPE=new Set(['int','float','bool','String','Variant','Array','Dictionary','Node','Control','PanelContainer','GridContainer','Texture2D','PackedScene','Vector2','void']);
+  const FN=new Set(['resize','append','clear','add_child','get_children','queue_free','instantiate','get_node','get_node_or_null','is_empty','has','emit_signal','connect','str','min','size','get_slide_collision_count']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tl(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/\w/.test(line[j]))j++;out+=`<span class="kw">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){
+        let j=i;while(j<line.length&&/\w/.test(line[j]))j++;
+        const w=line.slice(i,j);
+        out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);
+        i=j;continue;
+      }
+      if(/\d/.test(line[i])){let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tl).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id,btn){
+  const el=$(id);const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

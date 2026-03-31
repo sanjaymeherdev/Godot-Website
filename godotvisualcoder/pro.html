@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Generators — GodotVisualCoder</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;--border:#2a2f37;--border2:#343b45;--text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;--green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);--amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);--coral:#f87171;--coral-dim:rgba(248,113,113,0.10);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);--sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(14,15,17,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:32px;}
+.hdr-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-icon{width:32px;height:32px;border-radius:8px;object-fit:contain;}
+.hdr-icon-svg{width:32px;height:32px;border-radius:8px;background:var(--green-dim);border:1px solid var(--green2);display:none;align-items:center;justify-content:center;}
+.hdr-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.hdr-nav{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-link{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:color 0.15s,background 0.15s;}
+.nav-link:hover{color:var(--text);background:var(--bg3);}
+.nav-link.active{color:var(--green);}
+.hdr-cta{margin-left:auto;padding:8px 18px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
+.hdr-cta:hover{background:rgba(74,222,128,0.2);}
+.hdr-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hdr-burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;}
+
+.page-hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 24px 48px;}
+.page-hero-inner{max-width:1200px;margin:0 auto;display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;}
+.page-hero-text{flex:1;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--blue-dim);border:1px solid var(--blue2);border-radius:20px;padding:5px 14px;font-size:11px;font-family:var(--mono);color:var(--blue);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:20px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.page-hero h1{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-0.03em;margin-bottom:12px;}
+.page-hero p{font-size:15px;color:var(--text2);line-height:1.7;max-width:520px;}
+.hero-pricing-btn{padding:13px 24px;background:var(--blue-dim);border:1px solid var(--blue2);border-radius:12px;color:var(--blue);font-size:14px;font-weight:700;text-decoration:none;transition:background 0.15s;white-space:nowrap;align-self:flex-end;}
+.hero-pricing-btn:hover{background:rgba(96,165,250,0.2);}
+
+.main{flex:1;padding:48px 24px 80px;}
+.main-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:48px;}
+
+.tier-section{}
+.tier-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.tier-pill{padding:5px 14px;border-radius:20px;font-size:11px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;}
+.t1-pill{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.t2-pill{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+.t3-pill{background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);color:var(--purple);}
+.tier-label{font-size:13px;color:var(--text3);font-family:var(--mono);}
+.tier-divider{flex:1;height:1px;background:var(--border);}
+
+.gen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+
+.gen-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;transition:border-color 0.18s,transform 0.15s;}
+.gen-card.unlocked{text-decoration:none;color:inherit;cursor:pointer;}
+.gen-card.unlocked:hover{transform:translateY(-2px);border-color:var(--card-border);}
+.gen-card.unlocked:active{transform:scale(0.99);}
+.gen-card.locked{cursor:default;opacity:0.55;}
+.gen-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:18px 18px 0 0;background:var(--card-accent,transparent);}
+
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.lock-badge{display:flex;align-items:center;gap:5px;padding:3px 8px;background:var(--bg4);border:1px solid var(--border2);border-radius:10px;font-size:9px;font-family:var(--mono);color:var(--text3);white-space:nowrap;}
+.tier-badge-sm{padding:3px 8px;border-radius:10px;font-size:9px;font-family:var(--mono);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;}
+
+.card-name{font-size:16px;font-weight:700;letter-spacing:-0.01em;}
+.card-desc{font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);flex:1;}
+.card-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{font-size:9px;font-family:var(--mono);padding:2px 7px;border-radius:5px;border:1px solid var(--card-border,var(--border));color:var(--card-color,var(--text3));background:var(--card-bg,var(--bg3));}
+.card-btn{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card-bg,var(--bg3));border:1px solid var(--card-border,var(--border));border-radius:9px;color:var(--card-color,var(--text3));font-size:12px;font-weight:700;}
+
+.coming-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.coming-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;opacity:0.45;}
+.coming-name{font-size:14px;font-weight:600;letter-spacing:-0.01em;margin-bottom:6px;}
+.coming-desc{font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.5;}
+.coming-tag{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:3px 8px;border-radius:8px;font-size:9px;font-family:var(--mono);color:var(--text3);background:var(--bg3);border:1px solid var(--border);}
+
+.site-footer{background:#0a0b0d;border-top:1px solid var(--border);}
+.ftr-inner{max-width:1200px;margin:0 auto;padding:40px 24px 24px;display:grid;grid-template-columns:1fr auto;gap:40px;}
+.ftr-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:10px;}
+.ftr-logo span{font-size:14px;font-weight:700;color:var(--text);}
+.ftr-tag{font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;margin-bottom:10px;}
+.ftr-dev{font-size:12px;color:var(--text3);}
+.ftr-dev a{color:var(--green);text-decoration:none;}
+.ftr-cols{display:flex;gap:40px;}
+.ftr-col{display:flex;flex-direction:column;gap:8px;}
+.ftr-col-h{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:2px;}
+.ftr-link{font-size:12px;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.ftr-link:hover{color:var(--text2);}
+.ftr-bottom{max-width:1200px;margin:0 auto;padding:14px 24px;border-top:1px solid var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--text3);flex-wrap:wrap;}
+
+@media(max-width:680px){
+  .hdr-nav{display:none;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 0;z-index:99;}
+  .hdr-nav.open{display:flex;}
+  .hdr-burger{display:flex;}
+  .hdr-cta{display:none;}
+  .hdr-inner{gap:16px;}
+  .ftr-inner{grid-template-columns:1fr;gap:24px;padding:28px 20px 20px;}
+  .ftr-cols{flex-wrap:wrap;gap:24px;}
+  .page-hero-inner{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="hdr-inner">
+    <a class="hdr-brand" href="index.html">
+      <img src="demo.png" class="hdr-icon" alt="GodotVisualCoder" onerror="this.style.display='none';document.getElementById('hif').style.display='flex'">
+      <div id="hif" class="hdr-icon-svg"><svg viewBox="0 0 22 22" fill="none" width="18" height="18"><path d="M11 2L19 6.5V15.5L11 20L3 15.5V6.5L11 2Z" stroke="#4ade80" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="#4ade80"/></svg></div>
+      <span class="hdr-name">GodotVisualCoder</span>
+    </a>
+    <nav class="hdr-nav" id="hdrNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="free.html" class="nav-link">Free Tools</a>
+      <a href="pro.html" class="nav-link active">Pro Tools</a>
+      <a href="index.html#about" class="nav-link">About</a>
+    </nav>
+    <a href="pricing.html" class="hdr-cta">Get Pro</a>
+    <button class="hdr-burger" onclick="document.getElementById('hdrNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="eyebrow"><span class="dot"></span>Pro · Tier-based Access</div>
+      <h1>Pro Generators</h1>
+      <p>Advanced generators built for real game architecture. Multiplayer, RPC, state machines, full inventory systems and more — unlocked by tier.</p>
+    </div>
+    <a href="pricing.html" class="hero-pricing-btn">View Pricing →</a>
+  </div>
+</div>
+
+<main class="main">
+<div class="main-inner">
+
+  <!-- TIER 1 -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-pill t1-pill">Tier 1 — Starter</span>
+      <span class="tier-label">First 3 generators</span>
+      <div class="tier-divider"></div>
+    </div>
+    <div class="gen-grid">
+
+      <div class="gen-card unlocked" style="--card-accent:var(--green);--card-border:var(--green2);--card-color:var(--green);--card-bg:var(--green-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--green-dim);border:1px solid var(--green2)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+          </div>
+          <span class="tier-badge-sm t1-pill">Tier 1</span>
+        </div>
+        <div class="card-name">Movement Pro</div>
+        <div class="card-desc">CharacterBody2D + 3D, stance system (normal/crouch/prone), dynamic input mapping via _add_key_input, multiplayer authority guard.</div>
+        <div class="card-tags"><span class="tag">3D</span><span class="tag">stances</span><span class="tag">multiplayer</span><span class="tag">_add_key_input</span></div>
+        <div class="card-btn">Open Generator <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--coral);--card-border:#ef4444;--card-color:var(--coral);--card-bg:var(--coral-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--coral-dim);border:1px solid #ef4444">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><path d="M6 18L18 6M15 4l5 5-2.5 2.5L13 7z"/><circle cx="8.5" cy="15.5" r="2.5"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 1</span>
+        </div>
+        <div class="card-name">Combat Pro</div>
+        <div class="card-desc">Full advanced params, String/Enum toggle, RPC decorator support, server-authoritative damage, hit zone system.</div>
+        <div class="card-tags"><span class="tag">@rpc</span><span class="tag">enum</span><span class="tag">server-auth</span><span class="tag">hit params</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--amber);--card-border:#d97706;--card-color:var(--amber);--card-bg:var(--amber-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--amber-dim);border:1px solid #d97706">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="7" width="16" height="13" rx="1.5"/><path d="M9 7V5h6v2"/><path d="M12 11v4M10 13h4"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 1</span>
+        </div>
+        <div class="card-name">Inventory System</div>
+        <div class="card-desc">4 scripts: Item.gd (Resource), Inventory.gd (autoload), InventoryUI.gd, SlotPanel.gd. Full drag & drop, stacking, signals.</div>
+        <div class="card-tags"><span class="tag">Resource</span><span class="tag">Autoload</span><span class="tag">drag & drop</span><span class="tag">.tres</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-pill t2-pill">Tier 2 — Advanced</span>
+      <span class="tier-label">All Tier 1 + 3 more generators</span>
+      <div class="tier-divider"></div>
+    </div>
+    <div class="gen-grid">
+
+      <div class="gen-card locked" style="--card-accent:var(--blue);--card-border:var(--blue2);--card-color:var(--blue);--card-bg:var(--blue-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--blue-dim);border:1px solid var(--blue2)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"><path d="M8 6l4-4 4 4M16 18l-4 4-4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 2</span>
+        </div>
+        <div class="card-name">RPC Function Builder</div>
+        <div class="card-desc">Build @rpc decorated functions with authority, call_local, reliable/unreliable options. Server/client guard auto-generated.</div>
+        <div class="card-tags"><span class="tag">@rpc</span><span class="tag">authority</span><span class="tag">reliable</span><span class="tag">call_local</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--coral);--card-border:#ef4444;--card-color:var(--coral);--card-bg:var(--coral-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--coral-dim);border:1px solid #ef4444">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="8" cy="12" r="2" fill="#f87171"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 2</span>
+        </div>
+        <div class="card-name">State Machine</div>
+        <div class="card-desc">Generate enum State {}, current_state var, _process with match block, and transition functions. Your SafeZone/player pattern.</div>
+        <div class="card-tags"><span class="tag">enum State</span><span class="tag">match</span><span class="tag">transitions</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--green);--card-border:var(--green2);--card-color:var(--green);--card-bg:var(--green-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--green-dim);border:1px solid var(--green2)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L19 6v12L12 22 5 18V6L12 2z"/><path d="M12 8v4l3 2"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 2</span>
+        </div>
+        <div class="card-name">Autoload / Singleton</div>
+        <div class="card-desc">Generate a full autoload with signals, save/load to user://, _ready setup, and peer mapping functions.</div>
+        <div class="card-tags"><span class="tag">extends Node</span><span class="tag">signals</span><span class="tag">user://</span><span class="tag">JSON</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-pill t3-pill">Tier 3 — Premium</span>
+      <span class="tier-label">All generators + early access to new ones</span>
+      <div class="tier-divider"></div>
+    </div>
+    <div class="gen-grid">
+
+      <div class="gen-card locked" style="--card-accent:var(--purple);--card-border:rgba(192,132,252,0.5);--card-color:var(--purple);--card-bg:var(--purple-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v4M18.4 5.6l-2.8 2.8M21 12h-4M18.4 18.4l-2.8-2.8M12 21v-4M5.6 18.4l2.8-2.8M3 12h4M5.6 5.6l2.8 2.8"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 3</span>
+        </div>
+        <div class="card-name">Animation Controller</div>
+        <div class="card-desc">Stance × weapon type × action matrix. Generates the full animate() function with all state branches — matches real BR game pattern.</div>
+        <div class="card-tags"><span class="tag">AnimationPlayer</span><span class="tag">stances</span><span class="tag">weapon types</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--amber);--card-border:#d97706;--card-color:var(--amber);--card-bg:var(--amber-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--amber-dim);border:1px solid #d97706">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L22 8V16L12 22L2 16V8L12 2z"/><circle cx="12" cy="12" r="3"/><path d="M12 9V6M12 18v-3M9 12H6M18 12h-3"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 3</span>
+        </div>
+        <div class="card-name">Item Spawner</div>
+        <div class="card-desc">Folder-based .tres loader, rarity weight system, zone-aware spawning, relation resolution. Matches WorldItemSpawner pattern.</div>
+        <div class="card-tags"><span class="tag">DirAccess</span><span class="tag">rarity</span><span class="tag">zones</span><span class="tag">RayCast</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+      <div class="gen-card locked" style="--card-accent:var(--blue);--card-border:var(--blue2);--card-color:var(--blue);--card-bg:var(--blue-dim)">
+        <div class="card-top">
+          <div class="card-icon" style="background:var(--blue-dim);border:1px solid var(--blue2)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          </div>
+          <span class="lock-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2"/></svg>Tier 3</span>
+        </div>
+        <div class="card-name">Safe Zone System</div>
+        <div class="card-desc">State machine zone with shrink stages, damage ramp, RPC sync for all clients, server-authoritative damage application.</div>
+        <div class="card-tags"><span class="tag">SafeZone</span><span class="tag">@rpc</span><span class="tag">stages</span><span class="tag">damage</span></div>
+        <div class="card-btn" onclick="showPopup()" style="cursor:pointer">Coming Soon <svg width="14" height="14" viewBox="0 0 10 10" fill="none"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="currentColor" stroke-width="1.2"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div class="tier-section">
+    <div class="tier-header">
+      <span class="tier-pill" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text3)">Coming Soon</span>
+      <div class="tier-divider"></div>
+    </div>
+    <div class="coming-grid">
+      <div class="coming-card"><div class="coming-name">Touch Camera</div><div class="coming-desc">SpringArm3D drag + gyroscope, sensitivity, clamp, multiplayer authority</div><span class="coming-tag">Soon</span></div>
+      <div class="coming-card"><div class="coming-name">Virtual Joystick</div><div class="coming-desc">Dead zone, directional input simulation, sprint threshold, camera-relative</div><span class="coming-tag">Soon</span></div>
+      <div class="coming-card"><div class="coming-name">Kill Feed</div><div class="coming-desc">Scrolling kill entries, weapon icons, knock vs kill, fade out timer</div><span class="coming-tag">Soon</span></div>
+      <div class="coming-card"><div class="coming-name">Notification System</div><div class="coming-desc">user:// unread store, signal-driven popup, per-sender tracking</div><span class="coming-tag">Soon</span></div>
+      <div class="coming-card"><div class="coming-name">Network Manager</div><div class="coming-desc">ENet host/join, ban check, kick, peer-to-player mapping</div><span class="coming-tag">Soon</span></div>
+      <div class="coming-card"><div class="coming-name">Weapon Handler</div><div class="coming-desc">Slot system, scene load/unload, attachment swap, visibility switching</div><span class="coming-tag">Soon</span></div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="ftr-inner">
+    <div>
+      <a class="ftr-logo" href="index.html"><img src="demo.png" class="hdr-icon" alt="" onerror="this.style.display='none'"><span>GodotVisualCoder</span></a>
+      <p class="ftr-tag">Visual GDScript generators for Godot 4.x.</p>
+      <p class="ftr-dev">Dev: <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener">Champ Gaming</a></p>
+    </div>
+    <div class="ftr-cols">
+      <div class="ftr-col"><div class="ftr-col-h">Tools</div><a href="free.html" class="ftr-link">Free Generators</a><a href="pro.html" class="ftr-link">Pro Generators</a><a href="pricing.html" class="ftr-link">Pricing</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Legal</div><a href="terms.html" class="ftr-link">Terms of Use</a><a href="privacy.html" class="ftr-link">Privacy Policy</a><a href="refund.html" class="ftr-link">Refund Policy</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Links</div><a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" class="ftr-link">YouTube</a><a href="index.html#about" class="ftr-link">About</a></div>
+    </div>
+  </div>
+  <div class="ftr-bottom">
+    <span>© <span id="yr"></span> GodotVisualCoder. All rights reserved.</span>
+    <span>Godot 4.x · Made by Champ Gaming</span>
+  </div>
+</footer>
+
+</body>
+</html>
+
+<div id="popup-overlay" onclick="hidePopup()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div onclick="event.stopPropagation()" style="background:#15171a;border:1px solid #2a2f37;border-radius:20px;padding:36px 32px;max-width:420px;width:90%;text-align:center;">
+    <div style="width:48px;height:48px;border-radius:14px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;">⚡</div>
+    <h3 style="font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;">Coming Soon</h3>
+    <p style="font-size:13px;color:#8b95a1;line-height:1.7;font-family:'JetBrains Mono',monospace;margin-bottom:24px;">Pro tiers are launching soon. Contact on YouTube to get notified first or to ask about early access.</p>
+    <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" style="display:block;padding:13px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.4);border-radius:12px;color:#fbbf24;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:10px;">Contact on YouTube →</a>
+    <button onclick="hidePopup()" style="width:100%;padding:13px;background:transparent;border:1px solid #343b45;border-radius:12px;color:#555f6d;font-size:13px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;">Close</button>
+  </div>
+</div>
+<script>
+function showPopup(){document.getElementById('popup-overlay').style.display='flex';}
+function hidePopup(){document.getElementById('popup-overlay').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hidePopup();});
+document.getElementById('yr').textContent=new Date().getFullYear();
+</script>
+</body></html>

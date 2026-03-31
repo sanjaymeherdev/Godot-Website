@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ably Manager Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --tap:52px;--r:10px;--rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.back-btn:active{background:var(--bg4);}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--purple);background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-dot.purple{background:var(--purple);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.amber{border-left-color:var(--amber);}
+.hint.blue{border-left-color:var(--blue2);}
+.gen-btn{width:100%;height:56px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:var(--rl);color:var(--purple);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(192,132,252,0.2);transform:scale(0.99);}
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(192,132,252,0.4);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;min-height:36px;transition:all 0.15s;}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+.hidden{display:none!important;}
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="pro.html">‹</a>
+  <div>
+    <div class="header-title">Ably Manager Generator</div>
+    <div class="header-sub">AutoLoad · Realtime presence + private messaging</div>
+  </div>
+  <span class="header-badge">Pro · GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- API KEY -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Ably Config</span></div>
+    <div class="card-body">
+      <div class="hint amber">API key is an @export var — set it in the Inspector on your AutoLoad node. Never hardcode it in source.</div>
+      <div class="field"><div class="field-label">autoload_name</div><input type="text" id="autoloadName" value="AblyManager"></div>
+    </div>
+  </div>
+
+  <!-- CHANNELS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Channels</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">status_channel (presence + heartbeat)</div><input type="text" id="statusChannel" value="status"></div>
+      <div class="toggle-item active" id="tog-private" onclick="tog('private')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Private Messaging Channel</span>
+        <span class="toggle-hint">private:{email} · send_private_message()</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEARTBEAT -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Heartbeat Timers</span></div>
+    <div class="card-body">
+      <div class="hint">These control presence accuracy vs. bandwidth. Lower = more accurate but more traffic.</div>
+      <div class="grid3">
+        <div class="field"><div class="field-label">send_interval (s)</div><input type="number" id="hbSend" value="60"></div>
+        <div class="field"><div class="field-label">check_interval (s)</div><input type="number" id="hbCheck" value="30"></div>
+        <div class="field"><div class="field-label">timeout (s)</div><input type="number" id="hbTimeout" value="120"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUEUE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Action Queue</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">queue_interval (s) — delay between queued sends</div><input type="number" id="queueInterval" value="0.3" step="0.1"></div>
+    </div>
+  </div>
+
+  <!-- SIGNALS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot green"></div><span class="card-title">Extra Signals</span></div>
+    <div class="card-body">
+      <div class="toggle-item active" id="tog-sig-connect" onclick="tog('sig_connect')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">connected_to_ably</span>
+        <span class="toggle-hint">fires when action 4 received</span>
+      </div>
+      <div class="toggle-item active" id="tog-sig-disconnect" onclick="tog('sig_disconnect')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">disconnected_from_ably</span>
+        <span class="toggle-hint">fires when socket closes</span>
+      </div>
+      <div class="toggle-item active" id="tog-sig-status" onclick="tog('sig_status')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">status_channel_attached</span>
+        <span class="toggle-hint">fires when status channel ready</span>
+      </div>
+      <div class="toggle-item active" id="tog-sig-private" onclick="tog('sig_private_attached')">
+        <input type="checkbox" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">private_channel_attached</span>
+        <span class="toggle-hint">fires when private channel ready</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate AblyManager.gd</button>
+
+</div>
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag purple">AblyManager.gd</span>
+      <span class="out-sub">AutoLoad · add to Project Settings</span>
+      <button class="copy-btn" onclick="copyOut('outCode', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outCode"># tap Generate to produce code</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el && el.value.trim() ? el.value.trim() : fb; };
+const feats = { private:true, sig_connect:true, sig_disconnect:true, sig_status:true, sig_private_attached:true };
+
+function tog(f) {
+  feats[f] = !feats[f];
+  $('tog-' + f).classList.toggle('active', feats[f]);
+}
+
+function generate() {
+  const name        = v('autoloadName',  'AblyManager');
+  const statusCh    = v('statusChannel', 'status');
+  const hbSend      = v('hbSend',    '60');
+  const hbCheck     = v('hbCheck',   '30');
+  const hbTimeout   = v('hbTimeout', '120');
+  const queueInt    = v('queueInterval', '0.3');
+  const { private: priv, sig_connect, sig_disconnect, sig_status, sig_private_attached } = feats;
+
+  const L = [];
+
+  L.push('extends Node');
+  L.push('');
+  L.push('# ================================================================');
+  L.push('# ' + name + '.gd — AutoLoad');
+  L.push('# Add to Project Settings > AutoLoad.');
+  L.push('# Set api_key in the Inspector on the AutoLoad node.');
+  L.push('# ================================================================');
+  L.push('');
+  L.push('@export var api_key: String = ""');
+  L.push('');
+  L.push('# ── Signals ───────────────────────────────────────────────────');
+  L.push('signal presence_updated(online_emails: Array)');
+  if (priv) L.push('signal private_message_received(from_email: String, content: String, timestamp: int)');
+  if (sig_connect)          L.push('signal connected_to_ably()');
+  if (sig_disconnect)       L.push('signal disconnected_from_ably()');
+  if (sig_status)           L.push('signal status_channel_attached()');
+  if (priv && sig_private_attached) L.push('signal private_channel_attached()');
+  L.push('');
+  L.push('# ── State ─────────────────────────────────────────────────────');
+  L.push('var ws: WebSocketPeer');
+  L.push('var is_connected: bool    = false');
+  L.push('var my_email: String      = ""');
+  L.push('var connection_id: String = ""');
+  L.push('var msg_serial: int       = 0');
+  L.push('');
+  L.push('# ── Presence ──────────────────────────────────────────────────');
+  L.push('var online_users: Array        = []');
+  L.push('var last_heartbeat: Dictionary = {}');
+  L.push('');
+  L.push('# ── Channel state ─────────────────────────────────────────────');
+  L.push('var status_attached:  bool = false');
+  if (priv) L.push('var private_attached: bool = false');
+  L.push('');
+  L.push('# ── Action queue ──────────────────────────────────────────────');
+  L.push('var action_queue: Array  = []');
+  L.push('var queue_timer: float   = 0.0');
+  L.push('const QUEUE_INTERVAL: float = ' + queueInt);
+  L.push('');
+  L.push('# ── Heartbeat timers ──────────────────────────────────────────');
+  L.push('var heartbeat_send_timer:  float = 0.0');
+  L.push('var heartbeat_check_timer: float = 0.0');
+  L.push('const HEARTBEAT_SEND_INTERVAL:  float = ' + hbSend + '.0');
+  L.push('const HEARTBEAT_CHECK_INTERVAL: float = ' + hbCheck + '.0');
+  L.push('const HEARTBEAT_TIMEOUT:        float = ' + hbTimeout + '.0');
+  L.push('');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('func _ready() -> void:');
+  L.push('\tws = WebSocketPeer.new()');
+  L.push('\tset_process(false)');
+  L.push('');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('# PUBLIC API');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('');
+  L.push('func connect_ably(email: String) -> void:');
+  L.push('\tif api_key.is_empty():');
+  L.push('\t\tpush_error("[' + name + '] api_key is not set — assign it in the Inspector")');
+  L.push('\t\treturn');
+  L.push('\tmy_email = email');
+  L.push('\tvar state = ws.get_ready_state()');
+  L.push('\tif state == WebSocketPeer.STATE_OPEN and my_email == email:');
+  L.push('\t\treturn');
+  L.push('\tif state != WebSocketPeer.STATE_CLOSED and state != WebSocketPeer.STATE_CLOSING:');
+  L.push('\t\tws.close()');
+  L.push('\t\t_reset_state()');
+  L.push('\t\tawait get_tree().create_timer(0.3).timeout');
+  L.push('\tvar url = "wss://realtime.ably.io/?key=" + api_key.uri_encode() + "&clientId=" + email.uri_encode() + "&format=json&v=1.2"');
+  L.push('\tvar err = ws.connect_to_url(url)');
+  L.push('\tif err != OK:');
+  L.push('\t\tpush_error("[' + name + '] connect_to_url failed: " + error_string(err))');
+  L.push('\t\treturn');
+  L.push('\tset_process(true)');
+  L.push('');
+  L.push('func disconnect_ably() -> void:');
+  L.push('\tif is_connected and status_attached:');
+  L.push('\t\tsend(_make_status_msg("offline"))');
+  L.push('\tawait get_tree().create_timer(0.3).timeout');
+  L.push('\tws.close()');
+  L.push('\t_reset_state()');
+  L.push('');
+  if (priv) {
+    L.push('func send_private_message(to_email: String, content: String) -> void:');
+    L.push('\tif not is_connected or not private_attached: return');
+    L.push('\tvar msg = {');
+    L.push('\t\t"action": 15,');
+    L.push('\t\t"channel": "private:" + to_email,');
+    L.push('\t\t"msgSerial": -1,');
+    L.push('\t\t"messages": [{"data": JSON.stringify({"from": my_email, "text": content, "time": Time.get_unix_time_from_system()})}]');
+    L.push('\t}');
+    L.push('\tsend(msg)');
+    L.push('');
+  }
+  L.push('func get_online_users() -> Array: return online_users.duplicate()');
+  L.push('func is_online(email: String) -> bool: return email in online_users');
+  L.push('');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('# PROCESS');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('');
+  L.push('func _process(delta: float) -> void:');
+  L.push('\tif not ws: return');
+  L.push('\tws.poll()');
+  L.push('\tvar state = ws.get_ready_state()');
+  L.push('');
+  L.push('\tif state == WebSocketPeer.STATE_OPEN:');
+  L.push('\t\twhile ws.get_available_packet_count() > 0:');
+  L.push('\t\t\tvar packet = ws.get_packet()');
+  L.push('\t\t\t_handle_message(packet.get_string_from_utf8())');
+  L.push('\t\tif action_queue.size() > 0:');
+  L.push('\t\t\tqueue_timer -= delta');
+  L.push('\t\t\tif queue_timer <= 0.0:');
+  L.push('\t\t\t\tvar next = action_queue.pop_front()');
+  L.push('\t\t\t\tsend(next)');
+  L.push('\t\t\t\tqueue_timer = QUEUE_INTERVAL');
+  L.push('\t\tif is_connected and status_attached:');
+  L.push('\t\t\theartbeat_send_timer += delta');
+  L.push('\t\t\tif heartbeat_send_timer >= HEARTBEAT_SEND_INTERVAL:');
+  L.push('\t\t\t\theartbeat_send_timer = 0.0');
+  L.push('\t\t\t\tqueue_action(_make_status_msg("heartbeat"))');
+  L.push('\t\theartbeat_check_timer += delta');
+  L.push('\t\tif heartbeat_check_timer >= HEARTBEAT_CHECK_INTERVAL:');
+  L.push('\t\t\theartbeat_check_timer = 0.0');
+  L.push('\t\t\t_check_stale_players()');
+  L.push('');
+  L.push('\telif state == WebSocketPeer.STATE_CLOSED:');
+  L.push('\t\tif is_connected:');
+  L.push('\t\t\tis_connected = false');
+  if (sig_disconnect) L.push('\t\t\tdisconnected_from_ably.emit()');
+  L.push('\t\tset_process(false)');
+  L.push('');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('# MESSAGE HANDLING');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('');
+  L.push('func _handle_message(msg_str: String) -> void:');
+  L.push('\tvar json = JSON.new()');
+  L.push('\tif json.parse(msg_str) != OK: return');
+  L.push('\tvar data = json.data');
+  L.push('\tif not data.has("action"): return');
+  L.push('\tmatch int(data.action):');
+  L.push('\t\t4:  # CONNECTED');
+  L.push('\t\t\tconnection_id = data.get("connectionId", "")');
+  L.push('\t\t\tis_connected  = true');
+  if (sig_connect) L.push('\t\t\tconnected_to_ably.emit()');
+  L.push('\t\t\tqueue_action({"action": 10, "channel": "' + statusCh + '", "msgSerial": -1})');
+  L.push('\t\t11: # ATTACHED');
+  L.push('\t\t\tvar channel = data.get("channel", "")');
+  L.push('\t\t\tif channel == "' + statusCh + '" and not status_attached:');
+  L.push('\t\t\t\tstatus_attached = true');
+  if (sig_status) L.push('\t\t\t\tstatus_channel_attached.emit()');
+  L.push('\t\t\t\tqueue_action(_make_status_msg("online"))');
+  L.push('\t\t\t\tqueue_action(_make_status_msg("who_is_online"))');
+  if (priv) {
+    L.push('\t\t\t\tqueue_action({"action": 10, "channel": "private:" + my_email, "msgSerial": -1})');
+    L.push('\t\t\telif channel == "private:" + my_email:');
+    L.push('\t\t\t\tprivate_attached = true');
+    if (sig_private_attached) L.push('\t\t\t\tprivate_channel_attached.emit()');
+  }
+  L.push('\t\t15: # MESSAGE');
+  L.push('\t\t\t_handle_channel_message(data)');
+  L.push('');
+  L.push('func _handle_channel_message(data: Dictionary) -> void:');
+  L.push('\tif not data.has("channel") or not data.has("messages"): return');
+  L.push('\tif data.channel == "' + statusCh + '":');
+  L.push('\t\tfor msg in data.messages:');
+  L.push('\t\t\tif not msg.has("data"): continue');
+  L.push('\t\t\tvar d = JSON.parse_string(msg.data)');
+  L.push('\t\t\tif d == null or not d.has("email") or not d.has("status"): continue');
+  L.push('\t\t\tvar sender_email = d.email');
+  L.push('\t\t\tvar status       = d.status');
+  L.push('\t\t\tif sender_email == my_email: continue');
+  L.push('\t\t\tmatch status:');
+  L.push('\t\t\t\t"online":');
+  L.push('\t\t\t\t\tif sender_email not in online_users:');
+  L.push('\t\t\t\t\t\tonline_users.append(sender_email)');
+  L.push('\t\t\t\t\t\tpresence_updated.emit(online_users)');
+  L.push('\t\t\t\t\tlast_heartbeat[sender_email] = Time.get_unix_time_from_system()');
+  L.push('\t\t\t\t"offline":');
+  L.push('\t\t\t\t\tonline_users.erase(sender_email)');
+  L.push('\t\t\t\t\tlast_heartbeat.erase(sender_email)');
+  L.push('\t\t\t\t\tpresence_updated.emit(online_users)');
+  L.push('\t\t\t\t"heartbeat":');
+  L.push('\t\t\t\t\tlast_heartbeat[sender_email] = Time.get_unix_time_from_system()');
+  L.push('\t\t\t\t\tif sender_email not in online_users:');
+  L.push('\t\t\t\t\t\tonline_users.append(sender_email)');
+  L.push('\t\t\t\t\t\tpresence_updated.emit(online_users)');
+  L.push('\t\t\t\t"who_is_online":');
+  L.push('\t\t\t\t\tqueue_action(_make_status_msg("online"))');
+  if (priv) {
+    L.push('\telif data.channel.begins_with("private:"):');
+    L.push('\t\tfor msg in data.messages:');
+    L.push('\t\t\tif not msg.has("data"): continue');
+    L.push('\t\t\tvar msg_json = JSON.new()');
+    L.push('\t\t\tif msg_json.parse(msg.data) != OK: continue');
+    L.push('\t\t\tvar m = msg_json.data');
+    L.push('\t\t\tif m.has("from") and m.has("text") and m.has("time"):');
+    L.push('\t\t\t\tprivate_message_received.emit(m.from, m.text, int(m.time))');
+  }
+  L.push('');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('# INTERNAL HELPERS');
+  L.push('# ══════════════════════════════════════════════════════════════');
+  L.push('');
+  L.push('func _check_stale_players() -> void:');
+  L.push('\tvar now     = Time.get_unix_time_from_system()');
+  L.push('\tvar changed = false');
+  L.push('\tfor email in last_heartbeat.keys():');
+  L.push('\t\tif now - last_heartbeat[email] > HEARTBEAT_TIMEOUT:');
+  L.push('\t\t\tonline_users.erase(email)');
+  L.push('\t\t\tlast_heartbeat.erase(email)');
+  L.push('\t\t\tchanged = true');
+  L.push('\tif changed: presence_updated.emit(online_users)');
+  L.push('');
+  L.push('func _make_status_msg(status: String) -> Dictionary:');
+  L.push('\treturn {');
+  L.push('\t\t"action": 15,');
+  L.push('\t\t"channel": "' + statusCh + '",');
+  L.push('\t\t"msgSerial": -1,');
+  L.push('\t\t"messages": [{"data": JSON.stringify({"email": my_email, "status": status})}]');
+  L.push('\t}');
+  L.push('');
+  L.push('func queue_action(data: Dictionary) -> void:');
+  L.push('\taction_queue.append(data)');
+  L.push('');
+  L.push('func send(data: Dictionary) -> void:');
+  L.push('\tif ws.get_ready_state() != WebSocketPeer.STATE_OPEN: return');
+  L.push('\tif data.get("msgSerial", 0) == -1:');
+  L.push('\t\tdata["msgSerial"] = msg_serial');
+  L.push('\t\tmsg_serial += 1');
+  L.push('\tws.send_text(JSON.stringify(data))');
+  L.push('');
+  L.push('func _reset_state() -> void:');
+  L.push('\tis_connected      = false');
+  L.push('\tstatus_attached   = false');
+  if (priv) L.push('\tprivate_attached  = false');
+  L.push('\taction_queue.clear()');
+  L.push('\tonline_users.clear()');
+  L.push('\tlast_heartbeat.clear()');
+  L.push('\theartbeat_send_timer  = 0.0');
+  L.push('\theartbeat_check_timer = 0.0');
+
+  renderCode('outCode', L.join('\n'));
+}
+
+/* ── TOKENIZER ── */
+function highlight(code) {
+  const KW  = new Set(['extends','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','signal','@export','@onready']);
+  const TYPE = new Set(['float','int','bool','String','void','Dictionary','Array','WebSocketPeer']);
+  const FN  = new Set(['_ready','_process','connect_ably','disconnect_ably','send_private_message','get_online_users','is_online','_handle_message','_handle_channel_message','_check_stale_players','_make_status_msg','queue_action','send','_reset_state','emit','push_error','uri_encode','connect_to_url','is_empty','has','get','erase','append','pop_front','duplicate','clear','parse','stringify','parse_string','get_packet','get_available_packet_count','poll','get_ready_state','close','send_text','get_string_from_utf8','get_unix_time_from_system','create_timer','error_string','begins_with']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])){let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id, btn){
+  const el=$(id);
+  const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Combat Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+    --border:#2a2f37; --border2:#343b45;
+    --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+    --coral:#f87171; --coral2:#ef4444;
+    --coral-dim:rgba(248,113,113,0.10); --coral-dim2:rgba(248,113,113,0.06);
+    --blue:#60a5fa; --blue-dim:rgba(96,165,250,0.10);
+    --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+    --green:#4ade80; --green2:#22c55e; --green-dim:rgba(74,222,128,0.10);
+    --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+    --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+    --tap:52px; --r:10px; --rl:14px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+  /* HEADER */
+  .header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+  .back-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:20px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+  .back-btn:active{background:var(--bg4);}
+  .header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+  .header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--coral);background:var(--coral-dim);border:1px solid var(--coral2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+  /* PAGE */
+  .page{padding:16px 16px 100px;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+  /* CARD */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card-dot{width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;}
+  .card-dot.green{background:var(--green);}
+  .card-dot.blue{background:var(--blue);}
+  .card-dot.amber{background:var(--amber);}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+  .card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+  /* SIMPLE / ADVANCED MODE TOGGLE */
+  .mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg3);padding:4px;border-radius:var(--r);border:1px solid var(--border);}
+  .mode-btn{padding:12px;text-align:center;font-size:13px;font-weight:600;font-family:var(--sans);background:transparent;border:none;border-radius:8px;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;line-height:1.3;}
+  .mode-btn .mode-sub{display:block;font-size:10px;font-family:var(--mono);font-weight:400;margin-top:2px;color:var(--text3);}
+  .mode-btn.active{background:var(--bg4);color:var(--coral);border:1px solid var(--border2);}
+  .mode-btn.active .mode-sub{color:var(--coral);}
+  .mode-btn:active{background:var(--bg4);}
+
+  /* FIELDS */
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .key-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .key-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+  select,input[type="text"],input[type="number"]{
+    width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);
+    border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;
+    padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;
+  }
+  select:focus,input:focus{border-color:var(--coral2);}
+
+  /* TABS */
+  .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:var(--bg3);padding:4px;border-radius:var(--r);border:1px solid var(--border);}
+  .tab{padding:10px 4px;text-align:center;font-size:10px;font-family:var(--mono);font-weight:500;background:transparent;border:none;border-radius:8px;color:var(--text2);cursor:pointer;line-height:1.4;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .tab.active{background:var(--bg4);color:var(--coral);border:1px solid var(--border2);}
+  .tab:active{background:var(--bg4);}
+  .tab-pane{display:none;flex-direction:column;gap:10px;}
+  .tab-pane.active{display:flex;}
+
+  /* DETECT BUTTONS */
+  .detect-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .detect-btn{padding:14px 10px;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:11px;line-height:1.5;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .detect-btn .detect-name{font-size:13px;font-weight:600;color:var(--text);font-family:var(--sans);display:block;margin-bottom:3px;}
+  .detect-btn.active{background:var(--coral-dim2);border-color:var(--coral2);color:var(--coral);}
+  .detect-btn.active .detect-name{color:var(--coral);}
+  .detect-btn:active{background:var(--bg4);}
+
+  /* HINT */
+  .hint{background:var(--bg4);border-left:2px solid var(--coral2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+  .hint.green{border-left-color:var(--green2);}
+  .hint.blue{border-left-color:var(--blue);}
+  .hint.amber{border-left-color:var(--amber);}
+
+  /* TOGGLE */
+  .toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+  .toggle-item.active{background:var(--coral-dim2);border-color:var(--coral2);}
+  .toggle-item:active{background:var(--bg4);}
+  .toggle-item input[type="checkbox"]{display:none;}
+  .chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .toggle-item.active .chk-box{background:var(--coral);border-color:var(--coral);}
+  .chk-mark{display:none;}
+  .toggle-item.active .chk-mark{display:block;}
+  .toggle-label{flex:1;font-size:14px;font-weight:500;}
+  .toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  /* SUB */
+  .sub{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;}
+
+  /* PARAM ROWS */
+  .param-section{display:flex;flex-direction:column;gap:8px;}
+
+  .param-row{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .param-row-top{display:flex;align-items:center;gap:8px;}
+  .param-row-top .chk-box{cursor:pointer;}
+  .param-name-label{flex:1;font-size:13px;font-weight:600;color:var(--text2);font-family:var(--mono);}
+  .param-row.active-param{border-color:var(--coral2);background:var(--coral-dim2);}
+  .param-row.active-param .param-name-label{color:var(--coral);}
+
+  .param-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .param-controls input,
+  .param-controls select{height:42px;font-size:13px;}
+
+  /* String/Enum pill toggle */
+  .type-pill{display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden;height:42px;}
+  .pill-btn{flex:1;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;padding:0 8px;}
+  .pill-btn.active{background:var(--bg4);color:var(--coral);}
+  .pill-btn:active{background:var(--bg4);}
+
+  /* Custom param rows */
+  .custom-param-row{display:grid;grid-template-columns:1fr 120px 42px 36px;gap:6px;align-items:center;}
+  .custom-param-row input{height:44px;font-size:13px;}
+  .custom-param-row select{height:44px;font-size:12px;padding:0 8px;}
+
+  .remove-btn{width:36px;height:44px;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--coral);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .remove-btn:active{background:var(--coral-dim);}
+
+  .add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1px dashed var(--border2);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;width:100%;}
+  .add-btn:active{background:var(--bg4);border-color:var(--coral2);color:var(--coral);}
+
+  .custom-header{display:grid;grid-template-columns:1fr 120px 42px 36px;gap:6px;padding:0 2px;}
+  .custom-header span{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  /* BOOL ROWS */
+  .bool-row{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:6px;align-items:center;}
+  .bool-row input[type="text"]{height:44px;font-size:13px;}
+  .bool-row select{height:44px;font-size:12px;padding:0 8px;}
+  .bool-header{display:grid;grid-template-columns:1fr 90px 80px 36px;gap:6px;padding:0 2px;}
+  .bool-header span{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  /* GEN BTN */
+  .gen-btn{width:100%;height:56px;background:var(--coral-dim);border:1px solid var(--coral2);border-radius:var(--rl);color:var(--coral);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .gen-btn:active{background:rgba(248,113,113,0.2);transform:scale(0.99);}
+
+  /* OUTPUT */
+  .out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+  .out-tag.dealer{background:var(--coral-dim);color:var(--coral);border:1px solid var(--coral2);}
+  .out-tag.victim{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
+  .out-tag.setup{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+  .out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .copy-btn{margin-left:auto;padding:8px 14px;min-height:36px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .copy-btn:active{background:var(--bg3);}
+  .copy-btn.copied{color:var(--green);border-color:var(--green2);}
+  .out-code{padding:14px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+  .out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+  /* SYNTAX */
+  .kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+
+  .hidden{display:none!important;}
+
+  @media(min-width:560px){.page{padding:24px 24px 80px;}}
+  @media(min-width:768px){
+    .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+    .form-col{flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px;}
+    .out-col{flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="index.html">‹</a>
+  <div>
+    <div class="header-title">Combat Generator</div>
+    <div class="header-sub">dealer · victim · setup</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- MODE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Damage Mode</span></div>
+    <div class="card-body">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeSimpleBtn" onclick="setMode('simple')">
+          Simple
+          <span class="mode-sub">take_damage(amount)</span>
+        </button>
+        <button class="mode-btn" id="modeAdvBtn" onclick="setMode('advanced')">
+          Advanced
+          <span class="mode-sub">weapon · zone · hit_type…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NODE TYPE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Node Type</span></div>
+    <div class="card-body">
+      <div class="field">
+        <div class="field-label">dimension</div>
+        <select id="nodeDim" onchange="syncAll()">
+          <option value="2d">2D — Area2D, RayCast2D…</option>
+          <option value="3d">3D — Area3D, RayCast3D…</option>
+        </select>
+      </div>
+      <div class="key-grid">
+        <div class="field">
+          <div class="field-label">dealer node</div>
+          <select id="dealerNode">
+            <option value="CharacterBody">CharacterBody</option>
+            <option value="Area">Area</option>
+            <option value="RigidBody">RigidBody</option>
+            <option value="Node">Node</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label">victim node</div>
+          <select id="victimNode">
+            <option value="CharacterBody">CharacterBody</option>
+            <option value="Area">Area</option>
+            <option value="RigidBody">RigidBody</option>
+            <option value="Node">Node</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETECTION -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Detection Type</span></div>
+    <div class="card-body">
+      <div class="detect-grid">
+        <div class="detect-btn active" data-det="area_area" onclick="selectDetect(this)">
+          <span class="detect-name">Area → Area</span>area_entered signal
+        </div>
+        <div class="detect-btn" data-det="body_area" onclick="selectDetect(this)">
+          <span class="detect-name">Body → Area</span>body_entered signal
+        </div>
+        <div class="detect-btn" data-det="body_body" onclick="selectDetect(this)">
+          <span class="detect-name">Body → Body</span>move_and_slide contact
+        </div>
+        <div class="detect-btn" data-det="raycast" onclick="selectDetect(this)">
+          <span class="detect-name">Raycast</span>RayCast2D / 3D
+        </div>
+      </div>
+      <div id="det-hint-area_area" class="hint">Dealer has an Area node. When it overlaps another Area on the victim the signal fires. Both need matching collision layers.</div>
+      <div id="det-hint-body_area" class="hint hidden">Dealer's CharacterBody enters an Area on the victim. The Area node on the victim emits body_entered.</div>
+      <div id="det-hint-body_body" class="hint hidden">After move_and_slide(), get_slide_collision() checks if the collider is a valid victim by group.</div>
+      <div id="det-hint-raycast" class="hint hidden">A RayCast node on the dealer checks on attack input. Targets body, area, or both via collision mask.</div>
+      <div id="raycast-opts" class="sub hidden">
+        <div class="key-grid">
+          <div class="field"><div class="field-label">RayCast node var</div><input type="text" id="rayVar" value="ray"></div>
+          <div class="field"><div class="field-label">ray length</div><input type="number" id="rayLen" value="64"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">targets</div>
+          <select id="rayTarget">
+            <option value="body">Body only</option>
+            <option value="area">Area only</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+      </div>
+      <div id="area-node-opts" class="sub">
+        <div class="field"><div class="field-label">Area node var (on dealer)</div><input type="text" id="areaVar" value="hit_area"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIGGER -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Attack Trigger</span></div>
+    <div class="card-body">
+      <div class="tabs">
+        <button class="tab active" data-tab="taction" onclick="switchTriggerTab('taction')">is_action<br>_pressed</button>
+        <button class="tab" data-tab="tkey" onclick="switchTriggerTab('tkey')">is_key<br>_pressed</button>
+        <button class="tab" data-tab="tui" onclick="switchTriggerTab('tui')">UI<br>Button</button>
+      </div>
+      <div class="tab-pane active" id="tab-taction">
+        <div class="field"><div class="field-label">action name</div><input type="text" id="t_action" value="attack"></div>
+      </div>
+      <div class="tab-pane" id="tab-tkey">
+        <div class="field"><div class="field-label">key constant</div><input type="text" id="t_key" value="KEY_Z"></div>
+      </div>
+      <div class="tab-pane" id="tab-tui">
+        <div class="field"><div class="field-label">bool var name</div><input type="text" id="t_ui" value="btn_attack"></div>
+        <div class="hint">Wire your Button's pressed signal to set this bool true in _ready().</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAMAGE & COOLDOWN -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Damage & Cooldown</span></div>
+    <div class="card-body">
+      <div class="key-grid">
+        <div class="field"><div class="field-label">damage per hit</div><input type="number" id="dmgVal" value="10"></div>
+        <div class="field"><div class="field-label">hits per attack</div><input type="number" id="hitsVal" value="1"></div>
+      </div>
+      <div class="toggle-item" id="tog-cooldown" onclick="toggleFeat('cooldown')">
+        <input type="checkbox" id="useCooldown">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Cooldown</span>
+        <span class="toggle-hint">timer-based</span>
+      </div>
+      <div class="sub hidden" id="cooldownSub">
+        <div class="field"><div class="field-label">duration (seconds)</div><input type="number" id="cooldownVal" value="1.0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANIMATION -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Animation</span></div>
+    <div class="card-body">
+      <div class="toggle-item" id="tog-anim" onclick="toggleFeat('anim')">
+        <input type="checkbox" id="useAnim">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Dealer animation</span>
+        <span class="toggle-hint">AnimationPlayer</span>
+      </div>
+      <div class="sub hidden" id="animSub">
+        <div class="field"><div class="field-label">AnimationPlayer var</div><input type="text" id="animVar" value="anim_player"></div>
+        <div class="field"><div class="field-label">attack anim name</div><input type="text" id="animAtk" value="attack"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADDITIONAL BOOL CONDITIONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Attack Conditions</span></div>
+    <div class="card-body">
+      <div class="hint amber">Booleans that must be true or false before the attack fires. e.g. has_ammo = true, is_reloading = false.</div>
+      <div class="bool-header"><span>variable name</span><span>default</span><span>must be</span><span></span></div>
+      <div id="boolRows"></div>
+      <button class="add-btn" onclick="addBoolRow()">+ Add Condition</button>
+    </div>
+  </div>
+
+  <!-- ADVANCED PARAMS (hidden in simple mode) -->
+  <div class="card hidden" id="advParamsCard">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Hit Parameters</span></div>
+    <div class="card-body">
+      <div class="hint blue">Enable the parameters you want passed into take_damage(). Toggle String / Enum per field. Enum generates a constant at the top of the victim script.</div>
+
+      <div class="param-section" id="builtinParams">
+
+        <!-- weapon -->
+        <div class="param-row" id="pr-weapon">
+          <div class="param-row-top">
+            <div class="chk-box" onclick="toggleParam('weapon')"><svg class="chk-mark" id="pm-weapon" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="param-name-label" id="pl-weapon">weapon</span>
+            <div class="type-pill">
+              <button class="pill-btn active" id="pp-weapon-str" onclick="setPillType('weapon','String')">String</button>
+              <button class="pill-btn" id="pp-weapon-enum" onclick="setPillType('weapon','enum')">Enum</button>
+            </div>
+          </div>
+          <div class="param-controls hidden" id="pc-weapon">
+            <div class="field"><div class="field-label">var name</div><input type="text" id="pv-weapon" value="weapon_name"></div>
+            <div class="field" id="pe-weapon-wrap" style="display:none">
+              <div class="field-label">enum values (comma separated)</div>
+              <input type="text" id="pe-weapon" value="SWORD,BOW,MAGIC">
+            </div>
+          </div>
+        </div>
+
+        <!-- hit_type -->
+        <div class="param-row" id="pr-hit_type">
+          <div class="param-row-top">
+            <div class="chk-box" onclick="toggleParam('hit_type')"><svg class="chk-mark" id="pm-hit_type" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="param-name-label" id="pl-hit_type">hit_type</span>
+            <div class="type-pill">
+              <button class="pill-btn active" id="pp-hit_type-str" onclick="setPillType('hit_type','String')">String</button>
+              <button class="pill-btn" id="pp-hit_type-enum" onclick="setPillType('hit_type','enum')">Enum</button>
+            </div>
+          </div>
+          <div class="param-controls hidden" id="pc-hit_type">
+            <div class="field"><div class="field-label">var name</div><input type="text" id="pv-hit_type" value="hit_type"></div>
+            <div class="field" id="pe-hit_type-wrap" style="display:none">
+              <div class="field-label">enum values</div>
+              <input type="text" id="pe-hit_type" value="KNOCK,KILL">
+            </div>
+          </div>
+        </div>
+
+        <!-- zone -->
+        <div class="param-row" id="pr-zone">
+          <div class="param-row-top">
+            <div class="chk-box" onclick="toggleParam('zone')"><svg class="chk-mark" id="pm-zone" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="param-name-label" id="pl-zone">zone</span>
+            <div class="type-pill">
+              <button class="pill-btn active" id="pp-zone-str" onclick="setPillType('zone','String')">String</button>
+              <button class="pill-btn" id="pp-zone-enum" onclick="setPillType('zone','enum')">Enum</button>
+            </div>
+          </div>
+          <div class="param-controls hidden" id="pc-zone">
+            <div class="field"><div class="field-label">var name</div><input type="text" id="pv-zone" value="hit_zone"></div>
+            <div class="field" id="pe-zone-wrap" style="display:none">
+              <div class="field-label">enum values</div>
+              <input type="text" id="pe-zone" value="HEAD,BODY,LEGS">
+            </div>
+          </div>
+        </div>
+
+        <!-- hitter -->
+        <div class="param-row" id="pr-hitter">
+          <div class="param-row-top">
+            <div class="chk-box" onclick="toggleParam('hitter')"><svg class="chk-mark" id="pm-hitter" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="param-name-label" id="pl-hitter">hitter</span>
+            <div class="type-pill">
+              <button class="pill-btn active" id="pp-hitter-str" onclick="noop()">String</button>
+            </div>
+          </div>
+          <div class="param-controls hidden" id="pc-hitter">
+            <div class="field"><div class="field-label">var name</div><input type="text" id="pv-hitter" value="hitter_name"></div>
+          </div>
+        </div>
+
+        <!-- victim -->
+        <div class="param-row" id="pr-victim">
+          <div class="param-row-top">
+            <div class="chk-box" onclick="toggleParam('victim')"><svg class="chk-mark" id="pm-victim" width="12" height="12" viewBox="0 0 12 12" style="display:none"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="param-name-label" id="pl-victim">victim</span>
+            <div class="type-pill">
+              <button class="pill-btn active" id="pp-victim-str" onclick="noop()">String</button>
+            </div>
+          </div>
+          <div class="param-controls hidden" id="pc-victim">
+            <div class="field"><div class="field-label">var name</div><input type="text" id="pv-victim" value="victim_name"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Custom params -->
+      <div class="custom-header" style="margin-top:8px"><span>custom param</span><span>type</span><span>enum vals</span><span></span></div>
+      <div id="customParamRows"></div>
+      <button class="add-btn" onclick="addCustomParam()">+ Add Custom Parameter</button>
+    </div>
+  </div>
+
+  <!-- VICTIM SETTINGS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot green"></div><span class="card-title">Victim Settings</span></div>
+    <div class="card-body">
+      <div class="key-grid">
+        <div class="field"><div class="field-label">health variable</div><input type="text" id="healthVar" value="health"></div>
+        <div class="field"><div class="field-label">max health</div><input type="number" id="maxHealth" value="100"></div>
+      </div>
+      <div class="key-grid">
+        <div class="field"><div class="field-label">victim group</div><input type="text" id="victimGroup" value="enemy"></div>
+        <div class="field"><div class="field-label">death signal</div><input type="text" id="deathSignal" value="died"></div>
+      </div>
+      <div class="toggle-item" id="tog-victimAnim" onclick="toggleFeat('victimAnim')">
+        <input type="checkbox" id="useVictimAnim">
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Victim AnimationPlayer</span>
+        <span class="toggle-hint">hurt / death anims</span>
+      </div>
+      <div class="sub hidden" id="victimAnimSub">
+        <div class="field"><div class="field-label">AnimationPlayer var</div><input type="text" id="victimAnimVar" value="anim_player"></div>
+        <div class="key-grid">
+          <div class="field"><div class="field-label">hurt anim</div><input type="text" id="animHurt" value="hurt"></div>
+          <div class="field"><div class="field-label">death anim</div><input type="text" id="animDeath" value="death"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate GDScript</button>
+</div><!-- form-col -->
+
+<div class="out-col">
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag dealer">Dealer</span><span class="out-sub">attacker script</span><button class="copy-btn" onclick="copyOut('dealerOut',this)">Copy</button></div>
+    <div class="out-code empty" id="dealerOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag victim">Victim</span><span class="out-sub">target script</span><button class="copy-btn" onclick="copyOut('victimOut',this)">Copy</button></div>
+    <div class="out-code empty" id="victimOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag setup">Setup</span><span class="out-sub">_ready() + groups + layers</span><button class="copy-btn" onclick="copyOut('setupOut',this)">Copy</button></div>
+    <div class="out-code empty" id="setupOut"># tap Generate to produce code</div>
+  </div>
+</div>
+</div><!-- page -->
+
+<script>
+const $=id=>document.getElementById(id);
+let mode='simple', triggerTab='taction', detectType='area_area';
+const feats={cooldown:false,anim:false,victimAnim:false};
+const paramStates={weapon:false,hit_type:false,zone:false,hitter:false,victim:false};
+const paramTypes={weapon:'String',hit_type:'String',zone:'String'};
+let boolCount=0, customParamCount=0;
+
+/* MODE */
+function setMode(m){
+  mode=m;
+  $('modeSimpleBtn').classList.toggle('active',m==='simple');
+  $('modeAdvBtn').classList.toggle('active',m==='advanced');
+  $('advParamsCard').classList.toggle('hidden',m==='simple');
+}
+
+/* DETECTION */
+function selectDetect(el){
+  document.querySelectorAll('.detect-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  detectType=el.dataset.det;
+  ['area_area','body_area','body_body','raycast'].forEach(t=>$('det-hint-'+t).classList.toggle('hidden',t!==detectType));
+  $('raycast-opts').classList.toggle('hidden',detectType!=='raycast');
+  $('area-node-opts').classList.toggle('hidden',detectType==='body_body'||detectType==='raycast');
+}
+
+/* TRIGGER TAB */
+function switchTriggerTab(t){
+  triggerTab=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
+}
+
+/* FEATURES */
+function toggleFeat(f){
+  feats[f]=!feats[f];
+  $('tog-'+f).classList.toggle('active',feats[f]);
+  syncAll();
+}
+
+function syncAll(){
+  $('cooldownSub').classList.toggle('hidden',!feats.cooldown);
+  $('animSub').classList.toggle('hidden',!feats.anim);
+  $('victimAnimSub').classList.toggle('hidden',!feats.victimAnim);
+}
+
+/* BUILT-IN PARAMS */
+function toggleParam(p){
+  paramStates[p]=!paramStates[p];
+  $('pm-'+p).style.display=paramStates[p]?'block':'none';
+  $('pr-'+p).classList.toggle('active-param',paramStates[p]);
+  $('pc-'+p).classList.toggle('hidden',!paramStates[p]);
+  $('pl-'+p).style.color=paramStates[p]?'var(--coral)':'';
+}
+
+function setPillType(p,type){
+  paramTypes[p]=type;
+  $('pp-'+p+'-str').classList.toggle('active',type==='String');
+  $('pp-'+p+'-enum').classList.toggle('active',type==='enum');
+  const wrap=$('pe-'+p+'-wrap');
+  if(wrap) wrap.style.display=type==='enum'?'flex':'none';
+}
+
+function noop(){}
+
+/* CUSTOM PARAMS */
+function addCustomParam(){
+  const id=++customParamCount;
+  const div=document.createElement('div');
+  div.id='cprow-'+id;
+  div.style.cssText='display:flex;flex-direction:column;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;';
+  div.innerHTML=`
+    <div class="custom-param-row">
+      <input type="text" placeholder="param_name" id="cpname-${id}">
+      <select id="cptype-${id}" onchange="syncCustomEnum(${id})">
+        <option>String</option><option>float</option><option>int</option><option>bool</option><option>enum</option>
+      </select>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);font-family:var(--mono);">vals</div>
+      <button class="remove-btn" onclick="removeCustomParam(${id})">×</button>
+    </div>
+    <div id="cpenum-${id}" style="display:none">
+      <input type="text" placeholder="VAL1,VAL2,VAL3" id="cpenumvals-${id}" style="height:42px;font-size:13px;">
+    </div>
+  `;
+  $('customParamRows').appendChild(div);
+}
+
+function syncCustomEnum(id){
+  const isEnum=$('cptype-'+id).value==='enum';
+  $('cpenum-'+id).style.display=isEnum?'block':'none';
+}
+
+function removeCustomParam(id){const el=$('cprow-'+id);if(el)el.remove();}
+
+/* BOOL CONDITIONS */
+function addBoolRow(){
+  const id=++boolCount;
+  const div=document.createElement('div');
+  div.className='bool-row'; div.id='brow-'+id;
+  div.innerHTML=`
+    <input type="text" placeholder="has_ammo" id="bname-${id}">
+    <select id="bdef-${id}"><option value="true">true</option><option value="false">false</option></select>
+    <select id="bmust-${id}"><option value="true">true</option><option value="false">false</option></select>
+    <button class="remove-btn" onclick="removeBool(${id})">×</button>
+  `;
+  $('boolRows').appendChild(div);
+}
+function removeBool(id){const el=$('brow-'+id);if(el)el.remove();}
+
+function getBoolRows(){
+  const rows=[];
+  document.querySelectorAll('[id^="brow-"]').forEach(r=>{
+    const id=r.id.replace('brow-','');
+    const name=$('bname-'+id)?.value.trim();
+    if(!name)return;
+    rows.push({name,def:$('bdef-'+id)?.value,must:$('bmust-'+id)?.value});
+  });
+  return rows;
+}
+
+function getCustomParams(){
+  const rows=[];
+  document.querySelectorAll('[id^="cprow-"]').forEach(r=>{
+    const id=r.id.replace('cprow-','');
+    const name=$('cpname-'+id)?.value.trim();
+    if(!name)return;
+    const type=$('cptype-'+id)?.value;
+    const enumVals=type==='enum'?($('cpenumvals-'+id)?.value.trim()||''):'' ;
+    rows.push({name,type,enumVals});
+  });
+  return rows;
+}
+
+/* HELPERS */
+function v(id,fb){const el=$(id);return el&&el.value.trim()?el.value.trim():fb;}
+function sfx(){return $('nodeDim').value==='2d'?'2D':'3D';}
+
+/* BUILD PARAM SIGNATURE */
+function buildParams(){
+  if(mode==='simple') return [{name:'amount',type:'float',isEnum:false,enumName:'',enumVals:''}];
+  const params=[{name:'amount',type:'float',isEnum:false,enumName:'',enumVals:''}];
+  const builtins=['weapon','hit_type','zone','hitter','victim'];
+  builtins.forEach(p=>{
+    if(!paramStates[p])return;
+    const isEnum=(paramTypes[p]==='enum');
+    const varName=v('pv-'+p,p);
+    const enumVals=isEnum?(v('pe-'+p,'')):'' ;
+    const enumName=varName.toUpperCase()+'_TYPE';
+    params.push({name:varName,type:isEnum?enumName:'String',isEnum,enumName,enumVals,label:p});
+  });
+  getCustomParams().forEach(cp=>{
+    const isEnum=cp.type==='enum';
+    const enumName=cp.name.toUpperCase()+'_TYPE';
+    params.push({name:cp.name,type:isEnum?enumName:cp.type,isEnum,enumName,enumVals:cp.enumVals});
+  });
+  return params;
+}
+
+/* GENERATE */
+function generate(){
+  const sx=sfx();
+  const dmg=v('dmgVal','10');
+  const hits=parseInt(v('hitsVal','1'));
+  const cooldown=v('cooldownVal','1.0');
+  const areaVar=v('areaVar','hit_area');
+  const rayVar=v('rayVar','ray');
+  const rayLen=v('rayLen','64');
+  const healthVar=v('healthVar','health');
+  const maxHP=v('maxHealth','100');
+  const group=v('victimGroup','enemy');
+  const deathSig=v('deathSignal','died');
+  const animVar=v('animVar','anim_player');
+  const animAtk=v('animAtk','attack');
+  const animHurt=v('animHurt','hurt');
+  const animDeath=v('animDeath','death');
+  const victimAnimVar=v('victimAnimVar','anim_player');
+  const bools=getBoolRows();
+  const params=buildParams();
+
+  let triggerExpr='';
+  if(triggerTab==='taction') triggerExpr=`Input.is_action_just_pressed("${v('t_action','attack')}")`;
+  else if(triggerTab==='tkey') triggerExpr=`Input.is_key_pressed(${v('t_key','KEY_Z')})`;
+  else triggerExpr=v('t_ui','btn_attack');
+
+  /* build take_damage call args — dealer passes values */
+  function buildCallArgs(){
+    return params.map(p=>{
+      if(p.name==='amount') return dmg;
+      if(p.isEnum) return `${p.enumName}.${p.enumVals.split(',')[0].trim()}`;
+      if(p.type==='String') return `"${p.name}_value"`;
+      if(p.type==='bool') return 'false';
+      return '0';
+    }).join(', ');
+  }
+
+  const sig=params.map(p=>`${p.name}: ${p.type}`).join(', ');
+  const callArgs=buildCallArgs();
+
+  /* ── DEALER VARS ── */
+  const dv=[];
+  if(feats.cooldown){dv.push(`var attack_cooldown: float = ${cooldown}`);dv.push(`var _attack_timer: float = 0.0`);}
+  if(triggerTab==='tui') dv.push(`var ${v('t_ui','btn_attack')}: bool = false`);
+  bools.forEach(b=>dv.push(`var ${b.name}: bool = ${b.def}`));
+  if(feats.anim) dv.push(`@onready var ${animVar}: AnimationPlayer = $AnimationPlayer`);
+  if(detectType==='raycast') dv.push(`@onready var ${rayVar}: RayCast${sx} = $${rayVar.charAt(0).toUpperCase()+rayVar.slice(1)}`);
+
+  /* ── DEALER FUNC ── */
+  const dl=[];
+  dl.push(`func _physics_process(delta: float) -> void:`);dl.push(``);
+  if(feats.cooldown){
+    dl.push(`\tif _attack_timer > 0.0:`);
+    dl.push(`\t\t_attack_timer -= delta`);
+    dl.push(`\t\treturn`);dl.push(``);
+  }
+  dl.push(`\tif ${triggerExpr}:`);
+  if(bools.length>0){
+    const conds=bools.map(b=>`${b.name} == ${b.must}`).join(' and ');
+    dl.push(`\t\tif not (${conds}):`);
+    dl.push(`\t\t\treturn`);dl.push(``);
+  }
+  if(feats.anim) dl.push(`\t\t${animVar}.play("${animAtk}")`);
+  if(feats.cooldown) dl.push(`\t\t_attack_timer = attack_cooldown`);
+  dl.push(``);
+
+  function emitHit(indent,targetVar){
+    if(hits>1){
+      dl.push(`${indent}for _h in ${hits}:`);
+      dl.push(`${indent}\t${targetVar}.take_damage(${callArgs})`);
+    } else {
+      dl.push(`${indent}${targetVar}.take_damage(${callArgs})`);
+    }
+  }
+
+  if(detectType==='area_area'||detectType==='body_area'){
+    dl.push(`\t\t# Detection handled via signal — see Setup panel`);
+  } else if(detectType==='body_body'){
+    dl.push(`\t\tfor i in get_slide_collision_count():`);
+    dl.push(`\t\t\tvar col := get_slide_collision(i)`);
+    dl.push(`\t\t\tvar body := col.get_collider()`);
+    dl.push(`\t\t\tif body.is_in_group("${group}"):`);
+    emitHit('\t\t\t\t','body');
+  } else if(detectType==='raycast'){
+    dl.push(`\t\tif ${rayVar}.is_colliding():`);
+    dl.push(`\t\t\tvar target := ${rayVar}.get_collider()`);
+    dl.push(`\t\t\tif target.is_in_group("${group}"):`);
+    emitHit('\t\t\t\t','target');
+  }
+
+  /* ── VICTIM VARS ── */
+  const vv=[];
+  vv.push(`signal ${deathSig}`);
+  /* enum declarations */
+  params.forEach(p=>{
+    if(!p.isEnum||!p.enumVals)return;
+    const vals=p.enumVals.split(',').map(s=>s.trim()).filter(Boolean).join(', ');
+    vv.push(`enum ${p.enumName} { ${vals} }`);
+  });
+  vv.push(`var ${healthVar}: float = ${maxHP}`);
+  if(feats.victimAnim) vv.push(`@onready var ${victimAnimVar}: AnimationPlayer = $AnimationPlayer`);
+
+  /* ── VICTIM FUNC ── */
+  const vl=[];
+  vl.push(`func take_damage(${sig}) -> void:`);
+  vl.push(`\t${healthVar} -= amount`);
+  if(feats.victimAnim) vl.push(`\t${victimAnimVar}.play("${animHurt}")`);
+  /* extra param branches */
+  if(mode==='advanced'){
+    params.forEach(p=>{
+      if(p.name==='amount')return;
+      if(p.isEnum&&p.enumVals){
+        const vals=p.enumVals.split(',').map(s=>s.trim()).filter(Boolean);
+        vl.push(`\t# Handle ${p.name}`);
+        vals.forEach((val,i)=>{
+          vl.push(`\t${i===0?'if':'elif'} ${p.name} == ${p.enumName}.${val}:`);
+          vl.push(`\t\tpass  # handle ${val.toLowerCase()} case`);
+        });
+      }
+    });
+  }
+  vl.push(`\tif ${healthVar} <= 0.0:`);
+  vl.push(`\t\t${healthVar} = 0.0`);
+  if(feats.victimAnim) vl.push(`\t\t${victimAnimVar}.play("${animDeath}")`);
+  vl.push(`\t\temit_signal("${deathSig}")`);
+  vl.push(`\t\t# handle death here`);
+
+  /* ── SETUP ── */
+  const sl=[];
+  sl.push(`# --- Victim: add to group in _ready() ---`);
+  sl.push(`func _ready() -> void:`);
+  sl.push(`\tadd_to_group("${group}")`);
+  if(detectType==='area_area'){
+    sl.push(``);
+    sl.push(`# --- Dealer: connect Area signal in _ready() ---`);
+    sl.push(`# func _ready() -> void:`);
+    sl.push(`#\t${areaVar}.area_entered.connect(_on_hit_area_entered)`);
+    sl.push(``);
+    sl.push(`func _on_hit_area_entered(area: Area${sx}) -> void:`);
+    sl.push(`\tvar parent := area.get_parent()`);
+    sl.push(`\tif parent.is_in_group("${group}"):`);
+    if(hits>1){sl.push(`\t\tfor _h in ${hits}:`);sl.push(`\t\t\tparent.take_damage(${callArgs})`);}
+    else sl.push(`\t\tparent.take_damage(${callArgs})`);
+  } else if(detectType==='body_area'){
+    sl.push(``);
+    sl.push(`# --- Dealer: connect Area signal in _ready() ---`);
+    sl.push(`# func _ready() -> void:`);
+    sl.push(`#\t${areaVar}.body_entered.connect(_on_hit_area_body_entered)`);
+    sl.push(``);
+    sl.push(`func _on_hit_area_body_entered(body: Node) -> void:`);
+    sl.push(`\tif body.is_in_group("${group}"):`);
+    if(hits>1){sl.push(`\t\tfor _h in ${hits}:`);sl.push(`\t\t\tbody.take_damage(${callArgs})`);}
+    else sl.push(`\t\tbody.take_damage(${callArgs})`);
+  } else if(detectType==='raycast'){
+    sl.push(``);sl.push(`# --- Raycast setup in editor ---`);
+    sl.push(`# Add RayCast${sx} as child of dealer`);
+    sl.push(`# Set target_position to Vector${sx==='2D'?2:3}(${rayLen}, 0${sx==='3D'?', 0':''})`);
+    sl.push(`# Set collision_mask to match victim's collision layer`);
+  } else {
+    sl.push(``);sl.push(`# --- Body to Body: no signal setup needed ---`);
+    sl.push(`# Ensure dealer calls move_and_slide() before the attack check`);
+  }
+  sl.push(``);sl.push(`# --- Collision layers reminder ---`);
+  sl.push(`# Dealer layer: 1   Dealer mask: 2`);
+  sl.push(`# Victim layer: 2   Victim mask: 1`);
+  sl.push(`# Set in Project Settings → Layer Names → ${$('nodeDim').value==='2d'?'2D Physics':'3D Physics'}`);
+
+  const dealerFull=(dv.length?dv.join('\n')+'\n\n':'')+dl.join('\n');
+  const victimFull=vv.join('\n')+'\n\n'+vl.join('\n');
+
+  renderCode('dealerOut',dealerFull);
+  renderCode('victimOut',victimFull);
+  renderCode('setupOut',sl.join('\n'));
+}
+
+/* TOKENIZER */
+function highlight(code){
+  const KW=new Set(['func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','signal','enum']);
+  const TYPE=new Set(['float','int','bool','String','Vector2','Vector3','void','Node']);
+  const FN=new Set(['is_on_floor','move_and_slide','move_toward','get_axis','is_action_just_pressed','is_action_pressed','is_key_pressed','play','normalized','length','is_in_group','get_collider','is_colliding','get_slide_collision','get_slide_collision_count','get_parent','add_to_group','emit_signal','take_damage','queue_free']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tl(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/\w/.test(line[j]))j++;out+=`<span class="kw">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){
+        let j=i;while(j<line.length&&/\w/.test(line[j]))j++;
+        const w=line.slice(i,j);
+        out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);
+        i=j;continue;
+      }
+      if(/\d/.test(line[i])||(line[i]==='-'&&/\d/.test(line[i+1]||''))){
+        let j=i+(line[i]==='-'?1:0);while(j<line.length&&/[\d.]/.test(line[j]))j++;
+        out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;
+      }
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tl).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id,btn){
+  const el=$(id);const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>UI Elements Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+    --border:#2a2f37; --border2:#343b45;
+    --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+    --blue:#60a5fa; --blue2:#3b82f6;
+    --blue-dim:rgba(96,165,250,0.10); --blue-dim2:rgba(96,165,250,0.06);
+    --green:#4ade80; --green2:#22c55e; --green-dim:rgba(74,222,128,0.10);
+    --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+    --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+    --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+    --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+    --tap:52px; --r:10px; --rl:14px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+  /* HEADER */
+  .header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+  .back-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:20px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+  .back-btn:active{background:var(--bg4);}
+  .header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+  .header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--blue);background:var(--blue-dim);border:1px solid var(--blue2);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+  /* PAGE */
+  .page{padding:16px 16px 100px;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+  /* NODE TYPE SCROLL TABS */
+  .node-tabs-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+  .node-tabs-wrap::-webkit-scrollbar{height:3px;}
+  .node-tabs-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  .node-tabs{display:flex;gap:6px;min-width:max-content;padding:2px;}
+  .node-tab{padding:8px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;transition:all 0.15s;}
+  .node-tab:active{background:var(--bg3);}
+  .node-tab.active{background:var(--blue-dim2);border-color:var(--blue2);color:var(--blue);}
+
+  /* PANES */
+  .node-pane{display:none;flex-direction:column;gap:12px;}
+  .node-pane.active{display:flex;}
+
+  /* CARD */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+  .card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+  /* ENABLE CHECKBOX STYLES */
+  .enable-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .enable-checkbox{width:18px;height:18px;cursor:pointer;accent-color:var(--blue);}
+  .enable-label{font-size:13px;font-weight:600;color:var(--text);font-family:var(--sans);}
+  .enable-hint{font-size:10px;color:var(--text3);font-family:var(--mono);margin-left:auto;}
+  .disabled-content{opacity:0.5;pointer-events:none;}
+  
+  /* FIELDS */
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .key-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .key-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+  select,input[type="text"],input[type="number"]{
+    width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);
+    border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;
+    padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;
+  }
+  select:focus,input:focus{border-color:var(--blue2);}
+  textarea.field-input{width:100%;min-height:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;resize:vertical;line-height:1.6;transition:border-color 0.15s;}
+  textarea.field-input:focus{border-color:var(--blue2);}
+
+  /* TOGGLE */
+  .toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+  .toggle-item.active{background:var(--blue-dim2);border-color:var(--blue2);}
+  .toggle-item:active{background:var(--bg4);}
+  .toggle-item input[type="checkbox"]{display:none;}
+  .chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .toggle-item.active .chk-box{background:var(--blue);border-color:var(--blue);}
+  .chk-mark{display:none;}
+  .toggle-item.active .chk-mark{display:block;}
+  .toggle-label{flex:1;font-size:14px;font-weight:500;}
+  .toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+  /* HINT */
+  .hint{background:var(--bg4);border-left:2px solid var(--blue2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+
+  /* SUB */
+  .sub{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;}
+
+  /* OPTION ITEM ROWS */
+  .opt-row{display:grid;grid-template-columns:1fr 36px;gap:6px;align-items:center;}
+  .opt-row input{height:44px;font-size:13px;}
+  .remove-btn{width:36px;height:44px;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--coral);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+  .remove-btn:active{background:var(--coral-dim);}
+  .add-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border:1px dashed var(--border2);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;width:100%;}
+  .add-btn:active{background:var(--bg4);border-color:var(--blue2);color:var(--blue);}
+
+  /* SIGNAL TAGS */
+  .signal-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);}
+  .signal-name{font-family:var(--mono);font-size:12px;color:var(--amber);flex:1;}
+  .signal-fn{font-family:var(--mono);font-size:11px;color:var(--text2);}
+
+  /* GEN */
+  .gen-btn{width:100%;height:56px;background:var(--blue-dim);border:1px solid var(--blue2);border-radius:var(--rl);color:var(--blue);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;margin-top:8px;}
+  .gen-btn:active{background:rgba(96,165,250,0.2);transform:scale(0.99);}
+  
+  /* SELECT ALL BUTTON */
+  .select-all-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:8px 12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);}
+  .select-all-btn{padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;}
+  .select-all-btn:active{background:var(--bg2);}
+  .select-all-status{font-size:11px;color:var(--text3);font-family:var(--mono);}
+
+  /* OUTPUT */
+  .out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+  .out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+  .out-tag.setup{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+  .out-tag.signals{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.4);}
+  .out-tag.vars{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+  .out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .copy-btn{margin-left:auto;padding:8px 14px;min-height:36px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+  .copy-btn:active{background:var(--bg3);}
+  .copy-btn.copied{color:var(--green);border-color:var(--green2);}
+  .out-code{padding:14px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+  .out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+  /* SYNTAX */
+  .kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+
+  .hidden{display:none!important;}
+
+  @media(min-width:560px){.page{padding:24px 24px 80px;}}
+  @media(min-width:768px){
+    .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+    .form-col{flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px;}
+    .out-col{flex:1;min-width:320px;display:flex;flex-direction:column;gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="index.html">‹</a>
+  <div>
+    <div class="header-title">UI Elements Generator</div>
+    <div class="header-sub">setup_ui() · signals · @onready</div>
+  </div>
+  <span class="header-badge">GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- SELECT ALL BAR -->
+  <div class="select-all-bar">
+    <span class="select-all-status" id="selectAllStatus">⚫ Select elements to include</span>
+    <button class="select-all-btn" onclick="toggleSelectAll()">Select All</button>
+  </div>
+
+  <!-- NODE TYPE SCROLL TABS -->
+  <div class="node-tabs-wrap">
+    <div class="node-tabs" id="nodeTabs">
+      <button class="node-tab active" data-pane="label" onclick="switchNode('label')">Label</button>
+      <button class="node-tab" data-pane="richtextlabel" onclick="switchNode('richtextlabel')">RichTextLabel</button>
+      <button class="node-tab" data-pane="texturerect" onclick="switchNode('texturerect')">TextureRect</button>
+      <button class="node-tab" data-pane="button" onclick="switchNode('button')">Button</button>
+      <button class="node-tab" data-pane="texturebutton" onclick="switchNode('texturebutton')">TextureButton</button>
+      <button class="node-tab" data-pane="lineedit" onclick="switchNode('lineedit')">LineEdit</button>
+      <button class="node-tab" data-pane="textedit" onclick="switchNode('textedit')">TextEdit</button>
+      <button class="node-tab" data-pane="optionbutton" onclick="switchNode('optionbutton')">OptionButton</button>
+      <button class="node-tab" data-pane="panel" onclick="switchNode('panel')">Panel</button>
+      <button class="node-tab" data-pane="hbox" onclick="switchNode('hbox')">HBoxContainer</button>
+      <button class="node-tab" data-pane="vbox" onclick="switchNode('vbox')">VBoxContainer</button>
+      <button class="node-tab" data-pane="gridcontainer" onclick="switchNode('gridcontainer')">GridContainer</button>
+    </div>
+  </div>
+
+  <!-- ── LABEL ── -->
+  <div class="node-pane active" id="pane-label">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Label</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_label" checked onchange="toggleElementEnable('label', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="label-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="label_var" value="my_label"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="label_path" value="MyLabel"></div>
+          <div class="field"><div class="field-label">text content</div><input type="text" id="label_text" value="Hello World"></div>
+          <div class="key-grid">
+            <div class="field"><div class="field-label">font size (0 = skip)</div><input type="number" id="label_size" value="16"></div>
+            <div class="field"><div class="field-label">alignment</div>
+              <select id="label_align">
+                <option value="">— skip —</option>
+                <option value="HORIZONTAL_ALIGNMENT_LEFT">Left</option>
+                <option value="HORIZONTAL_ALIGNMENT_CENTER">Center</option>
+                <option value="HORIZONTAL_ALIGNMENT_RIGHT">Right</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><div class="field-label">modulate color (hex, empty = skip)</div><input type="text" id="label_color" placeholder="e.g. ff4444ff"></div>
+          <div class="toggle-item" id="tog-label_vis" onclick="togItem('label_vis')">
+            <input type="checkbox" id="label_vis">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Set visible</span>
+            <span class="toggle-hint">visible = true/false</span>
+          </div>
+          <div class="sub hidden" id="sub-label_vis">
+            <div class="field"><div class="field-label">visible</div>
+              <select id="label_visible"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RICH TEXT LABEL ── -->
+  <div class="node-pane" id="pane-richtextlabel">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">RichTextLabel</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_richtextlabel" checked onchange="toggleElementEnable('richtextlabel', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="richtextlabel-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="rtl_var" value="rich_label"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="rtl_path" value="RichTextLabel"></div>
+          <div class="field"><div class="field-label">bbcode text</div><textarea class="field-input" id="rtl_text">[b]Hello[/b] [color=red]World[/color]</textarea></div>
+          <div class="toggle-item" id="tog-rtl_scroll" onclick="togItem('rtl_scroll')">
+            <input type="checkbox" id="rtl_scroll">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Scroll active</span>
+            <span class="toggle-hint">scroll_active = true</span>
+          </div>
+          <div class="toggle-item" id="tog-rtl_fit" onclick="togItem('rtl_fit')">
+            <input type="checkbox" id="rtl_fit">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Fit content height</span>
+            <span class="toggle-hint">fit_content = true</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TEXTURE RECT ── -->
+  <div class="node-pane" id="pane-texturerect">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">TextureRect</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_texturerect" checked onchange="toggleElementEnable('texturerect', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="texturerect-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="tr_var" value="my_texture"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="tr_path" value="TextureRect"></div>
+          <div class="field"><div class="field-label">texture preload path</div><input type="text" id="tr_tex" placeholder="res://icon.png"></div>
+          <div class="field"><div class="field-label">stretch mode</div>
+            <select id="tr_stretch">
+              <option value="">— skip —</option>
+              <option value="STRETCH_SCALE">Scale</option>
+              <option value="STRETCH_TILE">Tile</option>
+              <option value="STRETCH_KEEP">Keep</option>
+              <option value="STRETCH_KEEP_CENTERED">Keep Centered</option>
+              <option value="STRETCH_KEEP_ASPECT">Keep Aspect</option>
+              <option value="STRETCH_KEEP_ASPECT_CENTERED">Keep Aspect Centered</option>
+            </select>
+          </div>
+          <div class="key-grid">
+            <div class="toggle-item" id="tog-tr_fliph" onclick="togItem('tr_fliph')">
+              <input type="checkbox" id="tr_fliph">
+              <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+              <span class="toggle-label">Flip H</span>
+            </div>
+            <div class="toggle-item" id="tog-tr_flipv" onclick="togItem('tr_flipv')">
+              <input type="checkbox" id="tr_flipv">
+              <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+              <span class="toggle-label">Flip V</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BUTTON ── -->
+  <div class="node-pane" id="pane-button">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Button</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_button" checked onchange="toggleElementEnable('button', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="button-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="btn_var" value="my_button"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="btn_path" value="MyButton"></div>
+          <div class="field"><div class="field-label">button text</div><input type="text" id="btn_text" value="Click Me"></div>
+          <div class="field"><div class="field-label">icon preload path (empty = skip)</div><input type="text" id="btn_icon" placeholder="res://icon.png"></div>
+          <div class="toggle-item" id="tog-btn_disabled" onclick="togItem('btn_disabled')">
+            <input type="checkbox" id="btn_disabled">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Set disabled state</span>
+            <span class="toggle-hint">disabled = true/false</span>
+          </div>
+          <div class="sub hidden" id="sub-btn_disabled">
+            <select id="btn_disabled_val"><option value="false">false (enabled)</option><option value="true">true (disabled)</option></select>
+          </div>
+          <div class="hint">Signal: pressed — connect in _ready(). Function name below.</div>
+          <div class="field"><div class="field-label">signal handler function name</div><input type="text" id="btn_signal_fn" value="_on_my_button_pressed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TEXTURE BUTTON ── -->
+  <div class="node-pane" id="pane-texturebutton">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">TextureButton</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_texturebutton" checked onchange="toggleElementEnable('texturebutton', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="texturebutton-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="tb_var" value="my_tex_button"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="tb_path" value="TextureButton"></div>
+          <div class="field"><div class="field-label">normal texture</div><input type="text" id="tb_normal" placeholder="res://normal.png"></div>
+          <div class="field"><div class="field-label">pressed texture (empty = skip)</div><input type="text" id="tb_pressed" placeholder="res://pressed.png"></div>
+          <div class="field"><div class="field-label">disabled texture (empty = skip)</div><input type="text" id="tb_disabled" placeholder="res://disabled.png"></div>
+          <div class="field"><div class="field-label">hover texture (empty = skip)</div><input type="text" id="tb_hover" placeholder="res://hover.png"></div>
+          <div class="field"><div class="field-label">signal handler function name</div><input type="text" id="tb_signal_fn" value="_on_tex_button_pressed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LINE EDIT ── -->
+  <div class="node-pane" id="pane-lineedit">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">LineEdit</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_lineedit" checked onchange="toggleElementEnable('lineedit', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="lineedit-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="le_var" value="my_line_edit"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="le_path" value="LineEdit"></div>
+          <div class="field"><div class="field-label">placeholder text</div><input type="text" id="le_placeholder" value="Enter text..."></div>
+          <div class="key-grid">
+            <div class="field"><div class="field-label">max length (0 = unlimited)</div><input type="number" id="le_maxlen" value="0"></div>
+            <div class="field"><div class="field-label">editable</div><select id="le_editable"><option value="true">true</option><option value="false">false</option></select></div>
+          </div>
+          <div class="field"><div class="field-label">secret (password field)</div><select id="le_secret"><option value="false">false</option><option value="true">true</option></select></div>
+          <div class="hint">Signals available: text_changed(new_text), text_submitted(new_text)</div>
+          <div class="key-grid">
+            <div class="toggle-item" id="tog-le_sig_changed" onclick="togItem('le_sig_changed')">
+              <input type="checkbox" id="le_sig_changed">
+              <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+              <span class="toggle-label" style="font-size:12px">text_changed</span>
+            </div>
+            <div class="toggle-item" id="tog-le_sig_submitted" onclick="togItem('le_sig_submitted')">
+              <input type="checkbox" id="le_sig_submitted">
+              <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+              <span class="toggle-label" style="font-size:12px">text_submitted</span>
+            </div>
+          </div>
+          <div class="field"><div class="field-label">handler prefix (e.g. _on_line_edit)</div><input type="text" id="le_fn_prefix" value="_on_line_edit"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TEXT EDIT ── -->
+  <div class="node-pane" id="pane-textedit">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">TextEdit</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_textedit" checked onchange="toggleElementEnable('textedit', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="textedit-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="te_var" value="my_text_edit"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="te_path" value="TextEdit"></div>
+          <div class="field"><div class="field-label">placeholder text</div><input type="text" id="te_placeholder" value="Enter multiline text..."></div>
+          <div class="key-grid">
+            <div class="field"><div class="field-label">editable</div><select id="te_editable"><option value="true">true</option><option value="false">false</option></select></div>
+            <div class="field"><div class="field-label">wrap mode</div>
+              <select id="te_wrap">
+                <option value="TextEdit.LINE_WRAPPING_NONE">None</option>
+                <option value="TextEdit.LINE_WRAPPING_BOUNDARY">Boundary</option>
+              </select>
+            </div>
+          </div>
+          <div class="toggle-item" id="tog-te_sig" onclick="togItem('te_sig')">
+            <input type="checkbox" id="te_sig">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">text_changed signal</span>
+          </div>
+          <div class="field"><div class="field-label">handler function name</div><input type="text" id="te_fn" value="_on_text_edit_changed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OPTION BUTTON ── -->
+  <div class="node-pane" id="pane-optionbutton">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">OptionButton</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_optionbutton" checked onchange="toggleElementEnable('optionbutton', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="optionbutton-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="ob_var" value="my_option_btn"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="ob_path" value="OptionButton"></div>
+          <div class="field"><div class="field-label">default selected index</div><input type="number" id="ob_selected" value="0"></div>
+          <div class="field-label" style="margin-top:4px">Items</div>
+          <div id="ob_items"></div>
+          <button class="add-btn" onclick="addOptItem()">+ Add Item</button>
+          <div class="hint">Signal: item_selected(index) — fired when user picks an option.</div>
+          <div class="toggle-item" id="tog-ob_sig" onclick="togItem('ob_sig')">
+            <input type="checkbox" id="ob_sig">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">item_selected signal</span>
+          </div>
+          <div class="field"><div class="field-label">handler function name</div><input type="text" id="ob_fn" value="_on_option_selected"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL ── -->
+  <div class="node-pane" id="pane-panel">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">Panel</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_panel" checked onchange="toggleElementEnable('panel', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="panel-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="panel_var" value="my_panel"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="panel_path" value="Panel"></div>
+          <div class="field"><div class="field-label">modulate color (hex, empty = skip)</div><input type="text" id="panel_color" placeholder="e.g. ffffff80"></div>
+          <div class="toggle-item" id="tog-panel_vis" onclick="togItem('panel_vis')">
+            <input type="checkbox" id="panel_vis">
+            <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Set visible</span>
+            <span class="toggle-hint">visible = true/false</span>
+          </div>
+          <div class="sub hidden" id="sub-panel_vis">
+            <select id="panel_visible"><option value="true">true</option><option value="false">false</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HBOX ── -->
+  <div class="node-pane" id="pane-hbox">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">HBoxContainer</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_hbox" checked onchange="toggleElementEnable('hbox', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="hbox-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="hbox_var" value="my_hbox"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="hbox_path" value="HBoxContainer"></div>
+          <div class="field"><div class="field-label">separation (px)</div><input type="number" id="hbox_sep" value="8"></div>
+          <div class="field"><div class="field-label">alignment</div>
+            <select id="hbox_align">
+              <option value="">— skip —</option>
+              <option value="ALIGNMENT_BEGIN">Begin</option>
+              <option value="ALIGNMENT_CENTER">Center</option>
+              <option value="ALIGNMENT_END">End</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VBOX ── -->
+  <div class="node-pane" id="pane-vbox">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">VBoxContainer</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_vbox" checked onchange="toggleElementEnable('vbox', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="vbox-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="vbox_var" value="my_vbox"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="vbox_path" value="VBoxContainer"></div>
+          <div class="field"><div class="field-label">separation (px)</div><input type="number" id="vbox_sep" value="8"></div>
+          <div class="field"><div class="field-label">alignment</div>
+            <select id="vbox_align">
+              <option value="">— skip —</option>
+              <option value="ALIGNMENT_BEGIN">Begin</option>
+              <option value="ALIGNMENT_CENTER">Center</option>
+              <option value="ALIGNMENT_END">End</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GRID CONTAINER ── -->
+  <div class="node-pane" id="pane-gridcontainer">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><span class="card-title">GridContainer</span></div>
+      <div class="card-body">
+        <div class="enable-row">
+          <input type="checkbox" class="enable-checkbox" id="enable_gridcontainer" checked onchange="toggleElementEnable('gridcontainer', this.checked)">
+          <span class="enable-label">Include this element</span>
+          <span class="enable-hint">✓ code will be generated</span>
+        </div>
+        <div id="gridcontainer-content">
+          <div class="field"><div class="field-label">@onready var name</div><input type="text" id="gc_var" value="my_grid"></div>
+          <div class="field"><div class="field-label">node path</div><input type="text" id="gc_path" value="GridContainer"></div>
+          <div class="key-grid">
+            <div class="field"><div class="field-label">columns</div><input type="number" id="gc_cols" value="3"></div>
+            <div class="field"><div class="field-label">h separation (px)</div><input type="number" id="gc_hsep" value="8"></div>
+          </div>
+          <div class="field"><div class="field-label">v separation (px)</div><input type="number" id="gc_vsep" value="8"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate GDScript</button>
+</div><!-- form-col -->
+
+<div class="out-col">
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag vars">Variables</span><span class="out-sub">@onready — top of script</span><button class="copy-btn" onclick="copyOut('varsOut',this)">Copy</button></div>
+    <div class="out-code empty" id="varsOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag setup">setup_ui()</span><span class="out-sub">call from _ready()</span><button class="copy-btn" onclick="copyOut('setupOut',this)">Copy</button></div>
+    <div class="out-code empty" id="setupOut"># tap Generate to produce code</div>
+  </div>
+  <div class="out-card">
+    <div class="out-head"><span class="out-tag signals">Signals</span><span class="out-sub">paste inside _ready()</span><button class="copy-btn" onclick="copyOut('signalsOut',this)">Copy</button></div>
+    <div class="out-code empty" id="signalsOut"># tap Generate to produce code</div>
+  </div>
+</div>
+</div><!-- page -->
+
+<script>
+const $=id=>document.getElementById(id);
+let activeNode='label';
+let optItemCount=0;
+const togStates={};
+
+// Track which elements are enabled
+const enabledElements = {
+  label: true,
+  richtextlabel: true,
+  texturerect: true,
+  button: true,
+  texturebutton: true,
+  lineedit: true,
+  textedit: true,
+  optionbutton: true,
+  panel: true,
+  hbox: true,
+  vbox: true,
+  gridcontainer: true
+};
+
+function switchNode(n){
+  activeNode=n;
+  document.querySelectorAll('.node-tab').forEach(t=>t.classList.toggle('active',t.dataset.pane===n));
+  document.querySelectorAll('.node-pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+n));
+}
+
+function toggleElementEnable(elementId, isEnabled) {
+  enabledElements[elementId] = isEnabled;
+  const contentDiv = $(`${elementId}-content`);
+  if (contentDiv) {
+    if (isEnabled) {
+      contentDiv.style.opacity = '1';
+      contentDiv.style.pointerEvents = 'auto';
+    } else {
+      contentDiv.style.opacity = '0.5';
+      contentDiv.style.pointerEvents = 'none';
+    }
+  }
+  updateSelectAllStatus();
+}
+
+function updateSelectAllStatus() {
+  const allEnabled = Object.values(enabledElements).every(v => v === true);
+  const someEnabled = Object.values(enabledElements).some(v => v === true);
+  const statusEl = $('#selectAllStatus');
+  if (allEnabled) {
+    statusEl.innerHTML = '✅ All elements selected';
+  } else if (someEnabled) {
+    const count = Object.values(enabledElements).filter(v => v === true).length;
+    statusEl.innerHTML = `⚫ ${count} element(s) selected`;
+  } else {
+    statusEl.innerHTML = '⚠️ No elements selected';
+  }
+}
+
+function toggleSelectAll() {
+  const allCurrentlyEnabled = Object.values(enabledElements).every(v => v === true);
+  const newState = !allCurrentlyEnabled;
+  
+  for (const [key] of Object.entries(enabledElements)) {
+    enabledElements[key] = newState;
+    const checkbox = $(`enable_${key}`);
+    if (checkbox) checkbox.checked = newState;
+    const contentDiv = $(`${key}-content`);
+    if (contentDiv) {
+      if (newState) {
+        contentDiv.style.opacity = '1';
+        contentDiv.style.pointerEvents = 'auto';
+      } else {
+        contentDiv.style.opacity = '0.5';
+        contentDiv.style.pointerEvents = 'none';
+      }
+    }
+  }
+  updateSelectAllStatus();
+}
+
+function togItem(id){
+  togStates[id]=!togStates[id];
+  $('tog-'+id).classList.toggle('active',togStates[id]);
+  const sub=$('sub-'+id);
+  if(sub) sub.classList.toggle('hidden',!togStates[id]);
+}
+
+function addOptItem(){
+  const id=++optItemCount;
+  const div=document.createElement('div');
+  div.className='opt-row'; div.id='optrow-'+id;
+  div.innerHTML=`<input type="text" placeholder="Option label" id="optval-${id}"><button class="remove-btn" onclick="removeOpt(${id})">×</button>`;
+  $('ob_items').appendChild(div);
+}
+function removeOpt(id){const el=$('optrow-'+id);if(el)el.remove();}
+function getOptItems(){
+  const items=[];
+  document.querySelectorAll('[id^="optrow-"]').forEach(r=>{
+    const id=r.id.replace('optrow-','');
+    const val=$('optval-'+id)?.value.trim();
+    if(val) items.push(val);
+  });
+  return items;
+}
+
+function v(id,fb){const el=$(id);return el&&el.value.trim()?el.value.trim():fb;}
+function vn(id,fb){const el=$(id);return el&&el.value!==''?el.value:fb;}
+function tog(id){return !!togStates[id];}
+function isEnabled(elementId) { return enabledElements[elementId] === true; }
+
+function generate(){
+  const vars=[], setup=[], signals=[], handlers=[];
+
+  /* ── LABEL ── */
+  if (isEnabled('label')) {
+    const lv=v('label_var','my_label'), lp=v('label_path','MyLabel');
+    vars.push(`@onready var ${lv}: Label = $${lp}`);
+    setup.push(`\t# Label`);
+    setup.push(`\t${lv}.text = "${v('label_text','Hello World')}"`);
+    const lsize=parseInt(vn('label_size','0'));
+    if(lsize>0) setup.push(`\t${lv}.add_theme_font_size_override("font_size", ${lsize})`);
+    const lalign=v('label_align','');
+    if(lalign) setup.push(`\t${lv}.horizontal_alignment = ${lalign}`);
+    const lcolor=v('label_color','');
+    if(lcolor) setup.push(`\t${lv}.modulate = Color("#${lcolor}")`);
+    if(tog('label_vis')) setup.push(`\t${lv}.visible = ${v('label_visible','true')}`);
+  }
+
+  /* ── RICH TEXT LABEL ── */
+  if (isEnabled('richtextlabel')) {
+    const rv=v('rtl_var','rich_label'), rp=v('rtl_path','RichTextLabel');
+    vars.push(`@onready var ${rv}: RichTextLabel = $${rp}`);
+    setup.push(``);setup.push(`\t# RichTextLabel`);
+    setup.push(`\t${rv}.bbcode_enabled = true`);
+    const rtxt=($('rtl_text')?.value||'').replace(/\n/g,'\\n').replace(/"/g,'\\"');
+    setup.push(`\t${rv}.text = "${rtxt}"`);
+    if(tog('rtl_scroll')) setup.push(`\t${rv}.scroll_active = true`);
+    if(tog('rtl_fit'))    setup.push(`\t${rv}.fit_content = true`);
+  }
+
+  /* ── TEXTURE RECT ── */
+  if (isEnabled('texturerect')) {
+    const trv=v('tr_var','my_texture'), trp=v('tr_path','TextureRect');
+    vars.push(`@onready var ${trv}: TextureRect = $${trp}`);
+    setup.push(``);setup.push(`\t# TextureRect`);
+    const trtex=v('tr_tex','');
+    if(trtex) setup.push(`\t${trv}.texture = preload("${trtex}")`);
+    const trstr=v('tr_stretch','');
+    if(trstr) setup.push(`\t${trv}.stretch_mode = TextureRect.${trstr}`);
+    if(tog('tr_fliph')) setup.push(`\t${trv}.flip_h = true`);
+    if(tog('tr_flipv')) setup.push(`\t${trv}.flip_v = true`);
+  }
+
+  /* ── BUTTON ── */
+  if (isEnabled('button')) {
+    const bv=v('btn_var','my_button'), bp=v('btn_path','MyButton');
+    vars.push(`@onready var ${bv}: Button = $${bp}`);
+    setup.push(``);setup.push(`\t# Button`);
+    setup.push(`\t${bv}.text = "${v('btn_text','Click Me')}"`);
+    const bicon=v('btn_icon','');
+    if(bicon) setup.push(`\t${bv}.icon = preload("${bicon}")`);
+    if(tog('btn_disabled')) setup.push(`\t${bv}.disabled = ${v('btn_disabled_val','false')}`);
+    const bfn=v('btn_signal_fn','_on_my_button_pressed');
+    signals.push(`\t${bv}.pressed.connect(${bfn})`);
+    handlers.push(`\nfunc ${bfn}() -> void:`);
+    handlers.push(`\tpass  # handle button press`);
+  }
+
+  /* ── TEXTURE BUTTON ── */
+  if (isEnabled('texturebutton')) {
+    const tbv=v('tb_var','my_tex_button'), tbp=v('tb_path','TextureButton');
+    vars.push(`@onready var ${tbv}: TextureButton = $${tbp}`);
+    setup.push(``);setup.push(`\t# TextureButton`);
+    const tbn=v('tb_normal','');
+    if(tbn) setup.push(`\t${tbv}.texture_normal = preload("${tbn}")`);
+    const tbpr=v('tb_pressed','');
+    if(tbpr) setup.push(`\t${tbv}.texture_pressed = preload("${tbpr}")`);
+    const tbdi=v('tb_disabled','');
+    if(tbdi) setup.push(`\t${tbv}.texture_disabled = preload("${tbdi}")`);
+    const tbho=v('tb_hover','');
+    if(tbho) setup.push(`\t${tbv}.texture_hover = preload("${tbho}")`);
+    const tbfn=v('tb_signal_fn','_on_tex_button_pressed');
+    signals.push(`\t${tbv}.pressed.connect(${tbfn})`);
+    handlers.push(`\nfunc ${tbfn}() -> void:`);
+    handlers.push(`\tpass  # handle texture button press`);
+  }
+
+  /* ── LINE EDIT ── */
+  if (isEnabled('lineedit')) {
+    const lev=v('le_var','my_line_edit'), lep=v('le_path','LineEdit');
+    vars.push(`@onready var ${lev}: LineEdit = $${lep}`);
+    setup.push(``);setup.push(`\t# LineEdit`);
+    setup.push(`\t${lev}.placeholder_text = "${v('le_placeholder','Enter text...')}"`);
+    const lemaxlen=parseInt(vn('le_maxlen','0'));
+    if(lemaxlen>0) setup.push(`\t${lev}.max_length = ${lemaxlen}`);
+    setup.push(`\t${lev}.editable = ${v('le_editable','true')}`);
+    if(v('le_secret','false')==='true') setup.push(`\t${lev}.secret = true`);
+    const lepre=v('le_fn_prefix','_on_line_edit');
+    if(tog('le_sig_changed')){
+      signals.push(`\t${lev}.text_changed.connect(${lepre}_text_changed)`);
+      handlers.push(`\nfunc ${lepre}_text_changed(new_text: String) -> void:`);
+      handlers.push(`\tpass  # handle text changed`);
+    }
+    if(tog('le_sig_submitted')){
+      signals.push(`\t${lev}.text_submitted.connect(${lepre}_text_submitted)`);
+      handlers.push(`\nfunc ${lepre}_text_submitted(new_text: String) -> void:`);
+      handlers.push(`\tpass  # handle text submitted`);
+    }
+  }
+
+  /* ── TEXT EDIT ── */
+  if (isEnabled('textedit')) {
+    const tev=v('te_var','my_text_edit'), tep=v('te_path','TextEdit');
+    vars.push(`@onready var ${tev}: TextEdit = $${tep}`);
+    setup.push(``);setup.push(`\t# TextEdit`);
+    setup.push(`\t${tev}.placeholder_text = "${v('te_placeholder','Enter multiline text...')}"`);
+    setup.push(`\t${tev}.editable = ${v('te_editable','true')}`);
+    setup.push(`\t${tev}.wrap_mode = ${v('te_wrap','TextEdit.LINE_WRAPPING_NONE')}`);
+    if(tog('te_sig')){
+      const tefn=v('te_fn','_on_text_edit_changed');
+      signals.push(`\t${tev}.text_changed.connect(${tefn})`);
+      handlers.push(`\nfunc ${tefn}() -> void:`);
+      handlers.push(`\tpass  # handle text changed`);
+    }
+  }
+
+  /* ── OPTION BUTTON ── */
+  if (isEnabled('optionbutton')) {
+    const obv=v('ob_var','my_option_btn'), obp=v('ob_path','OptionButton');
+    vars.push(`@onready var ${obv}: OptionButton = $${obp}`);
+    setup.push(``);setup.push(`\t# OptionButton`);
+    setup.push(`\t${obv}.clear()`);
+    const items=getOptItems();
+    if(items.length>0) items.forEach(it=>setup.push(`\t${obv}.add_item("${it}")`));
+    else setup.push(`\t# ${obv}.add_item("Option 1")`);
+    const obsel=vn('ob_selected','0');
+    setup.push(`\t${obv}.selected = ${obsel}`);
+    if(tog('ob_sig')){
+      const obfn=v('ob_fn','_on_option_selected');
+      signals.push(`\t${obv}.item_selected.connect(${obfn})`);
+      handlers.push(`\nfunc ${obfn}(index: int) -> void:`);
+      handlers.push(`\tpass  # handle option selected`);
+    }
+  }
+
+  /* ── PANEL ── */
+  if (isEnabled('panel')) {
+    const pav=v('panel_var','my_panel'), pap=v('panel_path','Panel');
+    vars.push(`@onready var ${pav}: Panel = $${pap}`);
+    setup.push(``);setup.push(`\t# Panel`);
+    const pcolor=v('panel_color','');
+    if(pcolor) setup.push(`\t${pav}.modulate = Color("#${pcolor}")`);
+    if(tog('panel_vis')) setup.push(`\t${pav}.visible = ${v('panel_visible','true')}`);
+  }
+
+  /* ── HBOX ── */
+  if (isEnabled('hbox')) {
+    const hbv=v('hbox_var','my_hbox'), hbp=v('hbox_path','HBoxContainer');
+    vars.push(`@onready var ${hbv}: HBoxContainer = $${hbp}`);
+    setup.push(``);setup.push(`\t# HBoxContainer`);
+    setup.push(`\t${hbv}.add_theme_constant_override("separation", ${vn('hbox_sep','8')})`);
+    const hba=v('hbox_align','');
+    if(hba) setup.push(`\t${hbv}.alignment = BoxContainer.${hba}`);
+  }
+
+  /* ── VBOX ── */
+  if (isEnabled('vbox')) {
+    const vbv=v('vbox_var','my_vbox'), vbp=v('vbox_path','VBoxContainer');
+    vars.push(`@onready var ${vbv}: VBoxContainer = $${vbp}`);
+    setup.push(``);setup.push(`\t# VBoxContainer`);
+    setup.push(`\t${vbv}.add_theme_constant_override("separation", ${vn('vbox_sep','8')})`);
+    const vba=v('vbox_align','');
+    if(vba) setup.push(`\t${vbv}.alignment = BoxContainer.${vba}`);
+  }
+
+  /* ── GRID CONTAINER ── */
+  if (isEnabled('gridcontainer')) {
+    const gcv=v('gc_var','my_grid'), gcp=v('gc_path','GridContainer');
+    vars.push(`@onready var ${gcv}: GridContainer = $${gcp}`);
+    setup.push(``);setup.push(`\t# GridContainer`);
+    setup.push(`\t${gcv}.columns = ${vn('gc_cols','3')}`);
+    setup.push(`\t${gcv}.add_theme_constant_override("h_separation", ${vn('gc_hsep','8')})`);
+    setup.push(`\t${gcv}.add_theme_constant_override("v_separation", ${vn('gc_vsep','8')})`);
+  }
+
+  /* ── ASSEMBLE ── */
+  const setupFull = vars.length > 0 ? ['func setup_ui() -> void:', ...setup].join('\n') : '# No elements selected';
+  const signalsFull = signals.length
+    ? ['# Inside _ready():', ...signals].join('\n')
+    : '# No signals configured';
+  const handlersOut = handlers.length ? handlers.join('\n') : '';
+  const signalsAndHandlers = signalsFull + (handlersOut ? '\n\n# Signal handlers:' + handlersOut : '');
+
+  renderCode('varsOut', vars.length ? vars.join('\n') : '# No elements selected');
+  renderCode('setupOut', setupFull);
+  renderCode('signalsOut', signalsAndHandlers);
+}
+
+/* TOKENIZER */
+function highlight(code){
+  const KW=new Set(['func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass']);
+  const TYPE=new Set(['Label','RichTextLabel','TextureRect','Button','TextureButton','LineEdit','TextEdit','OptionButton','Panel','HBoxContainer','VBoxContainer','GridContainer','BoxContainer','String','float','int','bool','void','Color','TextEdit']);
+  const FN=new Set(['add_theme_font_size_override','add_theme_constant_override','preload','connect','clear','add_item','modulate','visible','text','bbcode_enabled','scroll_active','fit_content','stretch_mode','flip_h','flip_v','disabled','icon','placeholder_text','max_length','editable','secret','wrap_mode','selected','alignment','columns']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tl(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/\w/.test(line[j]))j++;out+=`<span class="kw">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){
+        let j=i;while(j<line.length&&/\w/.test(line[j]))j++;
+        const w=line.slice(i,j);
+        out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);
+        i=j;continue;
+      }
+      if(/\d/.test(line[i])){
+        let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;
+        out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;
+      }
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tl).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id,btn){
+  const el=$(id);const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+
+/* default one option item */
+addOptItem();
+updateSelectAllStatus();
+</script>
+</body>
+</html>

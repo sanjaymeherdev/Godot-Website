@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Inventory System Generator · GDScript</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --tap:52px;--r:10px;--rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--amber);background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-dot.purple{background:var(--purple);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:13px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 12px;outline:none;resize:vertical;min-height:120px;line-height:1.6;}
+textarea:focus{border-color:var(--green2);}
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;min-height:48px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:20px;height:20px;flex-shrink:0;border:1px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:13px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.amber{border-left-color:var(--amber);}
+.hint.blue{border-left-color:var(--blue2);}
+.hint.coral{border-left-color:var(--coral);}
+.gen-btn{width:100%;height:56px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);border-radius:var(--rl);color:var(--amber);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(251,191,36,0.2);transform:scale(0.99);}
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-top:12px;}
+.out-card:first-child{margin-top:0;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.green{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+.out-tag.blue{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+.out-tag.amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.4);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;min-height:36px;transition:all 0.15s;}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+.kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
+.tog-row{display:flex;flex-direction:column;gap:6px;}
+.hidden{display:none!important;}
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="pro.html">‹</a>
+  <div>
+    <div class="header-title">Inventory System Generator</div>
+    <div class="header-sub">PlayerInventory + InvUI · 2 scripts</div>
+  </div>
+  <span class="header-badge">Pro · GDScript 4.x</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- GENERAL -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">General</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field"><div class="field-label">class_name</div><input type="text" id="className" value="PlayerInventory"></div>
+        <div class="field"><div class="field-label">base_capacity</div><input type="number" id="baseCap" value="100"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEAPON SLOTS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Weapon Slots</span></div>
+    <div class="card-body">
+      <div class="tog-row">
+        <div class="toggle-item active" id="tog-maingun1" onclick="tog('maingun1')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Main Gun Slot 1</span><span class="toggle-hint">main_gun_1 · mag_ammo_slot1</span>
+        </div>
+        <div class="toggle-item active" id="tog-maingun2" onclick="tog('maingun2')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Main Gun Slot 2</span><span class="toggle-hint">main_gun_2 · mag_ammo_slot2</span>
+        </div>
+        <div class="toggle-item active" id="tog-pistol" onclick="tog('pistol')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Pistol Slot</span><span class="toggle-hint">pistol_gun · mag_ammo_pistol</span>
+        </div>
+        <div class="toggle-item active" id="tog-melee" onclick="tog('melee')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Melee Slot</span><span class="toggle-hint">melee_weapon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EQUIPMENT SLOTS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Equipment Slots</span></div>
+    <div class="card-body">
+      <div class="tog-row">
+        <div class="toggle-item active" id="tog-helmet" onclick="tog('helmet')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Helmet</span><span class="toggle-hint">helmet + helmet_hp</span>
+        </div>
+        <div class="toggle-item active" id="tog-vest" onclick="tog('vest')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Vest</span><span class="toggle-hint">vest + vest_hp</span>
+        </div>
+        <div class="toggle-item active" id="tog-backpack" onclick="tog('backpack')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Backpack</span><span class="toggle-hint">backpack + capacity expansion</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTACHMENTS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Attachments</span></div>
+    <div class="card-body">
+      <div class="tog-row">
+        <div class="toggle-item active" id="tog-scope" onclick="tog('scope')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Scope</span><span class="toggle-hint">SCOPE attachment type</span>
+        </div>
+        <div class="toggle-item active" id="tog-front" onclick="tog('front')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Front Attachment</span><span class="toggle-hint">FRONT attachment type</span>
+        </div>
+        <div class="toggle-item active" id="tog-mag-att" onclick="tog('mag_att')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Magazine Attachment</span><span class="toggle-hint">MEGAZINE attachment type</span>
+        </div>
+        <div class="toggle-item active" id="tog-dropdata" onclick="tog('dropdata')">
+          <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Death Drop Data</span><span class="toggle-hint">get_equipment_drop_data()</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEM PATHS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Item Resource Paths</span></div>
+    <div class="card-body">
+      <div class="hint amber">One path per line. These are loaded into the item DB on _ready for capacity calculation.</div>
+      <textarea id="itemPaths">res://Ammo/5mm.tres
+res://Ammo/9mm.tres
+res://Ammo/3mm.tres
+res://Ammo/15mm.tres
+res://Ammo/awmammo.tres
+res://Resources/med.tres
+res://Resources/grenade.tres
+res://Attachments/red_dot.tres
+res://Attachments/2x.tres
+res://Attachments/4x.tres
+res://Attachments/silencer.tres
+res://Attachments/booster.tres
+res://Attachments/megazine.tres</textarea>
+    </div>
+  </div>
+
+  <!-- UI NODE PATHS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">UI Node Paths (InvUI)</span></div>
+    <div class="card-body">
+      <div class="hint blue">Match these to your scene tree. Used in @onready declarations.</div>
+      <div class="grid2">
+        <div class="field"><div class="field-label">helmet_panel</div><input type="text" id="helmetNode" value="HBoxContainer/Armor/Helmet"></div>
+        <div class="field"><div class="field-label">vest_panel</div><input type="text" id="vestNode" value="HBoxContainer/Armor/Vest"></div>
+        <div class="field"><div class="field-label">backpack_panel</div><input type="text" id="backpackNode" value="HBoxContainer/Armor/Backpack"></div>
+        <div class="field"><div class="field-label">main_gun_1_panel</div><input type="text" id="gun1Node" value="HBoxContainer/Guns/Primary"></div>
+        <div class="field"><div class="field-label">main_gun_2_panel</div><input type="text" id="gun2Node" value="HBoxContainer/Guns/Secondary"></div>
+        <div class="field"><div class="field-label">pistol_panel</div><input type="text" id="pistolNode" value="HBoxContainer/Guns/Pistol"></div>
+        <div class="field"><div class="field-label">melee_panel</div><input type="text" id="meleeNode" value="HBoxContainer/Guns/melee"></div>
+        <div class="field"><div class="field-label">inventory_grid</div><input type="text" id="gridNode" value="HBoxContainer/ScrollContainer/Details"></div>
+        <div class="field"><div class="field-label">exit_button</div><input type="text" id="exitNode" value="Button"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMMO TYPES -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Ammo Types</span></div>
+    <div class="card-body">
+      <div class="hint coral">One ammo ID per line. Each gets its own panel + stack splitting logic. Stack size applies to all.</div>
+      <textarea id="ammoTypes" style="min-height:80px">5mm
+9mm
+3mm
+15mm
+awmammo</textarea>
+      <div class="field"><div class="field-label">ammo_stack_size (bullets per panel)</div><input type="number" id="ammoStack" value="30"></div>
+    </div>
+  </div>
+
+  <!-- ITEM PANELS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Other Item Panels</span></div>
+    <div class="card-body">
+      <div class="hint">One item ID per line — each gets a panel_[id] @onready and an _update_item_panel call.</div>
+      <textarea id="itemPanels" style="min-height:80px">med
+nade
+booster
+silencer
+megazine
+reddot
+2x
+4x</textarea>
+    </div>
+  </div>
+
+  <!-- DRAG -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Drag Settings</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">drag_threshold (pixels before drag starts)</div><input type="number" id="dragThresh" value="10"></div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate 2 Scripts</button>
+
+</div>
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag green">PlayerInventory.gd</span>
+      <span class="out-sub">Node · attach to player · class_name</span>
+      <button class="copy-btn" onclick="copyOut('outInv', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outInv"># tap Generate to produce code</div>
+  </div>
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag amber">InvUI.gd</span>
+      <span class="out-sub">extends Control · attach to inventory UI root</span>
+      <button class="copy-btn" onclick="copyOut('outUI', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outUI"># tap Generate to produce code</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el && el.value.trim() ? el.value.trim() : fb; };
+const feats = {
+  maingun1:true, maingun2:true, pistol:true, melee:true,
+  helmet:true, vest:true, backpack:true,
+  scope:true, front:true, mag_att:true, dropdata:true
+};
+
+function tog(f) {
+  feats[f] = !feats[f];
+  $('tog-' + f).classList.toggle('active', feats[f]);
+}
+
+function getLines(id) {
+  return v(id,'').split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+}
+
+function generate() {
+  const cn        = v('className',  'PlayerInventory');
+  const baseCap   = v('baseCap',    '100');
+  const itemPaths = getLines('itemPaths');
+  const ammoTypes = getLines('ammoTypes');
+  const ammoStack = v('ammoStack',  '30');
+  const itemPanels= getLines('itemPanels');
+  const dragThr   = v('dragThresh', '10');
+
+  const nodes = {
+    helmet:   v('helmetNode',   'HBoxContainer/Armor/Helmet'),
+    vest:     v('vestNode',     'HBoxContainer/Armor/Vest'),
+    backpack: v('backpackNode', 'HBoxContainer/Armor/Backpack'),
+    gun1:     v('gun1Node',     'HBoxContainer/Guns/Primary'),
+    gun2:     v('gun2Node',     'HBoxContainer/Guns/Secondary'),
+    pistol:   v('pistolNode',   'HBoxContainer/Guns/Pistol'),
+    melee:    v('meleeNode',    'HBoxContainer/Guns/melee'),
+    grid:     v('gridNode',     'HBoxContainer/ScrollContainer/Details'),
+    exit:     v('exitNode',     'Button'),
+  };
+
+  const f = feats;
+  renderCode('outInv', buildInventory(cn, baseCap, itemPaths, f));
+  renderCode('outUI',  buildUI(cn, nodes, ammoTypes, ammoStack, itemPanels, dragThr, f));
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PlayerInventory.gd
+══════════════════════════════════════════════════════════════ */
+function buildInventory(cn, baseCap, itemPaths, f) {
+  const L = [];
+  const {maingun1, maingun2, pistol, melee, helmet, vest, backpack, scope, front, mag_att, dropdata} = f;
+  const anyGun = maingun1 || maingun2 || pistol;
+  const anyEquip = helmet || vest || backpack;
+  const anyAttach = (maingun1 || maingun2) && (scope || front || mag_att);
+
+  L.push('extends Node');
+  L.push('class_name ' + cn);
+  L.push('');
+  L.push('# ── Signals ───────────────────────────────────────────────────');
+  L.push('signal inventory_updated()');
+  if (anyEquip) L.push('signal equipment_changed()');
+  if (maingun1 || maingun2) L.push('signal main_gun_equipped(slot: int, gun: ItemData)');
+  if (pistol) L.push('signal pistol_equipped(gun: ItemData)');
+  if (melee)  L.push('signal melee_equipped(melee: ItemData)');
+  if (anyGun) L.push('signal weapon_unequipped(slot_type: String)');
+  if (anyAttach) L.push('signal attachment_changed(weapon_slot: String, attachment_type: String, attachment: ItemData)');
+  L.push('');
+
+  if (anyEquip) {
+    L.push('# ── Equipment ─────────────────────────────────────────────────');
+    if (helmet)   { L.push('var helmet: ItemData = null'); L.push('var helmet_hp: int = 0'); }
+    if (vest)     { L.push('var vest: ItemData = null'); L.push('var vest_hp: int = 0'); }
+    if (backpack) L.push('var backpack: ItemData = null');
+    L.push('');
+  }
+
+  if (maingun1 || maingun2) {
+    L.push('# ── Main Guns ─────────────────────────────────────────────────');
+    if (maingun1) L.push('var main_gun_1: ItemData = null');
+    if (maingun2) L.push('var main_gun_2: ItemData = null');
+    L.push('');
+  }
+  if (pistol) { L.push('var pistol_gun: ItemData = null'); L.push(''); }
+  if (melee)  { L.push('var melee_weapon: ItemData = null'); L.push(''); }
+
+  if (anyAttach) {
+    L.push('# ── Attachments ───────────────────────────────────────────────');
+    if (maingun1) {
+      if (scope) L.push('var main_gun_1_scope: ItemData = null');
+      if (front) L.push('var main_gun_1_front: ItemData = null');
+      if (mag_att) L.push('var main_gun_1_mag: ItemData = null');
+    }
+    if (maingun2) {
+      if (scope) L.push('var main_gun_2_scope: ItemData = null');
+      if (front) L.push('var main_gun_2_front: ItemData = null');
+      if (mag_att) L.push('var main_gun_2_mag: ItemData = null');
+    }
+    if (pistol && mag_att) L.push('var pistol_mag: ItemData = null');
+    L.push('');
+  }
+
+  L.push('# ── Inventory ─────────────────────────────────────────────────');
+  L.push('var items: Dictionary = {}');
+  L.push('var max_capacity: int = ' + baseCap);
+  L.push('var current_capacity: int = 0');
+  L.push('');
+
+  if (anyGun) {
+    L.push('# ── Per-slot magazine ammo ────────────────────────────────────');
+    if (maingun1) L.push('var mag_ammo_slot1: int = 0');
+    if (maingun2) L.push('var mag_ammo_slot2: int = 0');
+    if (pistol)   L.push('var mag_ammo_pistol: int = 0');
+    L.push('');
+  }
+
+  L.push('var _item_db: Dictionary = {}');
+  L.push('');
+  L.push('const ITEM_PATHS = [');
+  itemPaths.forEach(p => L.push('\t"' + p + '",'));
+  L.push(']');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\t_build_item_db()');
+  L.push('');
+  L.push('func _build_item_db() -> void:');
+  L.push('\t_item_db.clear()');
+  L.push('\tfor path in ITEM_PATHS:');
+  L.push('\t\tif ResourceLoader.exists(path):');
+  L.push('\t\t\tvar res = load(path) as ItemData');
+  L.push('\t\t\tif res: _item_db[res.id] = res');
+  L.push('\t\telse:');
+  L.push('\t\t\tpush_warning("[' + cn + '] Item path not found: " + path)');
+  L.push('');
+  L.push('# ── Items ─────────────────────────────────────────────────────');
+  L.push('func add_item(item_id: String, quantity: int = 1) -> bool:');
+  L.push('\tif not items.has(item_id): items[item_id] = 0');
+  L.push('\titems[item_id] += quantity');
+  L.push('\t_recalculate_capacity()');
+  L.push('\tinventory_updated.emit()');
+  L.push('\treturn true');
+  L.push('');
+  L.push('func remove_item(item_id: String, quantity: int = 1) -> bool:');
+  L.push('\tif not items.has(item_id): return false');
+  L.push('\titems[item_id] -= quantity');
+  L.push('\tif items[item_id] <= 0: items.erase(item_id)');
+  L.push('\t_recalculate_capacity()');
+  L.push('\tinventory_updated.emit()');
+  L.push('\treturn true');
+  L.push('');
+  L.push('func get_item_quantity(item_id: String) -> int:');
+  L.push('\treturn items.get(item_id, 0)');
+  L.push('');
+  L.push('func _recalculate_capacity() -> void:');
+  L.push('\tcurrent_capacity = 0');
+  L.push('\tfor item_id in items:');
+  L.push('\t\tvar qty = items[item_id]');
+  L.push('\t\tif qty <= 0: continue');
+  L.push('\t\tvar item_data = _item_db.get(item_id, null)');
+  L.push('\t\tif not item_data: continue');
+  L.push('\t\tvar max_stack = item_data.max_stack');
+  L.push('\t\tvar space = item_data.space_per_item');
+  L.push('\t\tif max_stack > 1:');
+  L.push('\t\t\tvar stacks = ceili(float(qty) / float(max_stack))');
+  L.push('\t\t\tcurrent_capacity += stacks * space');
+  L.push('\t\telse:');
+  L.push('\t\t\tcurrent_capacity += qty * space');
+  L.push('');
+
+  if (maingun1 || maingun2) {
+    L.push('# ── Main Gun equip/unequip ────────────────────────────────────');
+    L.push('func equip_main_gun(slot: int, gun: ItemData) -> void:');
+    L.push('\tmatch slot:');
+    if (maingun1) { L.push('\t\t1: main_gun_1 = gun; mag_ammo_slot1 = get_megazine_capacity("main_1") if gun else 0'); }
+    if (maingun2) { L.push('\t\t2: main_gun_2 = gun; mag_ammo_slot2 = get_megazine_capacity("main_2") if gun else 0'); }
+    L.push('\t\t_: return');
+    L.push('\tmain_gun_equipped.emit(slot, gun)');
+    L.push('');
+    L.push('func unequip_main_gun(slot: int) -> ItemData:');
+    L.push('\tvar weapon: ItemData = null');
+    L.push('\tvar slot_name = ""');
+    L.push('\tmatch slot:');
+    if (maingun1) {
+      L.push('\t\t1:');
+      L.push('\t\t\tweapon = main_gun_1; main_gun_1 = null');
+      if (scope) L.push('\t\t\tmain_gun_1_scope = null');
+      if (front) L.push('\t\t\tmain_gun_1_front = null');
+      if (mag_att) L.push('\t\t\tmain_gun_1_mag = null');
+      L.push('\t\t\tmag_ammo_slot1 = 0; slot_name = "main_1"');
+    }
+    if (maingun2) {
+      L.push('\t\t2:');
+      L.push('\t\t\tweapon = main_gun_2; main_gun_2 = null');
+      if (scope) L.push('\t\t\tmain_gun_2_scope = null');
+      if (front) L.push('\t\t\tmain_gun_2_front = null');
+      if (mag_att) L.push('\t\t\tmain_gun_2_mag = null');
+      L.push('\t\t\tmag_ammo_slot2 = 0; slot_name = "main_2"');
+    }
+    L.push('\tif weapon: weapon_unequipped.emit(slot_name)');
+    L.push('\treturn weapon');
+    L.push('');
+    L.push('func get_main_gun(slot: int) -> ItemData:');
+    if (maingun1) L.push('\tif slot == 1: return main_gun_1');
+    if (maingun2) L.push('\tif slot == 2: return main_gun_2');
+    L.push('\treturn null');
+    L.push('');
+  }
+
+  if (pistol) {
+    L.push('func equip_pistol(gun: ItemData) -> void:');
+    L.push('\tpistol_gun = gun');
+    L.push('\tmag_ammo_pistol = get_megazine_capacity("pistol") if gun else 0');
+    L.push('\tpistol_equipped.emit(gun)');
+    L.push('');
+    L.push('func unequip_pistol() -> ItemData:');
+    L.push('\tvar weapon = pistol_gun; pistol_gun = null');
+    if (mag_att) L.push('\tpistol_mag = null');
+    L.push('\tmag_ammo_pistol = 0');
+    L.push('\tif weapon: weapon_unequipped.emit("pistol")');
+    L.push('\treturn weapon');
+    L.push('');
+  }
+
+  if (melee) {
+    L.push('func equip_melee(melee_item: ItemData) -> void:');
+    L.push('\tif not melee_item: return');
+    L.push('\tmelee_weapon = melee_item');
+    L.push('\tmelee_equipped.emit(melee_item)');
+    L.push('');
+    L.push('func unequip_melee() -> ItemData:');
+    L.push('\tvar weapon = melee_weapon; melee_weapon = null');
+    L.push('\tif weapon: weapon_unequipped.emit("melee")');
+    L.push('\treturn weapon');
+    L.push('');
+  }
+
+  if (anyGun) {
+    L.push('# ── Mag ammo persistence ──────────────────────────────────────');
+    L.push('func get_slot_mag_ammo(weapon_slot: String) -> int:');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) L.push('\t\t"main_1": return mag_ammo_slot1');
+    if (maingun2) L.push('\t\t"main_2": return mag_ammo_slot2');
+    if (pistol)   L.push('\t\t"pistol": return mag_ammo_pistol');
+    L.push('\treturn 0');
+    L.push('');
+    L.push('func save_slot_mag_ammo(weapon_slot: String, ammo: int) -> void:');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) L.push('\t\t"main_1": mag_ammo_slot1 = ammo');
+    if (maingun2) L.push('\t\t"main_2": mag_ammo_slot2 = ammo');
+    if (pistol)   L.push('\t\t"pistol": mag_ammo_pistol = ammo');
+    L.push('');
+    L.push('func get_megazine_capacity(weapon_slot: String) -> int:');
+    L.push('\tvar base_mag = 0');
+    L.push('\tvar mag_attachment = null');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) { L.push('\t\t"main_1":'); L.push('\t\t\tif main_gun_1: base_mag = main_gun_1.megazine_size'); if (mag_att) L.push('\t\t\tmag_attachment = main_gun_1_mag'); }
+    if (maingun2) { L.push('\t\t"main_2":'); L.push('\t\t\tif main_gun_2: base_mag = main_gun_2.megazine_size'); if (mag_att) L.push('\t\t\tmag_attachment = main_gun_2_mag'); }
+    if (pistol)   { L.push('\t\t"pistol":'); L.push('\t\t\tif pistol_gun: base_mag = pistol_gun.megazine_size'); if (mag_att) L.push('\t\t\tmag_attachment = pistol_mag'); }
+    if (mag_att) { L.push('\tif mag_attachment: return base_mag + int(mag_attachment.effect_value)'); }
+    L.push('\treturn base_mag');
+    L.push('');
+  }
+
+  if (anyAttach) {
+    L.push('# ── Attachments ───────────────────────────────────────────────');
+    L.push('func attach_attachment(weapon_slot: String, attachment: ItemData) -> bool:');
+    L.push('\tif not attachment: return false');
+    L.push('\tvar att_type = attachment.attachment_type');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) {
+      L.push('\t\t"main_1":');
+      L.push('\t\t\tmatch att_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: main_gun_1_scope = attachment');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: main_gun_1_front = attachment');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: main_gun_1_mag = attachment');
+    }
+    if (maingun2) {
+      L.push('\t\t"main_2":');
+      L.push('\t\t\tmatch att_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: main_gun_2_scope = attachment');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: main_gun_2_front = attachment');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: main_gun_2_mag = attachment');
+    }
+    if (pistol && mag_att) {
+      L.push('\t\t"pistol":');
+      L.push('\t\t\tif att_type == ItemData.AttachmentType.MEGAZINE: pistol_mag = attachment');
+    }
+    L.push('\tattachment_changed.emit(weapon_slot, ItemData.AttachmentType.keys()[att_type], attachment)');
+    L.push('\treturn true');
+    L.push('');
+    L.push('func remove_attachment(weapon_slot: String, attachment_type: int) -> ItemData:');
+    L.push('\tvar removed: ItemData = null');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) {
+      L.push('\t\t"main_1":');
+      L.push('\t\t\tmatch attachment_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: removed = main_gun_1_scope; main_gun_1_scope = null');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: removed = main_gun_1_front; main_gun_1_front = null');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: removed = main_gun_1_mag; main_gun_1_mag = null');
+    }
+    if (maingun2) {
+      L.push('\t\t"main_2":');
+      L.push('\t\t\tmatch attachment_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: removed = main_gun_2_scope; main_gun_2_scope = null');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: removed = main_gun_2_front; main_gun_2_front = null');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: removed = main_gun_2_mag; main_gun_2_mag = null');
+    }
+    if (pistol && mag_att) {
+      L.push('\t\t"pistol":');
+      L.push('\t\t\tif attachment_type == ItemData.AttachmentType.MEGAZINE: removed = pistol_mag; pistol_mag = null');
+    }
+    L.push('\tif removed: attachment_changed.emit(weapon_slot, ItemData.AttachmentType.keys()[attachment_type], null)');
+    L.push('\treturn removed');
+    L.push('');
+    L.push('func get_attachment(weapon_slot: String, attachment_type: int) -> ItemData:');
+    L.push('\tmatch weapon_slot:');
+    if (maingun1) {
+      L.push('\t\t"main_1":');
+      L.push('\t\t\tmatch attachment_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: return main_gun_1_scope');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: return main_gun_1_front');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: return main_gun_1_mag');
+    }
+    if (maingun2) {
+      L.push('\t\t"main_2":');
+      L.push('\t\t\tmatch attachment_type:');
+      if (scope)   L.push('\t\t\t\tItemData.AttachmentType.SCOPE: return main_gun_2_scope');
+      if (front)   L.push('\t\t\t\tItemData.AttachmentType.FRONT: return main_gun_2_front');
+      if (mag_att) L.push('\t\t\t\tItemData.AttachmentType.MEGAZINE: return main_gun_2_mag');
+    }
+    if (pistol && mag_att) {
+      L.push('\t\t"pistol":');
+      L.push('\t\t\tif attachment_type == ItemData.AttachmentType.MEGAZINE: return pistol_mag');
+    }
+    L.push('\treturn null');
+    L.push('');
+  }
+
+  if (backpack) {
+    L.push('func _update_backpack_capacity() -> void:');
+    L.push('\tmax_capacity = ' + baseCap + ' + backpack.capacity if backpack else ' + baseCap);
+    L.push('\t_recalculate_capacity()');
+    L.push('\tinventory_updated.emit()');
+    L.push('');
+  }
+
+  if (dropdata) {
+    L.push('func get_equipment_drop_data() -> Dictionary:');
+    L.push('\tvar drops = {}');
+    if (helmet)   L.push('\tif helmet: drops[helmet.id] = {"item_id": helmet.id, "hp": helmet_hp}');
+    if (vest)     L.push('\tif vest: drops[vest.id] = {"item_id": vest.id, "hp": vest_hp}');
+    if (backpack) L.push('\tif backpack: drops[backpack.id] = {"item_id": backpack.id, "hp": -1}');
+    L.push('\tfor item_id in items: drops[item_id] = {"item_id": item_id, "qty": items[item_id]}');
+    L.push('\treturn drops');
+  }
+
+  return L.join('\n');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   InvUI.gd
+══════════════════════════════════════════════════════════════ */
+function buildUI(cn, nodes, ammoTypes, ammoStack, itemPanels, dragThr, f) {
+  const L = [];
+  const {maingun1, maingun2, pistol, melee, helmet, vest, backpack, scope, front, mag_att} = f;
+
+  L.push('extends Control');
+  L.push('');
+  L.push('# ── Equipment panels ──────────────────────────────────────────');
+  if (helmet)   L.push('@onready var helmet_panel   = $"' + nodes.helmet + '"');
+  if (vest)     L.push('@onready var vest_panel     = $"' + nodes.vest + '"');
+  if (backpack) L.push('@onready var backpack_panel = $"' + nodes.backpack + '"');
+  L.push('');
+  L.push('# ── Weapon panels ─────────────────────────────────────────────');
+  if (maingun1) L.push('@onready var main_gun_1_panel = $"' + nodes.gun1 + '"');
+  if (maingun2) L.push('@onready var main_gun_2_panel = $"' + nodes.gun2 + '"');
+  if (pistol)   L.push('@onready var pistol_panel     = $"' + nodes.pistol + '"');
+  if (melee)    L.push('@onready var melee_panel      = $"' + nodes.melee + '"');
+  L.push('');
+  L.push('@onready var inventory_grid = $"' + nodes.grid + '"');
+  L.push('@onready var exit_button    = $"' + nodes.exit + '"');
+  L.push('');
+  L.push('# ── Item panels ───────────────────────────────────────────────');
+  ammoTypes.forEach(id => L.push('@onready var panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ' = $"' + nodes.grid + '/' + id + '"'));
+  itemPanels.forEach(id => L.push('@onready var panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ' = $"' + nodes.grid + '/' + id + '"'));
+  L.push('');
+  L.push('@export var inventory: ' + cn);
+  L.push('@export var player: CharacterBody3D');
+  L.push('');
+  L.push('# ── Drag system ───────────────────────────────────────────────');
+  L.push('var is_dragging: bool       = false');
+  L.push('var drag_preview: Control   = null');
+  L.push('var drag_data: Dictionary   = {}');
+  L.push('var drag_start_pos: Vector2 = Vector2.ZERO');
+  L.push('var selected_panel: Panel   = null');
+  L.push('var drag_threshold: float   = ' + dragThr + '.0');
+  L.push('var dragged_panel: Panel    = null');
+  L.push('var pending_weapon_part: String = ""');
+  L.push('var pending_weapon_slot: String = ""');
+  L.push('');
+  L.push('var ammo_panels: Dictionary = {');
+  ammoTypes.forEach((id, i) => L.push('\t"' + id + '": []' + (i < ammoTypes.length-1 ? ',' : '')));
+  L.push('}');
+  L.push('');
+  L.push('func _ready() -> void:');
+  L.push('\tif not inventory: push_error("[InvUI] inventory not set!"); return');
+  L.push('\tinventory.inventory_updated.connect(_on_inventory_updated)');
+  if (helmet||vest||backpack) L.push('\tinventory.equipment_changed.connect(_on_equipment_changed)');
+  if (maingun1||maingun2) L.push('\tinventory.main_gun_equipped.connect(_on_main_gun_equipped)');
+  if (pistol) L.push('\tinventory.pistol_equipped.connect(_on_pistol_equipped)');
+  if (melee)  L.push('\tinventory.melee_equipped.connect(_on_melee_equipped)');
+  L.push('\tinventory.weapon_unequipped.connect(_on_weapon_unequipped)');
+  if ((maingun1||maingun2||pistol) && (scope||front||mag_att)) L.push('\tinventory.attachment_changed.connect(_on_attachment_changed)');
+  L.push('\texit_button.pressed.connect(_on_exit_pressed)');
+  L.push('');
+  ammoTypes.forEach(id => L.push('\tammo_panels["' + id + '"] = [panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ']'));
+  L.push('');
+  L.push('\t_setup_drag_system()');
+  L.push('\t_initialize_panels()');
+  L.push('\t_refresh_all_ui()');
+  L.push('');
+  L.push('func _initialize_panels() -> void:');
+  ammoTypes.forEach(id => { L.push('\t_update_panel_quantity(panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ', 0)'); L.push('\tpanel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + '.visible = false'); });
+  itemPanels.forEach(id => { L.push('\t_update_panel_quantity(panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ', 0)'); L.push('\tpanel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + '.visible = false'); });
+  L.push('');
+  L.push('func _setup_drag_system() -> void:');
+  if (helmet)   L.push('\t_setup_panel_drag(helmet_panel, "helmet")');
+  if (vest)     L.push('\t_setup_panel_drag(vest_panel, "vest")');
+  if (backpack) L.push('\t_setup_panel_drag(backpack_panel, "backpack")');
+  if (maingun1) L.push('\t_setup_weapon_panel_drag(main_gun_1_panel, "main_1")');
+  if (maingun2) L.push('\t_setup_weapon_panel_drag(main_gun_2_panel, "main_2")');
+  if (pistol)   L.push('\t_setup_weapon_panel_drag(pistol_panel, "pistol")');
+  if (melee)    L.push('\t_setup_weapon_panel_drag(melee_panel, "melee")');
+  ammoTypes.forEach(id => L.push('\t_setup_item_panel_drag(panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ', "' + id + '")'));
+  itemPanels.forEach(id => L.push('\t_setup_item_panel_drag(panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ', "' + id + '")'));
+  L.push('');
+  L.push('func _setup_panel_drag(panel: Panel, item_type: String) -> void:');
+  L.push('\tif not panel: return');
+  L.push('\tpanel.mouse_filter = Control.MOUSE_FILTER_STOP');
+  L.push('\tpanel.gui_input.connect(_on_equipment_input.bind(panel, item_type))');
+  L.push('');
+  L.push('func _setup_weapon_panel_drag(weapon_panel: Panel, weapon_slot: String) -> void:');
+  L.push('\tif not weapon_panel: return');
+  L.push('\tweapon_panel.mouse_filter = Control.MOUSE_FILTER_STOP');
+  L.push('\tweapon_panel.gui_input.connect(_on_weapon_panel_input.bind(weapon_slot))');
+  L.push('');
+  L.push('func _setup_item_panel_drag(panel: Panel, item_id: String) -> void:');
+  L.push('\tif not panel: return');
+  L.push('\tpanel.mouse_filter = Control.MOUSE_FILTER_STOP');
+  L.push('\tpanel.gui_input.connect(_on_item_panel_input.bind(panel, item_id))');
+  L.push('');
+  L.push('func _on_equipment_input(event: InputEvent, panel: Panel, item_type: String) -> void:');
+  L.push('\t_handle_input(event, func(): _start_equipment_drag(panel, item_type), panel)');
+  L.push('');
+  L.push('func _on_weapon_panel_input(event: InputEvent, weapon_slot: String) -> void:');
+  const panelMap = [];
+  if (maingun1) panelMap.push('"main_1": main_gun_1_panel');
+  if (maingun2) panelMap.push('"main_2": main_gun_2_panel');
+  if (pistol)   panelMap.push('"pistol": pistol_panel');
+  if (melee)    panelMap.push('"melee": melee_panel');
+  L.push('\tvar panel_map = {' + panelMap.join(', ') + '}');
+  L.push('\tvar panel = panel_map.get(weapon_slot)');
+  L.push('\tif weapon_slot == "melee":');
+  L.push('\t\t_handle_input(event, func(): _start_weapon_drag(weapon_slot), panel); return');
+  L.push('\tif event is InputEventScreenTouch:');
+  L.push('\t\tif event.pressed:');
+  L.push('\t\t\tdrag_start_pos = event.position; _select_panel(panel)');
+  L.push('\t\t\tpending_weapon_part = _detect_weapon_part(weapon_slot, panel.get_local_mouse_position())');
+  L.push('\t\t\tpending_weapon_slot = weapon_slot');
+  L.push('\telif event is InputEventScreenDrag:');
+  L.push('\t\tif not is_dragging and drag_start_pos.distance_to(event.position) > drag_threshold:');
+  L.push('\t\t\tmatch pending_weapon_part:');
+  L.push('\t\t\t\t"gun": _start_weapon_drag(pending_weapon_slot)');
+  if (scope)   L.push('\t\t\t\t"scope": _start_attachment_drag(pending_weapon_slot, "scope")');
+  if (front)   L.push('\t\t\t\t"front": _start_attachment_drag(pending_weapon_slot, "front")');
+  if (mag_att) L.push('\t\t\t\t"mag": _start_attachment_drag(pending_weapon_slot, "mag")');
+  L.push('');
+  L.push('func _detect_weapon_part(weapon_slot: String, local_pos: Vector2) -> String:');
+  L.push('\tvar panel_map = {' + panelMap.join(', ') + '}');
+  L.push('\tvar panel = panel_map.get(weapon_slot)');
+  L.push('\tif not panel: return "gun"');
+  if (scope) {
+    L.push('\tvar scope_node = panel.get_node_or_null("scopeimg")');
+    L.push('\tif scope_node and scope_node.visible and scope_node.get_rect().has_point(local_pos): return "scope"');
+  }
+  if (front) {
+    L.push('\tvar front_node = panel.get_node_or_null("front")');
+    L.push('\tif front_node and front_node.visible and front_node.get_rect().has_point(local_pos): return "front"');
+  }
+  if (mag_att) {
+    L.push('\tvar mag_node = panel.get_node_or_null("Mag")');
+    L.push('\tif mag_node and mag_node.visible and mag_node.get_rect().has_point(local_pos): return "mag"');
+  }
+  L.push('\treturn "gun"');
+  L.push('');
+  L.push('func _on_item_panel_input(event: InputEvent, panel: Panel, item_id: String) -> void:');
+  L.push('\t_handle_input(event, func():');
+  L.push('\t\tif inventory.get_item_quantity(item_id) > 0: _start_item_drag(item_id, panel)');
+  L.push('\t, panel)');
+  L.push('');
+  L.push('func _handle_input(event: InputEvent, start_drag_cb: Callable, panel: Panel = null) -> void:');
+  L.push('\tif event is InputEventMouseButton or event is InputEventMouseMotion: return');
+  L.push('\tif event is InputEventScreenTouch:');
+  L.push('\t\tif event.pressed:');
+  L.push('\t\t\tif panel: _select_panel(panel)');
+  L.push('\t\t\tdrag_start_pos = event.position');
+  L.push('\telif event is InputEventScreenDrag:');
+  L.push('\t\tif not is_dragging and drag_start_pos.distance_to(event.position) > drag_threshold:');
+  L.push('\t\t\tstart_drag_cb.call()');
+  L.push('');
+  L.push('func _select_panel(panel: Panel) -> void:');
+  L.push('\tif selected_panel and selected_panel != panel: _deselect_panel(selected_panel)');
+  L.push('\tselected_panel = panel; _highlight_panel(panel, true)');
+  L.push('');
+  L.push('func _deselect_panel(panel: Panel) -> void:');
+  L.push('\tif panel and panel == selected_panel: _highlight_panel(panel, false); selected_panel = null');
+  L.push('');
+  L.push('func _highlight_panel(panel: Panel, highlight: bool) -> void:');
+  L.push('\tif not panel: return');
+  L.push('\tcreate_tween().tween_property(panel, "modulate", Color(0.5, 1.0, 0.5, 1.0) if highlight else Color.WHITE, 0.1)');
+  L.push('');
+  L.push('func _start_equipment_drag(panel: Panel, item_type: String) -> void:');
+  L.push('\tvar item: ItemData = null');
+  L.push('\tmatch item_type:');
+  if (helmet)   L.push('\t\t"helmet": item = inventory.helmet');
+  if (vest)     L.push('\t\t"vest": item = inventory.vest');
+  if (backpack) L.push('\t\t"backpack": item = inventory.backpack');
+  L.push('\tif not item: return');
+  L.push('\tis_dragging = true');
+  L.push('\tdrag_data = {"type": "equipment", "item": item, "item_type": item_type}');
+  L.push('\t_create_drag_preview(item.icon)');
+  L.push('');
+  L.push('func _start_weapon_drag(weapon_slot: String) -> void:');
+  L.push('\tvar gun: ItemData = null');
+  L.push('\tmatch weapon_slot:');
+  if (maingun1) L.push('\t\t"main_1": gun = inventory.main_gun_1');
+  if (maingun2) L.push('\t\t"main_2": gun = inventory.main_gun_2');
+  if (pistol)   L.push('\t\t"pistol": gun = inventory.pistol_gun');
+  if (melee)    L.push('\t\t"melee": gun = inventory.melee_weapon');
+  L.push('\tif not gun: return');
+  L.push('\tis_dragging = true');
+  L.push('\tdrag_data = {"type": "weapon", "weapon_slot": weapon_slot, "gun": gun}');
+  L.push('\t_create_drag_preview(gun.icon)');
+  L.push('');
+  if ((maingun1||maingun2||pistol) && (scope||front||mag_att)) {
+    L.push('func _start_attachment_drag(weapon_slot: String, attachment_type: String) -> void:');
+    L.push('\tvar attachment: ItemData = null');
+    L.push('\tvar attachment_enum = null');
+    L.push('\tmatch attachment_type:');
+    if (scope) {
+      L.push('\t\t"scope":');
+      L.push('\t\t\tattachment_enum = ItemData.AttachmentType.SCOPE');
+      L.push('\t\t\tmatch weapon_slot:');
+      if (maingun1) L.push('\t\t\t\t"main_1": attachment = inventory.main_gun_1_scope');
+      if (maingun2) L.push('\t\t\t\t"main_2": attachment = inventory.main_gun_2_scope');
+    }
+    if (front) {
+      L.push('\t\t"front":');
+      L.push('\t\t\tattachment_enum = ItemData.AttachmentType.FRONT');
+      L.push('\t\t\tmatch weapon_slot:');
+      if (maingun1) L.push('\t\t\t\t"main_1": attachment = inventory.main_gun_1_front');
+      if (maingun2) L.push('\t\t\t\t"main_2": attachment = inventory.main_gun_2_front');
+    }
+    if (mag_att) {
+      L.push('\t\t"mag":');
+      L.push('\t\t\tattachment_enum = ItemData.AttachmentType.MEGAZINE');
+      L.push('\t\t\tmatch weapon_slot:');
+      if (maingun1) L.push('\t\t\t\t"main_1": attachment = inventory.main_gun_1_mag');
+      if (maingun2) L.push('\t\t\t\t"main_2": attachment = inventory.main_gun_2_mag');
+      if (pistol)   L.push('\t\t\t\t"pistol": attachment = inventory.pistol_mag');
+    }
+    L.push('\tif not attachment: return');
+    L.push('\tis_dragging = true');
+    L.push('\tdrag_data = {"type": "attachment", "weapon_slot": weapon_slot, "attachment_type": attachment_enum, "attachment": attachment}');
+    L.push('\t_create_drag_preview(attachment.icon)');
+    L.push('');
+  }
+  L.push('func _start_item_drag(item_id: String, panel: Panel) -> void:');
+  L.push('\tvar is_ammo = item_id in ' + JSON.stringify(ammoTypes));
+  L.push('\tvar qty_label = panel.get_node_or_null("Qty")');
+  L.push('\tvar panel_qty = int(qty_label.text) if (is_ammo and qty_label and qty_label.text != "") else 1');
+  L.push('\tif panel_qty <= 0: return');
+  L.push('\tis_dragging = true');
+  L.push('\tdragged_panel = panel if is_ammo else null');
+  L.push('\tdrag_data = {"type": "item", "item_id": item_id, "quantity": panel_qty, "panel": panel if is_ammo else null, "is_ammo": is_ammo}');
+  L.push('\tvar icon = panel.get_node_or_null("icon")');
+  L.push('\tif icon and icon.texture: _create_drag_preview(icon.texture)');
+  L.push('');
+  L.push('func _create_drag_preview(texture: Texture2D) -> void:');
+  L.push('\tdrag_preview = Control.new()');
+  L.push('\tdrag_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE');
+  L.push('\tvar tr = TextureRect.new()');
+  L.push('\ttr.texture = texture; tr.custom_minimum_size = Vector2(50, 50)');
+  L.push('\ttr.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL');
+  L.push('\ttr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED');
+  L.push('\ttr.modulate = Color(1, 1, 1, 0.7); tr.mouse_filter = Control.MOUSE_FILTER_IGNORE');
+  L.push('\tdrag_preview.add_child(tr); drag_preview.z_index = 100; add_child(drag_preview)');
+  L.push('\tdrag_preview.global_position = get_global_mouse_position() - Vector2(25, 25)');
+  L.push('\tcreate_tween().tween_property(drag_preview, "scale", Vector2.ONE * 1.2, 0.1)');
+  L.push('');
+  L.push('func _process(_delta: float) -> void:');
+  L.push('\tif is_dragging and drag_preview:');
+  L.push('\t\tdrag_preview.global_position = get_global_mouse_position() - Vector2(25, 25)');
+  L.push('');
+  L.push('func _input(event: InputEvent) -> void:');
+  L.push('\tif not is_dragging: return');
+  L.push('\tif event is InputEventScreenTouch and not event.pressed: _end_drag()');
+  L.push('');
+  L.push('func _end_drag() -> void:');
+  L.push('\tif not is_dragging: return');
+  L.push('\tvar mouse_pos = get_global_mouse_position()');
+  L.push('\tif drag_data.get("type") == "item":');
+  L.push('\t\tvar item_id = drag_data.get("item_id", "")');
+  L.push('\t\tvar attachment_items = ' + JSON.stringify(itemPanels.filter(id => ['reddot','2x','4x','silencer','booster','megazine'].includes(id))));
+  L.push('\t\tif item_id in attachment_items:');
+  L.push('\t\t\tvar target_slot = _get_gun_panel_at(mouse_pos)');
+  L.push('\t\t\tif target_slot != "": _drop_attachment_on_gun(item_id, target_slot); _cleanup_drag(); return');
+  L.push('\tif drag_data.get("type") == "attachment":');
+  L.push('\t\tvar target_slot = _get_gun_panel_at(mouse_pos)');
+  L.push('\t\tif target_slot != "" and target_slot != drag_data.get("weapon_slot", ""):');
+  L.push('\t\t\t_swap_attachment_between_guns(target_slot); _cleanup_drag(); return');
+  L.push('\t\telif not _get_gun_panel_at(mouse_pos):');
+  L.push('\t\t\t_remove_attachment_to_inventory(); _cleanup_drag(); return');
+  L.push('\t\telse: _cleanup_drag(); return');
+  L.push('\tif not inventory_grid.get_global_rect().has_point(mouse_pos): _animate_removal(mouse_pos)');
+  L.push('\telse: _cleanup_drag()');
+  L.push('');
+  L.push('func _get_gun_panel_at(mouse_pos: Vector2) -> String:');
+  if (maingun1) L.push('\tif main_gun_1_panel.get_global_rect().has_point(mouse_pos): return "main_1"');
+  if (maingun2) L.push('\tif main_gun_2_panel.get_global_rect().has_point(mouse_pos): return "main_2"');
+  if (pistol)   L.push('\tif pistol_panel.get_global_rect().has_point(mouse_pos): return "pistol"');
+  L.push('\treturn ""');
+  L.push('');
+  L.push('func _drop_attachment_on_gun(item_id: String, target_slot: String) -> void:');
+  L.push('\tvar attachment = _get_attachment_item_data(item_id)');
+  L.push('\tif not attachment: return');
+  L.push('\tvar existing = inventory.get_attachment(target_slot, attachment.attachment_type)');
+  L.push('\tif existing: inventory.add_item(existing.id, 1)');
+  L.push('\tinventory.remove_item(item_id, 1)');
+  L.push('\tinventory.attach_attachment(target_slot, attachment)');
+  L.push('\t_refresh_all_ui()');
+  L.push('');
+  L.push('func _swap_attachment_between_guns(target_slot: String) -> void:');
+  L.push('\tvar attachment = drag_data.get("attachment") as ItemData');
+  L.push('\tvar source_slot = drag_data.get("weapon_slot", "")');
+  L.push('\tvar att_type = drag_data.get("attachment_type")');
+  L.push('\tif not attachment: return');
+  L.push('\tvar existing = inventory.get_attachment(target_slot, att_type)');
+  L.push('\tif existing: inventory.add_item(existing.id, 1)');
+  L.push('\tinventory.remove_attachment(source_slot, att_type)');
+  L.push('\tinventory.attach_attachment(target_slot, attachment)');
+  L.push('\t_refresh_all_ui()');
+  L.push('');
+  L.push('func _remove_attachment_to_inventory() -> void:');
+  L.push('\tvar attachment = drag_data.get("attachment") as ItemData');
+  L.push('\tvar weapon_slot = drag_data.get("weapon_slot", "")');
+  L.push('\tvar att_type = drag_data.get("attachment_type")');
+  L.push('\tif not attachment: return');
+  L.push('\tinventory.remove_attachment(weapon_slot, att_type)');
+  L.push('\tinventory.add_item(attachment.id, 1)');
+  L.push('\t_refresh_all_ui()');
+  L.push('');
+  // Build attachment path map from item panel IDs
+  const attachPathMap = [];
+  const knownAttachPaths = {'reddot':'res://Attachments/red_dot.tres','2x':'res://Attachments/2x.tres','4x':'res://Attachments/4x.tres','silencer':'res://Attachments/silencer.tres','booster':'res://Attachments/booster.tres','megazine':'res://Attachments/megazine.tres'};
+  itemPanels.forEach(id => { if (knownAttachPaths[id]) attachPathMap.push('"' + id + '": "' + knownAttachPaths[id] + '"'); });
+  L.push('func _get_attachment_item_data(item_id: String) -> ItemData:');
+  L.push('\tvar path_map = {' + attachPathMap.join(', ') + '}');
+  L.push('\tvar path = path_map.get(item_id, "")');
+  L.push('\tif path == "": return null');
+  L.push('\treturn load(path) as ItemData');
+  L.push('');
+  L.push('func _animate_removal(drop_pos: Vector2) -> void:');
+  L.push('\tif not drag_preview: return');
+  L.push('\tvar panel_to_animate = drag_data.get("panel", null)');
+  L.push('\tif panel_to_animate and drag_data.get("is_ammo", false):');
+  L.push('\t\tvar original_pos = panel_to_animate.global_position');
+  L.push('\t\tvar tp = create_tween()');
+  L.push('\t\ttp.parallel().tween_property(panel_to_animate, "modulate:a", 0.0, 0.3)');
+  L.push('\t\ttp.parallel().tween_property(panel_to_animate, "scale", Vector2(0.5, 0.5), 0.3)');
+  L.push('\t\ttp.parallel().tween_property(panel_to_animate, "global_position", drop_pos, 0.3)');
+  L.push('\t\ttp.tween_callback(func(): panel_to_animate.modulate = Color.WHITE; panel_to_animate.scale = Vector2.ONE; panel_to_animate.global_position = original_pos)');
+  L.push('\tvar t = create_tween()');
+  L.push('\tt.parallel().tween_property(drag_preview, "modulate:a", 0.0, 0.3)');
+  L.push('\tt.parallel().tween_property(drag_preview, "scale", Vector2(0.5, 0.5), 0.3)');
+  L.push('\tt.tween_callback(func(): _remove_dragged_item(); _cleanup_drag())');
+  L.push('');
+  L.push('func _remove_dragged_item() -> void:');
+  L.push('\tmatch drag_data.get("type", ""):');
+  L.push('\t\t"equipment":');
+  L.push('\t\t\tmatch drag_data.get("item_type", ""):');
+  if (helmet)   { L.push('\t\t\t\t"helmet": inventory.helmet = null; inventory.helmet_hp = 0'); }
+  if (vest)     { L.push('\t\t\t\t"vest": inventory.vest = null; inventory.vest_hp = 0'); }
+  if (backpack) { L.push('\t\t\t\t"backpack": inventory.backpack = null; inventory._update_backpack_capacity()'); }
+  if (helmet||vest||backpack) L.push('\t\t\tinventory.equipment_changed.emit()');
+  L.push('\t\t"weapon":');
+  L.push('\t\t\tmatch drag_data.get("weapon_slot", ""):');
+  if (maingun1) L.push('\t\t\t\t"main_1": inventory.unequip_main_gun(1)');
+  if (maingun2) L.push('\t\t\t\t"main_2": inventory.unequip_main_gun(2)');
+  if (pistol)   L.push('\t\t\t\t"pistol": inventory.unequip_pistol()');
+  if (melee)    L.push('\t\t\t\t"melee": inventory.unequip_melee()');
+  L.push('\t\t"attachment": _remove_attachment_to_inventory()');
+  L.push('\t\t"item": inventory.remove_item(drag_data.get("item_id", ""), drag_data.get("quantity", 1))');
+  L.push('');
+  L.push('func _cleanup_drag() -> void:');
+  L.push('\tif drag_preview: drag_preview.queue_free(); drag_preview = null');
+  L.push('\tis_dragging = false; drag_data = {}; dragged_panel = null');
+  L.push('\tpending_weapon_part = ""; pending_weapon_slot = ""');
+  L.push('\tif selected_panel: _deselect_panel(selected_panel)');
+  L.push('');
+  L.push('func _refresh_all_ui() -> void:');
+  if (helmet||vest||backpack) L.push('\t_update_equipment_ui()');
+  if (maingun1||maingun2||pistol||melee) L.push('\t_update_weapons_ui()');
+  L.push('\t_update_inventory_items()');
+  L.push('');
+  if (helmet||vest||backpack) {
+    L.push('func _update_equipment_ui() -> void:');
+    if (helmet) L.push('\t_update_equipment_panel(helmet_panel, inventory.helmet, inventory.helmet_hp)');
+    if (vest)   L.push('\t_update_equipment_panel(vest_panel, inventory.vest, inventory.vest_hp)');
+    if (backpack) L.push('\t_update_backpack_panel()');
+    L.push('');
+    L.push('func _update_equipment_panel(panel: Panel, item: ItemData, current_hp: int) -> void:');
+    L.push('\tvar tr = panel.get_node_or_null("TextureRect")');
+    L.push('\tvar lv = panel.get_node_or_null("Level")');
+    L.push('\tvar hb = panel.get_node_or_null("Health")');
+    L.push('\tif tr: tr.texture = item.icon if item else null; tr.modulate = Color.WHITE if item else Color(1,1,1,0.3); tr.visible = item != null');
+    L.push('\tif lv: lv.text = "Level: " + str(item.equipment_level) if item else "Empty"');
+    L.push('\tif hb: hb.max_value = item.max_hp if item else 1; hb.value = current_hp if item else 0');
+    L.push('');
+    if (backpack) {
+      L.push('func _update_backpack_panel() -> void:');
+      L.push('\tvar tr = backpack_panel.get_node_or_null("TextureRect")');
+      L.push('\tvar lv = backpack_panel.get_node_or_null("Level")');
+      L.push('\tvar cb = backpack_panel.get_node_or_null("capacity")');
+      L.push('\tif tr: tr.texture = inventory.backpack.icon if inventory.backpack else null; tr.modulate = Color.WHITE if inventory.backpack else Color(1,1,1,0.3); tr.visible = inventory.backpack != null');
+      L.push('\tif lv: lv.text = "Level: " + str(inventory.backpack.equipment_level) if inventory.backpack else "No Bag"');
+      L.push('\tif cb: cb.max_value = inventory.max_capacity; cb.value = inventory.current_capacity if inventory.backpack else 0');
+      L.push('');
+    }
+  }
+  if (maingun1||maingun2||pistol||melee) {
+    L.push('func _update_weapons_ui() -> void:');
+    if (maingun1) {
+      const a1 = [];
+      if (scope)   a1.push('"scope": inventory.main_gun_1_scope');
+      if (front)   a1.push('"front": inventory.main_gun_1_front');
+      if (mag_att) a1.push('"mag": inventory.main_gun_1_mag');
+      L.push('\t_update_weapon_panel(main_gun_1_panel, inventory.main_gun_1, {' + a1.join(', ') + '})');
+    }
+    if (maingun2) {
+      const a2 = [];
+      if (scope)   a2.push('"scope": inventory.main_gun_2_scope');
+      if (front)   a2.push('"front": inventory.main_gun_2_front');
+      if (mag_att) a2.push('"mag": inventory.main_gun_2_mag');
+      L.push('\t_update_weapon_panel(main_gun_2_panel, inventory.main_gun_2, {' + a2.join(', ') + '})');
+    }
+    if (pistol) {
+      const ap = [];
+      if (mag_att) ap.push('"mag": inventory.pistol_mag');
+      L.push('\t_update_weapon_panel(pistol_panel, inventory.pistol_gun, {' + ap.join(', ') + '}, true)');
+    }
+    if (melee) L.push('\t_update_melee_panel()');
+    L.push('');
+    L.push('func _update_weapon_panel(panel: Panel, gun: ItemData, attachments: Dictionary, is_pistol: bool = false) -> void:');
+    L.push('\tvar name_lbl = panel.get_node_or_null("Label")');
+    L.push('\tvar gun_tex  = panel.get_node_or_null("Gun")');
+    if (scope)   L.push('\tvar scope_tex = panel.get_node_or_null("scopeimg")');
+    if (front)   L.push('\tvar front_tex = panel.get_node_or_null("front")');
+    if (mag_att) L.push('\tvar mag_tex   = panel.get_node_or_null("Mag")');
+    L.push('\tif gun_tex: gun_tex.texture = gun.icon if gun else null; gun_tex.modulate = Color.WHITE if gun else Color(1,1,1,0.3); gun_tex.visible = gun != null');
+    L.push('\tif name_lbl: name_lbl.text = gun.name if gun else "Empty"');
+    if (scope)   L.push('\tif scope_tex and not is_pistol: scope_tex.visible = attachments.get("scope") != null; if attachments.get("scope"): scope_tex.texture = attachments["scope"].icon');
+    if (front)   L.push('\tif front_tex and not is_pistol: front_tex.visible = attachments.get("front") != null; if attachments.get("front"): front_tex.texture = attachments["front"].icon');
+    if (mag_att) L.push('\tif mag_tex: mag_tex.visible = attachments.get("mag") != null; if attachments.get("mag"): mag_tex.texture = attachments["mag"].icon');
+    L.push('');
+    if (melee) {
+      L.push('func _update_melee_panel() -> void:');
+      L.push('\tvar name_lbl   = melee_panel.get_node_or_null("Label")');
+      L.push('\tvar melee_tex  = melee_panel.get_node_or_null("melee")');
+      L.push('\tif melee_tex: melee_tex.texture = inventory.melee_weapon.icon if inventory.melee_weapon else null; melee_tex.modulate = Color.WHITE if inventory.melee_weapon else Color(1,1,1,0.3); melee_tex.visible = inventory.melee_weapon != null');
+      L.push('\tif name_lbl: name_lbl.text = inventory.melee_weapon.name if inventory.melee_weapon else "Empty"');
+      L.push('');
+    }
+  }
+  L.push('func _update_inventory_items() -> void:');
+  ammoTypes.forEach(id => L.push('\t_update_ammo_panels("' + id + '")'));
+  itemPanels.forEach(id => L.push('\t_update_item_panel(panel_' + id.replace(/[^a-zA-Z0-9_]/g,'_') + ', "' + id + '")'));
+  L.push('');
+  L.push('func _update_ammo_panels(ammo_type: String) -> void:');
+  L.push('\tvar total_qty = inventory.get_item_quantity(ammo_type)');
+  L.push('\tvar current_panels = ammo_panels[ammo_type]');
+  L.push('\tif total_qty == 0:');
+  L.push('\t\tcurrent_panels[0].visible = false; _update_panel_quantity(current_panels[0], 0)');
+  L.push('\t\twhile current_panels.size() > 1: current_panels.pop_back().queue_free()');
+  L.push('\t\treturn');
+  L.push('\tvar panels_needed = ceili(float(total_qty) / ' + ammoStack + '.0)');
+  L.push('\twhile current_panels.size() < panels_needed:');
+  L.push('\t\tvar np = current_panels[0].duplicate()');
+  L.push('\t\t_setup_item_panel_drag(np, ammo_type)');
+  L.push('\t\tinventory_grid.add_child(np); current_panels.append(np)');
+  L.push('\twhile current_panels.size() > panels_needed: current_panels.pop_back().queue_free()');
+  L.push('\tvar remaining = total_qty');
+  L.push('\tfor i in range(current_panels.size()):');
+  L.push('\t\tvar qty = mini(remaining, ' + ammoStack + ')');
+  L.push('\t\t_update_panel_quantity(current_panels[i], qty); remaining -= qty; current_panels[i].visible = true');
+  L.push('');
+  L.push('func _update_item_panel(panel: Panel, item_id: String) -> void:');
+  L.push('\tvar qty = inventory.get_item_quantity(item_id)');
+  L.push('\t_update_panel_quantity(panel, qty); panel.visible = qty > 0');
+  L.push('');
+  L.push('func _update_panel_quantity(panel: Panel, qty: int) -> void:');
+  L.push('\tvar lbl = panel.get_node_or_null("Qty")');
+  L.push('\tif lbl: lbl.text = str(qty) if qty > 0 else ""');
+  L.push('');
+  L.push('# ── Signal handlers ───────────────────────────────────────────');
+  L.push('func _on_inventory_updated() -> void:');
+  L.push('\t_update_inventory_items()');
+  if (backpack) L.push('\t_update_backpack_panel()');
+  L.push('');
+  if (helmet||vest||backpack) {
+    L.push('func _on_equipment_changed() -> void: _update_equipment_ui()');
+    L.push('');
+  }
+  if (maingun1||maingun2) L.push('func _on_main_gun_equipped(_slot: int, _gun: ItemData) -> void: _update_weapons_ui()');
+  if (pistol) L.push('func _on_pistol_equipped(_gun: ItemData) -> void: _update_weapons_ui()');
+  if (melee)  L.push('func _on_melee_equipped(_melee: ItemData) -> void: _update_melee_panel()');
+  L.push('func _on_weapon_unequipped(slot_type: String) -> void:');
+  L.push('\t_update_weapons_ui()');
+  if (melee) L.push('\tif slot_type == "melee": _update_melee_panel()');
+  L.push('');
+  if ((maingun1||maingun2||pistol) && (scope||front||mag_att)) {
+    L.push('func _on_attachment_changed(_ws: String, _at: String, _att: ItemData) -> void: _update_weapons_ui()');
+    L.push('');
+  }
+  L.push('func _on_exit_pressed() -> void: hide()');
+
+  return L.join('\n');
+}
+
+/* ── TOKENIZER ── */
+function highlight(code) {
+  const KW  = new Set(['extends','class_name','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','signal','@export','@onready','_']);
+  const TYPE = new Set(['float','int','bool','String','void','Dictionary','Array','ItemData','CharacterBody3D','Panel','Control','TextureRect','Texture2D','Vector2','Color','Callable','InputEvent','InputEventScreenTouch','InputEventScreenDrag','InputEventMouseButton','InputEventMouseMotion']);
+  const FN  = new Set(['_ready','add_item','remove_item','get_item_quantity','_recalculate_capacity','equip_main_gun','unequip_main_gun','get_main_gun','equip_pistol','unequip_pistol','equip_melee','unequip_melee','get_slot_mag_ammo','save_slot_mag_ammo','get_megazine_capacity','attach_attachment','remove_attachment','get_attachment','_update_backpack_capacity','get_equipment_drop_data','_build_item_db','_refresh_all_ui','_update_equipment_ui','_update_equipment_panel','_update_backpack_panel','_update_weapons_ui','_update_weapon_panel','_update_melee_panel','_update_inventory_items','_update_ammo_panels','_update_item_panel','_update_panel_quantity','_setup_drag_system','_initialize_panels','_setup_panel_drag','_setup_weapon_panel_drag','_setup_item_panel_drag','_handle_input','_select_panel','_deselect_panel','_highlight_panel','_start_equipment_drag','_start_weapon_drag','_start_attachment_drag','_start_item_drag','_create_drag_preview','_end_drag','_get_gun_panel_at','_drop_attachment_on_gun','_swap_attachment_between_guns','_remove_attachment_to_inventory','_get_attachment_item_data','_animate_removal','_remove_dragged_item','_cleanup_drag','_on_inventory_updated','_on_equipment_changed','_on_main_gun_equipped','_on_pistol_equipped','_on_melee_equipped','_on_weapon_unequipped','_on_attachment_changed','_on_exit_pressed','_detect_weapon_part','emit','push_error','push_warning','ceili','mini','load','get','has','erase','append','size','keys','clear','duplicate','queue_free','add_child','get_node_or_null','get_global_rect','has_point','get_local_mouse_position','get_global_mouse_position','distance_to','tween_property','tween_callback','parallel','create_tween','ResourceLoader','exists']);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])){let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=highlight(code);}
+
+function copyOut(id,btn){
+  const el=$(id);
+  const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!-- header.html — loaded dynamically into every page via loadComponent() -->
+<header class="site-header">
+  <div class="hdr-inner">
+    <a class="hdr-brand" href="index.html">
+      <!-- REPLACE src with your icon: demo.png -->
+      <img src="demo.png" alt="GodotVisualCoder icon" class="hdr-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="hdr-icon-fallback" style="display:none">
+        <svg viewBox="0 0 28 28" fill="none" width="28" height="28">
+          <path d="M14 2L24 7.5V20.5L14 26L4 20.5V7.5L14 2Z" stroke="#4ade80" stroke-width="1.6" fill="none"/>
+          <circle cx="14" cy="14" r="4" fill="#4ade80"/>
+        </svg>
+      </div>
+      <span class="hdr-name">GodotVisualCoder</span>
+    </a>
+
+    <nav class="hdr-nav" id="hdrNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="free.html" class="nav-link">Free Tools</a>
+      <a href="pro.html" class="nav-link">Pro Tools</a>
+      <a href="index.html#about" class="nav-link">About</a>
+    </nav>
+
+    <a href="pricing.html" class="hdr-cta">Get Pro</a>
+
+    <button class="hdr-burger" id="hdrBurger" aria-label="Menu" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<style>
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(14,15,17,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border, #2a2f37);
+}
+.hdr-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 20px; height: 60px;
+  display: flex; align-items: center; gap: 32px;
+}
+.hdr-brand {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
+}
+.hdr-icon { width: 32px; height: 32px; border-radius: 8px; object-fit: contain; }
+.hdr-icon-fallback {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(74,222,128,0.1); border: 1px solid #22c55e;
+  align-items: center; justify-content: center;
+}
+.hdr-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.02em; color: #e8eaed;
+}
+.hdr-nav {
+  display: flex; align-items: center; gap: 4px; flex: 1;
+}
+.nav-link {
+  padding: 6px 12px; border-radius: 8px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 500;
+  color: #8b95a1; text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+.nav-link:hover { color: #e8eaed; background: #1c1f23; }
+.nav-link.active { color: #4ade80; }
+.hdr-cta {
+  margin-left: auto; padding: 8px 18px;
+  background: rgba(74,222,128,0.1); border: 1px solid #22c55e;
+  border-radius: 20px; color: #4ade80;
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.04em; text-decoration: none; white-space: nowrap;
+  transition: background 0.15s;
+}
+.hdr-cta:hover { background: rgba(74,222,128,0.2); }
+.hdr-burger {
+  display: none; flex-direction: column; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px;
+  margin-left: auto;
+}
+.hdr-burger span {
+  display: block; width: 22px; height: 2px;
+  background: #8b95a1; border-radius: 2px; transition: all 0.2s;
+}
+@media (max-width: 680px) {
+  .hdr-nav { display: none; flex-direction: column; gap: 0;
+    position: fixed; top: 60px; left: 0; right: 0;
+    background: #15171a; border-bottom: 1px solid #2a2f37;
+    padding: 12px 0; z-index: 99; }
+  .hdr-nav.open { display: flex; }
+  .nav-link { padding: 12px 24px; border-radius: 0; font-size: 15px; }
+  .hdr-burger { display: flex; }
+  .hdr-cta { display: none; }
+  .hdr-inner { gap: 16px; }
+}
+</style>
+
+<script>
+function toggleMenu() {
+  const nav = document.getElementById('hdrNav');
+  nav.classList.toggle('open');
+}
+// Mark active nav link
+(function(){
+  const path = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(a => {
+    if (a.getAttribute('href') === path) a.classList.add('active');
+  });
+})();
+</script>

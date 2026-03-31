@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — GodotVisualCoder</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;--border:#2a2f37;--border2:#343b45;--text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;--green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);--amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);--coral:#f87171;--coral-dim:rgba(248,113,113,0.10);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);--sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(14,15,17,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:32px;}
+.hdr-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.hdr-icon{width:32px;height:32px;border-radius:8px;object-fit:contain;}
+.hdr-icon-svg{width:32px;height:32px;border-radius:8px;background:var(--green-dim);border:1px solid var(--green2);display:none;align-items:center;justify-content:center;}
+.hdr-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.hdr-nav{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-link{padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);text-decoration:none;transition:color 0.15s,background 0.15s;}
+.nav-link:hover{color:var(--text);background:var(--bg3);}
+.nav-link.active{color:var(--green);}
+.hdr-cta{margin-left:auto;padding:8px 18px;background:var(--green-dim);border:1px solid var(--green2);border-radius:20px;color:var(--green);font-size:12px;font-weight:700;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:background 0.15s;flex-shrink:0;}
+.hdr-cta:hover{background:rgba(74,222,128,0.2);}
+.hdr-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hdr-burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;}
+
+/* PAGE HERO */
+.page-hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 24px 48px;}
+.page-hero-inner{max-width:900px;margin:0 auto;text-align:center;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);border-radius:20px;padding:5px 14px;font-size:11px;font-family:var(--mono);color:var(--amber);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:20px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+.page-hero h1{font-size:clamp(28px,4vw,52px);font-weight:800;letter-spacing:-0.03em;margin-bottom:14px;}
+.page-hero p{font-size:15px;color:var(--text2);line-height:1.7;max-width:520px;margin:0 auto;}
+
+/* CURRENCY TOGGLE */
+.currency-row{max-width:900px;margin:32px auto 0;display:flex;justify-content:center;}
+.currency-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;}
+.cur-btn{padding:7px 20px;border-radius:7px;font-size:12px;font-family:var(--mono);font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all 0.15s;}
+.cur-btn.active{background:var(--bg2);border:1px solid var(--border2);color:var(--text);}
+
+/* MAIN */
+.main{flex:1;padding:56px 24px 80px;}
+.main-inner{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:64px;}
+
+/* AI CALLOUT */
+.ai-callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:16px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start;}
+.ai-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px;}
+.ai-callout-text h3{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--amber);}
+.ai-callout-text p{font-size:13px;color:var(--text2);line-height:1.65;font-family:var(--mono);margin:0;}
+
+/* PRICING CARDS */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.price-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px;position:relative;overflow:hidden;}
+.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:20px 20px 0 0;}
+.pc-advanced::before{background:var(--green);}
+.pc-pro::before{background:var(--blue);}
+.pc-premium::before{background:linear-gradient(90deg,var(--purple),var(--amber));}
+.pc-pro{border-color:rgba(96,165,250,0.3);}
+.pc-premium{border-color:rgba(192,132,252,0.3);}
+.popular-flag{position:absolute;top:16px;right:16px;padding:3px 10px;background:var(--blue-dim);border:1px solid var(--blue2);border-radius:20px;font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--blue);}
+.premium-flag{position:absolute;top:16px;right:16px;padding:3px 10px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:20px;font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--purple);}
+
+.pc-tier{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.pc-name{font-size:22px;font-weight:800;letter-spacing:-0.02em;}
+.pc-desc{font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.6;margin-top:4px;}
+
+.pc-price{display:flex;flex-direction:column;gap:4px;}
+.pc-amount{font-size:32px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
+.pc-amount .cur{font-size:18px;font-weight:600;color:var(--text2);}
+.pc-amount .period{font-size:13px;font-weight:500;color:var(--text3);}
+.pc-usd{font-size:12px;color:var(--text3);font-family:var(--mono);}
+.pc-type{display:inline-flex;padding:3px 8px;border-radius:6px;font-size:9px;font-family:var(--mono);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-top:4px;width:fit-content;}
+.type-onetime{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.type-monthly{background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);color:var(--purple);}
+
+.pc-features{display:flex;flex-direction:column;gap:8px;flex:1;}
+.pc-feat{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.5;}
+.feat-check{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.fc-green{background:var(--green-dim);border:1px solid var(--green2);}
+.fc-blue{background:var(--blue-dim);border:1px solid var(--blue2);}
+.fc-purple{background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);}
+.pc-feat.muted{color:var(--text3);}
+.feat-divider{height:1px;background:var(--border);margin:4px 0;}
+
+.pc-cta{display:block;text-align:center;padding:13px;border-radius:12px;font-size:13px;font-weight:700;letter-spacing:0.03em;text-decoration:none;transition:background 0.15s;margin-top:auto;}
+.cta-green{background:var(--green-dim);border:1px solid var(--green2);color:var(--green);}
+.cta-green:hover{background:rgba(74,222,128,0.2);}
+.cta-blue{background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue);}
+.cta-blue:hover{background:rgba(96,165,250,0.2);}
+.cta-purple{background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);color:var(--purple);}
+.cta-purple:hover{background:rgba(192,132,252,0.15);}
+
+/* COMPARE TABLE */
+.compare-wrap{display:flex;flex-direction:column;gap:20px;}
+.sec-ey{font-size:10px;font-family:var(--mono);font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.sec-h{font-size:clamp(20px,3vw,32px);font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;}
+.compare-table th{padding:12px 16px;text-align:left;font-size:11px;font-family:var(--mono);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg2);}
+.compare-table th.hl{color:var(--purple);}
+.compare-table td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--text2);font-family:var(--mono);}
+.compare-table td.hl{background:rgba(192,132,252,0.04);}
+.compare-table tr:last-child td{border-bottom:none;}
+.compare-table tr:hover td{background:var(--bg3);}
+.compare-table tr:hover td.hl{background:rgba(192,132,252,0.08);}
+.yes{color:var(--green);}
+.no{color:var(--text3);}
+.partial{color:var(--amber);}
+
+/* BONUS SECTION */
+.bonus-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.bonus-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 22px;display:flex;gap:14px;align-items:flex-start;}
+.bonus-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.bonus-name{font-size:14px;font-weight:700;letter-spacing:-0.01em;margin-bottom:5px;}
+.bonus-desc{font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.bonus-tag{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:3px 8px;border-radius:6px;font-size:9px;font-family:var(--mono);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:2px;}
+details{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+summary{padding:16px 20px;font-weight:600;font-size:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+summary::-webkit-details-marker{display:none;}
+summary::after{content:"+";color:var(--text3);font-size:1.2rem;font-weight:400;transition:color 0.15s;}
+details[open] summary::after{content:"−";color:var(--green);}
+.faq-body{padding:0 20px 16px;font-size:13px;color:var(--text2);line-height:1.75;font-family:var(--mono);}
+
+/* CTA BOTTOM */
+.cta-bottom{background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:48px 32px;text-align:center;}
+.cta-bottom h2{font-size:clamp(20px,3vw,32px);font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;}
+.cta-bottom p{font-size:14px;color:var(--text2);max-width:480px;margin:0 auto 28px;line-height:1.65;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{padding:13px 26px;background:var(--green-dim);border:1px solid var(--green2);border-radius:12px;color:var(--green);font-size:14px;font-weight:700;text-decoration:none;transition:background 0.15s;}
+.btn-primary:hover{background:rgba(74,222,128,0.2);}
+.btn-outline{padding:13px 26px;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--text2);font-size:14px;font-weight:600;text-decoration:none;transition:all 0.15s;}
+.btn-outline:hover{border-color:var(--green2);color:var(--green);}
+
+/* FOOTER */
+.site-footer{background:#0a0b0d;border-top:1px solid var(--border);}
+.ftr-inner{max-width:1200px;margin:0 auto;padding:40px 24px 24px;display:grid;grid-template-columns:1fr auto;gap:40px;}
+.ftr-logo{display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:10px;}
+.ftr-logo span{font-size:14px;font-weight:700;color:var(--text);}
+.ftr-tag{font-size:12px;color:var(--text3);font-family:var(--mono);line-height:1.7;margin-bottom:10px;}
+.ftr-dev{font-size:12px;color:var(--text3);}
+.ftr-dev a{color:var(--green);text-decoration:none;}
+.ftr-cols{display:flex;gap:40px;}
+.ftr-col{display:flex;flex-direction:column;gap:8px;}
+.ftr-col-h{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);margin-bottom:2px;}
+.ftr-link{font-size:12px;color:var(--text3);text-decoration:none;transition:color 0.15s;}
+.ftr-link:hover{color:var(--text2);}
+.ftr-bottom{max-width:1200px;margin:0 auto;padding:14px 24px;border-top:1px solid var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--text3);flex-wrap:wrap;}
+
+@media(max-width:860px){
+  .pricing-grid{grid-template-columns:1fr;}
+  .bonus-grid{grid-template-columns:1fr;}
+}
+@media(max-width:680px){
+  .hdr-nav{display:none;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 0;z-index:99;}
+  .hdr-nav.open{display:flex;}
+  .hdr-burger{display:flex;}
+  .hdr-cta{display:none;}
+  .hdr-inner{gap:16px;}
+  .ftr-inner{grid-template-columns:1fr;gap:24px;padding:28px 20px 20px;}
+  .ftr-cols{flex-wrap:wrap;gap:24px;}
+  .main{padding:40px 20px 64px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="hdr-inner">
+    <a class="hdr-brand" href="index.html">
+      <img src="demo.png" class="hdr-icon" alt="GodotVisualCoder" onerror="this.style.display='none';document.getElementById('hif').style.display='flex'">
+      <div id="hif" class="hdr-icon-svg"><svg viewBox="0 0 22 22" fill="none" width="18" height="18"><path d="M11 2L19 6.5V15.5L11 20L3 15.5V6.5L11 2Z" stroke="#4ade80" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="#4ade80"/></svg></div>
+      <span class="hdr-name">GodotVisualCoder</span>
+    </a>
+    <nav class="hdr-nav" id="hdrNav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="free.html" class="nav-link">Free Tools</a>
+      <a href="pro.html" class="nav-link">Pro Tools</a>
+      <a href="pricing.html" class="nav-link active">Pricing</a>
+    </nav>
+    <a href="pricing.html" class="hdr-cta">Get Pro</a>
+    <button class="hdr-burger" onclick="document.getElementById('hdrNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow"><span class="dot"></span>Simple · Tier-based · No Subscription for one-time tiers</div>
+    <h1>Pick Your Plan</h1>
+    <p>Start free. Upgrade when you need more. One-time payment for Advanced and Pro — no recurring charge. Monthly only for Premium which includes P2P server access.</p>
+    <div class="currency-row">
+      <div class="currency-toggle">
+        <button class="cur-btn active" id="btnINR" onclick="setCur('INR')">₹ INR</button>
+        <button class="cur-btn" id="btnUSD" onclick="setCur('USD')">$ USD</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+<div class="main-inner">
+
+  <!-- AI CALLOUT -->
+  <div class="ai-callout">
+    <div class="ai-icon">⚡</div>
+    <div class="ai-callout-text">
+      <h3>AI gives you plausible code. This gives you code that works in Godot 4.</h3>
+      <p>ChatGPT generates Godot 3 syntax half the time, doesn't know your node setup, and requires you to know the right prompt. Every generator here is Godot 4 guaranteed — form-based, pattern-tested in a real BR multiplayer project.</p>
+    </div>
+  </div>
+
+  <!-- PRICING CARDS -->
+  <div class="pricing-grid">
+
+    <!-- ADVANCED -->
+    <div class="price-card pc-advanced">
+      <div>
+        <div class="pc-tier">Tier 1</div>
+        <div class="pc-name">Advanced</div>
+        <div class="pc-desc">3 generators for developers ready to go beyond the basics.</div>
+      </div>
+      <div class="pc-price">
+        <div class="pc-amount"><span class="cur inr">₹</span><span class="cur usd" style="display:none">$</span><span class="val" data-inr="399" data-usd="5">399</span><span class="period"></span></div>
+        <div class="pc-usd alt-cur" data-show="usd" style="display:none">₹399 one-time</div>
+        <div class="pc-usd alt-cur" data-show="inr">$5 one-time</div>
+        <span class="pc-type type-onetime">One-time</span>
+      </div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="feat-check fc-green"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Movement Pro — 3D, stances, multiplayer authority</div>
+        <div class="pc-feat"><div class="feat-check fc-green"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Combat Pro — RPC, enums, server-authoritative</div>
+        <div class="pc-feat"><div class="feat-check fc-green"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#4ade80" stroke-width="1.5" fill="none"/></svg></div>Inventory System — 4 scripts + drag & drop</div>
+        <div class="feat-divider"></div>
+        <div class="pc-feat muted"><div class="feat-check" style="background:var(--bg3);border:1px solid var(--border2)"><svg width="9" height="9" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>RPC Function Builder — Pro tier</div>
+        <div class="pc-feat muted"><div class="feat-check" style="background:var(--bg3);border:1px solid var(--border2)"><svg width="9" height="9" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>State Machine — Pro tier</div>
+        <div class="pc-feat muted"><div class="feat-check" style="background:var(--bg3);border:1px solid var(--border2)"><svg width="9" height="9" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>P2P server slot — Premium only</div>
+      </div>
+      <button onclick="showPopup()" class="pc-cta cta-green">Buy Advanced →</button>
+    </div>
+
+    <!-- PRO -->
+    <div class="price-card pc-pro">
+      <div class="popular-flag">Most Popular</div>
+      <div>
+        <div class="pc-tier">Tier 2</div>
+        <div class="pc-name">Pro</div>
+        <div class="pc-desc">All Advanced generators plus 5 more for real game architecture.</div>
+      </div>
+      <div class="pc-price">
+        <div class="pc-amount"><span class="cur inr">₹</span><span class="cur usd" style="display:none">$</span><span class="val" data-inr="999" data-usd="12">999</span></div>
+        <div class="pc-usd alt-cur" data-show="usd" style="display:none">₹999 one-time</div>
+        <div class="pc-usd alt-cur" data-show="inr">$12 one-time</div>
+        <span class="pc-type type-onetime">One-time</span>
+      </div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>Everything in Advanced</div>
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>RPC Function Builder — @rpc decorators</div>
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>State Machine — enum, match, transitions</div>
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>Autoload / Singleton — signals, save/load</div>
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>Animation Controller — stance × weapon</div>
+        <div class="pc-feat"><div class="feat-check fc-blue"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#60a5fa" stroke-width="1.5" fill="none"/></svg></div>Item Spawner — rarity, zones, relations</div>
+        <div class="feat-divider"></div>
+        <div class="pc-feat muted"><div class="feat-check" style="background:var(--bg3);border:1px solid var(--border2)"><svg width="9" height="9" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>P2P server slot — Premium only</div>
+        <div class="pc-feat muted"><div class="feat-check" style="background:var(--bg3);border:1px solid var(--border2)"><svg width="9" height="9" viewBox="0 0 10 10"><rect x="2" y="4.5" width="6" height="4.5" rx="1" stroke="#555f6d" stroke-width="1.2" fill="none"/><path d="M3.5 4.5V3.5a1.5 1.5 0 013 0v1" stroke="#555f6d" stroke-width="1.2" fill="none"/></svg></div>Store addons — Premium only</div>
+      </div>
+      <button onclick="showPopup()" class="pc-cta cta-blue">Buy Pro →</button>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="price-card pc-premium">
+      <div class="premium-flag">Best Value</div>
+      <div>
+        <div class="pc-tier">Tier 3</div>
+        <div class="pc-name">Premium</div>
+        <div class="pc-desc">Everything, forever — plus P2P server access and free store assets.</div>
+      </div>
+      <div class="pc-price">
+        <div class="pc-amount"><span class="cur inr">₹</span><span class="cur usd" style="display:none">$</span><span class="val" data-inr="599" data-usd="7">599</span><span class="period" style="font-size:14px;font-weight:500;color:var(--text3)">/mo</span></div>
+        <div class="pc-usd alt-cur" data-show="usd" style="display:none">₹599/month</div>
+        <div class="pc-usd alt-cur" data-show="inr">$7/month</div>
+        <span class="pc-type type-monthly">Monthly</span>
+      </div>
+      <div class="pc-features">
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>Everything in Pro</div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>All upcoming generators — early access</div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>Safe Zone, Kill Feed, Touch Camera + more</div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div><strong style="color:var(--purple)">GodotConnect P2P slot — 10 players</strong></div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>Free addons &amp; assets from the store</div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>Auth + lobby + chat + host migration included</div>
+        <div class="pc-feat"><div class="feat-check fc-purple"><svg width="9" height="9" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#c084fc" stroke-width="1.5" fill="none"/></svg></div>Priority support via YouTube DM</div>
+      </div>
+      <button onclick="showPopup()" class="pc-cta cta-purple">Get Premium →</button>
+    </div>
+
+  </div>
+
+  <!-- COMPARE TABLE -->
+  <div class="compare-wrap">
+    <div>
+      <div class="sec-ey">Full comparison</div>
+      <h2 class="sec-h">What's included in each tier</h2>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="width:40%">Feature</th>
+          <th>Free</th>
+          <th>Advanced</th>
+          <th>Pro</th>
+          <th class="hl">Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Free generators (5)</td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Movement Pro</td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Combat Pro</td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Inventory System</td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>RPC Function Builder</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>State Machine</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Autoload / Singleton</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Animation Controller</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Item Spawner</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="yes">✓</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Safe Zone, Kill Feed + more</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>All upcoming generators</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td>Free store addons &amp; assets</td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="hl"><span class="yes">✓</span></td></tr>
+        <tr><td><strong>GodotConnect P2P — 10 players</strong></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="hl"><span class="yes" style="color:var(--purple)">✓</span></td></tr>
+        <tr><td>Payment type</td><td style="color:var(--green);font-size:11px">Free</td><td style="font-size:11px;color:var(--text2)">One-time</td><td style="font-size:11px;color:var(--text2)">One-time</td><td class="hl" style="font-size:11px;color:var(--purple)">Monthly</td></tr>
+        <tr>
+          <td></td>
+          <td><a href="free.html" style="font-size:11px;color:var(--green);font-family:var(--mono);text-decoration:none;">Try Free →</a></td>
+          <td><a href="#" onclick="showPopup();return false;" style="font-size:11px;color:var(--green);font-family:var(--mono);text-decoration:none;">Buy ₹399 →</a></td>
+          <td><a href="#" onclick="showPopup();return false;" style="font-size:11px;color:var(--blue);font-family:var(--mono);text-decoration:none;">Buy ₹999 →</a></td>
+          <td class="hl"><a href="#" onclick="showPopup();return false;" style="font-size:11px;color:var(--purple);font-family:var(--mono);text-decoration:none;">Get ₹599/mo →</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PREMIUM BONUS -->
+  <div>
+    <div class="sec-ey">Premium extras</div>
+    <h2 class="sec-h">What you get with Premium</h2>
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <div class="bonus-icon" style="background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L22 8V16L12 22L2 16V8L12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="bonus-name">GodotConnect P2P — 10 Players</div>
+          <div class="bonus-desc">A live GodotConnect slot for up to 10 concurrent players. Private virtual IPs, host migration, auth, lobby, chat — all included. No separate subscription needed.</div>
+          <span class="bonus-tag" style="background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);color:var(--purple)">Worth ₹200/mo standalone</span>
+        </div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon" style="background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div>
+          <div class="bonus-name">Free Store Addons &amp; Assets</div>
+          <div class="bonus-desc">Selected free addons and assets from the SanjayAIDev store every month — scripts, systems, and tools from the same production-tested codebase.</div>
+          <span class="bonus-tag" style="background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);color:var(--amber)">New assets added regularly</span>
+        </div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon" style="background:var(--green-dim);border:1px solid var(--green2)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L19 6v12L12 22 5 18V6L12 2z"/><path d="M12 8v4l3 2"/></svg>
+        </div>
+        <div>
+          <div class="bonus-name">All Upcoming Generators — Early Access</div>
+          <div class="bonus-desc">Safe Zone System, Kill Feed, Touch Camera, Virtual Joystick, Network Manager, Weapon Handler — and everything added after. You get them the day they launch.</div>
+          <span class="bonus-tag" style="background:var(--green-dim);border:1px solid var(--green2);color:var(--green)">New generators monthly</span>
+        </div>
+      </div>
+      <div class="bonus-card">
+        <div class="bonus-icon" style="background:var(--blue-dim);border:1px solid var(--blue2)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <div>
+          <div class="bonus-name">Priority Support</div>
+          <div class="bonus-desc">Direct access via YouTube DM. Generator not outputting what you need for your specific setup? Ask and it gets fixed or explained.</div>
+          <span class="bonus-tag" style="background:var(--blue-dim);border:1px solid var(--blue2);color:var(--blue)">Via YouTube @ChampGaming</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div>
+    <div class="sec-ey">Questions</div>
+    <h2 class="sec-h" style="margin-bottom:24px">Common questions</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Is Advanced and Pro really one-time? No subscription?</summary>
+        <div class="faq-body">Yes. You pay once and keep access to those generators permanently. No recurring charge, no expiry. Only Premium is monthly because it includes the GodotConnect P2P server slot which has ongoing infrastructure cost.</div>
+      </details>
+      <details>
+        <summary>What is the GodotConnect P2P slot in Premium?</summary>
+        <div class="faq-body">It's a live GodotConnect game slot — up to 10 concurrent players, private virtual IPs so real IPs are never exposed, host migration, lobby, chat, and auth all included. The same service sold separately at <a href="godotconnect.html" style="color:var(--green)">GodotConnect</a> — bundled into Premium at no extra cost.</div>
+      </details>
+      <details>
+        <summary>Can I use AI instead of buying this?</summary>
+        <div class="faq-body">You can try. ChatGPT generates Godot 3 syntax roughly half the time, doesn't know your node hierarchy, and the @rpc patterns it produces usually have wrong authority settings. Every generator here is Godot 4 tested on a real multiplayer project. The free tier costs nothing — try it first and see the difference.</div>
+      </details>
+      <details>
+        <summary>How do I access the generators after buying?</summary>
+        <div class="faq-body">Contact via YouTube <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" style="color:var(--green)">@ChampGaming</a> after payment. You'll receive login credentials for the pro generators. Payment via UPI or bank transfer (India) — international options available on request.</div>
+      </details>
+      <details>
+        <summary>What if I start on Advanced and want to upgrade to Pro?</summary>
+        <div class="faq-body">You pay the difference — ₹600 / $7 to go from Advanced to Pro. Contact via YouTube and it gets sorted. No need to pay full price again.</div>
+      </details>
+      <details>
+        <summary>What does "free store addons" in Premium mean exactly?</summary>
+        <div class="faq-body">Selected scripts and assets from the SanjayAIDev store are made available to Premium members at no charge. These rotate and expand over time — not every single item in the store, but a curated set of useful addons relevant to what you're building.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CTA BOTTOM -->
+  <div class="cta-bottom">
+    <h2>Start free. Upgrade when you're ready.</h2>
+    <p>5 generators free — no account needed. Upgrade to Advanced or Pro when you outgrow them. Add Premium when you want a live multiplayer backend included.</p>
+    <div class="cta-btns">
+      <a href="free.html" class="btn-primary">Try Free Generators</a>
+      <a href="pro.html" class="btn-outline">Browse Pro Tools</a>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="ftr-inner">
+    <div>
+      <a class="ftr-logo" href="index.html"><img src="demo.png" class="hdr-icon" alt="" onerror="this.style.display='none'"><span>GodotVisualCoder</span></a>
+      <p class="ftr-tag">Visual GDScript generators for Godot 4.x.<br>Build faster, learn better.</p>
+      <p class="ftr-dev">Dev: <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener">Champ Gaming</a></p>
+    </div>
+    <div class="ftr-cols">
+      <div class="ftr-col"><div class="ftr-col-h">Tools</div><a href="free.html" class="ftr-link">Free Generators</a><a href="pro.html" class="ftr-link">Pro Generators</a><a href="pricing.html" class="ftr-link">Pricing</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Legal</div><a href="terms.html" class="ftr-link">Terms of Use</a><a href="privacy.html" class="ftr-link">Privacy Policy</a><a href="refund.html" class="ftr-link">Refund Policy</a></div>
+      <div class="ftr-col"><div class="ftr-col-h">Links</div><a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener" class="ftr-link">YouTube</a><a href="https://sanjayaidev.netlify.app" target="_blank" rel="noopener" class="ftr-link">Store</a><a href="godotconnect.html" class="ftr-link">GodotConnect</a></div>
+    </div>
+  </div>
+  <div class="ftr-bottom">
+    <span>© <span id="yr"></span> GodotVisualCoder. All rights reserved.</span>
+    <span>Godot 4.x · Made by Champ Gaming</span>
+  </div>
+</footer>
+
+<!-- COMING SOON POPUP -->
+<div id="popup-overlay" onclick="hidePopup()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div onclick="event.stopPropagation()" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;max-width:420px;width:90%;text-align:center;position:relative;">
+    <div style="width:48px;height:48px;border-radius:14px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;">⚡</div>
+    <h3 style="font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;">Coming Soon</h3>
+    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-family:var(--mono);margin-bottom:24px;">Pro tiers are launching soon. Contact on YouTube to get notified first or to ask about early access.</p>
+    <a href="https://www.youtube.com/@ChampGaming" target="_blank" rel="noopener"
+      style="display:block;padding:13px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.4);border-radius:12px;color:var(--amber);font-size:13px;font-weight:700;text-decoration:none;margin-bottom:10px;">
+      Contact on YouTube →
+    </a>
+    <button onclick="hidePopup()" style="width:100%;padding:13px;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);">
+      Close
+    </button>
+  </div>
+</div>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function showPopup() {
+  const overlay = document.getElementById('popup-overlay');
+  overlay.style.display = 'flex';
+}
+function hidePopup() {
+  document.getElementById('popup-overlay').style.display = 'none';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hidePopup(); });
+
+function setCur(cur) {
+  const isUSD = cur === 'USD';
+  document.getElementById('btnINR').classList.toggle('active', !isUSD);
+  document.getElementById('btnUSD').classList.toggle('active', isUSD);
+  document.querySelectorAll('.val').forEach(el => {
+    el.textContent = isUSD ? el.dataset.usd : el.dataset.inr;
+  });
+  document.querySelectorAll('.cur.inr').forEach(el => el.style.display = isUSD ? 'none' : '');
+  document.querySelectorAll('.cur.usd').forEach(el => el.style.display = isUSD ? '' : 'none');
+  document.querySelectorAll('.alt-cur').forEach(el => {
+    el.style.display = (el.dataset.show === cur.toLowerCase()) ? '' : 'none';
+  });
+  const links = document.querySelectorAll('.compare-table tbody tr:last-child td a');
+  if (links[1]) links[1].textContent = isUSD ? 'Buy $5 →' : 'Buy ₹399 →';
+  if (links[2]) links[2].textContent = isUSD ? 'Buy $12 →' : 'Buy ₹999 →';
+  if (links[3]) links[3].textContent = isUSD ? 'Get $7/mo →' : 'Get ₹599/mo →';
+}
+</script>
+</body>
+</html>
