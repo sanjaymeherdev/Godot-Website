@@ -196,7 +196,7 @@
                 <div class="footer-container">
                     <div class="footer-grid">
                         <div class="footer-section">
-                            <h4>SanjayAIDev</h4>
+                            <h4>SanjayMeherDev</h4>
                             <p>Your go-to expert for Godot game development. From beginner tutorials to production-ready multiplayer systems, AI integrations, and complete game kits.</p>
                             <div class="social-links">
                                 <a href="https://youtube.com/@Champ_gaming" target="_blank">📺 YouTube</a>
