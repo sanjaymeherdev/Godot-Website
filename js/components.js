@@ -117,7 +117,7 @@
                 <div class="container">
                     <nav>
                         <div class="logo">
-                            <a href="${basePath}index.html">Sanjay<span>AIDev</span></a>
+                            <a href="${basePath}index.html">Sanjay<span>MeherDev</span></a>
                             <span class="tagline">Godot Expert</span>
                         </div>
                         <div class="nav-links">
