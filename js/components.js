@@ -16,9 +16,45 @@
             .sanjay-header .nav-links { display: flex; gap: 1.5rem; align-items: center; }
             .sanjay-header .nav-links a { color: #a0a0c0; text-decoration: none; transition: color 0.2s; font-weight: 500; }
             .sanjay-header .nav-links a:hover, .sanjay-header .nav-links a.active { color: #4f46e5; }
-            .sanjay-header .dropdown { position: relative; display: inline-block; }
-            .sanjay-header .dropbtn { cursor: pointer; background: none; border: none; color: #a0a0c0; font-weight: 500; font-size: 1rem; font-family: inherit; padding: 0; }
-            .sanjay-header .dropbtn:hover { color: #4f46e5; }
+           // Replace the dropdown-related styles in headerStyles with these:
+
+.sanjay-header .dropdown { position: relative; display: inline-block; }
+.sanjay-header .dropbtn { cursor: pointer; background: none; border: none; color: #a0a0c0; font-weight: 500; font-size: 1rem; font-family: inherit; padding: 0.5rem 0; }
+.sanjay-header .dropbtn:hover { color: #4f46e5; }
+.sanjay-header .dropdown-content { 
+    display: none; 
+    position: absolute; 
+    background: #1a1a2e; 
+    min-width: 240px; 
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
+    border-radius: 12px; 
+    z-index: 1000; 
+    top: 100%; 
+    left: 0; 
+    margin-top: 0; 
+    border: 1px solid rgba(79, 70, 229, 0.2); 
+    overflow: hidden;
+    padding-top: 0.5rem;
+}
+.sanjay-header .dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -0.5rem;
+    left: 0;
+    width: 100%;
+    height: 0.5rem;
+    background: transparent;
+}
+/* Add a bridge element to connect button to dropdown */
+.sanjay-header .dropdown::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 100%;
+    height: 0.5rem;
+    background: transparent;
+}
             .sanjay-header .dropdown-content { display: none; position: absolute; background: #1a1a2e; min-width: 240px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); border-radius: 12px; z-index: 1000; top: 100%; left: 0; margin-top: 0.5rem; border: 1px solid rgba(79, 70, 229, 0.2); overflow: hidden; }
             .sanjay-header .dropdown-content a { color: white; padding: 0.75rem 1rem; text-decoration: none; display: block; font-size: 0.9rem; transition: background 0.2s; }
             .sanjay-header .dropdown-content a:hover { background: #2d2d44; }
