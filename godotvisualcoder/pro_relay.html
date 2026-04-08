@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>RelayManager Builder · Visual GDScript Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+      --border:#2a2f37; --border2:#343b45;
+      --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+      --green:#4ade80; --green2:#22c55e;
+      --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+      --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+      --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+      --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+      --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+      --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+      --r:10px; --rl:14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
+    .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; font-size: 18px; }
+    .back-btn:active { background: var(--bg4); }
+    .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+    .header-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .header-badge { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); padding: 3px 8px; border-radius: 20px; }
+
+    .page { padding: 16px 16px 100px; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 900px) {
+      .page { flex-direction: row; align-items: flex-start; }
+      .form-col { flex: 1.2; min-width: 360px; }
+      .out-col { flex: 1.8; min-width: 450px; }
+    }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .card-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .card-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .card-dot.blue { background: var(--blue); }
+    .card-dot.purple { background: var(--purple); }
+    .card-dot.amber { background: var(--amber); }
+    .card-dot.coral { background: var(--coral); }
+    .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); font-family: var(--mono); }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.02em; }
+    .field-hint { font-size: 9px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+    select, input[type="text"], input[type="number"] { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 8px 12px; outline: none; transition: border-color 0.15s; }
+    select:focus, input:focus { border-color: var(--green2); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    .toggle-item { display: flex; align-items: center; gap: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .toggle-item.active { background: var(--green-dim2); border-color: var(--green2); }
+    .toggle-item input[type="checkbox"] { display: none; }
+    .chk-box { width: 20px; height: 20px; flex-shrink: 0; border: 1px solid var(--border2); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+    .toggle-item.active .chk-box { background: var(--green); border-color: var(--green); }
+    .chk-mark { display: none; }
+    .toggle-item.active .chk-mark { display: block; }
+    .toggle-label { flex: 1; font-size: 13px; font-weight: 500; }
+    .toggle-hint { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+
+    .param-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .param-row input { flex: 1; background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); padding: 6px 10px; font-family: var(--mono); font-size: 12px; }
+    .param-row button { background: var(--bg4); border: 1px solid var(--border2); color: var(--coral); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; }
+    .add-btn { background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); padding: 8px; color: var(--green2); font-family: var(--mono); font-size: 11px; cursor: pointer; margin-top: 4px; }
+
+    .hint { background: var(--bg4); border-left: 2px solid var(--green2); padding: 8px 12px; border-radius: 0 var(--r) var(--r) 0; font-size: 10px; color: var(--text2); font-family: var(--mono); line-height: 1.5; margin: 4px 0; }
+
+    .gen-btn { width: 100%; height: 52px; background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); border-radius: var(--rl); color: var(--purple); font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.1s; margin-top: 8px; }
+    .gen-btn:active { background: rgba(192,132,252,0.2); transform: scale(0.99); }
+
+    .out-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .out-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .out-tag { font-size: 10px; font-family: var(--mono); font-weight: 600; padding: 3px 8px; border-radius: 4px; background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .copy-btn { margin-left: auto; padding: 5px 12px; background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); font-family: var(--mono); font-size: 11px; cursor: pointer; transition: 0.1s; }
+    .copy-btn:active { background: var(--bg3); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+    .out-code { padding: 14px; font-family: var(--mono); font-size: 11px; line-height: 1.65; color: var(--text); white-space: pre; overflow-x: auto; min-height: 350px; background: var(--bg); border-radius: 0 0 var(--rl) var(--rl); }
+    .out-code.empty { color: var(--text3); font-style: italic; }
+
+    .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; } .cmt { color: #546e7a; font-style: italic; } .typ { color: var(--amber); }
+    .hidden { display: none !important; }
+    hr { border-color: var(--border); margin: 6px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="#">‹</a>
+  <div>
+    <div class="header-title">RelayManager Builder</div>
+    <div class="header-sub">Multiplayer State Sync · 3 Modes · Any Game</div>
+  </div>
+  <span class="header-badge">Pro · Relay System</span>
+</div>
+
+<div class="page">
+  <div class="form-col">
+
+    <!-- CORE SETTINGS -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Core Configuration</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Server Peer ID</div><input type="number" id="serverPeerId" value="1"></div>
+        <div class="field"><div class="field-label">Player Group Name</div><input type="text" id="playerGroup" value="player" placeholder="player"></div>
+        <div class="field-hint">Nodes in this group will be found as remote players</div>
+      </div>
+    </div>
+
+    <!-- SYNC MODES -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Sync Modes</span></div>
+      <div class="card-body">
+        <div class="grid3">
+          <div class="toggle-item active" id="tog-realtime" onclick="toggleSyncMode('realtime')">
+            <input type="checkbox" id="realtimeCheck" checked><div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">REALTIME</span><span class="toggle-hint">unreliable</span>
+          </div>
+          <div class="toggle-item active" id="tog-onchange" onclick="toggleSyncMode('onchange')">
+            <input type="checkbox" id="onchangeCheck" checked><div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">ON_CHANGE</span><span class="toggle-hint">reliable</span>
+          </div>
+          <div class="toggle-item active" id="tog-once" onclick="toggleSyncMode('once')">
+            <input type="checkbox" id="onceCheck" checked><div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">ONCE</span><span class="toggle-hint">reliable</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATE KEYS (customizable) -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot purple"></div><span class="card-title">State Keys (add as needed)</span></div>
+      <div class="card-body">
+        <div id="stateKeysContainer"></div>
+        <button class="add-btn" onclick="addStateKey()">+ Add State Key</button>
+        <div class="field-hint">Keys like "equipment", "guns", "health", "position" — will be cached and routed automatically</div>
+      </div>
+    </div>
+
+    <!-- TARGET & RELIABILITY -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Target & Reliability</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Default Target Filter</div>
+          <select id="targetFilter">
+            <option value="broadcast">Broadcast to all peers (except self & server)</option>
+            <option value="exclude_self">Exclude self only</option>
+            <option value="exclude_server">Exclude server only</option>
+            <option value="all">All connected peers (including self if needed)</option>
+          </select>
+        </div>
+        <div class="field"><div class="field-label">REALTIME Mode Reliability</div>
+          <select id="realtimeReliability">
+            <option value="unreliable">unreliable (default for REALTIME)</option>
+            <option value="reliable">reliable</option>
+          </select>
+        </div>
+        <div class="field"><div class="field-label">ON_CHANGE / ONCE Reliability</div>
+          <select id="reliableReliability">
+            <option value="reliable">reliable (default)</option>
+            <option value="unreliable">unreliable</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CACHE & CLEANUP -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot green"></div><span class="card-title">Cache & Cleanup</span></div>
+      <div class="card-body">
+        <div class="toggle-item active" id="tog-stateCache" onclick="toggleStateCache()">
+          <input type="checkbox" id="stateCacheCheck" checked><div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Enable State Cache</span>
+          <span class="toggle-hint">Store latest state per peer</span>
+        </div>
+        <div class="toggle-item active" id="tog-peerCleanup" onclick="togglePeerCleanup()">
+          <input type="checkbox" id="peerCleanupCheck" checked><div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Auto Cleanup on Peer Left</span>
+          <span class="toggle-hint">Clear cache and sent history when peer disconnects</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NODE ASSIGNMENT (optional groups) -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Optional Node Groups (no defaults)</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Equipment Visuals Group (optional)</div><input type="text" id="eqGroup" value="" placeholder="e.g., eqv, visuals, equipment"></div>
+        <div class="field-hint">If assigned, RelayManager will auto-apply state to nodes in this group on remote players</div>
+      </div>
+    </div>
+
+    <button class="gen-btn" onclick="generateRelayManager()">⚡ Generate RelayManager.gd</button>
+  </div>
+
+  <div class="out-col">
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag">RelayManager.gd</span>
+        <button class="copy-btn" onclick="copyOutput(this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="codeOutput"># Click Generate to create RelayManager script</div>
+    </div>
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag" style="background:rgba(251,191,36,0.12);color:var(--amber);border-color:var(--amber);">Usage Example</span>
+        <button class="copy-btn" onclick="copyUsage(this)">Copy</button>
+      </div>
+      <div class="out-code" id="usageOutput" style="font-size: 10px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // State
+  let syncModes = { realtime: true, onchange: true, once: true };
+  let stateCacheEnabled = true;
+  let peerCleanupEnabled = true;
+  let stateKeys = [];
+
+  function toggleSyncMode(mode) {
+    if (mode === 'realtime') { syncModes.realtime = !syncModes.realtime; document.getElementById('tog-realtime').classList.toggle('active', syncModes.realtime); document.getElementById('realtimeCheck').checked = syncModes.realtime; }
+    else if (mode === 'onchange') { syncModes.onchange = !syncModes.onchange; document.getElementById('tog-onchange').classList.toggle('active', syncModes.onchange); document.getElementById('onchangeCheck').checked = syncModes.onchange; }
+    else if (mode === 'once') { syncModes.once = !syncModes.once; document.getElementById('tog-once').classList.toggle('active', syncModes.once); document.getElementById('onceCheck').checked = syncModes.once; }
+  }
+
+  function toggleStateCache() { stateCacheEnabled = !stateCacheEnabled; document.getElementById('tog-stateCache').classList.toggle('active', stateCacheEnabled); document.getElementById('stateCacheCheck').checked = stateCacheEnabled; }
+  function togglePeerCleanup() { peerCleanupEnabled = !peerCleanupEnabled; document.getElementById('tog-peerCleanup').classList.toggle('active', peerCleanupEnabled); document.getElementById('peerCleanupCheck').checked = peerCleanupEnabled; }
+
+  function addStateKey() { stateKeys.push({ name: `key${stateKeys.length + 1}` }); renderStateKeys(); }
+  function removeStateKey(idx) { stateKeys.splice(idx, 1); renderStateKeys(); }
+  function updateStateKey(idx, value) { stateKeys[idx].name = value; }
+
+  function renderStateKeys() {
+    const container = document.getElementById('stateKeysContainer');
+    if (stateKeys.length === 0) { container.innerHTML = '<div class="hint" style="font-size:10px">No state keys added. Add keys like "equipment", "guns", "health" — they will be cached and routed.</div>'; return; }
+    let html = '';
+    for (let i = 0; i < stateKeys.length; i++) {
+      html += `<div class="param-row"><input type="text" value="${escapeHtml(stateKeys[i].name)}" placeholder="state key" onchange="updateStateKey(${i}, this.value)"><button onclick="removeStateKey(${i})">✕</button></div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(str) { if (!str) return ''; return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function highlightGDScript(code) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const keywords = new Set(['extends','class_name','func','var','const','if','elif','else','for','while','return','true','false','null','and','or','not','pass','break','continue','@export','@onready','@rpc','signal','enum','static','await','match','as','is','in','self','super','void','OK']);
+    const types = new Set(['int','float','String','bool','Vector2','Vector3','Dictionary','Array','Node','RelayManager','Mode']);
+    const builtins = new Set(['print','push_error','assert','get_tree','multiplayer','is_multiplayer_authority','get_unique_id','rpc','rpc_id','has_method','is_instance_valid','duplicate']);
+    function tokenLine(line) {
+      let out = '', i = 0;
+      while (i < line.length) {
+        if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+        if (line[i] === '"') { let j = i+1; while(j < line.length && line[j] !== '"') j++; out += `<span class="str">${esc(line.slice(i, j+1))}</span>`; i = j+1; continue; }
+        if (line[i] === '@') { let j = i+1; while(j < line.length && /[\w_]/.test(line[j])) j++; out += `<span class="kw">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        if (/[a-zA-Z_]/.test(line[i])) { let j = i; while(j < line.length && /[\w]/.test(line[j])) j++; const w = line.slice(i, j);
+          if (keywords.has(w)) out += `<span class="kw">${esc(w)}</span>`;
+          else if (types.has(w)) out += `<span class="typ">${esc(w)}</span>`;
+          else if (builtins.has(w)) out += `<span class="fn">${esc(w)}</span>`;
+          else out += esc(w);
+          i = j; continue;
+        }
+        if (/\d/.test(line[i]) || (line[i] === '-' && /\d/.test(line[i+1]))) { let j = i + (line[i] === '-' ? 1 : 0); while(j < line.length && /[\d.]/.test(line[j])) j++; out += `<span class="num">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        out += esc(line[i]); i++;
+      }
+      return out;
+    }
+    return code.split('\n').map(tokenLine).join('\n');
+  }
+
+  function generateRelayManager() {
+    const serverPeerId = parseInt(document.getElementById('serverPeerId').value) || 1;
+    const playerGroup = document.getElementById('playerGroup').value.trim() || "player";
+    const eqGroup = document.getElementById('eqGroup').value.trim();
+    const targetFilter = document.getElementById('targetFilter').value;
+    const realtimeReliability = document.getElementById('realtimeReliability').value;
+    const reliableReliability = document.getElementById('reliableReliability').value;
+    const hasRealtime = syncModes.realtime;
+    const hasOnChange = syncModes.onchange;
+    const hasOnce = syncModes.once;
+    const useStateCache = stateCacheEnabled;
+    const usePeerCleanup = peerCleanupEnabled;
+    const stateKeyList = stateKeys.map(k => k.name).filter(k => k.trim());
+
+    let code = `extends Node\n\n`;
+    code += `# RelayManager - Multiplayer State Sync\n`;
+    code += `# Generated for any game type. No hardcoded dependencies.\n\n`;
+
+    // Enum
+    let enumValues = [];
+    if (hasRealtime) enumValues.push("REALTIME");
+    if (hasOnChange) enumValues.push("ON_CHANGE");
+    if (hasOnce) enumValues.push("ONCE");
+    code += `enum Mode {\n`;
+    enumValues.forEach(v => { code += `\t${v},\n`; });
+    code += `}\n\n`;
+
+    code += `signal relay_received(sender_id: int, key: String, data: Dictionary)\n\n`;
+
+    if (hasOnChange) code += `var _last_sent : Dictionary = {}\n`;
+    if (hasOnce) code += `var _once_sent : Dictionary = {}\n`;
+    if (useStateCache) code += `# State cache for every known peer\nvar _state_cache : Dictionary = {}\n\n`;
+
+    code += `func _ready() -> void:\n`;
+    code += `\tname = "RelayManager"\n`;
+    code += `\tprint("[RelayManager] Ready.")\n`;
+    if (usePeerCleanup) {
+      code += `\t# Connect to your peer tracking system — example:\n`;
+      code += `\t# GameStateManager.peer_left.connect(_on_peer_left)\n`;
+      code += `\t# Or call _on_peer_left(peer_id) manually when a peer disconnects\n`;
+    }
+    code += `\n`;
+
+    // Helper to get player/equipment nodes (generic)
+    code += `# ================================================================\n`;
+    code += `# GENERIC NODE HELPERS — Override these to match your game structure\n`;
+    code += `# ================================================================\n\n`;
+    code += `# Override this function to return the remote player node for a peer_id\n`;
+    code += `func _get_remote_player(sender_id: int) -> Node:\n`;
+    code += `\tif multiplayer.is_server(): return null\n`;
+    code += `\tfor player in get_tree().get_nodes_in_group("${playerGroup}"):\n`;
+    code += `\t\tif player.name == str(sender_id):\n`;
+    code += `\t\t\treturn player\n`;
+    code += `\treturn null\n\n`;
+
+    if (eqGroup) {
+      code += `# Equipment visuals lookup using group: ${eqGroup}\n`;
+      code += `func _get_equipment_visuals(sender_id: int) -> Node:\n`;
+      code += `\tif multiplayer.is_server(): return null\n`;
+      code += `\tvar player := _get_remote_player(sender_id)\n`;
+      code += `\tif not is_instance_valid(player): return null\n`;
+      code += `\tfor child in player.get_children():\n`;
+      code += `\t\tif child.is_in_group("${eqGroup}"):\n`;
+      code += `\t\t\treturn child\n`;
+      code += `\treturn null\n\n`;
+    } else {
+      code += `# Equipment visuals — override this to match your game\n`;
+      code += `func _get_equipment_visuals(sender_id: int) -> Node:\n`;
+      code += `\treturn null  # Override in your game\n\n`;
+    }
+
+    // Optional: peer left cleanup
+    if (usePeerCleanup) {
+      code += `func _on_peer_left(peer_id: int) -> void:\n`;
+      if (useStateCache) code += `\t_state_cache.erase(peer_id)\n`;
+      if (hasOnChange) {
+        code += `\tvar keys_to_erase : Array = []\n`;
+        code += `\tfor k in _last_sent:\n`;
+        code += `\t\tif k.ends_with("_" + str(peer_id)):\n`;
+        code += `\t\t\tkeys_to_erase.append(k)\n`;
+        code += `\tfor k in keys_to_erase:\n`;
+        code += `\t\t_last_sent.erase(k)\n`;
+      }
+      if (hasOnce) {
+        code += `\tvar once_keys : Array = []\n`;
+        code += `\tfor k in _once_sent:\n`;
+        code += `\t\tif k.ends_with("_" + str(peer_id)):\n`;
+        code += `\t\t\tonce_keys.append(k)\n`;
+        code += `\tfor k in once_keys:\n`;
+        code += `\t\t_once_sent.erase(k)\n`;
+      }
+      code += `\tprint("[RelayManager] Peer left, cleaned: ", peer_id)\n\n`;
+    }
+
+    // RPC definitions
+    code += `# ================================================================\n`;
+    code += `# RPC TRANSPORT\n`;
+    code += `# ================================================================\n\n`;
+    if (hasRealtime) {
+      code += `@rpc("any_peer", "${realtimeReliability}")\n`;
+      code += `func relay(data: Dictionary) -> void:\n`;
+      code += `\tif not multiplayer.is_server(): return\n`;
+      code += `\tvar sender := multiplayer.get_remote_sender_id()\n`;
+      code += `\tfor id in _get_all_peers():\n`;
+      code += `\t\tif id != sender and id != ${serverPeerId}:\n`;
+      code += `\t\t\trpc_id(id, "_on_relay_received", sender, data)\n\n`;
+    }
+
+    code += `@rpc("any_peer", "${reliableReliability}")\n`;
+    code += `func relay_to(target_id: int, data: Dictionary) -> void:\n`;
+    code += `\tif not multiplayer.is_server(): return\n`;
+    code += `\tvar sender := multiplayer.get_remote_sender_id()\n`;
+    code += `\tif target_id == sender or target_id == ${serverPeerId}: return\n`;
+    code += `\trpc_id(target_id, "_on_relay_received_reliable", sender, data)\n\n`;
+
+    code += `@rpc("authority", "${realtimeReliability}")\n`;
+    code += `func _on_relay_received(sender_id: int, data: Dictionary) -> void:\n`;
+    code += `\t_on_received(sender_id, data)\n\n`;
+
+    code += `@rpc("authority", "${reliableReliability}")\n`;
+    code += `func _on_relay_received_reliable(sender_id: int, data: Dictionary) -> void:\n`;
+    code += `\t_on_received(sender_id, data)\n\n`;
+
+    // Helper to get all peers
+    code += `func _get_all_peers() -> Array:\n`;
+    code += `\tvar peers = []\n`;
+    code += `\t# Override this to return your peer list\n`;
+    code += `\t# Example: return GameStateManager.player_scenes.keys()\n`;
+    code += `\treturn peers\n\n`;
+
+    // Send function
+    code += `# ================================================================\n`;
+    code += `# PUBLIC SEND API\n`;
+    code += `# ================================================================\n\n`;
+    code += `func send(key: String, data: Dictionary, mode: Mode, target_id: int = -1) -> void:\n`;
+    code += `\tvar my_id := multiplayer.get_unique_id()\n`;
+    code += `\tvar payload := {"key": key, "data": data}\n\n`;
+    if (useStateCache) {
+      code += `\t# Update state cache if key is being tracked\n`;
+      code += `\tif _is_tracked_key(key):\n`;
+      code += `\t\tif not _state_cache.has(my_id):\n`;
+      code += `\t\t\t_state_cache[my_id] = {}\n`;
+      code += `\t\t_state_cache[my_id][key] = data.duplicate(true)\n\n`;
+    }
+    code += `\tmatch mode:\n`;
+    if (hasRealtime) code += `\t\tMode.REALTIME:\n\t\t\tif target_id == -1:\n\t\t\t\trelay.rpc_id(${serverPeerId}, payload)\n\t\t\telse:\n\t\t\t\tif target_id != my_id:\n\t\t\t\t\trelay_to.rpc_id(${serverPeerId}, target_id, payload)\n`;
+    if (hasOnChange) {
+      code += `\t\tMode.ON_CHANGE:\n`;
+      code += `\t\t\tvar cache_key := _make_key(key, target_id)\n`;
+      code += `\t\t\tif _last_sent.get(cache_key) == data:\n\t\t\t\treturn\n`;
+      code += `\t\t\t_last_sent[cache_key] = data.duplicate(true)\n`;
+      code += `\t\t\t_send_reliable(payload, target_id)\n`;
+    }
+    if (hasOnce) {
+      code += `\t\tMode.ONCE:\n`;
+      code += `\t\t\tvar cache_key := _make_key(key, target_id)\n`;
+      code += `\t\t\tif _once_sent.has(cache_key):\n\t\t\t\treturn\n`;
+      code += `\t\t\t_once_sent[cache_key] = true\n`;
+      code += `\t\t\t_send_reliable(payload, target_id)\n`;
+    }
+    code += `\n`;
+
+    code += `func _send_reliable(payload: Dictionary, target_id: int) -> void:\n`;
+    code += `\tvar my_id := multiplayer.get_unique_id()\n`;
+    code += `\tif target_id == -1:\n`;
+    code += `\t\tfor peer_id in _get_all_peers():\n`;
+    code += `\t\t\tif peer_id != my_id and peer_id != ${serverPeerId}:\n`;
+    code += `\t\t\t\trelay_to.rpc_id(${serverPeerId}, peer_id, payload)\n`;
+    code += `\telse:\n`;
+    code += `\t\tif target_id != my_id:\n`;
+    code += `\t\t\trelay_to.rpc_id(${serverPeerId}, target_id, payload)\n\n`;
+
+    if (hasOnce) code += `func clear_once(key: String, target_id: int = -1) -> void:\n\t_once_sent.erase(_make_key(key, target_id))\n\n`;
+    if (hasOnChange) code += `func clear_change_cache(key: String, target_id: int = -1) -> void:\n\t_last_sent.erase(_make_key(key, target_id))\n\n`;
+
+    code += `func _make_key(key: String, target_id: int) -> String:\n`;
+    code += `\treturn key + ("_" + str(target_id) if target_id != -1 else "_broadcast")\n\n`;
+
+    // Receive routing
+    code += `func _on_received(sender_id: int, payload: Dictionary) -> void:\n`;
+    code += `\tvar key  : String     = payload.get("key", "")\n`;
+    code += `\tvar data : Dictionary = payload.get("data", {})\n\n`;
+    if (useStateCache) {
+      code += `\tif _is_tracked_key(key):\n`;
+      code += `\t\tif not _state_cache.has(sender_id):\n`;
+      code += `\t\t\t_state_cache[sender_id] = {}\n`;
+      code += `\t\t_state_cache[sender_id][key] = data.duplicate(true)\n\n`;
+    }
+    code += `\trelay_received.emit(sender_id, key, data)\n`;
+    code += `\t_route(sender_id, key, data)\n\n`;
+
+    code += `func _route(sender_id: int, key: String, data: Dictionary) -> void:\n`;
+    code += `\t# Override this to add custom routing for your keys\n`;
+    if (eqGroup) {
+      code += `\tvar ev := _get_equipment_visuals(sender_id)\n`;
+      code += `\tif not is_instance_valid(ev): return\n`;
+      code += `\tmatch key:\n`;
+      for (let k of stateKeyList) {
+        if (k) code += `\t\t"${k}":\n\t\t\tif ev.has_method("apply_remote_${k}"):\n\t\t\t\tev.apply_remote_${k}(data)\n\t\t\telif ev.has_method("apply_remote_state"):\n\t\t\t\tev.apply_remote_state(key, data)\n`;
+      }
+      code += `\t\t_:\n\t\t\tif ev.has_method("apply_remote_state"):\n\t\t\t\tev.apply_remote_state(key, data)\n`;
+    } else {
+      code += `\t# No equipment group set — override _route in your game\n`;
+      code += `\tpass\n`;
+    }
+    code += `\n`;
+
+    if (useStateCache) {
+      code += `func _is_tracked_key(key: String) -> bool:\n`;
+      code += `\tvar tracked = [`;
+      for (let i = 0; i < stateKeyList.length; i++) {
+        if (stateKeyList[i]) code += `"${stateKeyList[i]}"${i < stateKeyList.length-1 ? ", " : ""}`;
+      }
+      code += `]\n\treturn key in tracked\n`;
+    }
+
+    // Render output
+    const outputEl = document.getElementById('codeOutput');
+    outputEl.classList.remove('empty');
+    outputEl.innerHTML = highlightGDScript(code);
+
+    // Usage example
+    const usageEl = document.getElementById('usageOutput');
+    let usage = `# === RelayManager Usage ===\n\n`;
+    usage += `# Add RelayManager as AutoLoad in Project Settings\n`;
+    usage += `# Name it "RelayManager"\n\n`;
+    usage += `# Send position every frame (REALTIME)\n`;
+    usage += `RelayManager.send("position", {"x": pos.x, "y": pos.y}, RelayManager.Mode.REALTIME)\n\n`;
+    usage += `# Send health only when changed (ON_CHANGE)\n`;
+    usage += `RelayManager.send("health", {"hp": current_hp}, RelayManager.Mode.ON_CHANGE)\n\n`;
+    usage += `# Send spawn data once (ONCE) — late joiners receive it\n`;
+    usage += `RelayManager.send("spawn_point", {"point": spawn_id}, RelayManager.Mode.ONCE)\n\n`;
+    usage += `# Listen for incoming data\n`;
+    usage += `RelayManager.relay_received.connect(_on_relay_data)\n\n`;
+    usage += `func _on_relay_data(sender_id: int, key: String, data: Dictionary):\n`;
+    usage += `\tmatch key:\n`;
+    usage += `\t\t"position": update_remote_position(sender_id, data)\n`;
+    usage += `\t\t"health": update_remote_health(sender_id, data)\n`;
+    usageEl.innerHTML = highlightGDScript(usage);
+  }
+
+  function copyOutput(btn) {
+    const el = document.getElementById('codeOutput');
+    let text = el.innerText || el.textContent;
+    if (!text.trim() || text.includes('Click Generate')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  function copyUsage(btn) {
+    const el = document.getElementById('usageOutput');
+    let text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  renderStateKeys();
+</script>
+</body>
+</html>
