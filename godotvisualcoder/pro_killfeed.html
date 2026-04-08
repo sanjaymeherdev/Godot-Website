@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kill Feed Pro · GDScript Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+  --border:#2a2f37; --border2:#343b45;
+  --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+  --green:#4ade80; --green2:#22c55e;
+  --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+  --tap:52px; --r:10px; --rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.back-btn:active{background:var(--bg4);}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--purple);background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.purple{background:var(--purple);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.field-row{display:flex;align-items:center;gap:8px;}
+
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+.field-row select,.field-row input{flex:1;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
+
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item:active{background:var(--bg4);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.blue{border-left-color:var(--blue);}
+.hint.purple{border-left-color:var(--purple);}
+.hint.amber{border-left-color:var(--amber);}
+.hint.coral{border-left-color:var(--coral);}
+
+.gen-btn{width:100%;height:56px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:var(--rl);color:var(--purple);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(192,132,252,0.2);transform:scale(0.99);}
+
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.killfeed{background:var(--coral-dim);color:var(--coral);border:1px solid var(--coral);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:36px;transition:all 0.15s;}
+.copy-btn:active{background:var(--bg3);color:var(--text);}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+.hidden{display:none!important;}
+
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="pro.html">‹</a>
+  <div>
+    <div class="header-title">Kill Feed Pro</div>
+    <div class="header-sub">killfeed_ui.gd · CombatLogger events · fade queue</div>
+  </div>
+  <span class="header-badge">Pro · Tier 3</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- FEED SETTINGS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Feed Settings</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field"><div class="field-label">max_entries</div><input type="number" id="maxEntries" value="3" min="1" max="10"></div>
+        <div class="field"><div class="field-label">fade_after (sec)</div><input type="number" id="fadeAfter" value="5.0" step="0.5" min="1"></div>
+        <div class="field"><div class="field-label">fade_duration (sec)</div><input type="number" id="fadeDur" value="0.2" step="0.05" min="0.05"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISPLAY OPTIONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Display Options</span></div>
+    <div class="card-body">
+      <div class="toggle-item active" id="tog-stripDomain" onclick="tog('stripDomain')">
+        <input type="checkbox" id="useStripDomain" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Strip email domain</span>
+        <span class="toggle-hint">"player@x.com" → "player"</span>
+      </div>
+      <div class="toggle-item active" id="tog-useColors" onclick="tog('useColors')">
+        <input type="checkbox" id="useColors" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Colored names (kill vs knock)</span>
+        <span class="toggle-hint">kill=red, knock=yellow</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEAPON ICONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Weapon Icons</span></div>
+    <div class="card-body">
+      <div class="hint amber">Set texture paths for each weapon type. Leave empty to skip icons.</div>
+      <div class="grid2">
+        <div class="field"><div class="field-label">AR / Assault</div><input type="text" id="iconAR" value="res://assets/gun.png" placeholder="res://path/to/icon.png"></div>
+        <div class="field"><div class="field-label">SMG</div><input type="text" id="iconSMG" value="res://assets/gun.png" placeholder="res://path/to/icon.png"></div>
+        <div class="field"><div class="field-label">Sniper</div><input type="text" id="iconSniper" value="res://assets/gun.png" placeholder="res://path/to/icon.png"></div>
+        <div class="field"><div class="field-label">Shotgun</div><input type="text" id="iconShotgun" value="" placeholder="optional"></div>
+        <div class="field"><div class="field-label">Melee</div><input type="text" id="iconMelee" value="" placeholder="optional"></div>
+        <div class="field"><div class="field-label">Grenade</div><input type="text" id="iconGrenade" value="" placeholder="optional"></div>
+        <div class="field"><div class="field-label">Zone / Gas</div><input type="text" id="iconZone" value="res://assets/bomb-blast-icon.png" placeholder="zone kill icon"></div>
+        <div class="field"><div class="field-label">Fall damage</div><input type="text" id="iconFall" value="" placeholder="optional"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE ICONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">State Icons</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field"><div class="field-label">Knocked icon</div><input type="text" id="knockedIcon" value="res://assets/knocked.png" placeholder="res://assets/knocked.png"></div>
+        <div class="field"><div class="field-label">Killed icon</div><input type="text" id="killedIcon" value="res://assets/kill.webp" placeholder="res://assets/kill.webp"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM WEAPON TYPES (extensible) -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Custom Weapon Types</span></div>
+    <div class="card-body">
+      <div class="hint purple">Add extra weapon types (e.g., "RPG", "Flamethrower") and their icon paths.</div>
+      <div id="customWeaponsContainer"></div>
+      <button class="gen-btn" style="height:40px;margin-top:8px;" onclick="addCustomWeapon()">+ Add Custom Weapon</button>
+    </div>
+  </div>
+
+  <!-- COLORS -->
+  <div class="card" id="colorCard">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Name Colors</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field"><div class="field-label">Kill name color</div><input type="text" id="colorKill" value="#ff5555" placeholder="#ff5555"></div>
+        <div class="field"><div class="field-label">Knock name color</div><input type="text" id="colorKnock" value="#fbbf24" placeholder="#fbbf24"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate killfeed_ui.gd</button>
+
+</div><!-- end form-col -->
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag killfeed">killfeed_ui.gd</span>
+      <span class="out-sub">Control · CombatLogger consumer</span>
+      <button class="copy-btn" onclick="copyOut('outKillfeed',this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outKillfeed"># tap Generate to produce code</div>
+  </div>
+
+  <!-- SCENE STRUCTURE -->
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag" style="background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.4);">Scene Structure</span>
+      <span class="out-sub">required node tree for killfeed.tscn</span>
+      <button class="copy-btn" onclick="copyScene(this)">Copy</button>
+    </div>
+    <div class="out-code" id="outScene" style="font-size:11px;line-height:1.9;"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el&&el.value.trim()?el.value.trim():fb; };
+
+let features = { stripDomain: true, useColors: true };
+let customWeapons = [];
+
+function tog(f) {
+  features[f] = !features[f];
+  $('tog-'+f).classList.toggle('active', features[f]);
+  if (f === 'useColors') {
+    $('colorCard').classList.toggle('hidden', !features.useColors);
+  }
+}
+
+function addCustomWeapon() {
+  const id = Date.now();
+  customWeapons.push({ id, name: '', path: '' });
+  renderCustomWeapons();
+}
+
+function removeCustomWeapon(idx) {
+  customWeapons.splice(idx, 1);
+  renderCustomWeapons();
+}
+
+function updateCustomWeapon(idx, field, value) {
+  customWeapons[idx][field] = value;
+}
+
+function renderCustomWeapons() {
+  const container = $('#customWeaponsContainer');
+  if (!container) return;
+  
+  if (customWeapons.length === 0) {
+    container.innerHTML = '<div class="hint" style="background:var(--bg3);">No custom weapons added. Click + to add.</div>';
+    return;
+  }
+  
+  let html = '';
+  for (let i = 0; i < customWeapons.length; i++) {
+    const w = customWeapons[i];
+    html += `
+      <div class="grid2" style="margin-bottom:8px;position:relative;">
+        <div class="field"><div class="field-label">Type name</div><input type="text" value="${escapeHtml(w.name)}" placeholder="RPG" onchange="updateCustomWeapon(${i}, 'name', this.value)"></div>
+        <div class="field"><div class="field-label">Icon path</div><input type="text" value="${escapeHtml(w.path)}" placeholder="res://assets/rpg.png" onchange="updateCustomWeapon(${i}, 'path', this.value)"></div>
+        <button style="position:absolute;right:-40px;top:12px;background:var(--bg4);border:1px solid var(--border2);color:var(--coral);border-radius:6px;width:28px;height:28px;cursor:pointer;" onclick="removeCustomWeapon(${i})">✕</button>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function generate() {
+  const maxEntries = parseInt(v('maxEntries', '3')) || 3;
+  const fadeAfter = parseFloat(v('fadeAfter', '5.0')) || 5.0;
+  const fadeDur = parseFloat(v('fadeDur', '0.2')) || 0.2;
+  
+  const weaponIcons = {
+    AR: v('iconAR', 'res://assets/gun.png'),
+    SMG: v('iconSMG', 'res://assets/gun.png'),
+    Sniper: v('iconSniper', 'res://assets/gun.png'),
+    Shotgun: v('iconShotgun', ''),
+    Melee: v('iconMelee', ''),
+    Grenade: v('iconGrenade', ''),
+    zone: v('iconZone', 'res://assets/bomb-blast-icon.png'),
+    fall: v('iconFall', ''),
+  };
+  
+  // Add custom weapons
+  for (const cw of customWeapons) {
+    if (cw.name && cw.name.trim()) {
+      weaponIcons[cw.name.trim()] = cw.path || '';
+    }
+  }
+  
+  const knockedIcon = v('knockedIcon', 'res://assets/knocked.png');
+  const killedIcon = v('killedIcon', 'res://assets/kill.webp');
+  const killColor = v('colorKill', '#ff5555');
+  const knockColor = v('colorKnock', '#fbbf24');
+  
+  renderCode('outKillfeed', highlight(buildKillfeed(
+    maxEntries, fadeAfter, fadeDur,
+    weaponIcons, knockedIcon, killedIcon,
+    killColor, knockColor
+  )));
+  buildSceneTree(maxEntries);
+}
+
+function buildKillfeed(maxEntries, fadeAfter, fadeDur, weaponIcons, knockedIcon, killedIcon, killColor, knockColor) {
+  const { stripDomain, useColors } = features;
+  
+  const L = [];
+  
+  L.push('extends Control');
+  L.push('');
+  L.push('# ── Weapon icon map: weapon type string → Texture2D path ──');
+  L.push('const WEAPON_ICON_PATHS : Dictionary = {');
+  
+  const sortedTypes = Object.keys(weaponIcons).sort();
+  for (const type of sortedTypes) {
+    const path = weaponIcons[type];
+    if (path && path.trim()) {
+      L.push(`\t"${type}" : "${path}",`);
+    }
+  }
+  L.push('}');
+  L.push('');
+  L.push(`# ── Feed rows — matches the ${maxEntries} HBoxContainers in killfeed.tscn ──`);
+  L.push('@onready var feeds : Array[HBoxContainer] = [');
+  for (let i = 1; i <= maxEntries; i++) {
+    L.push(`\t$VBoxContainer/feed${i},`);
+  }
+  L.push(']');
+  L.push('');
+  L.push('# State icons — knocked vs killed');
+  L.push(`@export var knocked_icon : Texture2D   # ${knockedIcon}`);
+  L.push(`@export var killed_icon  : Texture2D   # ${killedIcon}`);
+  L.push('');
+  L.push('# ── Internal queue of recent events (newest first) ──');
+  L.push(`var _events : Array[Dictionary] = []`);
+  L.push(`const MAX_ENTRIES : int = ${maxEntries}`);
+  L.push(`const FADE_AFTER  : float = ${fadeAfter}   # seconds before a row fades out`);
+  L.push(`const FADE_DURATION : float = ${fadeDur}`);
+  L.push('');
+  L.push('# Per-row fade timers');
+  L.push(`var _timers : Array[float] = []`);
+  L.push('');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('func _ready() -> void:');
+  L.push('\t# Initialize timers');
+  L.push(`\tfor i in range(${maxEntries}):`);
+  L.push('\t\t_timers.append(0.0)');
+  L.push('');
+  L.push('\t# Hide all rows initially');
+  L.push('\tfor feed in feeds:');
+  L.push('\t\tfeed.modulate = Color(1, 1, 1, 0)');
+  L.push('');
+  L.push('\t# Connect to CombatLogger autoload');
+  L.push('\tif not CombatLogger.combat_event.is_connected(_on_combat_event):');
+  L.push('\t\tCombatLogger.combat_event.connect(_on_combat_event)');
+  L.push('');
+  L.push('func _process(delta: float) -> void:');
+  L.push('\tfor i in range(feeds.size()):');
+  L.push('\t\tif _timers[i] > 0.0:');
+  L.push('\t\t\t_timers[i] -= delta');
+  L.push('\t\t\tif _timers[i] <= 0.0:');
+  L.push('\t\t\t\t_fade_row(i, false)');
+  L.push('');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('# EVENT HANDLER');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('');
+  L.push('func _on_combat_event(event: Dictionary) -> void:');
+  L.push('\tvar result : String = event.get("result", "")');
+  L.push('\tif result not in ["kill", "knock"]:');
+  L.push('\t\treturn   # ignore plain "hit" events');
+  L.push('');
+  L.push('\t# Build a display entry');
+  L.push('\tvar entry : Dictionary = {');
+  L.push('\t\t"killer"      : _display_name(event.get("attacker_email", "?")),');
+  L.push('\t\t"victim"      : _display_name(event.get("target_email",   "?")),');
+  L.push('\t\t"weapon_type" : event.get("weapon_type", "AR"),');
+  L.push('\t\t"is_knock"    : result == "knock",');
+  L.push('\t}');
+  L.push('');
+  L.push('\t# Push to front, cap at MAX_ENTRIES');
+  L.push('\t_events.push_front(entry)');
+  L.push('\tif _events.size() > MAX_ENTRIES:');
+  L.push('\t\t_events.resize(MAX_ENTRIES)');
+  L.push('');
+  L.push('\t_rebuild_feed()');
+  L.push('');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('# DISPLAY');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('');
+  L.push('func _rebuild_feed() -> void:');
+  L.push('\tfor i in range(feeds.size()):');
+  L.push('\t\tif i >= _events.size():');
+  L.push('\t\t\t_fade_row(i, false)');
+  L.push('\t\t\t_timers[i] = 0.0');
+  L.push('\t\t\tcontinue');
+  L.push('');
+  L.push('\t\tvar e    : Dictionary    = _events[i]');
+  L.push('\t\tvar feed : HBoxContainer = feeds[i]');
+  L.push('');
+  L.push('\t\tvar killer_lbl  : Label       = feed.get_node_or_null("killer")');
+  L.push('\t\tvar weapon_rect : TextureRect = feed.get_node_or_null("weapon")');
+  L.push('\t\tvar state_rect  : TextureRect = feed.get_node_or_null("state")');
+  L.push('\t\tvar victim_lbl  : Label       = feed.get_node_or_null("victim")');
+  L.push('');
+  L.push('\t\tif killer_lbl:');
+  L.push('\t\t\tkiller_lbl.text = e["killer"]');
+  if (useColors) {
+    L.push('\t\t\tkiller_lbl.modulate = Color("' + killColor + '") if not e["is_knock"] else Color("' + knockColor + '")');
+  }
+  L.push('');
+  L.push('\t\tif victim_lbl:');
+  L.push('\t\t\tvictim_lbl.text = e["victim"]');
+  if (useColors) {
+    L.push('\t\t\tvictim_lbl.modulate = Color("' + killColor + '") if not e["is_knock"] else Color("' + knockColor + '")');
+  }
+  L.push('');
+  L.push('\t\tif weapon_rect:');
+  L.push('\t\t\tweapon_rect.texture = _weapon_texture(e["weapon_type"])');
+  L.push('');
+  L.push('\t\tif state_rect:');
+  L.push('\t\t\tstate_rect.texture = knocked_icon if e["is_knock"] else killed_icon');
+  L.push('');
+  L.push('\t\t_fade_row(i, true)');
+  L.push('\t\t_timers[i] = FADE_AFTER');
+  L.push('');
+  L.push(`func _fade_row(idx: int, visible_in: bool) -> void:`);
+  L.push('\tvar feed = feeds[idx]');
+  L.push('\tvar t    = create_tween()');
+  L.push('\tt.tween_property(feed, "modulate", Color(1, 1, 1, 1.0) if visible_in else Color(1, 1, 1, 0.0), FADE_DURATION)');
+  L.push('');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('# HELPERS');
+  L.push('# ─────────────────────────────────────────────────────────────');
+  L.push('');
+  L.push('func _display_name(email: String) -> String:');
+  if (stripDomain) {
+    L.push('\t# Strip domain from email for cleaner display: "player@x.com" → "player"');
+    L.push('\tvar idx = email.find("@")');
+    L.push('\tif idx > 0:');
+    L.push('\t\treturn email.substr(0, idx)');
+  }
+  L.push('\treturn email');
+  L.push('');
+  L.push('func _weapon_texture(weapon_type: String) -> Texture2D:');
+  L.push('\tvar path : String = WEAPON_ICON_PATHS.get(weapon_type, WEAPON_ICON_PATHS.get("AR", ""))');
+  L.push('\tif path != "" and ResourceLoader.exists(path):');
+  L.push('\t\treturn load(path) as Texture2D');
+  L.push('\treturn null');
+  
+  return L.join('\n');
+}
+
+function buildSceneTree(maxEntries) {
+  const L = [];
+  const t = (indent, name, type, note) => `${indent}<span class="fn">${name}</span>  <span class="typ">[${type}]</span>${note ? '  <span class="cmt">← '+note+'</span>' : ''}`;
+  const cm = (indent, txt) => `${indent}<span class="cmt">${txt}</span>`;
+  const kw = txt => `<span class="kw">${txt}</span>`;
+  
+  L.push(cm('', '# ── Required scene tree for killfeed.tscn ──'));
+  L.push('');
+  L.push(t('', 'killfeed', 'Control', 'root · killfeed_ui.gd'));
+  L.push(cm('  ', '# Anchor: full rect / bottom right corner'));
+  L.push(t('  ', 'VBoxContainer', 'VBoxContainer', 'layout_mode = 1 · alignment bottom'));
+  L.push(cm('    ', '# Arrange feeds from bottom to top'));
+  
+  for (let i = 1; i <= maxEntries; i++) {
+    L.push(t('    ', `feed${i}`, 'HBoxContainer', `kill entry row ${i}`));
+    L.push(cm('      ', '# Nodes in this order:'));
+    L.push(cm('      ', '# [killer] Label → [weapon] TextureRect → [state] TextureRect → [victim] Label'));
+    L.push(t('      ', 'killer', 'Label', 'text = "PlayerName"'));
+    L.push(t('      ', 'weapon', 'TextureRect', 'expand_mode = fit_width · stretch_mode = keep'));
+    L.push(t('      ', 'state', 'TextureRect', 'expand_mode = fit_width · stretch_mode = keep'));
+    L.push(t('      ', 'victim', 'Label', 'text = "VictimName"'));
+    if (i < maxEntries) L.push('');
+  }
+  
+  L.push('');
+  L.push(cm('', '# ── Script assignments ──'));
+  L.push(`${kw('killfeed')}          <span class="cmt">→ killfeed_ui.gd  (generated)</span>`);
+  L.push('');
+  L.push(cm('', '# ── Required Autoloads ──'));
+  L.push(`<span class="typ">CombatLogger</span>  <span class="cmt">→ must exist with combat_event signal</span>`);
+  L.push('');
+  L.push(cm('', '# ── Signal format expected ──'));
+  L.push(cm('', '# CombatLogger.combat_event.emit({'));
+  L.push(cm('', '#   "result": "kill" / "knock",'));
+  L.push(cm('', '#   "attacker_email": "player@x.com",'));
+  L.push(cm('', '#   "target_email": "victim@x.com",'));
+  L.push(cm('', '#   "weapon_type": "AR" / "SMG" / "Sniper" / etc'));
+  L.push(cm('', '# })'));
+  
+  $('#outScene').innerHTML = L.join('\n');
+}
+
+// Highlighting and copy functions (same as your Movement Pro)
+const KW = new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@onready','@export_category','@export_range','@rpc']);
+const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Control','HBoxContainer','VBoxContainer','Label','TextureRect','Color','Texture2D']);
+const FN = new Set(['_ready','_process','_input','_on_combat_event','_rebuild_feed','_fade_row','_display_name','_weapon_texture','get_node_or_null','create_tween','tween_property','connect','is_connected','emit','has_method','add_child','remove_child','resize','push_front','find','substr','get','has','size','modulate']);
+
+function highlight(code) {
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])||(line[i]==='-'&&/\d/.test(line[i+1]||''))){let j=i+(line[i]==='-'?1:0);while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id,code){const el=$(id);el.classList.remove('empty');el.innerHTML=code;}
+
+function copyOut(id,btn){
+  const el=$(id);
+  const text=el.innerText||el.textContent;
+  if(!text.trim()||text.includes('tap Generate'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},1600);
+  });
+}
+
+function copyScene(btn) {
+  const el = $('#outScene');
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+}
+
+// Initialize
+$('colorCard').classList.toggle('hidden', !features.useColors);
+renderCustomWeapons();
+buildSceneTree(3);
+</script>
+</body>
+</html>
