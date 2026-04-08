@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Level System Generator · Godot 4.x</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);
+  --blue:#60a5fa;--blue2:#3b82f6;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --tap:52px;--r:10px;--rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;}
+.header-title{font-size:15px;font-weight:700;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--green);background:var(--green-dim);border:1px solid var(--green2);padding:3px 8px;border-radius:20px;}
+.page{padding:16px;max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+@media(min-width:1024px){
+  .page{flex-direction:row;align-items:flex-start;}
+  .form-col{flex:1;min-width:350px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:2;min-width:500px;display:flex;flex-direction:column;gap:12px;}
+}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-dot.purple{background:var(--purple);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select,input{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;}
+select:focus,input:focus{border-color:var(--green2);}
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.gen-btn{width:100%;height:56px;background:var(--green-dim);border:1px solid var(--green2);border-radius:var(--rl);color:var(--green);font-family:var(--sans);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:8px;}
+.gen-btn:active{transform:scale(0.99);}
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;padding:3px 8px;border-radius:4px;}
+.out-tag.green{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+.out-tag.blue{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+.out-tag.amber{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;max-height:500px;overflow-y:auto;}
+.out-code.empty{color:var(--text3);font-style:italic;}
+.kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="#">‹</a>
+  <div>
+    <div class="header-title">Level System Generator</div>
+    <div class="header-sub">LevelSystem.gd + LevelSystemUI.gd</div>
+  </div>
+  <span class="header-badge">GDScript 4.x · Pro</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- XP MODE -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">XP Calculation</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">xp_mode</div>
+        <select id="xpMode">
+          <option value="CUSTOM">CUSTOM - Manual thresholds</option>
+          <option value="LINEAR">LINEAR - Same XP each level</option>
+          <option value="EXPONENTIAL">EXPONENTIAL - Increasing XP each level</option>
+        </select>
+      </div>
+      <div id="linearExpoFields">
+        <div class="field"><div class="field-label">base_xp (for level 2)</div><input type="number" id="baseXp" value="100"></div>
+        <div class="field"><div class="field-label">xp_multiplier (exponential only)</div><input type="number" id="xpMultiplier" value="1.5" step="0.1"></div>
+      </div>
+      <div id="customField">
+        <div class="field"><div class="field-label">custom_thresholds (comma separated)</div><input type="text" id="customThresholds" value="500, 1000, 2000, 4000, 8000"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL DATA -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Level Content</span></div>
+    <div class="card-body">
+      <div class="field"><div class="field-label">level_titles (comma separated)</div><input type="text" id="levelTitles" value="Novice, Apprentice, Expert, Master, Grandmaster"></div>
+      <div class="field"><div class="field-label">level_descriptions (comma separated)</div><input type="text" id="levelDescs" value="Just starting out, Learning the ropes, Skilled warrior, Peak performance, Legendary hero"></div>
+      <div class="hint">Textures: Assign level_icons and level_banners arrays in Inspector after generation</div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Settings</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="field"><div class="field-label">starting_level</div><input type="number" id="startLevel" value="1" min="1"></div>
+        <div class="field"><div class="field-label">starting_xp</div><input type="number" id="startXp" value="0" min="0"></div>
+        <div class="field"><div class="field-label">max_level_cap (0 = unlimited)</div><input type="number" id="maxLevelCap" value="0" min="0"></div>
+      </div>
+      <div class="toggle-item active" id="tog-leveldown" onclick="tog('leveldown')">
+        <input type="checkbox" checked><div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Allow Level Down</span><span class="toggle-hint">Players can lose levels when XP drops</span>
+      </div>
+      <div class="toggle-item" id="tog-debug" onclick="tog('debug')">
+        <input type="checkbox"><div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Debug Mode</span><span class="toggle-hint">Print level changes to console</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generateAll()">▶ Generate 2 Scripts</button>
+
+</div>
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag green">LevelSystem.gd</span>
+      <span class="out-sub">class_name LevelSystem · Core logic</span>
+      <button class="copy-btn" onclick="copyOut('outSystem', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outSystem"># Click Generate to create code</div>
+  </div>
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag blue">LevelSystemUI.gd</span>
+      <span class="out-sub">extends Control · Ready-to-use UI</span>
+      <button class="copy-btn" onclick="copyOut('outUI', this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outUI"># Click Generate to create code</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const v = (id, fb) => { const el=$(id); return el && el.value.trim() ? el.value.trim() : fb; };
+
+let features = { leveldown: true, debug: false };
+
+function tog(f) {
+  features[f] = !features[f];
+  const el = $('tog-' + f);
+  if (el) el.classList.toggle('active', features[f]);
+}
+
+// Show/hide fields based on XP mode
+function updateXPModeFields() {
+  const mode = $('#xpMode').value;
+  const linearExpo = $('#linearExpoFields');
+  const customField = $('#customField');
+  
+  if (mode === 'CUSTOM') {
+    linearExpo.style.display = 'none';
+    customField.style.display = 'flex';
+  } else {
+    linearExpo.style.display = 'flex';
+    customField.style.display = 'none';
+  }
+}
+
+$('#xpMode').addEventListener('change', updateXPModeFields);
+updateXPModeFields();
+
+function parseArray(str, isInt = true) {
+  if (!str.trim()) return [];
+  const parts = str.split(',').map(s => s.trim());
+  if (isInt) {
+    return parts.map(p => parseInt(p)).filter(p => !isNaN(p));
+  }
+  return parts.filter(p => p);
+}
+
+function buildLevelSystem() {
+  const xpMode = $('#xpMode').value;
+  const baseXp = parseInt($('#baseXp').value) || 100;
+  const xpMultiplier = parseFloat($('#xpMultiplier').value) || 1.5;
+  const customStr = $('#customThresholds').value;
+  const customThresholds = parseArray(customStr, true);
+  const titles = parseArray($('#levelTitles').value, false);
+  const descs = parseArray($('#levelDescs').value, false);
+  const startLevel = parseInt($('#startLevel').value) || 1;
+  const startXp = parseInt($('#startXp').value) || 0;
+  const maxCap = parseInt($('#maxLevelCap').value) || 0;
+  const allowLevelDown = features.leveldown;
+  const debugMode = features.debug;
+  
+  let thresholdsArray = '[500, 1000, 2000, 4000, 8000]';
+  if (xpMode === 'CUSTOM' && customThresholds.length) {
+    thresholdsArray = JSON.stringify(customThresholds);
+  } else if (xpMode === 'LINEAR') {
+    thresholdsArray = '[]  # Generated at runtime via _generate_linear_thresholds()';
+  } else if (xpMode === 'EXPONENTIAL') {
+    thresholdsArray = '[]  # Generated at runtime via _generate_exponential_thresholds()';
+  }
+  
+  let titlesArray = titles.length ? JSON.stringify(titles) : '[]';
+  let descsArray = descs.length ? JSON.stringify(descs) : '[]';
+  
+  return `class_name LevelSystem
+extends Node
+
+# ─────────────────────────────────────────────
+#  SIGNALS
+# ─────────────────────────────────────────────
+signal xp_gained(amount: int, new_total: int)
+signal xp_spent(amount: int, new_total: int)
+signal level_up(old_level: int, new_level: int)
+signal level_down(old_level: int, new_level: int)
+signal max_level_reached(level: int)
+
+# ─────────────────────────────────────────────
+#  ENUMS
+# ─────────────────────────────────────────────
+enum XP_MODE {
+\tLINEAR,      
+\tEXPONENTIAL, 
+\tCUSTOM       
+}
+
+# ─────────────────────────────────────────────
+#  EXPORTS
+# ─────────────────────────────────────────────
+@export var xp_mode: XP_MODE = XP_MODE.${xpMode}
+@export var base_xp: int = ${baseXp}
+@export var xp_multiplier: float = ${xpMultiplier}
+@export var custom_thresholds: Array[int] = ${thresholdsArray}
+
+## Small square icons for each level (badges)
+@export var level_icons: Array[Texture2D]
+
+## Wide banners for each level (hero images)
+@export var level_banners: Array[Texture2D]
+
+@export var level_titles: Array[String] = ${titlesArray}
+@export var level_descriptions: Array[String] = ${descsArray}
+
+@export var allow_level_down: bool = ${allowLevelDown}
+@export var max_level_cap: int = ${maxCap}
+@export var starting_level: int = ${startLevel}
+@export var starting_xp: int = ${startXp}
+@export var debug_mode: bool = ${debugMode}
+
+# ─────────────────────────────────────────────
+#  STATE
+# ─────────────────────────────────────────────
+var current_xp: int = 0
+var current_level: int = 1
+var _xp_thresholds: Array[int] = []
+
+# ─────────────────────────────────────────────
+#  READY
+# ─────────────────────────────────────────────
+func _ready() -> void:
+\t_build_thresholds()
+\t_setup_initial_state()
+\tif debug_mode:
+\t\tprint("LevelSystem: %d levels configured" % get_max_level())
+
+func _build_thresholds() -> void:
+\tmatch xp_mode:
+\t\tXP_MODE.LINEAR:
+\t\t\t_xp_thresholds = _generate_linear_thresholds()
+\t\tXP_MODE.EXPONENTIAL:
+\t\t\t_xp_thresholds = _generate_exponential_thresholds()
+\t\tXP_MODE.CUSTOM:
+\t\t\t_xp_thresholds = custom_thresholds.duplicate()
+\t
+\tif max_level_cap > 0 and _xp_thresholds.size() > max_level_cap - 1:
+\t\t_xp_thresholds = _xp_thresholds.slice(0, max_level_cap - 1)
+
+func _generate_linear_thresholds() -> Array[int]:
+\tvar thresholds: Array[int] = []
+\tvar levels = max_level_cap if max_level_cap > 0 else 10
+\tfor i in range(levels):
+\t\tthresholds.append(base_xp * (i + 1))
+\treturn thresholds
+
+func _generate_exponential_thresholds() -> Array[int]:
+\tvar thresholds: Array[int] = []
+\tvar levels = max_level_cap if max_level_cap > 0 else 10
+\tvar current = float(base_xp)
+\tfor i in range(levels):
+\t\tthresholds.append(int(current))
+\t\tcurrent *= xp_multiplier
+\treturn thresholds
+
+func _setup_initial_state() -> void:
+\tcurrent_level = clamp(starting_level, 1, get_max_level())
+\tcurrent_xp = starting_xp
+\t
+\tif current_level < get_max_level():
+\t\tvar needed = get_xp_required_for_level(current_level + 1)
+\t\twhile current_xp >= needed and current_level < get_max_level():
+\t\t\tcurrent_xp -= needed
+\t\t\tcurrent_level += 1
+\t\t\tif current_level < get_max_level():
+\t\t\t\tneeded = get_xp_required_for_level(current_level + 1)
+
+# ─────────────────────────────────────────────
+#  PUBLIC METHODS
+# ─────────────────────────────────────────────
+func add_xp(amount: int) -> void:
+\tif amount <= 0:
+\t\treturn
+\tif current_level >= get_max_level():
+\t\temit_signal("max_level_reached", current_level)
+\t\treturn
+\t
+\tvar old_level = current_level
+\tcurrent_xp += amount
+\temit_signal("xp_gained", amount, current_xp)
+\t_check_level_up()
+\t
+\tif debug_mode and old_level != current_level:
+\t\tprint("Level up! %d -> %d" % [old_level, current_level])
+
+func remove_xp(amount: int) -> void:
+\tif amount <= 0:
+\t\treturn
+\t
+\tvar old_level = current_level
+\tcurrent_xp -= amount
+\temit_signal("xp_spent", amount, current_xp)
+\t
+\tif allow_level_down:
+\t\t_check_level_down()
+\t\tif debug_mode and old_level != current_level:
+\t\t\tprint("Level down! %d -> %d" % [old_level, current_level])
+\telse:
+\t\tif current_xp < 0:
+\t\t\tcurrent_xp = 0
+
+func reset() -> void:
+\tcurrent_xp = starting_xp
+\tcurrent_level = starting_level
+\tif current_level < get_max_level():
+\t\tvar needed = get_xp_required_for_level(current_level + 1)
+\t\twhile current_xp >= needed and current_level < get_max_level():
+\t\t\tcurrent_xp -= needed
+\t\t\tcurrent_level += 1
+\t\t\tif current_level < get_max_level():
+\t\t\t\tneeded = get_xp_required_for_level(current_level + 1)
+
+# ─────────────────────────────────────────────
+#  GETTERS
+# ─────────────────────────────────────────────
+func get_xp_to_next_level() -> int:
+\tif current_level >= get_max_level():
+\t\treturn 0
+\tvar needed = get_xp_required_for_level(current_level + 1)
+\treturn max(0, needed - current_xp)
+
+func get_progress_percentage() -> float:
+\tif current_level >= get_max_level():
+\t\treturn 1.0
+\tvar needed = get_xp_required_for_level(current_level + 1)
+\tif needed <= 0:
+\t\treturn 0
+\treturn float(current_xp) / float(needed)
+
+func get_max_level() -> int:
+\treturn _xp_thresholds.size() + 1
+
+func get_xp_required_for_level(level: int) -> int:
+\tif level <= 1:
+\t\treturn 0
+\tif level - 2 < _xp_thresholds.size():
+\t\treturn _xp_thresholds[level - 2]
+\treturn _xp_thresholds[-1]
+
+func get_current_icon() -> Texture2D:
+\tvar idx = current_level - 1
+\tif idx < level_icons.size():
+\t\treturn level_icons[idx]
+\treturn null
+
+func get_current_banner() -> Texture2D:
+\tvar idx = current_level - 1
+\tif idx < level_banners.size():
+\t\treturn level_banners[idx]
+\treturn null
+
+func get_level_icon(level: int) -> Texture2D:
+\tvar idx = level - 1
+\tif idx < level_icons.size():
+\t\treturn level_icons[idx]
+\treturn null
+
+func get_level_banner(level: int) -> Texture2D:
+\tvar idx = level - 1
+\tif idx < level_banners.size():
+\t\treturn level_banners[idx]
+\treturn null
+
+func get_current_title() -> String:
+\tvar idx = current_level - 1
+\tif idx < level_titles.size() and not level_titles[idx].is_empty():
+\t\treturn level_titles[idx]
+\treturn "Level %d" % current_level
+
+func get_current_description() -> String:
+\tvar idx = current_level - 1
+\tif idx < level_descriptions.size():
+\t\treturn level_descriptions[idx]
+\treturn ""
+
+func is_max_level() -> bool:
+\treturn current_level >= get_max_level()
+
+func get_xp_text() -> String:
+\tif current_level >= get_max_level():
+\t\treturn "MAX"
+\treturn "%d/%d" % [current_xp, get_xp_required_for_level(current_level + 1)]
+
+# ─────────────────────────────────────────────
+#  INTERNAL
+# ─────────────────────────────────────────────
+func _check_level_up() -> void:
+\twhile current_level < get_max_level():
+\t\tvar needed = get_xp_required_for_level(current_level + 1)
+\t\tif current_xp >= needed:
+\t\t\tcurrent_xp -= needed
+\t\t\tcurrent_level += 1
+\t\t\temit_signal("level_up", current_level - 1, current_level)
+\t\telse:
+\t\t\tbreak
+
+func _check_level_down() -> void:
+\twhile current_level > 1 and current_xp < 0:
+\t\tvar previous_needed = get_xp_required_for_level(current_level)
+\t\tcurrent_level -= 1
+\t\tcurrent_xp += previous_needed
+\t\temit_signal("level_down", current_level + 1, current_level)
+\t
+\tif current_level == 1 and current_xp < 0:
+\t\tcurrent_xp = 0`;
+}
+
+function buildLevelSystemUI() {
+  return `extends Control
+
+@export var level_system: LevelSystem
+
+# UI Nodes
+@onready var level_label: Label = $VBoxContainer/LevelInfo/LevelLabel
+@onready var title_label: Label = $VBoxContainer/LevelInfo/TitleLabel
+@onready var xp_label: Label = $VBoxContainer/XPInfo/XPLabel
+@onready var progress_bar: ProgressBar = $VBoxContainer/XPInfo/ProgressBar
+@onready var threshold_label: Label = $VBoxContainer/XPInfo/ThresholdLabel
+@onready var status_label: Label = $VBoxContainer/StatusLabel
+@onready var amount_input: LineEdit = $VBoxContainer/AmountInput
+@onready var add_button: Button = $VBoxContainer/Buttons/AddButton
+@onready var remove_button: Button = $VBoxContainer/Buttons/RemoveButton
+@onready var reset_button: Button = $VBoxContainer/Buttons/ResetButton
+
+# Two separate textures
+@onready var level_icon: TextureRect = $VBoxContainer/LevelInfo/LevelIcon
+@onready var level_banner: TextureRect = $VBoxContainer/LevelBanner
+
+func _ready() -> void:
+\tif not level_system:
+\t\tstatus_label.text = "ERROR: Assign LevelSystem node to level_system export"
+\t\treturn
+\t
+\t# Connect signals
+\tlevel_system.xp_gained.connect(_on_xp_gained)
+\tlevel_system.xp_spent.connect(_on_xp_removed)
+\tlevel_system.level_up.connect(_on_level_up)
+\tlevel_system.level_down.connect(_on_level_down)
+\tlevel_system.max_level_reached.connect(_on_max_level)
+\t
+\t# Connect buttons
+\tadd_button.pressed.connect(_on_add_button_pressed)
+\tremove_button.pressed.connect(_on_remove_button_pressed)
+\treset_button.pressed.connect(_on_reset_button_pressed)
+\t
+\t_update_display()
+\tstatus_label.text = "Ready! Add XP to begin"
+
+func _update_display() -> void:
+\tif not level_system:
+\t\treturn
+\t
+\t# Level number
+\tlevel_label.text = "Level: %d" % level_system.current_level
+\t
+\t# Title
+\ttitle_label.text = level_system.get_current_title()
+\t
+\t# XP text
+\txp_label.text = "XP: %d" % level_system.current_xp
+\t
+\t# Progress bar
+\tprogress_bar.value = level_system.get_progress_percentage() * 100
+\t
+\t# Threshold text
+\tif level_system.is_max_level():
+\t\tthreshold_label.text = "MAX LEVEL REACHED!"
+\t\tprogress_bar.value = 100
+\telse:
+\t\tvar current = level_system.current_xp
+\t\tvar needed = level_system.get_xp_required_for_level(level_system.current_level + 1)
+\t\tthreshold_label.text = "%d / %d XP to next level" % [current, needed]
+\t
+\t# Update ICON (small square)
+\tvar icon = level_system.get_current_icon()
+\tif icon and level_icon:
+\t\tlevel_icon.texture = icon
+\t\tlevel_icon.visible = true
+\telif level_icon:
+\t\tlevel_icon.visible = false
+\t
+\t# Update BANNER (wide)
+\tvar banner = level_system.get_current_banner()
+\tif banner and level_banner:
+\t\tlevel_banner.texture = banner
+\t\tlevel_banner.visible = true
+\telif level_banner:
+\t\tlevel_banner.visible = false
+
+func _on_xp_gained(amount: int, _new_total: int) -> void:
+\tstatus_label.text = "+%d XP" % amount
+\t_update_display()
+
+func _on_xp_removed(amount: int, _new_total: int) -> void:
+\tstatus_label.text = "-%d XP" % amount
+\t_update_display()
+
+func _on_level_up(old_level: int, new_level: int) -> void:
+\tstatus_label.text = "★ LEVEL UP! %d → %d ★" % [old_level, new_level]
+\t_update_display()
+\t
+\t# Flash effect
+\tmodulate = Color(1, 1, 0.5, 1)
+\tawait get_tree().create_timer(0.2).timeout
+\tmodulate = Color.WHITE
+
+func _on_level_down(old_level: int, new_level: int) -> void:
+\tstatus_label.text = "⚠ LEVEL DOWN! %d → %d ⚠" % [old_level, new_level]
+\t_update_display()
+\t
+\tmodulate = Color(1, 0.5, 0.5, 1)
+\tawait get_tree().create_timer(0.2).timeout
+\tmodulate = Color.WHITE
+
+func _on_max_level(level: int) -> void:
+\tstatus_label.text = "🏆 MAX LEVEL! Level %d 🏆" % level
+\t_update_display()
+
+func _get_amount() -> int:
+\tvar text: String = amount_input.text.strip_edges()
+\tif text.is_empty():
+\t\ttext = "10"
+\t\tamount_input.text = "10"
+\t
+\tif not text.is_valid_int():
+\t\tstatus_label.text = "Enter a valid number"
+\t\treturn 0
+\t
+\tvar val: int = text.to_int()
+\tif val <= 0:
+\t\tstatus_label.text = "Amount must be > 0"
+\t\treturn 0
+\t
+\treturn val
+
+func _on_add_button_pressed() -> void:
+\tvar amount = _get_amount()
+\tif amount > 0:
+\t\tlevel_system.add_xp(amount)
+
+func _on_remove_button_pressed() -> void:
+\tvar amount = _get_amount()
+\tif amount > 0:
+\t\tlevel_system.remove_xp(amount)
+
+func _on_reset_button_pressed() -> void:
+\tlevel_system.reset()
+\tstatus_label.text = "Reset to starting values"
+\t_update_display()`;
+}
+
+// Syntax highlighting
+function highlight(code) {
+  const KW = new Set(['extends','func','var','const','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','signal','@export','@onready','call_deferred','static','enum','class_name','as','is','break','continue','while','push_error','print','clamp']);
+  const TYPE = new Set(['float','int','bool','String','void','Dictionary','Array','Texture2D','Control','Label','LineEdit','Button','ProgressBar','TextureRect','HBoxContainer','VBoxContainer','Color']);
+  const FN = new Set(['_ready','add_xp','remove_xp','reset','get_xp_to_next_level','get_progress_percentage','get_max_level','get_xp_required_for_level','get_current_icon','get_current_banner','get_level_icon','get_level_banner','get_current_title','get_current_description','is_max_level','get_xp_text','_check_level_up','_check_level_down','_build_thresholds','_setup_initial_state','_generate_linear_thresholds','_generate_exponential_thresholds','_update_display','_on_xp_gained','_on_xp_removed','_on_level_up','_on_level_down','_on_max_level','_get_amount','_on_add_button_pressed','_on_remove_button_pressed','_on_reset_button_pressed']);
+  
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  
+  function tokenLine(line) {
+    let out = '', i = 0;
+    while (i < line.length) {
+      if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+      if (line[i] === '"') { let j = i + 1; while (j < line.length && line[j] !== '"') j++; out += `<span class="str">${esc(line.slice(i, j + 1))}</span>`; i = j + 1; continue; }
+      if (line[i] === '@') { let j = i + 1; while (j < line.length && /[\w_]/.test(line[j])) j++; const w = line.slice(i, j); out += KW.has(w) ? `<span class="kw">${esc(w)}</span>` : esc(w); i = j; continue; }
+      if (/[a-zA-Z_]/.test(line[i])) { let j = i; while (j < line.length && /[\w]/.test(line[j])) j++; const w = line.slice(i, j); out += KW.has(w) ? `<span class="kw">${esc(w)}</span>` : TYPE.has(w) ? `<span class="typ">${esc(w)}</span>` : FN.has(w) ? `<span class="fn">${esc(w)}</span>` : esc(w); i = j; continue; }
+      if (/\d/.test(line[i])) { let j = i; while (j < line.length && /[\d.]/.test(line[j])) j++; out += `<span class="num">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+      out += esc(line[i]); i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code) {
+  const el = $(id);
+  if (el) {
+    el.classList.remove('empty');
+    el.innerHTML = highlight(code);
+  }
+}
+
+function generateAll() {
+  renderCode('outSystem', buildLevelSystem());
+  renderCode('outUI', buildLevelSystemUI());
+}
+
+function copyOut(id, btn) {
+  const el = $(id);
+  const text = el.innerText || el.textContent;
+  if (!text.trim() || text.includes('Click Generate')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+}
+
+// No generate on load - user must click button
+</script>
+</body>
+</html>
