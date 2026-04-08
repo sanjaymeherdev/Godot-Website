@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Godot Touch Camera Builder · Mobile/PC Camera Controller</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+      --border:#2a2f37; --border2:#343b45;
+      --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+      --green:#4ade80; --green2:#22c55e;
+      --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+      --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+      --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+      --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+      --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+      --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+      --r:10px; --rl:14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
+    .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; font-size: 18px; }
+    .back-btn:active { background: var(--bg4); }
+    .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+    .header-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .header-badge { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); padding: 3px 8px; border-radius: 20px; }
+
+    .page { padding: 16px 16px 100px; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 900px) {
+      .page { flex-direction: row; align-items: flex-start; }
+      .form-col { flex: 1.2; min-width: 340px; }
+      .out-col { flex: 1.8; min-width: 400px; }
+    }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .card-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .card-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .card-dot.blue { background: var(--blue); }
+    .card-dot.purple { background: var(--purple); }
+    .card-dot.amber { background: var(--amber); }
+    .card-dot.coral { background: var(--coral); }
+    .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); font-family: var(--mono); }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.02em; }
+    .field-hint { font-size: 9px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+    select, input[type="text"], input[type="number"] { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 8px 12px; outline: none; transition: border-color 0.15s; }
+    select:focus, input:focus { border-color: var(--green2); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    .toggle-item { display: flex; align-items: center; gap: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .toggle-item.active { background: var(--green-dim2); border-color: var(--green2); }
+    .toggle-item input[type="checkbox"] { display: none; }
+    .chk-box { width: 20px; height: 20px; flex-shrink: 0; border: 1px solid var(--border2); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+    .toggle-item.active .chk-box { background: var(--green); border-color: var(--green); }
+    .chk-mark { display: none; }
+    .toggle-item.active .chk-mark { display: block; }
+    .toggle-label { flex: 1; font-size: 13px; font-weight: 500; }
+    .toggle-hint { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+
+    .hint { background: var(--bg4); border-left: 2px solid var(--green2); padding: 8px 12px; border-radius: 0 var(--r) var(--r) 0; font-size: 10px; color: var(--text2); font-family: var(--mono); line-height: 1.5; margin: 4px 0; }
+
+    .gen-btn { width: 100%; height: 52px; background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); border-radius: var(--rl); color: var(--purple); font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.1s; margin-top: 8px; }
+    .gen-btn:active { background: rgba(192,132,252,0.2); transform: scale(0.99); }
+
+    .out-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .out-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .out-tag { font-size: 10px; font-family: var(--mono); font-weight: 600; padding: 3px 8px; border-radius: 4px; background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .copy-btn { margin-left: auto; padding: 5px 12px; background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); font-family: var(--mono); font-size: 11px; cursor: pointer; transition: 0.1s; }
+    .copy-btn:active { background: var(--bg3); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+    .out-code { padding: 14px; font-family: var(--mono); font-size: 11px; line-height: 1.65; color: var(--text); white-space: pre; overflow-x: auto; min-height: 300px; background: var(--bg); border-radius: 0 0 var(--rl) var(--rl); }
+    .out-code.empty { color: var(--text3); font-style: italic; }
+
+    .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; } .cmt { color: #546e7a; font-style: italic; } .typ { color: var(--amber); }
+    .hidden { display: none !important; }
+    hr { border-color: var(--border); margin: 4px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="#">‹</a>
+  <div>
+    <div class="header-title">Touch Camera Builder</div>
+    <div class="header-sub">Mobile/PC Camera Controller · SpringArm3D</div>
+  </div>
+  <span class="header-badge">Godot 4 · Touch + Mouse</span>
+</div>
+
+<div class="page">
+  <div class="form-col">
+    <!-- PLATFORM & GYRO -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Platform & Input</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Platform Target</div>
+          <select id="platformTarget">
+            <option value="both">Both (Mobile + PC)</option>
+            <option value="mobile">Only Mobile</option>
+            <option value="pc">Only PC</option>
+          </select>
+          <div class="field-hint">PC mode disables touch/gyro, Mobile mode disables mouse capture</div>
+        </div>
+        <div id="gyroSection">
+          <div class="toggle-item" id="tog-gyro" onclick="toggleGyro()">
+            <input type="checkbox" id="gyroCheck">
+            <div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+            <span class="toggle-label">Enable Gyro Support</span>
+            <span class="toggle-hint">Only available on Mobile</span>
+          </div>
+        </div>
+        <div id="mouseCaptureSection">
+          <div class="field"><div class="field-label">Mouse Capture Key (PC)</div>
+            <input type="text" id="captureKey" value="E" placeholder="E">
+            <div class="field-hint">Press this key to capture mouse. ESC releases.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SENSITIVITY & ANGLES -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Sensitivity & Clamp Angles</span></div>
+      <div class="card-body">
+        <div class="grid2">
+          <div class="field"><div class="field-label">Touch Sensitivity</div><input type="number" id="touchSens" value="0.005" step="0.001"></div>
+          <div class="field"><div class="field-label">Mouse Sensitivity</div><input type="number" id="mouseSens" value="0.002" step="0.001"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><div class="field-label">Min Vertical Angle (deg)</div><input type="number" id="minAngle" value="-40" step="5"></div>
+          <div class="field"><div class="field-label">Max Vertical Angle (deg)</div><input type="number" id="maxAngle" value="40" step="5"></div>
+        </div>
+        <div id="gyroSensSection" class="hidden">
+          <hr>
+          <div class="grid2">
+            <div class="field"><div class="field-label">Gyro Sensitivity</div><input type="number" id="gyroSens" value="5.0" step="0.5"></div>
+            <div class="field"><div class="field-label">Gyro Deadzone</div><input type="number" id="gyroDeadzone" value="0.05" step="0.01"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTHORITY CHECK -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Authority / Ownership</span></div>
+      <div class="card-body">
+        <select id="authMode">
+          <option value="local">Local Player Check (is_local_player)</option>
+          <option value="authority">Multiplayer Authority (multiplayer.is_server)</option>
+        </select>
+        <div class="hint" style="border-left-color: var(--purple);">Determines which players can control the camera. Local = only local player. Authority = server only.</div>
+      </div>
+    </div>
+
+    <!-- JOYSTICK EXCLUSION -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Joystick Exclusion (Mobile)</span></div>
+      <div class="card-body">
+        <div class="toggle-item active" id="tog-joystick" onclick="toggleJoystick()">
+          <input type="checkbox" id="joystickCheck" checked>
+          <div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Exclude Joystick Area</span>
+          <span class="toggle-hint">Prevent camera drag when touching joystick</span>
+        </div>
+        <div class="field-hint">Requires a "background" TextureRect node as child of player for joystick bounds.</div>
+      </div>
+    </div>
+
+    <button class="gen-btn" onclick="generateCameraScript()">🎥 Generate Camera Controller</button>
+  </div>
+
+  <div class="out-col">
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag">TouchCameraController.gd</span>
+        <button class="copy-btn" onclick="copyOutput(this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="codeOutput"># Click Generate to create camera controller</div>
+    </div>
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag" style="background:rgba(251,191,36,0.12);color:var(--amber);border-color:var(--amber);">Usage Example</span>
+        <button class="copy-btn" onclick="copyUsage(this)">Copy</button>
+      </div>
+      <div class="out-code" id="usageOutput" style="font-size: 10px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // State
+  let gyroEnabled = false;
+  let joystickEnabled = true;
+
+  function toggleGyro() {
+    gyroEnabled = !gyroEnabled;
+    document.getElementById('tog-gyro').classList.toggle('active', gyroEnabled);
+    document.getElementById('gyroCheck').checked = gyroEnabled;
+    const gyroSensSection = document.getElementById('gyroSensSection');
+    if (gyroEnabled) {
+      gyroSensSection.classList.remove('hidden');
+    } else {
+      gyroSensSection.classList.add('hidden');
+    }
+  }
+
+  function toggleJoystick() {
+    joystickEnabled = !joystickEnabled;
+    document.getElementById('tog-joystick').classList.toggle('active', joystickEnabled);
+    document.getElementById('joystickCheck').checked = joystickEnabled;
+  }
+
+  // Platform change handler
+  function updatePlatformUI() {
+    const platform = document.getElementById('platformTarget').value;
+    const gyroSection = document.getElementById('gyroSection');
+    const mouseCaptureSection = document.getElementById('mouseCaptureSection');
+    
+    if (platform === 'pc') {
+      gyroSection.classList.add('hidden');
+      mouseCaptureSection.classList.remove('hidden');
+      // Auto-disable gyro if PC
+      if (gyroEnabled) toggleGyro();
+    } else if (platform === 'mobile') {
+      gyroSection.classList.remove('hidden');
+      mouseCaptureSection.classList.add('hidden');
+    } else { // both
+      gyroSection.classList.remove('hidden');
+      mouseCaptureSection.classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('platformTarget').addEventListener('change', updatePlatformUI);
+  
+  // Syntax highlighting
+  function highlightGDScript(code) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const keywords = new Set(['extends','class_name','func','var','const','if','elif','else','for','while','return','true','false','null','and','or','not','pass','break','continue','@export','@onready','@rpc','signal','enum','static','await','match','as','is','in','self','super','void','OK','NaN','Infinity']);
+    const types = new Set(['int','float','String','bool','Vector2','Vector3','Rect2','Node','Node3D','SpringArm3D','Control','TextureRect','CharacterBody3D','InputEvent','InputEventScreenTouch','InputEventScreenDrag','InputEventMouseButton','InputEventMouseMotion','InputEventKey']);
+    const builtins = new Set(['print','push_error','assert','get_tree','multiplayer','is_multiplayer_authority','get_unique_id','deg_to_rad','rad_to_deg','clamp','abs','OS','Input']);
+    
+    function tokenLine(line) {
+      let out = '', i = 0;
+      while (i < line.length) {
+        if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+        if (line[i] === '"' || line[i] === "'") { let j = i+1; while(j < line.length && line[j] !== line[i]) j++; out += `<span class="str">${esc(line.slice(i, j+1))}</span>`; i = j+1; continue; }
+        if (line[i] === '@') { let j = i+1; while(j < line.length && /[\w_]/.test(line[j])) j++; out += `<span class="kw">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        if (/[a-zA-Z_]/.test(line[i])) { let j = i; while(j < line.length && /[\w]/.test(line[j])) j++; const w = line.slice(i, j);
+          if (keywords.has(w)) out += `<span class="kw">${esc(w)}</span>`;
+          else if (types.has(w)) out += `<span class="typ">${esc(w)}</span>`;
+          else if (builtins.has(w)) out += `<span class="fn">${esc(w)}</span>`;
+          else out += esc(w);
+          i = j; continue;
+        }
+        if (/\d/.test(line[i]) || (line[i] === '-' && /\d/.test(line[i+1]))) { let j = i + (line[i] === '-' ? 1 : 0); while(j < line.length && /[\d.]/.test(line[j])) j++; out += `<span class="num">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        out += esc(line[i]); i++;
+      }
+      return out;
+    }
+    return code.split('\n').map(tokenLine).join('\n');
+  }
+
+  function generateCameraScript() {
+    const platform = document.getElementById('platformTarget').value;
+    const useGyro = gyroEnabled && (platform === 'mobile' || platform === 'both');
+    const useJoystick = joystickEnabled && (platform === 'mobile' || platform === 'both');
+    const authMode = document.getElementById('authMode').value;
+    const captureKey = document.getElementById('captureKey').value.trim().toUpperCase() || 'E';
+    
+    const touchSens = parseFloat(document.getElementById('touchSens').value);
+    const mouseSens = parseFloat(document.getElementById('mouseSens').value);
+    const minAngle = parseFloat(document.getElementById('minAngle').value);
+    const maxAngle = parseFloat(document.getElementById('maxAngle').value);
+    const gyroSens = parseFloat(document.getElementById('gyroSens').value);
+    const gyroDeadzone = parseFloat(document.getElementById('gyroDeadzone').value);
+    
+    const isMobile = (platform === 'mobile' || platform === 'both');
+    const isPC = (platform === 'pc' || platform === 'both');
+    
+    let code = `extends Control\nclass_name TouchCameraController\n\n`;
+    
+    // Exports
+    code += `@export var touch_sensitivity: float = ${touchSens}\n`;
+    if (isPC) code += `@export var mouse_sensitivity: float = ${mouseSens}\n`;
+    code += `@export var min_vertical_angle: float = ${minAngle}\n`;
+    code += `@export var max_vertical_angle: float = ${maxAngle}\n`;
+    if (useGyro) {
+      code += `@export var gyro_sensitivity: float = ${gyroSens}\n`;
+      code += `@export var gyro_deadzone: float = ${gyroDeadzone}\n`;
+    }
+    code += `\n@export var spring_arm: SpringArm3D = null\n`;
+    code += `@export var spring_arm_parent: Node3D = null\n\n`;
+    
+    // Variables
+    code += `var _is_mobile: bool = false\n`;
+    if (isPC) code += `var _mouse_captured: bool = false\n`;
+    code += `var _is_authorized: bool = false\n`;
+    code += `var _player_ref: Node = null\n\n`;
+    
+    if (isMobile) {
+      code += `# Touch state\n`;
+      code += `var _camera_touch_index: int = -1\n`;
+      code += `var _is_dragging: bool = false\n`;
+      code += `var _last_touch_position: Vector2 = Vector2.ZERO\n`;
+      if (useGyro) {
+        code += `var _gyro_active: bool = false\n`;
+        code += `var _initial_spring_arm_rotation_x: float = 0.0\n`;
+        code += `var _initial_parent_rotation_y: float = 0.0\n`;
+      }
+      if (useJoystick) {
+        code += `var _joystick_rect: Rect2 = Rect2()\n`;
+      }
+      code += `\n`;
+    }
+    
+    // _ready
+    code += `func _ready() -> void:\n`;
+    code += `\tawait get_tree().process_frame\n\n`;
+    code += `\t# Find player reference\n`;
+    code += `\t_player_ref = _find_player_ancestor()\n`;
+    if (authMode === 'local') {
+      code += `\tif _player_ref and _player_ref.has_method("is_local_player"):\n`;
+      code += `\t\t_is_authorized = _player_ref.is_local_player()\n`;
+      code += `\telse:\n`;
+      code += `\t\t_is_authorized = false\n`;
+    } else {
+      code += `\t_is_authorized = multiplayer.is_server()\n`;
+    }
+    code += `\n\tif not _is_authorized:\n`;
+    code += `\t\tset_process(false)\n`;
+    code += `\t\tset_process_input(false)\n`;
+    code += `\t\tset_process_unhandled_input(false)\n`;
+    code += `\t\tvisible = false\n`;
+    code += `\t\treturn\n\n`;
+    
+    code += `\t_is_mobile = OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")\n\n`;
+    code += `\tif spring_arm_parent == null and spring_arm != null:\n`;
+    code += `\t\tspring_arm_parent = spring_arm.get_parent()\n\n`;
+    
+    if (isPC) {
+      code += `\tif not _is_mobile:\n`;
+      code += `\t\t_capture_mouse()\n\n`;
+    }
+    
+    if (isMobile && useJoystick) {
+      code += `\t_update_joystick_rect()\n\n`;
+    }
+    
+    code += `\tprint("TouchCameraController initialized - Authorized: ", _is_authorized)\n\n`;
+    
+    // _find_player_ancestor
+    code += `func _find_player_ancestor() -> Node:\n`;
+    code += `\tvar node = get_parent()\n`;
+    code += `\tvar max_depth = 10\n`;
+    code += `\tvar depth = 0\n`;
+    code += `\twhile node and depth < max_depth:\n`;
+    code += `\t\tif node.has_method("is_local") or "is_local" in node:\n`;
+    code += `\t\t\treturn node\n`;
+    code += `\t\tif node is CharacterBody3D:\n`;
+    code += `\t\t\tif node.has_method("init"):\n`;
+    code += `\t\t\t\treturn node\n`;
+    code += `\t\tnode = node.get_parent()\n`;
+    code += `\t\tdepth += 1\n`;
+    code += `\treturn null\n\n`;
+    
+    if (isMobile && useJoystick) {
+      code += `func _update_joystick_rect() -> void:\n`;
+      code += `\tif not _player_ref:\n\t\treturn\n`;
+      code += `\tvar background = _player_ref.get_node_or_null("background")\n`;
+      code += `\tif background and background is TextureRect:\n`;
+      code += `\t\t_joystick_rect = Rect2(background.global_position, background.size)\n`;
+      code += `\telse:\n\t\t_joystick_rect = Rect2()\n\n`;
+      code += `func _is_over_joystick(pos: Vector2) -> bool:\n`;
+      code += `\tif _joystick_rect.size == Vector2.ZERO:\n\t\treturn false\n`;
+      code += `\treturn _joystick_rect.has_point(pos)\n\n`;
+    }
+    
+    // _unhandled_input
+    code += `func _unhandled_input(event: InputEvent) -> void:\n`;
+    code += `\tif not _is_authorized:\n\t\treturn\n`;
+    code += `\tif spring_arm == null or spring_arm_parent == null:\n\t\treturn\n\n`;
+    
+    if (isPC) {
+      code += `\t# PC Input\n`;
+      code += `\tif not _is_mobile:\n`;
+      code += `\t\tif event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:\n`;
+      code += `\t\t\t_release_mouse()\n`;
+      code += `\t\t\treturn\n`;
+      code += `\t\tif event is InputEventKey and event.keycode == KEY_${captureKey} and event.pressed and not _mouse_captured:\n`;
+      code += `\t\t\t_capture_mouse()\n`;
+      code += `\t\t\treturn\n`;
+      code += `\t\tif event is InputEventMouseMotion and _mouse_captured:\n`;
+      code += `\t\t\t_rotate_camera(-event.relative.x * mouse_sensitivity, -event.relative.y * mouse_sensitivity)\n`;
+      code += `\t\treturn\n\n`;
+    }
+    
+    if (isMobile) {
+      code += `\t# Mobile Input\n`;
+      code += `\tif event is InputEventScreenTouch:\n`;
+      code += `\t\tif event.pressed:\n`;
+      if (useJoystick) {
+        code += `\t\t\tif _camera_touch_index == -1 and not _is_over_joystick(event.position):\n`;
+      } else {
+        code += `\t\t\tif _camera_touch_index == -1:\n`;
+      }
+      code += `\t\t\t\t_camera_touch_index = event.index\n`;
+      code += `\t\t\t\t_is_dragging = true\n`;
+      code += `\t\t\t\t_last_touch_position = event.position\n`;
+      code += `\t\t\t\tget_viewport().set_input_as_handled()\n`;
+      code += `\t\telse:\n`;
+      code += `\t\t\tif event.index == _camera_touch_index:\n`;
+      code += `\t\t\t\t_camera_touch_index = -1\n`;
+      code += `\t\t\t\t_is_dragging = false\n\n`;
+      code += `\telif event is InputEventScreenDrag and _is_dragging and event.index == _camera_touch_index:\n`;
+      code += `\t\t_handle_touch_drag(event)\n`;
+      code += `\t\tget_viewport().set_input_as_handled()\n\n`;
+    }
+    
+    if (isMobile) {
+      code += `func _handle_touch_drag(drag_event: InputEventScreenDrag) -> void:\n`;
+      code += `\tif not _is_authorized or spring_arm == null or spring_arm_parent == null:\n\t\treturn\n`;
+      code += `\tspring_arm_parent.rotate_y(-drag_event.relative.x * touch_sensitivity)\n`;
+      code += `\tspring_arm.rotate_x(drag_event.relative.y * touch_sensitivity)\n`;
+      code += `\tspring_arm.rotation.x = clamp(spring_arm.rotation.x, deg_to_rad(min_vertical_angle), deg_to_rad(max_vertical_angle))\n`;
+      code += `\t_last_touch_position += drag_event.relative\n`;
+      if (useGyro) {
+        code += `\tif _gyro_active:\n`;
+        code += `\t\t_initial_spring_arm_rotation_x = spring_arm.rotation.x\n`;
+        code += `\t\t_initial_parent_rotation_y = spring_arm_parent.rotation.y\n`;
+      }
+      code += `\n\n`;
+    }
+    
+    // _rotate_camera helper
+    code += `func _rotate_camera(horizontal: float, vertical: float) -> void:\n`;
+    code += `\tif not _is_authorized:\n\t\treturn\n`;
+    code += `\tif spring_arm_parent:\n\t\tspring_arm_parent.rotate_y(horizontal)\n`;
+    code += `\tif spring_arm:\n\t\tspring_arm.rotate_x(vertical)\n`;
+    code += `\t\tspring_arm.rotation.x = clamp(spring_arm.rotation.x, deg_to_rad(min_vertical_angle), deg_to_rad(max_vertical_angle))\n\n`;
+    
+    if (isPC) {
+      code += `func capture_mouse() -> void:\n`;
+      code += `\tif not _is_authorized:\n\t\treturn\n`;
+      code += `\tInput.mouse_mode = Input.MOUSE_MODE_CAPTURED\n`;
+      code += `\t_mouse_captured = true\n\n`;
+      code += `func release_mouse() -> void:\n`;
+      code += `\tif not _is_authorized:\n\t\treturn\n`;
+      code += `\tInput.mouse_mode = Input.MOUSE_MODE_VISIBLE\n`;
+      code += `\t_mouse_captured = false\n\n`;
+      code += `func _capture_mouse() -> void:\n\tcapture_mouse()\n\n`;
+      code += `func _release_mouse() -> void:\n\trelease_mouse()\n\n`;
+    }
+    
+    if (useGyro) {
+      code += `func set_gyro_enabled(enabled: bool) -> void:\n`;
+      code += `\tif not _is_authorized:\n\t\treturn\n`;
+      code += `\tif enabled and not _gyro_active:\n`;
+      code += `\t\t_activate_gyroscope()\n`;
+      code += `\telif not enabled:\n`;
+      code += `\t\t_gyro_active = false\n\n`;
+      code += `func _activate_gyroscope() -> void:\n`;
+      code += `\tif Input.get_gyroscope().length_squared() < 0.0001:\n`;
+      code += `\t\t_gyro_active = false\n`;
+      code += `\t\treturn\n`;
+      code += `\tif spring_arm:\n`;
+      code += `\t\t_initial_spring_arm_rotation_x = spring_arm.rotation.x\n`;
+      code += `\tif spring_arm_parent:\n`;
+      code += `\t\t_initial_parent_rotation_y = spring_arm_parent.rotation.y\n`;
+      code += `\t_gyro_active = true\n\n`;
+      code += `func _process(delta: float) -> void:\n`;
+      code += `\tif not _is_authorized:\n\t\treturn\n`;
+      code += `\tif _is_mobile and _gyro_active:\n`;
+      code += `\t\tvar gyro_data: Vector3 = Input.get_gyroscope()\n`;
+      code += `\t\tif gyro_data.length_squared() < 0.0001:\n\t\t\treturn\n`;
+      code += `\t\tvar filtered := gyro_data\n`;
+      code += `\t\tif abs(filtered.x) < gyro_deadzone: filtered.x = 0.0\n`;
+      code += `\t\tif abs(filtered.y) < gyro_deadzone: filtered.y = 0.0\n`;
+      code += `\t\tif abs(filtered.z) < gyro_deadzone: filtered.z = 0.0\n`;
+      code += `\t\tif spring_arm_parent:\n`;
+      code += `\t\t\tspring_arm_parent.rotate_y(-filtered.y * gyro_sensitivity * delta)\n`;
+      code += `\t\tif spring_arm:\n`;
+      code += `\t\t\tspring_arm.rotate_x(-filtered.x * gyro_sensitivity * delta)\n`;
+      code += `\t\t\tspring_arm.rotation.x = clamp(spring_arm.rotation.x, deg_to_rad(min_vertical_angle), deg_to_rad(max_vertical_angle))\n\n`;
+      code += `func calibrate_gyroscope() -> void:\n`;
+      code += `\tif not _is_authorized:\n\t\treturn\n`;
+      code += `\t_activate_gyroscope()\n\n`;
+    } else {
+      code += `func _process(_delta: float) -> void:\n`;
+      code += `\tpass\n\n`;
+    }
+    
+    code += `func reset_camera() -> void:\n`;
+    code += `\tif not _is_authorized:\n\t\treturn\n`;
+    code += `\tif spring_arm:\n\t\tspring_arm.rotation.x = 0.0\n\t\tspring_arm.rotation.z = 0.0\n`;
+    code += `\tif spring_arm_parent:\n\t\tspring_arm_parent.rotation.y = 0.0\n`;
+    if (useGyro) {
+      code += `\tif _gyro_active:\n\t\t_initial_spring_arm_rotation_x = 0.0\n\t\t_initial_parent_rotation_y = 0.0\n`;
+    }
+    code += `\n`;
+    
+    if (isMobile && useJoystick) {
+      code += `func set_joystick_rect(rect: Rect2) -> void:\n\t_joystick_rect = rect\n`;
+    }
+    
+    // Render
+    const outputEl = document.getElementById('codeOutput');
+    outputEl.classList.remove('empty');
+    outputEl.innerHTML = highlightGDScript(code);
+    
+    // Usage example
+    const usageEl = document.getElementById('usageOutput');
+    usageEl.innerHTML = highlightGDScript(`# Add to your player scene as child Control node
+# Assign spring_arm and spring_arm_parent in inspector
+#
+# Script auto-detects platform and handles input
+# Only ${authMode === 'local' ? 'local player' : 'server'} can control the camera
+${useGyro ? '\n# Call set_gyro_enabled(true) to enable gyro on mobile' : ''}
+${isPC ? '\n# Press ${captureKey} to capture mouse, ESC to release' : ''}
+${useJoystick ? '\n# Joystick exclusion active - touch on joystick area won\'t rotate camera' : ''}
+`);
+  }
+  
+  function copyOutput(btn) {
+    const el = document.getElementById('codeOutput');
+    let text = el.innerText || el.textContent;
+    if (!text.trim() || text.includes('Click Generate')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+  
+  function copyUsage(btn) {
+    const el = document.getElementById('usageOutput');
+    let text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+  
+  // Initialize
+  updatePlatformUI();
+  document.getElementById('tog-gyro').classList.remove('active');
+  document.getElementById('gyroCheck').checked = false;
+  document.getElementById('tog-joystick').classList.add('active');
+  document.getElementById('joystickCheck').checked = true;
+  gyroEnabled = false;
+  joystickEnabled = true;
+</script>
+</body>
+</html>
