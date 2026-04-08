@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>UIState Pro · GDScript Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+  --border:#2a2f37; --border2:#343b45;
+  --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+  --green:#4ade80; --green2:#22c55e;
+  --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+  --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+  --tap:52px; --r:10px; --rl:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
+.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.back-btn:active{background:var(--bg4);}
+.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
+.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--purple);background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);padding:3px 8px;border-radius:20px;white-space:nowrap;}
+
+.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.card-dot.blue{background:var(--blue);}
+.card-dot.purple{background:var(--purple);}
+.card-dot.amber{background:var(--amber);}
+.card-dot.coral{background:var(--coral);}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.field-row{display:flex;align-items:center;gap:8px;}
+
+select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--green2);}
+.field-row select,.field-row input{flex:1;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
+.toggle-item:active{background:var(--bg4);}
+.toggle-item input[type="checkbox"]{display:none;}
+.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
+.chk-mark{display:none;}
+.toggle-item.active .chk-mark{display:block;}
+.toggle-label{flex:1;font-size:14px;font-weight:500;}
+.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.blue{border-left-color:var(--blue);}
+.hint.purple{border-left-color:var(--purple);}
+.hint.amber{border-left-color:var(--amber);}
+.hint.coral{border-left-color:var(--coral);}
+
+.gen-btn{width:100%;height:56px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:var(--rl);color:var(--purple);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
+.gen-btn:active{background:rgba(192,132,252,0.2);transform:scale(0.99);}
+
+.out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.out-tag.uistate{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
+.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:36px;transition:all 0.15s;}
+.copy-btn:active{background:var(--bg3);color:var(--text);}
+.copy-btn.copied{color:var(--green);border-color:var(--green2);}
+.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+
+.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+.hidden{display:none!important;}
+
+@media(min-width:768px){
+  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
+  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="pro.html">‹</a>
+  <div>
+    <div class="header-title">UIState Pro</div>
+    <div class="header-sub">UIState.gd · Autoload · Phase management</div>
+  </div>
+  <span class="header-badge">Pro · Tier 2</span>
+</div>
+
+<div class="page">
+<div class="form-col">
+
+  <!-- PHASE NAMES -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><span class="card-title">Game Phases</span></div>
+    <div class="card-body">
+      <div class="hint">Define your game phases. These become the Phase enum values.</div>
+      <div id="phasesContainer"></div>
+      <button class="gen-btn" style="height:40px;margin-top:8px;" onclick="addPhase()">+ Add Phase</button>
+      <div class="grid2" style="margin-top:8px;">
+        <div class="field"><div class="field-label">Default phase</div>
+          <select id="defaultPhase"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATION OPTIONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Integration</span></div>
+    <div class="card-body">
+      <div class="toggle-item active" id="tog-autoSync" onclick="tog('autoSync')">
+        <input type="checkbox" id="useAutoSync" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Auto-sync with GameStateManager</span>
+        <span class="toggle-hint">Connect to GSM signals automatically</span>
+      </div>
+      <div class="toggle-item active" id="tog-playerRegistration" onclick="tog('playerRegistration')">
+        <input type="checkbox" id="usePlayerRegistration" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Player registration system</span>
+        <span class="toggle-hint">Track current player node and notify on phase change</span>
+      </div>
+      <div class="toggle-item active" id="tog-helperMethods" onclick="tog('helperMethods')">
+        <input type="checkbox" id="useHelperMethods" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Helper methods</span>
+        <span class="toggle-hint">is_in_match(), is_in_lobby(), phase_name(), etc.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEBUG OPTIONS -->
+  <div class="card">
+    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Debug & Logging</span></div>
+    <div class="card-body">
+      <div class="toggle-item active" id="tog-debugLogs" onclick="tog('debugLogs')">
+        <input type="checkbox" id="useDebugLogs" checked>
+        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+        <span class="toggle-label">Enable debug prints</span>
+        <span class="toggle-hint">Log phase changes and registrations</span>
+      </div>
+      <div class="field"><div class="field-label">Autoload name</div><input type="text" id="autoloadName" value="UIState" placeholder="UIState"></div>
+    </div>
+  </div>
+
+  <button class="gen-btn" onclick="generate()">▶ Generate UIState.gd</button>
+
+</div><!-- end form-col -->
+<div class="out-col">
+
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag uistate">UIState.gd</span>
+      <span class="out-sub">Autoload · Phase manager</span>
+      <button class="copy-btn" onclick="copyOut('outUIState',this)">Copy</button>
+    </div>
+    <div class="out-code empty" id="outUIState"># tap Generate to produce code</div>
+  </div>
+
+  <!-- SCENE STRUCTURE -->
+  <div class="out-card">
+    <div class="out-head">
+      <span class="out-tag" style="background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.4);">Setup Instructions</span>
+      <span class="out-sub">how to integrate</span>
+      <button class="copy-btn" onclick="copyInstructions(this)">Copy</button>
+    </div>
+    <div class="out-code" id="outInstructions" style="font-size:11px;line-height:1.9;"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let phases = [
+  { name: "IDLE", isDefault: true },
+  { name: "GAME_LOBBY", isDefault: false },
+  { name: "PLANE", isDefault: false },
+  { name: "MATCH", isDefault: false },
+  { name: "VICTORY", isDefault: false },
+  { name: "RETURNING", isDefault: false }
+];
+
+let features = { autoSync: true, playerRegistration: true, helperMethods: true, debugLogs: true };
+
+function tog(f) {
+  features[f] = !features[f];
+  $(`tog-${f}`).classList.toggle('active', features[f]);
+}
+
+function addPhase() {
+  phases.push({ name: `PHASE_${phases.length + 1}`, isDefault: false });
+  renderPhases();
+}
+
+function removePhase(idx) {
+  if (phases[idx].isDefault) return;
+  phases.splice(idx, 1);
+  if (phases.filter(p => p.isDefault).length === 0 && phases.length > 0) {
+    phases[0].isDefault = true;
+  }
+  renderPhases();
+}
+
+function setDefaultPhase(idx) {
+  for (let i = 0; i < phases.length; i++) {
+    phases[i].isDefault = (i === idx);
+  }
+  renderPhases();
+}
+
+function updatePhaseName(idx, value) {
+  if (value.trim()) {
+    phases[idx].name = value.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+  }
+  renderPhases();
+}
+
+function renderPhases() {
+  const container = $('#phasesContainer');
+  const defaultSelect = $('#defaultPhase');
+  
+  let html = '';
+  for (let i = 0; i < phases.length; i++) {
+    const p = phases[i];
+    html += `
+      <div class="field-row" style="margin-bottom:8px;">
+        <input type="text" value="${p.name}" placeholder="PHASE_NAME" style="flex:1;" onchange="updatePhaseName(${i}, this.value)">
+        <button style="background:var(--bg4);border:1px solid var(--border2);color:var(--coral);border-radius:6px;width:32px;height:32px;cursor:pointer;${p.isDefault ? 'opacity:0.5;' : ''}" onclick="removePhase(${i})" ${p.isDefault ? 'disabled' : ''}>✕</button>
+      </div>
+    `;
+  }
+  container.innerHTML = html || '<div class="hint">Add at least one phase</div>';
+  
+  // Update default phase dropdown
+  let options = '';
+  for (let i = 0; i < phases.length; i++) {
+    options += `<option value="${i}" ${phases[i].isDefault ? 'selected' : ''}>${phases[i].name}</option>`;
+  }
+  defaultSelect.innerHTML = options;
+  defaultSelect.onchange = () => setDefaultPhase(parseInt(defaultSelect.value));
+}
+
+function generate() {
+  const autoloadName = v('autoloadName', 'UIState');
+  const defaultPhaseIdx = phases.findIndex(p => p.isDefault);
+  const defaultPhase = defaultPhaseIdx >= 0 ? phases[defaultPhaseIdx].name : (phases[0]?.name || 'IDLE');
+  
+  renderCode('outUIState', highlight(buildUIState(phases, defaultPhase, autoloadName, features)));
+  renderInstructions(autoloadName, features);
+}
+
+function buildUIState(phases, defaultPhase, autoloadName, features) {
+  const { autoSync, playerRegistration, helperMethods, debugLogs } = features;
+  
+  const L = [];
+  const phaseEnum = phases.map(p => p.name).join(',\n\t');
+  
+  L.push('extends Node');
+  L.push('');
+  L.push('# ================================================================');
+  L.push(`# ${autoloadName}.gd — AutoLoad`);
+  L.push('#');
+  L.push('# Central UI state manager for game phases.');
+  L.push('# Any script can:');
+  L.push('#   • Read:   UIState.current_phase');
+  L.push('#   • Update: UIState.set_phase(Phase.MATCH)');
+  L.push('#   • React:  connect to UIState.phase_changed');
+  L.push('# ================================================================');
+  L.push('');
+  L.push('# ── Phase enum ─────────────────────────────────────────────────');
+  L.push(`enum Phase {\n\t${phaseEnum}\n}`);
+  L.push('');
+  L.push('# ── State ─────────────────────────────────────────────────────');
+  L.push(`var current_phase : Phase = Phase.${defaultPhase}`);
+  L.push('var current_email : String = ""');
+  L.push('var current_peer_id : int = 0');
+  L.push('');
+  
+  if (playerRegistration) {
+    L.push('# ── Registered player node ────────────────────────────────────');
+    L.push('var _player : Node = null');
+    L.push('');
+  }
+  
+  L.push('# ================================================================');
+  L.push('# SIGNALS');
+  L.push('# ================================================================');
+  L.push('signal phase_changed(old_phase: Phase, new_phase: Phase)');
+  if (playerRegistration) {
+    L.push('signal player_registered(player: Node)');
+  }
+  L.push('');
+  L.push('# ================================================================');
+  L.push('# READY');
+  L.push('# ================================================================');
+  L.push('func _ready() -> void:');
+  L.push(`\tname = "${autoloadName}"`);
+  if (debugLogs) L.push('\tprint("[UIState] Ready.")');
+  L.push('');
+  
+  if (autoSync) {
+    L.push('\t# Sync from GSM signals automatically');
+    L.push('\tif has_node("/root/GameStateManager"):');
+    L.push('\t\tGameStateManager.phase_changed.connect(_on_gsm_phase_changed)');
+    L.push('\t\tGameStateManager.auth_completed.connect(_on_gsm_auth_completed)');
+    if (debugLogs) L.push('\t\tprint("[UIState] Connected to GameStateManager")');
+    L.push('\telse:');
+    if (debugLogs) L.push('\t\tprint("[UIState] GameStateManager not found — running standalone")');
+    L.push('');
+  }
+  
+  if (autoSync) {
+    L.push('# ================================================================');
+    L.push('# GSM SYNC (optional)');
+    L.push('# ================================================================');
+    L.push('func _on_gsm_phase_changed(old_phase, new_phase) -> void:');
+    L.push('\tset_phase(new_phase as Phase)');
+    L.push('');
+    L.push('func _on_gsm_auth_completed(email: String, _username: String) -> void:');
+    L.push('\tcurrent_email   = email');
+    L.push('\tif has_node("/root/GameStateManager"):');
+    L.push('\t\tcurrent_peer_id = GameStateManager.current_peer_id');
+    L.push('');
+  }
+  
+  L.push('# ================================================================');
+  L.push('# STATE UPDATE — call from any script');
+  L.push('# ================================================================');
+  L.push('func set_phase(new_phase: Phase) -> void:');
+  L.push('\tif new_phase == current_phase:');
+  L.push('\t\treturn');
+  L.push('\tvar old_phase  := current_phase');
+  L.push('\tcurrent_phase   = new_phase');
+  if (debugLogs) {
+    L.push('\tprint("[UIState] Phase: ", Phase.keys()[old_phase], " → ", Phase.keys()[new_phase])');
+  }
+  L.push('\tphase_changed.emit(old_phase, new_phase)');
+  if (playerRegistration) {
+    L.push('\t_notify_player(new_phase)');
+  }
+  L.push('');
+  
+  if (playerRegistration) {
+    L.push('# ================================================================');
+    L.push('# PLAYER REGISTRATION');
+    L.push('# ================================================================');
+    L.push('# Call from player.gd _ready():  UIState.register_player(self)');
+    L.push('# ================================================================');
+    L.push('func register_player(player: Node) -> void:');
+    L.push('\t_player = player');
+    if (debugLogs) L.push('\tprint("[UIState] Player registered: ", player.name)');
+    L.push('\tplayer_registered.emit(player)');
+    L.push('\t# Apply current phase immediately in case player joined mid-session');
+    L.push('\t_notify_player(current_phase)');
+    L.push('');
+    L.push('func unregister_player() -> void:');
+    L.push('\t_player = null');
+    if (debugLogs) L.push('\tprint("[UIState] Player unregistered.")');
+    L.push('');
+    L.push('# ================================================================');
+    L.push('# INTERNAL — notify player node of phase');
+    L.push('# ================================================================');
+    L.push('func _notify_player(phase: Phase) -> void:');
+    L.push('\tif _player == null or not is_instance_valid(_player):');
+    L.push('\t\treturn');
+    L.push('\tif _player.has_method("on_ui_phase_changed"):');
+    L.push('\t\t_player.on_ui_phase_changed(phase)');
+    L.push('');
+  }
+  
+  if (helperMethods) {
+    L.push('# ================================================================');
+    L.push('# HELPERS — readable from any script');
+    L.push('# ================================================================');
+    for (const p of phases) {
+      const nameLower = p.name.toLowerCase();
+      L.push(`func is_${nameLower}()  -> bool: return current_phase == Phase.${p.name}`);
+    }
+    L.push('func phase_name()   -> String: return Phase.keys()[current_phase]');
+  }
+  
+  return L.join('\n');
+}
+
+function renderInstructions(autoloadName, features) {
+  const L = [];
+  const cm = txt => `<span class="cmt">${escapeHtml(txt)}</span>`;
+  const kw = txt => `<span class="kw">${escapeHtml(txt)}</span>`;
+  const fn = txt => `<span class="fn">${escapeHtml(txt)}</span>`;
+  const typ = txt => `<span class="typ">${escapeHtml(txt)}</span>`;
+  
+  L.push(cm('# ── HOW TO SET UP ──'));
+  L.push('');
+  L.push(cm('1. Add as Autoload:'));
+  L.push(`   Project Settings → Autoload → Add`);
+  L.push(`   Path: ${autoloadName}.gd`);
+  L.push(`   Name: ${autoloadName}`);
+  L.push('');
+  L.push(cm('2. Usage examples:'));
+  L.push('');
+  L.push(`${kw('# Read current phase')}`);
+  L.push(`${kw('var')} phase = ${autoloadName}.current_phase`);
+  L.push('');
+  L.push(`${kw('# Change phase (from any script)')}`);
+  L.push(`${autoloadName}.${fn('set_phase')}(${autoloadName}.Phase.MATCH)`);
+  L.push('');
+  L.push(`${kw('# React to phase changes')}`);
+  L.push(`${autoloadName}.phase_changed.${fn('connect')}(${fn('_on_phase_changed')})`);
+  L.push('');
+  L.push(`${kw('func')} ${fn('_on_phase_changed')}(old_phase, new_phase):`);
+  L.push(`    ${kw('match')} new_phase:`);
+  L.push(`        ${autoloadName}.Phase.MATCH:`);
+  L.push(`            ${cm('# hide menus, show HUD')}`);
+  L.push(`        ${autoloadName}.Phase.VICTORY:`);
+  L.push(`            ${cm('# show win screen')}`);
+  L.push('');
+  
+  if (features.playerRegistration) {
+    L.push(cm('3. Player registration (optional):'));
+    L.push(`   ${kw('# In player.gd _ready()')}`);
+    L.push(`   ${autoloadName}.${fn('register_player')}(${kw('self')})`);
+    L.push('');
+    L.push(`   ${kw('# Then implement in player.gd:')}`);
+    L.push(`   ${kw('func')} ${fn('on_ui_phase_changed')}(phase):`);
+    L.push(`       ${kw('match')} phase:`);
+    L.push(`           ${autoloadName}.Phase.MATCH:`);
+    L.push(`               ${cm('# player can start moving/shooting')}`);
+    L.push(`           ${autoloadName}.Phase.VICTORY:`);
+    L.push(`               ${cm('# player celebrates')}`);
+    L.push('');
+  }
+  
+  if (features.autoSync) {
+    L.push(cm('4. GameStateManager integration (auto):'));
+    L.push(`   ${cm('# UIState auto-connects to GSM if present')}`);
+    L.push(`   ${cm('# No extra code needed — phases sync automatically')}`);
+    L.push('');
+  }
+  
+  L.push(cm('5. Access from any scene:'));
+  L.push(`   ${kw('var')} is_match = ${autoloadName}.${fn('is_match')}()  ${cm('# if helper methods enabled')}`);
+  L.push(`   ${kw('var')} phase_name = ${autoloadName}.${fn('phase_name')}()`);
+  
+  $('#outInstructions').innerHTML = L.join('\n');
+}
+
+function v(id, fb) { 
+  const el = $(id); 
+  return el && el.value.trim() ? el.value.trim() : fb; 
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Highlighting
+const KW = new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@onready']);
+const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Phase']);
+const FN = new Set(['_ready','set_phase','register_player','unregister_player','_notify_player','_on_gsm_phase_changed','_on_gsm_auth_completed','has_method','is_instance_valid','connect','emit','print','has_node']);
+
+function highlight(code) {
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokenLine(line){
+    let out='',i=0;
+    while(i<line.length){
+      if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+      if(line[i]==='"'){let j=i+1;while(j<line.length&&line[j]!=='"')j++;out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;}
+      if(line[i]==='@'){let j=i+1;while(j<line.length&&/[\w_]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/[a-zA-Z_]/.test(line[i])){let j=i;while(j<line.length&&/[\w]/.test(line[j]))j++;const w=line.slice(i,j);out+=KW.has(w)?`<span class="kw">${esc(w)}</span>`:TYPE.has(w)?`<span class="typ">${esc(w)}</span>`:FN.has(w)?`<span class="fn">${esc(w)}</span>`:esc(w);i=j;continue;}
+      if(/\d/.test(line[i])||(line[i]==='-'&&/\d/.test(line[i+1]||''))){let j=i+(line[i]==='-'?1:0);while(j<line.length&&/[\d.]/.test(line[j]))j++;out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;}
+      out+=esc(line[i]);i++;
+    }
+    return out;
+  }
+  return code.split('\n').map(tokenLine).join('\n');
+}
+
+function renderCode(id, code) {
+  const el = $(id);
+  el.classList.remove('empty');
+  el.innerHTML = code;
+}
+
+function copyOut(id, btn) {
+  const el = $(id);
+  const text = el.innerText || el.textContent;
+  if (!text.trim() || text.includes('tap Generate')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+}
+
+function copyInstructions(btn) {
+  const el = $('#outInstructions');
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1600);
+  });
+}
+
+// Initialize
+renderPhases();
+generate();
+</script>
+</body>
+</html>
