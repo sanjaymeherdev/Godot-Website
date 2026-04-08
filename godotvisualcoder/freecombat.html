@@ -706,46 +706,60 @@ function generate(){
   if(detectType==='raycast') dv.push(`@onready var ${rayVar}: RayCast${sx} = $${rayVar.charAt(0).toUpperCase()+rayVar.slice(1)}`);
 
   /* ── DEALER FUNC ── */
-  const dl=[];
-  dl.push(`func _physics_process(delta: float) -> void:`);dl.push(``);
-  if(feats.cooldown){
-    dl.push(`\tif _attack_timer > 0.0:`);
-    dl.push(`\t\t_attack_timer -= delta`);
-    dl.push(`\t\treturn`);dl.push(``);
-  }
-  dl.push(`\tif ${triggerExpr}:`);
-  if(bools.length>0){
-    const conds=bools.map(b=>`${b.name} == ${b.must}`).join(' and ');
-    dl.push(`\t\tif not (${conds}):`);
-    dl.push(`\t\t\treturn`);dl.push(``);
-  }
-  if(feats.anim) dl.push(`\t\t${animVar}.play("${animAtk}")`);
-  if(feats.cooldown) dl.push(`\t\t_attack_timer = attack_cooldown`);
+const dl=[];
+
+// Keep physics_process for cooldown timer only (if enabled)
+if(feats.cooldown){
+  dl.push(`func _physics_process(delta: float) -> void:`);
+  dl.push(`\tif _attack_timer > 0.0:`);
+  dl.push(`\t\t_attack_timer -= delta`);
+  dl.push(`\t\treturn`);
   dl.push(``);
+}
 
-  function emitHit(indent,targetVar){
-    if(hits>1){
-      dl.push(`${indent}for _h in ${hits}:`);
-      dl.push(`${indent}\t${targetVar}.take_damage(${callArgs})`);
-    } else {
-      dl.push(`${indent}${targetVar}.take_damage(${callArgs})`);
-    }
-  }
+// Attack handling in separate input function
+dl.push(`func _input(event: InputEvent) -> void:`);
+dl.push(`\t# Cooldown check`);
+if(feats.cooldown){
+  dl.push(`\tif _attack_timer > 0.0:`);
+  dl.push(`\t\treturn`);
+  dl.push(``);
+}
+dl.push(`\t# Attack trigger`);
+dl.push(`\tif ${triggerExpr}:`);
+if(bools.length>0){
+  const conds=bools.map(b=>`${b.name} == ${b.must}`).join(' and ');
+  dl.push(`\t\tif not (${conds}):`);
+  dl.push(`\t\t\treturn`);
+  dl.push(``);
+}
+if(feats.anim) dl.push(`\t\t${animVar}.play("${animAtk}")`);
+if(feats.cooldown) dl.push(`\t\t_attack_timer = attack_cooldown`);
+dl.push(``);
 
-  if(detectType==='area_area'||detectType==='body_area'){
-    dl.push(`\t\t# Detection handled via signal — see Setup panel`);
-  } else if(detectType==='body_body'){
-    dl.push(`\t\tfor i in get_slide_collision_count():`);
-    dl.push(`\t\t\tvar col := get_slide_collision(i)`);
-    dl.push(`\t\t\tvar body := col.get_collider()`);
-    dl.push(`\t\t\tif body.is_in_group("${group}"):`);
-    emitHit('\t\t\t\t','body');
-  } else if(detectType==='raycast'){
-    dl.push(`\t\tif ${rayVar}.is_colliding():`);
-    dl.push(`\t\t\tvar target := ${rayVar}.get_collider()`);
-    dl.push(`\t\t\tif target.is_in_group("${group}"):`);
-    emitHit('\t\t\t\t','target');
+function emitHit(indent,targetVar){
+  if(hits>1){
+    dl.push(`${indent}for _h in ${hits}:`);
+    dl.push(`${indent}\t${targetVar}.take_damage(${callArgs})`);
+  } else {
+    dl.push(`${indent}${targetVar}.take_damage(${callArgs})`);
   }
+}
+
+if(detectType==='area_area'||detectType==='body_area'){
+  dl.push(`\t\t# Detection handled via signal — see Setup panel`);
+} else if(detectType==='body_body'){
+  dl.push(`\t\tfor i in get_slide_collision_count():`);
+  dl.push(`\t\t\tvar col := get_slide_collision(i)`);
+  dl.push(`\t\t\tvar body := col.get_collider()`);
+  dl.push(`\t\t\tif body.is_in_group("${group}"):`);
+  emitHit('\t\t\t\t','body');
+} else if(detectType==='raycast'){
+  dl.push(`\t\tif ${rayVar}.is_colliding():`);
+  dl.push(`\t\t\tvar target := ${rayVar}.get_collider()`);
+  dl.push(`\t\t\tif target.is_in_group("${group}"):`);
+  emitHit('\t\t\t\t','target');
+}
 
   /* ── VICTIM VARS ── */
   const vv=[];
