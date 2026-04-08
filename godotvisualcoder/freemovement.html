@@ -242,7 +242,7 @@
         <div class="field-label">extends</div>
         <select id="nodeType" onchange="sync()">
           <option value="2d">CharacterBody2D</option>
-          <option value="3d">CharacterBody3D</option>
+          <option value="3d" selected>CharacterBody3D</option>
         </select>
       </div>
     </div>
@@ -264,8 +264,8 @@
         <div class="key-grid">
           <div class="field"><div class="field-label">Move Left</div><input type="text" id="a_left" value="ui_left"></div>
           <div class="field"><div class="field-label">Move Right</div><input type="text" id="a_right" value="ui_right"></div>
-          <div id="a_fwd" class="field hidden"><div class="field-label">Forward</div><input type="text" id="a_forward" value="ui_up"></div>
-          <div id="a_bck" class="field hidden"><div class="field-label">Back</div><input type="text" id="a_back" value="ui_down"></div>
+          <div id="a_fwd" class="field"><div class="field-label">Forward</div><input type="text" id="a_forward" value="ui_up"></div>
+          <div id="a_bck" class="field"><div class="field-label">Back</div><input type="text" id="a_back" value="ui_down"></div>
           <div id="a_jmp" class="field hidden"><div class="field-label">Jump</div><input type="text" id="a_jump" value="ui_accept"></div>
           <div id="a_run" class="field hidden"><div class="field-label">Run</div><input type="text" id="a_run_key" value="run"></div>
         </div>
@@ -277,8 +277,8 @@
         <div class="key-grid">
           <div class="field"><div class="field-label">Move Left</div><input type="text" id="k_left" value="KEY_A"></div>
           <div class="field"><div class="field-label">Move Right</div><input type="text" id="k_right" value="KEY_D"></div>
-          <div id="k_fwd" class="field hidden"><div class="field-label">Forward</div><input type="text" id="k_forward" value="KEY_W"></div>
-          <div id="k_bck" class="field hidden"><div class="field-label">Back</div><input type="text" id="k_back" value="KEY_S"></div>
+          <div id="k_fwd" class="field"><div class="field-label">Forward</div><input type="text" id="k_forward" value="KEY_W"></div>
+          <div id="k_bck" class="field"><div class="field-label">Back</div><input type="text" id="k_back" value="KEY_S"></div>
           <div id="k_jmp" class="field hidden"><div class="field-label">Jump</div><input type="text" id="k_jump" value="KEY_SPACE"></div>
           <div id="k_run" class="field hidden"><div class="field-label">Run</div><input type="text" id="k_run_key" value="KEY_SHIFT"></div>
         </div>
@@ -290,8 +290,8 @@
         <div class="key-grid">
           <div class="field"><div class="field-label">Left var</div><input type="text" id="u_left" value="btn_left"></div>
           <div class="field"><div class="field-label">Right var</div><input type="text" id="u_right" value="btn_right"></div>
-          <div id="u_fwd" class="field hidden"><div class="field-label">Forward var</div><input type="text" id="u_forward" value="btn_forward"></div>
-          <div id="u_bck" class="field hidden"><div class="field-label">Back var</div><input type="text" id="u_back" value="btn_back"></div>
+          <div id="u_fwd" class="field"><div class="field-label">Forward var</div><input type="text" id="u_forward" value="btn_forward"></div>
+          <div id="u_bck" class="field"><div class="field-label">Back var</div><input type="text" id="u_back" value="btn_back"></div>
           <div id="u_jmp" class="field hidden"><div class="field-label">Jump var</div><input type="text" id="u_jump" value="btn_jump"></div>
           <div id="u_run" class="field hidden"><div class="field-label">Run var</div><input type="text" id="u_run_key" value="btn_run"></div>
         </div>
@@ -320,7 +320,7 @@
         <div class="chk-box">
           <svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg>
         </div>
-        <span class="toggle-label">Jump</span>
+        <span class="toggle-label">Jump & Gravity</span>
         <span class="toggle-hint">is_on_floor() + gravity</span>
       </div>
 
@@ -462,7 +462,10 @@ function generate() {
   const vars = [];
   vars.push(`var walk_speed: float = ${walkSpd}`);
   if (run)  vars.push(`var run_speed: float = ${runSpd}`);
-  if (jump) { vars.push(`var jump_velocity: float = -${jumpVel}`); vars.push(`var gravity: float = ${grav}`); }
+  if (jump) { 
+    vars.push(`var jump_velocity: float = ${jumpVel}`); 
+    vars.push(`var gravity: float = ${grav}`); 
+  }
   if (run && runToggle) vars.push(`var is_running: bool = false`);
   if (activeTab === 'ui') {
     vars.push(`var ${L}: bool = false`);
@@ -478,9 +481,9 @@ function generate() {
   lines.push(``);
 
   if (jump) {
-    lines.push(`\t# Apply gravity`);
+    lines.push(`\t# Add gravity`);
     lines.push(`\tif not is_on_floor():`);
-    lines.push(`\t\tvelocity.y += gravity * delta`);
+    lines.push(`\t\tvelocity.y -= gravity * delta`);
     lines.push(``);
     lines.push(`\t# Jump`);
     const jc = activeTab==='action' ? `Input.is_action_just_pressed("${Jmp}")`
@@ -636,6 +639,10 @@ function copyOut(id, btn) {
   });
 }
 
+// Initialize with jump enabled by default to match your example
+feats.jump = true;
+$('tog-jump').classList.add('active');
+$('useJump').checked = true;
 sync();
 </script>
 </body>
