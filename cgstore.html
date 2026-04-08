@@ -8,676 +8,568 @@
     <link rel="icon" type="image/jpg" sizes="32x32" href="images/logo.jpg">
     <link rel="stylesheet" href="css/cgstyles.css">
     <style>
-        /* Store-specific styles */
-        .store-hero {
-            padding: 150px 0 80px;
-            text-align: center;
-            background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .store-hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        .filter-section {
-            padding: 2rem 0;
-            background: var(--secondary);
+
+        /* Store Layout - Desktop: Sidebar + Content */
+        .store-wrapper {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            background: #0a0a0a;
+        }
+
+        /* Sidebar Filter - Desktop */
+        .filter-sidebar {
+            width: 300px;
+            background: #111111;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2rem 1.5rem;
             position: sticky;
             top: 76px;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: calc(100vh - 76px);
+            overflow-y: auto;
+            transition: all 0.3s ease;
         }
-        
-        .filter-container {
+
+        .filter-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .filter-sidebar::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .filter-sidebar::-webkit-scrollbar-thumb {
+            background: #ff6b35;
+            border-radius: 4px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff6b35;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .category-list {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 0.5rem;
         }
-        
-        .filter-row {
+
+        .category-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .category-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .category-btn {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-        
-        .category-btn:hover {
-            border-color: var(--primary);
-            background: rgba(255, 107, 53, 0.1);
-        }
-        
-        .category-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .subcategory-container {
-            padding: 1rem 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        .subcategory-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .subcategory-label {
-            color: var(--accent);
-            font-weight: bold;
-            margin-right: 1rem;
-        }
-        
-        .subcategory-btn {
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
             background: rgba(255, 255, 255, 0.03);
-            color: #ccc;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1.2rem;
-            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-size: 0.9rem;
         }
-        
-        .subcategory-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+
+        .category-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
         }
-        
-        .subcategory-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
+
+        .category-item.active {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 107, 53, 0.05));
+            border-color: #ff6b35;
+            color: #ff6b35;
         }
-        
-        .active-filters {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
+
+        .category-icon {
+            font-size: 1.2rem;
+        }
+
+        .category-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 600;
             color: #ccc;
-            font-size: 0.9rem;
-        }
-        
-        .active-filter-badge {
-            background: rgba(255, 107, 53, 0.2);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 0.3rem 1rem;
-            border-radius: 20px;
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
-        .clear-filter {
-            background: none;
-            border: none;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 1.2rem;
-            margin-left: 0.5rem;
+
+        .subcategory-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        
-        .clear-filter:hover {
-            color: var(--error);
-        }
-        
-        .search-box {
-            position: relative;
-            flex: 1;
-            max-width: 400px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
+
+        .subcategory-chip {
+            padding: 0.4rem 1rem;
             background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
-            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        
-        .search-box input:focus {
+
+        .subcategory-chip:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff6b35;
+        }
+
+        .subcategory-chip.active {
+            background: #ff6b35;
+            border-color: #ff6b35;
+            color: white;
+        }
+
+        .search-sidebar {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .search-sidebar:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: #ff6b35;
         }
-        
-        .products-section {
-            padding: 80px 0;
-            min-height: 60vh;
+
+        .active-filters-sidebar {
+            margin-top: 1rem;
         }
-        
+
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 107, 53, 0.15);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 0.25rem;
+        }
+
+        .clear-badge {
+            cursor: pointer;
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        /* Main Content Area */
+        .store-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .store-hero {
+            background: radial-gradient(circle at 20% 30%, #2d1b69 0%, #0a0a0a 70%);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .store-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ff6b35, #ffb347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .store-hero p {
+            color: #ccc;
+        }
+
+        /* Products Grid */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-        
+
         .product-card {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
+            cursor: pointer;
         }
-        
+
         .product-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+            transform: translateY(-4px);
+            border-color: #ff6b35;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.15);
         }
-        
+
         .product-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #2d1b69 0%, var(--dark) 100%);
+            height: 160px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
-            color: var(--primary);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
-            overflow: hidden;
         }
-        
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
+
         .featured-badge {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: var(--accent);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
+            background: #ffb347;
+            color: #1a1a1a;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
             font-weight: bold;
         }
-        
+
         .product-content {
-            padding: 1.5rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            padding: 1rem;
         }
-        
+
         .product-category {
-            color: var(--accent);
-            font-size: 0.85rem;
+            font-size: 0.7rem;
+            color: #ff6b35;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
-            text-transform: uppercase;
         }
-        
-        .product-title {
-            font-size: 1.3rem;
-            color: var(--light);
-            margin-bottom: 0.8rem;
-            font-weight: bold;
-        }
-        
+
         .product-description {
-            color: #ccc;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            flex: 1;
+            font-size: 0.8rem;
+            color: #aaa;
+            line-height: 1.4;
+            margin-bottom: 1rem;
         }
-        
+
         .product-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
-        
+
         .product-price {
-            font-size: 1.8rem;
-            color: var(--primary);
+            font-size: 1.4rem;
             font-weight: bold;
+            color: #ff6b35;
         }
-        
-        .product-price-currency {
-            font-size: 1rem;
-            color: #ccc;
-        }
-        
+
         .buy-button {
-            background: var(--primary);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
+            background: #ff6b35;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
             border: none;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
-        
+
         .buy-button:hover {
             background: #e55a2b;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
-        
+
         .no-products {
             text-align: center;
-            padding: 4rem 2rem;
-            color: #ccc;
+            padding: 4rem;
+            color: #888;
         }
-        
-        .no-products-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--primary);
-        }
-        
-        .loading-spinner {
-            border: 4px solid rgba(255, 107, 53, 0.1);
-            border-top: 4px solid var(--primary);
+
+        /* Mobile Filter Button - Hidden on Desktop */
+        .mobile-filter-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: #ff6b35;
+            color: white;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+            border: none;
+        }
+
+        /* Mobile Filter Bottom Sheet */
+        .mobile-filter-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: #111111;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            z-index: 1000;
+            transition: bottom 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-filter-sheet.active {
+            bottom: 0;
+        }
+
+        .mobile-filter-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: #111111;
+            z-index: 10;
+        }
+
+        .mobile-filter-header h3 {
+            font-size: 1.2rem;
+        }
+
+        .close-sheet {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-filter-content {
+            padding: 1rem;
+        }
+
+        .mobile-category-item {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .mobile-category-item.active {
+            color: #ff6b35;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 107, 53, 0.1);
+            border-top: 3px solid #ff6b35;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        /* Email Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .email-modal {
-            background: var(--secondary);
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        .modal-title {
-            color: var(--primary);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .modal-product-info {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .modal-product-name {
-            font-size: 1.1rem;
-            color: var(--light);
-            margin-bottom: 0.5rem;
-        }
-        
-        .modal-product-price {
-            font-size: 1.5rem;
-            color: var(--primary);
-            font-weight: bold;
-        }
-        
-        .email-input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .email-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .modal-button {
-            flex: 1;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .modal-button-primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .modal-button-primary:hover {
-            background: #e55a2b;
-        }
-        
-        .modal-button-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--light);
-        }
-        
-        .modal-button-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .modal-note {
-            font-size: 0.85rem;
-            color: #ccc;
-            margin-top: 1rem;
-            text-align: center;
-        }
-        
-        /* Coupon Section */
-        .coupon-section {
-            margin: 1rem 0;
-        }
-        
-        .coupon-input-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .coupon-input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-        
-        .coupon-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .apply-coupon-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--light);
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        
-        .apply-coupon-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .apply-coupon-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .coupon-status {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-align: center;
-            display: none;
-        }
-        
-        .coupon-status.valid {
-            display: block;
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-            border: 1px solid #10b981;
-        }
-        
-        .coupon-status.invalid {
-            display: block;
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-        }
-        
-        .coupon-status.expired {
-            display: block;
-            background: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-            border: 1px solid #fbbf24;
-        }
-        
-        .coupon-status.loading {
-            display: block;
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-            border: 1px solid #3b82f6;
-        }
-        
-        #discountedPrice {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        
-        .price-strikethrough {
-            text-decoration: line-through;
-            opacity: 0.6;
-            font-size: 1.3rem !important;
-        }
-        
+
+        /* Responsive */
         @media (max-width: 768px) {
+            .filter-sidebar {
+                display: none;
+            }
+
+            .mobile-filter-toggle {
+                display: flex;
+            }
+
+            .store-content {
+                padding: 1rem;
+            }
+
+            .store-hero {
+                padding: 2rem 1rem;
+            }
+
             .store-hero h1 {
-                font-size: 2.2rem;
+                font-size: 1.8rem;
             }
-            
-            .filter-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .search-box {
-                max-width: 100%;
-            }
-            
+
             .products-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .filter-section {
-                top: 60px;
-            }
-            
-            .subcategory-buttons {
-                justify-content: center;
+                gap: 1rem;
             }
         }
-        
-        @media (max-width: 480px) {
-            .coupon-input-group {
-                flex-direction: column;
-            }
-            
-            .apply-coupon-btn {
-                width: 100%;
-            }
-            
-            .category-buttons {
-                justify-content: center;
+
+        @media (min-width: 769px) {
+            .mobile-filter-sheet, .overlay {
+                display: none !important;
             }
         }
     </style>
 </head>
 <body>
     <!-- Header -->
-  <div id="sanjay-header"></div>
+    <div id="sanjay-header"></div>
 
-    <!-- Hero Section -->
-    <section class="store-hero">
-        <div class="container">
-            <h1>🎮 Godot Assets Store</h1>
-            <p>40+ production-tested systems, scripts, and game frameworks for Godot 4</p>
-        </div>
-    </section>
+    <!-- Store Wrapper -->
+    <div class="store-wrapper">
+        <!-- Desktop Sidebar Filter -->
+        <aside class="filter-sidebar" id="filterSidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔍 Search</div>
+                <input type="text" id="searchSidebar" class="search-sidebar" placeholder="Search products...">
+            </div>
 
-    <!-- Filter Section -->
-    <section class="filter-section" id="filters">
-        <div class="container">
-            <div class="filter-container">
-                <!-- First Row: Main Categories -->
-                <div class="filter-row">
-                    <div class="category-buttons">
-                        <button class="category-btn active" data-category="all">All Products</button>
-                        <button class="category-btn" data-category="course">🎓 Courses</button>
-                        <button class="category-btn" data-category="script">📝 Scripts</button>
-                        <button class="category-btn" data-category="system">⚙️ Systems</button>
-                        <button class="category-btn" data-category="game">🎮 Games</button>
-                        <button class="category-btn" data-category="ai-tool">🤖 AI Tools</button>
-                        <button class="category-btn" data-category="app">📱 Apps</button>
-                    </div>
-                    
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="🔍 Search products...">
+            <div class="sidebar-section">
+                <div class="sidebar-title">📂 Categories</div>
+                <div class="category-list" id="categoryList">
+                    <!-- Categories will be populated by JS from your products -->
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">🏷️ Filters</div>
+                <div class="filter-group">
+                    <div class="filter-label">⭐ Featured</div>
+                    <div class="subcategory-list">
+                        <div class="subcategory-chip" data-filter="featured">Featured Only</div>
                     </div>
                 </div>
-                
-                <!-- Second Row: Subcategories (Dynamic based on main category) -->
-                <div class="subcategory-container" id="subcategoryContainer">
-                    <div class="subcategory-buttons">
-                        <span class="subcategory-label">Filter by:</span>
-                        <button class="subcategory-btn active" data-subcategory="all">All</button>
-                        <button class="subcategory-btn" data-subcategory="featured">⭐ Featured</button>
-                        <button class="subcategory-btn" data-subcategory="ui">🎨 UI</button>
-                        <button class="subcategory-btn" data-subcategory="multiplayer">🌐 Multiplayer</button>
-                        <button class="subcategory-btn" data-subcategory="ai">🤖 AI</button>
-                        <button class="subcategory-btn" data-subcategory="mobile">📱 Mobile</button>
-                        <button class="subcategory-btn" data-subcategory="backend">🔧 Backend</button>
-                        <button class="subcategory-btn" data-subcategory="template">📄 Template</button>
-                    </div>
-                </div>
-                
-                <!-- Active Filters Display -->
-                <div class="active-filters" id="activeFilters">
-                    <span>Active filters:</span>
-                    <div class="active-filter-badge" id="activeCategoryBadge">
-                        Category: All
-                        <button class="clear-filter" onclick="clearCategoryFilter()">✕</button>
-                    </div>
-                    <div class="active-filter-badge" id="activeSubcategoryBadge">
-                        Subcategory: All
-                        <button class="clear-filter" onclick="clearSubcategoryFilter()">✕</button>
+                <div class="filter-group">
+                    <div class="filter-label">🎨 Type</div>
+                    <div class="subcategory-list" id="subcategoryList">
+                        <!-- Subcategories populated by JS -->
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Products Section -->
-    <section class="products-section" id="products">
-        <div class="container">
-            <!-- Loading State -->
-            <div class="loading" id="loadingState">
-                <div class="loading-spinner"></div>
-                <p>Loading awesome products...</p>
+            <div class="sidebar-section">
+                <div class="sidebar-title">🎯 Active Filters</div>
+                <div id="activeFiltersSidebar" class="active-filters-sidebar">
+                    <!-- Active filters display -->
+                </div>
             </div>
-            
+        </aside>
+
+        <!-- Main Content -->
+        <main class="store-content">
+            <div class="store-hero">
+                <h1>🎮 Godot Assets Store</h1>
+                <p>Production-tested systems, scripts, and frameworks for Godot 4</p>
+            </div>
+
             <!-- Products Grid -->
-            <div class="products-grid" id="productsGrid" style="display: none;">
-                <!-- Products will be injected here by JavaScript -->
+            <div id="productsContainer">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading awesome products...</p>
+                </div>
             </div>
-            
-            <!-- No Products State -->
-            <div class="no-products" id="noProductsState" style="display: none;">
-                <div class="no-products-icon">🔍</div>
-                <h3>No products found</h3>
-                <p>Try adjusting your filters or search terms</p>
+        </main>
+    </div>
+
+    <!-- Mobile Filter Toggle Button -->
+    <button class="mobile-filter-toggle" id="mobileFilterToggle">
+        🔍
+    </button>
+
+    <!-- Mobile Filter Bottom Sheet -->
+    <div class="overlay" id="mobileOverlay"></div>
+    <div class="mobile-filter-sheet" id="mobileFilterSheet">
+        <div class="mobile-filter-header">
+            <h3>Filter Products</h3>
+            <button class="close-sheet" id="closeSheetBtn">✕</button>
+        </div>
+        <div class="mobile-filter-content">
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔍 Search</div>
+                <input type="text" id="searchMobile" class="search-sidebar" placeholder="Search products...">
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">📂 Categories</div>
+                <div id="mobileCategoryList"></div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">⭐ Featured</div>
+                <div class="subcategory-list">
+                    <div class="subcategory-chip" data-filter-mobile="featured">Featured Only</div>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">🎨 Type</div>
+                <div id="mobileSubcategoryList" class="subcategory-list"></div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Email Modal -->
-    <div class="modal-overlay" id="emailModal">
+    <!-- Email Modal (same as original, keep for functionality) -->
+    <div class="modal-overlay" id="emailModal" style="display: none;">
         <div class="email-modal">
             <button class="modal-close" onclick="closeEmailModal()">✕</button>
             <h2 class="modal-title">Enter Your Email</h2>
-            
             <div class="modal-product-info">
                 <div class="modal-product-name" id="modalProductName"></div>
                 <div class="modal-product-price">
@@ -685,102 +577,245 @@
                     <span id="discountedPrice" style="display: none; color: #10b981; margin-left: 10px;"></span>
                 </div>
             </div>
-            
-            <input 
-                type="email" 
-                class="email-input" 
-                id="customerEmail" 
-                placeholder="your@email.com"
-                required
-            >
-            
-            <!-- Coupon Section -->
+            <input type="email" class="email-input" id="customerEmail" placeholder="your@email.com" required>
             <div class="coupon-section">
                 <div class="coupon-input-group">
-                    <input 
-                        type="text" 
-                        class="coupon-input" 
-                        id="couponCode" 
-                        placeholder="Enter coupon code (optional)"
-                    >
-                    <button class="apply-coupon-btn" id="applyCouponBtn" onclick="applyCoupon()">
-                        Apply
-                    </button>
+                    <input type="text" class="coupon-input" id="couponCode" placeholder="Enter coupon code (optional)">
+                    <button class="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
                 </div>
                 <div class="coupon-status" id="couponStatus"></div>
             </div>
-            
             <div class="modal-buttons">
-                <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">
-                    Cancel
-                </button>
-                <button class="modal-button modal-button-primary" onclick="proceedToPayment()">
-                    Continue to Payment
-                </button>
+                <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">Cancel</button>
+                <button class="modal-button modal-button-primary" onclick="proceedToPayment()">Continue to Payment</button>
             </div>
-            
-            <p class="modal-note">
-                We'll check if you already own this product and send the download link to this email.
-            </p>
+            <p class="modal-note">We'll send the download link to this email after purchase.</p>
         </div>
     </div>
 
     <!-- Footer -->
     <div id="sanjay-footer"></div>
-     <script src="js/components.js"></script>
 
-    <!-- Load Razorpay SDK -->
+    <script src="js/components.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
-    <!-- Load store.js -->
     <script src="js/store.js"></script>
     
     <script>
-        // Mobile Menu
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            document.body.classList.add('menu-open');
+        // This script now works with your existing store.js
+        // It assumes store.js exposes:
+        // - products array or a function to get products
+        // - renderProducts() function
+        // - filter/sort functions
+        
+        // Wait for both DOM and store.js to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if products are available from store.js
+            if (typeof products !== 'undefined') {
+                initializeFilters();
+            } else {
+                // Poll for products to be available
+                const checkProducts = setInterval(function() {
+                    if (typeof products !== 'undefined') {
+                        clearInterval(checkProducts);
+                        initializeFilters();
+                    }
+                }, 100);
+            }
+        });
+        
+        function initializeFilters() {
+            // Populate categories dynamically from actual products
+            populateCategories();
+            populateSubcategories();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Trigger initial render if renderProducts exists
+            if (typeof renderProducts === 'function') {
+                renderProducts();
+            }
         }
-
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            document.body.classList.remove('menu-open');
-        }
-
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-        // Filter Functions (to be implemented in store.js)
-        function clearCategoryFilter() {
-            // This will be handled by store.js
-            document.querySelector('.category-btn[data-category="all"]').click();
-        }
-
-        function clearSubcategoryFilter() {
-            // This will be handled by store.js
-            document.querySelector('.subcategory-btn[data-subcategory="all"]').click();
-        }
-
-        // Currency Toggle (to be enhanced in store.js)
-        const currencyOptions = document.querySelectorAll('.currency-option');
-        currencyOptions.forEach(opt => {
-            opt.addEventListener('click', () => {
-                currencyOptions.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                // Currency change will be handled by store.js
-                if (typeof updatePricesForCurrency === 'function') {
-                    updatePricesForCurrency(opt.dataset.currency);
+        
+        function populateCategories() {
+            if (typeof products === 'undefined') return;
+            
+            // Get unique categories from products
+            const categoriesMap = new Map();
+            categoriesMap.set('all', { name: 'All Products', icon: '🎮', count: products.length });
+            
+            products.forEach(product => {
+                if (product.category && !categoriesMap.has(product.category)) {
+                    let icon = '📦';
+                    switch(product.category) {
+                        case 'course': icon = '🎓'; break;
+                        case 'script': icon = '📝'; break;
+                        case 'system': icon = '⚙️'; break;
+                        case 'game': icon = '🎮'; break;
+                        case 'ai-tool': icon = '🤖'; break;
+                        case 'app': icon = '📱'; break;
+                    }
+                    categoriesMap.set(product.category, {
+                        name: product.category.charAt(0).toUpperCase() + product.category.slice(1),
+                        icon: icon,
+                        count: products.filter(p => p.category === product.category).length
+                    });
                 }
             });
-        });
+            
+            // Render desktop categories
+            const categoryList = document.getElementById('categoryList');
+            if (categoryList) {
+                categoryList.innerHTML = Array.from(categoriesMap.entries()).map(([id, data]) => `
+                    <div class="category-item" data-cat="${id}" onclick="setCategory('${id}')">
+                        <span class="category-icon">${data.icon}</span>
+                        <span>${data.name}</span>
+                        <span class="category-count">${data.count}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Render mobile categories
+            const mobileCategoryList = document.getElementById('mobileCategoryList');
+            if (mobileCategoryList) {
+                mobileCategoryList.innerHTML = Array.from(categoriesMap.entries()).map(([id, data]) => `
+                    <div class="mobile-category-item" onclick="setCategory('${id}'); closeMobileSheet();">
+                        <span>${data.icon}</span>
+                        <span>${data.name}</span>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function populateSubcategories() {
+            const subcategories = ['ui', 'multiplayer', 'ai', 'mobile', 'backend', 'template'];
+            const subcatList = document.getElementById('subcategoryList');
+            if (subcatList) {
+                subcatList.innerHTML = subcategories.map(sub => `
+                    <div class="subcategory-chip" data-filter="${sub}" onclick="setSubcategory('${sub}')">${sub}</div>
+                `).join('');
+            }
+            
+            const mobileSubcat = document.getElementById('mobileSubcategoryList');
+            if (mobileSubcat) {
+                mobileSubcat.innerHTML = subcategories.map(sub => `
+                    <div class="subcategory-chip" onclick="setSubcategory('${sub}'); closeMobileSheet();">${sub}</div>
+                `).join('');
+            }
+        }
+        
+        function setupEventListeners() {
+            // Search inputs
+            const searchSidebar = document.getElementById('searchSidebar');
+            const searchMobile = document.getElementById('searchMobile');
+            
+            if (searchSidebar) {
+                searchSidebar.addEventListener('input', (e) => {
+                    if (typeof updateSearch === 'function') {
+                        updateSearch(e.target.value);
+                    }
+                    updateActiveFilters();
+                });
+            }
+            
+            if (searchMobile) {
+                searchMobile.addEventListener('input', (e) => {
+                    if (typeof updateSearch === 'function') {
+                        updateSearch(e.target.value);
+                    }
+                    updateActiveFilters();
+                });
+            }
+            
+            // Featured filter
+            document.querySelectorAll('.subcategory-chip[data-filter="featured"], .subcategory-chip[data-filter-mobile="featured"]').forEach(el => {
+                el.addEventListener('click', () => {
+                    if (typeof toggleFeatured === 'function') {
+                        toggleFeatured();
+                    }
+                });
+            });
+        }
+        
+        // Global functions for onclick handlers
+        window.setCategory = function(cat) {
+            if (typeof filterByCategory === 'function') {
+                filterByCategory(cat);
+            }
+            updateActiveFilters();
+            // Update active class on category items
+            document.querySelectorAll('.category-item').forEach(el => {
+                if (el.dataset.cat === cat) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        };
+        
+        window.setSubcategory = function(sub) {
+            if (typeof filterBySubcategory === 'function') {
+                filterBySubcategory(sub);
+            }
+            updateActiveFilters();
+        };
+        
+        window.updateActiveFilters = function() {
+            // This will be implemented based on your store.js filter state
+            const activeDiv = document.getElementById('activeFiltersSidebar');
+            if (activeDiv && typeof getActiveFilters === 'function') {
+                const filters = getActiveFilters();
+                activeDiv.innerHTML = filters;
+            }
+        };
+        
+        // Mobile sheet functions
+        window.openMobileSheet = function() {
+            document.getElementById('mobileFilterSheet').classList.add('active');
+            document.getElementById('mobileOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+        
+        window.closeMobileSheet = function() {
+            document.getElementById('mobileFilterSheet').classList.remove('active');
+            document.getElementById('mobileOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        };
+        
+        // Modal functions (should be defined in your store.js)
+        window.closeEmailModal = function() {
+            document.getElementById('emailModal').style.display = 'none';
+        };
+        
+        window.proceedToPayment = function() {
+            // Your payment logic from store.js
+            if (typeof processPayment === 'function') {
+                processPayment();
+            }
+        };
+        
+        window.applyCoupon = function() {
+            // Your coupon logic from store.js
+            if (typeof validateCoupon === 'function') {
+                validateCoupon();
+            }
+        };
+        
+        // Attach mobile event listeners
+        const mobileToggle = document.getElementById('mobileFilterToggle');
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', openMobileSheet);
+        }
+        
+        const closeSheetBtn = document.getElementById('closeSheetBtn');
+        if (closeSheetBtn) {
+            closeSheetBtn.addEventListener('click', closeMobileSheet);
+        }
+        
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileSheet);
+        }
     </script>
 </body>
 </html>
