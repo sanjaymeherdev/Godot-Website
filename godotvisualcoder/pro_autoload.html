@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Autoload Builder · Simple Singleton Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+      --border:#2a2f37; --border2:#343b45;
+      --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+      --green:#4ade80; --green2:#22c55e;
+      --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+      --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+      --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+      --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+      --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+      --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+      --r:10px; --rl:14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
+    .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; font-size: 18px; }
+    .back-btn:active { background: var(--bg4); }
+    .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+    .header-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .header-badge { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); padding: 3px 8px; border-radius: 20px; }
+
+    .page { padding: 16px 16px 100px; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 900px) {
+      .page { flex-direction: row; align-items: flex-start; }
+      .form-col { flex: 1.2; min-width: 380px; }
+      .out-col { flex: 1.8; min-width: 450px; }
+    }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .card-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .card-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .card-dot.blue { background: var(--blue); }
+    .card-dot.purple { background: var(--purple); }
+    .card-dot.amber { background: var(--amber); }
+    .card-dot.coral { background: var(--coral); }
+    .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); font-family: var(--mono); }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.02em; }
+    .field-hint { font-size: 9px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+    input[type="text"], input[type="number"] { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 8px 12px; outline: none; transition: border-color 0.15s; }
+    input:focus { border-color: var(--green2); }
+
+    .param-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .param-row select { background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); padding: 6px 8px; font-family: var(--mono); font-size: 11px; width: 80px; }
+    .param-row input { flex: 2; min-width: 120px; }
+    .param-row .default-input { flex: 1.5; }
+    .param-row button { background: var(--bg4); border: 1px solid var(--border2); color: var(--coral); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; flex-shrink: 0; }
+    .add-btn { background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); padding: 8px; color: var(--green2); font-family: var(--mono); font-size: 11px; cursor: pointer; margin-top: 4px; width: 100%; }
+
+    .toggle-item { display: flex; align-items: center; gap: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .toggle-item.active { background: var(--green-dim2); border-color: var(--green2); }
+    .toggle-item input[type="checkbox"] { display: none; }
+    .chk-box { width: 20px; height: 20px; flex-shrink: 0; border: 1px solid var(--border2); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+    .toggle-item.active .chk-box { background: var(--green); border-color: var(--green); }
+    .chk-mark { display: none; }
+    .toggle-item.active .chk-mark { display: block; }
+
+    .hint { background: var(--bg4); border-left: 2px solid var(--green2); padding: 8px 12px; border-radius: 0 var(--r) var(--r) 0; font-size: 10px; color: var(--text2); font-family: var(--mono); line-height: 1.5; margin: 4px 0; }
+
+    .gen-btn { width: 100%; height: 52px; background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); border-radius: var(--rl); color: var(--purple); font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.1s; margin-top: 8px; }
+    .gen-btn:active { background: rgba(192,132,252,0.2); transform: scale(0.99); }
+
+    .out-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .out-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .out-tag { font-size: 10px; font-family: var(--mono); font-weight: 600; padding: 3px 8px; border-radius: 4px; background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .copy-btn { margin-left: auto; padding: 5px 12px; background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); font-family: var(--mono); font-size: 11px; cursor: pointer; transition: 0.1s; }
+    .copy-btn:active { background: var(--bg3); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+    .out-code { padding: 14px; font-family: var(--mono); font-size: 11px; line-height: 1.65; color: var(--text); white-space: pre; overflow-x: auto; min-height: 300px; background: var(--bg); border-radius: 0 0 var(--rl) var(--rl); }
+    .out-code.empty { color: var(--text3); font-style: italic; }
+
+    .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; } .cmt { color: #546e7a; font-style: italic; } .typ { color: var(--amber); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="#">‹</a>
+  <div>
+    <div class="header-title">Autoload Builder</div>
+    <div class="header-sub">Simple Singleton · Persists Across Scenes</div>
+  </div>
+  <span class="header-badge">Free · No Install</span>
+</div>
+
+<div class="page">
+  <div class="form-col">
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Autoload Name</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Singleton Name</div><input type="text" id="autoloadName" value="GameData" placeholder="e.g., GameData, PlayerData, Global"></div>
+        <div class="field-hint">This will be the name used in Project Settings > Autoload</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot green"></div><span class="card-title">Variables (persist across scenes)</span></div>
+      <div class="card-body">
+        <div id="variablesContainer"></div>
+        <button class="add-btn" onclick="addVariable()">+ Add Variable</button>
+        <div class="field-hint">Add any variables you want to store globally. They will persist when changing scenes.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Save/Load to File (Optional)</span></div>
+      <div class="card-body">
+        <div class="toggle-item" id="tog-saveLoad" onclick="toggleSaveLoad()">
+          <input type="checkbox" id="saveLoadCheck">
+          <div class="chk-box"><svg class="chk-mark" width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Add Save/Load to File</span>
+          <span class="toggle-hint">Saves all variables to user://game_data.json</span>
+        </div>
+        <div id="autoSaveSection" class="hidden">
+          <div class="field"><div class="field-label">Auto-save Interval (seconds)</div><input type="number" id="autoSaveInterval" value="60" step="10"></div>
+          <div class="field-hint">0 = disabled</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="gen-btn" onclick="generateAutoload()">⚡ Generate Autoload Script</button>
+  </div>
+
+  <div class="out-col">
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag" id="outputFileName">GameData.gd</span>
+        <button class="copy-btn" onclick="copyOutput(this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="codeOutput"># Add variables above, then click Generate</div>
+    </div>
+    <div class="out-card">
+      <div class="out-head">
+        <span class="out-tag" style="background:rgba(251,191,36,0.12);color:var(--amber);border-color:var(--amber);">Usage Example</span>
+        <button class="copy-btn" onclick="copyUsage(this)">Copy</button>
+      </div>
+      <div class="out-code" id="usageOutput" style="font-size: 10px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // State
+  let variables = [];
+  let saveLoadEnabled = false;
+
+  function toggleSaveLoad() {
+    saveLoadEnabled = !saveLoadEnabled;
+    document.getElementById('tog-saveLoad').classList.toggle('active', saveLoadEnabled);
+    document.getElementById('saveLoadCheck').checked = saveLoadEnabled;
+    const autoSaveSection = document.getElementById('autoSaveSection');
+    if (saveLoadEnabled) {
+      autoSaveSection.classList.remove('hidden');
+    } else {
+      autoSaveSection.classList.add('hidden');
+    }
+  }
+
+  function addVariable() {
+    variables.push({ name: `var${variables.length + 1}`, type: "int", default: "0" });
+    renderVariables();
+  }
+
+  function removeVariable(idx) {
+    variables.splice(idx, 1);
+    renderVariables();
+  }
+
+  function updateVariable(idx, field, value) {
+    variables[idx][field] = value;
+  }
+
+  function renderVariables() {
+    const container = document.getElementById('variablesContainer');
+    if (variables.length === 0) {
+      container.innerHTML = '<div class="hint">No variables added. Click "+ Add Variable" to add global variables like "score", "health", "player_name", etc.</div>';
+      return;
+    }
+    let html = '';
+    for (let i = 0; i < variables.length; i++) {
+      const v = variables[i];
+      html += `
+        <div class="param-row">
+          <input type="text" value="${escapeHtml(v.name)}" placeholder="var_name" style="flex:1.5" onchange="updateVariable(${i}, 'name', this.value)">
+          <select onchange="updateVariable(${i}, 'type', this.value)" style="width:85px">
+            <option value="int" ${v.type === 'int' ? 'selected' : ''}>int</option>
+            <option value="float" ${v.type === 'float' ? 'selected' : ''}>float</option>
+            <option value="String" ${v.type === 'String' ? 'selected' : ''}>String</option>
+            <option value="bool" ${v.type === 'bool' ? 'selected' : ''}>bool</option>
+            <option value="Vector2" ${v.type === 'Vector2' ? 'selected' : ''}>Vector2</option>
+            <option value="Vector3" ${v.type === 'Vector3' ? 'selected' : ''}>Vector3</option>
+            <option value="Color" ${v.type === 'Color' ? 'selected' : ''}>Color</option>
+            <option value="Dictionary" ${v.type === 'Dictionary' ? 'selected' : ''}>Dictionary</option>
+            <option value="Array" ${v.type === 'Array' ? 'selected' : ''}>Array</option>
+          </select>
+          <input type="text" value="${escapeHtml(v.default)}" placeholder="default" class="default-input" style="flex:1.5" onchange="updateVariable(${i}, 'default', this.value)">
+          <button onclick="removeVariable(${i})">✕</button>
+        </div>
+      `;
+    }
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(str) { if (!str) return ''; return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function formatDefaultValue(type, value) {
+    if (type === "String") {
+      let v = value.trim();
+      if (v === "") return '""';
+      if (v.startsWith('"') && v.endsWith('"')) return v;
+      return `"${v}"`;
+    }
+    if (type === "bool") {
+      if (value === "true" || value === "True" || value === "1") return "true";
+      return "false";
+    }
+    if (type === "Vector2") {
+      if (value.includes(",")) return value;
+      return "Vector2.ZERO";
+    }
+    if (type === "Vector3") {
+      if (value.includes(",")) return value;
+      return "Vector3.ZERO";
+    }
+    if (type === "Color") {
+      return "Color.WHITE";
+    }
+    if (type === "Dictionary") {
+      return "{}";
+    }
+    if (type === "Array") {
+      return "[]";
+    }
+    if (type === "int" || type === "float") {
+      if (value === "" || isNaN(parseFloat(value))) return "0";
+      return value;
+    }
+    return value || "null";
+  }
+
+  function toSnakeCase(str) {
+    return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+  }
+
+  function highlightGDScript(code) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const keywords = new Set(['extends','class_name','func','var','const','if','elif','else','for','while','return','true','false','null','and','or','not','pass','break','continue','@export','@onready','signal','enum','static','await','match','as','is','in','self','super','void']);
+    const types = new Set(['int','float','String','bool','Vector2','Vector3','Color','Dictionary','Array','Node','Resource']);
+    const builtins = new Set(['print','push_error','assert','get_tree','FileAccess','JSON','Time','load','save']);
+    function tokenLine(line) {
+      let out = '', i = 0;
+      while (i < line.length) {
+        if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+        if (line[i] === '"') { let j = i+1; while(j < line.length && line[j] !== '"') j++; out += `<span class="str">${esc(line.slice(i, j+1))}</span>`; i = j+1; continue; }
+        if (line[i] === '@') { let j = i+1; while(j < line.length && /[\w_]/.test(line[j])) j++; out += `<span class="kw">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        if (/[a-zA-Z_]/.test(line[i])) { let j = i; while(j < line.length && /[\w]/.test(line[j])) j++; const w = line.slice(i, j);
+          if (keywords.has(w)) out += `<span class="kw">${esc(w)}</span>`;
+          else if (types.has(w)) out += `<span class="typ">${esc(w)}</span>`;
+          else if (builtins.has(w)) out += `<span class="fn">${esc(w)}</span>`;
+          else out += esc(w);
+          i = j; continue;
+        }
+        if (/\d/.test(line[i]) || (line[i] === '-' && /\d/.test(line[i+1]))) { let j = i + (line[i] === '-' ? 1 : 0); while(j < line.length && /[\d.]/.test(line[j])) j++; out += `<span class="num">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        out += esc(line[i]); i++;
+      }
+      return out;
+    }
+    return code.split('\n').map(tokenLine).join('\n');
+  }
+
+  function generateAutoload() {
+    const name = document.getElementById('autoloadName').value.trim();
+    const finalName = name === "" ? "GameData" : name;
+    document.getElementById('outputFileName').innerHTML = `${finalName}.gd`;
+    
+    const autoSaveInterval = parseInt(document.getElementById('autoSaveInterval').value) || 60;
+    
+    let code = `extends Node\n\n`;
+    code += `# ============================================\n`;
+    code += `# ${finalName} - Autoload Singleton\n`;
+    code += `# Persists across scene changes\n`;
+    code += `# Add as AutoLoad in Project Settings > Autoload\n`;
+    code += `# ============================================\n\n`;
+    
+    // Variables section
+    code += `# ────────────────────────────────────────────\n`;
+    code += `# GLOBAL VARIABLES (persist across scenes)\n`;
+    code += `# ────────────────────────────────────────────\n\n`;
+    
+    for (const v of variables) {
+      const varName = v.name.trim();
+      if (varName === "") continue;
+      const defaultValue = formatDefaultValue(v.type, v.default);
+      code += `var ${varName}: ${v.type} = ${defaultValue}\n`;
+    }
+    code += `\n`;
+    
+    // Signal for data changes (optional but useful)
+    code += `signal data_changed(key: String, value: Variant)\n\n`;
+    
+    // Getter/Setter methods for each variable
+    if (variables.length > 0) {
+      code += `# ────────────────────────────────────────────\n`;
+      code += `# GETTER / SETTER METHODS\n`;
+      code += `# ────────────────────────────────────────────\n\n`;
+      
+      for (const v of variables) {
+        const varName = v.name.trim();
+        if (varName === "") continue;
+        const type = v.type;
+        const setterName = `set_${varName}`;
+        const getterName = `get_${varName}`;
+        
+        code += `func ${setterName}(value: ${type}) -> void:\n`;
+        code += `\t${varName} = value\n`;
+        code += `\tdata_changed.emit("${varName}", value)\n\n`;
+        
+        code += `func ${getterName}() -> ${type}:\n`;
+        code += `\treturn ${varName}\n\n`;
+      }
+    }
+    
+    // Reset function
+    code += `# ────────────────────────────────────────────\n`;
+    code += `# RESET TO DEFAULTS\n`;
+    code += `# ────────────────────────────────────────────\n\n`;
+    code += `func reset() -> void:\n`;
+    for (const v of variables) {
+      const varName = v.name.trim();
+      if (varName === "") continue;
+      const defaultValue = formatDefaultValue(v.type, v.default);
+      code += `\t${varName} = ${defaultValue}\n`;
+    }
+    code += `\n`;
+    
+    // Save/Load functionality (if enabled)
+    if (saveLoadEnabled) {
+      code += `# ────────────────────────────────────────────\n`;
+      code += `# SAVE / LOAD TO FILE\n`;
+      code += `# ────────────────────────────────────────────\n\n`;
+      
+      code += `const SAVE_FILE := "user://${toSnakeCase(finalName)}_data.json"\n\n`;
+      
+      code += `func save_to_file() -> bool:\n`;
+      code += `\tvar save_data := {}\n`;
+      for (const v of variables) {
+        const varName = v.name.trim();
+        if (varName === "") continue;
+        code += `\tsave_data["${varName}"] = ${varName}\n`;
+      }
+      code += `\tvar file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)\n`;
+      code += `\tif not file:\n\t\treturn false\n`;
+      code += `\tfile.store_string(JSON.stringify(save_data))\n`;
+      code += `\treturn true\n\n`;
+      
+      code += `func load_from_file() -> bool:\n`;
+      code += `\tif not FileAccess.file_exists(SAVE_FILE):\n\t\treturn false\n`;
+      code += `\tvar file = FileAccess.open(SAVE_FILE, FileAccess.READ)\n`;
+      code += `\tif not file:\n\t\treturn false\n`;
+      code += `\tvar json_text = file.get_as_text()\n`;
+      code += `\tif json_text.is_empty():\n\t\treturn false\n`;
+      code += `\tvar json = JSON.new()\n`;
+      code += `\tif json.parse(json_text) != OK:\n\t\treturn false\n`;
+      code += `\tvar data = json.data\n`;
+      for (const v of variables) {
+        const varName = v.name.trim();
+        if (varName === "") continue;
+        code += `\tif data.has("${varName}"):\n\t\t${varName} = data["${varName}"]\n`;
+      }
+      code += `\treturn true\n\n`;
+      
+      if (autoSaveInterval > 0) {
+        code += `var _save_timer: float = 0.0\n\n`;
+        code += `func _process(delta: float) -> void:\n`;
+        code += `\t_save_timer += delta\n`;
+        code += `\tif _save_timer >= ${autoSaveInterval}:\n`;
+        code += `\t\t_save_timer = 0.0\n`;
+        code += `\t\tsave_to_file()\n\n`;
+      }
+      
+      code += `func _ready() -> void:\n`;
+      code += `\tload_from_file()\n`;
+    }
+    
+    // Render output
+    const outputEl = document.getElementById('codeOutput');
+    outputEl.classList.remove('empty');
+    outputEl.innerHTML = highlightGDScript(code);
+    
+    // Usage example
+    let usage = `# === ${finalName} Usage Examples ===\n\n`;
+    usage += `# Set values anywhere in your game:\n`;
+    for (const v of variables.slice(0, 3)) {
+      const varName = v.name.trim();
+      if (varName === "") continue;
+      const type = v.type;
+      if (type === "int") usage += `${finalName}.set_${varName}(100)\n`;
+      else if (type === "String") usage += `${finalName}.set_${varName}("Hello World")\n`;
+      else if (type === "bool") usage += `${finalName}.set_${varName}(true)\n`;
+      else usage += `${finalName}.set_${varName}(value)\n`;
+    }
+    usage += `\n# Get values anywhere:\n`;
+    for (const v of variables.slice(0, 3)) {
+      const varName = v.name.trim();
+      if (varName === "") continue;
+      usage += `var my_${varName} = ${finalName}.get_${varName}()\n`;
+    }
+    usage += `\n# Direct access (also works, but getter/setter emit signals):\n`;
+    for (const v of variables.slice(0, 2)) {
+      const varName = v.name.trim();
+      if (varName === "") continue;
+      usage += `${finalName}.${varName} = 999\n`;
+    }
+    usage += `\n# Listen to changes:\n`;
+    usage += `${finalName}.data_changed.connect(_on_data_changed)\n\n`;
+    usage += `func _on_data_changed(key: String, value: Variant):\n`;
+    usage += `\tprint("Data changed: ", key, " = ", value)\n`;
+    
+    if (saveLoadEnabled) {
+      usage += `\n# Save/Load manually:\n`;
+      usage += `${finalName}.save_to_file()\n`;
+      usage += `${finalName}.load_from_file()\n`;
+      usage += `\n# Reset all to defaults:\n`;
+      usage += `${finalName}.reset()\n`;
+    }
+    
+    const usageEl = document.getElementById('usageOutput');
+    usageEl.innerHTML = highlightGDScript(usage);
+  }
+  
+  function copyOutput(btn) {
+    const el = document.getElementById('codeOutput');
+    let text = el.innerText || el.textContent;
+    if (!text.trim() || text.includes('Add variables')) return;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+  
+  function copyUsage(btn) {
+    const el = document.getElementById('usageOutput');
+    let text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+  
+  // Initialize
+  renderVariables();
+</script>
+</body>
+</html>
