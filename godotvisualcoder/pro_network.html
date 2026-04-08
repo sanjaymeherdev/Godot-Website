@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Godot Network Generator · Multiplayer Scaffold</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
+      --border:#2a2f37; --border2:#343b45;
+      --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
+      --green:#4ade80; --green2:#22c55e;
+      --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
+      --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
+      --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
+      --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
+      --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
+      --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+      --r:10px; --rl:14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
+    .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); text-decoration: none; font-size: 18px; }
+    .back-btn:active { background: var(--bg4); }
+    .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+    .header-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+    .header-badge { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--purple); background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); padding: 3px 8px; border-radius: 20px; }
+
+    .page { padding: 16px 16px 100px; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 900px) {
+      .page { flex-direction: row; align-items: flex-start; }
+      .form-col { flex: 1.2; min-width: 340px; }
+      .out-col { flex: 1.8; min-width: 400px; }
+    }
+
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .card-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .card-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .card-dot.blue { background: var(--blue); }
+    .card-dot.purple { background: var(--purple); }
+    .card-dot.amber { background: var(--amber); }
+    .card-dot.coral { background: var(--coral); }
+    .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); font-family: var(--mono); }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.02em; }
+    select, input[type="text"], input[type="number"] { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); font-family: var(--mono); font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
+    select:focus, input:focus { border-color: var(--green2); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .toggle-item { display: flex; align-items: center; gap: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .toggle-item.active { background: var(--green-dim2); border-color: var(--green2); }
+    .toggle-item input[type="checkbox"] { display: none; }
+    .chk-box { width: 22px; height: 22px; flex-shrink: 0; border: 1px solid var(--border2); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .toggle-item.active .chk-box { background: var(--green); border-color: var(--green); }
+    .chk-mark { display: none; }
+    .toggle-item.active .chk-mark { display: block; }
+    .toggle-label { flex: 1; font-size: 14px; font-weight: 500; }
+    .toggle-hint { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+    .hint { background: var(--bg4); border-left: 2px solid var(--green2); padding: 10px 12px; border-radius: 0 var(--r) var(--r) 0; font-size: 11px; color: var(--text2); font-family: var(--mono); line-height: 1.6; margin: 8px 0; }
+
+    .gen-btn { width: 100%; height: 52px; background: var(--purple-dim); border: 1px solid rgba(192,132,252,0.4); border-radius: var(--rl); color: var(--purple); font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: all 0.1s; margin-top: 8px; }
+    .gen-btn:active { background: rgba(192,132,252,0.2); transform: scale(0.99); }
+
+    .out-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; margin-bottom: 12px; }
+    .out-head { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .out-tag { font-size: 10px; font-family: var(--mono); font-weight: 600; padding: 3px 8px; border-radius: 4px; background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+    .out-tag.server { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+    .out-tag.client { background: var(--amber-dim); color: var(--amber); border-color: var(--amber); }
+    .copy-btn { margin-left: auto; padding: 6px 14px; background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); font-family: var(--mono); font-size: 11px; cursor: pointer; transition: 0.1s; }
+    .copy-btn:active { background: var(--bg3); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green2); }
+    .out-code { padding: 14px; font-family: var(--mono); font-size: 12px; line-height: 1.7; color: var(--text); white-space: pre; overflow-x: auto; min-height: 200px; background: var(--bg); border-radius: 0 0 var(--rl) var(--rl); }
+    .out-code.empty { color: var(--text3); font-style: italic; }
+
+    /* syntax */
+    .kw { color: #c792ea; } .fn { color: #82aaff; } .str { color: #c3e88d; } .num { color: #f78c6c; } .cmt { color: #546e7a; font-style: italic; } .typ { color: var(--amber); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-btn" href="#">‹</a>
+  <div>
+    <div class="header-title">Network Generator</div>
+    <div class="header-sub">Multiplayer scaffold · ENET / WebSocket · Split or Combined</div>
+  </div>
+  <span class="header-badge">Godot 4 · Multiplayer</span>
+</div>
+
+<div class="page">
+  <div class="form-col">
+    <!-- TRANSPORT & MODE -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Core Settings</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Transport Type</div>
+          <select id="transport">
+            <option value="WebSocket">WebSocket (wss:// or ws://)</option>
+            <option value="ENET">ENET (UDPServer / ENetMultiplayerPeer)</option>
+          </select>
+        </div>
+        <div class="field"><div class="field-label">Network Mode</div>
+          <select id="networkMode">
+            <option value="combined">Combined (single script: auto-starts server, join called externally)</option>
+            <option value="separate">Separate (two scripts: Server starts on _ready, Client connects on _ready)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVER & CLIENT DETAILS -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Connection Parameters</span></div>
+      <div class="card-body">
+        <div class="field"><div class="field-label">Server Port (ENET or WebSocket)</div><input type="number" id="serverPort" value="8080"></div>
+        <div class="field"><div class="field-label">Remote Server URL (WebSocket only)</div><input type="text" id="remoteUrl" value="wss://your-server.com/ws"></div>
+        <div class="field"><div class="field-label">Local Server URL (WebSocket dev)</div><input type="text" id="localUrl" value="ws://127.0.0.1:8080"></div>
+        <div class="field"><div class="field-label">Max Players</div><input type="number" id="maxPlayers" value="10"></div>
+      </div>
+    </div>
+
+    <!-- BEHAVIOR TOGGLES -->
+    <div class="card">
+      <div class="card-head"><div class="card-dot purple"></div><span class="card-title">Behavior Options</span></div>
+      <div class="card-body">
+        <div class="toggle-item active" id="tog-spawnOwnPlayer" onclick="toggleOption('spawnOwnPlayer')">
+          <input type="checkbox" id="spawnOwnPlayerCheck" checked>
+          <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Server spawns its own player</span>
+          <span class="toggle-hint">Add player[1] automatically on host</span>
+        </div>
+        <div class="toggle-item active" id="tog-localHeadlessSwitch" onclick="toggleOption('localHeadlessSwitch')">
+          <input type="checkbox" id="localHeadlessCheck" checked>
+          <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
+          <span class="toggle-label">Local / Headless toggle (USE_LOCAL constant)</span>
+          <span class="toggle-hint">Generate bool to switch between local and remote</span>
+        </div>
+        <div class="hint" style="border-left-color: var(--purple);">🔧 If "Separate" mode: generates Server.gd (auto-start) + Client.gd (auto-connect). Combined mode: single network manager, join must be called from another script.</div>
+      </div>
+    </div>
+
+    <button class="gen-btn" onclick="generateNetworkScripts()">⚡ Generate Network Code</button>
+  </div>
+
+  <div class="out-col">
+    <div class="out-card" id="outputServerCard">
+      <div class="out-head">
+        <span class="out-tag server" id="outputServerTag">Server Script</span>
+        <button class="copy-btn" onclick="copyOutput('serverCode', this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="serverCode"># Click Generate to create network code</div>
+    </div>
+    <div class="out-card" id="outputClientCard">
+      <div class="out-head">
+        <span class="out-tag client" id="outputClientTag">Client Script</span>
+        <button class="copy-btn" onclick="copyOutput('clientCode', this)">Copy</button>
+      </div>
+      <div class="out-code empty" id="clientCode"># Client script will appear here (separate mode only)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // state for toggles
+  let options = {
+    spawnOwnPlayer: true,
+    localHeadlessSwitch: true
+  };
+
+  function toggleOption(opt) {
+    options[opt] = !options[opt];
+    const element = document.getElementById(`tog-${opt}`);
+    if (element) element.classList.toggle('active', options[opt]);
+    const checkbox = document.getElementById(opt === 'spawnOwnPlayer' ? 'spawnOwnPlayerCheck' : 'localHeadlessCheck');
+    if (checkbox) checkbox.checked = options[opt];
+  }
+
+  // Helper: escape and highlight GDScript
+  function highlightGDScript(code) {
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const keywords = new Set(['extends','class_name','func','var','const','if','elif','else','for','while','return','true','false','null','and','or','not','pass','break','continue','@rpc','@onready','@export','signal','enum','static','await','match','as','is','in','self','super','void','OK','Error']);
+    const types = new Set(['int','float','String','bool','Vector2','Vector3','Dictionary','Array','Node','WebSocketMultiplayerPeer','ENetMultiplayerPeer','MultiplayerAPI']);
+    const builtins = new Set(['print','push_error','assert','rpc','rpc_id','get_tree','multiplayer','is_multiplayer_authority','get_unique_id','get_remote_sender_id']);
+
+    function tokenLine(line) {
+      let out = '', i = 0;
+      while (i < line.length) {
+        if (line[i] === '#') { out += `<span class="cmt">${esc(line.slice(i))}</span>`; break; }
+        if (line[i] === '"' || line[i] === "'") { let j = i+1; while(j < line.length && line[j] !== line[i]) j++; out += `<span class="str">${esc(line.slice(i, j+1))}</span>`; i = j+1; continue; }
+        if (line[i] === '@') { let j = i+1; while(j < line.length && /[\w_]/.test(line[j])) j++; const w = line.slice(i, j); out += `<span class="kw">${esc(w)}</span>`; i = j; continue; }
+        if (/[a-zA-Z_]/.test(line[i])) { let j = i; while(j < line.length && /[\w]/.test(line[j])) j++; const w = line.slice(i, j); 
+          if (keywords.has(w)) out += `<span class="kw">${esc(w)}</span>`;
+          else if (types.has(w)) out += `<span class="typ">${esc(w)}</span>`;
+          else if (builtins.has(w)) out += `<span class="fn">${esc(w)}</span>`;
+          else out += esc(w);
+          i = j; continue;
+        }
+        if (/\d/.test(line[i]) || (line[i] === '-' && /\d/.test(line[i+1]))) { let j = i + (line[i] === '-' ? 1 : 0); while(j < line.length && /[\d.]/.test(line[j])) j++; out += `<span class="num">${esc(line.slice(i, j))}</span>`; i = j; continue; }
+        out += esc(line[i]); i++;
+      }
+      return out;
+    }
+    return code.split('\n').map(tokenLine).join('\n');
+  }
+
+  function renderCode(containerId, rawCode, isEmptyHint = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!rawCode || rawCode.trim() === '') {
+      container.innerHTML = '<span class="cmt"># ' + (isEmptyHint || 'No output') + '</span>';
+      container.classList.add('empty');
+      return;
+    }
+    container.classList.remove('empty');
+    container.innerHTML = highlightGDScript(rawCode);
+  }
+
+  function copyOutput(codeId, btn) {
+    const el = document.getElementById(codeId);
+    let raw = el.innerText || el.textContent;
+    if (!raw.trim() || raw.includes('Click Generate')) return;
+    navigator.clipboard.writeText(raw).then(() => {
+      btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  // Generate scripts based on UI
+  function generateNetworkScripts() {
+    const transport = document.getElementById('transport').value;
+    const mode = document.getElementById('networkMode').value;
+    const port = document.getElementById('serverPort').value;
+    const remoteUrl = document.getElementById('remoteUrl').value.trim() || "wss://default.replit.dev";
+    const localUrl = document.getElementById('localUrl').value.trim() || "ws://127.0.0.1:8080";
+    const maxPlayers = document.getElementById('maxPlayers').value;
+    const spawnOwn = options.spawnOwnPlayer;
+    const useLocalSwitch = options.localHeadlessSwitch;
+
+    // Helper to build base network logic (shared across modes)
+    function buildBaseNetworkClass(className, includeAutoStartServer = false, includeAutoConnect = false, isServerOnly = false, isClientOnly = false) {
+      let code = `extends Node\n\n`;
+      if (useLocalSwitch) {
+        code += `const USE_LOCAL: bool = true  # false = remote server\n`;
+      }
+      if (transport === "WebSocket") {
+        code += `const SERVER_URL_REMOTE: String = "${remoteUrl}"\n`;
+        code += `const SERVER_URL_LOCAL: String = "${localUrl}"\n`;
+      }
+      code += `const MAX_PLAYERS: int = ${maxPlayers}\n\n`;
+      code += `var players = {}\n\n`;
+      code += `signal player_connected(peer_id)\n`;
+      code += `signal server_disconnected\n\n`;
+
+      // _ready
+      code += `func _ready() -> void:\n`;
+      code += `\tmultiplayer.connection_failed.connect(_on_connection_failed)\n`;
+      code += `\tmultiplayer.peer_disconnected.connect(_on_player_disconnected)\n`;
+      code += `\tmultiplayer.peer_connected.connect(_on_player_connected)\n`;
+      code += `\tmultiplayer.connected_to_server.connect(_on_connected_ok)\n`;
+      code += `\tmultiplayer.server_disconnected.connect(_on_server_disconnected)\n`;
+      if (includeAutoStartServer) {
+        code += `\tstart_server()\n`;
+      }
+      if (includeAutoConnect) {
+        code += `\tjoin_game()\n`;
+      }
+      code += `\n`;
+      // _process polling
+      code += `func _process(_delta: float) -> void:\n`;
+      code += `\tif multiplayer.multiplayer_peer:\n`;
+      code += `\t\tmultiplayer.multiplayer_peer.poll()\n\n`;
+
+      // start_server()
+      code += `func start_server() -> int:\n`;
+      if (transport === "WebSocket") {
+        code += `\tvar peer = WebSocketMultiplayerPeer.new()\n`;
+        code += `\tvar error = peer.create_server(${port})\n`;
+      } else {
+        code += `\tvar peer = ENetMultiplayerPeer.new()\n`;
+        code += `\tvar error = peer.create_server(${port}, ${maxPlayers})\n`;
+      }
+      code += `\tif error:\n\t\treturn error\n`;
+      code += `\tmultiplayer.multiplayer_peer = peer\n`;
+      if (spawnOwn && !isClientOnly) {
+        code += `\t# Server spawns its own player\n`;
+        code += `\tplayers[1] = {"id": 1}\n`;
+        code += `\tplayer_connected.emit(1)\n`;
+      }
+      code += `\treturn OK\n\n`;
+
+      // join_game()
+      let joinCode = `func join_game(address: String = "") -> int:\n`;
+      if (transport === "WebSocket") {
+        joinCode += `\tvar peer = WebSocketMultiplayerPeer.new()\n`;
+        if (useLocalSwitch) {
+          joinCode += `\tvar url := SERVER_URL_LOCAL if USE_LOCAL else SERVER_URL_REMOTE\n`;
+        } else {
+          joinCode += `\tvar url := SERVER_URL_LOCAL\n`;
+        }
+        joinCode += `\tvar error = peer.create_client(url)\n`;
+      } else {
+        joinCode += `\tvar peer = ENetMultiplayerPeer.new()\n`;
+        joinCode += `\tvar error = peer.create_client(address if address != "" else "127.0.0.1", ${port})\n`;
+      }
+      joinCode += `\tif error:\n\t\treturn error\n`;
+      joinCode += `\tmultiplayer.multiplayer_peer = peer\n`;
+      joinCode += `\treturn OK\n\n`;
+
+      code += joinCode;
+      code += `func _on_connected_ok() -> void:\n`;
+      code += `\tvar peer_id = multiplayer.get_unique_id()\n`;
+      code += `\tplayers[peer_id] = {"id": peer_id}\n`;
+      code += `\tplayer_connected.emit(peer_id)\n\n`;
+
+      code += `func _on_player_connected(id: int) -> void:\n`;
+      code += `\t_register_player.rpc_id(id)\n\n`;
+
+      code += `func _on_server_disconnected() -> void:\n`;
+      code += `\tmultiplayer.multiplayer_peer = null\n`;
+      code += `\tplayers.clear()\n`;
+      code += `\tserver_disconnected.emit()\n\n`;
+
+      code += `func _on_player_disconnected(id: int) -> void:\n`;
+      code += `\tplayers.erase(id)\n\n`;
+
+      code += `func _on_connection_failed() -> void:\n`;
+      code += `\tmultiplayer.multiplayer_peer = null\n\n`;
+
+      code += `@rpc("any_peer", "reliable")\n`;
+      code += `func _register_player() -> void:\n`;
+      code += `\tvar new_player_id = multiplayer.get_remote_sender_id()\n`;
+      code += `\tplayers[new_player_id] = {"id": new_player_id}\n`;
+      code += `\tplayer_connected.emit(new_player_id)\n`;
+      return code;
+    }
+
+    if (mode === "separate") {
+      // Server.gd : starts server on _ready, no join logic
+      let serverCode = `# Server.gd - Auto-starts server\n`;
+      serverCode += buildBaseNetworkClass("NetworkServer", true, false, true, false);
+      // Client.gd : connects on _ready, no start_server
+      let clientCode = `# Client.gd - Auto-connects to server\n`;
+      clientCode += buildBaseNetworkClass("NetworkClient", false, true, false, true);
+      renderCode("serverCode", serverCode, "# Server script will appear here");
+      renderCode("clientCode", clientCode, "# Client script will appear here");
+      document.getElementById("outputServerCard").classList.remove("hidden");
+      document.getElementById("outputClientCard").classList.remove("hidden");
+      document.getElementById("outputServerTag").innerHTML = "🖥️ Server.gd";
+      document.getElementById("outputClientTag").innerHTML = "💻 Client.gd";
+    } else {
+      // Combined: single script, server starts automatically, join must be called externally.
+      let combinedCode = `# NetworkManager.gd - Server auto-starts, join must be called from another script\n`;
+      combinedCode += buildBaseNetworkClass("NetworkManager", true, false, false, false);
+      combinedCode += `\n# --- External usage ---\n`;
+      combinedCode += `# To join as client from another script:\n`;
+      combinedCode += `# $NetworkManager.join_game()\n`;
+      renderCode("serverCode", combinedCode, "# Combined network script");
+      renderCode("clientCode", "# Separate mode disabled — use combined script above");
+      document.getElementById("outputServerCard").classList.remove("hidden");
+      document.getElementById("outputClientCard").classList.remove("hidden");
+      document.getElementById("outputServerTag").innerHTML = "📦 NetworkManager.gd (combined)";
+      document.getElementById("outputClientTag").innerHTML = "ℹ️ Info";
+    }
+  }
+
+  // initial dummy render
+  window.onload = () => {
+    renderCode("serverCode", "# Click Generate to create network code", "Click Generate");
+    renderCode("clientCode", "# Client script will appear here (separate mode only)", "Select Separate mode");
+    document.getElementById("outputClientCard").classList.remove("hidden");
+  };
+</script>
+</body>
+</html>
