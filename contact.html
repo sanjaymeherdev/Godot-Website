@@ -300,10 +300,8 @@
     </style>
 </head>
 <body>
-    <!-- Header placeholder -->
-    <div id="sanjay-header"></div>
-    
-    <!-- Hero Section -->
+    <!-- Header --><div id="sanjay-header"></div>
+       <!-- Hero Section -->
     <section class="contact-hero">
         <div class="container">
             <h1>Contact Us</h1>
@@ -458,36 +456,19 @@
     <div class="chat-widget">
         <!-- Chat widget will be injected here by chat-loader.js -->
     </div>
-    
-    <!-- Footer placeholder -->
+ <!-- Footer -->
     <div id="sanjay-footer"></div>
     
-    <!-- Scripts - IMPORTANT: Load components.js FIRST -->
+    <!-- Scripts -->
     <script src="components.js"></script>
+
+   <!-- JavaScript Files -->
     <script src="js/auth.js"></script>
     <script src="js/chat-loader.js"></script>
     <script src="js/chat-widget.js"></script>
     
     <!-- Main Script -->
     <script>
-        // Wait for components.js to load before running page-specific code
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if header and footer were loaded
-            const headerDiv = document.getElementById('sanjay-header');
-            const footerDiv = document.getElementById('sanjay-footer');
-            
-            if (headerDiv && headerDiv.innerHTML.trim() === '') {
-                console.warn('Header not loaded from components.js - check file path and content');
-                // Optional: Add fallback header content
-                headerDiv.innerHTML = '<nav style="background: #1a1a2e; padding: 1rem; text-align: center;"><a href="index.html" style="color: #ff6b35;">Home</a> | <a href="contact.html" style="color: #ff6b35;">Contact</a></nav>';
-            }
-            
-            if (footerDiv && footerDiv.innerHTML.trim() === '') {
-                console.warn('Footer not loaded from components.js - check file path and content');
-                footerDiv.innerHTML = '<footer style="background: #1a1a2e; padding: 2rem; text-align: center; color: #ccc;"><p>&copy; 2024 Godot Game Assets Marketplace. All rights reserved.</p></footer>';
-            }
-        });
-
         // Apps Script Web App URL
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRZxOdPO9o7nbKtXGSftSJFnSVquVyVk2RAOZEM2P4JTeWew1K_jvMxEvLGwuSoXmS/exec';
 
@@ -498,106 +479,100 @@
         const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
         const body = document.body;
 
-        // Check if mobile elements exist (they might be in the header)
-        if (mobileMenuBtn && mobileCloseBtn && mobileMenu && mobileMenuOverlay) {
-            function openMobileMenu() {
-                mobileMenu.classList.add('active');
-                mobileMenuOverlay.classList.add('active');
-                body.classList.add('menu-open');
-            }
-
-            function closeMobileMenu() {
-                mobileMenu.classList.remove('active');
-                mobileMenuOverlay.classList.remove('active');
-                body.classList.remove('menu-open');
-            }
-
-            mobileMenuBtn.addEventListener('click', openMobileMenu);
-            mobileCloseBtn.addEventListener('click', closeMobileMenu);
-            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            body.classList.add('menu-open');
         }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            body.classList.remove('menu-open');
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileCloseBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 
         // Contact Form Submission
-        const contactForm = document.getElementById('contactForm');
-        if (contactForm) {
-            contactForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const responseDiv = document.getElementById('formResponse');
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value.trim();
+            
+            // Validate
+            if (!name || !email || !subject || !message) {
+                showResponse('Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showResponse('Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Sending...';
+            responseDiv.style.display = 'none';
+            
+            try {
+                // Send to Apps Script
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Apps Script requires no-cors mode
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        message: message
+                    })
+                });
                 
-                const submitBtn = document.getElementById('submitBtn');
-                const responseDiv = document.getElementById('formResponse');
-                const name = document.getElementById('name').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const subject = document.getElementById('subject').value;
-                const message = document.getElementById('message').value.trim();
+                // Note: With no-cors mode, we won't get the actual response
+                // But if the request completes without error, we can assume success
+                showResponse('Thank you! Your message has been sent successfully. We\'ll get back to you within 24 hours.', 'success');
                 
-                // Validate
-                if (!name || !email || !subject || !message) {
-                    showResponse('Please fill in all required fields.', 'error');
-                    return;
-                }
+                // Reset form
+                document.getElementById('contactForm').reset();
                 
-                // Email validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    showResponse('Please enter a valid email address.', 'error');
-                    return;
-                }
+                // Scroll to response
+                responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 
-                // Disable button and show loading
-                submitBtn.disabled = true;
-                submitBtn.classList.add('loading');
-                submitBtn.textContent = 'Sending...';
-                responseDiv.style.display = 'none';
-                
-                try {
-                    // Send to Apps Script
-                    const response = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: name,
-                            email: email,
-                            subject: subject,
-                            message: message
-                        })
-                    });
-                    
-                    showResponse('Thank you! Your message has been sent successfully. We\'ll get back to you within 24 hours.', 'success');
-                    
-                    // Reset form
-                    contactForm.reset();
-                    
-                    // Scroll to response
-                    responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    
-                } catch (error) {
-                    console.error('Error submitting form:', error);
-                    showResponse('An error occurred while sending your message. Please try contacting us directly at graphicyin@gmail.com', 'error');
-                } finally {
-                    // Re-enable button
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('loading');
-                    submitBtn.textContent = 'Send Message →';
-                }
-            });
-        }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showResponse('An error occurred while sending your message. Please try contacting us directly at graphicyin@gmail.com', 'error');
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Send Message →';
+            }
+        });
         
         function showResponse(message, type) {
             const responseDiv = document.getElementById('formResponse');
-            if (responseDiv) {
-                responseDiv.textContent = message;
-                responseDiv.className = `response-message ${type}`;
-                responseDiv.style.display = 'block';
-                
-                // Auto-hide after 10 seconds for success messages
-                if (type === 'success') {
-                    setTimeout(() => {
-                        responseDiv.style.display = 'none';
-                    }, 10000);
-                }
+            responseDiv.textContent = message;
+            responseDiv.className = `response-message ${type}`;
+            responseDiv.style.display = 'block';
+            
+            // Auto-hide after 10 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    responseDiv.style.display = 'none';
+                }, 10000);
             }
         }
 
@@ -614,20 +589,19 @@
                         top: targetElement.offsetTop - 80,
                         behavior: 'smooth'
                     });
-                    // Close mobile menu if open
-                    if (mobileMenu && mobileMenu.classList.contains('active')) {
-                        closeMobileMenu();
-                    }
+                    closeMobileMenu();
                 }
             });
         });
 
         // Set active page
-        const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
-        navLinks.forEach(link => {
-            if (link.getAttribute('href') === 'contact.html') {
-                link.classList.add('active');
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav-links a');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === 'contact.html') {
+                    link.classList.add('active');
+                }
+            });
         });
     </script>
 </body>
