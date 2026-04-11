@@ -539,7 +539,7 @@ Build Mode:     <span class="str">Release</span></pre>
             <div class="card">
                 <h3>3 Ad Types Available</h3>
                 <div class="ad-grid">
-                    <div class="ad-type-card"><div class="icon">📌</div><h4>Banner</h4><p>320×50 strip. Top or bottom. Show/hide without reloading.</p></div>
+                    <div class="ad-type-card"><div class="icon">📌</div><h4>Banner</h4><p>320×50 strip. Top or bottom. Displays automatically after <code style="font-family:var(--font-mono); font-size:0.75rem;">load_banner()</code> succeeds.</p></div>
                     <div class="ad-type-card"><div class="icon">🖥️</div><h4>Interstitial</h4><p>Full-screen. Auto-reloads after closing or failed show.</p></div>
                     <div class="ad-type-card"><div class="icon">🎁</div><h4>Rewarded</h4><p>Video with reward. Fires <code style="font-family:var(--font-mono); font-size:0.75rem;">on_rewarded_earned</code> on completion.</p></div>
                 </div>
@@ -553,74 +553,115 @@ Build Mode:     <span class="str">Release</span></pre>
                     <div><strong>Always wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_initialization_complete</code> before loading ads.</strong> And always wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_*_loaded</code> before showing. The wrapper has built-in guards — calling <code style="font-family:var(--font-mono); font-size:0.82rem;">show_interstitial()</code> before it's ready just prints a warning and does nothing.</div>
                 </div>
 
+                <!-- FIX 1: Updated to Godot 4 signal syntax throughout -->
+                <!-- FIX 2: Removed misleading show_banner() function; banner auto-shows on load -->
+                <!-- FIX 3: All signals connected upfront in _ready(), not inside _on_ads_ready() -->
+                <!-- FIX 4: Added on_banner_clicked signal which was missing -->
                 <div class="code-wrap">
                     <div class="code-header">
-                        <span class="code-filename">autoload/game_manager.gd — complete example</span>
+                        <span class="code-filename">your_scene.gd — complete example (Godot 4 syntax)</span>
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
                     <pre><span class="kw">extends</span> <span class="fn">Node</span>
 
-<span class="kw">func</span> <span class="fn">_ready</span>():
-    <span class="cm"># 1. Connect initialization signal first</span>
-    UnityAds.<span class="fn">connect</span>(<span class="str">"on_initialization_complete"</span>, <span class="fn">_on_ads_ready</span>)
-    UnityAds.<span class="fn">connect</span>(<span class="str">"on_initialization_failed"</span>, <span class="fn">_on_ads_failed</span>)
+<span class="kw">func</span> <span class="fn">_ready</span>() -> <span class="kw">void</span>:
+    <span class="cm"># 1. Connect ALL signals first, before calling initialize()</span>
+    UnityAds.on_initialization_complete.<span class="fn">connect</span>(<span class="fn">_on_ads_ready</span>)
+    UnityAds.on_initialization_failed.<span class="fn">connect</span>(<span class="fn">_on_ads_failed</span>)
 
-    <span class="cm"># 2. Set GDPR consent (call before initialize if needed)</span>
+    UnityAds.on_interstitial_loaded.<span class="fn">connect</span>(<span class="fn">_on_interstitial_loaded</span>)
+    UnityAds.on_interstitial_completed.<span class="fn">connect</span>(<span class="fn">_on_interstitial_completed</span>)
+    UnityAds.on_interstitial_failed_to_load.<span class="fn">connect</span>(<span class="fn">_on_interstitial_failed</span>)
+
+    UnityAds.on_rewarded_loaded.<span class="fn">connect</span>(<span class="fn">_on_rewarded_loaded</span>)
+    UnityAds.on_rewarded_earned.<span class="fn">connect</span>(<span class="fn">_on_reward_earned</span>)
+    UnityAds.on_rewarded_failed_to_load.<span class="fn">connect</span>(<span class="fn">_on_rewarded_failed</span>)
+
+    UnityAds.on_banner_loaded.<span class="fn">connect</span>(<span class="fn">_on_banner_loaded</span>)
+    UnityAds.on_banner_failed_to_load.<span class="fn">connect</span>(<span class="fn">_on_banner_failed</span>)
+    UnityAds.on_banner_clicked.<span class="fn">connect</span>(<span class="fn">_on_banner_clicked</span>)
+
+    <span class="cm"># 2. Set GDPR consent if needed (call before initialize)</span>
     UnityAds.<span class="fn">set_consent</span>(<span class="kw">true</span>, <span class="kw">true</span>)
 
-    <span class="cm"># 3. Initialize — uses GAME_ID + TEST_MODE from UnityAds.gd</span>
+    <span class="cm"># 3. Now initialize — uses GAME_ID + TEST_MODE from UnityAds.gd</span>
     UnityAds.<span class="fn">initialize</span>()
 
-<span class="kw">func</span> <span class="fn">_on_ads_ready</span>():
+<span class="kw">func</span> <span class="fn">_on_ads_ready</span>() -> <span class="kw">void</span>:
     <span class="fn">print</span>(<span class="str">"Unity Ads ready — loading all ad types"</span>)
 
-    <span class="cm"># 4. Load all ads after init completes</span>
+    <span class="cm"># 4. Load ads AFTER init completes — not before</span>
     UnityAds.<span class="fn">load_interstitial</span>()
     UnityAds.<span class="fn">load_rewarded</span>()
     UnityAds.<span class="fn">load_banner</span>(<span class="str">"bottom"</span>)  <span class="cm"># "top" or "bottom"</span>
+    <span class="cm"># Banner displays automatically once on_banner_loaded fires</span>
 
-    <span class="cm"># 5. Connect ad result signals</span>
-    UnityAds.<span class="fn">connect</span>(<span class="str">"on_rewarded_earned"</span>, <span class="fn">_on_reward_earned</span>)
-    UnityAds.<span class="fn">connect</span>(<span class="str">"on_interstitial_completed"</span>, <span class="fn">_on_interstitial_done</span>)
-
-<span class="kw">func</span> <span class="fn">_on_ads_failed</span>(error: <span class="kw">String</span>, message: <span class="kw">String</span>):
+<span class="kw">func</span> <span class="fn">_on_ads_failed</span>(error: <span class="kw">String</span>, message: <span class="kw">String</span>) -> <span class="kw">void</span>:
     <span class="fn">print</span>(<span class="str">"Unity Ads init failed: "</span>, error, <span class="str">" — "</span>, message)
 
 <span class="cm"># ── Banner ──────────────────────────────────────────────────────</span>
-<span class="kw">func</span> <span class="fn">show_banner</span>():
-    <span class="kw">if</span> UnityAds.<span class="fn">is_banner_ready</span>():
-        <span class="cm"># Banner shows automatically after load_banner()</span>
-        <span class="cm"># Call hide_banner() to hide it</span>
-        <span class="fn">pass</span>
+<span class="kw">func</span> <span class="fn">_on_banner_loaded</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Banner visible: "</span>, placement_id)
+    <span class="cm"># No extra call needed — banner is already showing</span>
 
-<span class="kw">func</span> <span class="fn">toggle_banner</span>(visible: <span class="kw">bool</span>):
-    <span class="kw">if</span> visible:
-        UnityAds.<span class="fn">load_banner</span>(<span class="str">"bottom"</span>)
+<span class="kw">func</span> <span class="fn">_on_banner_failed</span>(placement_id: <span class="kw">String</span>, error: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Banner failed: "</span>, error)
+
+<span class="kw">func</span> <span class="fn">_on_banner_clicked</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Banner clicked: "</span>, placement_id)
+
+<span class="kw">func</span> <span class="fn">toggle_banner</span>(show: <span class="kw">bool</span>) -> <span class="kw">void</span>:
+    <span class="kw">if</span> show:
+        UnityAds.<span class="fn">load_banner</span>(<span class="str">"bottom"</span>)   <span class="cm"># loads and shows automatically</span>
     <span class="kw">else</span>:
         UnityAds.<span class="fn">hide_banner</span>()
 
 <span class="cm"># ── Interstitial ────────────────────────────────────────────────</span>
-<span class="kw">func</span> <span class="fn">on_level_complete</span>():
+<span class="kw">func</span> <span class="fn">_on_interstitial_loaded</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Interstitial ready: "</span>, placement_id)
+
+<span class="kw">func</span> <span class="fn">_on_interstitial_failed</span>(placement_id: <span class="kw">String</span>, error: <span class="kw">String</span>, message: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Interstitial load failed: "</span>, error)
+
+<span class="kw">func</span> <span class="fn">on_level_complete</span>() -> <span class="kw">void</span>:
     <span class="kw">if</span> UnityAds.<span class="fn">is_interstitial_ready</span>():
         UnityAds.<span class="fn">show_interstitial</span>()
-        <span class="cm"># wait for on_interstitial_completed before scene change</span>
+        <span class="cm"># Do NOT change scene here — wait for on_interstitial_completed</span>
     <span class="kw">else</span>:
-        <span class="fn">change_scene</span>()   <span class="cm"># proceed if not loaded</span>
+        <span class="fn">change_scene</span>()   <span class="cm"># Ad not ready — proceed without it</span>
 
-<span class="kw">func</span> <span class="fn">_on_interstitial_done</span>(placement_id: <span class="kw">String</span>):
-    <span class="cm"># Auto-reloads inside UnityAds.gd — just proceed</span>
+<span class="kw">func</span> <span class="fn">_on_interstitial_completed</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="cm"># Ad closed by user — now safe to change scene</span>
+    <span class="cm"># UnityAds.gd auto-reloads interstitial here</span>
     <span class="fn">change_scene</span>()
 
 <span class="cm"># ── Rewarded ────────────────────────────────────────────────────</span>
-<span class="kw">func</span> <span class="fn">offer_revive</span>():
+<span class="kw">func</span> <span class="fn">_on_rewarded_loaded</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Rewarded ready: "</span>, placement_id)
+
+<span class="kw">func</span> <span class="fn">_on_rewarded_failed</span>(placement_id: <span class="kw">String</span>, error: <span class="kw">String</span>, message: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="fn">print</span>(<span class="str">"Rewarded load failed: "</span>, error)
+
+<span class="kw">func</span> <span class="fn">offer_revive</span>() -> <span class="kw">void</span>:
     <span class="kw">if</span> UnityAds.<span class="fn">is_rewarded_ready</span>():
         UnityAds.<span class="fn">show_rewarded</span>()
+        <span class="cm"># Reward is given in _on_reward_earned, NOT here</span>
     <span class="kw">else</span>:
         <span class="fn">print</span>(<span class="str">"Rewarded not ready yet"</span>)
 
-<span class="kw">func</span> <span class="fn">_on_reward_earned</span>(placement_id: <span class="kw">String</span>):
-    <span class="fn">give_player_coins</span>(<span class="num">100</span>)
-    <span class="cm"># Auto-reloads inside UnityAds.gd</span></pre>
+<span class="kw">func</span> <span class="fn">_on_reward_earned</span>(placement_id: <span class="kw">String</span>) -> <span class="kw">void</span>:
+    <span class="cm"># Only fires when user COMPLETES the video — safe to give reward</span>
+    <span class="cm"># UnityAds.gd auto-reloads rewarded here</span>
+    <span class="fn">give_player_coins</span>(<span class="num">100</span>)</pre>
+                </div>
+
+                <div class="callout warning">
+                    <span class="callout-icon">⚠️</span>
+                    <div>
+                        <strong>Godot 4 signal syntax changed from Godot 3.</strong> Always use the dot syntax:<br>
+                        <code style="font-family:var(--font-mono); font-size:0.82rem; color:var(--success);">✓ UnityAds.on_rewarded_earned.connect(_on_reward_earned)</code><br>
+                        <code style="font-family:var(--font-mono); font-size:0.82rem; color:var(--danger);">✗ UnityAds.connect("on_rewarded_earned", _on_reward_earned)</code>
+                    </div>
                 </div>
             </div>
 
@@ -660,7 +701,7 @@ Build Mode:     <span class="str">Release</span></pre>
 
             <div class="card">
                 <h3>All Available Signals</h3>
-                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">Connect to these from any script using <code style="font-family:var(--font-mono); color:var(--accent); font-size:0.82rem;">UnityAds.connect("signal_name", callable)</code>.</p>
+                <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1rem;">Connect to these from any script using Godot 4 dot syntax: <code style="font-family:var(--font-mono); color:var(--accent); font-size:0.82rem;">UnityAds.signal_name.connect(your_func)</code></p>
 
                 <table class="signal-table">
                     <thead>
@@ -671,14 +712,19 @@ Build Mode:     <span class="str">Release</span></pre>
                         <tr><td><code>on_initialization_failed</code></td><td>error, message</td><td class="sig-desc">SDK failed to initialize</td></tr>
                         <tr><td><code>on_interstitial_loaded</code></td><td>placement_id</td><td class="sig-desc">Interstitial ready to show</td></tr>
                         <tr><td><code>on_interstitial_shown</code></td><td>placement_id</td><td class="sig-desc">Interstitial appeared on screen</td></tr>
-                        <tr><td><code>on_interstitial_completed</code></td><td>placement_id</td><td class="sig-desc">User closed interstitial ← use this to change scene</td></tr>
+                        <tr><td><code>on_interstitial_completed</code></td><td>placement_id</td><td class="sig-desc">User closed interstitial ← change scene here</td></tr>
                         <tr><td><code>on_interstitial_failed_to_load</code></td><td>placement_id, error, msg</td><td class="sig-desc">Auto-retries after 5 seconds</td></tr>
+                        <tr><td><code>on_interstitial_failed_to_show</code></td><td>placement_id, error, msg</td><td class="sig-desc">Show failed — reload and use fallback navigation</td></tr>
+                        <tr><td><code>on_interstitial_clicked</code></td><td>placement_id</td><td class="sig-desc">User tapped the interstitial ad</td></tr>
                         <tr><td><code>on_rewarded_loaded</code></td><td>placement_id</td><td class="sig-desc">Rewarded ad ready to show</td></tr>
                         <tr><td><code>on_rewarded_earned</code></td><td>placement_id</td><td class="sig-desc">User completed the video ← give reward here</td></tr>
                         <tr><td><code>on_rewarded_shown</code></td><td>placement_id</td><td class="sig-desc">Rewarded video started</td></tr>
                         <tr><td><code>on_rewarded_failed_to_load</code></td><td>placement_id, error, msg</td><td class="sig-desc">Auto-retries after 5 seconds</td></tr>
-                        <tr><td><code>on_banner_loaded</code></td><td>placement_id</td><td class="sig-desc">Banner visible on screen</td></tr>
-                        <tr><td><code>on_banner_failed_to_load</code></td><td>placement_id, error</td><td class="sig-desc">Banner failed — check placement ID</td></tr>
+                        <tr><td><code>on_rewarded_failed_to_show</code></td><td>placement_id, error, msg</td><td class="sig-desc">Show failed — handle gracefully</td></tr>
+                        <tr><td><code>on_rewarded_clicked</code></td><td>placement_id</td><td class="sig-desc">User tapped the rewarded ad</td></tr>
+                        <tr><td><code>on_banner_loaded</code></td><td>placement_id</td><td class="sig-desc">Banner visible on screen — no extra call needed</td></tr>
+                        <tr><td><code>on_banner_failed_to_load</code></td><td>placement_id, error</td><td class="sig-desc">Banner failed — check placement ID in dashboard</td></tr>
+                        <tr><td><code>on_banner_clicked</code></td><td>placement_id</td><td class="sig-desc">User tapped the banner ad</td></tr>
                     </tbody>
                 </table>
 
@@ -783,7 +829,11 @@ Build Mode:     <span class="str">Release</span></pre>
                         </tr>
                         <tr>
                             <td class="issue">show_interstitial() does nothing</td>
-                            <td class="fix"><strong>Called before loading.</strong> Always call <code style="font-family:var(--font-mono); font-size:0.82rem;">initialize()</code> → wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_initialization_complete</code> → <code style="font-family:var(--font-mono); font-size:0.82rem;">load_interstitial()</code> → wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_interstitial_loaded</code> → then show.</td>
+                            <td class="fix"><strong>Called before loading or wrong signal syntax.</strong> Always call <code style="font-family:var(--font-mono); font-size:0.82rem;">initialize()</code> → wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_initialization_complete</code> → <code style="font-family:var(--font-mono); font-size:0.82rem;">load_interstitial()</code> → wait for <code style="font-family:var(--font-mono); font-size:0.82rem;">on_interstitial_loaded</code> → then show. Also confirm you're using Godot 4 dot syntax for signals: <code style="font-family:var(--font-mono); font-size:0.82rem;">UnityAds.on_interstitial_loaded.connect(func)</code></td>
+                        </tr>
+                        <tr>
+                            <td class="issue">Signals never fire</td>
+                            <td class="fix"><strong>Using old Godot 3 connect syntax.</strong> Replace <code style="font-family:var(--font-mono); font-size:0.82rem;">UnityAds.connect("signal_name", func)</code> with <code style="font-family:var(--font-mono); font-size:0.82rem;">UnityAds.signal_name.connect(func)</code> throughout your scripts.</td>
                         </tr>
                     </tbody>
                 </table>
