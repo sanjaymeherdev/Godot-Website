@@ -16,6 +16,7 @@
     --text: #e2e8f0;
     --muted: #64748b;
     --green: #22c55e;
+    --error: #ef4444;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,7 +29,7 @@
     overflow-x: hidden;
   }
 
-  /* ── Nav (matches site) ── */
+  /* ── Nav ── */
   nav {
     display: flex;
     align-items: center;
@@ -133,10 +134,7 @@
     flex-wrap: wrap;
     gap: 1rem;
   }
-  .trial-card-header h2 {
-    font-size: 1.4rem;
-    font-weight: 800;
-  }
+  .trial-card-header h2 { font-size: 1.4rem; font-weight: 800; }
   .free-badge {
     font-family: 'Space Mono', monospace;
     font-size: 0.75rem;
@@ -220,7 +218,7 @@
     display: block;
   }
 
-  /* ── Download ── */
+  /* ── Download Section ── */
   .download-section {
     padding: 2rem 2.5rem;
   }
@@ -232,25 +230,130 @@
     font-family: 'Space Mono', monospace;
     margin-bottom: 1.2rem;
   }
-  .download-btn {
+
+  /* ── Form ── */
+  .dl-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-row { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-row label {
+    font-size: 0.78rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .form-row input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    width: 100%;
+  }
+  .form-row input:focus {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.04);
+  }
+  .form-row input::placeholder { color: var(--muted); }
+
+  .dl-submit {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: var(--accent);
     color: #000;
-    text-decoration: none;
+    border: none;
     font-weight: 700;
     font-size: 1rem;
+    font-family: 'Syne', sans-serif;
     padding: 1rem 1.5rem;
     border-radius: 6px;
+    cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;
-    margin-bottom: 1.2rem;
+    margin-top: 0.4rem;
+    width: 100%;
   }
-  .download-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  .download-btn .btn-right {
+  .dl-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  .dl-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .dl-submit .btn-right {
     font-family: 'Space Mono', monospace;
     font-size: 0.75rem;
     opacity: 0.7;
+  }
+
+  .form-status {
+    font-size: 0.83rem;
+    padding: 0.7rem 1rem;
+    border-radius: 5px;
+    display: none;
+    margin-top: 0.25rem;
+  }
+  .form-status.error {
+    display: block;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: var(--error);
+  }
+  .form-status.info {
+    display: block;
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+  }
+
+  /* ── Success State ── */
+  .dl-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+  .dl-success.active { display: flex; }
+  .success-icon {
+    font-size: 3rem;
+    animation: pop 0.4s ease-out;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .dl-success h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--green);
+  }
+  .dl-success p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 420px;
+  }
+  .final-dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--green);
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    font-family: 'Syne', sans-serif;
+    padding: 1rem 2rem;
+    border-radius: 6px;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+  .final-dl-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .dl-success .email-note {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
   }
 
   .download-note {
@@ -259,6 +362,7 @@
     line-height: 1.6;
     padding: 0.9rem 1rem;
     border-left: 2px solid var(--border);
+    margin-top: 1.2rem;
   }
 
   /* ── Guide CTA ── */
@@ -275,16 +379,8 @@
     gap: 1.5rem;
     flex-wrap: wrap;
   }
-  .guide-cta-text h3 {
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 0.4rem;
-  }
-  .guide-cta-text p {
-    font-size: 0.875rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
+  .guide-cta-text h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .guide-cta-text p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
   .guide-btn {
     display: inline-block;
     background: var(--accent2);
@@ -301,17 +397,13 @@
   .guide-btn:hover { opacity: 0.85; }
 
   /* ── Next steps ── */
-  .next-section {
-    max-width: 680px;
-    margin: 0 auto 4rem;
-  }
+  .next-section { max-width: 680px; margin: 0 auto 4rem; }
   .next-section h2 {
-    font-size: 1.2rem;
+    font-size: 0.75rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
     color: var(--muted);
     font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
   }
@@ -491,16 +583,50 @@
 
     <div class="download-section">
       <h3>Download</h3>
-      <!-- REPLACE href WITH YOUR ACTUAL DOWNLOAD LINK -->
-      <a class="download-btn" href="https://drive.google.com/drive/folders/1B5iXzPfFQAweqX95AFnE0_D78giwqy-y?usp=sharing" download>
-        <span>⬇ CGRelay Trial Project — Godot 4</span>
-        <span class="btn-right">.zip · Godot 4.x</span>
-      </a>
-      <p class="download-note">
-        Open the project in Godot 4.4+, hit Play, and share it with a friend.
-        Both of you will appear on the same map in seconds.
-        The trial Game ID is pre-set — nothing to configure.
-      </p>
+
+      <!-- Form State -->
+      <div id="formState">
+        <form class="dl-form" onsubmit="requestTrialDownload(event)">
+          <div class="form-row">
+            <label for="trialName">Your Name</label>
+            <input type="text" id="trialName" placeholder="John Doe" required autocomplete="name"/>
+          </div>
+          <div class="form-row">
+            <label for="trialEmail">Email Address</label>
+            <input type="email" id="trialEmail" placeholder="john@example.com" required autocomplete="email"/>
+          </div>
+          <div class="form-row">
+            <label for="trialPhone">WhatsApp Number</label>
+            <input type="tel" id="trialPhone" placeholder="+91 9876543210" required autocomplete="tel"/>
+          </div>
+          <button type="submit" class="dl-submit" id="trialSubmitBtn">
+            <span>⬇ Get Free Trial</span>
+            <span class="btn-right">.zip · Godot 4.x</span>
+          </button>
+          <div class="form-status" id="formStatus"></div>
+        </form>
+
+        <p class="download-note">
+          Open the project in Godot 4.4+, hit Play, and share it with a friend.
+          Both of you will appear on the same map in seconds.
+          The trial Game ID is pre-set — nothing to configure.
+        </p>
+      </div>
+
+      <!-- Success State -->
+      <div class="dl-success" id="successState">
+        <div class="success-icon">✅</div>
+        <h3>You're all set!</h3>
+        <p>Your download is ready. We've also sent the link to your email so you can find it later.</p>
+        <a class="final-dl-btn"
+           id="finalDlBtn"
+           href="https://drive.google.com/drive/folders/1B5iXzPfFQAweqX95AFnE0_D78giwqy-y?usp=sharing"
+           target="_blank">
+          📥 Download CGRelay Trial
+        </a>
+        <span class="email-note">// link also sent to your email</span>
+      </div>
+
     </div>
   </div>
 
@@ -567,6 +693,72 @@
   </p>
   <p>© 2024 Godot Game Assets Marketplace. All rights reserved.</p>
 </footer>
+
+<script>
+  const FREE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec'
+
+  async function requestTrialDownload(event) {
+    event.preventDefault()
+
+    const name   = document.getElementById('trialName').value.trim()
+    const email  = document.getElementById('trialEmail').value.trim().toLowerCase()
+    const phone  = document.getElementById('trialPhone').value.trim()
+    const btn    = document.getElementById('trialSubmitBtn')
+    const status = document.getElementById('formStatus')
+
+    // Basic validation
+    if (!name || !email || !phone) {
+      showStatus('⚠️ Please fill in all fields', 'error')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showStatus('⚠️ Please enter a valid email address', 'error')
+      return
+    }
+
+    // Loading state
+    btn.disabled = true
+    btn.querySelector('span').textContent = 'Processing...'
+    showStatus('🔄 Registering your download...', 'info')
+
+    try {
+      const res = await fetch(FREE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'logFreeDownload',
+          name:       name,
+          email:      email,
+          phone:      phone,
+          assetId:    'cgrelay_trial',
+          assetTitle: 'CGRelay Trial'
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        // Hide form, show success
+        document.getElementById('formState').style.display = 'none'
+        document.getElementById('successState').classList.add('active')
+      } else {
+        throw new Error(data.message || 'Something went wrong')
+      }
+
+    } catch (err) {
+      showStatus('❌ ' + (err.message || 'Error submitting. Please try again.'), 'error')
+      btn.disabled = false
+      btn.querySelector('span').textContent = '⬇ Get Free Trial'
+    }
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('formStatus')
+    el.textContent = msg
+    el.className = 'form-status ' + type
+  }
+</script>
 
 </body>
 </html>
