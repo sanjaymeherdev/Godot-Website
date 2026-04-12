@@ -593,16 +593,19 @@
 </footer>
 
 <script>
+  // ── Config ──
+  const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
+  const SITE_URL = 'https://sanjaymeherdev.netlify.app'
+
   // ── Tab switching ──
   function switchTab(tab) {
     document.getElementById('card-new').classList.remove('active')
     document.getElementById('card-existing').classList.remove('active')
     document.getElementById('tab-new').classList.remove('active')
     document.getElementById('tab-existing').classList.remove('active')
-
     document.getElementById('card-' + tab).classList.add('active')
     document.getElementById('tab-' + tab).classList.add('active')
-
     clearStatus()
   }
 
@@ -630,11 +633,6 @@
     }
   }
 
-  // ── Config ──
-  const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
-  const SITE_URL = 'https://sanjaymeherdev.netlify.app'
-
   // ── Google Sign In ──
   function signInWithGoogle() {
     const btn = document.getElementById('googleBtn')
@@ -644,24 +642,22 @@
       Connecting to Google...
     `
     showStatus('status-new', '🔄 Redirecting to Google...', 'info')
-    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${SITE_URL}/cgrelay-callback`
+    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${SITE_URL}/cgrelay/callback`
   }
 
   // ── Existing user login ──
   async function handleLogin() {
-    const gameId   = document.getElementById('gameId').value.trim()
-    const adminId  = document.getElementById('adminId').value.trim()
+    const gameId    = document.getElementById('gameId').value.trim()
+    const adminId   = document.getElementById('adminId').value.trim()
     const adminPass = document.getElementById('adminPass').value.trim()
-    const btn      = document.getElementById('loginBtn')
-    const spinner  = document.getElementById('loginSpinner')
-    const btnText  = document.getElementById('loginBtnText')
+    const btn       = document.getElementById('loginBtn')
+    const spinner   = document.getElementById('loginSpinner')
+    const btnText   = document.getElementById('loginBtnText')
 
-    // Validation
-    if (!gameId) { showStatus('status-existing', '⚠️ Please enter your Game ID', 'error'); return }
-    if (!adminId) { showStatus('status-existing', '⚠️ Please enter your Admin ID', 'error'); return }
+    if (!gameId)    { showStatus('status-existing', '⚠️ Please enter your Game ID', 'error'); return }
+    if (!adminId)   { showStatus('status-existing', '⚠️ Please enter your Admin ID', 'error'); return }
     if (!adminPass) { showStatus('status-existing', '⚠️ Please enter your Admin Password', 'error'); return }
 
-    // Loading state
     btn.disabled = true
     spinner.style.display = 'block'
     btnText.textContent = 'Verifying...'
@@ -686,8 +682,7 @@
         return
       }
 
-      const record = data[0]
-      const admin = record.admin || {}
+      const admin = data[0].admin || {}
 
       if (admin.admin_id !== adminId || admin.admin_pass !== adminPass) {
         showStatus('status-existing', '❌ Wrong Admin ID or Password', 'error')
@@ -695,14 +690,13 @@
         return
       }
 
-      // Success — store session and redirect
       showStatus('status-existing', '✅ Login successful! Redirecting...', 'success')
       sessionStorage.setItem('cgrelay_game_id', gameId)
       sessionStorage.setItem('cgrelay_admin_id', adminId)
       sessionStorage.setItem('cgrelay_auth', 'admin')
 
       setTimeout(() => {
-        window.location.href = '/cgrelay-dashboard'
+        window.location.href = '/cgrelay/dashboard'
       }, 1000)
 
     } catch (err) {
@@ -712,23 +706,19 @@
   }
 
   function resetLoginBtn() {
-    const btn = document.getElementById('loginBtn')
-    const spinner = document.getElementById('loginSpinner')
-    const btnText = document.getElementById('loginBtnText')
-    btn.disabled = false
-    spinner.style.display = 'none'
-    btnText.textContent = 'Access Dashboard'
+    document.getElementById('loginBtn').disabled = false
+    document.getElementById('loginSpinner').style.display = 'none'
+    document.getElementById('loginBtnText').textContent = 'Access Dashboard'
   }
 
-  // ── Enter key on login form ──
+  // ── Enter key ──
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-      const existingActive = document.getElementById('card-existing').classList.contains('active')
-      if (existingActive) handleLogin()
+      if (document.getElementById('card-existing').classList.contains('active')) handleLogin()
     }
   })
 
-  // ── Check if returning from Google OAuth or registration ──
+  // ── Handle URL params ──
   const urlParams = new URLSearchParams(window.location.search)
 
   const errorMap = {
@@ -745,7 +735,6 @@
     showStatus('status-new', '❌ ' + (errorMap[err] || 'Sign-in failed. Please try again.'), 'error')
   }
 
-  // Pre-fill game_id if returning from edge function (already registered)
   const existingGameId = urlParams.get('game_id')
   if (existingGameId) {
     switchTab('existing')
@@ -753,7 +742,6 @@
     showStatus('status-existing', 'ℹ️ You already have a registered game. Login with your admin credentials.', 'info')
   }
 
-  // Coming back after successful registration
   if (urlParams.get('registered') === 'true') {
     switchTab('existing')
     showStatus('status-existing', '✅ Registration complete! Login with your admin credentials.', 'success')
