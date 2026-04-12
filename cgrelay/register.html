@@ -631,7 +631,7 @@
 <script>
   // ── Config ──
   const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
+  const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'
   const EDGE_PAYMENT_URL = `${SUPABASE_URL}/functions/v1/cgrelay-payment`
   const SITE_URL = 'https://sanjaymeherdev.netlify.app'
 
@@ -885,9 +885,12 @@
       const data = await res.json()
 
       if (data.success) {
-        // Store payment_link_id for polling on return
+        // Save credentials to sessionStorage — survives Razorpay redirect
         sessionStorage.setItem('cgrelay_payment_link_id', data.payment_link_id)
-        sessionStorage.setItem('cgrelay_game_id', data.payment_link_id)
+        sessionStorage.setItem('cgrelay_game_id', gameId)
+        sessionStorage.setItem('cgrelay_admin_id', adminId)
+        sessionStorage.setItem('cgrelay_admin_pass', adminPass)
+        sessionStorage.setItem('cgrelay_auth', 'google')
         setLoading(false)
         window.location.href = data.payment_url
       } else {
@@ -932,7 +935,7 @@
         if (data.success && data.status === 'completed') {
           setLoading(false)
           sessionStorage.setItem('cgrelay_game_id', data.game_id)
-          sessionStorage.setItem('cgrelay_auth', 'google')
+          // admin_id, admin_pass, auth already saved before payment redirect
           window.location.href = '/cgrelay/dashboard'
           return
         }
