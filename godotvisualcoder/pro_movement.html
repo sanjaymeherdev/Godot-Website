@@ -1,607 +1,795 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Movement Pro · GDScript Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0e0f11; --bg2:#15171a; --bg3:#1c1f23; --bg4:#23272d;
-  --border:#2a2f37; --border2:#343b45;
-  --text:#e8eaed; --text2:#8b95a1; --text3:#555f6d;
-  --green:#4ade80; --green2:#22c55e;
-  --green-dim:rgba(74,222,128,0.10); --green-dim2:rgba(74,222,128,0.06);
-  --blue:#60a5fa; --blue2:#3b82f6; --blue-dim:rgba(96,165,250,0.10);
-  --amber:#fbbf24; --amber-dim:rgba(251,191,36,0.10);
-  --coral:#f87171; --coral-dim:rgba(248,113,113,0.10);
-  --purple:#c084fc; --purple-dim:rgba(192,132,252,0.10);
-  --sans:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
-  --tap:52px; --r:10px; --rl:14px;
+:root{
+  --bg:#0e0f11;--bg2:#15171a;--bg3:#1c1f23;--bg4:#23272d;
+  --border:#2a2f37;--border2:#343b45;
+  --text:#e8eaed;--text2:#8b95a1;--text3:#555f6d;
+  --green:#4ade80;--green2:#22c55e;--green-dim:rgba(74,222,128,0.10);--green-dim2:rgba(74,222,128,0.06);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.10);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.10);
+  --coral:#f87171;--coral-dim:rgba(248,113,113,0.10);
+  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.10);
+  --mono:'JetBrains Mono','Fira Mono','Consolas',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --tap:44px;--r:8px;--rl:12px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-.header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;background:var(--bg);}
-.back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:18px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
-.back-btn:active{background:var(--bg4);}
-.header-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;}
-.header-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
-.header-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--purple);background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);padding:3px 8px;border-radius:20px;white-space:nowrap;}
-
-.page{padding:16px 16px 100px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased;}
+.wrap{display:flex;gap:12px;padding:12px;min-height:100vh;}
+.form-col{width:320px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+.out-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;}
 
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
-.card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-.card-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
-.card-dot.blue{background:var(--blue);}
-.card-dot.purple{background:var(--purple);}
-.card-dot.amber{background:var(--amber);}
-.card-dot.coral{background:var(--coral);}
-.card-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
-.card-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.card-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.dot.a{background:var(--amber);}
+.dot.c{background:var(--coral);}
+.dot.b{background:var(--blue);}
+.dot.p{background:var(--purple);}
+.card-title{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);font-family:var(--mono);}
+.card-body{padding:12px;display:flex;flex-direction:column;gap:10px;}
 
-.field{display:flex;flex-direction:column;gap:5px;}
-.field-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
-.field-row{display:flex;align-items:center;gap:8px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.lbl{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
 
-select,input[type="text"],input[type="number"]{width:100%;height:var(--tap);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;padding:0 12px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color 0.15s;}
-select:focus,input:focus{border-color:var(--green2);}
-.field-row select,.field-row input{flex:1;}
+input[type="number"],input[type="text"]{width:100%;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:13px;padding:0 10px;outline:none;-webkit-appearance:none;}
+input:focus{border-color:var(--green2);}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;}
+.tog{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;cursor:pointer;user-select:none;transition:border-color .15s,background .15s;}
+.tog.on{background:var(--green-dim2);border-color:var(--green2);}
+.chk{width:18px;height:18px;flex-shrink:0;border:1px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.tog.on .chk{background:var(--green);border-color:var(--green);}
+.chk svg{display:none;}
+.tog.on .chk svg{display:block;}
+.tog-lbl{flex:1;font-size:13px;}
+.tog-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
 
-.toggle-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;min-height:var(--tap);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color 0.15s,background 0.15s;user-select:none;}
-.toggle-item.active{background:var(--green-dim2);border-color:var(--green2);}
-.toggle-item:active{background:var(--bg4);}
-.toggle-item input[type="checkbox"]{display:none;}
-.chk-box{width:22px;height:22px;flex-shrink:0;border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-.toggle-item.active .chk-box{background:var(--green);border-color:var(--green);}
-.chk-mark{display:none;}
-.toggle-item.active .chk-mark{display:block;}
-.toggle-label{flex:1;font-size:14px;font-weight:500;}
-.toggle-hint{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:8px 10px;border-radius:0 var(--r) var(--r) 0;font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
+.hint.b{border-left-color:var(--blue);}
+.hint.a{border-left-color:var(--amber);}
 
-.sub{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;}
-.hint{background:var(--bg4);border-left:2px solid var(--green2);padding:10px 12px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6;}
-.hint.blue{border-left-color:var(--blue);}
-.hint.purple{border-left-color:var(--purple);}
-.hint.amber{border-left-color:var(--amber);}
-
-.gen-btn{width:100%;height:56px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:var(--rl);color:var(--purple);font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
-.gen-btn:active{background:rgba(192,132,252,0.2);transform:scale(0.99);}
+.gen-btn{width:100%;height:48px;background:var(--purple-dim);border:1px solid rgba(192,132,252,0.4);border-radius:var(--rl);color:var(--purple);font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background .15s;}
+.gen-btn:active{background:rgba(192,132,252,0.2);}
 
 .out-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
-.out-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-.out-tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
-.out-tag.player{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
-.out-tag.anim{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue2);}
-.out-tag.cam{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.4);}
-.out-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
-.copy-btn{margin-left:auto;padding:8px 14px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:36px;transition:all 0.15s;}
-.copy-btn:active{background:var(--bg3);color:var(--text);}
-.copy-btn.copied{color:var(--green);border-color:var(--green2);}
-.out-code{padding:14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:60px;}
-.out-code.empty{color:var(--text3);font-style:italic;font-size:12px;}
+.out-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.tag{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:0.07em;text-transform:uppercase;padding:3px 7px;border-radius:4px;}
+.tag.pl{background:var(--green-dim);color:var(--green);border:1px solid var(--green2);}
+.tag.an{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue);}
+.tag.ca{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,.4);}
+.tag.sc{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+.out-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.copy-btn{margin-left:auto;padding:6px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;min-height:30px;transition:all .15s;}
+.copy-btn:active{background:var(--bg3);}
+.copy-btn.ok{color:var(--green);border-color:var(--green2);}
+.out-code{padding:12px;font-family:var(--mono);font-size:11px;line-height:1.8;color:var(--text);white-space:pre;overflow-x:auto;min-height:48px;}
+.out-code.empty{color:var(--text3);font-style:italic;font-size:11px;}
 
-.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .num{color:#f78c6c;} .cmt{color:#546e7a;font-style:italic;} .typ{color:var(--amber);}
+.kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.num{color:#f78c6c;}.cmt{color:#546e7a;font-style:italic;}.typ{color:var(--amber);}
 .hidden{display:none!important;}
 
-@media(min-width:768px){
-  .page{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
-  .form-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
-  .out-col{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px;}
-}
+.sec-lbl{font-size:10px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;padding:4px 0 2px;}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <a class="back-btn" href="pro.html">‹</a>
-  <div>
-    <div class="header-title">Movement Pro</div>
-    <div class="header-sub">CharacterBody3D · stances · weapons · multiplayer</div>
-  </div>
-  <span class="header-badge">Pro · Tier 1</span>
-</div>
-
-<div class="page">
+<div class="wrap">
 <div class="form-col">
 
-  <!-- SPEEDS -->
-  <div class="card">
-    <div class="card-head"><div class="card-dot"></div><span class="card-title">Speeds</span></div>
-    <div class="card-body">
-      <div class="grid2">
-        <div class="field"><div class="field-label">normal_speed</div><input type="number" id="spNormal" value="2.0" step="0.1"></div>
-        <div class="field"><div class="field-label">sprint_speed</div><input type="number" id="spSprint" value="6.0" step="0.1"></div>
-        <div class="field"><div class="field-label">crouch_speed</div><input type="number" id="spCrouch" value="1.0" step="0.1"></div>
-        <div class="field"><div class="field-label">prone_speed</div><input type="number" id="spProne" value="0.67" step="0.01"></div>
-      </div>
-      <div class="field"><div class="field-label">jump_velocity</div><input type="number" id="spJump" value="4" step="0.5"></div>
+<div class="card">
+  <div class="card-head"><div class="dot"></div><span class="card-title">Speeds</span></div>
+  <div class="card-body">
+    <div class="g2">
+      <div class="field"><div class="lbl">normal_speed</div><input type="number" id="spN" value="2.0" step="0.1"></div>
+      <div class="field"><div class="lbl">sprint_speed</div><input type="number" id="spS" value="6.0" step="0.1"></div>
+      <div class="field"><div class="lbl">crouch_speed</div><input type="number" id="spC" value="1.0" step="0.1"></div>
+      <div class="field"><div class="lbl">prone_speed</div><input type="number" id="spP" value="0.67" step="0.01"></div>
+    </div>
+    <div class="field"><div class="lbl">jump_velocity</div><input type="number" id="spJ" value="4" step="0.5"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><div class="dot a"></div><span class="card-title">Stances</span></div>
+  <div class="card-body">
+    <div class="hint a">Normal is always included.</div>
+    <div class="tog on" data-f="crouch" onclick="tog(this)">
+      <div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div>
+      <span class="tog-lbl">Crouch</span><span class="tog-hint">KEY_C</span>
+    </div>
+    <div class="tog on" data-f="prone" onclick="tog(this)">
+      <div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div>
+      <span class="tog-lbl">Prone</span><span class="tog-hint">KEY_X</span>
     </div>
   </div>
+</div>
 
-  <!-- STANCES -->
-  <div class="card">
-    <div class="card-head"><div class="card-dot amber"></div><span class="card-title">Stances</span></div>
-    <div class="card-body">
-      <div class="hint amber">Normal stance is always included. Enable crouch and prone as needed.</div>
-      <div class="toggle-item active" id="tog-crouch" data-feat="crouch">
-        <input type="checkbox" id="useCrouch" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Crouch</span>
-        <span class="toggle-hint">KEY_C · toggle</span>
-      </div>
-      <div class="toggle-item active" id="tog-prone" data-feat="prone">
-        <input type="checkbox" id="useProne" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Prone</span>
-        <span class="toggle-hint">KEY_X · toggle</span>
-      </div>
+<div class="card">
+  <div class="card-head"><div class="dot c"></div><span class="card-title">Weapon Types</span></div>
+  <div class="card-body">
+    <div class="hint">Each adds input + animation branching.</div>
+    <div class="tog on" data-f="gun" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Main Gun</span><span class="tog-hint">KEY_1</span></div>
+    <div class="tog on" data-f="pistol" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Pistol</span><span class="tog-hint">KEY_2</span></div>
+    <div class="tog on" data-f="melee" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Melee</span><span class="tog-hint">KEY_3</span></div>
+    <div class="tog on" data-f="nade" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Grenade</span><span class="tog-hint">KEY_4</span></div>
+    <div class="tog on" data-f="punch" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Bare Hands</span><span class="tog-hint">no weapon</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><div class="dot b"></div><span class="card-title">Multiplayer</span></div>
+  <div class="card-body">
+    <div class="tog on" data-f="mp" onclick="tog(this)"><div class="chk"><svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" stroke="#0e0f11" stroke-width="1.8" fill="none"/></svg></div><span class="tog-lbl">Authority guards</span><span class="tog-hint">_enter_tree + check</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><div class="dot b"></div><span class="card-title">Animation Names</span></div>
+  <div class="card-body">
+    <div class="hint b">Match your AnimationPlayer names exactly.</div>
+    <div class="sec-lbl">No Weapon</div>
+    <div class="g2">
+      <div class="field"><div class="lbl">Idle</div><input type="text" id="aN_Idle" value="Idle"></div>
+      <div class="field"><div class="lbl">Walk</div><input type="text" id="aN_Walk" value="Walking"></div>
+      <div class="field"><div class="lbl">Run</div><input type="text" id="aN_Run" value="Running"></div>
+      <div class="field"><div class="lbl">Jump</div><input type="text" id="aN_Jump" value="JumpSt"></div>
+      <div class="field" id="f_punch"><div class="lbl">Punch</div><input type="text" id="aN_Punch" value="Punch"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_gun">Main Gun</div>
+    <div class="g2" id="blk_gun">
+      <div class="field"><div class="lbl">Idle</div><input type="text" id="aG_Idle" value="RifleIdle"></div>
+      <div class="field"><div class="lbl">Walk</div><input type="text" id="aG_Walk" value="Walk"></div>
+      <div class="field"><div class="lbl">Run</div><input type="text" id="aG_Run" value="Run"></div>
+      <div class="field"><div class="lbl">Jump</div><input type="text" id="aG_Jump" value="RifleJump"></div>
+      <div class="field"><div class="lbl">Aim</div><input type="text" id="aG_Aim" value="RifleAim"></div>
+      <div class="field"><div class="lbl">Fire</div><input type="text" id="aG_Fire" value="Firing"></div>
+      <div class="field"><div class="lbl">Walk+Fire</div><input type="text" id="aG_WF" value="WalkFire"></div>
+      <div class="field"><div class="lbl">Run+Fire</div><input type="text" id="aG_RF" value="RunFire"></div>
+      <div class="field"><div class="lbl">Reload</div><input type="text" id="aG_Rl" value="Reload"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_pistol">Pistol</div>
+    <div class="g2" id="blk_pistol">
+      <div class="field"><div class="lbl">Fire</div><input type="text" id="aP_Fire" value="PistolFire"></div>
+      <div class="field"><div class="lbl">Walk+Fire</div><input type="text" id="aP_WF" value="Walkpistol"></div>
+      <div class="field"><div class="lbl">Run+Fire</div><input type="text" id="aP_RF" value="RunPistol"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_melee">Melee</div>
+    <div class="g2" id="blk_melee">
+      <div class="field"><div class="lbl">Attack</div><input type="text" id="aM_Att" value="Attack2"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_nade">Grenade</div>
+    <div class="g2" id="blk_nade">
+      <div class="field"><div class="lbl">Throw</div><input type="text" id="aNG_Th" value="IdleGrenade"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_crouch">Crouch</div>
+    <div class="g2" id="blk_crouch">
+      <div class="field"><div class="lbl">Idle</div><input type="text" id="aC_Idle" value="CrIdle"></div>
+      <div class="field"><div class="lbl">Walk</div><input type="text" id="aC_Walk" value="CrWalk"></div>
+      <div class="field"><div class="lbl">Fire</div><input type="text" id="aC_Fire" value="CrFire"></div>
+      <div class="field"><div class="lbl">Walk+Fire</div><input type="text" id="aC_WF" value="CrWFire"></div>
+      <div class="field"><div class="lbl">Aim</div><input type="text" id="aC_Aim" value="IdleCrAim"></div>
+      <div class="field"><div class="lbl">Reload</div><input type="text" id="aC_Rl" value="CrReload"></div>
+      <div class="field" id="f_cpFire"><div class="lbl">Pistol Fire</div><input type="text" id="aCP_Fire" value="CrPistol"></div>
+      <div class="field" id="f_cpWF"><div class="lbl">Pistol Walk+Fire</div><input type="text" id="aCP_WF" value="CrWPistol"></div>
+      <div class="field" id="f_cMelee"><div class="lbl">Melee</div><input type="text" id="aCM_Att" value="CrMelee"></div>
+      <div class="field" id="f_cNade"><div class="lbl">Grenade Throw</div><input type="text" id="aCG_Th" value="CrThGrenade"></div>
+    </div>
+    <div class="sec-lbl" id="lbl_prone">Prone</div>
+    <div class="g2" id="blk_prone">
+      <div class="field"><div class="lbl">Idle</div><input type="text" id="aPr_Idle" value="ProneIdle"></div>
+      <div class="field"><div class="lbl">Forward</div><input type="text" id="aPr_Fwd" value="ProneForward"></div>
+      <div class="field"><div class="lbl">Fire</div><input type="text" id="aPr_Fire" value="ProneFire"></div>
+      <div class="field"><div class="lbl">Reload</div><input type="text" id="aPr_Rl" value="PrReload"></div>
+      <div class="field" id="f_prMelee"><div class="lbl">Melee</div><input type="text" id="aPrM_Att" value="ProneMelee"></div>
+      <div class="field" id="f_prNade"><div class="lbl">Grenade Throw</div><input type="text" id="aPrG_Th" value="ProneGrenade"></div>
+      <div class="field" id="f_prPistol"><div class="lbl">Pistol Fire</div><input type="text" id="aPrP_Fire" value="PronePistol"></div>
+    </div>
+    <div class="sec-lbl">Camera</div>
+    <div class="g2">
+      <div class="field"><div class="lbl">mouse_sensitivity</div><input type="number" id="camSens" value="0.005" step="0.001"></div>
+      <div class="field"><div class="lbl">max_look_up (deg)</div><input type="number" id="camUp" value="50"></div>
+      <div class="field"><div class="lbl">max_look_down (deg)</div><input type="number" id="camDown" value="75"></div>
     </div>
   </div>
+</div>
 
-  <!-- WEAPON TYPES -->
-  <div class="card">
-    <div class="card-head"><div class="card-dot coral"></div><span class="card-title">Weapon Types</span></div>
-    <div class="card-body">
-      <div class="hint">Only include weapon types your game uses. Each adds input handling and animation branching.</div>
-      <div class="toggle-item active" id="tog-maingun" data-feat="maingun">
-        <input type="checkbox" id="useMaingun" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Main Gun</span>
-        <span class="toggle-hint">AR / SMG / Sniper</span>
-      </div>
-      <div class="toggle-item active" id="tog-pistol" data-feat="pistol">
-        <input type="checkbox" id="usePistol" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Pistol</span>
-        <span class="toggle-hint">separate anim set</span>
-      </div>
-      <div class="toggle-item active" id="tog-melee" data-feat="melee">
-        <input type="checkbox" id="useMelee" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Melee</span>
-        <span class="toggle-hint">cooldown + anim</span>
-      </div>
-      <div class="toggle-item active" id="tog-grenade" data-feat="grenade">
-        <input type="checkbox" id="useGrenade" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Grenade</span>
-        <span class="toggle-hint">aim + throw</span>
-      </div>
-      <div class="toggle-item active" id="tog-punch" data-feat="punch">
-        <input type="checkbox" id="usePunch" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Bare Hands / Punch</span>
-        <span class="toggle-hint">no weapon equipped</span>
-      </div>
-    </div>
-  </div>
+<button class="gen-btn" onclick="generate()">▶ Generate 3 Scripts</button>
+</div>
 
-  <!-- MULTIPLAYER -->
-  <div class="card">
-    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Multiplayer</span></div>
-    <div class="card-body">
-      <div class="toggle-item active" id="tog-mp" data-feat="mp">
-        <input type="checkbox" id="useMp" checked>
-        <div class="chk-box"><svg class="chk-mark" width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#0e0f11" stroke-width="2" fill="none"/></svg></div>
-        <span class="toggle-label">Multiplayer Authority Guards</span>
-        <span class="toggle-hint">_enter_tree + is_multiplayer_authority()</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ANIMATION NAMES -->
-  <div class="card">
-    <div class="card-head"><div class="card-dot blue"></div><span class="card-title">Animation Names</span></div>
-    <div class="card-body">
-      <div class="hint blue">Match these exactly to your AnimationPlayer animation names.</div>
-
-      <div class="field"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Normal Stance — No Weapon</div></div>
-      <div class="grid2">
-        <div class="field"><div class="field-label">Idle</div><input type="text" id="aN_Idle" value="Idle"></div>
-        <div class="field"><div class="field-label">Walk</div><input type="text" id="aN_Walk" value="Walking"></div>
-        <div class="field"><div class="field-label">Run</div><input type="text" id="aN_Run" value="Running"></div>
-        <div class="field"><div class="field-label">Jump</div><input type="text" id="aN_Jump" value="JumpSt"></div>
-        <div class="field" id="f_punch"><div class="field-label">Punch</div><input type="text" id="aN_Punch" value="Punch"></div>
-      </div>
-
-      <div class="field"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Normal Stance — Main Gun</div></div>
-      <div class="grid2" id="block_maingun">
-        <div class="field"><div class="field-label">Idle</div><input type="text" id="aG_Idle" value="RifleIdle"></div>
-        <div class="field"><div class="field-label">Walk</div><input type="text" id="aG_Walk" value="Walk"></div>
-        <div class="field"><div class="field-label">Run</div><input type="text" id="aG_Run" value="Run"></div>
-        <div class="field"><div class="field-label">Jump</div><input type="text" id="aG_Jump" value="RifleJump"></div>
-        <div class="field"><div class="field-label">Aim</div><input type="text" id="aG_Aim" value="RifleAim"></div>
-        <div class="field"><div class="field-label">Fire</div><input type="text" id="aG_Fire" value="Firing"></div>
-        <div class="field"><div class="field-label">Walk+Fire</div><input type="text" id="aG_WalkFire" value="WalkFire"></div>
-        <div class="field"><div class="field-label">Run+Fire</div><input type="text" id="aG_RunFire" value="RunFire"></div>
-        <div class="field"><div class="field-label">Reload</div><input type="text" id="aG_Reload" value="Reload"></div>
-      </div>
-
-      <div class="field" id="block_pistol_lbl"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Normal Stance — Pistol</div></div>
-      <div class="grid2" id="block_pistol">
-        <div class="field"><div class="field-label">Fire</div><input type="text" id="aP_Fire" value="PistolFire"></div>
-        <div class="field"><div class="field-label">Walk+Fire</div><input type="text" id="aP_WalkFire" value="Walkpistol"></div>
-        <div class="field"><div class="field-label">Run+Fire</div><input type="text" id="aP_RunFire" value="RunPistol"></div>
-      </div>
-
-      <div class="field"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Crouch Stance</div></div>
-      <div class="grid2" id="block_crouch">
-        <div class="field"><div class="field-label">Idle</div><input type="text" id="aC_Idle" value="CrIdle"></div>
-        <div class="field"><div class="field-label">Walk</div><input type="text" id="aC_Walk" value="CrWalk"></div>
-        <div class="field"><div class="field-label">Fire (gun)</div><input type="text" id="aC_Fire" value="CrFire"></div>
-        <div class="field"><div class="field-label">Walk+Fire</div><input type="text" id="aC_WalkFire" value="CrWFire"></div>
-        <div class="field"><div class="field-label">Aim</div><input type="text" id="aC_Aim" value="IdleCrAim"></div>
-        <div class="field"><div class="field-label">Reload</div><input type="text" id="aC_Reload" value="CrReload"></div>
-        <div class="field" id="f_crPistolFire"><div class="field-label">Pistol Fire</div><input type="text" id="aCP_Fire" value="CrPistol"></div>
-        <div class="field" id="f_crPistolWalk"><div class="field-label">Pistol Walk+Fire</div><input type="text" id="aCP_Walk" value="CrWPistol"></div>
-        <div class="field" id="f_crMelee"><div class="field-label">Melee</div><input type="text" id="aCM_Melee" value="CrMelee"></div>
-        <div class="field" id="f_crGrenade"><div class="field-label">Grenade Throw</div><input type="text" id="aCG_Throw" value="CrThGrenade"></div>
-      </div>
-
-      <div class="field"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Prone Stance</div></div>
-      <div class="grid2" id="block_prone">
-        <div class="field"><div class="field-label">Idle</div><input type="text" id="aPr_Idle" value="ProneIdle"></div>
-        <div class="field"><div class="field-label">Forward</div><input type="text" id="aPr_Fwd" value="ProneForward"></div>
-        <div class="field"><div class="field-label">Fire (gun)</div><input type="text" id="aPr_Fire" value="ProneFire"></div>
-        <div class="field"><div class="field-label">Reload</div><input type="text" id="aPr_Reload" value="PrReload"></div>
-        <div class="field" id="f_prMelee"><div class="field-label">Melee</div><input type="text" id="aPrM_Melee" value="ProneMelee"></div>
-        <div class="field" id="f_prGrenade"><div class="field-label">Grenade Throw</div><input type="text" id="aPrG_Throw" value="ProneGrenade"></div>
-        <div class="field" id="f_prPistol"><div class="field-label">Pistol Fire</div><input type="text" id="aPrP_Fire" value="PronePistol"></div>
-        <div class="field" id="f_normalGrenade"><div class="field-label">Normal Grenade Throw</div><input type="text" id="aNG_Throw" value="IdleGrenade"></div>
-        <div class="field" id="f_normalMelee"><div class="field-label">Normal Melee</div><input type="text" id="aNM_Melee" value="Attack2"></div>
-      </div>
-
-      <!-- Camera -->
-      <div class="field"><div class="field-label" style="color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:0.08em">Camera (playercam.gd)</div></div>
-      <div class="grid2">
-        <div class="field"><div class="field-label">mouse_sensitivity</div><input type="number" id="camSens" value="0.005" step="0.001"></div>
-        <div class="field"><div class="field-label">max_look_up (deg)</div><input type="number" id="camUp" value="50"></div>
-        <div class="field"><div class="field-label">max_look_down (deg)</div><input type="number" id="camDown" value="75"></div>
-      </div>
-    </div>
-  </div>
-
-  <button class="gen-btn" onclick="generate()">▶ Generate 3 Scripts</button>
-
-</div><!-- end form-col -->
 <div class="out-col">
-
   <div class="out-card">
-    <div class="out-head">
-      <span class="out-tag player">player.gd</span>
-      <span class="out-sub">CharacterBody3D script</span>
-      <button class="copy-btn" onclick="copyOut('outPlayer',this)">Copy</button>
-    </div>
-    <div class="out-code empty" id="outPlayer"># tap Generate to produce code</div>
+    <div class="out-head"><span class="tag pl">player.gd</span><span class="out-sub">CharacterBody3D</span><button class="copy-btn" onclick="cp('oPlayer',this)">Copy</button></div>
+    <div class="out-code empty" id="oPlayer"># tap Generate</div>
   </div>
-
   <div class="out-card">
-    <div class="out-head">
-      <span class="out-tag anim">animation.gd</span>
-      <span class="out-sub">Node3D body script</span>
-      <button class="copy-btn" onclick="copyOut('outAnim',this)">Copy</button>
-    </div>
-    <div class="out-code empty" id="outAnim"># tap Generate to produce code</div>
+    <div class="out-head"><span class="tag an">animation.gd</span><span class="out-sub">Node3D body script</span><button class="copy-btn" onclick="cp('oAnim',this)">Copy</button></div>
+    <div class="out-code empty" id="oAnim"># tap Generate</div>
   </div>
-
   <div class="out-card">
-    <div class="out-head">
-      <span class="out-tag cam">playercam.gd</span>
-      <span class="out-sub">SpringArm camera script</span>
-      <button class="copy-btn" onclick="copyOut('outCam',this)">Copy</button>
-    </div>
-    <div class="out-code empty" id="outCam"># tap Generate to produce code</div>
+    <div class="out-head"><span class="tag ca">playercam.gd</span><span class="out-sub">SpringArm camera</span><button class="copy-btn" onclick="cp('oCam',this)">Copy</button></div>
+    <div class="out-code empty" id="oCam"># tap Generate</div>
   </div>
-
-  <!-- SCENE STRUCTURE -->
   <div class="out-card">
-    <div class="out-head">
-      <span class="out-tag" style="background:rgba(192,132,252,0.12);color:var(--purple);border:1px solid rgba(192,132,252,0.4);">Scene Structure</span>
-      <span class="out-sub">required node tree</span>
-      <button class="copy-btn" onclick="copyScene(this)">Copy</button>
-    </div>
-    <div class="out-code" id="outScene" style="font-size:11px;line-height:1.9;"><!-- generated on load --></div>
+    <div class="out-head"><span class="tag sc">Scene Structure</span><span class="out-sub">required node tree</span><button class="copy-btn" onclick="cp('oScene',this)">Copy</button></div>
+    <div class="out-code" id="oScene" style="font-size:11px;line-height:1.9;"></div>
   </div>
-
 </div>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-const v = (id, fb) => { const el=$(id); return el && el.value.trim() ? el.value.trim() : fb; };
+const $=id=>document.getElementById(id);
+const v=(id,fb)=>{const e=$(id);return e&&e.value.trim()?e.value.trim():fb;};
+const feats={crouch:true,prone:true,gun:true,pistol:true,melee:true,nade:true,punch:true,mp:true};
 
-// Feature toggles state
-const feats = { crouch: true, prone: true, maingun: true, pistol: true, melee: true, grenade: true, punch: true, mp: true };
-
-// Initialize toggle listeners
-function initToggles() {
-  const toggles = document.querySelectorAll('.toggle-item');
-  toggles.forEach(toggle => {
-    toggle.addEventListener('click', function(e) {
-      const feat = this.dataset.feat;
-      if (feat && feats.hasOwnProperty(feat)) {
-        feats[feat] = !feats[feat];
-        this.classList.toggle('active', feats[feat]);
-        syncForm();
-        buildSceneTree();
-      }
-    });
-  });
-}
-
-function syncForm() {
-  const { crouch, prone, maingun, pistol, melee, grenade, punch } = feats;
-  show('block_maingun', maingun);
-  show('block_pistol', pistol);
-  show('block_pistol_lbl', pistol);
-  show('block_crouch', crouch);
-  show('block_prone', prone);
-  show('f_punch', punch);
-  show('f_crPistolFire', crouch && pistol);
-  show('f_crPistolWalk', crouch && pistol);
-  show('f_crMelee', crouch && melee);
-  show('f_crGrenade', crouch && grenade);
-  show('f_prMelee', prone && melee);
-  show('f_prGrenade', prone && grenade);
-  show('f_prPistol', prone && pistol);
-  show('f_normalGrenade', grenade);
-  show('f_normalMelee', melee);
-}
-
-function show(id, visible) {
-  const el = $(id);
-  if (el) {
-    if (visible) {
-      el.classList.remove('hidden');
-    } else {
-      el.classList.add('hidden');
-    }
-  }
-}
-
-/* ── GENERATE ── */
-function generate() {
-  const sp = {
-    normal: v('spNormal','2.0'), sprint: v('spSprint','6.0'),
-    crouch: v('spCrouch','1.0'), prone: v('spProne','0.67'), jump: v('spJump','4')
-  };
-  const { crouch, prone, maingun, pistol, melee, grenade, punch, mp } = feats;
-  const an = {
-    idle: v('aN_Idle','Idle'), walk: v('aN_Walk','Walking'), run: v('aN_Run','Running'), jump: v('aN_Jump','JumpSt'), punch: v('aN_Punch','Punch'),
-    gIdle: v('aG_Idle','RifleIdle'), gWalk: v('aG_Walk','Walk'), gRun: v('aG_Run','Run'), gJump: v('aG_Jump','RifleJump'),
-    gAim: v('aG_Aim','RifleAim'), gFire: v('aG_Fire','Firing'), gWalkFire: v('aG_WalkFire','WalkFire'), gRunFire: v('aG_RunFire','RunFire'), gReload: v('aG_Reload','Reload'),
-    pFire: v('aP_Fire','PistolFire'), pWalkFire: v('aP_WalkFire','Walkpistol'), pRunFire: v('aP_RunFire','RunPistol'),
-    cIdle: v('aC_Idle','CrIdle'), cWalk: v('aC_Walk','CrWalk'), cFire: v('aC_Fire','CrFire'), cWalkFire: v('aC_WalkFire','CrWFire'),
-    cAim: v('aC_Aim','IdleCrAim'), cReload: v('aC_Reload','CrReload'), cpFire: v('aCP_Fire','CrPistol'), cpWalk: v('aCP_Walk','CrWPistol'),
-    cmMelee: v('aCM_Melee','CrMelee'), cgThrow: v('aCG_Throw','CrThGrenade'),
-    prIdle: v('aPr_Idle','ProneIdle'), prFwd: v('aPr_Fwd','ProneForward'), prFire: v('aPr_Fire','ProneFire'), prReload: v('aPr_Reload','PrReload'),
-    prMelee: v('aPrM_Melee','ProneMelee'), prThrow: v('aPrG_Throw','ProneGrenade'), prPistol: v('aPrP_Fire','PronePistol'),
-    nGrenade: v('aNG_Throw','IdleGrenade'), nMelee: v('aNM_Melee','Attack2'),
-  };
-  const cam = { sens: v('camSens','0.005'), up: v('camUp','50'), down: v('camDown','75') };
-
-  renderCode('outPlayer', highlight(buildPlayer(sp, crouch, prone, maingun, pistol, melee, grenade, punch, mp)));
-  renderCode('outAnim',   highlight(buildAnim(an, crouch, prone, maingun, pistol, melee, grenade, punch)));
-  renderCode('outCam',    highlight(buildCam(cam, mp)));
-  buildSceneTree();
-}
-
-/* ── PLAYER.GD (simplified for space) ── */
-function buildPlayer(sp, crouch, prone, maingun, pistol, melee, grenade, punch, mp) {
-  const lines = [];
-  lines.push('extends CharacterBody3D\n');
-  lines.push(`const NORMAL_SPEED = ${sp.normal}`);
-  lines.push(`const SPRINT_SPEED = ${sp.sprint}`);
-  if (crouch) lines.push(`const CROUCH_SPEED = ${sp.crouch}`);
-  if (prone) lines.push(`const PRONE_SPEED = ${sp.prone}`);
-  lines.push(`const JUMP_VELOCITY = ${sp.jump}\n`);
-  
-  // Weapon enum
-  const weapons = ['MAIN_GUN', 'PISTOL', 'MELEE', 'GRENADE', 'NONE'].filter(w => {
-    if (w === 'MAIN_GUN') return maingun;
-    if (w === 'PISTOL') return pistol;
-    if (w === 'MELEE') return melee;
-    if (w === 'GRENADE') return grenade;
-    return true;
-  });
-  lines.push(`enum WeaponType { ${weapons.join(', ')} }\n`);
-  
-  lines.push('@export var gui: Control = null');
-  lines.push('@export var inv: Control = null');
-  lines.push('@export var _body: Node3D = null');
-  lines.push('@export var _spring_arm_offset: Node3D = null');
-  lines.push('@export var inventory: PlayerInventory = null');
-  lines.push('@export var weapon_handler: PlayerWeaponHandler = null');
-  lines.push('@export var raycast: RayCast3D = null\n');
-  
-  lines.push('var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")');
-  lines.push('var current_stance: String = "normal"');
-  lines.push('var is_running_mode: bool = false');
-  lines.push('var _current_speed: float');
-  lines.push('var mouse_locked = true');
-  lines.push('var current_weapon: WeaponType = WeaponType.NONE\n');
-  
-  lines.push('# Placeholder - Full implementation would continue here');
-  lines.push('# The complete script is too long for this response');
-  lines.push('# but follows the structure from your original code');
-  
-  return lines.join('\n');
-}
-
-/* ── ANIMATION.GD (placeholder) ── */
-function buildAnim(an, crouch, prone, maingun, pistol, melee, grenade, punch) {
-  const lines = [];
-  lines.push('extends Node3D\n');
-  lines.push('const LERP_VELOCITY: float = 0.15\n');
-  lines.push('@export var _character: CharacterBody3D = null');
-  lines.push('@export var animation_player: AnimationPlayer = null\n');
-  lines.push('# Animation settings and logic would go here');
-  lines.push('# Following the structure from your original animation.gd');
-  return lines.join('\n');
-}
-
-/* ── PLAYERCAM.GD ── */
-function buildCam(cam, mp) {
-  const lines = [];
-  lines.push('extends Node3D');
-  lines.push('class_name SpringArmCharacter\n');
-  lines.push('@export_category("Camera Settings")');
-  lines.push(`@export var mouse_sensitivity: float = ${cam.sens}`);
-  lines.push(`@export_range(0, 90, 1) var max_look_up_degrees: float = ${cam.up}`);
-  lines.push(`@export_range(0, 90, 1) var max_look_down_degrees: float = ${cam.down}\n`);
-  lines.push('@export_category("Objects")');
-  lines.push('@export var _spring_arm: SpringArm3D = null\n');
-  lines.push('func _unhandled_input(event) -> void:');
-  lines.push(`\tif (event is InputEventMouseMotion)${mp ? ' and is_multiplayer_authority()' : ''}:`);
-  lines.push('\t\trotate_y(-event.relative.x * mouse_sensitivity)');
-  lines.push('\t\t_spring_arm.rotate_x(-event.relative.y * mouse_sensitivity)');
-  lines.push('\t\tvar max_up_rad = deg_to_rad(-max_look_up_degrees)');
-  lines.push('\t\tvar max_down_rad = deg_to_rad(max_look_down_degrees)');
-  lines.push('\t\t_spring_arm.rotation.x = clamp(_spring_arm.rotation.x, max_up_rad, max_down_rad)');
-  return lines.join('\n');
-}
-
-// Replace the renderCode function with this:
-function renderCode(id, code) {
-  const el = $(id);
-  el.classList.remove('empty');
-  el.innerHTML = code;  // Changed from .innerHTML to .innerHTML (was correct but needs HTML content)
-}
-
-// Also fix the copyOut function to get plain text:
-function copyOut(id, btn) {
-  const el = $(id);
-  // Get text content without HTML tags
-  const text = el.textContent || el.innerText;
-  if (!text.trim() || text.includes('tap Generate')) return;
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy';
-      btn.classList.remove('copied');
-    }, 1600);
-  });
-}
-
-// Make sure the highlight function returns HTML string properly
-function highlight(code) {
-  const KW = new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@export_category','@export_range','@onready','@rpc']);
-  const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Node3D','CharacterBody3D','AnimationPlayer','SpringArm3D','RayCast3D','Control','ItemData','PlayerInventory','PlayerWeaponHandler','WeaponType']);
-  const FN = new Set(['_ready','_process','_physics_process','_input','_unhandled_input','_enter_tree','is_on_floor','move_and_slide','move_toward','get_vector','is_action_just_pressed','is_action_pressed','is_action_released','is_key_pressed','play','stop','pause','normalized','length','has_method','is_instance_valid','is_playing','lerp_angle','rotate_y','rotate_x','clamp','deg_to_rad','atan2','set_mouse_mode','set_multiplayer_authority','is_multiplayer_authority','get_remote_sender_id','add_to_group','has_animation','push_error','push_warning','create_timer']);
-  
-  function esc(s) { 
-    return s.replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-  }
-  
-  function tokenLine(line) {
-    let out = '', i = 0;
-    while (i < line.length) {
-      // Skip if we're at the end
-      if (i >= line.length) break;
-      
-      // Handle comments
-      if (line[i] === '#') {
-        out += `<span class="cmt">${esc(line.slice(i))}</span>`;
-        break;
-      }
-      
-      // Handle strings
-      if (line[i] === '"') {
-        let j = i + 1;
-        while (j < line.length && line[j] !== '"') j++;
-        out += `<span class="str">${esc(line.slice(i, j + 1))}</span>`;
-        i = j + 1;
-        continue;
-      }
-      
-      // Handle words (keywords, types, functions)
-      if (/[a-zA-Z_]/.test(line[i])) {
-        let j = i;
-        while (j < line.length && /[\w]/.test(line[j])) j++;
-        const w = line.slice(i, j);
-        if (KW.has(w)) {
-          out += `<span class="kw">${esc(w)}</span>`;
-        } else if (TYPE.has(w)) {
-          out += `<span class="typ">${esc(w)}</span>`;
-        } else if (FN.has(w)) {
-          out += `<span class="fn">${esc(w)}</span>`;
-        } else {
-          out += esc(w);
-        }
-        i = j;
-        continue;
-      }
-      
-      // Handle numbers
-      if (/\d/.test(line[i]) || (line[i] === '-' && i + 1 < line.length && /\d/.test(line[i+1]))) {
-        let j = i + (line[i] === '-' ? 1 : 0);
-        while (j < line.length && /[\d.]/.test(line[j])) j++;
-        out += `<span class="num">${esc(line.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-      
-      // Handle operators and punctuation
-      out += esc(line[i]);
-      i++;
-    }
-    return out;
-  }
-  
-  return code.split('\n').map(tokenLine).join('\n');
-}
-/* ── SCENE TREE ── */
-function buildSceneTree() {
-  const lines = [];
-  lines.push('# Required scene structure for Movement Pro');
-  lines.push('');
-  lines.push('Player (CharacterBody3D) [player.gd]');
-  lines.push('  ├─ Body (Node3D) [animation.gd]');
-  lines.push('  │   ├─ Armature (Node3D) [PlayerWeaponHandler]');
-  lines.push('  │   │   └─ Skeleton3D');
-  lines.push('  │   └─ AnimationPlayer');
-  lines.push('  ├─ CollisionShape3D');
-  lines.push('  ├─ camera (Node3D) [playercam.gd]');
-  lines.push('  │   └─ SpringArm3D');
-  lines.push('  │       └─ Camera3D');
-  lines.push('  │           └─ RayCast3D');
-  lines.push('  ├─ GameUI (Control)');
-  lines.push('  ├─ InventoryManager (Control) [PlayerInventory]');
-  lines.push('  └─ InvUI (Control)');
-  
-  $('outScene').innerHTML = lines.join('\n');
-}
-
-function copyScene(btn) {
-  const el = $('outScene');
-  const text = el.innerText || el.textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy';
-      btn.classList.remove('copied');
-    }, 1600);
-  });
-}
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', () => {
-  initToggles();
+function tog(el){
+  const f=el.dataset.f;
+  feats[f]=!feats[f];
+  el.classList.toggle('on',feats[f]);
   syncForm();
-  buildSceneTree();
-});
+}
+function sh(id,vis){const e=$(id);if(e)e.classList.toggle('hidden',!vis);}
+function syncForm(){
+  const {crouch,prone,gun,pistol,melee,nade,punch}=feats;
+  sh('lbl_gun',gun);sh('blk_gun',gun);
+  sh('lbl_pistol',pistol);sh('blk_pistol',pistol);
+  sh('lbl_melee',melee);sh('blk_melee',melee);
+  sh('lbl_nade',nade);sh('blk_nade',nade);
+  sh('f_punch',punch);
+  sh('lbl_crouch',crouch);sh('blk_crouch',crouch);
+  sh('lbl_prone',prone);sh('blk_prone',prone);
+  sh('f_cpFire',crouch&&pistol);sh('f_cpWF',crouch&&pistol);
+  sh('f_cMelee',crouch&&melee);sh('f_cNade',crouch&&nade);
+  sh('f_prMelee',prone&&melee);sh('f_prNade',prone&&nade);sh('f_prPistol',prone&&pistol);
+}
+
+function generate(){
+  const sp={n:v('spN','2.0'),s:v('spS','6.0'),c:v('spC','1.0'),p:v('spP','0.67'),j:v('spJ','4')};
+  const {crouch,prone,gun,pistol,melee,nade,punch,mp}=feats;
+  const an={
+    idle:v('aN_Idle','Idle'),walk:v('aN_Walk','Walking'),run:v('aN_Run','Running'),jump:v('aN_Jump','JumpSt'),punch:v('aN_Punch','Punch'),
+    gIdle:v('aG_Idle','RifleIdle'),gWalk:v('aG_Walk','Walk'),gRun:v('aG_Run','Run'),gJump:v('aG_Jump','RifleJump'),
+    gAim:v('aG_Aim','RifleAim'),gFire:v('aG_Fire','Firing'),gWF:v('aG_WF','WalkFire'),gRF:v('aG_RF','RunFire'),gRl:v('aG_Rl','Reload'),
+    pFire:v('aP_Fire','PistolFire'),pWF:v('aP_WF','Walkpistol'),pRF:v('aP_RF','RunPistol'),
+    mAtt:v('aM_Att','Attack2'),ngTh:v('aNG_Th','IdleGrenade'),
+    cIdle:v('aC_Idle','CrIdle'),cWalk:v('aC_Walk','CrWalk'),cFire:v('aC_Fire','CrFire'),cWF:v('aC_WF','CrWFire'),
+    cAim:v('aC_Aim','IdleCrAim'),cRl:v('aC_Rl','CrReload'),cpFire:v('aCP_Fire','CrPistol'),cpWF:v('aCP_WF','CrWPistol'),
+    cmAtt:v('aCM_Att','CrMelee'),cgTh:v('aCG_Th','CrThGrenade'),
+    prIdle:v('aPr_Idle','ProneIdle'),prFwd:v('aPr_Fwd','ProneForward'),prFire:v('aPr_Fire','ProneFire'),prRl:v('aPr_Rl','PrReload'),
+    prMAtt:v('aPrM_Att','ProneMelee'),prGTh:v('aPrG_Th','ProneGrenade'),prPFire:v('aPrP_Fire','PronePistol'),
+  };
+  const cam={sens:v('camSens','0.005'),up:v('camUp','50'),down:v('camDown','75')};
+
+  renderCode('oPlayer', hl(buildPlayer(sp,crouch,prone,gun,pistol,melee,nade,punch,mp)));
+  renderCode('oAnim',   hl(buildAnim(an,crouch,prone,gun,pistol,melee,nade,punch)));
+  renderCode('oCam',    hl(buildCam(cam,mp)));
+  buildScene(crouch,prone,gun,pistol,melee,nade,mp);
+}
+
+function renderCode(id,code){const e=$(id);e.classList.remove('empty');e.innerHTML=code;}
+
+function buildPlayer(sp,crouch,prone,gun,pistol,melee,nade,punch,mp){
+  const L=[];
+  const _=s=>L.push(s);
+  _('extends CharacterBody3D\n');
+  if(mp){_('func _enter_tree() -> void:');_('\tset_multiplayer_authority(str(name).to_int())\n');}
+  _('# ── Constants ───────────────────────────────────────────────');
+  _(`const NORMAL_SPEED : float = ${sp.n}`);
+  _(`const SPRINT_SPEED : float = ${sp.s}`);
+  if(crouch)_(`const CROUCH_SPEED : float = ${sp.c}`);
+  if(prone) _(`const PRONE_SPEED  : float = ${sp.p}`);
+  _(`const JUMP_VELOCITY: float = ${sp.j}`);
+  _('const GRAVITY      : float = 9.8');
+  _('const LERP_VEL     : float = 0.15\n');
+
+  const wkeys=[];
+  if(gun)   wkeys.push('GUN');
+  if(pistol)wkeys.push('PISTOL');
+  if(melee) wkeys.push('MELEE');
+  if(nade)  wkeys.push('NADE');
+  wkeys.push('NONE');
+  _('# ── Weapon type ─────────────────────────────────────────────');
+  _(`enum WeaponType { ${wkeys.join(', ')} }\n`);
+
+  _('# ── Exports ─────────────────────────────────────────────────');
+  _('@export var camera    : Camera3D        = null');
+  _('@export var anim_node : Node            = null  # animation.gd node');
+  _('@export var body      : Node3D          = null\n');
+
+  _('# ── State ───────────────────────────────────────────────────');
+  _('var current_weapon : WeaponType = WeaponType.NONE');
+  _('var stance         : String     = "normal"  # normal / crouch / prone');
+  _('var is_aiming      : bool       = false');
+  _('var is_firing      : bool       = false');
+  _('var is_reloading   : bool       = false');
+  _('var is_sprinting   : bool       = false');
+  _('var is_jumping     : bool       = false');
+  if(gun||pistol){
+    _('var current_mag    : int        = 0');
+    _('var reserve_ammo   : int        = 90');
+    _(`var mag_size       : int        = 30`);
+    _('var fire_rate      : float      = 0.1');
+    _('var _fire_timer    : float      = 0.0');
+    _('var _reload_timer  : float      = 0.0');
+  }
+  if(melee)_('var _melee_timer   : float      = 0.0');
+  _('var _jump_requested: bool       = false');
+  _('var _sprint_toggled: bool       = false');
+  _('var _is_dead       : bool       = false\n');
+
+  if(mp){
+    _('# ── Health (synced) ─────────────────────────────────────────');
+    _('@export var health     : float = 100.0');
+    _('@export var is_dead    : bool  = false\n');
+  }else{
+    _('var health             : float = 100.0\n');
+  }
+
+  _('signal health_changed(hp: float)');
+  _('signal player_died()\n');
+
+  _('# ================================================================');
+  _('# READY');
+  _('# ================================================================');
+  _('func _ready() -> void:');
+  if(mp){
+    _('\tif not is_multiplayer_authority():');
+    _('\t\tset_process(false)');
+    _('\t\tset_physics_process(false)');
+    _('\t\treturn');
+  }
+  _('\tInput.mouse_mode = Input.MOUSE_MODE_CAPTURED');
+  if(gun||pistol)_(`\tcurrent_mag = mag_size`);
+  _('\n');
+
+  _('# ================================================================');
+  _('# INPUT');
+  _('# ================================================================');
+  _('func _input(event: InputEvent) -> void:');
+  if(mp)_('\tif not is_multiplayer_authority(): return');
+  _('\tif _is_dead: return\n');
+
+  if(crouch){
+    _('\tif event is InputEventKey and event.keycode == KEY_C and event.pressed and not event.echo:');
+    _('\t\t_toggle_stance("crouch")\n');
+  }
+  if(prone){
+    _('\tif event is InputEventKey and event.keycode == KEY_X and event.pressed and not event.echo:');
+    _('\t\t_toggle_stance("prone")\n');
+  }
+  _('\t# Space — jump');
+  _('\tif event is InputEventKey and event.keycode == KEY_SPACE and event.pressed and not event.echo:');
+  _('\t\tif is_on_floor() and stance == "normal":');
+  _('\t\t\t_jump_requested = true\n');
+  _('\t# Shift — sprint toggle');
+  _('\tif event is InputEventKey and event.keycode == KEY_SHIFT and event.pressed and not event.echo:');
+  _('\t\t_sprint_toggled = not _sprint_toggled\n');
+
+  _('\t# Weapon mode keys');
+  if(gun){_('\tif event is InputEventKey and event.keycode == KEY_1 and event.pressed:');_('\t\t_set_weapon(WeaponType.GUN)\n');}
+  if(pistol){_('\tif event is InputEventKey and event.keycode == KEY_2 and event.pressed:');_('\t\t_set_weapon(WeaponType.PISTOL)\n');}
+  if(melee){_('\tif event is InputEventKey and event.keycode == KEY_3 and event.pressed:');_('\t\t_set_weapon(WeaponType.MELEE)\n');}
+  if(nade){_('\tif event is InputEventKey and event.keycode == KEY_4 and event.pressed:');_('\t\t_set_weapon(WeaponType.NADE)\n');}
+  _('\t# Q — cycle weapon mode');
+  _('\tif event is InputEventKey and event.keycode == KEY_Q and event.pressed and not event.echo:');
+  _('\t\t_cycle_weapon()\n');
+
+  _('\t# RMB — aim');
+  _('\tif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:');
+  _('\t\tis_aiming = event.pressed');
+  _('\t\tif not is_aiming: is_firing = false\n');
+  _('\t# LMB — fire');
+  _('\tif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:');
+  if(gun||pistol){
+    _('\t\tif event.pressed:');
+    _('\t\t\tis_firing = current_weapon in [' + [gun?'WeaponType.GUN':'',pistol?'WeaponType.PISTOL':''].filter(Boolean).join(', ') + ']');
+    _('\t\telse:');
+    _('\t\t\tis_firing = false\n');
+  }else{
+    _('\t\tis_firing = event.pressed\n');
+  }
+  _('\t# R — reload');
+  if(gun||pistol){
+    _('\tif event is InputEventKey and event.keycode == KEY_R and event.pressed and not event.echo:');
+    _('\t\t_try_reload()\n');
+  }
+
+  _('# ================================================================');
+  _('# PROCESS');
+  _('# ================================================================');
+  _('func _process(delta: float) -> void:');
+  if(mp)_('\tif not is_multiplayer_authority(): return');
+  _('\tif _is_dead: return\n');
+  if(gun||pistol){
+    _('\tif _fire_timer > 0.0: _fire_timer -= delta');
+    _('\tif is_reloading:');
+    _('\t\t_reload_timer -= delta');
+    _('\t\tif _reload_timer <= 0.0: _finish_reload()');
+    _('\t\treturn');
+    _('\tif is_firing and _fire_timer <= 0.0: _do_fire()\n');
+  }
+  if(melee){
+    _('\tif _melee_timer > 0.0: _melee_timer -= delta\n');
+  }
+
+  _('# ================================================================');
+  _('# PHYSICS');
+  _('# ================================================================');
+  _('func _physics_process(delta: float) -> void:');
+  if(mp)_('\tif not is_multiplayer_authority(): return');
+  _('\tif _is_dead:');
+  _('\t\tvelocity = Vector3.ZERO');
+  _('\t\tmove_and_slide()');
+  _('\t\treturn\n');
+  _('\tif not is_on_floor(): velocity.y -= GRAVITY * delta');
+  _('\tif _jump_requested and is_on_floor():');
+  _('\t\tvelocity.y = JUMP_VELOCITY');
+  _('\t\t_jump_requested = false');
+  _('\t\tis_jumping = true\n');
+  _('\tvar dir := _get_move_dir()');
+  _('\tvar spd := _get_speed()');
+  _('\tif dir.length() > 0.01:');
+  _('\t\tvelocity.x = dir.x * spd');
+  _('\t\tvelocity.z = dir.z * spd');
+  _('\t\tif body: body.rotation.y = lerp_angle(body.rotation.y, atan2(velocity.x, velocity.z), LERP_VEL)');
+  _('\telse:');
+  _('\t\tvelocity.x = move_toward(velocity.x, 0.0, spd)');
+  _('\t\tvelocity.z = move_toward(velocity.z, 0.0, spd)');
+  _('\tmove_and_slide()\n');
+
+  _('# ================================================================');
+  _('# MOVEMENT HELPERS');
+  _('# ================================================================');
+  _('func _get_move_dir() -> Vector3:');
+  _('\tvar cam := get_viewport().get_camera_3d()');
+  _('\tif not cam: return Vector3.ZERO');
+  _('\tvar raw := Vector2.ZERO');
+  _('\tif Input.is_key_pressed(KEY_W): raw.y += 1.0');
+  _('\tif Input.is_key_pressed(KEY_S): raw.y -= 1.0');
+  _('\tif Input.is_key_pressed(KEY_D): raw.x += 1.0');
+  _('\tif Input.is_key_pressed(KEY_A): raw.x -= 1.0');
+  _('\tif raw.length() > 1.0: raw = raw.normalized()');
+  _('\tvar fwd := -cam.global_transform.basis.z; fwd.y = 0');
+  _('\tvar rgt :=  cam.global_transform.basis.x; rgt.y = 0');
+  _('\treturn (fwd.normalized() * raw.y + rgt.normalized() * raw.x).normalized() * raw.length()\n');
+  _('func _get_speed() -> float:');
+  const cases=[];
+  if(crouch)cases.push('\t\t"crouch": return CROUCH_SPEED');
+  if(prone) cases.push('\t\t"prone":  return PRONE_SPEED');
+  _('\tmatch stance:');
+  cases.forEach(c=>_(c));
+  _('\tif _sprint_toggled: return SPRINT_SPEED');
+  _('\treturn NORMAL_SPEED\n');
+
+  if(crouch||prone){
+    _('func _toggle_stance(s: String) -> void:');
+    _('\tif stance == s: stance = "normal"');
+    _('\telse: stance = s');
+    _('\tif anim_node and anim_node.has_method("on_stance_changed"):');
+    _('\t\tanim_node.on_stance_changed(stance)\n');
+  }
+
+  _('func _set_weapon(w: WeaponType) -> void:');
+  _('\tcurrent_weapon = w');
+  _('\tis_firing = false');
+  _('\tis_reloading = false');
+  if(gun||pistol)_('\tcurrent_mag = mag_size');
+  _('\tif anim_node and anim_node.has_method("on_weapon_changed"):');
+  _('\t\tanim_node.on_weapon_changed(w)\n');
+
+  _('func _cycle_weapon() -> void:');
+  const order=[];
+  if(gun)   order.push('WeaponType.GUN');
+  if(pistol)order.push('WeaponType.PISTOL');
+  if(melee) order.push('WeaponType.MELEE');
+  if(nade)  order.push('WeaponType.NADE');
+  order.push('WeaponType.NONE');
+  _(`\tvar order : Array = [${order.join(', ')}]`);
+  _('\tvar idx : int = order.find(current_weapon)');
+  _('\t_set_weapon(order[(idx + 1) % order.size()])\n');
+
+  if(gun||pistol){
+    _('func _do_fire() -> void:');
+    _('\tif is_reloading or current_mag <= 0: return');
+    _('\tcurrent_mag -= 1');
+    _('\t_fire_timer = fire_rate');
+    _('\t_perform_raycast()\n');
+    _('func _try_reload() -> void:');
+    _('\tif is_reloading or current_mag >= mag_size or reserve_ammo <= 0: return');
+    _('\tis_reloading = true');
+    _('\t_reload_timer = 2.0\n');
+    _('func _finish_reload() -> void:');
+    _('\tvar needed := mag_size - current_mag');
+    _('\tvar load   := min(needed, reserve_ammo)');
+    _('\tcurrent_mag   += load');
+    _('\treserve_ammo  -= load');
+    _('\tis_reloading   = false\n');
+    _('func _perform_raycast() -> void:');
+    _('\tvar cam := get_viewport().get_camera_3d()');
+    _('\tif not cam: return');
+    _('\tvar space  := cam.get_world_3d().direct_space_state');
+    _('\tvar origin := cam.global_position');
+    _('\tvar dir    := -cam.global_transform.basis.z');
+    _('\tvar query  := PhysicsRayQueryParameters3D.create(origin, origin + dir * 100.0)');
+    if(mp)_('\tquery.exclude = [get_rid()]');
+    _('\tvar result := space.intersect_ray(query)');
+    _('\tif result.is_empty(): return');
+    _('\tvar hit := result["collider"]');
+    _('\tif hit and hit.has_method("apply_damage"): hit.apply_damage(20.0)\n');
+  }
+
+  if(melee){
+    _('func _do_melee() -> void:');
+    _('\tif _melee_timer > 0.0: return');
+    _('\t_melee_timer = 0.6');
+    _('\t# perform melee hit\n');
+  }
+
+  _('func apply_damage(amount: float) -> void:');
+  _('\tif _is_dead: return');
+  _('\thealth = clampf(health - amount, 0.0, 100.0)');
+  _('\thealth_changed.emit(health)');
+  _('\tif health <= 0.0: _die()\n');
+  _('func _die() -> void:');
+  _('\t_is_dead = true');
+  _('\tvelocity = Vector3.ZERO');
+  _('\tplayer_died.emit()\n');
+
+  return L.join('\n');
+}
+
+function buildAnim(an,crouch,prone,gun,pistol,melee,nade,punch){
+  const L=[];
+  const _=s=>L.push(s);
+  _('extends Node3D\n');
+  _('# ── All state comes from player flags — no external class deps ─');
+  _('@export var anim : AnimationPlayer = null\n');
+  _('var _stance  : String    = "normal"');
+  _('var _weapon  : int       = 0  # WeaponType int value');
+  _('var _current : String    = ""\n');
+  _('# ── Called by player.gd ────────────────────────────────────────');
+  _('func on_stance_changed(s: String) -> void:');
+  _('\t_stance = s\n');
+  _('func on_weapon_changed(w: int) -> void:');
+  _('\t_weapon = w\n');
+  _('func update_anim(');
+  _('\t\tis_firing: bool,');
+  _('\t\tis_aiming: bool,');
+  _('\t\tis_reloading: bool,');
+  _('\t\tis_walking: bool,');
+  _('\t\tis_running: bool,');
+  _('\t\tis_jumping: bool) -> void:\n');
+  _('\tvar a : String = _resolve(is_firing, is_aiming, is_reloading, is_walking, is_running, is_jumping)');
+  _('\t_play(a)\n');
+  _('func _resolve(firing:bool,aiming:bool,reloading:bool,walking:bool,running:bool,jumping:bool) -> String:');
+  _('\tif jumping: return _jump_anim()');
+  _(`\tmatch _stance:`);
+
+  const wt_prefix= gun||pistol||melee||nade ? '\t\t\t' : '\t\t\t';
+
+  if(crouch){
+    _('\t\t"crouch":');
+    _('\t\t\tif reloading: return "'+an.cRl+'"');
+    _('\t\t\tif aiming:    return "'+an.cAim+'"');
+    _('\t\t\tmatch _weapon:');
+    if(gun){
+      _('\t\t\t\t0: # GUN');
+      _('\t\t\t\t\tif firing and walking: return "'+an.cWF+'"');
+      _('\t\t\t\t\tif firing:             return "'+an.cFire+'"');
+      _('\t\t\t\t\tif walking:            return "'+an.cWalk+'"');
+      _('\t\t\t\t\treturn "'+an.cIdle+'"');
+    }
+    const pIdx=gun?1:0;
+    if(pistol){
+      _(`\t\t\t\t${pIdx}: # PISTOL`);
+      _('\t\t\t\t\tif firing and walking: return "'+an.cpWF+'"');
+      _('\t\t\t\t\tif firing:             return "'+an.cpFire+'"');
+      _('\t\t\t\t\tif walking:            return "'+an.cWalk+'"');
+      _('\t\t\t\t\treturn "'+an.cIdle+'"');
+    }
+    const mIdx=[gun,pistol].filter(Boolean).length;
+    if(melee){
+      _(`\t\t\t\t${mIdx}: # MELEE`);
+      _('\t\t\t\t\tif firing: return "'+an.cmAtt+'"');
+      _('\t\t\t\t\tif walking: return "'+an.cWalk+'"');
+      _('\t\t\t\t\treturn "'+an.cIdle+'"');
+    }
+    const nIdx=[gun,pistol,melee].filter(Boolean).length;
+    if(nade){
+      _(`\t\t\t\t${nIdx}: # NADE`);
+      _('\t\t\t\t\tif firing: return "'+an.cgTh+'"');
+      _('\t\t\t\t\treturn "'+an.cIdle+'"');
+    }
+    _('\t\t\t\t_: if walking: return "'+an.cWalk+'"');
+    _('\t\t\t\t   return "'+an.cIdle+'"');
+  }
+
+  if(prone){
+    _('\t\t"prone":');
+    _('\t\t\tif reloading: return "'+an.prRl+'"');
+    _('\t\t\tmatch _weapon:');
+    if(gun){
+      _('\t\t\t\t0: # GUN');
+      _('\t\t\t\t\tif firing:  return "'+an.prFire+'"');
+      _('\t\t\t\t\tif walking: return "'+an.prFwd+'"');
+      _('\t\t\t\t\treturn "'+an.prIdle+'"');
+    }
+    const pi2=gun?1:0;
+    if(pistol){
+      _(`\t\t\t\t${pi2}: # PISTOL`);
+      _('\t\t\t\t\tif firing: return "'+an.prPFire+'"');
+      _('\t\t\t\t\treturn "'+an.prIdle+'"');
+    }
+    const mi2=[gun,pistol].filter(Boolean).length;
+    if(melee){
+      _(`\t\t\t\t${mi2}: # MELEE`);
+      _('\t\t\t\t\tif firing: return "'+an.prMAtt+'"');
+      _('\t\t\t\t\treturn "'+an.prIdle+'"');
+    }
+    const ni2=[gun,pistol,melee].filter(Boolean).length;
+    if(nade){
+      _(`\t\t\t\t${ni2}: # NADE`);
+      _('\t\t\t\t\tif firing: return "'+an.prGTh+'"');
+      _('\t\t\t\t\treturn "'+an.prIdle+'"');
+    }
+    _('\t\t\t\t_: if walking: return "'+an.prFwd+'"');
+    _('\t\t\t\t   return "'+an.prIdle+'"');
+  }
+
+  _('\t\t_: # normal');
+  _('\t\t\tif reloading: return "'+an.gRl+'"');
+  _('\t\t\tif aiming:    return "'+an.gAim+'"');
+  _('\t\t\tmatch _weapon:');
+  if(gun){
+    _('\t\t\t\t0: # GUN');
+    _('\t\t\t\t\tif firing and running:  return "'+an.gRF+'"');
+    _('\t\t\t\t\tif firing and walking:  return "'+an.gWF+'"');
+    _('\t\t\t\t\tif firing:              return "'+an.gFire+'"');
+    _('\t\t\t\t\tif running:             return "'+an.gRun+'"');
+    _('\t\t\t\t\tif walking:             return "'+an.gWalk+'"');
+    _('\t\t\t\t\treturn "'+an.gIdle+'"');
+  }
+  const pn=gun?1:0;
+  if(pistol){
+    _(`\t\t\t\t${pn}: # PISTOL`);
+    _('\t\t\t\t\tif firing and running:  return "'+an.pRF+'"');
+    _('\t\t\t\t\tif firing and walking:  return "'+an.pWF+'"');
+    _('\t\t\t\t\tif firing:              return "'+an.pFire+'"');
+    _('\t\t\t\t\tif running:             return "'+an.gRun+'"');
+    _('\t\t\t\t\tif walking:             return "'+an.gWalk+'"');
+    _('\t\t\t\t\treturn "'+an.gIdle+'"');
+  }
+  const mn=[gun,pistol].filter(Boolean).length;
+  if(melee){
+    _(`\t\t\t\t${mn}: # MELEE`);
+    _('\t\t\t\t\tif firing:  return "'+an.mAtt+'"');
+    _('\t\t\t\t\tif running: return "'+an.gRun+'"');
+    _('\t\t\t\t\tif walking: return "'+an.gWalk+'"');
+    _('\t\t\t\t\treturn "'+an.gIdle+'"');
+  }
+  const nn=[gun,pistol,melee].filter(Boolean).length;
+  if(nade){
+    _(`\t\t\t\t${nn}: # NADE`);
+    _('\t\t\t\t\tif firing: return "'+an.ngTh+'"');
+    _('\t\t\t\t\treturn "'+an.gIdle+'"');
+  }
+  if(punch){
+    const punchN=[gun,pistol,melee,nade].filter(Boolean).length;
+    _(`\t\t\t\t${punchN}: # NONE / BARE HANDS`);
+    _('\t\t\t\t\tif firing:  return "'+an.punch+'"');
+    _('\t\t\t\t\tif running: return "'+an.run+'"');
+    _('\t\t\t\t\tif walking: return "'+an.walk+'"');
+    _('\t\t\t\t\treturn "'+an.idle+'"');
+  }
+  _('\t\t\t\t_:');
+  _('\t\t\t\t\tif running: return "'+an.run+'"');
+  _('\t\t\t\t\tif walking: return "'+an.walk+'"');
+  _('\t\t\t\t\treturn "'+an.idle+'"\n');
+
+  _('func _jump_anim() -> String:');
+  _('\tmatch _weapon:');
+  if(gun)  _('\t\t0: return "'+an.gJump+'"');
+  _('\t\t_: return "'+an.jump+'"\n');
+
+  _('func _play(name: String) -> void:');
+  _('\tif not anim or _current == name: return');
+  _('\tif not anim.has_animation(name):');
+  _('\t\tpush_warning("[AnimGD] Missing animation: " + name)');
+  _('\t\treturn');
+  _('\t_current = name');
+  _('\tanim.play(name)');
+
+  return L.join('\n');
+}
+
+function buildCam(cam,mp){
+  const L=[];
+  const _=s=>L.push(s);
+  _('extends Node3D\n');
+  _('@export_category("Camera Settings")');
+  _(`@export var mouse_sensitivity   : float = ${cam.sens}`);
+  _(`@export_range(0,90,1) var max_look_up   : float = ${cam.up}`);
+  _(`@export_range(0,90,1) var max_look_down : float = ${cam.down}\n`);
+  _('@export_category("Nodes")');
+  _('@export var spring_arm : SpringArm3D = null\n');
+  _('func _ready() -> void:');
+  _('\tset_as_top_level(false)\n');
+  _('func _unhandled_input(event: InputEvent) -> void:');
+  if(mp)_('\tif not get_parent().is_multiplayer_authority(): return');
+  _('\tif Input.mouse_mode != Input.MOUSE_MODE_CAPTURED: return');
+  _('\tif not (event is InputEventMouseMotion): return');
+  _('\trotate_y(-event.relative.x * mouse_sensitivity)');
+  _('\tif spring_arm:');
+  _('\t\tspring_arm.rotate_x(-event.relative.y * mouse_sensitivity)');
+  _('\t\tvar up_r   := deg_to_rad(-max_look_up)');
+  _('\t\tvar down_r := deg_to_rad(max_look_down)');
+  _('\t\tspring_arm.rotation.x = clamp(spring_arm.rotation.x, up_r, down_r)');
+  return L.join('\n');
+}
+
+function buildScene(crouch,prone,gun,pistol,melee,nade,mp){
+  const lines=[
+    '# Required scene structure',
+    '',
+    'Player  (CharacterBody3D) ← player.gd',
+    '  ├─ CollisionShape3D',
+    '  ├─ Body  (Node3D) ← animation.gd',
+    '  │   ├─ Skeleton3D / MeshInstance3D',
+    '  │   └─ AnimationPlayer',
+    '  ├─ CameraOffset  (Node3D) ← playercam.gd',
+    '  │   └─ SpringArm3D',
+    '  │       └─ Camera3D',
+    '  │           └─ RayCast3D',
+    '  └─ HUD  (CanvasLayer, optional)',
+  ];
+  $('oScene').innerHTML=lines.join('\n');
+}
+
+function cp(id,btn){
+  const e=$(id);
+  const txt=e.textContent||e.innerText;
+  if(!txt.trim()||txt.includes('tap Generate'))return;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok');},1600);
+  });
+}
+
+const KW=new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@export_category','@export_range','@onready','@rpc']);
+const TY=new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Node3D','CharacterBody3D','AnimationPlayer','SpringArm3D','RayCast3D','Camera3D']);
+const FN=new Set(['_ready','_process','_physics_process','_input','_unhandled_input','_enter_tree','is_on_floor','move_and_slide','move_toward','lerp_angle','atan2','clamp','clampf','deg_to_rad','rotate_y','rotate_x','normalized','length','has_method','has_animation','is_instance_valid','is_multiplayer_authority','set_multiplayer_authority','apply_damage','push_warning','push_error','get_rid','emit','find','filter','join','set_as_top_level','get_viewport','get_camera_3d','intersect_ray']);
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function hlLine(line){
+  let out='',i=0;
+  while(i<line.length){
+    if(line[i]==='#'){out+=`<span class="cmt">${esc(line.slice(i))}</span>`;break;}
+    if(line[i]==='"'){
+      let j=i+1;while(j<line.length&&line[j]!=='"')j++;
+      out+=`<span class="str">${esc(line.slice(i,j+1))}</span>`;i=j+1;continue;
+    }
+    if(/[a-zA-Z_@]/.test(line[i])){
+      let j=i;while(j<line.length&&/[\w@]/.test(line[j]))j++;
+      const w=line.slice(i,j);
+      if(KW.has(w))out+=`<span class="kw">${esc(w)}</span>`;
+      else if(TY.has(w))out+=`<span class="typ">${esc(w)}</span>`;
+      else if(FN.has(w))out+=`<span class="fn">${esc(w)}</span>`;
+      else out+=esc(w);
+      i=j;continue;
+    }
+    if(/\d/.test(line[i])){
+      let j=i;while(j<line.length&&/[\d.]/.test(line[j]))j++;
+      out+=`<span class="num">${esc(line.slice(i,j))}</span>`;i=j;continue;
+    }
+    out+=esc(line[i]);i++;
+  }
+  return out;
+}
+function hl(code){return code.split('\n').map(hlLine).join('\n');}
+
+syncForm();buildScene(true,true,true,true,true,true,true);
 </script>
 </body>
 </html>
