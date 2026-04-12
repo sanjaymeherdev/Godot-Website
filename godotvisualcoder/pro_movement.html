@@ -467,64 +467,18 @@ function buildCam(cam, mp) {
   return lines.join('\n');
 }
 
-/* ── HIGHLIGHTER ── */
-function highlight(code) {
-  const KW = new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@export_category','@export_range','@onready','@rpc']);
-  const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Node3D','CharacterBody3D','AnimationPlayer','SpringArm3D','RayCast3D','Control','ItemData']);
-  const FN = new Set(['_ready','_process','_physics_process','_input','_unhandled_input','_enter_tree','is_on_floor','move_and_slide','move_toward','get_vector','is_action_just_pressed','is_action_pressed','is_action_released','is_key_pressed','play','stop','pause','normalized','length','has_method','is_instance_valid','is_playing','lerp_angle','rotate_y','rotate_x','clamp','deg_to_rad','atan2','set_mouse_mode','set_multiplayer_authority','is_multiplayer_authority','get_remote_sender_id','add_to_group','has_animation','push_error','push_warning','create_timer']);
-  
-  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  
-  function tokenLine(line) {
-    let out = '', i = 0;
-    while (i < line.length) {
-      if (line[i] === '#') {
-        out += `<span class="cmt">${esc(line.slice(i))}</span>`;
-        break;
-      }
-      if (line[i] === '"') {
-        let j = i + 1;
-        while (j < line.length && line[j] !== '"') j++;
-        out += `<span class="str">${esc(line.slice(i, j + 1))}</span>`;
-        i = j + 1;
-        continue;
-      }
-      if (/[a-zA-Z_]/.test(line[i])) {
-        let j = i;
-        while (j < line.length && /[\w]/.test(line[j])) j++;
-        const w = line.slice(i, j);
-        if (KW.has(w)) out += `<span class="kw">${esc(w)}</span>`;
-        else if (TYPE.has(w)) out += `<span class="typ">${esc(w)}</span>`;
-        else if (FN.has(w)) out += `<span class="fn">${esc(w)}</span>`;
-        else out += esc(w);
-        i = j;
-        continue;
-      }
-      if (/\d/.test(line[i]) || (line[i] === '-' && /\d/.test(line[i+1] || ''))) {
-        let j = i + (line[i] === '-' ? 1 : 0);
-        while (j < line.length && /[\d.]/.test(line[j])) j++;
-        out += `<span class="num">${esc(line.slice(i, j))}</span>`;
-        i = j;
-        continue;
-      }
-      out += esc(line[i]);
-      i++;
-    }
-    return out;
-  }
-  
-  return code.split('\n').map(tokenLine).join('\n');
-}
-
+// Replace the renderCode function with this:
 function renderCode(id, code) {
   const el = $(id);
   el.classList.remove('empty');
-  el.innerHTML = highlight(code);
+  el.innerHTML = code;  // Changed from .innerHTML to .innerHTML (was correct but needs HTML content)
 }
 
+// Also fix the copyOut function to get plain text:
 function copyOut(id, btn) {
   const el = $(id);
-  const text = el.innerText || el.textContent;
+  // Get text content without HTML tags
+  const text = el.textContent || el.innerText;
   if (!text.trim() || text.includes('tap Generate')) return;
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = 'Copied!';
@@ -536,6 +490,77 @@ function copyOut(id, btn) {
   });
 }
 
+// Make sure the highlight function returns HTML string properly
+function highlight(code) {
+  const KW = new Set(['extends','class_name','func','var','if','elif','else','and','or','not','return','true','false','null','for','in','pass','match','await','enum','const','static','while','break','continue','signal','@export','@export_category','@export_range','@onready','@rpc']);
+  const TYPE = new Set(['float','int','bool','String','Vector2','Vector3','void','Dictionary','Array','Node','Node3D','CharacterBody3D','AnimationPlayer','SpringArm3D','RayCast3D','Control','ItemData','PlayerInventory','PlayerWeaponHandler','WeaponType']);
+  const FN = new Set(['_ready','_process','_physics_process','_input','_unhandled_input','_enter_tree','is_on_floor','move_and_slide','move_toward','get_vector','is_action_just_pressed','is_action_pressed','is_action_released','is_key_pressed','play','stop','pause','normalized','length','has_method','is_instance_valid','is_playing','lerp_angle','rotate_y','rotate_x','clamp','deg_to_rad','atan2','set_mouse_mode','set_multiplayer_authority','is_multiplayer_authority','get_remote_sender_id','add_to_group','has_animation','push_error','push_warning','create_timer']);
+  
+  function esc(s) { 
+    return s.replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+  }
+  
+  function tokenLine(line) {
+    let out = '', i = 0;
+    while (i < line.length) {
+      // Skip if we're at the end
+      if (i >= line.length) break;
+      
+      // Handle comments
+      if (line[i] === '#') {
+        out += `<span class="cmt">${esc(line.slice(i))}</span>`;
+        break;
+      }
+      
+      // Handle strings
+      if (line[i] === '"') {
+        let j = i + 1;
+        while (j < line.length && line[j] !== '"') j++;
+        out += `<span class="str">${esc(line.slice(i, j + 1))}</span>`;
+        i = j + 1;
+        continue;
+      }
+      
+      // Handle words (keywords, types, functions)
+      if (/[a-zA-Z_]/.test(line[i])) {
+        let j = i;
+        while (j < line.length && /[\w]/.test(line[j])) j++;
+        const w = line.slice(i, j);
+        if (KW.has(w)) {
+          out += `<span class="kw">${esc(w)}</span>`;
+        } else if (TYPE.has(w)) {
+          out += `<span class="typ">${esc(w)}</span>`;
+        } else if (FN.has(w)) {
+          out += `<span class="fn">${esc(w)}</span>`;
+        } else {
+          out += esc(w);
+        }
+        i = j;
+        continue;
+      }
+      
+      // Handle numbers
+      if (/\d/.test(line[i]) || (line[i] === '-' && i + 1 < line.length && /\d/.test(line[i+1]))) {
+        let j = i + (line[i] === '-' ? 1 : 0);
+        while (j < line.length && /[\d.]/.test(line[j])) j++;
+        out += `<span class="num">${esc(line.slice(i, j))}</span>`;
+        i = j;
+        continue;
+      }
+      
+      // Handle operators and punctuation
+      out += esc(line[i]);
+      i++;
+    }
+    return out;
+  }
+  
+  return code.split('\n').map(tokenLine).join('\n');
+}
 /* ── SCENE TREE ── */
 function buildSceneTree() {
   const lines = [];
