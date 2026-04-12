@@ -593,16 +593,19 @@
 </footer>
 
 <script>
+  // ── Config ──
+  const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
+  const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const SITE_URL     = 'https://sanjaymeherdev.netlify.app'
+
   // ── Tab switching ──
   function switchTab(tab) {
     document.getElementById('card-new').classList.remove('active')
     document.getElementById('card-existing').classList.remove('active')
     document.getElementById('tab-new').classList.remove('active')
     document.getElementById('tab-existing').classList.remove('active')
-
     document.getElementById('card-' + tab).classList.add('active')
     document.getElementById('tab-' + tab).classList.add('active')
-
     clearStatus()
   }
 
@@ -620,12 +623,12 @@
   // ── Password toggle ──
   function togglePassword() {
     const input = document.getElementById('adminPass')
-    const btn = document.getElementById('togglePassBtn')
+    const btn   = document.getElementById('togglePassBtn')
     if (input.type === 'password') {
-      input.type = 'text'
+      input.type      = 'text'
       btn.textContent = '🙈'
     } else {
-      input.type = 'password'
+      input.type      = 'password'
       btn.textContent = '👁'
     }
   }
@@ -639,56 +642,33 @@
       Connecting to Google...
     `
     showStatus('status-new', '🔄 Redirecting to Google...', 'info')
-
-    // TODO: Replace with your Supabase Google OAuth URL
-    // window.location.href = 'YOUR_SUPABASE_GOOGLE_OAUTH_URL'
-
-    // Placeholder — simulate redirect
-    setTimeout(() => {
-      showStatus('status-new', '⚠️ Google OAuth URL not configured yet.', 'error')
-      btn.disabled = false
-      btn.innerHTML = `
-        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      `
-    }, 1500)
+    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${SITE_URL}/cgrelay/callback`
   }
 
   // ── Existing user login ──
   async function handleLogin() {
-    const gameId   = document.getElementById('gameId').value.trim()
-    const adminId  = document.getElementById('adminId').value.trim()
+    const gameId    = document.getElementById('gameId').value.trim()
+    const adminId   = document.getElementById('adminId').value.trim()
     const adminPass = document.getElementById('adminPass').value.trim()
-    const btn      = document.getElementById('loginBtn')
-    const spinner  = document.getElementById('loginSpinner')
-    const btnText  = document.getElementById('loginBtnText')
+    const btn       = document.getElementById('loginBtn')
+    const spinner   = document.getElementById('loginSpinner')
+    const btnText   = document.getElementById('loginBtnText')
 
-    // Validation
-    if (!gameId) { showStatus('status-existing', '⚠️ Please enter your Game ID', 'error'); return }
-    if (!adminId) { showStatus('status-existing', '⚠️ Please enter your Admin ID', 'error'); return }
+    if (!gameId)    { showStatus('status-existing', '⚠️ Please enter your Game ID', 'error'); return }
+    if (!adminId)   { showStatus('status-existing', '⚠️ Please enter your Admin ID', 'error'); return }
     if (!adminPass) { showStatus('status-existing', '⚠️ Please enter your Admin Password', 'error'); return }
 
-    // Loading state
-    btn.disabled = true
+    btn.disabled          = true
     spinner.style.display = 'block'
-    btnText.textContent = 'Verifying...'
+    btnText.textContent   = 'Verifying...'
     showStatus('status-existing', '🔄 Checking credentials...', 'info')
 
     try {
-      // TODO: Replace with your Supabase URL and anon key
-      const SUPABASE_URL = 'YOUR_SUPABASE_URL'
-      const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'
-
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/packages?game_id=eq.${encodeURIComponent(gameId)}&select=game_id,admin`,
         {
           headers: {
-            'apikey': SUPABASE_KEY,
+            'apikey':        SUPABASE_KEY,
             'Authorization': 'Bearer ' + SUPABASE_KEY
           }
         }
@@ -702,8 +682,7 @@
         return
       }
 
-      const record = data[0]
-      const admin = record.admin || {}
+      const admin = data[0].admin || {}
 
       if (admin.admin_id !== adminId || admin.admin_pass !== adminPass) {
         showStatus('status-existing', '❌ Wrong Admin ID or Password', 'error')
@@ -711,15 +690,14 @@
         return
       }
 
-      // Success — store session and redirect
       showStatus('status-existing', '✅ Login successful! Redirecting...', 'success')
-      sessionStorage.setItem('cgrelay_game_id', gameId)
-      sessionStorage.setItem('cgrelay_admin_id', adminId)
+      sessionStorage.setItem('cgrelay_game_id',    gameId)
+      sessionStorage.setItem('cgrelay_admin_id',   adminId)
       sessionStorage.setItem('cgrelay_admin_pass', adminPass)
-      sessionStorage.setItem('cgrelay_auth', 'admin')
+      sessionStorage.setItem('cgrelay_auth',       'admin')
 
       setTimeout(() => {
-        window.location.href = '/cgrelay-dashboard'
+        window.location.href = '/cgrelay/dashboard'
       }, 1000)
 
     } catch (err) {
@@ -729,28 +707,42 @@
   }
 
   function resetLoginBtn() {
-    const btn = document.getElementById('loginBtn')
-    const spinner = document.getElementById('loginSpinner')
-    const btnText = document.getElementById('loginBtnText')
-    btn.disabled = false
-    spinner.style.display = 'none'
-    btnText.textContent = 'Access Dashboard'
+    document.getElementById('loginBtn').disabled          = false
+    document.getElementById('loginSpinner').style.display = 'none'
+    document.getElementById('loginBtnText').textContent   = 'Access Dashboard'
   }
 
-  // ── Enter key on login form ──
+  // ── Enter key ──
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      const existingActive = document.getElementById('card-existing').classList.contains('active')
-      if (existingActive) handleLogin()
+    if (e.key === 'Enter' && document.getElementById('card-existing').classList.contains('active')) {
+      handleLogin()
     }
   })
 
-  // ── Check if returning from Google OAuth ──
+  // ── Handle URL params ──
   const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('error')) {
-    switchTab('new')
-    showStatus('status-new', '❌ Google sign-in failed. Please try again.', 'error')
+
+  const errorMap = {
+    no_session:      'Session expired. Please try again.',
+    invalid_session: 'Invalid session. Please sign in again.',
+    gmail_only:      'Only Gmail accounts are supported.',
+    db_error:        'Server error. Please try again later.',
+    server_error:    'Something went wrong. Please try again.'
   }
+
+  const err = urlParams.get('error')
+  if (err) {
+    switchTab('new')
+    showStatus('status-new', '❌ ' + (errorMap[err] || 'Sign-in failed. Please try again.'), 'error')
+  }
+
+  const existingGameId = urlParams.get('game_id')
+  if (existingGameId) {
+    switchTab('existing')
+    document.getElementById('gameId').value = existingGameId
+    showStatus('status-existing', 'ℹ️ You already have a registered game. Login with your admin credentials.', 'info')
+  }
+
   if (urlParams.get('registered') === 'true') {
     switchTab('existing')
     showStatus('status-existing', '✅ Registration complete! Login with your admin credentials.', 'success')
