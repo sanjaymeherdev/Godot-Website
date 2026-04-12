@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CGRelay — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080810;
+    --surface: #0f0f1a;
+    --surface2: #161624;
+    --surface3: #1c1c2e;
+    --border: #1f1f35;
+    --accent: #ff6b35;
+    --accent-dim: rgba(255,107,53,0.10);
+    --accent-glow: rgba(255,107,53,0.2);
+    --text: #f0eff5;
+    --muted: #6b6b8a;
+    --muted2: #9898b8;
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.1);
+    --error: #ef4444;
+    --error-dim: rgba(239,68,68,0.1);
+    --warning: #f59e0b;
+    --warning-dim: rgba(245,158,11,0.1);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .bg-grid {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,107,53,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,53,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,16,0.92); backdrop-filter: blur(12px);
+  }
+
+  .nav-left { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-logo {
+    font-family: 'Space Mono', monospace; font-size: 0.95rem;
+    font-weight: 700; color: var(--accent); text-decoration: none;
+    letter-spacing: 0.08em;
+  }
+
+  .nav-game-id {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--muted2); background: var(--surface2);
+    border: 1px solid var(--border); padding: 0.3rem 0.8rem;
+    border-radius: 4px; letter-spacing: 0.05em;
+  }
+
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+
+  .status-pill {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; font-family: 'Space Mono', monospace;
+    padding: 0.3rem 0.8rem; border-radius: 20px;
+  }
+  .status-pill.active {
+    background: var(--green-dim); color: var(--green);
+    border: 1px solid rgba(34,197,94,0.2);
+  }
+  .status-pill.expired {
+    background: var(--error-dim); color: var(--error);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+  .status-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .nav-logout {
+    font-size: 0.8rem; color: var(--muted); cursor: pointer;
+    background: none; border: none; font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s; padding: 0.3rem 0.6rem;
+  }
+  .nav-logout:hover { color: var(--error); }
+
+  /* ── Layout ── */
+  .dashboard {
+    position: relative; z-index: 1; flex: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 57px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 1.5rem 0;
+    display: flex; flex-direction: column; gap: 0.25rem;
+  }
+
+  .sidebar-section {
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-label {
+    font-size: 0.62rem; font-family: 'Space Mono', monospace;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); padding: 0 0.75rem; margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 0.75rem; border-radius: 6px;
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--muted2); cursor: pointer;
+    transition: all 0.15s; border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: var(--accent-dim); color: var(--accent);
+    border: 1px solid rgba(255,107,53,0.15);
+  }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+  .sidebar-divider {
+    height: 1px; background: var(--border);
+    margin: 0.75rem 1rem;
+  }
+
+  /* ── Main content ── */
+  .main {
+    padding: 2rem; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+
+  /* ── Panel ── */
+  .panel { display: none; flex-direction: column; gap: 1.5rem; }
+  .panel.active { display: flex; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-title {
+    font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem;
+  }
+  .panel-sub { font-size: 0.83rem; color: var(--muted2); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+
+  .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 1rem;
+  }
+
+  .card-header-left { display: flex; align-items: center; gap: 0.75rem; }
+  .card-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: var(--accent-dim); border: 1px solid rgba(255,107,53,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; flex-shrink: 0;
+  }
+  .card-title { font-size: 0.875rem; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+  .card-body { padding: 1.5rem; }
+
+  /* ── Stat grid ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem;
+  }
+  .stat-item .stat-label {
+    font-size: 0.68rem; font-family: 'Space Mono', monospace;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.5rem; display: block;
+  }
+  .stat-item .stat-value {
+    font-size: 1.4rem; font-weight: 700; font-family: 'Space Mono', monospace;
+    color: var(--accent);
+  }
+  .stat-item .stat-sub {
+    font-size: 0.72rem; color: var(--muted2); margin-top: 0.2rem;
+  }
+
+  /* ── Form elements ── */
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-group label {
+    font-size: 0.72rem; font-family: 'Space Mono', monospace;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2);
+  }
+
+  .form-group input {
+    padding: 0.75rem 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+    outline: none; transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+  .form-group input::placeholder { color: var(--muted); }
+  .form-group input:disabled {
+    opacity: 0.5; cursor: not-allowed;
+    background: var(--surface);
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 0.7rem 1.2rem; border-radius: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    border: none; display: inline-flex; align-items: center;
+    gap: 0.4rem;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent); color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #e55a2b; transform: translateY(-1px);
+    box-shadow: 0 4px 15px var(--accent-glow);
+  }
+
+  .btn-outline {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+  .btn-danger {
+    background: var(--error-dim); color: var(--error);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+  .btn-danger:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
+
+  .btn-success {
+    background: var(--green-dim); color: var(--green);
+    border: 1px solid rgba(34,197,94,0.2);
+  }
+  .btn-success:hover:not(:disabled) { background: rgba(34,197,94,0.2); }
+
+  .btn-sm { padding: 0.45rem 0.85rem; font-size: 0.8rem; }
+
+  /* ── Toast ── */
+  .toast-container {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .toast {
+    padding: 0.85rem 1.2rem; border-radius: 8px;
+    font-size: 0.875rem; max-width: 320px;
+    animation: slideIn 0.3s ease;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .toast.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .toast.error { background: var(--error-dim); color: var(--error); border: 1px solid rgba(239,68,68,0.25); }
+  .toast.info { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(255,107,53,0.2); }
+  .toast.warning { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+
+  /* ── Ban list ── */
+  .ban-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .ban-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .ban-ip {
+    font-family: 'Space Mono', monospace; font-size: 0.83rem; color: var(--error);
+  }
+  .ban-date { font-size: 0.72rem; color: var(--muted); }
+  .ban-empty {
+    text-align: center; padding: 2rem; color: var(--muted);
+    font-size: 0.875rem;
+    background: var(--surface2); border-radius: 8px;
+    border: 1px dashed var(--border);
+  }
+
+  /* ── Peer slider ── */
+  .peer-control {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .peer-input-wrap {
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .peer-btn {
+    width: 36px; height: 36px; border-radius: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 1.2rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .peer-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .peer-count {
+    width: 60px; text-align: center;
+    font-family: 'Space Mono', monospace; font-size: 1.2rem;
+    font-weight: 700; color: var(--accent);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.4rem; outline: none;
+  }
+
+  .peer-calc {
+    padding: 1rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.83rem; color: var(--muted2); line-height: 1.8;
+    margin-top: 1rem;
+  }
+  .peer-calc strong { color: var(--text); }
+  .peer-calc .highlight { color: var(--accent); font-weight: 700; font-size: 1rem; }
+
+  /* ── Billing info ── */
+  .billing-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  .billing-row:last-child { border-bottom: none; }
+  .billing-row .label { color: var(--muted2); }
+  .billing-row .value { font-family: 'Space Mono', monospace; font-size: 0.82rem; }
+  .billing-row .value.accent { color: var(--accent); }
+  .billing-row .value.warning { color: var(--warning); }
+  .billing-row .value.green { color: var(--green); }
+
+  /* ── Loading state ── */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(8,8,16,0.85); backdrop-filter: blur(8px);
+    z-index: 200; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+  }
+  .loading-overlay.active { display: flex; }
+  .loading-spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay p { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted2); }
+
+  /* ── Skeleton ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .dashboard { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.2rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <p id="loadingMsg">Loading...</p>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-logo" href="/">CGRELAY</a>
+    <span class="nav-game-id" id="navGameId">—</span>
+  </div>
+  <div class="nav-right">
+    <div class="status-pill active" id="statusPill">
+      <div class="dot"></div>
+      <span id="statusText">Active</span>
+    </div>
+    <button class="nav-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Overview</span>
+      <button class="nav-item active" onclick="switchPanel('overview')" id="nav-overview">
+        <span class="icon">📊</span> Overview
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Manage</span>
+      <button class="nav-item" onclick="switchPanel('game')" id="nav-game">
+        <span class="icon">🎮</span> Game Settings
+      </button>
+      <button class="nav-item" onclick="switchPanel('peers')" id="nav-peers">
+        <span class="icon">👥</span> Peers
+      </button>
+      <button class="nav-item" onclick="switchPanel('bans')" id="nav-bans">
+        <span class="icon">🚫</span> IP Bans
+      </button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Billing</span>
+      <button class="nav-item" onclick="switchPanel('billing')" id="nav-billing">
+        <span class="icon">💰</span> Billing
+      </button>
+      <button class="nav-item" onclick="switchPanel('renew')" id="nav-renew">
+        <span class="icon">🔄</span> Renew
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── OVERVIEW ── -->
+    <div class="panel active" id="panel-overview">
+      <div>
+        <div class="panel-title">Dashboard</div>
+        <div class="panel-sub" id="overviewSub">Loading your game data...</div>
+      </div>
+
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-item">
+          <span class="stat-label">Max Peers</span>
+          <div class="stat-value skeleton" style="height:2rem;width:60px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Game Type</span>
+          <div class="stat-value skeleton" style="height:2rem;width:80px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Version</span>
+          <div class="stat-value skeleton" style="height:2rem;width:60px;">&nbsp;</div>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Next Billing</span>
+          <div class="stat-value skeleton" style="height:2rem;width:100px;">&nbsp;</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">ℹ️</div>
+            <div>
+              <div class="card-title">Game Info</div>
+              <div class="card-sub">Your registered game details</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="gameInfoContent">
+            <div class="skeleton" style="height:1rem;width:80%;margin-bottom:0.75rem;">&nbsp;</div>
+            <div class="skeleton" style="height:1rem;width:60%;margin-bottom:0.75rem;">&nbsp;</div>
+            <div class="skeleton" style="height:1rem;width:70%;">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAME SETTINGS ── -->
+    <div class="panel" id="panel-game">
+      <div>
+        <div class="panel-title">Game Settings</div>
+        <div class="panel-sub">Update your game name and version. Game ID cannot be changed.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">✏️</div>
+            <div>
+              <div class="card-title">Edit Details</div>
+              <div class="card-sub">Changes apply immediately</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Game ID (locked)</label>
+              <input type="text" id="editGameId" disabled/>
+            </div>
+            <div class="form-group">
+              <label>Game Name (max 20 chars)</label>
+              <input type="text" id="editGameName" placeholder="BR Mini" maxlength="20"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Version</label>
+              <input type="text" id="editVersion" placeholder="1.0.0"/>
+            </div>
+            <div class="form-group">
+              <label>Game Type (locked)</label>
+              <input type="text" id="editGameType" disabled/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveGameSettings()" id="saveGameBtn">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PEERS ── -->
+    <div class="panel" id="panel-peers">
+      <div>
+        <div class="panel-title">Peer Management</div>
+        <div class="panel-sub">Increase takes effect immediately. Decrease applies on next billing cycle.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">👥</div>
+            <div>
+              <div class="card-title">Current Peers</div>
+              <div class="card-sub" id="currentPeersSub">Loading...</div>
+            </div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--accent)" id="currentPeersVal">—</div>
+        </div>
+        <div class="card-body">
+          <label style="font-size:0.72rem;font-family:'Space Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);display:block;margin-bottom:0.75rem;">
+            New Peer Count
+          </label>
+          <div class="peer-control">
+            <div class="peer-input-wrap">
+              <button class="peer-btn" onclick="adjustPeers(-1)">−</button>
+              <input type="number" class="peer-count" id="newPeerCount" value="6" min="1" max="200" oninput="updatePeerCalc()"/>
+              <button class="peer-btn" onclick="adjustPeers(1)">+</button>
+            </div>
+            <button class="btn btn-outline" onclick="updatePeers()" id="updatePeersBtn">
+              Apply Change
+            </button>
+          </div>
+
+          <div class="peer-calc" id="peerCalc">
+            Select a peer count to see pricing
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BANS ── -->
+    <div class="panel" id="panel-bans">
+      <div>
+        <div class="panel-title">IP Ban Management</div>
+        <div class="panel-sub">Banned IPs are blocked from joining your game immediately.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">🚫</div>
+            <div>
+              <div class="card-title">Ban IP Address</div>
+              <div class="card-sub">Enter an IP to block from your game</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:0.75rem;align-items:flex-end;">
+            <div class="form-group" style="flex:1;margin-bottom:0;">
+              <label>IP Address</label>
+              <input type="text" id="banIpInput" placeholder="192.168.1.1"/>
+            </div>
+            <button class="btn btn-danger" onclick="banIp()" id="banBtn">
+              Ban IP
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">📋</div>
+            <div>
+              <div class="card-title">Banned IPs</div>
+              <div class="card-sub" id="banCountSub">Loading...</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="ban-list" id="banList">
+            <div class="ban-empty">Loading ban list...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BILLING ── -->
+    <div class="panel" id="panel-billing">
+      <div>
+        <div class="panel-title">Billing</div>
+        <div class="panel-sub">Your current billing cycle and payment history.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">💰</div>
+            <div>
+              <div class="card-title">Current Cycle</div>
+              <div class="card-sub">Billing details for your active plan</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body" id="billingContent">
+          <div class="skeleton" style="height:1rem;margin-bottom:0.75rem;">&nbsp;</div>
+          <div class="skeleton" style="height:1rem;margin-bottom:0.75rem;">&nbsp;</div>
+          <div class="skeleton" style="height:1rem;">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RENEW ── -->
+    <div class="panel" id="panel-renew">
+      <div>
+        <div class="panel-title">Renew Subscription</div>
+        <div class="panel-sub">Renew your plan for the next 30 days.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon">🔄</div>
+            <div>
+              <div class="card-title">Renewal Summary</div>
+              <div class="card-sub">Review and pay for next month</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="renewContent">
+            <div class="skeleton" style="height:1rem;margin-bottom:0.75rem;">&nbsp;</div>
+            <div class="skeleton" style="height:1rem;margin-bottom:1.5rem;">&nbsp;</div>
+          </div>
+          <button class="btn btn-primary" onclick="renew()" id="renewBtn" style="margin-top:1rem;">
+            🔄 Generate Renewal Link
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── Config ──
+  const SUPABASE_URL  = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
+  const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
+  const EDGE_MGMT_URL = `${SUPABASE_URL}/functions/v1/cgrelay-management`
+  const SITE_URL      = 'https://sanjaymeherdev.netlify.app'
+
+  let gameData    = null
+  let billingData = null
+  let gameId      = ''
+  let adminId     = ''
+  let adminPass   = ''
+
+  // ── On load ──
+  window.addEventListener('load', async () => {
+    // Read credentials from sessionStorage
+    gameId    = sessionStorage.getItem('cgrelay_game_id') || ''
+    adminId   = sessionStorage.getItem('cgrelay_admin_id') || ''
+    adminPass = sessionStorage.getItem('cgrelay_admin_pass') || ''
+
+    // Handle upgrade/renew return from Razorpay
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('upgrade') === 'success' || urlParams.get('renew') === 'success') {
+      showToast('Payment confirmed! Your game has been updated.', 'success')
+      window.history.replaceState({}, '', '/cgrelay/dashboard')
+    }
+
+    if (!gameId || !adminId || !adminPass) {
+      window.location.href = '/cgrelay/auth'
+      return
+    }
+
+    document.getElementById('navGameId').textContent = gameId
+    await loadGameData()
+  })
+
+  // ── Load game data ──
+  async function loadGameData() {
+    try {
+      const res = await callMgmt('getGame')
+
+      if (!res.success) {
+        if (res.message === 'Invalid credentials') {
+          window.location.href = '/cgrelay/auth'
+          return
+        }
+        showToast(res.message || 'Failed to load game data', 'error')
+        return
+      }
+
+      gameData    = res.game
+      billingData = res.billing
+
+      renderOverview()
+      renderGameSettings()
+      renderBilling()
+      renderRenew()
+      renderBanList()
+      renderPeers()
+
+    } catch (err) {
+      showToast('Failed to connect. Please refresh.', 'error')
+    }
+  }
+
+  // ── Render overview ──
+  function renderOverview() {
+    const g = gameData
+    const b = billingData
+
+    document.getElementById('overviewSub').textContent =
+      `${g.game_name || g.game_id} — ${g.game_type}`
+
+    const nextBilling = b ? new Date(b.next_billing_date).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    }) : '—'
+
+    const daysLeft = b ? Math.max(0, Math.ceil(
+      (new Date(b.next_billing_date) - new Date()) / (1000 * 60 * 60 * 24)
+    )) : 0
+
+    document.getElementById('statGrid').innerHTML = `
+      <div class="stat-item">
+        <span class="stat-label">Max Peers</span>
+        <div class="stat-value">${g.max_peers}</div>
+        <div class="stat-sub">${b?.plan || 'custom'} plan</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Game Type</span>
+        <div class="stat-value" style="font-size:1rem;text-transform:uppercase;">${g.game_type}</div>
+        <div class="stat-sub">relay profile</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Version</span>
+        <div class="stat-value" style="font-size:1rem;">${g.version}</div>
+        <div class="stat-sub">current build</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Next Billing</span>
+        <div class="stat-value" style="font-size:0.9rem;${daysLeft <= 5 ? 'color:var(--warning)' : ''}">${nextBilling}</div>
+        <div class="stat-sub">${daysLeft} days left</div>
+      </div>
+    `
+
+    document.getElementById('gameInfoContent').innerHTML = `
+      <div class="billing-row">
+        <span class="label">Game ID</span>
+        <span class="value" style="font-family:'Space Mono',monospace">${g.game_id}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Game Name</span>
+        <span class="value">${g.game_name || '—'}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Banned IPs</span>
+        <span class="value ${g.banned_ips.length > 0 ? 'warning' : 'green'}">${g.banned_ips.length} ${g.banned_ips.length === 1 ? 'IP' : 'IPs'}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Registered</span>
+        <span class="value">${new Date(g.created_at).toLocaleDateString('en-IN')}</span>
+      </div>
+    `
+
+    // Update status pill
+    const pill = document.getElementById('statusPill')
+    const statusText = document.getElementById('statusText')
+    if (b?.status === 'active') {
+      pill.className = 'status-pill active'
+      statusText.textContent = 'Active'
+    } else {
+      pill.className = 'status-pill expired'
+      statusText.textContent = 'Expired'
+    }
+  }
+
+  // ── Render game settings ──
+  function renderGameSettings() {
+    document.getElementById('editGameId').value   = gameData.game_id
+    document.getElementById('editGameName').value = gameData.game_name || ''
+    document.getElementById('editVersion').value  = gameData.version
+    document.getElementById('editGameType').value = gameData.game_type
+  }
+
+  // ── Render billing ──
+  function renderBilling() {
+    const b = billingData
+    if (!b) {
+      document.getElementById('billingContent').innerHTML =
+        '<p style="color:var(--muted);font-size:0.875rem;">No billing data found.</p>'
+      return
+    }
+
+    const nextDate = new Date(b.next_billing_date).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    })
+    const startDate = new Date(b.billing_cycle_start).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    })
+    const daysLeft = Math.max(0, Math.ceil(
+      (new Date(b.next_billing_date) - new Date()) / (1000 * 60 * 60 * 24)
+    ))
+
+    document.getElementById('billingContent').innerHTML = `
+      <div class="billing-row">
+        <span class="label">Plan</span>
+        <span class="value" style="text-transform:capitalize">${b.plan}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Current Peers</span>
+        <span class="value accent">${b.peers}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Cycle Started</span>
+        <span class="value">${startDate}</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Next Billing Date</span>
+        <span class="value ${daysLeft <= 5 ? 'warning' : ''}">${nextDate} (${daysLeft} days)</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Renewal Amount</span>
+        <span class="value accent">Rs. ${b.renewal_amount}/mo</span>
+      </div>
+      ${b.advance_credit > 0 ? `
+      <div class="billing-row">
+        <span class="label">Advance Credit</span>
+        <span class="value green">Rs. ${b.advance_credit}</span>
+      </div>` : ''}
+      ${b.pending_peers ? `
+      <div class="billing-row">
+        <span class="label">Pending Change</span>
+        <span class="value warning">↓ ${b.pending_peers} peers on renewal</span>
+      </div>` : ''}
+      <div class="billing-row">
+        <span class="label">Status</span>
+        <span class="value ${b.status === 'active' ? 'green' : 'warning'}" style="text-transform:capitalize">${b.status}</span>
+      </div>
+    `
+  }
+
+  // ── Render renew ──
+  function renderRenew() {
+    const b = billingData
+    if (!b) return
+
+    const renewPeers  = b.pending_peers || b.peers
+    const renewAmount = renewPeers * 20
+
+    document.getElementById('renewContent').innerHTML = `
+      <div class="billing-row">
+        <span class="label">Renewing for</span>
+        <span class="value accent">${renewPeers} peers × Rs. 20</span>
+      </div>
+      <div class="billing-row">
+        <span class="label">Amount due</span>
+        <span class="value accent" style="font-size:1.1rem;">Rs. ${renewAmount}</span>
+      </div>
+      ${b.pending_peers ? `
+      <div class="billing-row">
+        <span class="label">Note</span>
+        <span class="value warning">Decrease from ${b.peers} → ${b.pending_peers} peers applied</span>
+      </div>` : ''}
+    `
+  }
+
+  // ── Render ban list ──
+  function renderBanList() {
+    const bans = gameData.banned_ips || []
+    const list = document.getElementById('banList')
+    const sub  = document.getElementById('banCountSub')
+
+    sub.textContent = `${bans.length} IP${bans.length !== 1 ? 's' : ''} banned`
+
+    if (bans.length === 0) {
+      list.innerHTML = '<div class="ban-empty">No IPs banned. Your game is open to all.</div>'
+      return
+    }
+
+    list.innerHTML = bans.map(ip => `
+      <div class="ban-item">
+        <div>
+          <div class="ban-ip">${ip}</div>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="unbanIp('${ip}')">Unban</button>
+      </div>
+    `).join('')
+  }
+
+  // ── Render peers ──
+  function renderPeers() {
+    const b = billingData
+    const current = gameData.max_peers
+
+    document.getElementById('currentPeersVal').textContent = current
+    document.getElementById('currentPeersSub').textContent =
+      b?.pending_peers ? `Decreasing to ${b.pending_peers} on next cycle` : 'Active peer limit'
+
+    document.getElementById('newPeerCount').value = current
+    updatePeerCalc()
+  }
+
+  // ── Peer calc ──
+  function updatePeerCalc() {
+    const newPeers  = parseInt(document.getElementById('newPeerCount').value) || 0
+    const current   = gameData?.max_peers || 0
+    const b         = billingData
+    const calc      = document.getElementById('peerCalc')
+
+    if (!b || newPeers === current) {
+      calc.innerHTML = '<span style="color:var(--muted)">Change peer count to see pricing</span>'
+      return
+    }
+
+    if (newPeers < current) {
+      const newRenewal = newPeers * 20
+      calc.innerHTML = `
+        <strong>Decrease</strong> from ${current} → ${newPeers} peers<br/>
+        Takes effect on next billing cycle<br/>
+        New renewal: <span class="highlight">Rs. ${newRenewal}/mo</span>
+      `
+    } else {
+      const addedPeers    = newPeers - current
+      const nextBilling   = new Date(b.next_billing_date)
+      const daysRemaining = Math.max(0, Math.ceil((nextBilling - new Date()) / (1000 * 60 * 60 * 24)))
+      const dailyRate     = 20 / 30
+      const extraAmount   = Math.ceil(addedPeers * dailyRate * daysRemaining)
+      const credit        = b.advance_credit || 0
+      const amountDue     = Math.max(0, extraAmount - credit)
+      const newRenewal    = newPeers * 20
+
+      calc.innerHTML = `
+        <strong>Increase</strong> from ${current} → ${newPeers} peers<br/>
+        ${addedPeers} new peers × Rs. 20 × ${daysRemaining} days ÷ 30 = Rs. ${extraAmount}<br/>
+        ${credit > 0 ? `Advance credit: <span style="color:var(--green)">− Rs. ${Math.min(credit, extraAmount)}</span><br/>` : ''}
+        <span class="highlight">Pay now: Rs. ${amountDue}</span><br/>
+        New renewal from next cycle: Rs. ${newRenewal}/mo
+      `
+    }
+  }
+
+  function adjustPeers(delta) {
+    const input = document.getElementById('newPeerCount')
+    const val   = parseInt(input.value) || 1
+    input.value = Math.max(1, Math.min(200, val + delta))
+    updatePeerCalc()
+  }
+
+  // ── API calls ──
+  async function callMgmt(action, extra = {}) {
+    const res = await fetch(EDGE_MGMT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, game_id: gameId, admin_id: adminId, admin_pass: adminPass, ...extra })
+    })
+    return res.json()
+  }
+
+  // ── Save game settings ──
+  async function saveGameSettings() {
+    const gameName = document.getElementById('editGameName').value.trim()
+    const version  = document.getElementById('editVersion').value.trim()
+    const btn      = document.getElementById('saveGameBtn')
+
+    if (!gameName && !version) { showToast('Nothing to update', 'warning'); return }
+
+    btn.disabled = true
+    btn.textContent = 'Saving...'
+
+    const res = await callMgmt('updateGame', { game_name: gameName, version })
+
+    if (res.success) {
+      gameData.game_name = gameName
+      gameData.version   = version
+      renderOverview()
+      showToast('Game settings updated!', 'success')
+    } else {
+      showToast(res.message || 'Failed to update', 'error')
+    }
+
+    btn.disabled = false
+    btn.textContent = 'Save Changes'
+  }
+
+  // ── Ban IP ──
+  async function banIp() {
+    const ip  = document.getElementById('banIpInput').value.trim()
+    const btn = document.getElementById('banBtn')
+
+    if (!ip) { showToast('Enter an IP address', 'warning'); return }
+
+    btn.disabled = true
+    btn.textContent = 'Banning...'
+
+    const res = await callMgmt('banIp', { ip })
+
+    if (res.success) {
+      gameData.banned_ips.push(ip)
+      renderBanList()
+      renderOverview()
+      document.getElementById('banIpInput').value = ''
+      showToast(`IP ${ip} banned successfully`, 'success')
+    } else {
+      showToast(res.message || 'Failed to ban IP', 'error')
+    }
+
+    btn.disabled = false
+    btn.textContent = 'Ban IP'
+  }
+
+  // ── Unban IP ──
+  async function unbanIp(ip) {
+    const res = await callMgmt('unbanIp', { ip })
+
+    if (res.success) {
+      gameData.banned_ips = gameData.banned_ips.filter(b => b !== ip)
+      renderBanList()
+      renderOverview()
+      showToast(`IP ${ip} unbanned`, 'success')
+    } else {
+      showToast(res.message || 'Failed to unban IP', 'error')
+    }
+  }
+
+  // ── Update peers ──
+  async function updatePeers() {
+    const newPeers = parseInt(document.getElementById('newPeerCount').value)
+    const btn      = document.getElementById('updatePeersBtn')
+
+    if (!newPeers || newPeers < 1) { showToast('Invalid peer count', 'warning'); return }
+    if (newPeers === gameData.max_peers) { showToast('Peer count is already ' + newPeers, 'warning'); return }
+
+    btn.disabled = true
+    btn.textContent = 'Processing...'
+
+    const res = await callMgmt('updatePeers', { new_peers: newPeers })
+
+    if (res.success) {
+      if (res.type === 'decrease') {
+        billingData.pending_peers  = newPeers
+        billingData.renewal_amount = newPeers * 20
+        showToast(res.message, 'info')
+        renderPeers()
+        renderBilling()
+        renderRenew()
+      } else if (res.type === 'increase' && res.payment_url) {
+        showToast('Redirecting to payment...', 'info')
+        setTimeout(() => { window.location.href = res.payment_url }, 1000)
+      }
+    } else {
+      showToast(res.message || 'Failed to update peers', 'error')
+    }
+
+    btn.disabled = false
+    btn.textContent = 'Apply Change'
+  }
+
+  // ── Renew ──
+  async function renew() {
+    const btn = document.getElementById('renewBtn')
+    btn.disabled = true
+    btn.textContent = 'Creating link...'
+
+    const res = await callMgmt('renew')
+
+    if (res.success && res.payment_url) {
+      showToast('Redirecting to payment...', 'info')
+      setTimeout(() => { window.location.href = res.payment_url }, 1000)
+    } else {
+      showToast(res.message || 'Failed to create renewal link', 'error')
+      btn.disabled = false
+      btn.textContent = '🔄 Generate Renewal Link'
+    }
+  }
+
+  // ── Panel switching ──
+  function switchPanel(panel) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+    document.getElementById('panel-' + panel).classList.add('active')
+    document.getElementById('nav-' + panel).classList.add('active')
+  }
+
+  // ── Logout ──
+  function logout() {
+    sessionStorage.clear()
+    window.location.href = '/cgrelay/auth'
+  }
+
+  // ── Toast ──
+  function showToast(msg, type = 'info') {
+    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }
+    const container = document.getElementById('toastContainer')
+    const toast = document.createElement('div')
+    toast.className = `toast ${type}`
+    toast.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`
+    container.appendChild(toast)
+    setTimeout(() => toast.remove(), 4000)
+  }
+</script>
+
+</body>
+</html>
