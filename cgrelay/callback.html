@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CGRelay — Authenticating...</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: sans-serif;
+    background: #080810;
+    color: #f0eff5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid #1f1f35;
+    border-top-color: #ff6b35;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { font-size: 0.875rem; color: #6b6b8a; }
+  .error {
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 400px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="spinner" id="spinner"></div>
+<p id="msg">Verifying your account...</p>
+<div class="error" id="errorBox"></div>
+
+<script>
+  const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
+  const EDGE_AUTH_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/cgrelay-auth'
+  const SITE_URL = 'https://sanjaymeherdev.netlify.app'
+
+  async function handleCallback() {
+    try {
+      // ── Supabase puts session in URL hash after OAuth ──
+      // Format: #access_token=xxx&token_type=bearer&...
+      const hash = window.location.hash.substring(1)
+      const params = new URLSearchParams(hash)
+      const accessToken = params.get('access_token')
+      const errorDesc = params.get('error_description')
+
+      if (errorDesc) {
+        showError('Google sign-in failed: ' + errorDesc)
+        setTimeout(() => {
+          window.location.href = `${SITE_URL}/cgrelay-auth?error=invalid_session`
+        }, 2000)
+        return
+      }
+
+      if (!accessToken) {
+        showError('No session found. Redirecting...')
+        setTimeout(() => {
+          window.location.href = `${SITE_URL}/cgrelay-auth?error=no_session`
+        }, 2000)
+        return
+      }
+
+      document.getElementById('msg').textContent = 'Checking your account...'
+
+      // ── Call edge function with token ──
+      const res = await fetch(EDGE_AUTH_URL, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      // Edge function returns a redirect
+      // If it redirected us, we follow it
+      if (res.redirected) {
+        window.location.href = res.url
+        return
+      }
+
+      // If edge function returned JSON (error case)
+      const data = await res.json().catch(() => null)
+      if (data && data.error) {
+        showError(data.error)
+        setTimeout(() => {
+          window.location.href = `${SITE_URL}/cgrelay-auth?error=server_error`
+        }, 2000)
+        return
+      }
+
+      // Fallback — should not reach here
+      window.location.href = `${SITE_URL}/cgrelay-auth?error=server_error`
+
+    } catch (err) {
+      console.error('Callback error:', err)
+      showError('Something went wrong. Redirecting...')
+      setTimeout(() => {
+        window.location.href = `${SITE_URL}/cgrelay-auth?error=server_error`
+      }, 2000)
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('spinner').style.display = 'none'
+    document.getElementById('msg').style.display = 'none'
+    const box = document.getElementById('errorBox')
+    box.textContent = '❌ ' + msg
+    box.style.display = 'block'
+  }
+
+  // Run on load
+  handleCallback()
+</script>
+
+</body>
+</html>
