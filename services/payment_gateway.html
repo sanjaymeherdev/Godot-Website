@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
     <meta property="og:title" content="Payment Gateway Setup Service — Razorpay & PayPal · SanjayAIDev">
-    <meta property="og:description" content="Production-ready Razorpay & PayPal payment gateway setup with Supabase Edge Functions. Generic, reusable, webhook-verified. Built and battle-tested in production.">
-    <meta property="og:url" content="https://sanjaymeherdev.netlify.app/payment-gateway">
-    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:description" content="Production-ready Razorpay & PayPal payment gateway setup with Supabase Edge Functions.">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Gateway Setup — Razorpay & PayPal · SanjayAIDev</title>
@@ -12,19 +10,15 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/chat-widget.css">
     <style>
-        /* ── ALL CLASSES NAMESPACED WITH "pg-" TO AVOID CONFLICTS ── */
+        /* ALL CLASSES PREFIXED WITH "pg-" - NO CONFLICT WITH HEADER/FOOTER */
         :root {
-            --pg-primary:   #ff6b35;
-            --pg-accent:    #00d9ff;
-            --pg-success:   #10b981;
-            --pg-dark:      #0d0d1a;
-            --pg-secondary: #12121f;
-            --pg-light:     #f0f0f0;
-            --pg-rp-blue:   #2d8cf0;
-            --pg-pp-gold:   #ffc439;
+            --pg-primary: #ff6b35;
+            --pg-accent: #00d9ff;
+            --pg-success: #10b981;
+            --pg-rp-blue: #2d8cf0;
+            --pg-pp-gold: #ffc439;
         }
 
-        /* Hero */
         .pg-hero {
             background: radial-gradient(ellipse at 60% 0%, rgba(255,107,53,0.12) 0%, transparent 60%),
                         radial-gradient(ellipse at 10% 80%, rgba(0,217,255,0.07) 0%, transparent 50%),
@@ -48,7 +42,7 @@
         .pg-hero h1 {
             font-size: clamp(2rem, 5vw, 3.2rem);
             font-weight: 800;
-            color: var(--pg-light);
+            color: #f0f0f0;
             line-height: 1.2;
             margin-bottom: 1.2rem;
         }
@@ -76,12 +70,11 @@
             border-radius: 20px;
             font-size: 0.82rem;
         }
-        .pg-pill.green  { background: rgba(16,185,129,0.1);  color: #10b981; border-color: rgba(16,185,129,0.3); }
-        .pg-pill.blue   { background: rgba(45,140,240,0.1);  color: var(--pg-rp-blue); border-color: rgba(45,140,240,0.3); }
-        .pg-pill.gold   { background: rgba(255,196,57,0.1);  color: var(--pg-pp-gold); border-color: rgba(255,196,57,0.3); }
-        .pg-pill.orange { background: rgba(255,107,53,0.1);  color: var(--pg-primary); border-color: rgba(255,107,53,0.3); }
+        .pg-pill.green { background: rgba(16,185,129,0.1); color: #10b981; border-color: rgba(16,185,129,0.3); }
+        .pg-pill.blue { background: rgba(45,140,240,0.1); color: var(--pg-rp-blue); }
+        .pg-pill.gold { background: rgba(255,196,57,0.1); color: var(--pg-pp-gold); }
+        .pg-pill.orange { background: rgba(255,107,53,0.1); color: var(--pg-primary); }
 
-        /* Proof bar */
         .pg-proof-bar {
             background: #0f0f0f;
             border-top: 1px solid rgba(255,255,255,0.06);
@@ -94,7 +87,6 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        .pg-proof-item { text-align: center; }
         .pg-proof-num {
             display: block;
             font-size: 1.7rem;
@@ -108,7 +100,6 @@
             letter-spacing: 0.06em;
         }
 
-        /* Sections */
         .pg-section { padding: 5rem 0; }
         .pg-section-dark { background: #050505; padding: 5rem 0; }
         .pg-section-light { background: #0a0a0a; padding: 5rem 0; }
@@ -117,7 +108,7 @@
             font-weight: 700;
             text-align: center;
             margin-bottom: 1rem;
-            color: var(--pg-light);
+            color: #f0f0f0;
         }
         .pg-section-subtitle {
             text-align: center;
@@ -127,7 +118,12 @@
             font-size: 0.95rem;
         }
 
-        /* Cards Grid */
+        .pg-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
         .pg-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -160,22 +156,18 @@
             margin-bottom: 0.9rem;
             display: inline-block;
         }
-        .pg-badge-rp   { background: rgba(45,140,240,0.15); color: var(--pg-rp-blue); }
-        .pg-badge-pp   { background: rgba(255,196,57,0.15); color: var(--pg-pp-gold); }
+        .pg-badge-rp { background: rgba(45,140,240,0.15); color: var(--pg-rp-blue); }
+        .pg-badge-pp { background: rgba(255,196,57,0.15); color: var(--pg-pp-gold); }
         .pg-badge-both { background: rgba(255,107,53,0.15); color: var(--pg-primary); }
-        .pg-badge-pop  { background: var(--pg-primary); color: white; }
+        .pg-badge-pop { background: var(--pg-primary); color: white; }
 
         .pg-card-header h3 {
             font-size: 1.3rem;
-            color: var(--pg-light);
+            color: #f0f0f0;
             font-weight: 700;
             margin-bottom: 0.4rem;
         }
-        .pg-card-header p {
-            color: #999;
-            font-size: 0.875rem;
-            line-height: 1.6;
-        }
+        .pg-card-header p { color: #999; font-size: 0.875rem; line-height: 1.6; }
         .pg-card-body { padding: 1.4rem 1.6rem; }
         .pg-price {
             font-size: 1.8rem;
@@ -183,11 +175,7 @@
             color: var(--pg-primary);
             margin-bottom: 1.2rem;
         }
-        .pg-price small {
-            font-size: 0.85rem;
-            color: #666;
-            font-weight: normal;
-        }
+        .pg-price small { font-size: 0.85rem; color: #666; font-weight: normal; }
         .pg-features {
             list-style: none;
             padding: 0;
@@ -208,7 +196,7 @@
             left: 0;
             font-weight: bold;
         }
-        .pg-features li.highlight { color: var(--pg-light); }
+        .pg-features li.highlight { color: #f0f0f0; }
         .pg-features li code, .pg-card-body code {
             background: #1a1a1a;
             padding: 0.1rem 0.3rem;
@@ -218,7 +206,6 @@
             color: #ffaa77;
         }
 
-        /* Flow steps */
         .pg-flow-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -245,18 +232,9 @@
             color: white;
             margin: 0 auto 0.9rem;
         }
-        .pg-flow-step h4 {
-            color: var(--pg-light);
-            font-size: 0.95rem;
-            margin-bottom: 0.5rem;
-        }
-        .pg-flow-step p {
-            color: #888;
-            font-size: 0.82rem;
-            line-height: 1.6;
-        }
+        .pg-flow-step h4 { color: #f0f0f0; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .pg-flow-step p { color: #888; font-size: 0.82rem; line-height: 1.6; }
 
-        /* Tech grid */
         .pg-tech-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -273,15 +251,9 @@
             align-items: flex-start;
         }
         .pg-tech-icon { font-size: 1.4rem; flex-shrink: 0; }
-        .pg-tech-text h4 {
-            color: var(--pg-light);
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
+        .pg-tech-text h4 { color: #f0f0f0; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
         .pg-tech-text p { color: #888; font-size: 0.8rem; line-height: 1.5; }
 
-        /* Use cases */
         .pg-usecase-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
@@ -303,7 +275,6 @@
             transform: translateY(-2px);
         }
 
-        /* Production note */
         .pg-production-note {
             background: rgba(16,185,129,0.06);
             border: 1px solid rgba(16,185,129,0.2);
@@ -319,7 +290,6 @@
             margin-right: auto;
         }
 
-        /* FAQ */
         .pg-faq-list { margin-top: 2rem; max-width: 760px; margin-left: auto; margin-right: auto; }
         .pg-faq-item { border-bottom: 1px solid rgba(255,255,255,0.07); }
         .pg-faq-q {
@@ -327,7 +297,7 @@
             text-align: left;
             background: none;
             border: none;
-            color: var(--pg-light);
+            color: #f0f0f0;
             font-size: 0.95rem;
             font-weight: 600;
             padding: 1.2rem 0;
@@ -349,7 +319,6 @@
         }
         .pg-faq-item.open .pg-faq-a { max-height: 300px; padding-bottom: 1.2rem; }
 
-        /* CTA */
         .pg-cta {
             background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(0,217,255,0.08) 100%);
             border: 1px solid rgba(255,107,53,0.2);
@@ -358,10 +327,9 @@
             text-align: center;
             margin-top: 3rem;
         }
-        .pg-cta h2 { font-size: 1.9rem; color: var(--pg-light); margin-bottom: 0.8rem; }
+        .pg-cta h2 { font-size: 1.9rem; color: #f0f0f0; margin-bottom: 0.8rem; }
         .pg-cta p { color: #aaa; font-size: 0.95rem; margin-bottom: 2rem; }
 
-        /* Buttons */
         .pg-btn-primary {
             display: inline-flex;
             align-items: center;
@@ -405,13 +373,6 @@
         .pg-btn-outline:hover { background: rgba(255,107,53,0.1); }
         .pg-cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-        /* Container - unique name to avoid conflict */
-        .pg-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
         @media (max-width: 768px) {
             .pg-hero { padding: 3.5rem 0 3rem; }
             .pg-cta { padding: 2rem 1.2rem; }
@@ -427,31 +388,23 @@
     <section class="pg-hero">
         <div class="pg-container">
             <div class="pg-hero-badge">💳 Production-Tested · Live in Your Project Today</div>
-            <h1>
-                Payment Gateway Setup<br>
-                <span class="hl-rp">Razorpay</span> &amp; <span class="hl-pp">PayPal</span>
-                <br>with Supabase
-            </h1>
-            <p class="pg-hero-sub">
-                Generic, reusable, webhook-verified payment infrastructure — built and running in production.
-                Works for any product: assets, subscriptions, SaaS, one-time purchases. No lock-in, no black box.
-            </p>
+            <h1>Payment Gateway Setup<br><span class="hl-rp">Razorpay</span> &amp; <span class="hl-pp">PayPal</span><br>with Supabase</h1>
+            <p class="pg-hero-sub">Generic, reusable, webhook-verified payment infrastructure — built and running in production. Works for any product: assets, subscriptions, SaaS, one-time purchases.</p>
             <div class="pg-hero-pills">
                 <span class="pg-pill green">✓ Webhook Verified</span>
                 <span class="pg-pill green">✓ Idempotent Capture</span>
                 <span class="pg-pill blue">Razorpay INR</span>
                 <span class="pg-pill gold">PayPal USD</span>
                 <span class="pg-pill orange">Supabase Edge Functions</span>
-                <span class="pg-pill">Sandbox → Live Ready</span>
             </div>
             <div class="pg-cta-row">
-                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%27m%20interested%20in%20the%20Payment%20Gateway%20Setup%20service" target="_blank" class="pg-btn-wa">💬 Get Started on WhatsApp</a>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I'm%20interested%20in%20the%20Payment%20Gateway%20Setup" target="_blank" class="pg-btn-wa">💬 Get Started on WhatsApp</a>
                 <a href="#packages" class="pg-btn-outline">See Packages ↓</a>
             </div>
         </div>
     </section>
 
-    <!-- Proof bar -->
+    <!-- Proof Bar -->
     <div class="pg-proof-bar">
         <div class="pg-container">
             <div class="pg-proof-bar-inner">
@@ -467,10 +420,8 @@
     <section class="pg-section-light" id="packages">
         <div class="pg-container">
             <h2 class="pg-section-title">💳 Choose Your Package</h2>
-            <p class="pg-section-subtitle">All packages include the Edge Function, DB schema, RLS policies, and a test page.</p>
-
+            <p class="pg-section-subtitle">All packages include Edge Function, DB schema, RLS policies, and test page.</p>
             <div class="pg-cards">
-                <!-- Razorpay -->
                 <div class="pg-card rp">
                     <div class="pg-card-header">
                         <div class="pg-badge pg-badge-rp">Razorpay · Indian Market</div>
@@ -488,11 +439,9 @@
                             <li>Test HTML page included</li>
                             <li>Business logic hook (<code>type</code> + <code>metadata</code>)</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20the%20Razorpay%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Razorpay Setup →</a>
+                        <a href="https://wa.me/917504704502?text=I%20want%20Razorpay%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Razorpay Setup →</a>
                     </div>
                 </div>
-
-                <!-- PayPal -->
                 <div class="pg-card pp">
                     <div class="pg-card-header">
                         <div class="pg-badge pg-badge-pp">PayPal · International</div>
@@ -510,11 +459,9 @@
                             <li>Test HTML page included</li>
                             <li>Business logic hook (<code>type</code> + <code>metadata</code>)</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20the%20PayPal%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;background:var(--pg-pp-gold);color:#000;">Get PayPal Setup →</a>
+                        <a href="https://wa.me/917504704502?text=I%20want%20PayPal%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;background:var(--pg-pp-gold);color:#000;">Get PayPal Setup →</a>
                     </div>
                 </div>
-
-                <!-- Both -->
                 <div class="pg-card both">
                     <div class="pg-card-header">
                         <div style="display:flex;gap:0.5rem;margin-bottom:0.9rem;flex-wrap:wrap;">
@@ -525,7 +472,7 @@
                         <p>Full payment coverage — INR for Indian buyers, USD/international via PayPal.</p>
                     </div>
                     <div class="pg-card-body">
-                        <div class="pg-price">₹1200 <small>one-time <span style="color:var(--pg-success);font-size:0.8rem;">save ₹400</span></small></div>
+                        <div class="pg-price">₹1200 <small>one-time <span style="color:var(--pg-success);">save ₹400</span></small></div>
                         <ul class="pg-features">
                             <li class="highlight">Everything in both individual packages</li>
                             <li>Two separate Edge Functions</li>
@@ -533,16 +480,13 @@
                             <li>Indian + international buyers covered</li>
                             <li>Priority WhatsApp support</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Both%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Both Gateways →</a>
+                        <a href="https://wa.me/917504704502?text=I%20want%20Both%20Gateways%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Both Gateways →</a>
                     </div>
                 </div>
             </div>
-
             <div class="pg-production-note">
                 <div class="pg-tech-icon">🏭</div>
-                <div class="pg-tech-text">
-                    <p><strong>Built in production, not theory.</strong> Both gateways power real payments on <strong>CGRelay</strong> — Indian game developers pay monthly via Razorpay, international users via PayPal.</p>
-                </div>
+                <div class="pg-tech-text"><p><strong>Built in production, not theory.</strong> Both gateways power real payments on <strong>CGRelay</strong> — Indian developers pay via Razorpay, international users via PayPal.</p></div>
             </div>
         </div>
     </section>
@@ -586,12 +530,12 @@
             <div class="pg-usecase-grid">
                 <div class="pg-usecase-tag">🎮 Game Asset Store</div>
                 <div class="pg-usecase-tag">📦 Digital Downloads</div>
-                <div class="pg-usecase-tag">🔄 Monthly Subscriptions</div>
-                <div class="pg-usecase-tag">⚡ One-time Upgrades</div>
+                <div class="pg-usecase-tag">🔄 Subscriptions</div>
                 <div class="pg-usecase-tag">🤖 SaaS Plans</div>
                 <div class="pg-usecase-tag">🎓 Course Access</div>
                 <div class="pg-usecase-tag">🛒 E-commerce</div>
                 <div class="pg-usecase-tag">🔑 License Keys</div>
+                <div class="pg-usecase-tag">🎨 Design Assets</div>
             </div>
         </div>
     </section>
@@ -601,10 +545,10 @@
         <div class="pg-container">
             <h2 class="pg-section-title">❓ Common Questions</h2>
             <div class="pg-faq-list">
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Do I need to know TypeScript or Deno?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">No. Deploy once using Supabase CLI, set env vars, it runs. Business logic is a simple switch-case at the bottom.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">What if I sell multiple products?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Use <code>type</code> and <code>metadata</code> fields. Add new product types downstream without touching gateway code.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Is the code mine after purchase?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Yes, completely. Full source, no obfuscation, no license checks. Use in as many projects as you want.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">How long does setup take?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Files delivered same day. Deployment takes under 30 minutes. WhatsApp support included.</div></div>
+                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Do I need TypeScript or Deno?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">No. Deploy once using Supabase CLI, set env vars, it runs. Business logic is a simple switch-case.</div></div>
+                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">What if I sell multiple products?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Use <code>type</code> and <code>metadata</code> fields. Add new product types without touching gateway code.</div></div>
+                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Is the code mine after purchase?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Yes. Full source, no obfuscation, no license checks. Use in as many projects as you want.</div></div>
+                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">How long does setup take?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Files delivered same day. Deployment under 30 minutes. WhatsApp support included.</div></div>
             </div>
         </div>
     </section>
@@ -616,7 +560,7 @@
                 <h2>Ready to Accept Payments?</h2>
                 <p>Tell me which gateway you need — I'll deliver the files same day.</p>
                 <div class="pg-cta-row">
-                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%27m%20interested%20in%20the%20Payment%20Gateway%20Setup%20service" target="_blank" class="pg-btn-wa">💬 Chat on WhatsApp</a>
+                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I'm%20interested%20in%20Payment%20Gateway%20Setup" target="_blank" class="pg-btn-wa">💬 Chat on WhatsApp</a>
                     <a href="services.html" class="pg-btn-outline">View All Services →</a>
                 </div>
             </div>
