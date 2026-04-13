@@ -193,15 +193,6 @@
     <h2>PayPal <span>Gateway Tester</span></h2>
   </div>
 
-  <!-- CONFIG -->
-  <div class="card">
-    <div class="card-title">Config</div>
-    <div class="field">
-      <label>Edge Function URL</label>
-      <input id="fnUrl" type="text" placeholder="https://xxx.supabase.co/functions/v1/paypal-payment" />
-    </div>
-  </div>
-
   <!-- CREATE ORDER -->
   <div class="card">
     <div class="card-title">01 — Create Order</div>
@@ -279,7 +270,7 @@
 </div>
 
 <script>
-  let currentOrderId = null
+  const FN_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/paypal-payment'
 
   function log(msg, type = 'info') {
     const el = document.getElementById('log')
@@ -297,18 +288,13 @@
 
   function setStatus(status) {
     const pill = document.getElementById('statusPill')
+    if (!pill) return
     pill.textContent = status
     pill.className = `status-pill ${status}`
   }
 
-  function getUrl() {
-    const url = document.getElementById('fnUrl').value.trim()
-    if (!url) { log('Edge Function URL is required', 'err'); return null }
-    return url
-  }
-
-  async function call(url, body) {
-    const res = await fetch(url, {
+  async function call(body) {
+    const res = await fetch(FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -317,9 +303,6 @@
   }
 
   async function createOrder() {
-    const url = getUrl()
-    if (!url) return
-
     let metadata = {}
     try {
       metadata = JSON.parse(document.getElementById('metadata').value || '{}')
@@ -328,6 +311,8 @@
       return
     }
 
+    // Build return_url without any existing query params to keep it clean
+    const base = window.location.origin + window.location.pathname
     const body = {
       action:      'createOrder',
       email:       document.getElementById('email').value,
@@ -336,31 +321,27 @@
       type:        document.getElementById('type').value,
       description: document.getElementById('description').value,
       metadata,
-      return_url:  window.location.href + '?payment=success',
-      cancel_url:  window.location.href + '?payment=cancel'
+      return_url:  base + '?payment=success',
+      cancel_url:  base + '?payment=cancel'
     }
 
     log('Creating PayPal order...', 'info')
-    log('POST → ' + url, 'info')
     log('Body: ' + JSON.stringify(body, null, 2), 'data')
 
     try {
-      const data = await call(url, body)
+      const data = await call(body)
       log('Response: ' + JSON.stringify(data, null, 2), data.success ? 'ok' : 'err')
 
       if (data.success) {
-        currentOrderId = data.paypal_order_id
-        document.getElementById('orderId').value = currentOrderId
-        document.getElementById('orderIdSpan').textContent = currentOrderId
+        document.getElementById('orderId').value = data.paypal_order_id
+        document.getElementById('orderIdSpan').textContent = data.paypal_order_id
         document.getElementById('orderIdDisplay').style.display = 'block'
         setStatus('pending')
-
-        log('✅ Order created: ' + currentOrderId, 'ok')
-        log('Opening PayPal approval page...', 'warn')
-        log('Use your sandbox buyer account to approve payment', 'warn')
-
-        // Open PayPal approval in new tab
-        window.open(data.approval_url, '_blank')
+        log('✅ Order created: ' + data.paypal_order_id, 'ok')
+        log('Redirecting to PayPal...', 'warn')
+        log('Use your sandbox buyer account to approve', 'warn')
+        // Redirect in same tab so return_url brings us back here
+        window.location.href = data.approval_url
       }
     } catch (err) {
       log('Fetch error: ' + err.message, 'err')
@@ -368,9 +349,6 @@
   }
 
   async function captureOrder() {
-    const url = getUrl()
-    if (!url) return
-
     const orderId = document.getElementById('orderId').value.trim()
     if (!orderId) { log('Order ID is required', 'err'); return }
 
@@ -378,7 +356,7 @@
     setStatus('capturing')
 
     try {
-      const data = await call(url, { action: 'captureOrder', paypal_order_id: orderId })
+      const data = await call({ action: 'captureOrder', paypal_order_id: orderId })
       log('Response: ' + JSON.stringify(data, null, 2), data.success ? 'ok' : 'err')
 
       if (data.success) {
@@ -388,6 +366,7 @@
         log('Metadata: ' + JSON.stringify(data.metadata), 'ok')
       } else {
         setStatus(data.status || 'failed')
+        log(data.message || 'Capture failed', 'err')
       }
     } catch (err) {
       log('Fetch error: ' + err.message, 'err')
@@ -395,35 +374,48 @@
   }
 
   async function pollStatus() {
-    const url = getUrl()
-    if (!url) return
-
     const orderId = document.getElementById('orderId').value.trim()
     if (!orderId) { log('Order ID is required', 'err'); return }
 
     log('Polling status for: ' + orderId, 'info')
 
     try {
-      const data = await call(url, { action: 'pollStatus', paypal_order_id: orderId })
+      const data = await call({ action: 'pollStatus', paypal_order_id: orderId })
       log('Response: ' + JSON.stringify(data, null, 2), data.success ? 'ok' : 'warn')
-
       if (data.status) setStatus(data.status)
     } catch (err) {
       log('Fetch error: ' + err.message, 'err')
     }
   }
 
-  // Auto-fill order ID from URL param (after PayPal redirect)
-  const params = new URLSearchParams(window.location.search)
-  const token = params.get('token') // PayPal appends token= to return_url
-  if (token) {
-    document.getElementById('orderId').value = token
-    document.getElementById('orderIdDisplay').style.display = 'block'
-    document.getElementById('orderIdSpan').textContent = token
-    document.getElementById('statusPill').className = 'status-pill pending'
-    log('Returned from PayPal. Order token: ' + token, 'warn')
-    log('Click "Capture Order" to complete payment', 'warn')
-  }
+  // ── Auto-run on page load ──────────────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    const params  = new URLSearchParams(window.location.search)
+    const token   = params.get('token')   // PayPal appends ?token=ORDER_ID to return_url
+    const payment = params.get('payment') // our own flag
+
+    if (token && payment === 'success') {
+      // Show the order ID
+      document.getElementById('orderId').value = token
+      document.getElementById('orderIdDisplay').style.display = 'block'
+      document.getElementById('orderIdSpan').textContent = token
+      setStatus('pending')
+
+      log('↩ Returned from PayPal. Order: ' + token, 'warn')
+      log('Auto-capturing...', 'info')
+
+      // Auto-capture immediately — no click needed
+      document.getElementById('orderId').value = token
+      captureOrder()
+
+      // Clean URL so refresh doesn't re-trigger
+      window.history.replaceState({}, '', window.location.pathname)
+
+    } else if (payment === 'cancel') {
+      log('⚠ Payment cancelled by user', 'warn')
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  })
 </script>
 </body>
 </html>
