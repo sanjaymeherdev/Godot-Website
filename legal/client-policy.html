@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Client Policy — SanjayMeherDev / Graphicy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #111118;
+      --surface2:  #1a1a24;
+      --border:    #2a2a3a;
+      --accent:    #00d9ff;
+      --accent2:   #7c3aed;
+      --green:     #22c55e;
+      --red:       #ef4444;
+      --yellow:    #f59e0b;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 4rem 2rem 2rem;
+      max-width: 860px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .hero-tag::before {
+      content: '';
+      display: inline-block; width: 24px; height: 1px;
+      background: var(--accent);
+    }
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+    h1 span { color: var(--accent); }
+    .hero-meta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap;
+      font-size: 12px; color: var(--muted);
+      font-family: var(--mono);
+      margin-top: 1.2rem;
+    }
+    .hero-meta span { display: flex; align-items: center; gap: .4rem; }
+
+    /* ── LAYOUT ── */
+    .layout {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: sticky; top: 72px;
+      padding-top: 2rem;
+    }
+    .sidebar-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .75rem;
+    }
+    .toc-list { list-style: none; }
+    .toc-list li { margin-bottom: 2px; }
+    .toc-list a {
+      display: block;
+      padding: .35rem .75rem;
+      font-size: 12.5px;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      border-radius: 0 4px 4px 0;
+      transition: all .2s;
+    }
+    .toc-list a:hover,
+    .toc-list a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(0,217,255,.05);
+    }
+
+    /* ── CONTENT ── */
+    .content { padding-top: 2rem; }
+
+    section { margin-bottom: 2.5rem; scroll-margin-top: 80px; }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    h2::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin: 1.2rem 0 .5rem;
+    }
+
+    p { color: #94a3b8; margin-bottom: .75rem; font-size: 14px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .card.green  { border-left: 3px solid var(--green); }
+    .card.red    { border-left: 3px solid var(--red); }
+    .card.yellow { border-left: 3px solid var(--yellow); }
+    .card.blue   { border-left: 3px solid var(--accent); }
+    .card.purple { border-left: 3px solid var(--accent2); }
+
+    .card-head {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: .6rem;
+    }
+    .card.green  .card-head { color: var(--green); }
+    .card.red    .card-head { color: var(--red); }
+    .card.yellow .card-head { color: var(--yellow); }
+    .card.blue   .card-head { color: var(--accent); }
+    .card.purple .card-head { color: var(--accent2); }
+
+    /* ── RULE LIST ── */
+    .rule-list { list-style: none; }
+    .rule-list li {
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13.5px;
+      color: #94a3b8;
+      display: flex; gap: .75rem; align-items: flex-start;
+    }
+    .rule-list li:last-child { border-bottom: none; }
+    .rule-list li .icon { flex-shrink: 0; margin-top: 2px; }
+
+    /* ── BADGE TABLE ── */
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: .6rem;
+      margin-top: .75rem;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .5rem .85rem;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--text);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .badge .dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot-green  { background: var(--green); }
+    .dot-red    { background: var(--red); }
+    .dot-yellow { background: var(--yellow); }
+
+    /* ── MILESTONE TABLE ── */
+    .ms-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ms-table th {
+      background: var(--surface2);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .6rem .85rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .ms-table td {
+      padding: .6rem .85rem;
+      border-bottom: 1px solid var(--border);
+      color: #94a3b8;
+    }
+    .ms-table tr:last-child td { border-bottom: none; }
+    .ms-table tr:hover td { background: rgba(255,255,255,.02); }
+    .ms-table .status {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-family: var(--mono); font-size: 11px;
+      padding: 2px 8px; border-radius: 3px;
+    }
+    .status.locked   { background: rgba(239,68,68,.12);  color: var(--red);    }
+    .status.released { background: rgba(34,197,94,.12);  color: var(--green);  }
+
+    /* ── INLINE CODE ── */
+    code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 3px;
+      color: var(--accent);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      background: rgba(0,217,255,.05);
+      border: 1px solid rgba(0,217,255,.2);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-size: 13.5px;
+      color: #94a3b8;
+      margin: 1rem 0;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://sanjaymeherdev.netlify.app" class="nav-brand">SANJAYAIDEV</a>
+  <div class="nav-links">
+    <a href="https://sanjaymeherdev.netlify.app">Home</a>
+    <a href="https://sanjaymeherdev.netlify.app/services">Services</a>
+    <a href="https://sanjaymeherdev.netlify.app/cgstore">Store</a>
+    <a href="https://sanjaymeherdev.netlify.app/legal/terms-of-service">Terms</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Legal &amp; Policy</div>
+  <h1>Client <span>Policy</span></h1>
+  <p style="color:#94a3b8; font-size:14px; max-width:560px;">
+    These policies apply to all custom development services, store products, and subscriptions
+    offered by <strong style="color:#e2e8f0;">Sanjay Meher (Graphicy / SanjayAIDev)</strong>.
+    Read before placing an order or starting a project.
+  </p>
+  <div class="hero-meta">
+    <span>📅 Last Updated: April 2026</span>
+    <span>🇮🇳 Governed by Indian Law</span>
+    <span>✉️ graphicyin@gmail.com</span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Contents</div>
+    <ul class="toc-list" id="toc">
+      <li><a href="#minor">1. Minor Clients</a></li>
+      <li><a href="#payment">2. Payment Terms</a></li>
+      <li><a href="#refund">3. Refund Policy</a></li>
+      <li><a href="#scope">4. Project Scope</a></li>
+      <li><a href="#store">5. Store Products</a></li>
+      <li><a href="#subscriptions">6. Subscriptions</a></li>
+      <li><a href="#decline">7. Right to Decline</a></li>
+      <li><a href="#ip">8. Intellectual Property</a></li>
+      <li><a href="#dispute">9. Disputes</a></li>
+      <li><a href="#contact">10. Contact</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- 1. MINOR CLIENTS -->
+    <section id="minor">
+      <h2>1. Minor Clients</h2>
+      <div class="card red">
+        <div class="card-head">⚠ Strict Policy — No Exceptions</div>
+        <p style="margin:0; font-size:13.5px;">Clients under the age of 18 cannot engage in any paid service without verified parental or legal guardian consent. Work will not begin until this process is complete.</p>
+      </div>
+      <h3>Verification Process</h3>
+      <ul class="rule-list">
+        <li><span class="icon">📋</span><span>Minor must provide a valid <strong style="color:#e2e8f0;">Aadhaar card</strong> as identity proof.</span></li>
+        <li><span class="icon">📞</span><span>I will <strong style="color:#e2e8f0;">directly contact the parent/guardian</strong> via WhatsApp or call before any work begins.</span></li>
+        <li><span class="icon">✍️</span><span>Parent/guardian must <strong style="color:#e2e8f0;">sign a written consent agreement</strong> covering project scope and payment terms.</span></li>
+        <li><span class="icon">💳</span><span>All payments must come from the <strong style="color:#e2e8f0;">parent's UPI/bank account</strong>, not the minor.</span></li>
+        <li><span class="icon">🚫</span><span>If the parent is <strong style="color:#e2e8f0;">unreachable or unwilling to sign</strong>, the project will be declined regardless of payment offered.</span></li>
+      </ul>
+      <div class="callout">
+        <strong>Why this policy exists:</strong> Under the Indian Contract Act 1872, agreements with minors are void. This process protects both parties and ensures every project has full legal standing.
+      </div>
+    </section>
+
+    <!-- 2. PAYMENT TERMS -->
+    <section id="payment">
+      <h2>2. Payment Terms</h2>
+      <div class="badge-grid">
+        <div class="badge"><span class="dot dot-green"></span>UPI Accepted</div>
+        <div class="badge"><span class="dot dot-green"></span>Bank Transfer</div>
+        <div class="badge"><span class="dot dot-green"></span>Razorpay</div>
+        <div class="badge"><span class="dot dot-red"></span>No Credit Without Consent</div>
+      </div>
+      <h3>Custom Service Projects</h3>
+      <ul class="rule-list">
+        <li><span class="icon">💰</span><span>All custom projects use a <strong style="color:#e2e8f0;">milestone-based payment structure</strong>. Payment is due at each milestone before the next begins.</span></li>
+        <li><span class="icon">🔒</span><span>Work on a new milestone <strong style="color:#e2e8f0;">will not start</strong> until payment for the previous milestone is received.</span></li>
+        <li><span class="icon">📩</span><span>An invoice or payment link will be shared via WhatsApp/email at each milestone delivery.</span></li>
+        <li><span class="icon">⏱</span><span>Payment is expected within <strong style="color:#e2e8f0;">24 hours</strong> of milestone delivery. Delays beyond this may pause the project.</span></li>
+      </ul>
+      <h3>Store Products & Subscriptions</h3>
+      <ul class="rule-list">
+        <li><span class="icon">💳</span><span>All store purchases are <strong style="color:#e2e8f0;">full payment upfront</strong> before download/access is granted.</span></li>
+        <li><span class="icon">🔄</span><span>Subscriptions (CGRelay, GodotConnect) are billed monthly. Access is active as long as payment is current.</span></li>
+      </ul>
+    </section>
+
+    <!-- 3. REFUND POLICY -->
+    <section id="refund">
+      <h2>3. Refund Policy</h2>
+      <div class="card red">
+        <div class="card-head">🔒 Non-Refundable Once Approved</div>
+        <p style="margin:0; font-size:13.5px;">Once a milestone is delivered and approved by the client (verbally, via WhatsApp, or in writing), that payment is <strong style="color:#fff;">final and non-refundable</strong>. Approval includes any message such as "ok", "looks good", "done", or "proceed".</p>
+      </div>
+      <h3>Refund Eligibility</h3>
+      <div class="card green">
+        <div class="card-head">✅ Eligible for Refund</div>
+        <ul class="rule-list" style="margin:0;">
+          <li><span class="icon">✔</span><span>Work not started on a paid milestone due to my unavailability.</span></li>
+          <li><span class="icon">✔</span><span>Project cancelled by me before any milestone delivery.</span></li>
+          <li><span class="icon">✔</span><span>Store product is completely non-functional and I am unable to fix it within 7 days.</span></li>
+        </ul>
+      </div>
+      <div class="card red">
+        <div class="card-head">❌ Not Eligible for Refund</div>
+        <ul class="rule-list" style="margin:0;">
+          <li><span class="icon">✖</span><span>Milestone delivered and approved by the client.</span></li>
+          <li><span class="icon">✖</span><span>Client changed their mind about the project after work began.</span></li>
+          <li><span class="icon">✖</span><span>Client requested features outside the original agreed scope.</span></li>
+          <li><span class="icon">✖</span><span>Store products that have been downloaded and used.</span></li>
+          <li><span class="icon">✖</span><span>Subscription months already consumed.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. PROJECT SCOPE -->
+    <section id="scope">
+      <h2>4. Project Scope & Revisions</h2>
+      <ul class="rule-list">
+        <li><span class="icon">📝</span><span>Project scope is defined at the start. Any features <strong style="color:#e2e8f0;">not listed in the initial agreement</strong> are considered out of scope.</span></li>
+        <li><span class="icon">🔁</span><span>Each milestone includes <strong style="color:#e2e8f0;">up to 2 free revisions</strong>. Additional revisions may incur extra charges.</span></li>
+        <li><span class="icon">⏳</span><span>Delivery timelines are estimates. Delays caused by <strong style="color:#e2e8f0;">client-side feedback delays</strong> are not counted against the delivery time.</span></li>
+        <li><span class="icon">💬</span><span>All project communication happens via <strong style="color:#e2e8f0;">WhatsApp or email</strong>. Verbal-only instructions will not be actioned.</span></li>
+        <li><span class="icon">📦</span><span>Final deliverables include the <strong style="color:#e2e8f0;">working project files and basic documentation</strong> unless otherwise agreed.</span></li>
+      </ul>
+    </section>
+
+    <!-- 5. STORE PRODUCTS -->
+    <section id="store">
+      <h2>5. Store Products (Scripts & Systems)</h2>
+      <ul class="rule-list">
+        <li><span class="icon">🎮</span><span>All products are for <strong style="color:#e2e8f0;">personal and commercial game use only</strong>. You may use them in games you publish.</span></li>
+        <li><span class="icon">🚫</span><span>You may <strong style="color:#e2e8f0;">not resell, redistribute, or repackage</strong> any product as your own.</span></li>
+        <li><span class="icon">🔧</span><span>You may modify scripts for your own use. Modified versions cannot be distributed.</span></li>
+        <li><span class="icon">📬</span><span>Bug reports are welcome. Fixes are provided on a best-effort basis with no guaranteed SLA.</span></li>
+        <li><span class="icon">🔄</span><span>Updates to purchased products are free for the version purchased. Major version upgrades may require repurchase.</span></li>
+      </ul>
+    </section>
+
+    <!-- 6. SUBSCRIPTIONS -->
+    <section id="subscriptions">
+      <h2>6. Subscriptions (CGRelay & GodotConnect)</h2>
+      <div class="badge-grid">
+        <div class="badge"><span class="dot dot-yellow"></span>CGRelay — ₹50/mo</div>
+        <div class="badge"><span class="dot dot-yellow"></span>GodotConnect — ₹150/mo</div>
+      </div>
+      <ul class="rule-list" style="margin-top:.75rem;">
+        <li><span class="icon">📅</span><span>Subscriptions run on a <strong style="color:#e2e8f0;">monthly cycle</strong>. Access ends if the next month's payment is not received.</span></li>
+        <li><span class="icon">🛑</span><span>To cancel, notify me <strong style="color:#e2e8f0;">at least 5 days before</strong> the next billing date to avoid being charged for another month.</span></li>
+        <li><span class="icon">⬇️</span><span>Downtime for maintenance will be communicated in advance where possible. Unplanned outages do not qualify for refunds unless they exceed <strong style="color:#e2e8f0;">48 consecutive hours</strong>.</span></li>
+        <li><span class="icon">🔗</span><span>Server credentials and access links are <strong style="color:#e2e8f0;">non-transferable</strong> and for your account only.</span></li>
+      </ul>
+    </section>
+
+    <!-- 7. RIGHT TO DECLINE -->
+    <section id="decline">
+      <h2>7. Right to Decline Projects</h2>
+      <div class="card yellow">
+        <div class="card-head">📌 Reserved Right</div>
+        <p style="margin:0; font-size:13.5px;">I reserve the right to decline any project request without explanation. This is a freelance service, not an obligation to serve all requests.</p>
+      </div>
+      <p>Projects will typically be declined if:</p>
+      <ul class="rule-list">
+        <li><span class="icon">🚩</span><span>The client is a minor and parental consent cannot be obtained.</span></li>
+        <li><span class="icon">🚩</span><span>The project scope is unclear and the client is unwilling to define it.</span></li>
+        <li><span class="icon">🚩</span><span>The budget does not match the complexity of the work requested.</span></li>
+        <li><span class="icon">🚩</span><span>The client pressures to skip the contract or payment process.</span></li>
+        <li><span class="icon">🚩</span><span>The project involves content that is illegal or harmful.</span></li>
+      </ul>
+    </section>
+
+    <!-- 8. IP -->
+    <section id="ip">
+      <h2>8. Intellectual Property</h2>
+      <ul class="rule-list">
+        <li><span class="icon">🎨</span><span>Upon <strong style="color:#e2e8f0;">full payment</strong>, the client owns the custom work delivered for their project.</span></li>
+        <li><span class="icon">🛠</span><span>Generic systems, frameworks, and reusable code I use to build your project <strong style="color:#e2e8f0;">remain my IP</strong>. I may reuse them in other projects.</span></li>
+        <li><span class="icon">📣</span><span>I reserve the right to <strong style="color:#e2e8f0;">showcase completed work in my portfolio</strong> unless the client requests otherwise in writing.</span></li>
+        <li><span class="icon">🔐</span><span>Store products remain the intellectual property of <strong style="color:#e2e8f0;">Graphicy / Sanjay Meher</strong> at all times.</span></li>
+      </ul>
+    </section>
+
+    <!-- 9. DISPUTES -->
+    <section id="dispute">
+      <h2>9. Dispute Resolution</h2>
+      <ul class="rule-list">
+        <li><span class="icon">💬</span><span>All disputes should first be raised directly via <strong style="color:#e2e8f0;">WhatsApp or email</strong> for informal resolution.</span></li>
+        <li><span class="icon">📋</span><span>Written communication (chat logs, emails) serves as the <strong style="color:#e2e8f0;">primary evidence</strong> in any dispute.</span></li>
+        <li><span class="icon">⚖️</span><span>This policy is governed by the <strong style="color:#e2e8f0;">laws of India</strong>. Any legal proceedings will be subject to Indian jurisdiction.</span></li>
+        <li><span class="icon">🪪</span><span>For minor client disputes, the <strong style="color:#e2e8f0;">signed parental consent agreement and Aadhaar records</strong> will be used as proof of agreement.</span></li>
+      </ul>
+    </section>
+
+    <!-- 10. CONTACT -->
+    <section id="contact">
+      <h2>10. Contact</h2>
+      <div class="card blue">
+        <div class="card-head">📬 Get in Touch</div>
+        <ul class="rule-list" style="margin:0;">
+          <li><span class="icon">💬</span><span>WhatsApp: <code>+91 75047 04502</code></span></li>
+          <li><span class="icon">✉️</span><span>Email: <code>graphicyin@gmail.com</code></span></li>
+          <li><span class="icon">🌐</span><span>Website: <code>sanjaymeherdev.netlify.app</code></span></li>
+        </ul>
+      </div>
+      <p style="font-size:13px; margin-top:.5rem;">By hiring me or purchasing from my store, you confirm that you have read and agree to this policy.</p>
+    </section>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 Sanjay Meher · Graphicy · SanjayAIDev — All Rights Reserved</div>
+  <div style="margin-top:.5rem;">
+    <a href="https://sanjaymeherdev.netlify.app/legal/terms-of-service">Terms of Service</a> ·
+    <a href="https://sanjaymeherdev.netlify.app/legal/privacy-policy">Privacy Policy</a> ·
+    <a href="https://sanjaymeherdev.netlify.app/legal/data-privacy">Data Privacy</a>
+  </div>
+</footer>
+
+<script>
+  // Active TOC link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc-list a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
