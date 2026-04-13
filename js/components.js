@@ -245,6 +245,7 @@
                             <a href="${basePath}legal/privacy.html">Privacy Policy</a>
                             <a href="${basePath}legal/license.html">License</a>
                             <a href="${basePath}legal/refund.html">Refund Policy</a>
+							<a href="${basePath}legal/client-policy.html">Client Policy</a>
                         </div>
                     <div class="footer-bottom">
                         <p>© ${year} SanjayAIDev. All rights reserved.</p>
