@@ -548,7 +548,277 @@
         </div>
     </div>
 </section>
+<!--
+  ============================================================
+  SanjayAIDev — Testimonial Widget
+  Drop this block into any product page.
 
+  Usage:
+    1. Paste this entire block where you want reviews to appear
+    2. Set data-service to the product key:
+       cgrelay | godotmp | godotconnect | visualcoder | paymentgateway | assets
+    3. Replace SCRIPT_URL with your Apps Script Web App URL
+
+  Example:
+    <div class="sai-reviews" data-service="cgrelay"></div>
+  ============================================================
+-->
+
+<!-- ① Place this div where reviews should appear -->
+<div class="sai-reviews" data-service="cgrelay"></div>
+
+<!-- ② Paste this ONCE per page, before </body> -->
+<style>
+.sai-reviews-section {
+  padding: 3rem 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sai-reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.sai-reviews-title {
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #00d9ff;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.sai-reviews-title::before {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 1px;
+  background: #00d9ff;
+}
+.sai-reviews-meta {
+  font-size: 11px;
+  color: #556070;
+}
+.sai-reviews-meta span {
+  color: #f59e0b;
+  font-size: 13px;
+}
+.sai-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .9rem;
+  background: rgba(0,217,255,.08);
+  border: 1px solid rgba(0,217,255,.25);
+  border-radius: 6px;
+  color: #00d9ff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.sai-review-btn:hover {
+  background: rgba(0,217,255,.14);
+  border-color: rgba(0,217,255,.5);
+}
+.sai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+}
+.sai-card {
+  background: #0f1018;
+  border: 1px solid #23243a;
+  border-radius: 12px;
+  padding: 1.2rem 1.3rem;
+  transition: border-color .2s, transform .2s;
+  animation: saiCardIn .4s ease both;
+}
+@keyframes saiCardIn {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.sai-card:hover {
+  border-color: rgba(0,217,255,.2);
+  transform: translateY(-2px);
+}
+.sai-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .75rem;
+}
+.sai-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00d9ff22, #7c3aed44);
+  border: 1px solid #23243a;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  color: #00d9ff;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.sai-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dde3f0;
+  margin-left: .65rem;
+  flex: 1;
+  font-family: 'Syne', sans-serif;
+}
+.sai-stars {
+  color: #f59e0b;
+  font-size: 13px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.sai-message {
+  font-size: 13px;
+  color: #7a8a9a;
+  line-height: 1.65;
+  font-family: 'Syne', sans-serif;
+  border-top: 1px solid #23243a;
+  padding-top: .75rem;
+  margin-top: .1rem;
+}
+.sai-date {
+  font-size: 10px;
+  color: #334155;
+  margin-top: .65rem;
+  text-align: right;
+}
+.sai-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #556070;
+  font-size: 12px;
+  border: 1px dashed #23243a;
+  border-radius: 12px;
+}
+.sai-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #00d9ff;
+  font-size: 11px;
+  letter-spacing: .1em;
+}
+.sai-loading::after {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(0,217,255,.2);
+  border-top-color: #00d9ff;
+  border-radius: 50%;
+  animation: saiSpin .7s linear infinite;
+  vertical-align: middle;
+  margin-left: .5rem;
+}
+@keyframes saiSpin {
+  to { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+(function() {
+  // ── REPLACE WITH YOUR APPS SCRIPT WEB APP URL ──
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJTwSZP6mZvrZsd6FbfqY_vd8UlJn0Vb_IDg_s7dN9V1SAEeOuia6X6pHRGzUH4iVgkQ/exec';
+  // ── REPLACE WITH YOUR REVIEW PAGE URL ──
+  const REVIEW_PAGE = 'https://sanjaymeherdev.netlify.app/review';
+
+  function stars(n) {
+    return '★'.repeat(n) + '☆'.repeat(5 - n);
+  }
+
+  function initials(name) {
+    return name.trim().split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function formatDate(ts) {
+    try {
+      return new Date(ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch { return ''; }
+  }
+
+  function avgStars(reviews) {
+    if (!reviews.length) return 0;
+    return (reviews.reduce((s, r) => s + r.stars, 0) / reviews.length).toFixed(1);
+  }
+
+  async function loadReviews(container, service) {
+    container.innerHTML = `<div class="sai-loading">Loading reviews</div>`;
+    try {
+      const res  = await fetch(`${SCRIPT_URL}?service=${encodeURIComponent(service)}`);
+      const data = await res.json();
+      render(container, data.reviews || [], service);
+    } catch (e) {
+      container.innerHTML = `<div class="sai-empty">Could not load reviews right now.</div>`;
+    }
+  }
+
+  function render(container, reviews, service) {
+    const avg   = avgStars(reviews);
+    const count = reviews.length;
+
+    const section = document.createElement('div');
+    section.className = 'sai-reviews-section';
+
+    // Header row
+    section.innerHTML = `
+      <div class="sai-reviews-header">
+        <div class="sai-reviews-title">What Devs Say</div>
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+          ${count > 0 ? `<div class="sai-reviews-meta"><span>${stars(Math.round(avg))}</span> ${avg} · ${count} review${count !== 1 ? 's' : ''}</div>` : ''}
+          <a class="sai-review-btn" href="${REVIEW_PAGE}?service=${service}" target="_blank">+ Leave a Review</a>
+        </div>
+      </div>
+    `;
+
+    if (!count) {
+      section.innerHTML += `<div class="sai-empty">No reviews yet — be the first! 🚀</div>`;
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'sai-grid';
+      reviews.forEach((r, i) => {
+        const card = document.createElement('div');
+        card.className = 'sai-card';
+        card.style.animationDelay = `${i * 60}ms`;
+        card.innerHTML = `
+          <div class="sai-card-top">
+            <div style="display:flex;align-items:center;flex:1;min-width:0;">
+              <div class="sai-avatar">${initials(r.name)}</div>
+              <div class="sai-name">${escHtml(r.name)}</div>
+            </div>
+            <div class="sai-stars">${stars(r.stars)}</div>
+          </div>
+          <div class="sai-message">"${escHtml(r.message)}"</div>
+          <div class="sai-date">${formatDate(r.timestamp)}</div>
+        `;
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+    }
+
+    container.innerHTML = '';
+    container.appendChild(section);
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Init all widgets on the page
+  document.querySelectorAll('.sai-reviews[data-service]').forEach(el => {
+    loadReviews(el, el.dataset.service);
+  });
+})();
+</script>
 <!-- ========== FAQ ========== -->
 <section style="padding: 60px 0; background: var(--secondary);">
     <div class="container">
