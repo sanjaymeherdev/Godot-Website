@@ -2,31 +2,48 @@
 <html lang="en">
 <head>
     <meta property="og:title" content="Payment Gateway Setup Service — Razorpay & PayPal · SanjayAIDev">
-    <meta property="og:description" content="Production-ready Razorpay & PayPal payment gateway setup with Supabase Edge Functions.">
+    <meta property="og:description" content="Production-ready Razorpay & PayPal payment gateway setup with Supabase Edge Functions. Generic, reusable, webhook-verified. Built and battle-tested in production.">
+    <meta property="og:url" content="https://sanjaymeherdev.netlify.app/payment-gateway">
+    <meta name="twitter:card" content="summary_large_image">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Gateway Setup — Razorpay & PayPal · SanjayAIDev</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/chat-widget.css">
     <style>
-        /* ALL CLASSES PREFIXED WITH "pg-" - NO CONFLICT WITH HEADER/FOOTER */
+        /* ── CSS vars (mirrors site) ── */
         :root {
-            --pg-primary: #ff6b35;
-            --pg-accent: #00d9ff;
-            --pg-success: #10b981;
-            --pg-rp-blue: #2d8cf0;
-            --pg-pp-gold: #ffc439;
+            --primary:   #ff6b35;
+            --accent:    #00d9ff;
+            --success:   #10b981;
+            --dark:      #0d0d1a;
+            --secondary: #12121f;
+            --light:     #f0f0f0;
+            --rp-blue:   #2d8cf0;
+            --pp-gold:   #ffc439;
         }
 
-        .pg-hero {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        /* ── Hero ── */
+        .gw-hero {
             background: radial-gradient(ellipse at 60% 0%, rgba(255,107,53,0.12) 0%, transparent 60%),
                         radial-gradient(ellipse at 10% 80%, rgba(0,217,255,0.07) 0%, transparent 50%),
                         #0a0a0a;
             padding: 5rem 0 4rem;
             text-align: center;
         }
-        .pg-hero-badge {
+        .gw-hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -39,30 +56,30 @@
             font-weight: bold;
             margin-bottom: 1.4rem;
         }
-        .pg-hero h1 {
+        .gw-hero h1 {
             font-size: clamp(2rem, 5vw, 3.2rem);
             font-weight: 800;
-            color: #f0f0f0;
+            color: var(--light);
             line-height: 1.2;
             margin-bottom: 1.2rem;
         }
-        .pg-hero h1 .hl-rp { color: var(--pg-rp-blue); }
-        .pg-hero h1 .hl-pp { color: var(--pg-pp-gold); }
-        .pg-hero-sub {
+        .gw-hero h1 .hl-rp { color: var(--rp-blue); }
+        .gw-hero h1 .hl-pp { color: var(--pp-gold); }
+        .gw-hero-sub {
             color: #aaa;
             font-size: 1.05rem;
             max-width: 620px;
             margin: 0 auto 2.5rem;
             line-height: 1.7;
         }
-        .pg-hero-pills {
+        .gw-hero-pills {
             display: flex;
             gap: 0.7rem;
             justify-content: center;
             flex-wrap: wrap;
             margin-bottom: 2.5rem;
         }
-        .pg-pill {
+        .pill {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.12);
             color: #ccc;
@@ -70,83 +87,88 @@
             border-radius: 20px;
             font-size: 0.82rem;
         }
-        .pg-pill.green { background: rgba(16,185,129,0.1); color: #10b981; border-color: rgba(16,185,129,0.3); }
-        .pg-pill.blue { background: rgba(45,140,240,0.1); color: var(--pg-rp-blue); }
-        .pg-pill.gold { background: rgba(255,196,57,0.1); color: var(--pg-pp-gold); }
-        .pg-pill.orange { background: rgba(255,107,53,0.1); color: var(--pg-primary); }
+        .pill.green  { background: rgba(16,185,129,0.1);  color: #10b981; border-color: rgba(16,185,129,0.3); }
+        .pill.blue   { background: rgba(45,140,240,0.1);  color: var(--rp-blue); border-color: rgba(45,140,240,0.3); }
+        .pill.gold   { background: rgba(255,196,57,0.1);  color: var(--pp-gold); border-color: rgba(255,196,57,0.3); }
+        .pill.orange { background: rgba(255,107,53,0.1);  color: var(--primary); border-color: rgba(255,107,53,0.3); }
 
-        .pg-proof-bar {
+        /* ── Proof bar ── */
+        .proof-bar {
             background: #0f0f0f;
             border-top: 1px solid rgba(255,255,255,0.06);
             border-bottom: 1px solid rgba(255,255,255,0.06);
             padding: 1.4rem 0;
         }
-        .pg-proof-bar-inner {
+        .proof-bar-inner {
             display: flex;
             gap: 2.5rem;
             justify-content: center;
             flex-wrap: wrap;
         }
-        .pg-proof-num {
+        .proof-item {
+            text-align: center;
+        }
+        .proof-num {
             display: block;
             font-size: 1.7rem;
             font-weight: 800;
-            color: var(--pg-primary);
+            color: var(--primary);
         }
-        .pg-proof-label {
+        .proof-label {
             font-size: 0.78rem;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 0.06em;
         }
 
-        .pg-section { padding: 5rem 0; }
-        .pg-section-dark { background: #050505; padding: 5rem 0; }
-        .pg-section-light { background: #0a0a0a; padding: 5rem 0; }
-        .pg-section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #f0f0f0;
-        }
-        .pg-section-subtitle {
+        /* ── Section layout ── */
+        .section-normal { padding: 5rem 0; background: #0a0a0a; }
+        .section-dark    { background: #050505; padding: 5rem 0; }
+        .section-subtitle {
             text-align: center;
             color: #aaa;
             margin-top: -1rem;
             margin-bottom: 2.5rem;
             font-size: 0.95rem;
         }
-
-        .pg-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--light);
         }
 
-        .pg-cards {
+        /* ── What you get — gateway cards ── */
+        .gw-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
-        .pg-card {
+        .gw-card {
             background: #0f0f0f;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 16px;
             overflow: hidden;
             transition: all 0.3s;
         }
-        .pg-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
-        .pg-card.rp { border-color: rgba(45,140,240,0.3); }
-        .pg-card.pp { border-color: rgba(255,196,57,0.3); }
-        .pg-card.both { border-color: rgba(255,107,53,0.3); }
+        .gw-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .gw-card.rp { border-color: rgba(45,140,240,0.3); }
+        .gw-card.rp:hover { box-shadow: 0 16px 40px rgba(45,140,240,0.15); }
+        .gw-card.pp { border-color: rgba(255,196,57,0.3); }
+        .gw-card.pp:hover { box-shadow: 0 16px 40px rgba(255,196,57,0.12); }
+        .gw-card.both { border-color: rgba(255,107,53,0.3); }
+        .gw-card.both:hover { box-shadow: 0 16px 40px rgba(255,107,53,0.15); }
 
-        .pg-card-header {
+        .gw-card-header {
             padding: 1.6rem 1.6rem 1.2rem;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .pg-badge {
+        .gw-card-header .badge {
             font-size: 0.72rem;
             font-weight: bold;
             text-transform: uppercase;
@@ -156,32 +178,40 @@
             margin-bottom: 0.9rem;
             display: inline-block;
         }
-        .pg-badge-rp { background: rgba(45,140,240,0.15); color: var(--pg-rp-blue); }
-        .pg-badge-pp { background: rgba(255,196,57,0.15); color: var(--pg-pp-gold); }
-        .pg-badge-both { background: rgba(255,107,53,0.15); color: var(--pg-primary); }
-        .pg-badge-pop { background: var(--pg-primary); color: white; }
+        .badge-rp   { background: rgba(45,140,240,0.15);  color: var(--rp-blue); }
+        .badge-pp   { background: rgba(255,196,57,0.15);  color: var(--pp-gold); }
+        .badge-both { background: rgba(255,107,53,0.15);  color: var(--primary); }
+        .badge-pop  { background: var(--primary); color: white; }
 
-        .pg-card-header h3 {
+        .gw-card-header h3 {
             font-size: 1.3rem;
-            color: #f0f0f0;
+            color: var(--light);
             font-weight: 700;
             margin-bottom: 0.4rem;
         }
-        .pg-card-header p { color: #999; font-size: 0.875rem; line-height: 1.6; }
-        .pg-card-body { padding: 1.4rem 1.6rem; }
-        .pg-price {
+        .gw-card-header p {
+            color: #999;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .gw-card-body { padding: 1.4rem 1.6rem; }
+        .gw-price {
             font-size: 1.8rem;
             font-weight: 800;
-            color: var(--pg-primary);
+            color: var(--primary);
             margin-bottom: 1.2rem;
         }
-        .pg-price small { font-size: 0.85rem; color: #666; font-weight: normal; }
-        .pg-features {
+        .gw-price small {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: normal;
+        }
+        .gw-features {
             list-style: none;
             padding: 0;
             margin: 0 0 1.4rem;
         }
-        .pg-features li {
+        .gw-features li {
             font-size: 0.855rem;
             color: #bbb;
             padding: 0.35rem 0;
@@ -189,15 +219,15 @@
             position: relative;
             line-height: 1.5;
         }
-        .pg-features li::before {
+        .gw-features li::before {
             content: "✓";
-            color: var(--pg-success);
+            color: var(--success);
             position: absolute;
             left: 0;
             font-weight: bold;
         }
-        .pg-features li.highlight { color: #f0f0f0; }
-        .pg-features li code, .pg-card-body code {
+        .gw-features li.highlight { color: var(--light); }
+        .gw-features li code, .gw-card-body code {
             background: #1a1a1a;
             padding: 0.1rem 0.3rem;
             border-radius: 4px;
@@ -206,23 +236,26 @@
             color: #ffaa77;
         }
 
-        .pg-flow-grid {
+        /* ── How it works ── */
+        .flow-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.2rem;
             margin-top: 2rem;
+            position: relative;
         }
-        .pg-flow-step {
+        .flow-step {
             background: #0f0f0f;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 1.4rem;
             text-align: center;
+            position: relative;
         }
-        .pg-flow-step-num {
+        .flow-step-num {
             width: 36px;
             height: 36px;
-            background: var(--pg-primary);
+            background: var(--primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -232,16 +265,31 @@
             color: white;
             margin: 0 auto 0.9rem;
         }
-        .pg-flow-step h4 { color: #f0f0f0; font-size: 0.95rem; margin-bottom: 0.5rem; }
-        .pg-flow-step p { color: #888; font-size: 0.82rem; line-height: 1.6; }
+        .flow-step h4 {
+            color: var(--light);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .flow-step p {
+            color: #888;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+        .flow-step code {
+            background: #1a1a1a;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
 
-        .pg-tech-grid {
+        /* ── What's included technical breakdown ── */
+        .tech-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 1rem;
             margin-top: 2rem;
         }
-        .pg-tech-item {
+        .tech-item {
             background: #0f0f0f;
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 10px;
@@ -250,35 +298,51 @@
             gap: 0.9rem;
             align-items: flex-start;
         }
-        .pg-tech-icon { font-size: 1.4rem; flex-shrink: 0; }
-        .pg-tech-text h4 { color: #f0f0f0; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
-        .pg-tech-text p { color: #888; font-size: 0.8rem; line-height: 1.5; }
+        .tech-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 0.1rem;
+        }
+        .tech-text h4 {
+            color: var(--light);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .tech-text p {
+            color: #888;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
 
-        .pg-usecase-grid {
+        /* ── Use cases ── */
+        .usecase-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
             gap: 0.8rem;
             margin-top: 2rem;
         }
-        .pg-usecase-tag {
+        .usecase-tag {
             background: rgba(0,217,255,0.06);
             border: 1px solid rgba(0,217,255,0.18);
-            color: var(--pg-accent);
+            color: var(--accent);
             padding: 0.75rem 1rem;
             border-radius: 8px;
             font-size: 0.855rem;
             text-align: center;
             transition: all 0.2s;
         }
-        .pg-usecase-tag:hover {
+        .usecase-tag:hover {
             background: rgba(0,217,255,0.12);
             transform: translateY(-2px);
         }
 
-        .pg-production-note {
+        /* ── Proof / production badge ── */
+        .production-note {
             background: rgba(16,185,129,0.06);
             border: 1px solid rgba(16,185,129,0.2);
-            border-left: 3px solid var(--pg-success);
+            border-left: 3px solid var(--success);
             border-radius: 10px;
             padding: 1.2rem 1.6rem;
             display: flex;
@@ -289,15 +353,26 @@
             margin-left: auto;
             margin-right: auto;
         }
+        .production-note-icon { font-size: 1.6rem; flex-shrink: 0; }
+        .production-note-text p {
+            color: #bbb;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .production-note-text strong { color: var(--light); }
 
-        .pg-faq-list { margin-top: 2rem; max-width: 760px; margin-left: auto; margin-right: auto; }
-        .pg-faq-item { border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .pg-faq-q {
+        /* ── FAQ ── */
+        .faq-list { margin-top: 2rem; max-width: 760px; margin-left: auto; margin-right: auto; }
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .faq-q {
             width: 100%;
             text-align: left;
             background: none;
             border: none;
-            color: #f0f0f0;
+            color: var(--light);
             font-size: 0.95rem;
             font-weight: 600;
             padding: 1.2rem 0;
@@ -305,21 +380,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
-        .pg-faq-q:hover { color: var(--pg-primary); }
-        .pg-faq-arrow { transition: transform 0.25s; color: var(--pg-primary); }
-        .pg-faq-item.open .pg-faq-arrow { transform: rotate(180deg); }
-        .pg-faq-a {
+        .faq-q:hover { color: var(--primary); }
+        .faq-arrow { flex-shrink: 0; transition: transform 0.25s; color: var(--primary); }
+        .faq-item.open .faq-arrow { transform: rotate(180deg); }
+        .faq-a {
             color: #aaa;
             font-size: 0.875rem;
             line-height: 1.75;
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease;
+            transition: max-height 0.3s ease, padding 0.3s;
         }
-        .pg-faq-item.open .pg-faq-a { max-height: 300px; padding-bottom: 1.2rem; }
+        .faq-item.open .faq-a { max-height: 300px; padding-bottom: 1.2rem; }
+        .faq-a code {
+            background: #1a1a1a;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
 
-        .pg-cta {
+        /* ── CTA bottom ── */
+        .gw-cta {
             background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(0,217,255,0.08) 100%);
             border: 1px solid rgba(255,107,53,0.2);
             border-radius: 20px;
@@ -327,14 +410,21 @@
             text-align: center;
             margin-top: 3rem;
         }
-        .pg-cta h2 { font-size: 1.9rem; color: #f0f0f0; margin-bottom: 0.8rem; }
-        .pg-cta p { color: #aaa; font-size: 0.95rem; margin-bottom: 2rem; }
+        .gw-cta h2 { font-size: 1.9rem; color: var(--light); margin-bottom: 0.8rem; }
+        .gw-cta p  { color: #aaa; font-size: 0.95rem; margin-bottom: 2rem; max-width: 520px; margin-left: auto; margin-right: auto; }
+        .cta-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-        .pg-btn-primary {
+        /* ── Shared ── */
+        .btn-primary {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: var(--pg-primary);
+            background: var(--primary);
             color: white;
             padding: 0.85rem 1.8rem;
             border-radius: 8px;
@@ -343,8 +433,8 @@
             text-decoration: none;
             transition: all 0.25s;
         }
-        .pg-btn-primary:hover { background: #e55a2b; transform: translateY(-1px); }
-        .pg-btn-wa {
+        .btn-primary:hover { background: #e55a2b; transform: translateY(-1px); }
+        .btn-wa {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -355,233 +445,753 @@
             font-weight: bold;
             font-size: 0.9rem;
             text-decoration: none;
+            transition: all 0.25s;
+            white-space: nowrap;
         }
-        .pg-btn-wa:hover { background: #1ebe5a; }
-        .pg-btn-outline {
+        .btn-wa:hover { background: #1ebe5a; }
+        .btn-outline {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             background: transparent;
-            color: var(--pg-primary);
-            border: 1px solid var(--pg-primary);
+            color: var(--primary);
+            border: 1px solid var(--primary);
             padding: 0.85rem 1.8rem;
             border-radius: 8px;
             font-weight: bold;
             font-size: 0.9rem;
             text-decoration: none;
+            transition: all 0.25s;
         }
-        .pg-btn-outline:hover { background: rgba(255,107,53,0.1); }
-        .pg-cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-outline:hover { background: rgba(255,107,53,0.1); }
+
+        /* container class - critical for layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
 
         @media (max-width: 768px) {
-            .pg-hero { padding: 3.5rem 0 3rem; }
-            .pg-cta { padding: 2rem 1.2rem; }
-            .pg-cta h2 { font-size: 1.5rem; }
-            .pg-section-title { font-size: 1.6rem; }
+            .gw-hero { padding: 3.5rem 0 3rem; }
+            .gw-cta { padding: 2rem 1.2rem; }
+            .gw-cta h2 { font-size: 1.5rem; }
+            .proof-bar-inner { gap: 1.5rem; }
+            .section-title { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
     <div id="sanjay-header"></div>
 
-    <!-- Hero -->
-    <section class="pg-hero">
-        <div class="pg-container">
-            <div class="pg-hero-badge">💳 Production-Tested · Live in Your Project Today</div>
-            <h1>Payment Gateway Setup<br><span class="hl-rp">Razorpay</span> &amp; <span class="hl-pp">PayPal</span><br>with Supabase</h1>
-            <p class="pg-hero-sub">Generic, reusable, webhook-verified payment infrastructure — built and running in production. Works for any product: assets, subscriptions, SaaS, one-time purchases.</p>
-            <div class="pg-hero-pills">
-                <span class="pg-pill green">✓ Webhook Verified</span>
-                <span class="pg-pill green">✓ Idempotent Capture</span>
-                <span class="pg-pill blue">Razorpay INR</span>
-                <span class="pg-pill gold">PayPal USD</span>
-                <span class="pg-pill orange">Supabase Edge Functions</span>
+    <!-- ══════════════════════════════════════
+         HERO
+    ══════════════════════════════════════ -->
+    <section class="gw-hero">
+        <div class="container">
+            <div class="gw-hero-badge">💳 Production-Tested · Live in Your Project Today</div>
+            <h1>
+                Payment Gateway Setup<br>
+                <span class="hl-rp">Razorpay</span> &amp; <span class="hl-pp">PayPal</span>
+                <br>with Supabase
+            </h1>
+            <p class="gw-hero-sub">
+                Generic, reusable, webhook-verified payment infrastructure — built and running in production.
+                Works for any product: assets, subscriptions, SaaS, one-time purchases. No lock-in, no black box.
+            </p>
+            <div class="gw-hero-pills">
+                <span class="pill green">✓ Webhook Verified</span>
+                <span class="pill green">✓ Idempotent Capture</span>
+                <span class="pill blue">Razorpay INR</span>
+                <span class="pill gold">PayPal USD</span>
+                <span class="pill orange">Supabase Edge Functions</span>
+                <span class="pill">Sandbox → Live Ready</span>
             </div>
-            <div class="pg-cta-row">
-                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I'm%20interested%20in%20the%20Payment%20Gateway%20Setup" target="_blank" class="pg-btn-wa">💬 Get Started on WhatsApp</a>
-                <a href="#packages" class="pg-btn-outline">See Packages ↓</a>
+            <div class="cta-row">
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%27m%20interested%20in%20the%20Payment%20Gateway%20Setup%20service" target="_blank" class="btn-wa">💬 Get Started on WhatsApp</a>
+                <a href="#packages" class="btn-outline">See Packages ↓</a>
             </div>
         </div>
     </section>
 
-    <!-- Proof Bar -->
-    <div class="pg-proof-bar">
-        <div class="pg-container">
-            <div class="pg-proof-bar-inner">
-                <div class="pg-proof-item"><span class="pg-proof-num">2</span><span class="pg-proof-label">Gateways</span></div>
-                <div class="pg-proof-item"><span class="pg-proof-num">∞</span><span class="pg-proof-label">Product Types</span></div>
-                <div class="pg-proof-item"><span class="pg-proof-num">0</span><span class="pg-proof-label">Server to Manage</span></div>
-                <div class="pg-proof-item"><span class="pg-proof-num">Live</span><span class="pg-proof-label">In Production</span></div>
+    <!-- ── Proof bar ── -->
+    <div class="proof-bar">
+        <div class="container">
+            <div class="proof-bar-inner">
+                <div class="proof-item">
+                    <span class="proof-num">2</span>
+                    <span class="proof-label">Gateways</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-num">∞</span>
+                    <span class="proof-label">Product Types</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-num">0</span>
+                    <span class="proof-label">Server to Manage</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-num">Live</span>
+                    <span class="proof-label">In Production</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Packages -->
-    <section class="pg-section-light" id="packages">
-        <div class="pg-container">
-            <h2 class="pg-section-title">💳 Choose Your Package</h2>
-            <p class="pg-section-subtitle">All packages include Edge Function, DB schema, RLS policies, and test page.</p>
-            <div class="pg-cards">
-                <div class="pg-card rp">
-                    <div class="pg-card-header">
-                        <div class="pg-badge pg-badge-rp">Razorpay · Indian Market</div>
+    <!-- ══════════════════════════════════════
+         PACKAGES
+    ══════════════════════════════════════ -->
+    <section class="section-normal" id="packages">
+        <div class="container">
+            <h2 class="section-title">💳 Choose Your Package</h2>
+            <p class="section-subtitle">All packages include the Edge Function, DB schema, RLS policies, and a test page.</p>
+
+            <div class="gw-cards">
+
+                <!-- Razorpay -->
+                <div class="gw-card rp">
+                    <div class="gw-card-header">
+                        <div class="badge badge-rp">Razorpay · Indian Market</div>
                         <h3>🇮🇳 Razorpay Gateway</h3>
                         <p>For Indian businesses. Payment links, webhook verification, automatic status tracking — all in INR.</p>
                     </div>
-                    <div class="pg-card-body">
-                        <div class="pg-price">₹800 <small>one-time</small></div>
-                        <ul class="pg-features">
+                    <div class="gw-card-body">
+                        <div class="gw-price">₹800 <small>one-time</small></div>
+                        <ul class="gw-features">
                             <li class="highlight">Supabase Edge Function (Deno/TypeScript)</li>
                             <li>Create payment links via API</li>
                             <li>HMAC webhook signature verification</li>
                             <li>Idempotent payment processing</li>
                             <li><code>razorpay_payments</code> table + RLS</li>
+                            <li>Poll status fallback (DB + Razorpay API)</li>
                             <li>Test HTML page included</li>
+                            <li>Sandbox → Live, one line change</li>
                             <li>Business logic hook (<code>type</code> + <code>metadata</code>)</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=I%20want%20Razorpay%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Razorpay Setup →</a>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20the%20Razorpay%20Gateway%20setup" target="_blank" class="btn-primary" style="width:100%;justify-content:center;">Get Razorpay Setup →</a>
                     </div>
                 </div>
-                <div class="pg-card pp">
-                    <div class="pg-card-header">
-                        <div class="pg-badge pg-badge-pp">PayPal · International</div>
+
+                <!-- PayPal -->
+                <div class="gw-card pp">
+                    <div class="gw-card-header">
+                        <div class="badge badge-pp">PayPal · International</div>
                         <h3>🌍 PayPal Gateway</h3>
-                        <p>For international buyers. Orders API, auto-capture, dual-path idempotency.</p>
+                        <p>For international buyers. Orders API, auto-capture, dual-path idempotency — all in USD or any currency.</p>
                     </div>
-                    <div class="pg-card-body">
-                        <div class="pg-price">₹800 <small>one-time</small></div>
-                        <ul class="pg-features">
+                    <div class="gw-card-body">
+                        <div class="gw-price">₹800 <small>one-time</small></div>
+                        <ul class="gw-features">
                             <li class="highlight">Supabase Edge Function (Deno/TypeScript)</li>
                             <li>Create PayPal orders via API</li>
                             <li>PayPal webhook signature verification</li>
-                            <li>Dual-path idempotency</li>
+                            <li>Auto-capture on approval (server-side)</li>
+                            <li>Dual-path idempotency (webhook + return URL)</li>
                             <li><code>paypal_payments</code> table + RLS</li>
                             <li>Test HTML page included</li>
+                            <li>Sandbox → Live, one line change</li>
                             <li>Business logic hook (<code>type</code> + <code>metadata</code>)</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=I%20want%20PayPal%20Gateway%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;background:var(--pg-pp-gold);color:#000;">Get PayPal Setup →</a>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20the%20PayPal%20Gateway%20setup" target="_blank" class="btn-primary" style="width:100%;justify-content:center;background:var(--pp-gold);color:#000;">Get PayPal Setup →</a>
                     </div>
                 </div>
-                <div class="pg-card both">
-                    <div class="pg-card-header">
+
+                <!-- Both -->
+                <div class="gw-card both">
+                    <div class="gw-card-header">
                         <div style="display:flex;gap:0.5rem;margin-bottom:0.9rem;flex-wrap:wrap;">
-                            <div class="pg-badge pg-badge-both">Best Value</div>
-                            <div class="pg-badge pg-badge-pop">Popular</div>
+                            <div class="badge badge-both">Best Value</div>
+                            <div class="badge badge-pop">Popular</div>
                         </div>
                         <h3>🌐 Both Gateways</h3>
-                        <p>Full payment coverage — INR for Indian buyers, USD/international via PayPal.</p>
+                        <p>Full payment coverage — INR for Indian buyers via Razorpay, USD/international via PayPal. One system, any market.</p>
                     </div>
-                    <div class="pg-card-body">
-                        <div class="pg-price">₹1200 <small>one-time <span style="color:var(--pg-success);">save ₹400</span></small></div>
-                        <ul class="pg-features">
+                    <div class="gw-card-body">
+                        <div class="gw-price">₹1200 <small>one-time <span style="color:var(--success);font-size:0.8rem;">save ₹400</span></small></div>
+                        <ul class="gw-features">
                             <li class="highlight">Everything in both individual packages</li>
                             <li>Two separate Edge Functions</li>
+                            <li>Two tables, two test pages</li>
                             <li>Same <code>type</code> + <code>metadata</code> pattern across both</li>
+                            <li>Downstream trigger works for both</li>
                             <li>Indian + international buyers covered</li>
                             <li>Priority WhatsApp support</li>
                         </ul>
-                        <a href="https://wa.me/917504704502?text=I%20want%20Both%20Gateways%20setup" target="_blank" class="pg-btn-primary" style="width:100%;justify-content:center;">Get Both Gateways →</a>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Both%20Gateway%20setup%20(Razorpay%20%2B%20PayPal)" target="_blank" class="btn-primary" style="width:100%;justify-content:center;">Get Both Gateways →</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="production-note">
+                <div class="production-note-icon">🏭</div>
+                <div class="production-note-text">
+                    <p>
+                        <strong>Built in production, not theory.</strong> Both gateways power real payments on
+                        <strong>CGRelay</strong> — Indian game developers pay monthly via Razorpay, international users via PayPal.
+                        You're getting the exact same code, battle-tested and running live. The test HTML page lets you verify
+                        everything works before you go live with real money.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         HOW IT WORKS
+    ══════════════════════════════════════ -->
+    <section class="section-dark">
+        <div class="container">
+            <h2 class="section-title">⚡ How It Works</h2>
+            <p class="section-subtitle">Same flow for both gateways — your frontend stays simple.</p>
+
+            <div class="flow-grid">
+                <div class="flow-step">
+                    <div class="flow-step-num">1</div>
+                    <h4>User Clicks Buy</h4>
+                    <p>Your frontend calls the Edge Function with email, amount, type, and metadata.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-num">2</div>
+                    <h4>Pending Row Created</h4>
+                    <p>Payment record saved to Supabase with all metadata before user reaches payment page.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-num">3</div>
+                    <h4>User Pays</h4>
+                    <p>User completes payment on Razorpay or PayPal — hosted, secure, no card data touches your server.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-num">4</div>
+                    <h4>Webhook Fires</h4>
+                    <p>Payment provider calls your Edge Function. Signature verified. Payment marked <strong style="color:var(--success);">completed</strong>.</p>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-num">5</div>
+                    <h4>Your Logic Runs</h4>
+                    <p>Postgres trigger or another Edge Function reads <code>type</code> + <code>metadata</code> and does whatever your product needs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TECHNICAL BREAKDOWN
+    ══════════════════════════════════════ -->
+    <section class="section-normal">
+        <div class="container">
+            <h2 class="section-title">🔧 What's Inside</h2>
+            <p class="section-subtitle">Every hard part is already solved — you just plug in your business logic.</p>
+
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">🔐</div>
+                    <div class="tech-text">
+                        <h4>Webhook Signature Verification</h4>
+                        <p>HMAC for Razorpay, PayPal's own verification API for PayPal. No fake webhooks.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">⚛️</div>
+                    <div class="tech-text">
+                        <h4>Idempotent Processing</h4>
+                        <p>Atomic status claim prevents double-processing even if webhook and return URL fire simultaneously.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📦</div>
+                    <div class="tech-text">
+                        <h4>type + metadata Pattern</h4>
+                        <p>Every payment carries what it's for. Add new products without touching gateway code.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🗄️</div>
+                    <div class="tech-text">
+                        <h4>Supabase Table + RLS</h4>
+                        <p>Schema, row-level security, and service role access — everything set up and locked down.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🔄</div>
+                    <div class="tech-text">
+                        <h4>Poll Status Fallback</h4>
+                        <p>Client can poll status anytime. DB checked first, provider API as fallback. Always in sync.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🧪</div>
+                    <div class="tech-text">
+                        <h4>Sandbox → Live in One Line</h4>
+                        <p>Test keys and live keys separated. Flip one env var, redeploy — done.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🌐</div>
+                    <div class="tech-text">
+                        <h4>No Server to Manage</h4>
+                        <p>Runs entirely on Supabase Edge Functions — serverless, always on, scales automatically.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🧩</div>
+                    <div class="tech-text">
+                        <h4>Downstream Trigger Ready</h4>
+                        <p>Postgres trigger hook included — fire any logic when payment completes, fully decoupled.</p>
                     </div>
                 </div>
             </div>
-            <div class="pg-production-note">
-                <div class="pg-tech-icon">🏭</div>
-                <div class="pg-tech-text"><p><strong>Built in production, not theory.</strong> Both gateways power real payments on <strong>CGRelay</strong> — Indian developers pay via Razorpay, international users via PayPal.</p></div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         USE CASES
+    ══════════════════════════════════════ -->
+    <section class="section-dark">
+        <div class="container">
+            <h2 class="section-title">🎯 Works For Anything</h2>
+            <p class="section-subtitle">The gateway doesn't know what you're selling — it just handles the money.</p>
+
+            <div class="usecase-grid">
+                <div class="usecase-tag">🎮 Game Asset Store</div>
+                <div class="usecase-tag">📦 Digital Downloads</div>
+                <div class="usecase-tag">🔄 Monthly Subscriptions</div>
+                <div class="usecase-tag">⚡ One-time Upgrades</div>
+                <div class="usecase-tag">🤖 SaaS Plans</div>
+                <div class="usecase-tag">🎓 Course Access</div>
+                <div class="usecase-tag">🛒 E-commerce</div>
+                <div class="usecase-tag">🔑 License Keys</div>
+                <div class="usecase-tag">🎨 Design Assets</div>
+                <div class="usecase-tag">📱 App Pro Unlock</div>
+                <div class="usecase-tag">🏆 Tournament Entry</div>
+                <div class="usecase-tag">👤 Membership Tiers</div>
             </div>
         </div>
     </section>
 
-    <!-- How It Works -->
-    <section class="pg-section-dark">
-        <div class="pg-container">
-            <h2 class="pg-section-title">⚡ How It Works</h2>
-            <p class="pg-section-subtitle">Same flow for both gateways — your frontend stays simple.</p>
-            <div class="pg-flow-grid">
-                <div class="pg-flow-step"><div class="pg-flow-step-num">1</div><h4>User Clicks Buy</h4><p>Frontend calls Edge Function with email, amount, type, metadata.</p></div>
-                <div class="pg-flow-step"><div class="pg-flow-step-num">2</div><h4>Pending Row Created</h4><p>Payment record saved to Supabase before user reaches payment page.</p></div>
-                <div class="pg-flow-step"><div class="pg-flow-step-num">3</div><h4>User Pays</h4><p>User completes payment on Razorpay or PayPal.</p></div>
-                <div class="pg-flow-step"><div class="pg-flow-step-num">4</div><h4>Webhook Fires</h4><p>Provider calls Edge Function. Signature verified. Payment marked completed.</p></div>
-                <div class="pg-flow-step"><div class="pg-flow-step-num">5</div><h4>Your Logic Runs</h4><p>Postgres trigger reads <code>type</code> + <code>metadata</code> and executes your business logic.</p></div>
+    <!-- ══════════════════════════════════════
+         FAQ
+    ══════════════════════════════════════ -->
+    <section class="section-normal">
+        <div class="container">
+            <h2 class="section-title">❓ Common Questions</h2>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        Do I need to know TypeScript or Deno to use this?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        No. You deploy the Edge Function once using the Supabase CLI (one command), set four env vars in the Supabase dashboard, and it runs. You only touch the code if you want to add your own business logic — and that's a simple switch-case at the bottom of the file.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        What if I need to sell multiple different products?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        That's exactly what the <code>type</code> and <code>metadata</code> fields are for. You pass <code>type: "asset_purchase"</code> for one thing, <code>type: "subscription_tier1"</code> for another — the gateway routes them. You add new product types downstream without touching the gateway code at all.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        What happens if the webhook and the return URL both fire at the same time?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        The idempotency system handles this. The first one to arrive atomically sets the status to <code>capturing</code> / <code>processing</code> — the second one sees that and walks away silently. No double charge, no duplicate processing, ever.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        Can I use this if I'm not using Supabase for the rest of my app?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        Yes. The payment gateway only needs a Supabase project for the Edge Function runtime and the payments table. Your main app can be on any stack — the gateway is fully standalone. You just call it via HTTP from wherever your frontend lives.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        Is the code mine after purchase? Can I modify it?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        Yes, completely. You get the full source — no obfuscation, no license checks, no callbacks to my servers. It's your code to use, modify, and deploy in as many projects as you want.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-q" onclick="toggleFaq(this)">
+                        How long does setup take?
+                        <span class="faq-arrow">▾</span>
+                    </button>
+                    <div class="faq-a">
+                        Files are delivered same day. Deployment takes under 30 minutes — run the SQL in Supabase, set env vars, deploy the Edge Function with one CLI command, and test with the included HTML page. I'm available on WhatsApp if anything needs clarification.
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Technical Breakdown -->
-    <section class="pg-section-light">
-        <div class="pg-container">
-            <h2 class="pg-section-title">🔧 What's Inside</h2>
-            <p class="pg-section-subtitle">Every hard part is already solved — you just plug in your business logic.</p>
-            <div class="pg-tech-grid">
-                <div class="pg-tech-item"><div class="pg-tech-icon">🔐</div><div class="pg-tech-text"><h4>Webhook Signature Verification</h4><p>HMAC for Razorpay, PayPal's own verification API.</p></div></div>
-                <div class="pg-tech-item"><div class="pg-tech-icon">⚛️</div><div class="pg-tech-text"><h4>Idempotent Processing</h4><p>Atomic status claim prevents double-processing.</p></div></div>
-                <div class="pg-tech-item"><div class="pg-tech-icon">📦</div><div class="pg-tech-text"><h4>type + metadata Pattern</h4><p>Add new products without touching gateway code.</p></div></div>
-                <div class="pg-tech-item"><div class="pg-tech-icon">🗄️</div><div class="pg-tech-text"><h4>Supabase Table + RLS</h4><p>Schema, row-level security, service role access.</p></div></div>
-                <div class="pg-tech-item"><div class="pg-tech-icon">🧪</div><div class="pg-tech-text"><h4>Sandbox → Live in One Line</h4><p>Flip one env var, redeploy — done.</p></div></div>
-                <div class="pg-tech-item"><div class="pg-tech-icon">🌐</div><div class="pg-tech-text"><h4>No Server to Manage</h4><p>Supabase Edge Functions — serverless, always on.</p></div></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Use Cases -->
-    <section class="pg-section-dark">
-        <div class="pg-container">
-            <h2 class="pg-section-title">🎯 Works For Anything</h2>
-            <p class="pg-section-subtitle">The gateway doesn't know what you're selling — it just handles the money.</p>
-            <div class="pg-usecase-grid">
-                <div class="pg-usecase-tag">🎮 Game Asset Store</div>
-                <div class="pg-usecase-tag">📦 Digital Downloads</div>
-                <div class="pg-usecase-tag">🔄 Subscriptions</div>
-                <div class="pg-usecase-tag">🤖 SaaS Plans</div>
-                <div class="pg-usecase-tag">🎓 Course Access</div>
-                <div class="pg-usecase-tag">🛒 E-commerce</div>
-                <div class="pg-usecase-tag">🔑 License Keys</div>
-                <div class="pg-usecase-tag">🎨 Design Assets</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="pg-section-light">
-        <div class="pg-container">
-            <h2 class="pg-section-title">❓ Common Questions</h2>
-            <div class="pg-faq-list">
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Do I need TypeScript or Deno?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">No. Deploy once using Supabase CLI, set env vars, it runs. Business logic is a simple switch-case.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">What if I sell multiple products?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Use <code>type</code> and <code>metadata</code> fields. Add new product types without touching gateway code.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">Is the code mine after purchase?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Yes. Full source, no obfuscation, no license checks. Use in as many projects as you want.</div></div>
-                <div class="pg-faq-item"><button class="pg-faq-q" onclick="toggleFaq(this)">How long does setup take?<span class="pg-faq-arrow">▾</span></button><div class="pg-faq-a">Files delivered same day. Deployment under 30 minutes. WhatsApp support included.</div></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bottom CTA -->
-    <section class="pg-section-dark">
-        <div class="pg-container">
-            <div class="pg-cta">
+    <!-- ══════════════════════════════════════
+         BOTTOM CTA
+    ══════════════════════════════════════ -->
+    <section class="section-dark">
+        <div class="container">
+            <div class="gw-cta">
                 <h2>Ready to Accept Payments?</h2>
-                <p>Tell me which gateway you need — I'll deliver the files same day.</p>
-                <div class="pg-cta-row">
-                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I'm%20interested%20in%20Payment%20Gateway%20Setup" target="_blank" class="pg-btn-wa">💬 Chat on WhatsApp</a>
-                    <a href="services.html" class="pg-btn-outline">View All Services →</a>
+                <p>Tell me which gateway you need — I'll deliver the files same day. Test it, verify it works, then pay.</p>
+                <div class="cta-row">
+                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%27m%20interested%20in%20the%20Payment%20Gateway%20Setup%20service" target="_blank" class="btn-wa">💬 Chat on WhatsApp</a>
+                    <a href="services.html" class="btn-outline">View All Services →</a>
                 </div>
             </div>
         </div>
     </section>
 
     <div id="sanjay-footer"></div>
-    <div class="chat-widget"></div>
-
-    <script src="js/components.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/chat-loader.js"></script>
-    <script src="js/chat-widget.js"></script>
 
     <script>
+        // Simple FAQ toggle function
         function toggleFaq(btn) {
-            const item = btn.closest('.pg-faq-item');
+            const item = btn.closest('.faq-item');
             const isOpen = item.classList.contains('open');
-            document.querySelectorAll('.pg-faq-item.open').forEach(i => i.classList.remove('open'));
+            document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
             if (!isOpen) item.classList.add('open');
         }
+    </script>
+
+    <!-- Your components.js - integrated directly -->
+    <script>
+        (function() {
+            // ========== HEADER STYLES ==========
+            const headerStyles = `
+            <style>
+                /* Header Styles */
+                .sanjay-header { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(79, 70, 229, 0.2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; }
+                .sanjay-header .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+                .sanjay-header nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; flex-wrap: wrap; }
+                .sanjay-header .logo { font-size: 1.5rem; font-weight: bold; }
+                .sanjay-header .logo a { color: white; text-decoration: none; }
+                .sanjay-header .logo span { color: #4f46e5; }
+                .sanjay-header .logo .tagline { font-size: 0.7rem; opacity: 0.7; margin-left: 0.5rem; font-weight: normal; }
+                .sanjay-header .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+                .sanjay-header .nav-links a { color: #a0a0c0; text-decoration: none; transition: color 0.2s; font-weight: 500; }
+                .sanjay-header .nav-links a:hover, .sanjay-header .nav-links a.active { color: #4f46e5; }
+                
+                /* Fixed Dropdown Styles - No Gap */
+                .sanjay-header .dropdown { position: relative; display: inline-block; }
+                .sanjay-header .dropbtn { cursor: pointer; background: none; border: none; color: #a0a0c0; font-weight: 500; font-size: 1rem; font-family: inherit; padding: 0.5rem 0; }
+                .sanjay-header .dropbtn:hover { color: #4f46e5; }
+                .sanjay-header .dropdown-content { 
+                    display: none; 
+                    position: absolute; 
+                    background: #1a1a2e; 
+                    min-width: 240px; 
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.3); 
+                    border-radius: 12px; 
+                    z-index: 1000; 
+                    top: 100%; 
+                    left: 0; 
+                    margin-top: 0; 
+                    border: 1px solid rgba(79, 70, 229, 0.2); 
+                    overflow: hidden;
+                }
+                .sanjay-header .dropdown::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -0.5rem;
+                    left: 0;
+                    width: 100%;
+                    height: 0.5rem;
+                    background: transparent;
+                }
+                .sanjay-header .dropdown-content::before {
+                    content: '';
+                    position: absolute;
+                    top: -0.5rem;
+                    left: 0;
+                    width: 100%;
+                    height: 0.5rem;
+                    background: transparent;
+                }
+                .sanjay-header .dropdown-content a { color: white; padding: 0.75rem 1rem; text-decoration: none; display: block; font-size: 0.9rem; transition: background 0.2s; }
+                .sanjay-header .dropdown-content a:hover { background: #2d2d44; }
+                
+                .sanjay-header .cta-button-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; display: inline-block; }
+                .sanjay-header .cta-button-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+                .sanjay-header .cta-button-secondary { border: 2px solid #4f46e5; color: #4f46e5; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-block; background: transparent; }
+                .sanjay-header .cta-button-secondary:hover { background: #4f46e5; color: white; }
+                .sanjay-header .mobile-menu-btn { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+                .sanjay-header .mobile-menu { position: fixed; top: 0; right: -100%; width: 80%; max-width: 320px; height: 100%; background: #1a1a2e; z-index: 2000; transition: right 0.3s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.3); overflow-y: auto; }
+                .sanjay-header .mobile-menu.active { right: 0; }
+                .sanjay-header .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+                .sanjay-header .mobile-menu-logo { font-size: 1.25rem; font-weight: bold; color: white; }
+                .sanjay-header .mobile-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+                .sanjay-header .mobile-nav-links { padding: 1rem; }
+                .sanjay-header .mobile-nav-links a { display: block; padding: 0.75rem 1rem; color: white; text-decoration: none; border-radius: 8px; transition: background 0.2s; }
+                .sanjay-header .mobile-nav-links a:hover { background: #2d2d44; }
+                .sanjay-header .mobile-dropdown { margin: 0.5rem 0; }
+                .sanjay-header .mobile-dropdown-header { font-weight: bold; padding: 0.75rem 1rem; color: #4f46e5; font-size: 0.9rem; }
+                .sanjay-header .mobile-dropdown a { padding-left: 2rem !important; font-size: 0.9rem; }
+                .sanjay-header .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none; }
+                .sanjay-header .mobile-menu-overlay.active { display: block; }
+                body.sanjay-menu-open { overflow: hidden; }
+                @media (max-width: 768px) { .sanjay-header .nav-links { display: none; } .sanjay-header .mobile-menu-btn { display: block; } .sanjay-header .cta-button-primary, .sanjay-header .cta-button-secondary { display: none; } .sanjay-header .logo .tagline { display: none; } }
+            </style>
+        `;
+            
+            // ========== FOOTER STYLES ==========
+            const footerStyles = `
+                <style>
+                    .sanjay-footer { background: #050505; margin-top: 0; border-top: 1px solid rgba(79, 70, 229, 0.2); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; }
+                    .sanjay-footer .footer-container { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 1.5rem; }
+                    .sanjay-footer .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+                    .sanjay-footer .footer-section h4 { color: #4f46e5; margin-bottom: 1rem; font-size: 1.1rem; }
+                    .sanjay-footer .footer-section p { color: #a0a0c0; line-height: 1.6; font-size: 0.9rem; }
+                    .sanjay-footer .footer-section a { display: block; color: #a0a0c0; text-decoration: none; margin-bottom: 0.5rem; transition: color 0.2s; font-size: 0.9rem; }
+                    .sanjay-footer .footer-section a:hover { color: #4f46e5; }
+                    .sanjay-footer .social-links { display: flex; gap: 1rem; margin-top: 1rem; }
+                    .sanjay-footer .social-links a { display: inline-block; margin-bottom: 0; font-size: 1.2rem; }
+                    .sanjay-footer .footer-bottom { text-align: center; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #a0a0c0; font-size: 0.85rem; }
+                    .sanjay-footer .footer-bottom a { color: #4f46e5; text-decoration: none; }
+                    .sanjay-footer .footer-bottom a:hover { text-decoration: underline; }
+                    .sanjay-footer .footer-credits { margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.7; }
+                    @media (max-width: 768px) { .sanjay-footer .footer-grid { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; } .sanjay-footer .social-links { justify-content: center; } .sanjay-footer .footer-section a { text-align: center; } }
+                </style>
+            `;
+            
+            function getBasePath() { return './'; }
+            
+            function renderHeader() {
+                const basePath = getBasePath();
+                return `
+                    <header class="sanjay-header">
+                        <div class="container">
+                            <nav>
+                                <div class="logo">
+                                    <a href="${basePath}index.html">Sanjay<span>MeherDev</span></a>
+                                    <span class="tagline">Godot Expert</span>
+                                </div>
+                                <div class="nav-links">
+                                    <a href="index.html">Home</a>
+                                    <div class="dropdown">
+                                        <button class="dropbtn">Store ▼</button>
+                                        <div class="dropdown-content">
+                                            <a href="cgstore.html?category=multiplayer">🎮 Multiplayer Systems</a>
+                                            <a href="cgstore.html?category=ai">🤖 AI & Tools</a>
+                                            <a href="cgstore.html?category=gamekits">🎲 Complete Game Kits</a>
+                                            <a href="cgstore.html?category=systems">⚙️ Universal Systems</a>
+                                            <a href="cgstore.html?category=bundles">📦 Bundles</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="dropbtn">Services ▼</button>
+                                        <div class="dropdown-content">
+                                            <a href="godotmp.html">⚡ Done-For-You Networking</a>
+                                            <a href="godotconnect.html">🔒 Privacy P2P Backend</a>
+                                            <a href="cgrelay.html">🔄 Managed Relay Server</a>
+                                            <a href="customdev.html">🛠️ Custom Development</a>
+                                        </div>
+                                    </div>
+                                    <a href="freegodotassets.html">Free Tools</a>
+                                    <a href="learn.html">Learn</a>
+                                    <a href="blog.html">Blog</a>
+                                    <a href="contact.html">Contact</a>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <a href="cgstore.html" class="cta-button-primary">🎮 Shop</a>
+                                    <a href="services.html#consult" class="cta-button-secondary">💬 Consult</a>
+                                </div>
+                                <button class="mobile-menu-btn" id="sanjayMobileMenuBtn">☰</button>
+                            </nav>
+                        </div>
+                        <div class="mobile-menu" id="sanjayMobileMenu">
+                            <div class="mobile-menu-header">
+                                <div class="mobile-menu-logo">SanjayAIDev</div>
+                                <button class="mobile-close-btn" id="sanjayMobileCloseBtn">✕</button>
+                            </div>
+                            <div class="mobile-nav-links">
+                                <a href="index.html">Home</a>
+                                <div class="mobile-dropdown">
+                                    <div class="mobile-dropdown-header">Store</div>
+                                    <a href="cgstore.html?category=multiplayer">→ Multiplayer Systems</a>
+                                    <a href="cgstore.html?category=ai">→ AI & Tools</a>
+                                    <a href="cgstore.html?category=gamekits">→ Complete Game Kits</a>
+                                    <a href="cgstore.html?category=systems">→ Universal Systems</a>
+                                </div>
+                                <div class="mobile-dropdown">
+                                    <div class="mobile-dropdown-header">Services</div>
+                                    <a href="godotmp.html">→ Done-For-You Networking</a>
+                                    <a href="godotconnect.html">→ Privacy P2P Backend</a>
+                                    <a href="cgrelay.html">→ Managed Relay Server</a>
+                                    <a href="customdev.html">→ Custom Development</a>
+                                </div>
+                                <a href="freegodotassets.html">Free Tools</a>
+                                <a href="learn.html">Learn</a>
+                                <a href="blog.html">Blog</a>
+                                <a href="contact.html">Contact</a>
+                                <a href="cgstore.html" class="cta-button-primary" style="display: block; text-align: center; margin: 1rem;">Shop Now</a>
+                                <a href="services.html#consult" class="cta-button-secondary" style="display: block; text-align: center; margin: 1rem;">Free Consultation</a>
+                            </div>
+                        </div>
+                        <div class="mobile-menu-overlay" id="sanjayMobileMenuOverlay"></div>
+                    </header>
+                `;
+            }
+            
+            function renderFooter() {
+                const basePath = getBasePath();
+                const year = new Date().getFullYear();
+                return `
+                    <footer class="sanjay-footer">
+                        <div class="footer-container">
+                            <div class="footer-grid">
+                                <div class="footer-section">
+                                    <h4>SanjayMeherDev</h4>
+                                    <p>Your go-to expert for Godot game development. From beginner tutorials to production-ready multiplayer systems, AI integrations, and complete game kits.</p>
+                                    <div class="social-links">
+                                        <a href="https://youtube.com/@Champ_gaming" target="_blank">📺 YouTube</a>
+                                        <a href="#" target="_blank">🐙 GitHub</a>
+                                        <a href="#" target="_blank">🐦 Twitter</a>
+                                        <a href="#" target="_blank">💬 Discord</a>
+                                    </div>
+                                </div>
+                                <div class="footer-section">
+                                    <h4>Products</h4>
+                                    <a href="cgstore.html?category=multiplayer">🎮 Multiplayer Systems</a>
+                                    <a href="cgstore.html?category=ai">🤖 AI & Tools</a>
+                                    <a href="cgstore.html?category=gamekits">🎲 Complete Game Kits</a>
+                                    <a href="cgstore.html?category=systems">⚙️ Universal Systems</a>
+                                    <a href="freegodotassets.html">✨ Free Tools</a>
+                                </div>
+                                <div class="footer-section">
+                                    <h4>Services</h4>
+                                    <a href="godotmp.html">⚡ Done-For-You Networking</a>
+                                    <a href="godotconnect.html">🔒 Privacy P2P Backend</a>
+                                    <a href="cgrelay.html">🔄 Managed Relay Server</a>
+                                    <a href="customdev.html">🛠️ Custom Development</a>
+                                    <a href="services.html#consult">💬 Free Consultation</a>
+                                </div>
+                                <div class="footer-section">
+                                    <h4>Resources</h4>
+                                    <a href="learn.html">📚 Learn Godot</a>
+                                    <a href="blog.html">📝 Blog</a>
+                                    <a href="godotvisualcoder.html">🎨 GodotVisualCoder</a>
+                                    <a href="faq.html">❓ FAQ</a>
+                                    <a href="contact.html">📧 Contact</a>
+                                </div>
+                            </div>
+                            <div class="footer-bottom">
+                                <h4>Legal</h4>
+                                <a href="legal/terms.html">Terms of Service</a>
+                                <a href="legal/privacy.html">Privacy Policy</a>
+                                <a href="legal/license.html">License</a>
+                                <a href="legal/refund.html">Refund Policy</a>
+                            </div>
+                            <div class="footer-bottom">
+                                <p>© ${year} SanjayAIDev. All rights reserved.</p>
+                                <p class="footer-credits">Built with ❤️ for the Godot community | Made in India 🇮🇳</p>
+                            </div>
+                        </div>
+                    </footer>
+                `;
+            }
+            
+            function initHeader() {
+                const mobileMenuBtn = document.getElementById('sanjayMobileMenuBtn');
+                const mobileCloseBtn = document.getElementById('sanjayMobileCloseBtn');
+                const mobileMenu = document.getElementById('sanjayMobileMenu');
+                const mobileMenuOverlay = document.getElementById('sanjayMobileMenuOverlay');
+                
+                if (mobileMenuBtn && mobileCloseBtn && mobileMenu && mobileMenuOverlay) {
+                    function openMobileMenu() {
+                        mobileMenu.classList.add('active');
+                        mobileMenuOverlay.classList.add('active');
+                        document.body.classList.add('sanjay-menu-open');
+                    }
+                    function closeMobileMenu() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuOverlay.classList.remove('active');
+                        document.body.classList.remove('sanjay-menu-open');
+                    }
+                    mobileMenuBtn.addEventListener('click', openMobileMenu);
+                    mobileCloseBtn.addEventListener('click', closeMobileMenu);
+                    mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') closeMobileMenu();
+                    });
+                }
+                
+                const dropdowns = document.querySelectorAll('.sanjay-header .dropdown');
+                dropdowns.forEach(dropdown => {
+                    const content = dropdown.querySelector('.dropdown-content');
+                    let timeoutId;
+                    
+                    function showDropdown() {
+                        clearTimeout(timeoutId);
+                        if (content) content.style.display = 'block';
+                    }
+                    
+                    function hideDropdown() {
+                        timeoutId = setTimeout(() => {
+                            if (content) content.style.display = 'none';
+                        }, 150);
+                    }
+                    
+                    dropdown.addEventListener('mouseenter', showDropdown);
+                    dropdown.addEventListener('mouseleave', hideDropdown);
+                    
+                    if (content) {
+                        content.addEventListener('mouseenter', showDropdown);
+                        content.addEventListener('mouseleave', hideDropdown);
+                    }
+                });
+            }
+            
+            function init() {
+                const headerContainer = document.getElementById('sanjay-header');
+                const footerContainer = document.getElementById('sanjay-footer');
+                
+                if (headerContainer) {
+                    document.head.insertAdjacentHTML('beforeend', headerStyles);
+                    headerContainer.innerHTML = renderHeader();
+                    initHeader();
+                }
+                
+                if (footerContainer) {
+                    document.head.insertAdjacentHTML('beforeend', footerStyles);
+                    footerContainer.innerHTML = renderFooter();
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Payment Gateway Setup — Razorpay & PayPal",
+      "provider": {
+        "@type": "Organization",
+        "name": "SanjayAIDev",
+        "url": "https://sanjaymeherdev.netlify.app"
+      },
+      "description": "Production-ready Razorpay and PayPal payment gateway setup with Supabase Edge Functions. Generic, reusable, webhook-verified.",
+      "offers": [
+        { "@type": "Offer", "name": "Razorpay Gateway", "price": "800", "priceCurrency": "INR" },
+        { "@type": "Offer", "name": "PayPal Gateway",   "price": "800", "priceCurrency": "INR" },
+        { "@type": "Offer", "name": "Both Gateways",    "price": "1200","priceCurrency": "INR" }
+      ]
+    }
     </script>
 </body>
 </html>
