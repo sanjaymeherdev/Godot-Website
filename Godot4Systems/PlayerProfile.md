@@ -6,7 +6,7 @@ A ready-to-use authentication and profile management system for Godot 4 with Sup
 
 - `PlayerProfileManager.gd` - Core authentication and data management
 - `ProfileUI.tscn` - Complete UI scene with all panels
-- `CGLive.png` - Default avatar image
+- `profileUI.gd` - Complete UI code
 
 ## 🚀 Quick Setup
 
