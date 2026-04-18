@@ -464,331 +464,398 @@
     <script src="js/chat-widget.js"></script>
     
     <!-- Blog JavaScript -->
-    <script>
-        class BlogManager {
-            constructor() {
-                this.blogPosts = [];
-                this.currentCategory = 'all';
-                this.currentPage = 1;
-                this.postsPerPage = 8;
-                this.totalPages = 0;
-                
-                this.elements = {
-                    container: document.getElementById('blogPostsContainer'),
-                    pagination: document.getElementById('blogPagination'),
-                    prevBtn: document.getElementById('prevPage'),
-                    nextBtn: document.getElementById('nextPage'),
-                    filterButtons: document.querySelectorAll('.filter-btn'),
-                    subscribeForm: document.getElementById('subscribeForm')
-                };
-                
-                this.init();
-            }
-            
-            async init() {
-                await this.loadBlogPosts();
-                this.setupEventListeners();
-                this.setupMobileMenu();
-                this.setupSmoothScrolling();
-            }
-            
-            async loadBlogPosts() {
-                try {
-                    const response = await fetch('data/blog-posts.json');
-                    const data = await response.json();
-                    this.blogPosts = data.posts;
-                    
-                    // Sort by date (newest first)
-                    this.blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    
-                    this.renderBlogPosts();
-                } catch (error) {
-                    console.error('Error loading blog posts:', error);
-                    this.showError();
-                }
-            }
-            
-            renderBlogPosts() {
-                const filteredPosts = this.filterPostsByCategory();
-                const paginatedPosts = this.getPaginatedPosts(filteredPosts);
-                
-                this.elements.container.innerHTML = '';
-                
-                if (paginatedPosts.length === 0) {
-                    this.showNoPosts();
-                    return;
-                }
-                
-                paginatedPosts.forEach((post, index) => {
-                    const postElement = this.createPostElement(post, index);
-                    this.elements.container.appendChild(postElement);
-                });
-                
-                this.updatePagination(filteredPosts.length);
-            }
-            
-            createPostElement(post, index) {
-                const article = document.createElement('article');
-                article.className = 'blog-card';
-                article.style.animationDelay = `${index * 0.1}s`;
-                
-                article.innerHTML = `
-                    <img src="${post.thumbnail}" 
-                         alt="${post.title}" 
-                         class="blog-thumbnail"
-                         loading="lazy">
-                    <div class="blog-content">
-                        <div class="blog-meta">
-                            <span class="blog-category">${this.capitalizeFirstLetter(post.category)}</span>
-                            <span class="blog-date">${this.formatDate(post.date)}</span>
-                        </div>
-                        <h3 class="blog-title">${post.title}</h3>
-                        <p class="blog-excerpt">${post.excerpt}</p>
-                        <a href="${post.url}" class="read-more-btn">Read More</a>
-                    </div>
-                `;
-                
-                return article;
-            }
-            
-            filterPostsByCategory() {
-                if (this.currentCategory === 'all') {
-                    return this.blogPosts;
-                }
-                return this.blogPosts.filter(post => post.category === this.currentCategory);
-            }
-            
-            getPaginatedPosts(posts) {
-                const startIndex = (this.currentPage - 1) * this.postsPerPage;
-                const endIndex = startIndex + this.postsPerPage;
-                return posts.slice(startIndex, endIndex);
-            }
-            
-            updatePagination(totalPosts) {
-                this.totalPages = Math.ceil(totalPosts / this.postsPerPage);
-                
-                // Clear existing page number buttons
-                const existingNumbers = document.querySelectorAll('.page-number');
-                existingNumbers.forEach(btn => btn.remove());
-                
-                // Hide pagination if only 1 page
-                if (this.totalPages <= 1) {
-                    this.elements.pagination.style.display = 'none';
-                    return;
-                }
-                
-                this.elements.pagination.style.display = 'flex';
-                
-                // Create page number buttons
-                for (let i = 1; i <= this.totalPages; i++) {
-                    const pageBtn = document.createElement('button');
-                    pageBtn.className = `page-btn page-number ${i === this.currentPage ? 'active' : ''}`;
-                    pageBtn.textContent = i;
-                    
-                    pageBtn.addEventListener('click', () => {
-                        this.currentPage = i;
-                        this.renderBlogPosts();
-                        this.scrollToBlogGrid();
-                    });
-                    
-                    // Insert before next button
-                    this.elements.prevBtn.parentNode.insertBefore(pageBtn, this.elements.nextBtn);
-                }
-                
-                // Update prev/next buttons
-                this.elements.prevBtn.disabled = this.currentPage === 1;
-                this.elements.nextBtn.disabled = this.currentPage === this.totalPages;
-            }
-            
-            setupEventListeners() {
-                // Filter buttons
-                this.elements.filterButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
-                        button.classList.add('active');
-                        
-                        this.currentCategory = button.dataset.category;
-                        this.currentPage = 1;
-                        this.renderBlogPosts();
-                    });
-                });
-                
-                // Pagination buttons
-                this.elements.prevBtn.addEventListener('click', () => {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                        this.renderBlogPosts();
-                        this.scrollToBlogGrid();
-                    }
-                });
-                
-                this.elements.nextBtn.addEventListener('click', () => {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                        this.renderBlogPosts();
-                        this.scrollToBlogGrid();
-                    }
-                });
-                
-                // Subscribe form
-                if (this.elements.subscribeForm) {
-                    this.elements.subscribeForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const emailInput = this.elements.subscribeForm.querySelector('.subscribe-input');
-                        const email = emailInput.value;
-                        
-                        if (email && email.includes('@')) {
-                            alert(`Thank you for subscribing! We'll send Godot tips to ${email}`);
-                            emailInput.value = '';
-                        } else {
-                            alert('Please enter a valid email address.');
-                        }
-                    });
-                }
-            }
-            
-            showError() {
-                this.elements.container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
-                        <p style="color: #ff6b35; margin-bottom: 1rem;">Unable to load blog posts.</p>
-                        <p style="margin-bottom: 1.5rem;">Please check back later or refresh the page.</p>
-                        <button onclick="location.reload()" class="cta-button" style="margin: 0 auto;">Refresh Page</button>
-                    </div>
-                `;
-            }
-            
-            showNoPosts() {
-                this.elements.container.innerHTML = `
-                    <div class="no-posts">
-                        <p>No blog posts found in this category.</p>
-                        <button class="filter-btn active" data-category="all" style="margin-top: 1rem;">
-                            Show All Posts
-                        </button>
-                    </div>
-                `;
-                
-                // Add event listener to the button
-                const showAllBtn = this.elements.container.querySelector('.filter-btn');
-                if (showAllBtn) {
-                    showAllBtn.addEventListener('click', () => {
-                        this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
-                        document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
-                        
-                        this.currentCategory = 'all';
-                        this.currentPage = 1;
-                        this.renderBlogPosts();
-                    });
-                }
-                
-                this.elements.pagination.style.display = 'none';
-            }
-            
-            formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-            }
-            
-            capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-            
-            scrollToBlogGrid() {
-                document.getElementById('blog-grid').scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-            
-            setupMobileMenu() {
-                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-                const mobileCloseBtn = document.getElementById('mobileCloseBtn');
-                const mobileMenu = document.getElementById('mobileMenu');
-                const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-                const body = document.body;
+<!-- ============================================
+     STEP 1: Replace the existing JSON-LD at the
+     bottom of blog.html with this entire block.
+     Place it just before </body>
+     ============================================ -->
 
-                const openMobileMenu = () => {
-                    mobileMenu.classList.add('active');
-                    mobileMenuOverlay.classList.add('active');
-                    body.classList.add('menu-open');
-                };
-
-                const closeMobileMenu = () => {
-                    mobileMenu.classList.remove('active');
-                    mobileMenuOverlay.classList.remove('active');
-                    body.classList.remove('menu-open');
-                };
-
-                mobileMenuBtn.addEventListener('click', openMobileMenu);
-                mobileCloseBtn.addEventListener('click', closeMobileMenu);
-                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-                // Close menu when clicking on links
-                const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
-                mobileLinks.forEach(link => {
-                    link.addEventListener('click', closeMobileMenu);
-                });
-
-                // Close menu on escape key
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        closeMobileMenu();
-                    }
-                });
-            }
-            
-            setupSmoothScrolling() {
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    anchor.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const targetId = this.getAttribute('href');
-                        if (targetId === '#') return;
-                        
-                        const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop - 80,
-                                behavior: 'smooth'
-                            });
-                        }
-                    });
-                });
-            }
-        }
-
-        // Initialize the blog when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            window.blogManager = new BlogManager();
-        });
-    </script>
-    <script type="application/ld+json">
+<script type="application/ld+json" id="blog-schema">
 {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "name": "Godot Development Blog",
-  "description": "Latest Godot Engine tutorials, optimization tips, and game development insights",
-  "url": "https://sanjaygodot.netlify.app/blog.html",
+  "description": "Godot Engine tutorials for Android export, AdMob, Unity Ads, keystores, and mobile publishing.",
+  "url": "https://sanjaymeherdev.netlify.app/blog.html",
   "mainEntity": {
     "@type": "ItemList",
-    "numberOfItems": 12,
+    "numberOfItems": 6,
     "itemListOrder": "https://schema.org/ItemListOrderDescending",
     "itemListElement": [
       {
-        "@type": "ListItem",
+        "@type": "BlogPosting",
         "position": 1,
-        "url": "https://sanjaygodot.netlify.app/blog/godot-multiplayer-guide.html"
+        "id": 1,
+        "headline": "AdMob Integration Guide for Godot",
+        "excerpt": "Complete guide to integrating AdMob ads into your Godot game for Android and iOS. Learn banner, interstitial, and rewarded ad implementation with production-ready code.",
+        "category": "mobile",
+        "datePublished": "2026-04-10",
+        "readTime": "8 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/admob-guide.html",
+        "keywords": "admob, monetization, mobile, android, ios"
       },
       {
-        "@type": "ListItem",
+        "@type": "BlogPosting",
         "position": 2,
-        "url": "https://sanjaygodot.netlify.app/blog/mobile-optimization.html"
+        "id": 2,
+        "headline": "Debug vs Release Keystore in Godot Android Builds",
+        "excerpt": "Understand the difference between debug and release keystores for Godot Android exports, and how to properly sign your APK for Google Play submission.",
+        "category": "mobile",
+        "datePublished": "2026-04-05",
+        "readTime": "6 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/debug-vs-release-keystore.html",
+        "keywords": "android, keystore, export, google-play, mobile"
+      },
+      {
+        "@type": "BlogPosting",
+        "position": 3,
+        "id": 3,
+        "headline": "Export Settings for APK Release from Godot",
+        "excerpt": "Step-by-step walkthrough of all the critical export settings you need to configure before releasing your Godot game as an APK on the Google Play Store.",
+        "category": "mobile",
+        "datePublished": "2026-03-28",
+        "readTime": "7 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1611224923853-80b023f02d71?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/export-setting-for-apk-release-from-godot.html",
+        "keywords": "export, apk, android, google-play, release"
+      },
+      {
+        "@type": "BlogPosting",
+        "position": 4,
+        "id": 4,
+        "headline": "Fixing Godot Export Problems",
+        "excerpt": "Troubleshoot the most common Godot export errors — missing templates, Android SDK issues, signing failures, and black screen problems — with proven fixes.",
+        "category": "tutorials",
+        "datePublished": "2026-03-20",
+        "readTime": "9 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/godot-export-problem.html",
+        "keywords": "export, troubleshooting, android, errors, godot4"
+      },
+      {
+        "@type": "BlogPosting",
+        "position": 5,
+        "id": 5,
+        "headline": "Godot Keystore Setup: Complete Guide",
+        "excerpt": "Learn how to create, configure, and securely store your Android keystore for Godot projects. Covers keytool commands, Godot editor settings, and common pitfalls.",
+        "category": "mobile",
+        "datePublished": "2026-03-12",
+        "readTime": "6 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/godot-keystore.html",
+        "keywords": "keystore, android, security, export, setup"
+      },
+      {
+        "@type": "BlogPosting",
+        "position": 6,
+        "id": 6,
+        "headline": "Unity Ads Integration in Godot",
+        "excerpt": "How to integrate Unity Ads into your Godot mobile game for Android and iOS. Includes plugin setup, banner and interstitial implementation, and revenue optimization tips.",
+        "category": "mobile",
+        "datePublished": "2026-03-05",
+        "readTime": "8 min read",
+        "thumbnail": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80",
+        "url": "blog/unityads-guide.html",
+        "keywords": "unity-ads, monetization, mobile, android, ios"
       }
     ]
   }
 }
 </script>
+
+
+<!-- ============================================
+     STEP 2: Replace the ENTIRE BlogManager class
+     inside the <script> block in blog.html.
+     Only loadBlogPosts() changes — everything
+     else (renderBlogPosts, filters, pagination,
+     mobile menu, smooth scroll) stays exactly
+     the same. Replace just the class definition
+     shown below.
+     ============================================ -->
+
+<script>
+    class BlogManager {
+        constructor() {
+            this.blogPosts = [];
+            this.currentCategory = 'all';
+            this.currentPage = 1;
+            this.postsPerPage = 8;
+            this.totalPages = 0;
+
+            this.elements = {
+                container: document.getElementById('blogPostsContainer'),
+                pagination: document.getElementById('blogPagination'),
+                prevBtn: document.getElementById('prevPage'),
+                nextBtn: document.getElementById('nextPage'),
+                filterButtons: document.querySelectorAll('.filter-btn'),
+                subscribeForm: document.getElementById('subscribeForm')
+            };
+
+            this.init();
+        }
+
+        // CHANGED: sync, reads from schema instead of fetch
+        init() {
+            this.loadBlogPosts();
+            this.setupEventListeners();
+            this.setupMobileMenu();
+            this.setupSmoothScrolling();
+        }
+
+        loadBlogPosts() {
+            try {
+                const schemaEl = document.getElementById('blog-schema');
+                if (!schemaEl) throw new Error('blog-schema not found');
+
+                const schema = JSON.parse(schemaEl.textContent);
+                const posts = schema.mainEntity.itemListElement;
+
+                // Map BlogPosting fields to what renderBlogPosts() expects
+                this.blogPosts = posts.map(p => ({
+                    id:       p.id,
+                    title:    p.headline,
+                    excerpt:  p.excerpt,
+                    category: p.category,
+                    date:     p.datePublished,
+                    readTime: p.readTime,
+                    thumbnail: p.thumbnail,
+                    url:      p.url,
+                    tags:     p.keywords ? p.keywords.split(', ') : []
+                }));
+
+                // Sort newest first
+                this.blogPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                this.renderBlogPosts();
+
+            } catch (error) {
+                console.error('Error loading blog posts:', error);
+                this.showError();
+            }
+        }
+
+        // ── Everything below is UNCHANGED ──
+
+        renderBlogPosts() {
+            const filteredPosts = this.filterPostsByCategory();
+            const paginatedPosts = this.getPaginatedPosts(filteredPosts);
+
+            this.elements.container.innerHTML = '';
+
+            if (paginatedPosts.length === 0) {
+                this.showNoPosts();
+                return;
+            }
+
+            paginatedPosts.forEach((post, index) => {
+                const postElement = this.createPostElement(post, index);
+                this.elements.container.appendChild(postElement);
+            });
+
+            this.updatePagination(filteredPosts.length);
+        }
+
+        createPostElement(post, index) {
+            const article = document.createElement('article');
+            article.className = 'blog-card';
+            article.style.animationDelay = `${index * 0.1}s`;
+
+            article.innerHTML = `
+                <img src="${post.thumbnail}"
+                     alt="${post.title}"
+                     class="blog-thumbnail"
+                     loading="lazy">
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <span class="blog-category">${this.capitalizeFirstLetter(post.category)}</span>
+                        <span class="blog-date">${this.formatDate(post.date)}</span>
+                    </div>
+                    <h3 class="blog-title">${post.title}</h3>
+                    <p class="blog-excerpt">${post.excerpt}</p>
+                    <a href="${post.url}" class="read-more-btn">Read More</a>
+                </div>
+            `;
+
+            return article;
+        }
+
+        filterPostsByCategory() {
+            if (this.currentCategory === 'all') return this.blogPosts;
+            return this.blogPosts.filter(post => post.category === this.currentCategory);
+        }
+
+        getPaginatedPosts(posts) {
+            const startIndex = (this.currentPage - 1) * this.postsPerPage;
+            return posts.slice(startIndex, startIndex + this.postsPerPage);
+        }
+
+        updatePagination(totalPosts) {
+            this.totalPages = Math.ceil(totalPosts / this.postsPerPage);
+
+            document.querySelectorAll('.page-number').forEach(btn => btn.remove());
+
+            if (this.totalPages <= 1) {
+                this.elements.pagination.style.display = 'none';
+                return;
+            }
+
+            this.elements.pagination.style.display = 'flex';
+
+            for (let i = 1; i <= this.totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn page-number ${i === this.currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    this.currentPage = i;
+                    this.renderBlogPosts();
+                    this.scrollToBlogGrid();
+                });
+                this.elements.prevBtn.parentNode.insertBefore(pageBtn, this.elements.nextBtn);
+            }
+
+            this.elements.prevBtn.disabled = this.currentPage === 1;
+            this.elements.nextBtn.disabled = this.currentPage === this.totalPages;
+        }
+
+        setupEventListeners() {
+            this.elements.filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    this.currentCategory = button.dataset.category;
+                    this.currentPage = 1;
+                    this.renderBlogPosts();
+                });
+            });
+
+            this.elements.prevBtn.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.renderBlogPosts();
+                    this.scrollToBlogGrid();
+                }
+            });
+
+            this.elements.nextBtn.addEventListener('click', () => {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                    this.renderBlogPosts();
+                    this.scrollToBlogGrid();
+                }
+            });
+
+            if (this.elements.subscribeForm) {
+                this.elements.subscribeForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const emailInput = this.elements.subscribeForm.querySelector('.subscribe-input');
+                    const email = emailInput.value;
+                    if (email && email.includes('@')) {
+                        alert(`Thank you for subscribing! We'll send Godot tips to ${email}`);
+                        emailInput.value = '';
+                    } else {
+                        alert('Please enter a valid email address.');
+                    }
+                });
+            }
+        }
+
+        showError() {
+            this.elements.container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <p style="color: #ff6b35; margin-bottom: 1rem;">Unable to load blog posts.</p>
+                    <p style="margin-bottom: 1.5rem;">Please check back later or refresh the page.</p>
+                    <button onclick="location.reload()" class="cta-button" style="margin: 0 auto;">Refresh Page</button>
+                </div>
+            `;
+        }
+
+        showNoPosts() {
+            this.elements.container.innerHTML = `
+                <div class="no-posts">
+                    <p>No blog posts found in this category.</p>
+                    <button class="filter-btn active" data-category="all" style="margin-top: 1rem;">
+                        Show All Posts
+                    </button>
+                </div>
+            `;
+            const showAllBtn = this.elements.container.querySelector('.filter-btn');
+            if (showAllBtn) {
+                showAllBtn.addEventListener('click', () => {
+                    this.elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
+                    this.currentCategory = 'all';
+                    this.currentPage = 1;
+                    this.renderBlogPosts();
+                });
+            }
+            this.elements.pagination.style.display = 'none';
+        }
+
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        scrollToBlogGrid() {
+            document.getElementById('blog-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+            const body = document.body;
+
+            const openMobileMenu = () => {
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.classList.add('active');
+                body.classList.add('menu-open');
+            };
+            const closeMobileMenu = () => {
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                body.classList.remove('menu-open');
+            };
+
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+            document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMobileMenu();
+            });
+        }
+
+        setupSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({ top: targetElement.offsetTop - 80, behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.blogManager = new BlogManager();
+    });
+</script>  
 </body>
 </html>
