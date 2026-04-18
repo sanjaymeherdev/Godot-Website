@@ -1102,88 +1102,138 @@
     <script src="js/chat-loader.js"></script>
     <script src="js/chat-widget.js"></script>
 
-    <script>
-        /* ── Category tabs ── */
-        document.querySelectorAll('.cat-tab').forEach(tab => {
-            tab.addEventListener('click', function () {
-                document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.systems-panel').forEach(p => p.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('panel-' + this.dataset.panel).classList.add('active');
-            });
+   <!-- ============================================
+     STEP 1: Paste this schema block in index.html
+     just before the closing </body> tag,
+     ABOVE the existing <script> blocks
+     ============================================ -->
+
+<script type="application/ld+json" id="featured-products-schema">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": 1,
+    "name": "Touch Controls",
+    "short_description": "Complete mobile touch controls bundle — joystick, buttons, camera & gyroscope for Godot 4. 75% OFF limited time!",
+    "image": "images/products/touch.png",
+    "category": "Scripts",
+    "featured": true,
+    "price_inr": 49,
+    "price_usd": 1,
+    "offers": {
+      "@type": "Offer",
+      "price": "49",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": 2,
+    "name": "Supabase Auth System Godot",
+    "short_description": "Complete authentication system — Email, Google OAuth, password reset, user profiles & admin dashboard for Godot 4. 80% OFF!",
+    "image": "images/products/supabase.png",
+    "category": "Systems",
+    "featured": true,
+    "price_inr": 99,
+    "price_usd": 2,
+    "offers": {
+      "@type": "Offer",
+      "price": "99",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": 8,
+    "name": "AdMob Plugin for Godot 4.4",
+    "short_description": "A complete, production-ready AdMob plugin for Godot 4.4 with support for banner, interstitial, rewarded, and native ads — Android only.",
+    "image": "images/products/godot_admob.jpg",
+    "category": "Tools",
+    "featured": false,
+    "price_inr": 300,
+    "price_usd": 4,
+    "offers": {
+      "@type": "Offer",
+      "price": "300",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+]
+</script>
+
+
+<!-- ============================================
+     STEP 2: Replace the entire loadFeaturedProducts()
+     function and the loadFeaturedProducts() call
+     at the bottom of your existing <script> block.
+     Everything else in that script block stays.
+     ============================================ -->
+
+<script>
+    /* ── Category tabs — KEEP AS IS ── */
+    document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.systems-panel').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('panel-' + this.dataset.panel).classList.add('active');
         });
+    });
 
-        /* ── Video placeholder ── */
-        function playVideo() {
-            window.open('https://youtube.com/your-video-id', '_blank');
-        }
+    /* ── Video placeholder — KEEP AS IS ── */
+    function playVideo() {
+        window.open('https://youtube.com/your-video-id', '_blank');
+    }
 
-        /* ── Featured products from store data (IDs 1, 2, 8 — no buy button) ── */
-        const FEATURED_IDS = [1, 2, 8];
-        const PRODUCTS_JSON = 'data/products.json';
+    /* ── Featured products — NOW READS FROM SCHEMA ── */
+    function loadFeaturedProducts() {
+        const grid = document.getElementById('featuredGrid');
+        try {
+            const schemaEl = document.getElementById('featured-products-schema');
+            if (!schemaEl) throw new Error('featured-products-schema not found');
 
-        async function loadFeaturedProducts() {
-            const grid = document.getElementById('featuredGrid');
-            try {
-                const res = await fetch(PRODUCTS_JSON);
-                if (!res.ok) throw new Error();
-                let products = await res.json();
+            const products = JSON.parse(schemaEl.textContent);
 
-                // Parse prices same way store.js does
-                products = products.map(p => {
-                    let price_inr = 0, price_usd = 0;
-                    if (typeof p.price === 'string') {
-                        const patterns = [
-                            /Rs\.?\s*(\d+(?:\.\d+)?)\s*&&\s*\$(\d+(?:\.\d+)?)/i,
-                            /Rs\.?\s*(\d+(?:\.\d+)?)\s*%%\s*\$(\d+(?:\.\d+)?)/i,
-                            /Rs\s*(\d+(?:\.\d+)?)\s*&&\s*\$(\d+(?:\.\d+)?)/i,
-                            /Rs\.?\s*(\d+(?:\.\d+)?).*?\$(\d+(?:\.\d+)?)/i
-                        ];
-                        for (const pat of patterns) {
-                            const m = p.price.match(pat);
-                            if (m) { price_inr = parseFloat(m[1]); price_usd = parseFloat(m[2]); break; }
-                        }
-                    }
-                    return { ...p, price_inr, price_usd };
-                });
+            if (!products.length) {
+                grid.innerHTML = '<p style="color:#888;text-align:center;grid-column:1/-1;">No featured products found.</p>';
+                return;
+            }
 
-                const featured = FEATURED_IDS
-                    .map(id => products.find(p => p.id === id))
-                    .filter(Boolean);
-
-                if (!featured.length) {
-                    grid.innerHTML = '<p style="color:#888;text-align:center;grid-column:1/-1;">No featured products found.</p>';
-                    return;
-                }
-
-                grid.innerHTML = featured.map(p => `
-                    <div class="hp-card">
-                        <div class="featured-img">
-                            <img src="${p.image}" alt="${p.name}"
-                                 onerror="this.style.display='none';this.parentElement.innerHTML='🎮';">
-                            ${p.featured ? '<span class="featured-label">Featured</span>' : ''}
+            grid.innerHTML = products.map(p => `
+                <div class="hp-card">
+                    <div class="featured-img">
+                        <img src="${p.image}" alt="${p.name}"
+                             onerror="this.style.display='none';this.parentElement.innerHTML='🎮';">
+                        ${p.featured ? '<span class="featured-label">Featured</span>' : ''}
+                    </div>
+                    <div class="hp-card-body">
+                        <div class="hp-card-tag">${p.category}</div>
+                        <div class="hp-card-title">${p.name}</div>
+                        <div class="hp-card-desc">${p.short_description}</div>
+                        <div class="featured-price">
+                            ₹${p.price_inr} <small>/ $${p.price_usd} one-time</small>
                         </div>
-                        <div class="hp-card-body">
-                            <div class="hp-card-tag">${p.category}</div>
-                            <div class="hp-card-title">${p.name}</div>
-                            <div class="hp-card-desc">${p.short_description || p.description.slice(0, 120) + '…'}</div>
-                            <div class="featured-price">
-                                ₹${p.price_inr} <small>/ $${p.price_usd} one-time</small>
-                            </div>
-                            <div class="hp-card-footer">
-                                <a href="cgstore.html" class="btn-outline">View in Store →</a>
-                            </div>
+                        <div class="hp-card-footer">
+                            <a href="cgstore.html" class="btn-outline">View in Store →</a>
                         </div>
                     </div>
-                `).join('');
+                </div>
+            `).join('');
 
-            } catch (e) {
-                grid.innerHTML = '<p style="color:#888;text-align:center;grid-column:1/-1;">Could not load featured products.</p>';
-            }
+        } catch (e) {
+            console.error('Error loading featured products:', e);
+            grid.innerHTML = '<p style="color:#888;text-align:center;grid-column:1/-1;">Could not load featured products.</p>';
         }
+    }
 
-        loadFeaturedProducts();
-    </script>
+    loadFeaturedProducts();
+</script>
 
     <script type="application/ld+json">
     {
