@@ -453,7 +453,55 @@
             </div>
         </div>
     </div>
-
+<script type="application/ld+json" id="free-assets-schema">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": "free-1",
+    "title": "Local Multiplayer Server",
+    "description": "Make a Local ENET Server to play with friends",
+    "image": "images/products/6.jpg",
+    "downloadUrl": "https://drive.google.com/drive/folders/18-bY70kpTJKarQwBHh2NlyJm7xucfLjP?usp=sharing",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": "free-2",
+    "title": "Third Person Controller Script",
+    "description": "Third Person Controller Script suitable for all types of games",
+    "image": "images/products/brtpp.jpg",
+    "downloadUrl": "https://drive.google.com/drive/folders/1rwUErdFk4UjiAZ8J2_aVRqiaG_9NvUuQ?usp=sharing",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "id": "Resourse",
+    "title": "Godot FPS Resource System",
+    "description": "Add Unlimited Gun with Just 2 Scripts",
+    "image": "images/products/res.jpg",
+    "downloadUrl": "https://drive.google.com/file/d/1oryRyLkY1sSB5vEi55KtU9cc4KMbZgXY/view?usp=sharing",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+]
+</script>
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -475,7 +523,6 @@
     <script>
         // Configuration
         const CONFIG = {
-            FREE_ASSETS_JSON: 'data/free-assets.json',
             GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwSiG2b0NKaQRAzUJT0rYJ4vi3w6Uf1cZUsWxSFh2zpEXNwbpliel3bTfNymjZ2yfSM/exec'
         };
 
@@ -488,18 +535,19 @@
         });
 
         // Load free assets from JSON
-        async function loadFreeAssets() {
+        function loadFreeAssets() {
             try {
-                const response = await fetch(CONFIG.FREE_ASSETS_JSON);
-                if (!response.ok) throw new Error('Failed to load assets');
-                
-                const assets = await response.json();
+                const schemaEl = document.getElementById('free-assets-schema');
+                if (!schemaEl) throw new Error('free-assets-schema not found');
+         
+                const assets = JSON.parse(schemaEl.textContent);
                 displayAssets(assets);
-                
+         
                 document.getElementById('loadingAssets').classList.remove('active');
             } catch (error) {
                 console.error('Error loading assets:', error);
-                document.getElementById('loadingAssets').innerHTML = '<p style="color: var(--error);">Error loading assets. Please refresh the page.</p>';
+                document.getElementById('loadingAssets').innerHTML =
+                    '<p style="color: var(--error);">Error loading assets. Please refresh the page.</p>';
             }
         }
 
