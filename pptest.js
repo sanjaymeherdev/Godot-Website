@@ -1,4 +1,4 @@
-const GAS_URL    = 'https://script.google.com/macros/s/AKfycbz2DRN8dfqdbf9sUjyt4v1x9yo7-GSflZMxfg03xGOzYnd-bNNeDSc6mrbIwZ6QqLCR9g/exec';
+const GAS_URL    = 'https://script.google.com/macros/s/AKfycbzvGCTjASsKJ0NcHD4iAXBy-l70dGAbc8o3U14aZEYxIu3dNwlorAnBC_VtETnmP0AR_g/exec';
 const PRODUCT_ID = '1';
 const AMOUNT     = '1.00';
 
