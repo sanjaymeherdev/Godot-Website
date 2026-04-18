@@ -3,592 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Godot Assets — Test Checkout</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>PayPal Test — $1</title>
   <style>
-    :root {
-      --bg: #0d0d0f;
-      --surface: #16161a;
-      --border: #2a2a32;
-      --accent: #ff6b35;
-      --accent2: #ffb347;
-      --text: #f0ede8;
-      --muted: #7a7a8a;
-      --success: #3ecf8e;
-      --radius: 16px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
+      background: #0d0d0f;
+      color: #f0ede8;
+      font-family: sans-serif;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      overflow-x: hidden;
     }
-
-    /* Background grid */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,107,53,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,107,53,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Ambient glow */
-    body::after {
-      content: '';
-      position: fixed;
-      top: -20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(255,107,53,0.12) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 480px;
-      animation: fadeUp 0.6s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Logo bar */
-    .logo-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 32px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .logo-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50%      { opacity: 0.4; }
-    }
-
-    /* Card */
     .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    /* Product section */
-    .product-header {
-      padding: 28px 28px 24px;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,107,53,0.12);
-      border: 1px solid rgba(255,107,53,0.3);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 100px;
-      margin-bottom: 14px;
-    }
-
-    .badge::before {
-      content: '';
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    .product-name {
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1.2;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, var(--text) 60%, var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .product-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-      font-family: 'DM Mono', monospace;
-      font-weight: 400;
-    }
-
-    .price-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .price {
-      font-size: 38px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
-
-    .price sup {
-      font-size: 20px;
-      vertical-align: super;
-      font-weight: 600;
-    }
-
-    .price-note {
-      font-size: 12px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      line-height: 1.5;
-    }
-
-    /* Features */
-    .features {
-      padding: 0 28px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 20px;
-    }
-
-    .feature {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .feature-icon {
-      width: 22px; height: 22px;
-      border-radius: 6px;
-      background: rgba(62,207,142,0.1);
-      border: 1px solid rgba(62,207,142,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
-      flex-shrink: 0;
-    }
-
-    /* Form section */
-    .form-section {
-      padding: 24px 28px 28px;
-      border-top: 1px solid var(--border);
-    }
-
-    .form-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .form-input {
+      background: #16161a;
+      border: 1px solid #2a2a32;
+      border-radius: 16px;
+      padding: 40px 32px;
       width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      max-width: 400px;
+    }
+    h1 { font-size: 20px; margin-bottom: 6px; }
+    .price { color: #ff6b35; font-size: 32px; font-weight: 800; margin-bottom: 28px; }
+    label { display: block; font-size: 12px; color: #7a7a8a; margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+    input {
+      width: 100%;
+      background: #0d0d0f;
+      border: 1px solid #2a2a32;
       border-radius: 10px;
       padding: 13px 16px;
       font-size: 15px;
-      font-family: 'DM Mono', monospace;
-      color: var(--text);
+      color: #f0ede8;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .form-input::placeholder { color: var(--muted); }
-
-    .form-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(255,107,53,0.12);
-    }
-
-    .form-input.error {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
-    }
-
-    .error-msg {
-      font-size: 12px;
-      color: #ef4444;
-      margin-top: 6px;
-      font-family: 'DM Mono', monospace;
-      display: none;
-    }
-
-    .error-msg.visible { display: block; }
-
-    /* Buy button */
-    .buy-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 16px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Syne', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .buy-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .buy-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(255,107,53,0.4);
-    }
-
-    .buy-btn:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    .buy-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-inner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    /* Spinner */
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .buy-btn.loading .spinner { display: block; }
-    .buy-btn.loading .btn-text { opacity: 0.7; }
-
-    /* Trust strip */
-    .trust-strip {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 16px 28px;
-      border-top: 1px solid var(--border);
-    }
-
-    .trust-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-    }
-
-    /* Status banner */
-    .status-banner {
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-top: 16px;
-      font-size: 13px;
-      font-family: 'DM Mono', monospace;
-      display: none;
-      align-items: flex-start;
-      gap: 10px;
-      line-height: 1.5;
-    }
-
-    .status-banner.error {
-      display: flex;
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.2);
-      color: #fca5a5;
-    }
-
-    .status-banner.info {
-      display: flex;
-      background: rgba(255,179,71,0.08);
-      border: 1px solid rgba(255,179,71,0.2);
-      color: var(--accent2);
-    }
-
-    /* Test mode pill */
-    .test-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,179,71,0.1);
-      border: 1px solid rgba(255,179,71,0.25);
-      color: var(--accent2);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 5px 12px;
-      border-radius: 100px;
       margin-bottom: 20px;
     }
-
-    .footer-note {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 12px;
-      color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      line-height: 1.7;
+    input:focus { border-color: #ff6b35; }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: #ff6b35;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
     }
-
-    .footer-note a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { margin-top: 14px; font-size: 13px; color: #ef4444; text-align: center; }
+    .msg.info { color: #ffb347; }
   </style>
 </head>
 <body>
-
-<div class="wrapper">
-
-  <div class="logo-bar">
-    <div class="logo-dot"></div>
-    🎮 Godot Assets Store
-  </div>
-
-  <div class="test-pill">⚡ Sandbox / Test Mode — $1 USD</div>
-
   <div class="card">
+    <h1>Touch Kit Pro — Test</h1>
+    <div class="price">$1.00</div>
 
-    <!-- Product -->
-    <div class="product-header">
-      <div class="badge">Digital Download</div>
-      <div class="product-name">Touch Kit Pro<br>for Godot 4</div>
-      <div class="product-desc">
-        Mobile-ready touch controls, virtual joystick,
-        gesture detection &amp; tap feedback — plug and play.
-      </div>
-      <div class="price-row">
-        <div class="price"><sup>$</sup>1</div>
-        <div class="price-note">
-          One-time payment<br>
-          Instant delivery via email
-        </div>
-      </div>
-    </div>
+    <label for="email">Email Address</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
 
-    <!-- Features -->
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        Godot 4.x compatible source files
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        Lifetime access &amp; future updates
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        Full commercial license included
-      </div>
-    </div>
-
-    <!-- Form -->
-    <div class="form-section">
-      <label class="form-label" for="email">Your Email Address</label>
-      <input
-        class="form-input"
-        type="email"
-        id="email"
-        placeholder="you@example.com"
-        autocomplete="email"
-      />
-      <div class="error-msg" id="email-error">Please enter a valid email address.</div>
-
-      <div class="status-banner" id="status-banner">
-        <span id="status-icon">⚠</span>
-        <span id="status-msg"></span>
-      </div>
-
-      <button class="buy-btn" id="buy-btn" onclick="handleBuy()">
-        <div class="btn-inner">
-          <div class="spinner"></div>
-          <span class="btn-text">Pay $1 with PayPal →</span>
-        </div>
-      </button>
-    </div>
-
-    <!-- Trust -->
-    <div class="trust-strip">
-      <div class="trust-item">🔒 Secure Checkout</div>
-      <div class="trust-item">📧 Instant Email</div>
-      <div class="trust-item">💳 PayPal</div>
-    </div>
-
+    <button id="payBtn">Pay with PayPal</button>
+    <div class="msg" id="msg"></div>
   </div>
 
-  <div class="footer-note">
-    This is a <strong style="color:var(--accent2)">sandbox test page</strong>.<br>
-    Use a PayPal sandbox buyer account to complete payment.<br>
-    Questions? <a href="mailto:Graphicyin@gmail.com">Graphicyin@gmail.com</a>
-  </div>
-
-</div>
-
-<script>
-  // ─── CONFIG ───────────────────────────────────────────────
-  const GAS_URL    = 'https://script.google.com/macros/s/AKfycbybekpAFxuIl77v7ypQ3JmFPgqbZKC5WJb9o6HROw4yUYXlxdKEQKqUq3_t040JmLhCkw/exec';
-  const PRODUCT_ID = '1';       // Must match your ProductLinks sheet
-  const AMOUNT     = '1.00';    // USD
-
-  // ─── HELPERS ──────────────────────────────────────────────
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  }
-
-  function setLoading(on) {
-    const btn = document.getElementById('buy-btn');
-    btn.disabled = on;
-    btn.classList.toggle('loading', on);
-    btn.querySelector('.btn-text').textContent = on
-      ? 'Connecting to PayPal...'
-      : 'Pay $1 with PayPal →';
-  }
-
-  function showStatus(type, msg) {
-    const banner = document.getElementById('status-banner');
-    const msgEl  = document.getElementById('status-msg');
-    const icon   = document.getElementById('status-icon');
-    banner.className = 'status-banner ' + type;
-    icon.textContent  = type === 'error' ? '⚠' : 'ℹ';
-    msgEl.textContent = msg;
-  }
-
-  function hideStatus() {
-    document.getElementById('status-banner').className = 'status-banner';
-  }
-
-  // ─── MAIN ─────────────────────────────────────────────────
-  async function handleBuy() {
-    hideStatus();
-
-    const emailInput = document.getElementById('email');
-    const errorEl    = document.getElementById('email-error');
-    const email      = emailInput.value.trim();
-
-    // Validate
-    if (!isValidEmail(email)) {
-      emailInput.classList.add('error');
-      errorEl.classList.add('visible');
-      emailInput.focus();
-      return;
-    }
-    emailInput.classList.remove('error');
-    errorEl.classList.remove('visible');
-
-    setLoading(true);
-
-    try {
-      // Call GAS to create PayPal order
-      const response = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        body: JSON.stringify({
-          action:    'createPaypalOrder',
-          productId: PRODUCT_ID,
-          amount:    AMOUNT,
-          email:     email
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.approveUrl) {
-        // Redirect buyer to PayPal
-        window.location.href = data.approveUrl;
-      } else {
-        setLoading(false);
-        showStatus('error',
-          (data.message || 'Something went wrong. Please try again.') +
-          '\n\nIf this persists, email Graphicyin@gmail.com'
-        );
-      }
-
-    } catch (err) {
-      setLoading(false);
-      showStatus('error',
-        'Network error — could not reach the payment server. ' +
-        'Check your connection and try again.'
-      );
-      console.error(err);
-    }
-  }
-
-  // Allow Enter key on email field
-  document.getElementById('email').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleBuy();
-  });
-
-  // Clear error on input
-  document.getElementById('email').addEventListener('input', function() {
-    this.classList.remove('error');
-    document.getElementById('email-error').classList.remove('visible');
-    hideStatus();
-  });
-</script>
+  <script src="pptest.js"></script>
 </body>
 </html>
