@@ -42,55 +42,24 @@ document.addEventListener('DOMContentLoaded', function () {
 // ============================================
 // PRODUCT LOADING & DISPLAY
 // ============================================
-async function loadProducts() {
+function loadProducts() {
+    showLoading();
+ 
     try {
-        showLoading();
-        const response = await fetch(CONFIG.PRODUCTS_JSON_PATH);
-        if (!response.ok) throw new Error('Failed to load products');
-        allProducts = await response.json();
-        
-        // Parse price strings into INR and USD values
-        // Parse price strings into INR and USD values
-allProducts = allProducts.map(product => {
-    // Handle different price formats
-    let price_inr = 0, price_usd = 0;
-    
-    if (typeof product.price === 'string') {
-        // Try multiple patterns
-        const patterns = [
-            /Rs\.?\s*(\d+(?:\.\d+)?)\s*&&\s*\$(\d+(?:\.\d+)?)/i,  // "Rs. 49 && $1"
-            /Rs\.?\s*(\d+(?:\.\d+)?)\s*%%\s*\$(\d+(?:\.\d+)?)/i,  // "Rs. 99 %% $2"  
-            /Rs\s*(\d+(?:\.\d+)?)\s*&&\s*\$(\d+(?:\.\d+)?)/i,      // "Rs 49 && $1" (no dot)
-            /Rs\.?\s*(\d+(?:\.\d+)?).*?\$(\d+(?:\.\d+)?)/i          // Fallback pattern
-        ];
-        
-        for (const pattern of patterns) {
-            const match = product.price.match(pattern);
-            if (match) {
-                price_inr = parseFloat(match[1]);
-                price_usd = parseFloat(match[2]);
-                break;
-            }
-        }
-    }
-    
-    return {
-        ...product,
-        price_inr: price_inr || 0,
-        price_usd: price_usd || 0
-    };
-});
-        
+        const schemaEl = document.getElementById('products-schema');
+        if (!schemaEl) throw new Error('products-schema script tag not found');
+ 
+        allProducts = JSON.parse(schemaEl.textContent);
         filteredProducts = [...allProducts];
         displayProducts(filteredProducts);
         hideLoading();
         updateActiveFiltersDisplay();
+ 
     } catch (error) {
-        console.error('Error loading products:', error);
+        console.error('Error reading products schema:', error);
         showError();
     }
 }
-
 // ============================================
 // DISPLAY PRODUCTS
 // ============================================
