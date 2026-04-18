@@ -42,7 +42,6 @@
       border-radius: 10px;
       margin-bottom: 20px;
       box-sizing: border-box;
-      transition: border-color 0.3s;
     }
     input:focus {
       outline: none;
@@ -58,10 +57,6 @@
       border-radius: 10px;
       cursor: pointer;
       width: 100%;
-      transition: transform 0.2s, opacity 0.2s;
-    }
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
     }
     button:disabled {
       opacity: 0.6;
@@ -88,10 +83,6 @@
       margin-bottom: 20px;
       text-align: left;
     }
-    .product-info p {
-      margin: 5px 0;
-      color: #374151;
-    }
     .price {
       font-size: 24px;
       font-weight: bold;
@@ -109,131 +100,126 @@
       <p><strong>Price:</strong> <span class="price">$1.00 USD</span></p>
     </div>
     
-    <input type="email" id="email" placeholder="Enter your email address" autocomplete="email">
-    <button id="payBtn">Pay with PayPal</button>
-    <div id="msg" class="msg"></div>
+    <input type="email" id="payment-email" placeholder="Enter your email address" autocomplete="email">
+    <button id="paypal-pay-btn">Pay with PayPal</button>
+    <div id="payment-msg" class="msg"></div>
   </div>
 
   <script>
-    // ============================================
-    // SUPABASE EDGE FUNCTION ENDPOINT
-    // Replace with your actual Supabase function URL
-    // ============================================
-    const SUPABASE_FUNCTION_URL = 'https://your-project-ref.supabase.co/functions/v1/paypal-payment';
-    
-    const PRODUCT_ID = '1';
-    const PRODUCT_NAME = 'Premium Game Asset';
-    const AMOUNT = '1.00';
-    const CURRENCY = 'USD';
+    (function() {
+      // Use unique IDs to avoid conflicts
+      const SUPABASE_FUNCTION_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/paypal-payment';
+      const PRODUCT_ID = '1';
+      const PRODUCT_NAME = 'Premium Game Asset';
+      const AMOUNT = '1.00';
 
-    const emailInput = document.getElementById('email');
-    const payBtn = document.getElementById('payBtn');
-    const msg = document.getElementById('msg');
-
-    function setMsg(text, isError = false) {
-      msg.textContent = text;
-      msg.className = 'msg';
-      if (text) {
-        msg.className += isError ? ' error' : ' info';
-      }
-    }
-
-    async function handleBuy() {
-      const email = emailInput.value.trim();
-
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setMsg('Please enter a valid email address.', true);
-        return;
+      // Wait for DOM to be fully loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
       }
 
-      payBtn.disabled = true;
-      payBtn.textContent = 'Creating order...';
-      setMsg('');
+      function init() {
+        const emailInput = document.getElementById('payment-email');
+        const payBtn = document.getElementById('paypal-pay-btn');
+        const msgDiv = document.getElementById('payment-msg');
 
-      try {
-        const response = await fetch(SUPABASE_FUNCTION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'createOrder',
-            email: email,
-            amount: AMOUNT,
-            currency: CURRENCY,
-            type: 'asset_purchase',
-            description: PRODUCT_NAME,
-            return_url: window.location.origin + '/index.html',
-            cancel_url: window.location.origin + '/cgstore.html',
-            metadata: {
-              productId: PRODUCT_ID,
-              productName: PRODUCT_NAME
-            }
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.approval_url) {
-          setMsg('Redirecting to PayPal...');
-          // Redirect to PayPal checkout
-          window.location.href = data.approval_url;
-        } else {
-          setMsg(data.message || 'Failed to create order. Please try again.', true);
-          payBtn.disabled = false;
-          payBtn.textContent = 'Pay with PayPal';
+        if (!payBtn) {
+          console.error('Button not found');
+          return;
         }
 
-      } catch (error) {
-        console.error('Error:', error);
-        setMsg('Network error. Please check your connection and try again.', true);
-        payBtn.disabled = false;
-        payBtn.textContent = 'Pay with PayPal';
-      }
-    }
-
-    // Check if returning from PayPal
-    function checkReturnFromPayPal() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-      const payerId = urlParams.get('PayerID');
-      
-      if (token && payerId) {
-        setMsg('Completing your purchase...');
-        payBtn.disabled = true;
-        
-        // Call capture endpoint
-        fetch(SUPABASE_FUNCTION_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'captureOrder',
-            paypal_order_id: token
-          })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            setMsg('Payment successful! Check your email for the download link.');
-            // Redirect or show success message
-          } else {
-            setMsg(data.message || 'Payment verification failed. Contact support.', true);
+        function setMsg(text, isError = false) {
+          if (msgDiv) {
+            msgDiv.textContent = text || '';
+            msgDiv.className = 'msg';
+            if (text && isError) msgDiv.className += ' error';
+            if (text && !isError) msgDiv.className += ' info';
           }
-        })
-        .catch(err => {
-          console.error(err);
-          setMsg('Error verifying payment. Contact support.', true);
-        });
+        }
+
+        async function handleBuy(e) {
+          // Prevent any default behavior
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          
+          const email = emailInput ? emailInput.value.trim() : '';
+
+          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setMsg('Please enter a valid email address.', true);
+            return;
+          }
+
+          if (payBtn) {
+            payBtn.disabled = true;
+            payBtn.textContent = 'Creating order...';
+          }
+          setMsg('');
+
+          try {
+            const response = await fetch(SUPABASE_FUNCTION_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                action: 'createOrder',
+                email: email,
+                amount: AMOUNT,
+                currency: 'USD',
+                type: 'asset_purchase',
+                description: PRODUCT_NAME,
+                return_url: window.location.origin + '/index.html',
+                cancel_url: window.location.origin,
+                metadata: {
+                  productId: PRODUCT_ID,
+                  productName: PRODUCT_NAME
+                }
+              })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.approval_url) {
+              setMsg('Redirecting to PayPal...');
+              window.location.href = data.approval_url;
+            } else {
+              setMsg(data.message || 'Failed to create order. Please try again.', true);
+              if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.textContent = 'Pay with PayPal';
+              }
+            }
+
+          } catch (error) {
+            console.error('Error:', error);
+            setMsg('Network error. Please check your connection.', true);
+            if (payBtn) {
+              payBtn.disabled = false;
+              payBtn.textContent = 'Pay with PayPal';
+            }
+          }
+        }
+
+        // Remove any existing listeners and add new one
+        const newBtn = payBtn.cloneNode(true);
+        payBtn.parentNode.replaceChild(newBtn, payBtn);
+        newBtn.addEventListener('click', handleBuy);
+        
+        if (emailInput) {
+          emailInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.stopPropagation();
+              handleBuy(e);
+            }
+          });
+        }
       }
-    }
-
-    payBtn.addEventListener('click', handleBuy);
-    emailInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') handleBuy();
-    });
-
-    // Check if returning from PayPal
-    checkReturnFromPayPal();
+    })();
   </script>
 </body>
 </html>
