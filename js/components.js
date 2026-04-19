@@ -160,7 +160,7 @@
             <!-- Mobile menu lives at body level to avoid stacking context issues -->
             <div id="sanjayMobileMenu">
                 <div class="mobile-menu-header">
-                    <div class="mobile-menu-logo">SanjayAIDev</div>
+                    <div class="mobile-menu-logo">SanjayMeherDev</div>
                     <button class="mobile-close-btn" id="sanjayMobileCloseBtn">✕</button>
                 </div>
                 <div class="mobile-nav-links">
