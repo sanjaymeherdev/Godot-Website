@@ -28,7 +28,42 @@
             align-items: flex-start;
             min-height: 80vh;
         }
+        /* Currency switch */
+.currency-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.currency-switch input { opacity: 0; width: 0; height: 0; }
+.currency-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,107,53,0.4);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.currency-slider:before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+.currency-switch input:checked + .currency-slider { background: #0070ba; }
+.currency-switch input:checked + .currency-slider:before { transform: translateX(20px); }
 
+.currency-label {
+    font-size: 0.82rem;
+    color: #666;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.currency-label-active { color: var(--light); font-weight: bold; }
         /* ── Sidebar ── */
         .store-sidebar {
             width: 240px;
@@ -552,19 +587,18 @@
                 placeholder="🔍 Search products..."
             >
 
-            <!-- Category filters -->
-            <div class="filter-group">
-                <div class="filter-label">Category</div>
-                <button class="category-btn active" data-category="all">All Products</button>
-                <button class="category-btn" data-category="course">🎓 Courses</button>
-                <button class="category-btn" data-category="script">📝 Scripts</button>
-                <button class="category-btn" data-category="system">⚙️ Systems</button>
-                <button class="category-btn" data-category="game">🎮 Games</button>
-                <button class="category-btn" data-category="ai-tool">🤖 AI Tools</button>
-                <button class="category-btn" data-category="app">📱 Apps</button>
-            </div>
+        <div class="filter-group">
+    <div class="filter-label">Category</div>
+    <button class="category-btn active" data-category="all">All Products</button>
+    <button class="category-btn" data-category="script">📝 Scripts</button>
+    <button class="category-btn" data-category="system">⚙️ Systems</button>
+    <button class="category-btn" data-category="asset">🎨 Assets</button>
+    <button class="category-btn" data-category="plugin">📱 Plugins</button>
+    <button class="category-btn" data-category="tool">🤖 Tools</button>
+</div>
 
-            <hr class="sidebar-divider">
+<hr class="sidebar-divider">
+
 
             <!-- Tag / subcategory chips -->
             <div class="filter-group">
@@ -581,7 +615,20 @@
                 </div>
             </div>
         </aside>
-
+<div class="filter-group">
+    <div class="filter-label">Currency & Payment</div>
+    <div style="display:flex; align-items:center; gap:10px; padding: 0.2rem 0;">
+        <span id="currencyLabelINR" class="currency-label currency-label-active">₹ INR</span>
+        <label class="currency-switch">
+            <input type="checkbox" id="currencyToggle">
+            <span class="currency-slider"></span>
+        </label>
+        <span id="currencyLabelUSD" class="currency-label">$ USD</span>
+    </div>
+    <div id="paymentMethodNote" style="font-size:0.78rem; margin-top:6px; font-weight:600;">
+        💳 Razorpay
+    </div>
+</div>
         <!-- Overlay for mobile sidebar -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -626,6 +673,7 @@
             <div class="modal-product-info">
                 <div class="modal-product-name" id="modalProductName"></div>
                 <div class="modal-product-price">
+                    <div id="modalPaymentMethod" style="font-size:0.8rem; margin-top:4px; font-weight:600; color:#ff6b35;"></div>
                     <span id="modalProductPrice"></span>
                     <span id="discountedPrice" style="display:none; color:#10b981; margin-left:10px;"></span>
                 </div>
