@@ -50,10 +50,28 @@ function handlePayPalReturn() {
     }
 
     if (ppOrderId && ppOrderId !== 'PAYPAL_ORDER_ID') {
+        // Add this line to capture immediately
+        capturePayPalOrder(ppOrderId);
+        // Then poll as backup
         pollPayPalUntilComplete(ppOrderId);
     }
 }
 
+// Add this new function
+async function capturePayPalOrder(orderId) {
+    try {
+        const res = await fetch(CONFIG.PAYPAL_EDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'captureOrder', paypal_order_id: orderId })
+        });
+        const data = await res.json();
+        console.log('Capture response:', data);
+        return data;
+    } catch (e) {
+        console.error('Capture error:', e);
+    }
+}
 async function pollPayPalUntilComplete(orderId) {
     const banner = showStatusBanner('⏳ Confirming your payment...', '#ff6b35', true);
     let attempts = 0;
