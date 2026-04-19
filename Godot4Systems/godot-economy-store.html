@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention Bundle – Solo Scripts | Godot 4 | Champ Gaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --accent: #00d9ff;
+            --dark: #0a0a0f;
+            --secondary: #111118;
+            --card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #e8e8f0;
+            --muted: #888899;
+            --success: #00e676;
+            --warning: #ffab40;
+            --danger: #ff5252;
+            --info: #40c4ff;
+            --code-bg: #0d0d14;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Syne', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: var(--font-display);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        header nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 1.5rem;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            color: white;
+            text-decoration: none;
+        }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: white; }
+        .cta-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: opacity 0.2s, transform 0.2s;
+            white-space: nowrap;
+        }
+        .cta-button:hover { opacity: 0.88; transform: translateY(-1px); }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .nav-links, .cta-button { display: none; }
+            .mobile-menu-btn { display: block; }
+        }
+
+        .solo-hero {
+            padding: 130px 2rem 70px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .solo-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,107,53,0.12);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.5rem;
+        }
+        .solo-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.02em;
+        }
+        .solo-hero h1 span { color: var(--primary); }
+        .solo-subtitle {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 620px;
+            margin: 0 auto 2.5rem;
+            font-weight: 400;
+        }
+
+        .guide-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 2rem 6rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.01em;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+        .section-title span { color: var(--accent); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(255,255,255,0.14); }
+
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .system-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            transition: all 0.2s;
+        }
+        .system-item:hover { border-color: var(--accent); background: rgba(0,217,255,0.04); }
+        .system-item h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .system-item p {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        .product-link {
+            display: inline-block;
+            background: rgba(255,107,53,0.15);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .product-link:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: 10px;
+            margin: 1.2rem 0;
+            font-size: 0.9rem;
+        }
+        .callout-icon { font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
+        .callout.info { background: rgba(64,196,255,0.07); border: 1px solid rgba(64,196,255,0.2); }
+        .callout.info .callout-icon { color: var(--info); }
+        .callout.warning { background: rgba(255,171,64,0.08); border: 1px solid rgba(255,171,64,0.25); }
+        .callout.warning .callout-icon { color: var(--warning); }
+        .callout.success { background: rgba(0,230,118,0.07); border: 1px solid rgba(0,230,118,0.2); }
+        .callout.success .callout-icon { color: var(--success); }
+        .callout strong { color: white; }
+
+        .code-wrap {
+            background: var(--code-bg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1.2rem 0;
+        }
+        .code-header {
+            padding: 0.6rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        pre {
+            padding: 1.2rem 1.4rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            line-height: 1.65;
+            color: #cdd6f4;
+        }
+        .kw  { color: #cba6f7; }
+        .fn  { color: #89b4fa; }
+        .str { color: #a6e3a1; }
+        .cm  { color: #585b70; }
+        .num { color: #fab387; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            font-size: 0.85rem;
+        }
+        .comparison-table th {
+            background: rgba(255,107,53,0.12);
+            color: var(--primary);
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid rgba(255,107,53,0.2);
+        }
+        .comparison-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        .comparison-table .check { color: var(--success); }
+        .comparison-table .cross { color: var(--danger); }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2rem 0;
+        }
+
+        .ref-link {
+            display: inline-block;
+            background: rgba(0,217,255,0.1);
+            border: 1px solid rgba(0,217,255,0.25);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin: 0.5rem 0;
+        }
+        .ref-link:hover {
+            background: rgba(0,217,255,0.2);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 2.5rem 2rem;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html" class="logo">CHAMP<span>GAMING</span></a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="scripts.html">Scripts</a>
+            <a href="minicourses.html">Mini Courses</a>
+            <a href="services.html">Services</a>
+            <a href="index.html#contact">Contact</a>
+        </div>
+        <a href="https://cggodotassets.shop/cgstore#retention-bundle" target="_blank" class="cta-button">View Bundle →</a>
+        <button class="mobile-menu-btn">☰</button>
+    </nav>
+</header>
+
+<section class="solo-hero">
+    <div class="hero-badge">🎯 SOLO SCRIPTS</div>
+    <h1>Retention Bundle — <span>Individual Systems</span></h1>
+    <p class="solo-subtitle">
+        Pick only what you need. Each system works standalone.<br>
+        No cloud save. No multiplayer. Perfect for solo & offline games.
+    </p>
+</section>
+
+<div class="guide-wrap">
+
+    <!-- SECTION 1: LIST OF INDIVIDUAL SYSTEMS -->
+    <h2 class="section-title">1. <span>Individual Systems</span> — What Each Does</h2>
+    <div class="systems-grid">
+        <div class="system-item">
+            <h3>🏆 Achievement Manager</h3>
+            <p>Tres-based modular achievements. Signal-based unlocking. Category filtering. Local save. Perfect for tracking player milestones.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Achievement Manager - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>🎁 Daily Reward System</h3>
+            <p>7-day streak + bonus day. 5 animation presets (zoom, bounce, shake, flash, spin). Auto-reset on missed day. Ready-to-use UI.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Daily Reward System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>🎫 Season Pass System</h3>
+            <p>Free + premium tracks. XP-based tier progression. Tres-based rewards. Claim tracking. Battle pass ready.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Season Pass System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>👤 Profile System</h3>
+            <p>Local profile management. Avatar picker. Stats tracking. Settings. No cloud dependency — pure local.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Profile System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>📊 Level System</h3>
+            <p>Linear/Exponential/Custom XP curves. Level up/down signals. Max level cap. UI-ready with icons, banners, titles.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Level System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>📋 Quest System</h3>
+            <p>Daily/Weekly/Monthly/One-time frequencies. Prerequisite quests. Level requirements. Progress tracking.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Quest System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>💰 Economy & Currency</h3>
+            <p>Multiple currency support. Purchase validation. Max purchase limits. Balance change signals. Store backend.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Economy System - Coming Soon')">View Product →</a>
+        </div>
+        <div class="system-item">
+            <h3>🏪 Store System</h3>
+            <p>Purchasable resources. Category filtering. Integration with currency system. Purchase tracking.</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Store System - Coming Soon')">View Product →</a>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: SIGNALS REFERENCE - LINK TO BUNDLE PAGE -->
+    <h2 class="section-title">2. <span>Signals Reference</span></h2>
+    <div class="card">
+        <p style="margin-bottom: 1rem;">All signals for these 8 systems are documented in the <strong>Retention Bundle documentation</strong>.</p>
+        <a href="retention-bundle.html#signals" class="ref-link">📡 View All Signals → (Section 5 of Bundle Page)</a>
+        <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Signals are <strong>identical</strong> whether you buy the bundle or a solo script. The same <code>unlock_ach</code>, <code>quest_completed</code>, <code>balance_changed</code> signals work exactly the same way.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3: COMMON PATTERNS -->
+    <h2 class="section-title">3. <span>Common Patterns</span> — Used Across All Scripts</h2>
+    <div class="card">
+        <p style="margin-bottom: 1rem;">Every solo script in the Retention Bundle follows the <strong>exact same structure</strong>. Learn it once — use all 8.</p>
+
+        <div class="code-wrap">
+            <div class="code-header">📁 Standard Script Structure</div>
+            <pre><span class="cm"># === EVERY SCRIPT HAS THIS PATTERN ===</span>
+
+<span class="cm"># 1. SIGNALS at top</span>
+<span class="kw">signal</span> <span class="fn">something_happened</span>(id: <span class="kw">String</span>)
+
+<span class="cm"># 2. CONSTANTS</span>
+<span class="kw">const</span> <span class="cn">SAVE_PATH</span>       = <span class="str">"user://scriptname_save.json"</span>
+<span class="kw">const</span> <span class="cn">RESOURCES_FOLDER</span> = <span class="str">"res://path/to/resources/"</span>
+
+<span class="cm"># 3. STATE variables</span>
+<span class="kw">var</span> <span class="cn">resources</span>: <span class="kw">Dictionary</span> = {}
+<span class="kw">var</span> <span class="cn">data</span>: <span class="kw">Dictionary</span>       = {}
+
+<span class="cm"># 4. _ready() — load resources, load save, connect signals</span>
+<span class="kw">func</span> <span class="fn">_ready</span>():
+    <span class="fn">_load_resources</span>()
+    <span class="fn">_load_save</span>()
+    <span class="fn">_connect_signals</span>()
+
+<span class="cm"># 5. RESOURCE LOADING — reads .tres files</span>
+<span class="kw">func</span> <span class="fn">_load_resources</span>():
+    <span class="cm"># Opens RESOURCES_FOLDER, loads all .tres files</span>
+
+<span class="cm"># 6. SAVE / LOAD — local JSON only (no cloud)</span>
+<span class="kw">func</span> <span class="fn">_load_save</span>():
+    <span class="kw">if</span> <span class="fn">FileAccess.file_exists</span>(<span class="cn">SAVE_PATH</span>):
+        <span class="cm"># read JSON, populate data dictionary</span>
+
+<span class="kw">func</span> <span class="fn">_write_save</span>():
+    <span class="cm"># write data dictionary to JSON file</span>
+
+<span class="cm"># 7. CORE LOGIC methods</span>
+<span class="kw">func</span> <span class="fn">add_something</span>():   <span class="cm"># modifies data, calls _write_save()</span>
+<span class="kw">func</span> <span class="fn">remove_something</span>(): <span class="cm"># modifies data, calls _write_save()</span>
+
+<span class="cm"># 8. HELPER getters</span>
+<span class="kw">func</span> <span class="fn">get_status</span>() -> <span class="kw">String</span>:
+<span class="kw">func</span> <span class="fn">is_unlocked</span>() -> <span class="kw">bool</span>:
+
+<span class="cm"># 9. RESET — for testing</span>
+<span class="kw">func</span> <span class="fn">reset</span>():
+    data.<span class="fn">clear</span>()
+    <span class="fn">_write_save</span>()</pre>
+        </div>
+
+        <div class="callout success">
+            <span class="callout-icon">✅</span>
+            <div><strong>No cloud save.</strong> Every script saves to its own local JSON file. No external dependencies. Works offline forever.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 4: COMPARISON WITH BUNDLE -->
+    <h2 class="section-title">4. <span>Solo vs Bundle</span> — What's Different?</h2>
+    <div class="card">
+        <table class="comparison-table">
+            <thead>
+                <tr><th>Feature</th><th>Solo Scripts</th><th>Retention Bundle</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Cloud Save (Supabase)</td><td class="cross">❌ No</td><td class="check">✅ Yes</td></tr>
+                <tr><td>Unified Save File</td><td class="cross">❌ Each script has own file</td><td class="check">✅ Single source of truth</td></tr>
+                <tr><td>Multiplayer Ready</td><td class="cross">❌ No</td><td class="check">✅ Yes (with sync)</td></tr>
+                <tr><td>Cross-system Signals</td><td class="cross">❌ No (standalone only)</td><td class="check">✅ Pre-wired (quest→currency, etc.)</td></tr>
+                <tr><td>Offline First</td><td class="check">✅ Yes</td><td class="check">✅ Yes</td></tr>
+                <tr><td>Local Save Only</td><td class="check">✅ Yes</td><td class="check">✅ Yes (with cloud sync option)</td></tr>
+                <tr><td>Best For</td><td>Solo/offline games, prototypes</td><td>Commercial, multiplayer, cross-platform</td></tr>
+            </tbody>
+        </table>
+
+        <div class="callout warning">
+            <span class="callout-icon">🎯</span>
+            <div><strong>Perfect for solo & offline games.</strong> No internet required. No server setup. No cloud dependencies. Each system stands completely alone — add only what you need.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 5: PRODUCT CARDS / LINKS -->
+    <h2 class="section-title">5. <span>Get the Scripts</span> — Buy Solo or Bundle</h2>
+    <div class="systems-grid">
+        <div class="system-item">
+            <h3>🏆 Achievement Manager</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Achievement Manager')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>🎁 Daily Reward System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Daily Reward System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>🎫 Season Pass System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Season Pass System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>👤 Profile System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Profile System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>📊 Level System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Level System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>📋 Quest System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Quest System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>💰 Economy System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Economy System')">Buy Solo →</a>
+        </div>
+        <div class="system-item">
+            <h3>🏪 Store System</h3>
+            <p>₹99 / $2</p>
+            <a href="#" class="product-link" onclick="alert('Store link: Store System')">Buy Solo →</a>
+        </div>
+    </div>
+
+    <div class="callout success" style="text-align: center; margin-top: 1rem;">
+        <span class="callout-icon">🎁</span>
+        <div><strong>Save 50%+ with the Bundle!</strong> All 8 systems for <strong>₹1000 / $15</strong> — includes cloud save, unified save, and multiplayer sync.</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="https://cggodotassets.shop/cgstore#retention-bundle" target="_blank" class="cta-button" style="padding: 0.8rem 2rem; font-size: 1rem;">View Retention Bundle →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2025 Champ Gaming · <a href="index.html" style="color:var(--primary); text-decoration:none;">sanjaymeherdev.netlify.app</a></p>
+    <p style="margin-top:0.4rem; opacity:0.5;">All systems built for Godot 4. Solo scripts = local save only. Bundle = cloud + local + MP ready.</p>
+</footer>
+
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                window.scrollTo({ top: target.offsetTop - 84, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
