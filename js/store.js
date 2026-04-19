@@ -3,7 +3,8 @@
 // ============================================
 const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwQayBpHK2M3rndlxTQeyPbzUNpzUKSV6-Sani2wUI20sbr5Nh2tYYLJX9zcmH_HXA4ug/exec',
-    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby89oeq6ANrY9EY_Bhv6mN6fXIqrDMYMlMTwt4VBzN3teixSf_D4nBhI8OA-oKvXHISgw/exec'
+    COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby89oeq6ANrY9EY_Bhv6mN6fXIqrDMYMlMTwt4VBzN3teixSf_D4nBhI8OA-oKvXHISgw/exec',
+    PAYPAL_EDGE_URL: 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/paypal-payment' // <-- replace with your Supabase URL
 };
 
 // ============================================
@@ -14,57 +15,137 @@ let filteredProducts = [];
 let currentCategory = 'all';
 let currentSubcategory = 'all';
 let currentSearch = '';
-let currentCurrency = 'inr'; // Default to INR
+let currentCurrency = 'inr';
 let appliedCoupon = null;
 let discountedAmount = null;
 let selectedProduct = null;
-
-// Currency conversion rates (you can adjust these)
-const CURRENCY_RATES = {
-    inr: 1,
-    usd: 0.012 // 1 INR = 0.012 USD (approx)
-};
 
 // ============================================
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', function () {
     initializeMobileMenu();
+    loadSavedCurrency();
     loadProducts();
     setupCategoryButtons();
     setupSubcategoryButtons();
     setupSearch();
-    setupCurrencyToggle();
-    loadSavedCurrency();
+    setupCurrencySwitch();
+    handlePayPalReturn();
 });
 
 // ============================================
-// PRODUCT LOADING & DISPLAY
+// PAYPAL RETURN HANDLER
+// polls status after user returns from PayPal approval page
+// ============================================
+function handlePayPalReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const ppOrderId = params.get('pp_order');
+    const cancelled = params.get('pp_cancelled');
+
+    if (cancelled) {
+        showStatusBanner('⚠️ Payment cancelled. You can try again anytime.', '#f59e0b');
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+    }
+
+    if (ppOrderId && ppOrderId !== 'PAYPAL_ORDER_ID') {
+        pollPayPalUntilComplete(ppOrderId);
+    }
+}
+
+async function pollPayPalUntilComplete(orderId) {
+    const banner = showStatusBanner('⏳ Confirming your payment...', '#ff6b35', true);
+    let attempts = 0;
+
+    const interval = setInterval(async () => {
+        attempts++;
+        try {
+            const res = await fetch(CONFIG.PAYPAL_EDGE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'pollStatus', paypal_order_id: orderId })
+            });
+            const data = await res.json();
+
+            if (data.status === 'completed') {
+                clearInterval(interval);
+                banner.style.background = '#10b981';
+                banner.textContent = '✅ Payment confirmed! Download link sent to your email.';
+                window.history.replaceState({}, '', window.location.pathname);
+                setTimeout(() => banner.remove(), 6000);
+                return;
+            }
+
+            if (data.status === 'failed') {
+                clearInterval(interval);
+                banner.style.background = '#ef4444';
+                banner.textContent = '❌ Payment failed. Please try again.';
+                window.history.replaceState({}, '', window.location.pathname);
+                return;
+            }
+
+        } catch (e) {
+            console.error('Poll error:', e);
+        }
+
+        if (attempts >= 15) {
+            clearInterval(interval);
+            banner.style.background = '#f59e0b';
+            banner.textContent = '⚠️ Still processing — check your email in a few minutes.';
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, 2000);
+}
+
+function showStatusBanner(message, color, persist = false) {
+    const existing = document.getElementById('status-banner');
+    if (existing) existing.remove();
+
+    const banner = document.createElement('div');
+    banner.id = 'status-banner';
+    banner.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0;
+        background: ${color}; color: white;
+        text-align: center; padding: 14px;
+        z-index: 9999; font-weight: bold; font-size: 15px;
+        transition: background 0.4s ease;
+    `;
+    banner.textContent = message;
+    document.body.prepend(banner);
+
+    if (!persist) setTimeout(() => banner.remove(), 4000);
+    return banner;
+}
+
+// ============================================
+// PRODUCT LOADING
 // ============================================
 function loadProducts() {
     showLoading();
- 
     try {
         const schemaEl = document.getElementById('products-schema');
-        if (!schemaEl) throw new Error('products-schema script tag not found');
- 
+        if (!schemaEl) throw new Error('products-schema not found');
+
         allProducts = JSON.parse(schemaEl.textContent);
         filteredProducts = [...allProducts];
         displayProducts(filteredProducts);
         hideLoading();
-        updateActiveFiltersDisplay();
- 
+        updateResultsCount();
     } catch (error) {
         console.error('Error reading products schema:', error);
         showError();
     }
 }
+
 // ============================================
 // DISPLAY PRODUCTS
 // ============================================
 function displayProducts(products) {
     const grid = document.getElementById('productsGrid');
     const noProductsState = document.getElementById('noProductsState');
+
+    updateResultsCount(products.length);
 
     if (products.length === 0) {
         grid.style.display = 'none';
@@ -75,14 +156,13 @@ function displayProducts(products) {
     grid.style.display = 'grid';
     noProductsState.style.display = 'none';
 
+    const price = (p) => currentCurrency === 'inr' ? p.price_inr : p.price_usd;
+    const symbol = currentCurrency === 'inr' ? '₹' : '$';
+
     grid.innerHTML = products.map(product => {
         const shortDesc = product.short_description || '';
         const fullDesc = product.description.replace(/\n/g, '<br>');
         const hasMore = product.description.trim().length > 0;
-        
-        // Get price based on current currency
-        const price = currentCurrency === 'inr' ? product.price_inr : product.price_usd;
-        const currencySymbol = currentCurrency === 'inr' ? '₹' : '$';
 
         return `
         <div class="product-card" data-product-id="${product.id}">
@@ -93,26 +173,20 @@ function displayProducts(products) {
             <div class="product-content">
                 <div class="product-category">${product.category}</div>
                 <h3 class="product-title">${product.name}</h3>
-
                 <div class="description-wrapper">
                     <p class="product-description short-desc" id="short-${product.id}">${shortDesc}</p>
                     <div class="product-description full-desc" id="full-${product.id}" style="display:none;">${fullDesc}</div>
                     ${hasMore ? `<button class="read-more-btn" id="btn-${product.id}" onclick="toggleReadMore(${product.id})">Read More ▾</button>` : ''}
                 </div>
-
-                ${product.youtubeUrl ? `
-                    <a href="${product.youtubeUrl}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="youtube-link"
-                       onclick="event.stopPropagation()">
+                ${product.youtubeUrl && !product.youtubeUrl.includes('your-demo') ? `
+                    <a href="${product.youtubeUrl}" target="_blank" rel="noopener noreferrer"
+                       class="youtube-link" onclick="event.stopPropagation()">
                         🎥 Watch Demo Video
                     </a>
                 ` : ''}
-
                 <div class="product-footer">
                     <div class="product-price">
-                        <span class="product-price-currency">${currencySymbol}</span>${price}
+                        <span class="product-price-currency">${symbol}</span>${price(product)}
                     </div>
                     <button class="buy-button" onclick="openEmailModal(${product.id})">
                         Buy Now
@@ -124,6 +198,14 @@ function displayProducts(products) {
     }).join('');
 }
 
+function updateResultsCount(count) {
+    const el = document.getElementById('resultsCount');
+    if (el) {
+        const n = count !== undefined ? count : filteredProducts.length;
+        el.textContent = `${n} product${n !== 1 ? 's' : ''}`;
+    }
+}
+
 // ============================================
 // READ MORE TOGGLE
 // ============================================
@@ -131,7 +213,6 @@ function toggleReadMore(productId) {
     const shortEl = document.getElementById(`short-${productId}`);
     const fullEl = document.getElementById(`full-${productId}`);
     const btn = document.getElementById(`btn-${productId}`);
-
     const isExpanded = fullEl.style.display === 'block';
 
     if (isExpanded) {
@@ -146,60 +227,44 @@ function toggleReadMore(productId) {
 }
 
 // ============================================
-// CATEGORY FILTERING (First Tier)
+// CATEGORY FILTERING
+// only categories actually used in product data
 // ============================================
 function setupCategoryButtons() {
     const categoryButtons = document.querySelectorAll('.category-btn');
     categoryButtons.forEach(button => {
         button.addEventListener('click', function () {
-            // Update active state
             categoryButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
-            
-            // Update current category
             currentCategory = this.dataset.category;
-            
-            // Reset subcategory to 'all'
             currentSubcategory = 'all';
             updateSubcategoryButtons();
-            
-            // Apply filters
             filterProducts();
-            updateActiveFiltersDisplay();
+            updateResultsCount();
         });
     });
 }
 
 // ============================================
-// SUBCATEGORY FILTERING (Second Tier)
+// SUBCATEGORY FILTERING
 // ============================================
 function setupSubcategoryButtons() {
     const subcategoryButtons = document.querySelectorAll('.subcategory-btn');
     subcategoryButtons.forEach(button => {
         button.addEventListener('click', function () {
-            // Update active state
             subcategoryButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
-            
-            // Update current subcategory
             currentSubcategory = this.dataset.subcategory;
-            
-            // Apply filters
             filterProducts();
-            updateActiveFiltersDisplay();
+            updateResultsCount();
         });
     });
 }
 
 function updateSubcategoryButtons() {
-    const subcategoryButtons = document.querySelectorAll('.subcategory-btn');
-    
-    // Reset all to default
-    subcategoryButtons.forEach(btn => {
+    document.querySelectorAll('.subcategory-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.subcategory === 'all') {
-            btn.classList.add('active');
-        }
+        if (btn.dataset.subcategory === 'all') btn.classList.add('active');
     });
 }
 
@@ -208,75 +273,63 @@ function updateSubcategoryButtons() {
 // ============================================
 function filterProducts() {
     let filtered = [...allProducts];
-    
-    // Apply category filter
+
     if (currentCategory !== 'all') {
-        // Map UI categories to actual product categories
         const categoryMap = {
-            'course': ['Course', 'Mini-Courses'],
-            'script': ['Scripts'],
-            'system': ['Systems'],
-            'game': ['Game', 'Games'],
-            'ai-tool': ['Tools', 'AI'],
-            'app': ['Plugins', 'Apps']
+            'script':  ['Scripts'],
+            'system':  ['Systems'],
+            'asset':   ['Assets'],
+            'plugin':  ['Plugins'],
+            'tool':    ['Tools']
         };
-        
-        const mappedCategories = categoryMap[currentCategory] || [currentCategory];
-        filtered = filtered.filter(p => mappedCategories.includes(p.category));
+        const mapped = categoryMap[currentCategory] || [currentCategory];
+        filtered = filtered.filter(p => mapped.includes(p.category));
     }
-    
-    // Apply subcategory filter
+
     if (currentSubcategory !== 'all') {
-        switch(currentSubcategory) {
+        switch (currentSubcategory) {
             case 'featured':
                 filtered = filtered.filter(p => p.featured);
                 break;
             case 'ui':
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes('ui') || 
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes('ui') ||
                     p.name.toLowerCase().includes('interface') ||
-                    p.name.toLowerCase().includes('menu')
-                );
+                    p.name.toLowerCase().includes('menu'));
                 break;
             case 'multiplayer':
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes('multiplayer') || 
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes('multiplayer') ||
                     p.name.toLowerCase().includes('auth') ||
-                    p.name.toLowerCase().includes('server')
-                );
+                    p.name.toLowerCase().includes('server'));
                 break;
             case 'ai':
-                filtered = filtered.filter(p => 
-                    p.category === 'Tools' || 
+                filtered = filtered.filter(p =>
+                    p.category === 'Tools' ||
                     p.name.toLowerCase().includes('ai') ||
-                    p.name.toLowerCase().includes('npc')
-                );
+                    p.name.toLowerCase().includes('npc'));
                 break;
             case 'mobile':
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes('touch') || 
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes('touch') ||
                     p.name.toLowerCase().includes('mobile') ||
-                    p.name.toLowerCase().includes('android')
-                );
+                    p.name.toLowerCase().includes('android'));
                 break;
             case 'backend':
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes('supabase') || 
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes('supabase') ||
                     p.name.toLowerCase().includes('auth') ||
-                    p.name.toLowerCase().includes('server')
-                );
+                    p.name.toLowerCase().includes('server'));
                 break;
             case 'template':
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes('kit') || 
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes('kit') ||
                     p.name.toLowerCase().includes('template') ||
-                    p.name.toLowerCase().includes('system')
-                );
+                    p.name.toLowerCase().includes('system'));
                 break;
         }
     }
-    
-    // Apply search filter
+
     if (currentSearch) {
         const search = currentSearch.toLowerCase();
         filtered = filtered.filter(p =>
@@ -284,7 +337,7 @@ function filterProducts() {
             p.description.toLowerCase().includes(search)
         );
     }
-    
+
     filteredProducts = filtered;
     displayProducts(filteredProducts);
 }
@@ -298,72 +351,50 @@ function setupSearch() {
         searchInput.addEventListener('input', function () {
             currentSearch = this.value.trim();
             filterProducts();
-            updateActiveFiltersDisplay();
         });
     }
 }
 
 // ============================================
-// CURRENCY TOGGLE
+// CURRENCY SWITCH
+// INR = Razorpay | USD = PayPal
 // ============================================
-function setupCurrencyToggle() {
-    const currencyOptions = document.querySelectorAll('.currency-option');
-    currencyOptions.forEach(opt => {
-        opt.addEventListener('click', function() {
-            const currency = this.dataset.currency;
-            setCurrency(currency);
+function setupCurrencySwitch() {
+    const toggle = document.getElementById('currencyToggle');
+    if (toggle) {
+        toggle.addEventListener('change', function () {
+            setCurrency(this.checked ? 'usd' : 'inr');
         });
-    });
+    }
 }
 
 function setCurrency(currency) {
     currentCurrency = currency;
-    
-    // Update toggle UI
-    document.querySelectorAll('.currency-option').forEach(opt => {
-        if (opt.dataset.currency === currency) {
-            opt.classList.add('active');
-        } else {
-            opt.classList.remove('active');
-        }
-    });
-    
-    // Save preference
+
+    const toggle = document.getElementById('currencyToggle');
+    const inrLabel = document.getElementById('currencyLabelINR');
+    const usdLabel = document.getElementById('currencyLabelUSD');
+    const methodNote = document.getElementById('paymentMethodNote');
+
+    if (toggle) toggle.checked = currency === 'usd';
+    if (inrLabel) inrLabel.classList.toggle('currency-label-active', currency === 'inr');
+    if (usdLabel) usdLabel.classList.toggle('currency-label-active', currency === 'usd');
+    if (methodNote) {
+        methodNote.textContent = currency === 'inr' ? '💳 Razorpay' : '🌐 PayPal';
+        methodNote.style.color = currency === 'inr' ? '#ff6b35' : '#0070ba';
+    }
+
     localStorage.setItem('preferredCurrency', currency);
-    
-    // Refresh displayed products with new currency
     displayProducts(filteredProducts.length ? filteredProducts : allProducts);
 }
 
 function loadSavedCurrency() {
     const saved = localStorage.getItem('preferredCurrency');
-    if (saved && (saved === 'inr' || saved === 'usd')) {
-        setCurrency(saved);
+    if (saved === 'inr' || saved === 'usd') {
+        currentCurrency = saved;
     }
-}
-
-// ============================================
-// ACTIVE FILTERS DISPLAY
-// ============================================
-function updateActiveFiltersDisplay() {
-    const categoryBadge = document.getElementById('activeCategoryBadge');
-    const subcategoryBadge = document.getElementById('activeSubcategoryBadge');
-    
-    // Update category badge
-    const categoryName = document.querySelector(`.category-btn[data-category="${currentCategory}"]`)?.textContent || 'All';
-    categoryBadge.innerHTML = `Category: ${categoryName} <button class="clear-filter" onclick="clearCategoryFilter()">✕</button>`;
-    
-    // Update subcategory badge
-    const subcategoryName = document.querySelector(`.subcategory-btn[data-subcategory="${currentSubcategory}"]`)?.textContent || 'All';
-    subcategoryBadge.innerHTML = `Subcategory: ${subcategoryName} <button class="clear-filter" onclick="clearSubcategoryFilter()">✕</button>`;
-}
-
-function clearCategoryFilter() {
-    document.querySelector('.category-btn[data-category="all"]').click();
-}
-
-function clearSubcategoryFilter() {
-    document.querySelector('.subcategory-btn[data-subcategory="all"]').click();
+    // UI sync happens after DOM is ready via setupCurrencySwitch + setCurrency call
+    setCurrency(currentCurrency);
 }
 
 // ============================================
@@ -377,10 +408,11 @@ function openEmailModal(productId) {
     discountedAmount = null;
 
     const price = currentCurrency === 'inr' ? selectedProduct.price_inr : selectedProduct.price_usd;
-    const currencySymbol = currentCurrency === 'inr' ? '₹' : '$';
+    const symbol = currentCurrency === 'inr' ? '₹' : '$';
+    const method = currentCurrency === 'inr' ? '💳 Pay with Razorpay (INR)' : '🌐 Pay with PayPal (USD)';
 
     document.getElementById('modalProductName').textContent = selectedProduct.name;
-    document.getElementById('modalProductPrice').textContent = `${currencySymbol}${price}`;
+    document.getElementById('modalProductPrice').textContent = `${symbol}${price}`;
     document.getElementById('modalProductPrice').classList.remove('price-strikethrough');
     document.getElementById('discountedPrice').style.display = 'none';
     document.getElementById('discountedPrice').textContent = '';
@@ -392,6 +424,16 @@ function openEmailModal(productId) {
     document.getElementById('applyCouponBtn').textContent = 'Apply';
     document.getElementById('couponStatus').className = 'coupon-status';
     document.getElementById('couponStatus').textContent = '';
+
+    // Show which payment method will be used
+    const methodEl = document.getElementById('modalPaymentMethod');
+    if (methodEl) methodEl.textContent = method;
+
+    const continueButton = document.querySelector('.modal-button-primary');
+    if (continueButton) {
+        continueButton.disabled = false;
+        continueButton.textContent = 'Continue to Payment';
+    }
 
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -440,7 +482,6 @@ async function applyCoupon() {
         emailInput.focus();
         return;
     }
-
     if (!couponCode) {
         statusDiv.className = 'coupon-status invalid';
         statusDiv.textContent = '⚠️ Please enter a coupon code';
@@ -459,10 +500,10 @@ async function applyCoupon() {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'validateCoupon',
-                couponCode: couponCode,
+                couponCode,
                 productId: selectedProduct.id,
                 amount: currentCurrency === 'inr' ? selectedProduct.price_inr : selectedProduct.price_usd,
-                email: email
+                email
             })
         });
 
@@ -475,18 +516,16 @@ async function applyCoupon() {
             statusDiv.className = 'coupon-status valid';
             statusDiv.textContent = `✅ ${result.message}`;
 
-            const originalPrice = document.getElementById('modalProductPrice');
-            const discountedPrice = document.getElementById('discountedPrice');
-
-            originalPrice.classList.add('price-strikethrough');
-            discountedPrice.style.display = 'inline';
-            discountedPrice.textContent = `${currentCurrency === 'inr' ? '₹' : '$'}${result.discountedAmount}`;
+            const symbol = currentCurrency === 'inr' ? '₹' : '$';
+            document.getElementById('modalProductPrice').classList.add('price-strikethrough');
+            const dp = document.getElementById('discountedPrice');
+            dp.style.display = 'inline';
+            dp.textContent = `${symbol}${result.discountedAmount}`;
 
             couponInput.disabled = true;
             emailInput.disabled = true;
             applyBtn.disabled = true;
             applyBtn.textContent = 'Applied ✓';
-
         } else {
             appliedCoupon = null;
             discountedAmount = null;
@@ -505,7 +544,6 @@ async function applyCoupon() {
             applyBtn.disabled = false;
             applyBtn.textContent = 'Apply';
         }
-
     } catch (error) {
         console.error('Coupon validation error:', error);
         statusDiv.className = 'coupon-status invalid';
@@ -516,7 +554,9 @@ async function applyCoupon() {
 }
 
 // ============================================
-// PAYMENT PROCESSING
+// PAYMENT PROCESSING — branches by currency
+// INR → Razorpay (existing Google Apps Script flow)
+// USD → PayPal (Supabase edge function)
 // ============================================
 async function proceedToPayment() {
     const emailInput = document.getElementById('customerEmail');
@@ -532,19 +572,19 @@ async function proceedToPayment() {
     continueButton.textContent = 'Contacting Server...';
 
     try {
+        // Check if already purchased (same for both methods)
         const checkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({
                 action: 'checkPurchase',
-                email: email,
+                email,
                 productId: selectedProduct.id
             })
         });
 
         const checkData = await checkResponse.json();
-
         if (!checkData.success) throw new Error(checkData.message || 'Failed to check purchase status');
 
         if (checkData.purchased) {
@@ -553,29 +593,12 @@ async function proceedToPayment() {
             return;
         }
 
-        const baseAmount = currentCurrency === 'inr' ? selectedProduct.price_inr : selectedProduct.price_usd;
-        const finalAmount = discountedAmount || baseAmount;
-
-        continueButton.textContent = 'Creating Payment Link...';
-        const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                action: 'createPaymentLink',
-                productId: selectedProduct.id,
-                amount: finalAmount,
-                currency: currentCurrency.toUpperCase(),
-                email: email,
-                couponCode: appliedCoupon || ''
-            })
-        });
-
-        const paymentLinkData = await paymentLinkResponse.json();
-
-        if (!paymentLinkData.success) throw new Error(paymentLinkData.message || 'Failed to create payment link');
-
-        showPaymentPage(paymentLinkData, email, selectedProduct, finalAmount, appliedCoupon);
+        // Branch by currency / payment method
+        if (currentCurrency === 'usd') {
+            await proceedWithPayPal(email, continueButton);
+        } else {
+            await proceedWithRazorpay(email, continueButton);
+        }
 
     } catch (error) {
         console.error('Process Error:', error);
@@ -585,37 +608,61 @@ async function proceedToPayment() {
     }
 }
 
+// ============================================
+// RAZORPAY FLOW (INR)
+// ============================================
+async function proceedWithRazorpay(email, continueButton) {
+    const finalAmount = discountedAmount || selectedProduct.price_inr;
+
+    continueButton.textContent = 'Creating Payment Link...';
+
+    const paymentLinkResponse = await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+            action: 'createPaymentLink',
+            productId: selectedProduct.id,
+            amount: finalAmount,
+            currency: 'INR',
+            email,
+            couponCode: appliedCoupon || ''
+        })
+    });
+
+    const paymentLinkData = await paymentLinkResponse.json();
+    if (!paymentLinkData.success) throw new Error(paymentLinkData.message || 'Failed to create payment link');
+
+    showPaymentPage(paymentLinkData, email, selectedProduct, finalAmount, appliedCoupon);
+}
+
 function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCode) {
     if (!paymentLinkData.paymentLinkUrl || !product) {
         alert('Error: Could not generate payment link');
-        const continueButton = document.querySelector('.modal-button-primary');
-        if (continueButton) {
-            continueButton.disabled = false;
-            continueButton.textContent = 'Continue to Payment';
-        }
+        const btn = document.querySelector('.modal-button-primary');
+        if (btn) { btn.disabled = false; btn.textContent = 'Continue to Payment'; }
         return;
     }
 
     closeEmailModal();
 
-    const currencySymbol = currentCurrency === 'inr' ? '₹' : '$';
-    const originalAmount = currentCurrency === 'inr' ? product.price_inr : product.price_usd;
+    const symbol = '₹';
+    const originalAmount = product.price_inr;
 
     document.body.innerHTML = `
         <div style="max-width:600px;margin:50px auto;padding:20px;text-align:center;">
-            <h2 style="color:#ff6b35;">Payment Link Ready</h2>
+            <h2 style="color:#ff6b35;">💳 Payment Link Ready</h2>
             <div style="background:#f5f5f5;padding:20px;border-radius:10px;margin:20px 0;">
                 <p><strong>Product:</strong> ${product.name}</p>
                 <p><strong>Amount:</strong>
                     ${couponCode
-                        ? `<span style="text-decoration:line-through;color:#999;">${currencySymbol}${originalAmount}</span>
-                           <span style="color:#10b981;font-size:1.2em;">${currencySymbol}${finalAmount}</span>`
-                        : `${currencySymbol}${finalAmount}`}
+                        ? `<span style="text-decoration:line-through;color:#999;">${symbol}${originalAmount}</span>
+                           <span style="color:#10b981;font-size:1.2em;">${symbol}${finalAmount}</span>`
+                        : `${symbol}${finalAmount}`}
                 </p>
-                ${couponCode ? `<p style="color:#10b981;"><strong>✅ Coupon Applied:</strong> ${couponCode}</p>` : ''}
+                ${couponCode ? `<p style="color:#10b981;"><strong>✅ Coupon:</strong> ${couponCode}</p>` : ''}
                 <p><strong>Email:</strong> ${email}</p>
             </div>
-            <p>Click the button below to complete payment:</p>
             <a href="${paymentLinkData.paymentLinkUrl}" target="_blank"
                style="display:inline-block;background:#ff6b35;color:white;padding:15px 30px;
                       border-radius:5px;text-decoration:none;font-size:16px;font-weight:bold;margin:20px 0;">
@@ -633,10 +680,49 @@ function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCod
             <button onclick="location.reload()"
                     style="background:#666;color:white;border:none;padding:10px 20px;
                            border-radius:5px;margin-top:20px;cursor:pointer;">
-                Back to Store
+                ← Back to Store
             </button>
         </div>
     `;
+}
+
+// ============================================
+// PAYPAL FLOW (USD)
+// ============================================
+async function proceedWithPayPal(email, continueButton) {
+    const finalAmount = discountedAmount || selectedProduct.price_usd;
+
+    continueButton.textContent = 'Creating PayPal Order...';
+
+    const res = await fetch(CONFIG.PAYPAL_EDGE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'createOrder',
+            email,
+            amount: finalAmount,
+            currency: 'USD',
+            type: String(selectedProduct.id),
+            description: `Purchased: ${selectedProduct.name}`,
+            metadata: {
+                productId: String(selectedProduct.id),
+                productName: selectedProduct.name,
+                downloadLink: selectedProduct.download_link || ''
+            },
+            return_url: window.location.origin + window.location.pathname + '?pp_order=PAYPAL_ORDER_ID',
+            cancel_url: window.location.origin + window.location.pathname + '?pp_cancelled=1'
+        })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        closeEmailModal();
+        // Replace placeholder in return_url with real order ID (edge function does this too, but belt+suspenders)
+        window.location.href = data.approval_url;
+    } else {
+        throw new Error(data.message || 'Failed to create PayPal order');
+    }
 }
 
 // ============================================
@@ -644,6 +730,7 @@ function showPaymentPage(paymentLinkData, email, product, finalAmount, couponCod
 // ============================================
 function showLoading() {
     document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('productsGrid').style.display = 'none';
 }
 
 function hideLoading() {
@@ -651,7 +738,7 @@ function hideLoading() {
 }
 
 function showError() {
-    document.getElementById('loadingState').innerHTML = '<h3>Error Loading Products</h3>';
+    document.getElementById('loadingState').innerHTML = '<h3 style="color:#ff6b35;">Error Loading Products</h3>';
 }
 
 function initializeMobileMenu() {
@@ -659,19 +746,17 @@ function initializeMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const close = document.getElementById('mobileCloseBtn');
     const overlay = document.getElementById('mobileMenuOverlay');
-    
+
     if (btn) btn.onclick = () => {
         menu.classList.add('active');
         overlay.classList.add('active');
         document.body.classList.add('menu-open');
     };
-    
     if (close) close.onclick = () => {
         menu.classList.remove('active');
         overlay.classList.remove('active');
         document.body.classList.remove('menu-open');
     };
-    
     if (overlay) overlay.onclick = () => {
         menu.classList.remove('active');
         overlay.classList.remove('active');
