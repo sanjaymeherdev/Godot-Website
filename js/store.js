@@ -4,7 +4,7 @@
 const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwQayBpHK2M3rndlxTQeyPbzUNpzUKSV6-Sani2wUI20sbr5Nh2tYYLJX9zcmH_HXA4ug/exec',
     COUPON_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby89oeq6ANrY9EY_Bhv6mN6fXIqrDMYMlMTwt4VBzN3teixSf_D4nBhI8OA-oKvXHISgw/exec',
-    PAYPAL_EDGE_URL: 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/paypal-payment' // <-- replace with your Supabase URL
+    PAYPAL_EDGE_URL: 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/cgstore-paypal' // <-- replace with your Supabase URL
 };
 
 // ============================================
