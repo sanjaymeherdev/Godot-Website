@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // ============================================
 function handlePayPalReturn() {
     const params = new URLSearchParams(window.location.search);
-    const ppOrderId = params.get('pp_order');
+    // PayPal appends ?token=ORDER_ID to the return_url automatically
+    const ppOrderId = params.get('token');
     const cancelled = params.get('pp_cancelled');
 
     if (cancelled) {
@@ -49,10 +50,8 @@ function handlePayPalReturn() {
         return;
     }
 
-    if (ppOrderId && ppOrderId !== 'PAYPAL_ORDER_ID') {
-        // Add this line to capture immediately
+    if (ppOrderId) {
         capturePayPalOrder(ppOrderId);
-        // Then poll as backup
         pollPayPalUntilComplete(ppOrderId);
     }
 }
@@ -727,7 +726,7 @@ async function proceedWithPayPal(email, continueButton) {
                 productName: selectedProduct.name,
                 downloadLink: selectedProduct.download_link || ''
             },
-            return_url: window.location.origin + window.location.pathname + '?pp_order=PAYPAL_ORDER_ID',
+            return_url: window.location.origin + window.location.pathname + '?pp_order=success',
             cancel_url: window.location.origin + window.location.pathname + '?pp_cancelled=1'
         })
     });
