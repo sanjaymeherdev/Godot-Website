@@ -62,21 +62,24 @@
         .sanjay-header .cta-button-secondary { border: 2px solid #4f46e5; color: #4f46e5; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-block; background: transparent; }
         .sanjay-header .cta-button-secondary:hover { background: #4f46e5; color: white; }
         .sanjay-header .mobile-menu-btn { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .sanjay-header .mobile-menu { position: fixed; top: 0; right: -100%; width: 80%; max-width: 320px; height: 100%; background: #1a1a2e; z-index: 2000; transition: right 0.3s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.3); overflow-y: auto; }
-        .sanjay-header .mobile-menu.active { right: 0; }
-        .sanjay-header .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sanjay-header .mobile-menu-logo { font-size: 1.25rem; font-weight: bold; color: white; }
-        .sanjay-header .mobile-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .sanjay-header .mobile-nav-links { padding: 1rem; }
-        .sanjay-header .mobile-nav-links a { display: block; padding: 0.75rem 1rem; color: white; text-decoration: none; border-radius: 8px; transition: background 0.2s; }
-        .sanjay-header .mobile-nav-links a:hover { background: #2d2d44; }
-        .sanjay-header .mobile-dropdown { margin: 0.5rem 0; }
-        .sanjay-header .mobile-dropdown-header { font-weight: bold; padding: 0.75rem 1rem; color: #4f46e5; font-size: 0.9rem; }
-        .sanjay-header .mobile-dropdown a { padding-left: 2rem !important; font-size: 0.9rem; }
-        .sanjay-header .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; display: none; }
-        .sanjay-header .mobile-menu-overlay.active { display: block; }
         body.sanjay-menu-open { overflow: hidden; }
         @media (max-width: 768px) { .sanjay-header .nav-links { display: none; } .sanjay-header .mobile-menu-btn { display: block; } .sanjay-header .cta-button-primary, .sanjay-header .cta-button-secondary { display: none; } .sanjay-header .logo .tagline { display: none; } }
+    </style>
+    <style>
+        /* Mobile menu — fixed to body level, always on top */
+        #sanjayMobileMenu { position: fixed; top: 0; right: -100%; width: 80%; max-width: 320px; height: 100%; background: #1a1a2e; z-index: 99999; transition: right 0.3s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.3); overflow-y: auto; }
+        #sanjayMobileMenu.active { right: 0; }
+        #sanjayMobileMenu .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #sanjayMobileMenu .mobile-menu-logo { font-size: 1.25rem; font-weight: bold; color: white; }
+        #sanjayMobileMenu .mobile-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        #sanjayMobileMenu .mobile-nav-links { padding: 1rem; }
+        #sanjayMobileMenu .mobile-nav-links a { display: block; padding: 0.75rem 1rem; color: white; text-decoration: none; border-radius: 8px; transition: background 0.2s; }
+        #sanjayMobileMenu .mobile-nav-links a:hover { background: #2d2d44; }
+        #sanjayMobileMenu .mobile-dropdown { margin: 0.5rem 0; }
+        #sanjayMobileMenu .mobile-dropdown-header { font-weight: bold; padding: 0.75rem 1rem; color: #4f46e5; font-size: 0.9rem; }
+        #sanjayMobileMenu .mobile-dropdown a { padding-left: 2rem !important; font-size: 0.9rem; }
+        #sanjayMobileMenuOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99998; display: none; }
+        #sanjayMobileMenuOverlay.active { display: block; }
     </style>
 `;
     
@@ -153,37 +156,38 @@
                         <button class="mobile-menu-btn" id="sanjayMobileMenuBtn">☰</button>
                     </nav>
                 </div>
-                <div class="mobile-menu" id="sanjayMobileMenu">
-                    <div class="mobile-menu-header">
-                        <div class="mobile-menu-logo">SanjayAIDev</div>
-                        <button class="mobile-close-btn" id="sanjayMobileCloseBtn">✕</button>
-                    </div>
-                    <div class="mobile-nav-links">
-                        <a href="${basePath}index.html">Home</a>
-                        <div class="mobile-dropdown">
-                            <div class="mobile-dropdown-header">Store</div>
-                            <a href="${basePath}cgstore.html?category=multiplayer">→ Multiplayer Systems</a>
-                            <a href="${basePath}cgstore.html?category=ai">→ AI & Tools</a>
-                            <a href="${basePath}cgstore.html?category=gamekits">→ Complete Game Kits</a>
-                            <a href="${basePath}cgstore.html?category=systems">→ Universal Systems</a>
-                        </div>
-                        <div class="mobile-dropdown">
-                            <div class="mobile-dropdown-header">Services</div>
-                            <a href="${basePath}godotmp.html">→ Done-For-You Networking</a>
-                            <a href="${basePath}godotconnect.html">→ Privacy P2P Backend</a>
-                            <a href="${basePath}cgrelay.html">→ Managed Relay Server</a>
-                            <a href="${basePath}customdev.html">→ Custom Development</a>
-                        </div>
-                        <a href="${basePath}freegodotassets.html">Free Tools</a>
-                        <a href="${basePath}learn.html">Learn</a>
-                        <a href="${basePath}blog.html">Blog</a>
-                        <a href="${basePath}contact.html">Contact</a>
-                        <a href="${basePath}cgstore.html" class="cta-button-primary" style="display: block; text-align: center; margin: 1rem;">Shop Now</a>
-                        <a href="${basePath}services.html#consult" class="cta-button-secondary" style="display: block; text-align: center; margin: 1rem;">Free Consultation</a>
-                    </div>
-                </div>
-                <div class="mobile-menu-overlay" id="sanjayMobileMenuOverlay"></div>
             </header>
+            <!-- Mobile menu lives at body level to avoid stacking context issues -->
+            <div id="sanjayMobileMenu">
+                <div class="mobile-menu-header">
+                    <div class="mobile-menu-logo">SanjayAIDev</div>
+                    <button class="mobile-close-btn" id="sanjayMobileCloseBtn">✕</button>
+                </div>
+                <div class="mobile-nav-links">
+                    <a href="${basePath}index.html">Home</a>
+                    <div class="mobile-dropdown">
+                        <div class="mobile-dropdown-header">Store</div>
+                        <a href="${basePath}cgstore.html?category=multiplayer">→ Multiplayer Systems</a>
+                        <a href="${basePath}cgstore.html?category=ai">→ AI & Tools</a>
+                        <a href="${basePath}cgstore.html?category=gamekits">→ Complete Game Kits</a>
+                        <a href="${basePath}cgstore.html?category=systems">→ Universal Systems</a>
+                    </div>
+                    <div class="mobile-dropdown">
+                        <div class="mobile-dropdown-header">Services</div>
+                        <a href="${basePath}godotmp.html">→ Done-For-You Networking</a>
+                        <a href="${basePath}godotconnect.html">→ Privacy P2P Backend</a>
+                        <a href="${basePath}cgrelay.html">→ Managed Relay Server</a>
+                        <a href="${basePath}customdev.html">→ Custom Development</a>
+                    </div>
+                    <a href="${basePath}freegodotassets.html">Free Tools</a>
+                    <a href="${basePath}learn.html">Learn</a>
+                    <a href="${basePath}blog.html">Blog</a>
+                    <a href="${basePath}contact.html">Contact</a>
+                    <a href="${basePath}cgstore.html" class="cta-button-primary" style="display: block; text-align: center; margin: 1rem;">Shop Now</a>
+                    <a href="${basePath}services.html#consult" class="cta-button-secondary" style="display: block; text-align: center; margin: 1rem;">Free Consultation</a>
+                </div>
+            </div>
+            <div id="sanjayMobileMenuOverlay"></div>
         `;
     }
     
@@ -237,16 +241,15 @@
                             <a href="${basePath}faq.html">❓ FAQ</a>
                             <a href="${basePath}contact.html">📧 Contact</a>
                         </div>
-                        
                     </div>
-					<div class="footer-bottom">
-                            <h4>Legal</h4>
-                            <a href="${basePath}legal/terms.html">Terms of Service</a>
-                            <a href="${basePath}legal/privacy.html">Privacy Policy</a>
-                            <a href="${basePath}legal/license.html">License</a>
-                            <a href="${basePath}legal/refund.html">Refund Policy</a>
-							<a href="${basePath}legal/client-policy.html">Client Policy</a>
-                        </div>
+                    <div class="footer-bottom">
+                        <h4>Legal</h4>
+                        <a href="${basePath}legal/terms.html">Terms of Service</a>
+                        <a href="${basePath}legal/privacy.html">Privacy Policy</a>
+                        <a href="${basePath}legal/license.html">License</a>
+                        <a href="${basePath}legal/refund.html">Refund Policy</a>
+                        <a href="${basePath}legal/client-policy.html">Client Policy</a>
+                    </div>
                     <div class="footer-bottom">
                         <p>© ${year} SanjayAIDev. All rights reserved.</p>
                         <p class="footer-credits">Built with ❤️ for the Godot community | Made in India 🇮🇳</p>
@@ -257,97 +260,78 @@
     }
     
     // Initialize Header Functionality
-   // Initialize Header Functionality
-function initHeader() {
-	const mobileMenu = document.getElementById('sanjayMobileMenu');
-    const mobileMenuOverlay = document.getElementById('sanjayMobileMenuOverlay');
-    if (mobileMenu) document.body.appendChild(mobileMenu);
-    if (mobileMenuOverlay) document.body.appendChild(mobileMenuOverlay);
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('.sanjay-header .nav-links a, .sanjay-header .mobile-nav-links a').forEach(link => {
-        const href = link.getAttribute('href')?.split('/').pop()?.split('?')[0];
-        if (href === currentPage) {
-            link.classList.add('active');
+    function initHeader() {
+        // Active nav link
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('.sanjay-header .nav-links a').forEach(link => {
+            const href = link.getAttribute('href')?.split('/').pop()?.split('?')[0];
+            if (href === currentPage) link.classList.add('active');
+        });
+
+        const mobileMenuBtn = document.getElementById('sanjayMobileMenuBtn');
+        const mobileCloseBtn = document.getElementById('sanjayMobileCloseBtn');
+        const mobileMenu = document.getElementById('sanjayMobileMenu');
+        const mobileMenuOverlay = document.getElementById('sanjayMobileMenuOverlay');
+
+        if (mobileMenuBtn && mobileCloseBtn && mobileMenu && mobileMenuOverlay) {
+            function openMobileMenu() {
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.classList.add('active');
+                document.body.classList.add('sanjay-menu-open');
+            }
+            function closeMobileMenu() {
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.classList.remove('sanjay-menu-open');
+            }
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeMobileMenu();
+            });
         }
-    });
-    
-    const mobileMenuBtn = document.getElementById('sanjayMobileMenuBtn');
-    const mobileCloseBtn = document.getElementById('sanjayMobileCloseBtn');
-    const mobileMenu = document.getElementById('sanjayMobileMenu');
-    const mobileMenuOverlay = document.getElementById('sanjayMobileMenuOverlay');
-    
-    if (mobileMenuBtn && mobileCloseBtn && mobileMenu && mobileMenuOverlay) {
-        function openMobileMenu() {
-            mobileMenu.classList.add('active');
-            mobileMenuOverlay.classList.add('active');
-            document.body.classList.add('sanjay-menu-open');
-        }
-        function closeMobileMenu() {
-            mobileMenu.classList.remove('active');
-            mobileMenuOverlay.classList.remove('active');
-            document.body.classList.remove('sanjay-menu-open');
-        }
-        mobileMenuBtn.addEventListener('click', openMobileMenu);
-        mobileCloseBtn.addEventListener('click', closeMobileMenu);
-        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMobileMenu();
+
+        // Desktop dropdown hover
+        const dropdowns = document.querySelectorAll('.sanjay-header .dropdown');
+        dropdowns.forEach(dropdown => {
+            const content = dropdown.querySelector('.dropdown-content');
+            let timeoutId;
+            function showDropdown() {
+                clearTimeout(timeoutId);
+                if (content) content.style.display = 'block';
+            }
+            function hideDropdown() {
+                timeoutId = setTimeout(() => {
+                    if (content) content.style.display = 'none';
+                }, 150);
+            }
+            dropdown.addEventListener('mouseenter', showDropdown);
+            dropdown.addEventListener('mouseleave', hideDropdown);
+            if (content) {
+                content.addEventListener('mouseenter', showDropdown);
+                content.addEventListener('mouseleave', hideDropdown);
+            }
         });
     }
-    
-    // Fixed Dropdown Event Handlers
-    const dropdowns = document.querySelectorAll('.sanjay-header .dropdown');
-    dropdowns.forEach(dropdown => {
-        const content = dropdown.querySelector('.dropdown-content');
-        let timeoutId;
-        
-        function showDropdown() {
-            clearTimeout(timeoutId);
-            if (content) content.style.display = 'block';
-        }
-        
-        function hideDropdown() {
-            timeoutId = setTimeout(() => {
-                if (content) content.style.display = 'none';
-            }, 150);
-        }
-        
-        dropdown.addEventListener('mouseenter', showDropdown);
-        dropdown.addEventListener('mouseleave', hideDropdown);
-        
-        if (content) {
-            content.addEventListener('mouseenter', showDropdown);
-            content.addEventListener('mouseleave', hideDropdown);
-        }
-    });
-}
-    
+
     // Inject components when DOM is ready
     function init() {
         const headerContainer = document.getElementById('sanjay-header');
         const footerContainer = document.getElementById('sanjay-footer');
-        
+
         if (headerContainer) {
             document.head.insertAdjacentHTML('beforeend', headerStyles);
-			document.head.insertAdjacentHTML('beforeend', `
-	        <style>
-	            #sanjayMobileMenu { z-index: 99999 !important; position: fixed !important; }
-	            #sanjayMobileMenuOverlay { z-index: 99998 !important; position: fixed !important; }
-	        </style>
-	    `);
-	    
-	    headerContainer.innerHTML = renderHeader();
-	    initHeader();
-	            headerContainer.innerHTML = renderHeader();
-	            initHeader();
+            headerContainer.innerHTML = renderHeader();
+            initHeader();
         }
-        
+
         if (footerContainer) {
             document.head.insertAdjacentHTML('beforeend', footerStyles);
             footerContainer.innerHTML = renderFooter();
         }
     }
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
