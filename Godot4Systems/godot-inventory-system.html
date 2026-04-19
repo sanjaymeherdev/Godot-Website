@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory System — Godot 4 | CGGodotAssets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --accent: #00d9ff;
+            --dark: #0a0a0f;
+            --secondary: #111118;
+            --card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #e8e8f0;
+            --muted: #888899;
+            --success: #00e676;
+            --warning: #ffab40;
+            --danger: #ff5252;
+            --info: #40c4ff;
+            --code-bg: #0d0d14;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Syne', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: var(--font-display);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        header nav {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px; gap: 1.5rem;
+        }
+        .logo { font-weight: 800; font-size: 1.1rem; letter-spacing: 0.08em; color: white; text-decoration: none; }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; transition: color 0.2s; }
+        .nav-links a:hover { color: white; }
+        .cta-button {
+            background: var(--primary); color: white; padding: 0.5rem 1.2rem;
+            border-radius: 6px; font-size: 0.85rem; font-weight: 700;
+            text-decoration: none; letter-spacing: 0.04em;
+            transition: opacity 0.2s, transform 0.2s; white-space: nowrap;
+        }
+        .cta-button:hover { opacity: 0.88; transform: translateY(-1px); }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+
+        /* ── HERO ── */
+        .hero {
+            padding: 130px 2rem 60px;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,107,53,0.12);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary); padding: 0.35rem 1rem;
+            border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+            letter-spacing: 0.08em; margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800;
+            line-height: 1.15; margin-bottom: 1.2rem; letter-spacing: -0.02em;
+        }
+        .hero h1 span { color: var(--primary); }
+        .hero-sub {
+            font-size: 1.05rem; color: var(--muted);
+            max-width: 600px; margin: 0 auto 2rem; font-weight: 400;
+        }
+        .hero-tags { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+        .tag {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: var(--muted); padding: 0.3rem 0.8rem;
+            border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+        }
+        .tag.accent { background: rgba(0,217,255,0.08); border-color: rgba(0,217,255,0.25); color: var(--accent); }
+        .tag.orange { background: rgba(255,107,53,0.1); border-color: rgba(255,107,53,0.3); color: var(--primary); }
+
+        /* ── FILE CARDS ── */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem; margin: 1.5rem 0;
+        }
+        .file-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.4rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .file-card:hover { border-color: rgba(0,217,255,0.3); background: rgba(0,217,255,0.04); }
+        .file-card .fname {
+            font-family: var(--font-mono); font-size: 0.88rem;
+            color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;
+        }
+        .file-card .ftype {
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+            color: var(--muted); margin-bottom: 0.7rem;
+        }
+        .file-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+        /* ── LAYOUT ── */
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 0 2rem 6rem; }
+        .section-title {
+            font-size: 1.6rem; font-weight: 800; margin-bottom: 1.5rem;
+            letter-spacing: -0.01em;
+            border-left: 4px solid var(--primary); padding-left: 1rem;
+        }
+        .section-title span { color: var(--accent); }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.8rem; margin-bottom: 2rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(255,255,255,0.14); }
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2.5rem 0;
+        }
+
+        /* ── CALLOUTS ── */
+        .callout {
+            display: flex; gap: 1rem; padding: 1.2rem 1.4rem;
+            border-radius: 10px; margin: 1.2rem 0; font-size: 0.9rem;
+        }
+        .callout-icon { font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
+        .callout.info { background: rgba(64,196,255,0.07); border: 1px solid rgba(64,196,255,0.2); }
+        .callout.warning { background: rgba(255,171,64,0.08); border: 1px solid rgba(255,171,64,0.25); }
+        .callout.success { background: rgba(0,230,118,0.07); border: 1px solid rgba(0,230,118,0.2); }
+        .callout strong { color: white; }
+
+        /* ── CODE ── */
+        .code-wrap {
+            background: var(--code-bg); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px; overflow: hidden; margin: 1.2rem 0;
+        }
+        .code-header {
+            padding: 0.6rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-family: var(--font-mono); font-size: 0.75rem;
+            color: var(--accent); font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        pre {
+            padding: 1.2rem 1.4rem; overflow-x: auto;
+            font-family: var(--font-mono); font-size: 0.82rem;
+            line-height: 1.7; color: #cdd6f4;
+        }
+        .kw  { color: #cba6f7; }
+        .fn  { color: #89b4fa; }
+        .str { color: #a6e3a1; }
+        .cm  { color: #585b70; font-style: italic; }
+        .num { color: #fab387; }
+        .cn  { color: #f38ba8; }
+        .tp  { color: #f9e2af; }
+
+        /* ── SIGNALS TABLE ── */
+        .sig-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.83rem; }
+        .sig-table th {
+            background: rgba(255,107,53,0.1); color: var(--primary);
+            padding: 0.75rem 1rem; text-align: left;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+            border-bottom: 1px solid rgba(255,107,53,0.2);
+        }
+        .sig-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .sig-table tr:last-child td { border-bottom: none; }
+        .sig-table code {
+            font-family: var(--font-mono); font-size: 0.78rem;
+            color: var(--accent); background: rgba(0,217,255,0.07);
+            padding: 0.15rem 0.4rem; border-radius: 4px;
+        }
+        .sig-table .desc { color: var(--muted); font-size: 0.8rem; }
+
+        /* ── SCENE TREE ── */
+        .tree {
+            font-family: var(--font-mono); font-size: 0.82rem;
+            line-height: 1.9; padding: 1.4rem;
+            background: var(--code-bg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px; color: #cdd6f4;
+            overflow-x: auto;
+        }
+        .tree .node-scene  { color: #cba6f7; }
+        .tree .node-ctrl   { color: #89b4fa; }
+        .tree .node-panel  { color: var(--accent); }
+        .tree .node-label  { color: #a6e3a1; }
+        .tree .node-tex    { color: #fab387; }
+        .tree .node-prog   { color: #f9e2af; }
+        .tree .node-grid   { color: var(--primary); }
+        .tree .note        { color: #585b70; font-style: italic; }
+
+        /* ── STEP LIST ── */
+        .steps { counter-reset: step; list-style: none; margin: 1.2rem 0; }
+        .steps li {
+            counter-increment: step;
+            display: flex; gap: 1rem; margin-bottom: 1.2rem; align-items: flex-start;
+        }
+        .steps li::before {
+            content: counter(step);
+            min-width: 28px; height: 28px;
+            background: rgba(255,107,53,0.15); border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary); font-size: 0.78rem; font-weight: 800;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 2px;
+        }
+        .steps li .step-body { font-size: 0.9rem; }
+        .steps li .step-body strong { color: white; display: block; margin-bottom: 0.3rem; }
+        .steps li .step-body span { color: var(--muted); font-size: 0.85rem; }
+
+        /* ── UPSELL ── */
+        .upsell {
+            background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(0,217,255,0.07) 100%);
+            border: 1px solid rgba(255,107,53,0.3); border-radius: 16px;
+            padding: 2.5rem; text-align: center; margin-top: 2rem;
+        }
+        .upsell h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .upsell .price-big { font-size: 2rem; font-weight: 800; color: var(--primary); }
+
+        footer {
+            border-top: 1px solid var(--border); text-align: center;
+            padding: 2.5rem 2rem; color: var(--muted); font-size: 0.82rem;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html" class="logo">CG<span>GODOT</span></a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="cgstore.html">Store</a>
+            <a href="services.html">Services</a>
+            <a href="index.html#contact">Contact</a>
+        </div>
+        <a href="https://cggodotassets.shop/cgstore" target="_blank" class="cta-button">Browse Store →</a>
+    </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-badge">📦 INVENTORY SYSTEM</div>
+    <h1>Drag & Drop Inventory<br><span>for Godot 4</span></h1>
+    <p class="hero-sub">
+        4-file drop-in inventory system. ItemDB autoload, typed ItemData resources,
+        PlayerInventory logic, and a full drag & drop UI — ready in minutes.
+    </p>
+    <div class="hero-tags">
+        <span class="tag accent">Godot 4.x</span>
+        <span class="tag orange">GDScript</span>
+        <span class="tag">RPG</span>
+        <span class="tag">Survival</span>
+        <span class="tag">Any Genre</span>
+        <span class="tag">No Plugins</span>
+        <span class="tag">Mobile Ready</span>
+    </div>
+</section>
+
+<div class="wrap">
+
+    <!-- SECTION 1: WHAT'S INCLUDED -->
+    <h2 class="section-title">1. <span>What's Included</span></h2>
+    <div class="files-grid">
+        <div class="file-card">
+            <div class="fname">ItemData.gd</div>
+            <div class="ftype">RESOURCE · CLASS</div>
+            <p>Typed Resource class for all item definitions. Supports guns, ammo, meds, melee, nades, helmets, vests, bags. Set everything in the Godot Inspector — no code needed to define items.</p>
+        </div>
+        <div class="file-card">
+            <div class="fname">ItemDB.gd</div>
+            <div class="ftype">AUTOLOAD · SINGLETON</div>
+            <p>Scans <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.8rem">res://Resources/</code> at startup and builds a global item dictionary. Call <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.8rem">ItemDB.get_item("id")</code> from anywhere.</p>
+        </div>
+        <div class="file-card">
+            <div class="fname">PlayerInventory.gd</div>
+            <div class="ftype">NODE · CORE LOGIC</div>
+            <p>All inventory state and logic. Equipment slots, item stacking, mag ammo persistence, weapon cycling, query helpers. Emits signals on every change — no polling needed.</p>
+        </div>
+        <div class="file-card">
+            <div class="fname">Inventory.gd + .tscn</div>
+            <div class="ftype">CONTROL · UI</div>
+            <p>Full drag & drop UI. Touch + mouse support. Equipment panels, item grid, med use with progress overlay, animated slots. Reference implementation — replace or extend freely.</p>
+        </div>
+    </div>
+
+    <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <div><strong>UI is optional.</strong> <code style="font-family:var(--font-mono);font-size:0.85rem">ItemData</code>, <code style="font-family:var(--font-mono);font-size:0.85rem">ItemDB</code>, and <code style="font-family:var(--font-mono);font-size:0.85rem">PlayerInventory</code> are fully self-contained backend logic. Build your own UI on top, or use the included scene as a starting point.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: SETUP -->
+    <h2 class="section-title">2. <span>Setup</span> — 4 Steps</h2>
+    <div class="card">
+        <ol class="steps">
+            <li>
+                <div class="step-body">
+                    <strong>Register ItemDB as AutoLoad</strong>
+                    <span>Project → Project Settings → AutoLoad → Add <code style="font-family:var(--font-mono);color:var(--accent)">res://ItemDB.gd</code> with name <code style="font-family:var(--font-mono);color:var(--accent)">ItemDB</code></span>
+                </div>
+            </li>
+            <li>
+                <div class="step-body">
+                    <strong>Create your item .tres files</strong>
+                    <span>Right-click in FileSystem → New Resource → pick <code style="font-family:var(--font-mono);color:var(--accent)">ItemData</code> → fill in Inspector → save to <code style="font-family:var(--font-mono);color:var(--accent)">res://Resources/</code></span>
+                </div>
+            </li>
+            <li>
+                <div class="step-body">
+                    <strong>Add PlayerInventory to your player scene</strong>
+                    <span>Add a <code style="font-family:var(--font-mono);color:var(--accent)">PlayerInventory</code> node as a child of your player. That's it — no exports required.</span>
+                </div>
+            </li>
+            <li>
+                <div class="step-body">
+                    <strong>Instance the Inventory scene (optional UI)</strong>
+                    <span>Add <code style="font-family:var(--font-mono);color:var(--accent)">Inventory.tscn</code> to your HUD. Assign the <code style="font-family:var(--font-mono);color:var(--accent)">inventory</code> export to your PlayerInventory node. Call <code style="font-family:var(--font-mono);color:var(--accent)">inventory_ui.open()</code> / <code style="font-family:var(--font-mono);color:var(--accent)">.close()</code>.</span>
+                </div>
+            </li>
+        </ol>
+
+        <div class="callout success">
+            <span class="callout-icon">✅</span>
+            <div><strong>ItemDB is zero-config.</strong> Just drop your <code style="font-family:var(--font-mono);font-size:0.85rem">.tres</code> files in <code style="font-family:var(--font-mono);font-size:0.85rem">res://Resources/</code> and they're available everywhere instantly.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3: ITEMDATA FIELDS -->
+    <h2 class="section-title">3. <span>ItemData</span> — Fields Reference</h2>
+    <div class="card">
+        <p style="color:var(--muted);margin-bottom:1.2rem;font-size:0.9rem">All fields are <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.85rem">@export</code> — configure everything in the Godot Inspector. Only fill in the group relevant to your item type.</p>
+
+        <div class="code-wrap">
+            <div class="code-header">📄 ItemData.gd — field groups</div>
+            <pre><span class="cm"># ── Shared (every item) ──────────────────────────────────</span>
+<span class="kw">@export var</span> id          : <span class="tp">String</span>    <span class="cm"># unique key, e.g. "ammo_ar"</span>
+<span class="kw">@export var</span> name        : <span class="tp">String</span>    <span class="cm"># display name</span>
+<span class="kw">@export var</span> item_type   : <span class="tp">ItemType</span>  <span class="cm"># GUN / AMMO / MED / MELEE / NADE / ...</span>
+<span class="kw">@export var</span> rarity      : <span class="tp">Rarity</span>    <span class="cm"># COMMON / UNCOMMON / RARE / LEGENDARY</span>
+<span class="kw">@export var</span> icon        : <span class="tp">Texture2D</span> <span class="cm"># shown in inventory slots</span>
+<span class="kw">@export var</span> scene_path  : <span class="tp">String</span>    <span class="cm"># 3D model path (optional)</span>
+
+<span class="cm"># ── Gun ──────────────────────────────────────────────────</span>
+<span class="kw">@export var</span> gun_type    : <span class="tp">GunType</span>   <span class="cm"># AR / SMG / SNIPER</span>
+<span class="kw">@export var</span> ammo_type   : <span class="tp">String</span>    <span class="cm"># matches ammo item id</span>
+<span class="kw">@export var</span> damage      : <span class="tp">int</span>
+<span class="kw">@export var</span> fire_rate   : <span class="tp">float</span>
+<span class="kw">@export var</span> mag_size    : <span class="tp">int</span>
+<span class="kw">@export var</span> reload_time : <span class="tp">float</span>
+
+<span class="cm"># ── Med ──────────────────────────────────────────────────</span>
+<span class="kw">@export var</span> health_amount : <span class="tp">int</span>
+<span class="kw">@export var</span> is_overtime   : <span class="tp">bool</span>   <span class="cm"># true = heals over time (drink)</span>
+<span class="kw">@export var</span> heal_duration : <span class="tp">float</span>  <span class="cm"># seconds, used if is_overtime = true</span>
+
+<span class="cm"># ── Melee ────────────────────────────────────────────────</span>
+<span class="kw">@export var</span> melee_damage    : <span class="tp">int</span>
+<span class="kw">@export var</span> melee_range     : <span class="tp">float</span>
+<span class="kw">@export var</span> melee_swing_time: <span class="tp">float</span>
+
+<span class="cm"># ── Nade ─────────────────────────────────────────────────</span>
+<span class="kw">@export var</span> nade_damage       : <span class="tp">int</span>
+<span class="kw">@export var</span> nade_blast_radius : <span class="tp">float</span>
+<span class="kw">@export var</span> nade_fuse_time    : <span class="tp">float</span>
+<span class="kw">@export var</span> nade_throw_force  : <span class="tp">float</span></pre>
+        </div>
+
+        <div class="callout warning">
+            <span class="callout-icon">⚠️</span>
+            <div><strong>id must be unique.</strong> ItemDB keys by <code style="font-family:var(--font-mono);font-size:0.85rem">id</code>. If two .tres files share the same id, the second one silently overwrites the first.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 4: PLAYERINVENTORY API -->
+    <h2 class="section-title">4. <span>PlayerInventory</span> — API Reference</h2>
+
+    <div class="card">
+        <p style="font-weight:700;color:white;margin-bottom:1rem;">Signals</p>
+        <table class="sig-table">
+            <thead><tr><th>Signal</th><th>Args</th><th>When</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><code>inventory_updated</code></td>
+                    <td class="desc">—</td>
+                    <td class="desc">Any item qty changed (add, remove, equip)</td>
+                </tr>
+                <tr>
+                    <td><code>gun_equipped</code></td>
+                    <td class="desc">slot: int, gun: ItemData</td>
+                    <td class="desc">Gun placed in slot 1</td>
+                </tr>
+                <tr>
+                    <td><code>gun_unequipped</code></td>
+                    <td class="desc">slot: int</td>
+                    <td class="desc">Gun removed from slot</td>
+                </tr>
+                <tr>
+                    <td><code>melee_equipped</code></td>
+                    <td class="desc">melee: ItemData</td>
+                    <td class="desc">Melee weapon equipped</td>
+                </tr>
+                <tr>
+                    <td><code>melee_unequipped</code></td>
+                    <td class="desc">—</td>
+                    <td class="desc">Melee slot cleared</td>
+                </tr>
+                <tr>
+                    <td><code>nade_equipped</code></td>
+                    <td class="desc">nade: ItemData</td>
+                    <td class="desc">Grenade type equipped</td>
+                </tr>
+                <tr>
+                    <td><code>nade_unequipped</code></td>
+                    <td class="desc">—</td>
+                    <td class="desc">Nade slot cleared</td>
+                </tr>
+                <tr>
+                    <td><code>mode_changed</code></td>
+                    <td class="desc">new_mode: WeaponMode</td>
+                    <td class="desc">Active weapon mode switched (GUN/MELEE/NADE/NONE)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <p style="font-weight:700;color:white;margin-bottom:1rem;">Methods</p>
+        <div class="code-wrap">
+            <div class="code-header">📋 PlayerInventory — public API</div>
+            <pre><span class="cm"># ── Items ────────────────────────────────────────────────</span>
+<span class="fn">add_item</span>(item_id: <span class="tp">String</span>, qty: <span class="tp">int</span> = <span class="num">1</span>) -> <span class="tp">bool</span>
+<span class="fn">remove_item</span>(item_id: <span class="tp">String</span>, qty: <span class="tp">int</span> = <span class="num">1</span>) -> <span class="tp">bool</span>
+<span class="fn">get_qty</span>(item_id: <span class="tp">String</span>) -> <span class="tp">int</span>
+<span class="fn">has_item</span>(item_id: <span class="tp">String</span>) -> <span class="tp">bool</span>
+
+<span class="cm"># ── Equip ────────────────────────────────────────────────</span>
+<span class="fn">equip_gun</span>(slot: <span class="tp">int</span>, gun: <span class="tp">ItemData</span>)
+<span class="fn">unequip_gun</span>(slot: <span class="tp">int</span>) -> <span class="tp">ItemData</span>
+<span class="fn">get_gun</span>(slot: <span class="tp">int</span>) -> <span class="tp">ItemData</span>
+<span class="fn">cycle_active_gun</span>()          <span class="cm"># cycle to next gun in items</span>
+
+<span class="fn">equip_melee</span>(item: <span class="tp">ItemData</span>)
+<span class="fn">unequip_melee</span>() -> <span class="tp">ItemData</span>
+
+<span class="fn">equip_nade</span>(item: <span class="tp">ItemData</span>)
+<span class="fn">unequip_nade</span>() -> <span class="tp">ItemData</span>
+<span class="fn">check_nade_quantity</span>()        <span class="cm"># auto-unequips if qty hits 0</span>
+
+<span class="cm"># ── Mag ammo persistence ─────────────────────────────────</span>
+<span class="fn">save_slot_mag_ammo</span>(slot: <span class="tp">int</span>, ammo: <span class="tp">int</span>)
+<span class="fn">get_slot_mag_ammo</span>(slot: <span class="tp">int</span>) -> <span class="tp">int</span>
+
+<span class="cm"># ── Query helpers ────────────────────────────────────────</span>
+<span class="fn">has_any_gun</span>()    -> <span class="tp">bool</span>
+<span class="fn">has_melee</span>()      -> <span class="tp">bool</span>
+<span class="fn">has_nade</span>()       -> <span class="tp">bool</span>
+<span class="fn">has_any_ammo</span>()   -> <span class="tp">bool</span>
+<span class="fn">has_ammo_for_slot</span>(slot: <span class="tp">int</span>) -> <span class="tp">bool</span>
+<span class="fn">has_medkit</span>()     -> <span class="tp">bool</span>
+<span class="fn">has_drink</span>()      -> <span class="tp">bool</span>
+
+<span class="cm"># ── Mode ─────────────────────────────────────────────────</span>
+<span class="fn">set_mode</span>(mode: <span class="tp">WeaponMode</span>)
+<span class="fn">get_mode</span>() -> <span class="tp">WeaponMode</span>
+
+<span class="cm"># ── Misc ─────────────────────────────────────────────────</span>
+<span class="fn">clear_all</span>()                   <span class="cm"># unequip everything, clear items</span></pre>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 5: CODE EXAMPLES -->
+    <h2 class="section-title">5. <span>Code Examples</span></h2>
+
+    <div class="card">
+        <p style="font-weight:700;color:white;margin-bottom:1rem;">Add items when player picks up loot</p>
+        <div class="code-wrap">
+            <div class="code-header">📄 pickup.gd</div>
+            <pre><span class="kw">extends</span> <span class="tp">Area3D</span>
+
+<span class="kw">@export var</span> item_id  : <span class="tp">String</span> = <span class="str">"ammo_ar"</span>
+<span class="kw">@export var</span> quantity : <span class="tp">int</span>    = <span class="num">30</span>
+
+<span class="kw">func</span> <span class="fn">_on_body_entered</span>(body: <span class="tp">Node3D</span>) -> <span class="tp">void</span>:
+    <span class="kw">var</span> inv = body.<span class="fn">get_node_or_null</span>(<span class="str">"PlayerInventory"</span>)
+    <span class="kw">if not</span> inv: <span class="kw">return</span>
+    inv.<span class="fn">add_item</span>(item_id, quantity)
+    <span class="fn">queue_free</span>()</pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <p style="font-weight:700;color:white;margin-bottom:1rem;">Listen to inventory signals in your player</p>
+        <div class="code-wrap">
+            <div class="code-header">📄 player.gd</div>
+            <pre><span class="kw">@onready var</span> inventory : <span class="tp">PlayerInventory</span> = $<span class="tp">PlayerInventory</span>
+
+<span class="kw">func</span> <span class="fn">_ready</span>() -> <span class="tp">void</span>:
+    inventory.gun_equipped.<span class="fn">connect</span>(_on_gun_equipped)
+    inventory.melee_equipped.<span class="fn">connect</span>(_on_melee_equipped)
+    inventory.mode_changed.<span class="fn">connect</span>(_on_mode_changed)
+    inventory.inventory_updated.<span class="fn">connect</span>(_on_inventory_changed)
+
+<span class="kw">func</span> <span class="fn">_on_gun_equipped</span>(slot: <span class="tp">int</span>, gun: <span class="tp">ItemData</span>) -> <span class="tp">void</span>:
+    <span class="fn">print</span>(<span class="str">"Equipped: "</span>, gun.name, <span class="str">" in slot "</span>, slot)
+    <span class="cm"># Spawn 3D gun model, update HUD, etc.</span>
+
+<span class="kw">func</span> <span class="fn">_on_mode_changed</span>(mode: <span class="tp">PlayerInventory</span>.<span class="tp">WeaponMode</span>) -> <span class="tp">void</span>:
+    <span class="kw">match</span> mode:
+        <span class="tp">PlayerInventory</span>.<span class="tp">WeaponMode</span>.<span class="cn">GUN</span>:   <span class="fn">_show_gun_anim</span>()
+        <span class="tp">PlayerInventory</span>.<span class="tp">WeaponMode</span>.<span class="cn">MELEE</span>: <span class="fn">_show_melee_anim</span>()
+        <span class="tp">PlayerInventory</span>.<span class="tp">WeaponMode</span>.<span class="cn">NADE</span>:  <span class="fn">_show_nade_anim</span>()</pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <p style="font-weight:700;color:white;margin-bottom:1rem;">Query helpers — drive player logic flags</p>
+        <div class="code-wrap">
+            <div class="code-header">📄 player.gd — combat flags</div>
+            <pre><span class="kw">func</span> <span class="fn">_update_combat_flags</span>() -> <span class="tp">void</span>:
+    has_weapon   = inventory.<span class="fn">has_any_gun</span>() <span class="kw">or</span> inventory.<span class="fn">has_melee</span>()
+    has_ammo     = inventory.<span class="fn">has_any_ammo</span>()
+    can_throw    = inventory.<span class="fn">has_nade</span>()
+    can_heal     = inventory.<span class="fn">has_medkit</span>() <span class="kw">or</span> inventory.<span class="fn">has_drink</span>()
+
+<span class="kw">func</span> <span class="fn">_input</span>(event: <span class="tp">InputEvent</span>) -> <span class="tp">void</span>:
+    <span class="kw">if</span> <span class="fn">Input.is_action_just_pressed</span>(<span class="str">"cycle_gun"</span>):
+        inventory.<span class="fn">cycle_active_gun</span>()   <span class="cm"># Q key</span>
+    <span class="kw">if</span> <span class="fn">Input.is_action_just_pressed</span>(<span class="str">"melee_mode"</span>):
+        inventory.<span class="fn">set_mode</span>(<span class="tp">PlayerInventory</span>.<span class="tp">WeaponMode</span>.<span class="cn">MELEE</span>)</pre>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 6: SCENE TREE -->
+    <h2 class="section-title">6. <span>Scene Tree</span> — Inventory.tscn</h2>
+    <div class="card">
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:1.2rem;">The included UI scene expects this exact node structure. Node names are case-sensitive.</p>
+
+        <div class="tree">
+<span class="node-scene">Inventory (Control)</span>  <span class="note">← Inventory.gd attached here</span>
+└── <span class="node-panel">Panel</span>
+    └── <span class="node-ctrl">HBoxContainer</span>
+        ├── <span class="node-ctrl">assets</span>  <span class="note">← equipment slots</span>
+        │   ├── <span class="node-panel">gun1</span> (Panel)
+        │   │   └── <span class="node-ctrl">VBoxContainer</span>
+        │   │       ├── <span class="node-tex">TextureRect</span>   <span class="note">← gun icon</span>
+        │   │       └── <span class="node-label">gunname</span> (Label)
+        │   ├── <span class="node-panel">melee</span> (Panel)
+        │   │   └── <span class="node-ctrl">VBoxContainer</span>
+        │   │       ├── <span class="node-tex">TextureRect</span>
+        │   │       └── <span class="node-label">gunname</span> (Label)
+        │   └── <span class="node-panel">nade</span> (Panel)
+        │       └── <span class="node-ctrl">VBoxContainer</span>
+        │           ├── <span class="node-tex">TextureRect</span>
+        │           └── <span class="node-label">gunname</span> (Label)
+        └── <span class="node-ctrl">items</span>  <span class="note">← item grid</span>
+            └── <span class="node-grid">GridContainer</span>
+                └── <span class="node-panel">in1</span> (Panel)  <span class="note">← slot template (visible=false)</span>
+                    └── <span class="node-ctrl">VBoxContainer</span>
+                        ├── <span class="node-ctrl">HBoxContainer</span>
+                        │   ├── <span class="node-tex">TextureRect</span>  <span class="note">← item icon</span>
+                        │   └── <span class="node-label">Label</span>         <span class="note">← stack qty</span>
+                        └── <span class="node-label">name</span> (Label)    <span class="note">← item name</span>
+        </div>
+
+        <div class="callout info" style="margin-top:1.2rem">
+            <span class="callout-icon">ℹ️</span>
+            <div><strong>in1 is duplicated at runtime.</strong> The slot template is hidden and cloned for each item. Don't delete it — the system won't work without it.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 7: ITEMDB -->
+    <h2 class="section-title">7. <span>ItemDB</span> — Global Access</h2>
+    <div class="card">
+        <div class="code-wrap">
+            <div class="code-header">📄 ItemDB.gd — available methods</div>
+            <pre><span class="cm"># ── Core ─────────────────────────────────────────────────</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_item</span>(id: <span class="tp">String</span>)  -> <span class="tp">ItemData</span>   <span class="cm"># null if not found</span>
+<span class="tp">ItemDB</span>.<span class="fn">has_item</span>(id: <span class="tp">String</span>)  -> <span class="tp">bool</span>
+
+<span class="cm"># ── Filtered getters ─────────────────────────────────────</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_guns</span>()                      -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_guns_by_type</span>(gun_type)           -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_ammo</span>()                      -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_ammo_for_gun</span>(gun_type)           -> <span class="tp">ItemData</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_meds</span>()                      -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_melee</span>()                     -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_nades</span>()                     -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_all_by_rarity</span>(rarity)           -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_melee_by_rarity</span>(rarity)         -> <span class="tp">Array</span>
+<span class="tp">ItemDB</span>.<span class="fn">get_nade_by_rarity</span>(rarity)          -> <span class="tp">Array</span></pre>
+        </div>
+
+        <div class="callout success">
+            <span class="callout-icon">✅</span>
+            <div><strong>Add new items with zero code.</strong> Drop a new <code style="font-family:var(--font-mono);font-size:0.85rem">.tres</code> file in <code style="font-family:var(--font-mono);font-size:0.85rem">res://Resources/</code> and it's available on next launch. No registration, no arrays to update.</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 8: FAQ -->
+    <h2 class="section-title">8. <span>FAQ</span></h2>
+    <div class="card">
+        <div style="display:flex;flex-direction:column;gap:1.4rem">
+            <div>
+                <p style="font-weight:700;color:white;margin-bottom:0.3rem">Can I use this for an RPG, not a shooter?</p>
+                <p style="color:var(--muted);font-size:0.88rem">Yes. ItemData supports any type. Remove or ignore the gun/ammo groups. The stacking, drag & drop, and signal system works for any genre. The WeaponMode enum is also fully optional.</p>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1.4rem">
+                <p style="font-weight:700;color:white;margin-bottom:0.3rem">Where do I put my .tres item files?</p>
+                <p style="color:var(--muted);font-size:0.88rem">Exactly <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">res://Resources/</code> — ItemDB scans this folder on startup. Subfolders are not scanned. All files must end in <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">.tres</code>.</p>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1.4rem">
+                <p style="font-weight:700;color:white;margin-bottom:0.3rem">Does it support multiplayer?</p>
+                <p style="color:var(--muted);font-size:0.88rem">The backend logic (PlayerInventory, ItemDB) is multiplayer-agnostic. The included UI has an <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">is_local</code> flag — call <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">init(true/false)</code> to show/hide it per player. Syncing inventory state over the network is up to you.</p>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1.4rem">
+                <p style="font-weight:700;color:white;margin-bottom:0.3rem">Does it work on mobile / touch screens?</p>
+                <p style="color:var(--muted);font-size:0.88rem">Yes. The drag system handles both <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">InputEventScreenTouch</code> and <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">InputEventScreenDrag</code> natively. Tested on Android.</p>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:1.4rem">
+                <p style="font-weight:700;color:white;margin-bottom:0.3rem">Can I replace the UI with my own?</p>
+                <p style="color:var(--muted);font-size:0.88rem">Absolutely — that's the point. <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">Inventory.gd</code> + <code style="font-family:var(--font-mono);color:var(--accent);font-size:0.83rem">.tscn</code> are a reference implementation. The backend (ItemData, ItemDB, PlayerInventory) has no UI dependency at all.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- UPSELL -->
+    <div class="upsell">
+        <h3>🔥 Need the Full BR Framework?</h3>
+        <p style="color:var(--muted);margin:0.5rem 0 1.2rem">This inventory is part of a complete Battle Royale system — 3 gun slots, pistol, attachments (scope/mag/front), armour HP, backpack capacity, StatsLogger, WeaponController and more. Built by a solo dev, used in a real shipped BR game.</p>
+        <a href="https://cggodotassets.shop/cgstore" target="_blank" class="cta-button" style="padding:0.8rem 2rem;font-size:1rem;">View Full Store →</a>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem;">Questions? <a href="https://wa.me/917504704502" style="color:var(--primary);text-decoration:none">Chat on WhatsApp →</a></p>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2025 CGGodotAssets · <a href="https://cggodotassets.shop">cggodotassets.shop</a></p>
+    <p style="margin-top:0.4rem;opacity:0.5">Built for Godot 4. No plugins. No cloud. Just clean GDScript.</p>
+</footer>
+
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) { e.preventDefault(); window.scrollTo({ top: target.offsetTop - 84, behavior: 'smooth' }); }
+        });
+    });
+</script>
+</body>
+</html>
