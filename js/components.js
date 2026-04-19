@@ -259,6 +259,10 @@
     // Initialize Header Functionality
    // Initialize Header Functionality
 function initHeader() {
+	const mobileMenu = document.getElementById('sanjayMobileMenu');
+    const mobileMenuOverlay = document.getElementById('sanjayMobileMenuOverlay');
+    if (mobileMenu) document.body.appendChild(mobileMenu);
+    if (mobileMenuOverlay) document.body.appendChild(mobileMenuOverlay);
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.sanjay-header .nav-links a, .sanjay-header .mobile-nav-links a').forEach(link => {
         const href = link.getAttribute('href')?.split('/').pop()?.split('?')[0];
@@ -325,8 +329,17 @@ function initHeader() {
         
         if (headerContainer) {
             document.head.insertAdjacentHTML('beforeend', headerStyles);
-            headerContainer.innerHTML = renderHeader();
-            initHeader();
+			document.head.insertAdjacentHTML('beforeend', `
+	        <style>
+	            #sanjayMobileMenu { z-index: 99999 !important; position: fixed !important; }
+	            #sanjayMobileMenuOverlay { z-index: 99998 !important; position: fixed !important; }
+	        </style>
+	    `);
+	    
+	    headerContainer.innerHTML = renderHeader();
+	    initHeader();
+	            headerContainer.innerHTML = renderHeader();
+	            initHeader();
         }
         
         if (footerContainer) {
