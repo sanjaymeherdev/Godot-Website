@@ -597,24 +597,162 @@ function highlight(code) {
   h = h.replace(new RegExp(`\\b(${KW2.join('|')})\\b`, 'g'), '<span class="kw2">$1</span>');
   h = h.replace(new RegExp(`\\b(${TYPES.join('|')})\\b`, 'g'), '<span class="ty">$1</span>');
   h = h.replace(/\b(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\b/g, '<span class="num">$1</span>');
-  h = h.replace(/\b(\w+)\s*(?=\()/g, (m,p1) => KEYWORDS.includes(p1) ? m : `<span class="fn">${p1}</span>(`);
+
+  // FIX #1: The original regex used a lookahead (?=\() which does NOT consume the "(",
+  // but the replacement string also appended "(", causing double parentheses like "func((".
+  // Fix: use a capturing group to consume the "(" and include it correctly in the replacement.
+  h = h.replace(/\b(\w+)(\s*\()/g, (m, p1, p2) => KEYWORDS.includes(p1) ? m : `<span class="fn">${p1}</span>${p2}`);
+
   h = h.replace(/\x01([^\x01]*)\x01/g,'$1');
   h = h.replace(/\x00(\d+)\x00/g, (_,i) => stash[parseInt(i)]);
   return h;
 }
 
-// DOM rendering helpers (abridged but functional)
+// DOM rendering helpers
 function toggleSec(hdr) { hdr.classList.toggle('open'); const body = hdr.nextElementSibling; if(body) body.classList.toggle('open'); }
 function esc(s) { return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function renderClassVars() { /* simplified for brevity but full logic */ const el=document.getElementById('cvarList'); if(!classVars.length){el.innerHTML='';return;} el.innerHTML=classVars.map(cv=>`<div class="cvar-item"><select class="cvar-ann" onchange="updateCV(${cv.id},'annotation',this.value)">${['','@export','@onready','@export_range','signal','@static_unload'].map(a=>`<option ${cv.annotation===a?'selected':''}>${a}</option>`).join('')}</select><input class="cvar-name" value="${esc(cv.name)}" onchange="updateCV(${cv.id},'name',this.value)"><input class="cvar-type" value="${esc(cv.type)}" onchange="updateCV(${cv.id},'type',this.value)"><input class="cvar-val" value="${esc(cv.value)}" onchange="updateCV(${cv.id},'value',this.value)"><button class="cvar-del" onclick="removeCV(${cv.id})">🗑</button></div>`).join(''); }
-function renderTabs() { const bar=document.getElementById('funcTabBar'); bar.innerHTML=functions.map(fn=>`<div class="func-tab ${fn.id===activeFnId?'active':''}" onclick="setActiveFunc(${fn.id})">${esc(fn.name)}<span class="tab-del" onclick="event.stopPropagation();removeFunc(${fn.id})">✕</span></div>`).join('')+'<button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>'; }
-function renderEditor() { /* keeping core functionality */ const fn=getActiveFn(); const ed=document.getElementById('funcEditor'); if(!fn){ed.innerHTML='<div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building,<br>or load a template from the panel below.</div>';return;} ed.innerHTML=`<div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--purple)"></div>Function Signature<span class="arrow">▶</span></div><div class="sec-body open"><div class="row2"><div class="field"><div class="field-label">Name</div><input type="text" value="${esc(fn.name)}" onchange="updateFn('name',this.value)"></div><div class="field"><div class="field-label">Return Type</div><select onchange="updateFn('returnType',this.value)">${['void','bool','int','float','String','Variant','Vector2','Vector3','Dictionary','Array','inferred'].map(t=>`<option ${fn.returnType===t?'selected':''}>${t}</option>`).join('')}</select></div></div><div class="toggle-row"><div class="toggle ${fn.isStatic?'active':''}" onclick="toggleFn('isStatic')"><input type="checkbox" ${fn.isStatic?'checked':''}> static func</div></div><div class="field"><div class="field-label">@rpc Annotation</div><select onchange="updateFn('rpcMode',this.value)"><option value="none">no @rpc</option><option value='"any_peer","call_local","reliable"'>any_peer · local · reliable</option><option value='"any_peer","call_remote","reliable"'>any_peer · remote · reliable</option><option value='"authority","call_local","reliable"'>authority · local · reliable</option><option value='"authority","call_remote","reliable"'>authority · remote · reliable</option><option value='"any_peer","call_local","unreliable_ordered"'>any_peer · local · unrel-ordered</option></select></div></div></div><div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--blue)"></div>Parameters<span class="arrow">▶</span></div><div class="sec-body open"><div class="param-list">${fn.params.map(p=>`<div class="param-item"><input type="text" value="${esc(p.name)}" onchange="updateParam(${p.id},'name',this.value)"><select onchange="updateParam(${p.id},'type',this.value)">${['Variant','int','float','String','bool','Vector2','Vector3','Node','Node3D','CharacterBody3D','VehicleBody3D','Area3D','RayCast3D','Dictionary','Array'].map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select><input type="text" value="${esc(p.defaultValue)}" placeholder="= default" onchange="updateParam(${p.id},'defaultValue',this.value)"><button class="param-del" onclick="removeParam(${p.id})">🗑</button></div>`).join('')}${fn.params.length===0?'<div class="empty-hint">No parameters. Click + to add.</div>':''}</div><button class="add-btn" onclick="addParam()">+ Add Parameter</button></div></div><div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Action Sequence<span class="arrow">▶</span></div><div class="sec-body open"><div class="action-list" id="actionList">${fn.actions.map((a,i)=>`<div class="action-row" data-indent="${a.indent||0}" data-id="${a.id}"><div class="indent-strip"></div><div class="action-move"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},+1)">▼</button></div><select class="action-type-sel" onchange="updateAction(${a.id},'type',this.value)">${Object.entries(ACTION_GROUPS).map(([grp,types])=>`<optgroup label="${grp}">${types.map(t=>`<option ${a.type===t?'selected':''}>${t}</option>`).join('')}</optgroup>`).join('')}</select><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span class="indent-val">${a.indent||0}</span><button onclick="changeIndent(${a.id},+1)">▶</button></div><div class="action-fields">${(ACTION_SPECS[a.type]||{}).needsName?`<input type="text" value="${esc(a.name||'')}" placeholder="name" onchange="updateAction(${a.id},'name',this.value)">`:''}${(ACTION_SPECS[a.type]||{}).needsValue?`<input type="text" class="${(ACTION_SPECS[a.type]||{}).rawStyle?'raw-input':(ACTION_SPECS[a.type]||{}).commentStyle?'comment-input':''}" value="${esc(a.value||'')}" placeholder="${(ACTION_SPECS[a.type]||{}).valuePlaceholder||''}" onchange="updateAction(${a.id},'value',this.value)">`:''}</div><button class="action-del" onclick="removeAction(${a.id})">🗑</button></div>`).join('')}</div><div style="display:flex;gap:6px"><button class="add-btn green" style="flex:2" onclick="addAction()">+ Add Action</button><button class="add-btn" style="flex:1" onclick="addAction('raw')">+ Raw Code</button><button class="add-btn" style="flex:1" onclick="addAction('blank')">+ Blank Line</button></div></div></div>`; }
-function generateAll() { const blocks=[]; if(classVars.length) blocks.push(classVars.map(genClassVarLine).join('\n'),''); for(const fn of functions) blocks.push(genFunction(fn),''); setOutput(blocks.length?highlight(blocks.join('\n').trim()):'<span class="cmt"># No functions defined yet.</span>'); updateStatus(); }
+
+function renderClassVars() {
+  const el=document.getElementById('cvarList');
+  if(!classVars.length){el.innerHTML='';return;}
+  el.innerHTML=classVars.map(cv=>`<div class="cvar-item">
+    <select class="cvar-ann" onchange="updateCV(${cv.id},'annotation',this.value)">
+      ${['','@export','@onready','@export_range','signal','@static_unload'].map(a=>`<option ${cv.annotation===a?'selected':''}>${a}</option>`).join('')}
+    </select>
+    <input class="cvar-name" value="${esc(cv.name)}" onchange="updateCV(${cv.id},'name',this.value)">
+    <input class="cvar-type" value="${esc(cv.type)}" onchange="updateCV(${cv.id},'type',this.value)">
+    <input class="cvar-val"  value="${esc(cv.value)}" onchange="updateCV(${cv.id},'value',this.value)">
+    <button class="cvar-del" onclick="removeCV(${cv.id})">🗑</button>
+  </div>`).join('');
+}
+
+function renderTabs() {
+  const bar=document.getElementById('funcTabBar');
+  bar.innerHTML=functions.map(fn=>`<div class="func-tab ${fn.id===activeFnId?'active':''}" onclick="setActiveFunc(${fn.id})">${esc(fn.name)}<span class="tab-del" onclick="event.stopPropagation();removeFunc(${fn.id})">✕</span></div>`).join('')+'<button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>';
+}
+
+function renderEditor() {
+  const fn=getActiveFn();
+  const ed=document.getElementById('funcEditor');
+  if(!fn){
+    ed.innerHTML='<div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building,<br>or load a template from the panel below.</div>';
+    return;
+  }
+  ed.innerHTML=`
+  <div class="sec">
+    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--purple)"></div>Function Signature<span class="arrow">▶</span></div>
+    <div class="sec-body open">
+      <div class="row2">
+        <div class="field"><div class="field-label">Name</div><input type="text" value="${esc(fn.name)}" onchange="updateFn('name',this.value)"></div>
+        <div class="field"><div class="field-label">Return Type</div><select onchange="updateFn('returnType',this.value)">${['void','bool','int','float','String','Variant','Vector2','Vector3','Dictionary','Array','inferred'].map(t=>`<option ${fn.returnType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle ${fn.isStatic?'active':''}" onclick="toggleFn('isStatic')"><input type="checkbox" ${fn.isStatic?'checked':''}> static func</div>
+      </div>
+      <div class="field">
+        <div class="field-label">@rpc Annotation</div>
+        <select onchange="updateFn('rpcMode',this.value)">
+          <option value="none" ${fn.rpcMode==='none'?'selected':''}>no @rpc</option>
+          <option value='"any_peer","call_local","reliable"'   ${fn.rpcMode==='"any_peer","call_local","reliable"'?'selected':''}  >any_peer · local · reliable</option>
+          <option value='"any_peer","call_remote","reliable"'  ${fn.rpcMode==='"any_peer","call_remote","reliable"'?'selected':''} >any_peer · remote · reliable</option>
+          <option value='"authority","call_local","reliable"'  ${fn.rpcMode==='"authority","call_local","reliable"'?'selected':''} >authority · local · reliable</option>
+          <option value='"authority","call_remote","reliable"' ${fn.rpcMode==='"authority","call_remote","reliable"'?'selected':''}>authority · remote · reliable</option>
+          <option value='"any_peer","call_local","unreliable_ordered"' ${fn.rpcMode==='"any_peer","call_local","unreliable_ordered"'?'selected':''}>any_peer · local · unrel-ordered</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--blue)"></div>Parameters<span class="arrow">▶</span></div>
+    <div class="sec-body open">
+      <div class="param-list">
+        ${fn.params.map(p=>`<div class="param-item">
+          <input type="text" value="${esc(p.name)}" onchange="updateParam(${p.id},'name',this.value)">
+          <select onchange="updateParam(${p.id},'type',this.value)">${['Variant','int','float','String','bool','Vector2','Vector3','Node','Node3D','CharacterBody3D','VehicleBody3D','Area3D','RayCast3D','Dictionary','Array'].map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select>
+          <input type="text" value="${esc(p.defaultValue)}" placeholder="= default" onchange="updateParam(${p.id},'defaultValue',this.value)">
+          <button class="param-del" onclick="removeParam(${p.id})">🗑</button>
+        </div>`).join('')}
+        ${fn.params.length===0?'<div class="empty-hint">No parameters. Click + to add.</div>':''}
+      </div>
+      <button class="add-btn" onclick="addParam()">+ Add Parameter</button>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Action Sequence<span class="arrow">▶</span></div>
+    <div class="sec-body open">
+      <div class="action-list" id="actionList">
+        ${fn.actions.map((a)=>`<div class="action-row" data-indent="${a.indent||0}" data-id="${a.id}">
+          <div class="indent-strip"></div>
+          <div class="action-move">
+            <button onclick="moveAction(${a.id},-1)">▲</button>
+            <button onclick="moveAction(${a.id},+1)">▼</button>
+          </div>
+          <select class="action-type-sel" onchange="updateAction(${a.id},'type',this.value)">
+            ${Object.entries(ACTION_GROUPS).map(([grp,types])=>`<optgroup label="${grp}">${types.map(t=>`<option ${a.type===t?'selected':''}>${t}</option>`).join('')}</optgroup>`).join('')}
+          </select>
+          <div class="indent-ctrl">
+            <button onclick="changeIndent(${a.id},-1)">◀</button>
+            <span class="indent-val">${a.indent||0}</span>
+            <button onclick="changeIndent(${a.id},+1)">▶</button>
+          </div>
+          <div class="action-fields">
+            ${(ACTION_SPECS[a.type]||{}).needsName?`<input type="text" value="${esc(a.name||'')}" placeholder="name" onchange="updateAction(${a.id},'name',this.value)">` :''}
+            ${(ACTION_SPECS[a.type]||{}).needsValue?`<input type="text" class="${(ACTION_SPECS[a.type]||{}).rawStyle?'raw-input':(ACTION_SPECS[a.type]||{}).commentStyle?'comment-input':''}" value="${esc(a.value||'')}" placeholder="${esc((ACTION_SPECS[a.type]||{}).valuePlaceholder||'')}" onchange="updateAction(${a.id},'value',this.value)">` :''}
+          </div>
+          <button class="action-del" onclick="removeAction(${a.id})">🗑</button>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="add-btn green" style="flex:2" onclick="addAction()">+ Add Action</button>
+        <button class="add-btn" style="flex:1" onclick="addAction('raw')">+ Raw Code</button>
+        <button class="add-btn" style="flex:1" onclick="addAction('blank')">+ Blank Line</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function generateAll() {
+  const blocks=[];
+  if(classVars.length) blocks.push(classVars.map(genClassVarLine).join('\n'),'');
+  for(const fn of functions) blocks.push(genFunction(fn),'');
+  setOutput(blocks.length?highlight(blocks.join('\n').trim()):'<span class="cmt"># No functions defined yet.</span>');
+  updateStatus();
+}
+
 function setOutput(html){document.getElementById('outputCode').innerHTML=html;}
 function addClassVar(){classVars.push({id:uid(),annotation:'',name:'my_var',type:'',value:''});renderClassVars();}
 function removeCV(id){classVars=classVars.filter(c=>c.id!==id);renderClassVars();}
-function updateCV(id,field,val){const c=classVars.find(c=>c.id===id);if(c)c[field]=val;renderClassVars();}
-function addFunction(template){const id=uid();functions.push({id,name:template?.name||`my_function_${id}`,returnType:template?.returnType||'void',isStatic:template?.isStatic||false,rpcMode:template?.rpcMode||'none',params:(template?.params||[]).map(p=>({...p,id:uid()})),actions:(template?.actions||[]).map(a=>({...a,id:uid()}))});activeFnId=id;renderTabs();renderEditor();updateStatus();}
+
+// FIX #3: updateCV previously called renderClassVars() which destroyed and recreated
+// all DOM nodes, causing a flicker on every blur. Now it only re-renders when needed
+// (annotation change triggers re-render since the select is already blurred anyway).
+function updateCV(id, field, val) {
+  const c = classVars.find(c => c.id === id);
+  if (c) {
+    c[field] = val;
+    // Only re-render for annotation changes (select dropdown).
+    // For text inputs, update is already reflected via the input's own value — no re-render needed.
+    if (field === 'annotation') renderClassVars();
+  }
+}
+
+function addFunction(template){
+  const id=uid();
+  functions.push({
+    id,
+    name:template?.name||`my_function_${id}`,
+    returnType:template?.returnType||'void',
+    isStatic:template?.isStatic||false,
+    rpcMode:template?.rpcMode||'none',
+    params:(template?.params||[]).map(p=>({...p,id:uid()})),
+    actions:(template?.actions||[]).map(a=>({...a,id:uid()}))
+  });
+  activeFnId=id;
+  renderTabs();
+  renderEditor();
+  updateStatus();
+}
+
 function removeFunc(id){functions=functions.filter(f=>f.id!==id);if(activeFnId===id)activeFnId=functions.length?functions[functions.length-1].id:null;renderTabs();renderEditor();updateStatus();}
 function setActiveFunc(id){activeFnId=id;renderTabs();renderEditor();}
 function getActiveFn(){return functions.find(f=>f.id===activeFnId)||null;}
@@ -629,12 +767,79 @@ function updateAction(id,field,val){const fn=getActiveFn();if(fn){const a=fn.act
 function moveAction(id,dir){const fn=getActiveFn();if(fn){const idx=fn.actions.findIndex(a=>a.id===id);const nxt=idx+dir;if(nxt>=0&&nxt<fn.actions.length){[fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]];renderEditor();}}}
 function changeIndent(id,delta){const fn=getActiveFn();if(fn){const a=fn.actions.find(a=>a.id===id);if(a){a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta));renderEditor();}}}
 function updateStatus(){const total=functions.reduce((s,f)=>s+f.actions.length,0);document.getElementById('funcCount').textContent=`${functions.length} function${functions.length!==1?'s':''} · ${total} action${total!==1?'s':''}`;document.getElementById('statusText').textContent='Ready';}
-function copyCode(){const code=document.getElementById('outputCode').innerText||'';navigator.clipboard.writeText(code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy All';btn.classList.remove('ok');},1800);});}
+function copyCode(){const code=document.getElementById('outputCode').textContent||'';navigator.clipboard.writeText(code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy All';btn.classList.remove('ok');},1800);});}
 function exportJSON(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({classVars,functions},null,2)],{type:'application/json'}));a.download='gdscript_config.json';a.click();}
-function importJSON(input){const file=input.files[0];if(!file)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);classVars=d.classVars||[];functions=d.functions||[];activeFnId=functions.length?functions[0].id:null;renderClassVars();renderTabs();renderEditor();updateStatus();document.getElementById('statusText').textContent='Config imported ✓';}catch(ex){alert('Invalid JSON file: '+ex.message);}};r.readAsText(file);input.value='';}
-const TEMPLATES=[{id:'vehicle_enter',label:'🚗 Enter Vehicle',template:{name:'enter_vehicle',returnType:'bool',params:[{name:'vehicle',type:'VehicleBody3D'},{name:'seat_index',type:'int',defaultValue:'0'}],actions:[{type:'if',value:'not vehicle or not is_multiplayer_authority()'},{type:'return',value:'false',indent:1},{type:'assign',name:'current_vehicle',value:'vehicle'},{type:'return',value:'true'}]}}];
-function buildTemplateGrid(){document.getElementById('tmplGrid').innerHTML=TEMPLATES.map(t=>`<button class="tmpl-btn" onclick="addFunction(${JSON.stringify(t.template)}); generateAll();"><span>${t.label.split(' ')[0]}</span>${t.label.split(' ').slice(1).join(' ')}</button>`).join('');}
-buildTemplateGrid(); renderClassVars(); renderTabs(); renderEditor(); updateStatus();
+
+function importJSON(input) {
+  const file=input.files[0];
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try {
+      const d=JSON.parse(e.target.result);
+      classVars=d.classVars||[];
+      functions=d.functions||[];
+      activeFnId=functions.length?functions[0].id:null;
+
+      // FIX #2: After importing, _nextId must be set above all existing IDs to prevent
+      // collisions when new items are added. Collect all IDs from the imported data.
+      const allIds = [
+        ...classVars.map(c => c.id),
+        ...functions.flatMap(f => [f.id, ...f.params.map(p=>p.id), ...f.actions.map(a=>a.id)])
+      ].filter(Number.isFinite);
+      _nextId = allIds.length ? Math.max(...allIds) + 1 : 1;
+
+      renderClassVars();
+      renderTabs();
+      renderEditor();
+      updateStatus();
+      document.getElementById('statusText').textContent='Config imported ✓';
+    } catch(ex) {
+      alert('Invalid JSON file: '+ex.message);
+    }
+  };
+  r.readAsText(file);
+  input.value='';
+}
+
+// FIX #4: buildTemplateGrid previously used JSON.stringify() inside an onclick=""
+// attribute, which breaks when template strings contain single or double quotes.
+// Now we store templates in a map and reference them by index — no serialization needed.
+const TEMPLATES = [
+  {
+    label:'🚗 Enter Vehicle',
+    template:{
+      name:'enter_vehicle',
+      returnType:'bool',
+      params:[{name:'vehicle',type:'VehicleBody3D'},{name:'seat_index',type:'int',defaultValue:'0'}],
+      actions:[
+        {type:'if',    value:'not vehicle or not is_multiplayer_authority()', indent:0},
+        {type:'return',value:'false', indent:1},
+        {type:'assign',name:'current_vehicle',value:'vehicle', indent:0},
+        {type:'return',value:'true', indent:0}
+      ]
+    }
+  }
+];
+
+function buildTemplateGrid() {
+  document.getElementById('tmplGrid').innerHTML = TEMPLATES.map((t,i) =>
+    `<button class="tmpl-btn" onclick="loadTemplate(${i})">
+      <span>${t.label.split(' ')[0]}</span>${t.label.split(' ').slice(1).join(' ')}
+    </button>`
+  ).join('');
+}
+
+function loadTemplate(index) {
+  const t = TEMPLATES[index];
+  if (t) { addFunction(t.template); generateAll(); }
+}
+
+buildTemplateGrid();
+renderClassVars();
+renderTabs();
+renderEditor();
+updateStatus();
 </script>
 </body>
 </html>
