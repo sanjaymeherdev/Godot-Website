@@ -442,9 +442,15 @@ function setCurrency(currency) {
     }
 
     localStorage.setItem('preferredCurrency', currency);
+    
+    // Close modal if open (to avoid coupon visibility mismatch)
+    const modal = document.getElementById('emailModal');
+    if (modal && modal.classList.contains('active')) {
+        closeEmailModal();
+    }
+    
     renderProducts(filteredProducts.length ? filteredProducts : allProducts);
 }
-
 function loadSavedCurrency() {
     const saved = localStorage.getItem('preferredCurrency');
     if (saved === 'inr' || saved === 'usd') currentCurrency = saved;
@@ -479,6 +485,12 @@ function openEmailModal(productId) {
     document.getElementById('couponStatus').className         = 'coupon-status';
     document.getElementById('couponStatus').textContent       = '';
 
+    // ── HIDE COUPON SECTION FOR USD ──
+    const couponSection = document.querySelector('.coupon-section');
+    if (couponSection) {
+        couponSection.style.display = currentCurrency === 'usd' ? 'none' : 'block';
+    }
+
     const methodEl = document.getElementById('modalPaymentMethod');
     if (methodEl) methodEl.textContent = method;
 
@@ -488,7 +500,6 @@ function openEmailModal(productId) {
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
-
 function closeEmailModal() {
     document.getElementById('emailModal').classList.remove('active');
     document.body.style.overflow = 'auto';
