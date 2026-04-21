@@ -145,18 +145,22 @@ function showStatusBanner(message, color, persist = false) {
 // ============================================
 function loadProducts() {
     showLoading();
-    try {
-        const schemaEl = document.getElementById('products-schema');
-        if (!schemaEl) throw new Error('products-schema not found');
-        allProducts      = JSON.parse(schemaEl.textContent);
-        filteredProducts = [...allProducts];
-        renderProducts(filteredProducts);
-        hideLoading();
-        updateResultsCount();
-    } catch (error) {
-        console.error('Error reading products schema:', error);
-        showError();
-    }
+    fetch('data/products.json')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            allProducts = data;
+            filteredProducts = [...allProducts];
+            renderProducts(filteredProducts);
+            hideLoading();
+            updateResultsCount();
+        })
+        .catch(error => {
+            console.error('Error loading products.json:', error);
+            showError();
+        });
 }
 
 // ============================================
