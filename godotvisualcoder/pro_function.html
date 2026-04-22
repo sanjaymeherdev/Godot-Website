@@ -1,758 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GDScript Pro Generator — Godot 4</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#080b0f;--bg2:#0d1117;--bg3:#141b22;--bg4:#1c2430;--bg5:#232d3a;
-  --border:#1e2a38;--border2:#253040;--border3:#2e3d50;
-  --text:#d4dde8;--text2:#7f96b0;--text3:#4a5f72;--text4:#2e3d50;
-  --green:#39d353;--green2:#2ea043;--green-dim:rgba(57,211,83,0.08);
-  --blue:#58a6ff;--blue-dim:rgba(88,166,255,0.08);
-  --purple:#bc8cff;--purple-dim:rgba(188,140,255,0.08);
-  --amber:#e3b341;--amber-dim:rgba(227,179,65,0.08);
-  --red:#f85149;--red-dim:rgba(248,81,73,0.08);
-  --cyan:#76e3ea;--cyan-dim:rgba(118,227,234,0.08);
-  --orange:#ffa657;
-  --r:8px;--r2:12px;
-}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border3);border-radius:3px}
-
-/* header */
-.header{display:flex;align-items:center;gap:16px;padding:0 20px;height:52px;background:var(--bg2);border-bottom:1px solid var(--border2);position:fixed;top:0;left:0;right:0;z-index:200;}
-.logo{font-size:15px;font-weight:700;color:var(--green);letter-spacing:-0.5px}
-.logo span{color:var(--text3)}
-.header-sep{color:var(--text4);font-size:10px}
-.header-desc{color:var(--text3);font-size:11px}
-.header-pills{display:flex;gap:6px;margin-left:auto}
-.pill{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:0.5px;border:1px solid}
-.pill-green{color:var(--green);border-color:rgba(57,211,83,0.3);background:var(--green-dim)}
-.pill-blue{color:var(--blue);border-color:rgba(88,166,255,0.3);background:var(--blue-dim)}
-
-/* layout */
-.workspace{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 52px);margin-top:52px;overflow:hidden;}
-.left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border2);overflow:hidden;}
-.right-panel{display:flex;flex-direction:column;overflow:hidden}
-.output-code{flex:1;overflow-y:auto;padding:16px;font-size:12.5px;line-height:1.75;white-space:pre;font-family:'JetBrains Mono',monospace;tab-size:4}
-.sample-code{overflow-y:auto;max-height:42vh;padding:14px 16px;font-size:12px;line-height:1.75;white-space:pre;font-family:'JetBrains Mono',monospace;opacity:0.78;border-bottom:2px solid var(--border2);flex-shrink:0}
-
-/* sections */
-.sec{border-bottom:1px solid var(--border);flex-shrink:0}
-.sec-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;transition:color 0.15s;}
-.sec-hdr:hover{color:var(--text2)}
-.sec-hdr .arrow{margin-left:auto;font-size:9px;transition:transform 0.2s}
-.sec-hdr.open .arrow{transform:rotate(90deg)}
-.sec-body{display:none;padding:12px 14px;gap:10px;flex-direction:column}
-.sec-body.open{display:flex}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-
-/* script header badges */
-.script-header-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:5px}
-.badge-opt{font-size:9px;background:var(--bg4);border:1px solid var(--border3);color:var(--text3);padding:1px 5px;border-radius:10px}
-.badge-req{font-size:9px;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.3);color:var(--red);padding:1px 5px;border-radius:10px}
-
-/* tabs */
-.func-tab-bar{display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border2);overflow-x:auto;flex-shrink:0;min-height:40px;}
-.func-tab{display:flex;align-items:center;gap:6px;padding:0 12px;height:40px;flex-shrink:0;font-size:11px;cursor:pointer;color:var(--text3);border-right:1px solid var(--border);transition:all 0.15s;white-space:nowrap;border-bottom:2px solid transparent;}
-.func-tab:hover{color:var(--text2);background:var(--bg3)}
-.func-tab.active{color:var(--blue);background:var(--bg3);border-bottom-color:var(--blue);}
-.func-tab .tab-del{color:var(--text4);font-size:14px;line-height:1;padding:0 2px;border-radius:3px;}
-.func-tab .tab-del:hover{color:var(--red);background:var(--red-dim)}
-.add-func-btn{display:flex;align-items:center;gap:5px;padding:0 14px;height:40px;flex-shrink:0;font-size:11px;font-family:inherit;background:none;border:none;color:var(--text3);cursor:pointer;}
-.add-func-btn:hover{color:var(--green)}
-
-/* forms */
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.field{display:flex;flex-direction:column;gap:4px}
-.field-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px}
-input,select,textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.15s;width:100%;}
-input:focus,select:focus,textarea:focus{border-color:var(--border3)}
-input::placeholder,textarea::placeholder{color:var(--text4);opacity:0.7;font-style:italic}
-select option{background:var(--bg4)}
-
-/* toggles */
-.toggle-row{display:flex;gap:16px;flex-wrap:wrap}
-.toggle{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border);font-size:11px;color:var(--text2);transition:all 0.15s;}
-.toggle:hover{border-color:var(--border3)}
-.toggle.active{border-color:rgba(88,166,255,0.4);background:var(--blue-dim);color:var(--blue)}
-.toggle input{display:none}
-
-/* params */
-.param-list{display:flex;flex-direction:column;gap:6px}
-.param-item{display:flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:6px 8px;}
-.param-item input,.param-item select{flex:1;min-width:60px;padding:5px 8px;font-size:11px}
-.param-item .param-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:16px;padding:0 4px}
-.param-item .param-del:hover{color:var(--red)}
-
-/* declarations */
-.cvar-header{display:flex;gap:6px;padding:0 8px 4px;font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:0.5px}
-.cvar-header span:nth-child(1){width:110px;flex-shrink:0}
-.cvar-header span:nth-child(2){width:48px;flex-shrink:0}
-.cvar-header span:nth-child(3){flex:1.2;min-width:70px}
-.cvar-header span:nth-child(4){flex:1;min-width:60px}
-.cvar-header span:nth-child(5){flex:1.2;min-width:70px}
-.cvar-item{display:flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:5px 8px}
-.cvar-ann{width:110px;flex-shrink:0;padding:4px 6px;font-size:11px}
-.cvar-keyword{width:48px;flex-shrink:0;padding:3px 6px;font-size:11px;background:var(--bg3);color:var(--red);border:1px solid rgba(248,81,73,0.2);border-radius:var(--r);text-align:center}
-.cvar-name{flex:1.2;min-width:70px;padding:4px 7px;font-size:11px}
-.cvar-type{flex:1;min-width:60px;padding:4px 6px;font-size:11px}
-.cvar-val{flex:1.2;min-width:70px;padding:4px 7px;font-size:11px}
-.cvar-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:14px;flex-shrink:0}
-.cvar-del:hover{color:var(--red)}
-
-/* action rows */
-.action-list{display:flex;flex-direction:column;gap:4px;min-height:50px}
-.action-row{display:flex;align-items:flex-start;gap:5px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:5px 6px;position:relative;transition:border-color 0.15s;}
-.action-row:hover{border-color:var(--border3)}
-.action-row[data-indent="0"]{margin-left:0}
-.action-row[data-indent="1"]{margin-left:16px;border-left:2px solid rgba(88,166,255,0.5)}
-.action-row[data-indent="2"]{margin-left:32px;border-left:2px solid rgba(188,140,255,0.5)}
-.action-row[data-indent="3"]{margin-left:48px;border-left:2px solid rgba(57,211,83,0.5)}
-.action-row[data-indent="4"]{margin-left:64px;border-left:2px solid rgba(227,179,65,0.5)}
-.action-row[data-indent="5"]{margin-left:80px;border-left:2px solid rgba(248,81,73,0.5)}
-.action-row[data-indent="6"]{margin-left:96px;border-left:2px solid rgba(118,227,234,0.5)}
-.action-row[data-indent="0"] .indent-strip{background:var(--text4)}
-.action-row[data-indent="1"] .indent-strip{background:var(--blue)}
-.action-row[data-indent="2"] .indent-strip{background:var(--purple)}
-.action-row[data-indent="3"] .indent-strip{background:var(--green)}
-.action-row[data-indent="4"] .indent-strip{background:var(--amber)}
-.action-row[data-indent="5"] .indent-strip{background:var(--red)}
-.action-row[data-indent="6"] .indent-strip{background:var(--cyan)}
-.action-row.is-block-opener{background:var(--bg3)}
-.action-row.is-else-row{background:var(--bg3);border-style:dashed}
-.indent-strip{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:22px}
-.action-move{display:flex;flex-direction:column;gap:0;flex-shrink:0}
-.action-move button{background:none;border:none;color:var(--text4);cursor:pointer;font-size:10px;padding:1px 3px}
-.action-move button:hover{color:var(--text2)}
-.action-type-sel{width:120px;flex-shrink:0;padding:4px 6px;font-size:11px}
-.indent-ctrl{display:flex;align-items:center;gap:3px;flex-shrink:0}
-.indent-ctrl button{background:var(--bg3);border:1px solid var(--border2);color:var(--text3);cursor:pointer;width:18px;height:22px;font-size:10px;border-radius:3px}
-.indent-ctrl button:hover{color:var(--text);border-color:var(--border3)}
-.indent-val{width:20px;text-align:center;font-size:11px;color:var(--text2)}
-.action-fields{flex:1;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.action-fields input,.action-fields select{flex:1;min-width:80px;padding:4px 7px;font-size:11px}
-.action-fields .raw-input{flex:1;min-width:200px;background:var(--bg3);border-color:rgba(57,211,83,0.2);color:var(--green)}
-.action-fields .comment-input{flex:1;background:var(--bg3);border-color:rgba(74,95,114,0.3);color:var(--text3)}
-.action-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:15px;padding:0 4px;line-height:22px}
-.action-del:hover{color:var(--red)}
-
-/* condition builder */
-.cond-builder{display:flex;flex-direction:column;gap:4px;flex:1}
-.cond-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.cond-op{width:48px;flex-shrink:0;padding:3px 5px;font-size:10px;font-weight:700;background:var(--bg3);border:1px solid var(--border3);border-radius:4px;color:var(--purple);cursor:pointer;text-align:center}
-.cond-op:hover{background:var(--purple-dim)}
-.cond-left{flex:1;min-width:80px;padding:4px 7px;font-size:11px}
-.cond-cmp{width:72px;flex-shrink:0;padding:4px 5px;font-size:11px}
-.cond-right{flex:1;min-width:60px;padding:4px 7px;font-size:11px}
-.cond-not{padding:3px 7px;font-size:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text3);cursor:pointer;flex-shrink:0}
-.cond-not.active{background:var(--red-dim);border-color:rgba(248,81,73,0.4);color:var(--red)}
-.cond-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:13px;padding:0 2px;flex-shrink:0}
-.cond-del:hover{color:var(--red)}
-.cond-add{font-size:10px;padding:3px 9px;background:var(--bg3);border:1px dashed var(--border3);border-radius:4px;color:var(--text3);cursor:pointer;align-self:flex-start;margin-top:2px}
-.cond-add:hover{color:var(--blue);border-color:var(--blue)}
-.cond-if-label{width:48px;flex-shrink:0;font-size:9px;color:var(--text4);text-align:center;text-transform:uppercase;letter-spacing:0.5px}
-
-/* buttons */
-.add-btn{width:100%;padding:8px;background:var(--bg3);border:1px dashed var(--border3);border-radius:var(--r);color:var(--text3);font-size:11px;font-family:inherit;cursor:pointer}
-.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
-.add-btn.green:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
-.bottom-bar{padding:12px 14px;border-top:1px solid var(--border2);display:flex;gap:8px;flex-shrink:0;background:var(--bg2)}
-.btn{flex:1;padding:10px 16px;border:none;border-radius:var(--r);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
-.btn-primary{background:linear-gradient(135deg,#238636,#196c2e);color:white}
-.btn-primary:hover{background:linear-gradient(135deg,#2ea043,#238636)}
-.btn-sm{padding:7px 12px;font-size:11px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);cursor:pointer}
-.btn-sm:hover{border-color:var(--border3);color:var(--text)}
-
-/* output */
-.output-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border2);background:var(--bg2)}
-.output-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase}
-.output-actions{display:flex;gap:6px;margin-left:auto}
-.copy-btn{padding:5px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:10px;cursor:pointer}
-.copy-btn:hover{border-color:var(--green);color:var(--green)}
-.copy-btn.ok{background:var(--green-dim);border-color:var(--green);color:var(--green)}
-.sample-banner{padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:8px;flex-shrink:0}
-.sample-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;padding:2px 7px;border-radius:10px;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.3);color:var(--green)}
-.sample-label{font-size:11px;color:var(--text3)}
-
-/* syntax highlight */
-.kw{color:var(--red)} .kw2{color:var(--purple)} .fn{color:var(--blue)} .ty{color:var(--cyan)} .str{color:var(--amber)} .num{color:var(--orange)} .cmt{color:var(--text3);font-style:italic} .ann{color:var(--purple)}
-
-.scrollable{overflow-y:auto;flex:1}
-.status-bar{display:flex;align-items:center;gap:10px;padding:4px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);background:var(--bg2)}
-.status-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
-.empty-hint{color:var(--text3);font-size:11px;line-height:1.8}
-
-/* guide */
-.guide-footer{background:var(--bg3);border-top:1px solid var(--border2);flex-shrink:0;font-size:11px;}
-.guide-header{padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg2);border-bottom:1px solid var(--border);user-select:none;color:var(--text2);}
-.guide-header:hover{color:var(--text);background:var(--bg3);}
-.guide-header .arrow{font-size:9px;transition:transform 0.2s;margin-left:auto}
-.guide-header.open .arrow{transform:rotate(90deg)}
-.guide-body{display:none;padding:14px 16px;background:var(--bg);max-height:180px;overflow-y:auto;line-height:1.6;color:var(--text2);}
-.guide-body.open{display:block}
-.guide-body h4{color:var(--green);margin:8px 0 4px;font-size:11px;letter-spacing:0.5px}
-.guide-body p{margin:4px 0}
-.guide-body code{background:var(--bg4);padding:2px 5px;border-radius:4px;font-size:10px;color:var(--cyan)}
-.guide-body .grid-guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-.guide-body hr{border-color:var(--border);margin:6px 0}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>GDScript Forge | Modular Visual Coder</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================ */
+    /* SECTION 1: CSS VARIABLES & THEME              */
+    /* ============================================ */
+    :root {
+      --bg:#080b0f; --bg2:#0d1117; --bg3:#141b22; --bg4:#1c2430;
+      --border:#1e2a38; --border2:#253040; --border3:#2e3d50;
+      --text:#d4dde8; --text2:#7f96b0; --text3:#4a5f72;
+      --green:#39d353; --green-dim:rgba(57,211,83,0.08);
+      --blue:#58a6ff; --blue-dim:rgba(88,166,255,0.08);
+      --purple:#bc8cff; --amber:#e3b341; --red:#f85149; --cyan:#76e3ea;
+      --r:8px; --r2:12px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;overflow-x:hidden}
+    /* ============================================ */
+    /* SECTION 2: LAYOUT & RESPONSIVE               */
+    /* ============================================ */
+    .workspace{display:flex;flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+    @media (min-width:860px){ .workspace{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 52px);overflow:hidden} }
+    .left-panel{background:var(--bg);width:100%;display:flex;flex-direction:column}
+    .right-panel{width:100%;margin-top:16px;border-top:2px solid var(--border2)}
+    @media (min-width:860px){ .right-panel{margin-top:0;border-top:none;overflow:hidden;height:100%} }
+    .output-code,.sample-code{white-space:pre-wrap;word-break:break-word;font-family:'JetBrains Mono',monospace;padding:16px;overflow-y:auto}
+    .output-code{flex:1;background:var(--bg);max-height:60vh}
+    .sample-code{background:var(--bg3);border-bottom:2px solid var(--border2);max-height:40vh}
+    /* ============================================ */
+    /* SECTION 3: FORM & CARD STYLES                */
+    /* ============================================ */
+    .sec{border-bottom:1px solid var(--border)}
+    .sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-weight:600;color:var(--text3);text-transform:uppercase}
+    .sec-hdr .arrow{margin-left:auto;font-size:9px;transition:transform 0.2s}
+    .sec-hdr.open .arrow{transform:rotate(90deg)}
+    .sec-body{display:none;padding:12px 14px;gap:10px;flex-direction:column}
+    .sec-body.open{display:flex}
+    .dot{width:7px;height:7px;border-radius:50%}
+    input,select,textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:monospace;font-size:12px;width:100%}
+    .badge-opt,.badge-req{font-size:9px;padding:1px 5px;border-radius:10px}
+    .badge-req{background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.3);color:var(--red)}
+    .add-btn{width:100%;padding:8px;background:var(--bg3);border:1px dashed var(--border3);border-radius:var(--r);cursor:pointer;font-size:11px}
+    .add-btn:hover{border-color:var(--blue);color:var(--blue)}
+    .btn-primary{background:linear-gradient(135deg,#238636,#196c2e);color:white;border:none;padding:10px;border-radius:var(--r);font-weight:700}
+    .copy-btn{padding:5px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer}
+    /* ============================================ */
+    /* SECTION 4: SYNTAX HIGHLIGHTING               */
+    /* ============================================ */
+    .kw{color:#ff7b72} .fn{color:#79c0ff} .ty{color:#79c0ff} .str{color:#a5d6ff} .num{color:#79c0ff} .cmt{color:#8b949e;font-style:italic} .ann{color:#ff7b72}
+    /* ============================================ */
+    /* SECTION 5: ACTION & CONDITION UI             */
+    /* ============================================ */
+    .action-row{display:flex;flex-wrap:wrap;gap:5px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:6px;margin-bottom:4px}
+    .cond-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+    .cond-op{background:var(--bg3);border:1px solid var(--border3);border-radius:4px;padding:3px 8px;font-size:10px;cursor:pointer}
+    .match-builder{background:var(--bg3);border-radius:var(--r);padding:10px;margin:6px 0}
+    .pattern-row{background:var(--bg4);margin:5px 0;padding:8px;border-left:3px solid var(--purple)}
+    .status-bar{font-size:10px;padding:4px 14px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:10px}
+  </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="logo">GDS<span>cript</span>PRO</div>
-  <div class="header-sep">▸</div>
-  <div class="header-desc">Visual GDScript Generator · Godot 4</div>
-  <div class="header-pills">
-    <span class="pill pill-green">GODOT 4</span>
-    <span class="pill pill-blue">BEGINNER FRIENDLY</span>
-  </div>
-</div>
-
 <div class="workspace">
+  <!-- ============================================ -->
+  <!-- LEFT PANEL: HEADER, DECLARATIONS, FUNCTIONS  -->
+  <!-- ============================================ -->
   <div class="left-panel">
-
-    <!-- Script Header -->
-    <div class="sec">
-      <div class="sec-hdr open" onclick="toggleSec(this)">
-        <div class="dot" style="background:var(--green)"></div>
-        Script Header
-        <span class="arrow">▶</span>
-      </div>
-      <div class="sec-body open">
-        <div class="row2">
-          <div class="field">
-            <div class="script-header-label">class_name <span class="badge-opt">optional</span></div>
-            <input type="text" id="classNameInput" placeholder="e.g., Player, Enemy" oninput="updateScriptHeader()">
-          </div>
-          <div class="field">
-            <div class="script-header-label">extends <span class="badge-req">required</span></div>
-            <input type="text" id="extendsInput" list="extendsList" placeholder="CharacterBody3D" oninput="updateScriptHeader()">
-            <datalist id="extendsList">
-              <option value="Node"><option value="Node2D"><option value="Node3D">
-              <option value="CharacterBody2D"><option value="CharacterBody3D">
-              <option value="RigidBody2D"><option value="RigidBody3D">
-              <option value="Area2D"><option value="Area3D">
-              <option value="StaticBody2D"><option value="StaticBody3D">
-              <option value="AnimationPlayer"><option value="Control">
-              <option value="CanvasLayer"><option value="Resource"><option value="RefCounted">
-            </datalist>
-          </div>
-        </div>
-      </div>
+    <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Script Header<span class="arrow">▶</span></div>
+      <div class="sec-body open"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="classNameInput" placeholder="class_name (optional)">
+        <input type="text" id="extendsInput" list="extendsList" placeholder="extends (required)">
+        <datalist id="extendsList"><option>CharacterBody3D</option><option>Node2D</option><option>Node3D</option><option>Area3D</option></datalist>
+      </div></div>
     </div>
-
-    <!-- Declarations -->
-    <div class="sec">
-      <div class="sec-hdr" onclick="toggleSec(this)">
-        <div class="dot" style="background:var(--amber)"></div>
-        Declarations
-        <span class="arrow">▶</span>
-      </div>
-      <div class="sec-body">
-        <div class="cvar-header">
-          <span>Annotation</span><span>Keyword</span><span>Name</span><span>: Type</span><span>= Value</span>
-        </div>
-        <div id="cvarList" class="param-list"></div>
-        <button class="add-btn" onclick="addClassVar()">+ Add Declaration</button>
-      </div>
+    <div class="sec"><div class="sec-hdr" onclick="toggleSec(this)"><div class="dot" style="background:var(--amber)"></div>Declarations & Enums<span class="arrow">▶</span></div>
+      <div class="sec-body"><div id="cvarList" class="param-list"></div><button class="add-btn" onclick="addClassVar()">+ Add Declaration</button><hr><button class="add-btn" onclick="openEnumModal()">🏷️ + Add Enum</button><div id="enumList"></div></div>
     </div>
-
-    <!-- Function Tabs -->
-    <div class="func-tab-bar" id="funcTabBar">
-      <button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>
-    </div>
-
-    <!-- Function Editor -->
-    <div class="func-editor scrollable" id="funcEditor">
-      <div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building.</div>
-    </div>
-
-    <div class="bottom-bar">
-      <button class="btn btn-primary" onclick="generateAll()">⚡ Generate GDScript</button>
-    </div>
-    <div class="status-bar">
-      <div class="status-dot"></div><span id="statusText">Ready</span>
-      <span id="funcCount" style="margin-left:auto">0 functions · 0 actions</span>
-    </div>
+    <div class="func-tab-bar" id="funcTabBar" style="display:flex;overflow-x:auto;background:var(--bg2);border-bottom:1px solid var(--border2);min-height:40px"></div>
+    <div id="funcEditor" style="overflow-y:auto;flex:1"></div>
+    <div class="bottom-bar" style="padding:12px;display:flex;gap:8px"><button class="btn-primary" style="flex:1" onclick="generateAll()">⚡ Generate GDScript</button></div>
+    <div class="status-bar"><div class="status-dot" style="background:var(--green)"></div><span id="statusText">Ready</span><span id="funcCount" style="margin-left:auto">0 functions</span></div>
   </div>
-
-  <div class="right-panel">
-    <div class="output-header">
-      <span class="output-title">⬡ Generated GDScript</span>
-      <div class="output-actions">
-        <button class="btn-sm" onclick="exportJSON()">↓ Export JSON</button>
-        <label class="btn-sm" style="cursor:pointer" for="importFile">↑ Import JSON</label>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
-        <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy All</button>
-      </div>
-    </div>
-    <div class="sample-banner">
-      <span class="sample-tag">EXAMPLE</span>
-      <span class="sample-label">CharacterBody3D movement — read this to understand GDScript structure</span>
-      <button class="btn-sm" id="sampleToggleBtn" style="margin-left:auto;font-size:10px" onclick="toggleSample()">Hide Sample</button>
-    </div>
-    <div id="sampleBlock" class="sample-code"></div>
-    <div class="output-code" id="outputCode"><span class="cmt"># Press ⚡ Generate GDScript to see your code here</span></div>
-  </div>
+  <!-- ============================================ -->
+  <!-- RIGHT PANEL: OUTPUT & EXAMPLE                -->
+  <!-- ============================================ -->
+  <div class="right-panel"><div class="output-header" style="padding:10px 14px;display:flex;justify-content:space-between"><span>⬡ Generated GDScript</span><div><button class="copy-btn" onclick="copyCode()">Copy All</button></div></div>
+  <div id="sampleBlock" class="sample-code"></div><div id="outputCode" class="output-code"><span class="cmt"># Press Generate</span></div></div>
 </div>
-
-<div class="guide-footer">
-  <div class="guide-header" onclick="toggleGuide()">
-    <div class="dot" style="background:var(--blue)"></div>
-    📘 User Guide
-    <span class="arrow" id="guideArrow">▶</span>
-  </div>
-  <div class="guide-body" id="guideBody">
-    <h4>🗂️ Script structure — always in this order</h4>
-    <p><code>class_name</code> (optional) → gives your script a reusable name across the project.<br>
-    <code>extends</code> (required) → tells Godot what kind of node this script belongs to. Without it, nothing works.<br>
-    <strong>Declarations</strong> → constants, exported vars, onready refs, signals — all before functions.<br>
-    <strong>Functions</strong> → <code>_ready()</code> runs once on load · <code>_physics_process(delta)</code> runs every physics frame.</p>
-    <hr>
-    <h4>🏷️ Annotation quick reference</h4>
-    <div class="grid-guide">
-      <div><code>@export</code> → <em>variable appears in the Godot Inspector</em></div>
-      <div><code>@onready</code> → <em>gets a node reference when scene loads (use $NodeName)</em></div>
-      <div><code>const</code> → <em>value that never changes (use UPPER_CASE)</em></div>
-      <div><code>signal</code> → <em>custom event other nodes can listen to</em></div>
-    </div>
-    <hr>
-    <h4>🔀 Nested logic tips</h4>
-    <p>After adding <code>if</code> / <code>for</code> / <code>while</code>, the next action auto-indents inside it. Use <code>◀ ▶</code> to adjust manually. Block openers show a darker background; <code>else/elif</code> show dashed borders and snap back to the correct indent automatically.</p>
-    <hr>
-    <h4>🔗 Condition builder (if / elif / while)</h4>
-    <p>Each condition row has: <code>not</code> toggle · left operand · comparator · right operand. Click <code>+ AND/OR condition</code> to chain multiple bools. Click the <code>AND</code>/<code>OR</code> badge between rows to toggle the operator.</p>
-  </div>
-</div>
-
 <script>
-'use strict';
-
-let classVars = [];
-let functions  = [];
+// ============================================
+// SECTION 1: GLOBAL STATE
+// ============================================
+let classVars = [];          // declarations
+let enums = [];              // {id,name,values:[{name,val}],exportDropdown,autoMatch, matchFuncName}
+let functions = [];
 let activeFnId = null;
-let _nextId    = 1;
+let _nextId = 1;
+let _lastGeneratedCode = "";
 const uid = () => _nextId++;
 
-let scriptClassName = '';
-let scriptExtends   = '';
+// ============================================
+// SECTION 2: BUILT-IN FUNCTION RESTRICTIONS
+// ============================================
+const BUILTIN_TYPES = {
+  enter_tree: { name:"_enter_tree", params:[], ret:"void" },
+  ready: { name:"_ready", params:[], ret:"void" },
+  process: { name:"_process", params:[{name:"delta",type:"float"}], ret:"void" },
+  physics_process: { name:"_physics_process", params:[{name:"delta",type:"float"}], ret:"void" },
+  input: { name:"_input", params:[{name:"event",type:"InputEvent"}], ret:"void" },
+  unhandled_input: { name:"_unhandled_input", params:[{name:"event",type:"InputEvent"}], ret:"void" },
+  exit_tree: { name:"_exit_tree", params:[], ret:"void" }
+};
+let builtInAdded = { enter_tree:false, ready:false, process:false, physics_process:false, input:false, unhandled_input:false, exit_tree:false };
 
-function updateScriptHeader(){
-  scriptClassName = document.getElementById('classNameInput').value.trim();
-  scriptExtends   = document.getElementById('extendsInput').value.trim();
-}
+// ============================================
+// SECTION 3: HELPER FUNCTIONS
+// ============================================
+function esc(s){ return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function toggleSec(hdr){ hdr.classList.toggle('open'); let b=hdr.nextElementSibling; if(b)b.classList.toggle('open'); }
 
-// ── BLOCK SETS ───────────────────────────────────────────────────
-const BLOCK_OPENERS = new Set(['if','elif','else','for','while','match','case']);
-const ELSE_TYPES    = new Set(['elif','else']);
-const COND_TYPES    = new Set(['if','elif','while']);
-
-// ── DECLARATIONS ─────────────────────────────────────────────────
-function getKeyword(ann){ return ann==='signal'?'signal':ann==='const'?'const':'var'; }
-
+// ============================================
+// SECTION 4: DECLARATIONS (VAR/SIGNAL/CONST)
+// ============================================
 function renderClassVars(){
   const el=document.getElementById('cvarList');
-  if(!classVars.length){el.innerHTML='<div class="empty-hint" style="padding:8px;text-align:center">✨ Add @export, @onready, signal, const, or var</div>';return;}
-  el.innerHTML=classVars.map(cv=>{
-    const kw=getKeyword(cv.annotation);
-    const isSig=cv.annotation==='signal';
-    return `<div class="cvar-item">
-      <select class="cvar-ann" onchange="updateCV(${cv.id},'annotation',this.value)">
-        ${['','@export','@onready','@export_range','@export_enum','const','signal','@static_unload'].map(a=>`<option ${cv.annotation===a?'selected':''}>${a||'none'}</option>`).join('')}
-      </select>
-      <div class="cvar-keyword">${kw}</div>
-      <input class="cvar-name" value="${esc(cv.name)}" placeholder="var_name" onchange="updateCV(${cv.id},'name',this.value)">
-      ${isSig
-        ?`<input class="cvar-type" placeholder="(none)" disabled style="opacity:0.3">`
-        :`<select class="cvar-type" onchange="updateCV(${cv.id},'type',this.value)" style="padding:4px 6px;font-size:11px">
-            ${['','int','float','String','bool','Vector2','Vector3','Color','Node','Node3D','CharacterBody3D','Area3D','AnimationPlayer','Camera3D','RigidBody3D','Dictionary','Array','Variant'].map(t=>`<option ${cv.type===t?'selected':''}>${t||': Type'}</option>`).join('')}
-          </select>`}
-      ${isSig
-        ?`<input class="cvar-val" placeholder="(none)" disabled style="opacity:0.3">`
-        :`<input class="cvar-val" value="${esc(cv.value)}" placeholder="${cv.annotation==='@onready'?'$NodeName':'= value'}" onchange="updateCV(${cv.id},'value',this.value)">`}
-      <button class="cvar-del" onclick="removeCV(${cv.id})">🗑</button>
-    </div>`;
+  if(!classVars.length){ el.innerHTML='<div class="empty-hint">✨ Add @export, @onready, signal, const</div>'; return; }
+  el.innerHTML=classVars.map(c=>`<div class="cvar-item" style="display:flex;gap:6px;flex-wrap:wrap;background:var(--bg4);margin-bottom:5px;padding:5px">
+    <select onchange="updateCV(${c.id},'ann',this.value)">${['','@export','@onready','const','signal'].map(a=>`<option ${c.ann===a?'selected':''}>${a||'none'}</option>`).join('')}</select>
+    <input value="${esc(c.name)}" placeholder="name" onchange="updateCV(${c.id},'name',this.value)">
+    ${c.ann==='signal'?'<span style="color:var(--text3)">(signal — no type/value)</span>':`<select onchange="updateCV(${c.id},'type',this.value)"><option value="">(no type)</option><option>int</option><option>float</option><option>String</option><option>bool</option><option>Vector3</option><option>CharacterBody3D</option><option>Node3D</option><option>Area3D</option><option>AnimationPlayer</option></select>
+    <input placeholder="= value" value="${esc(c.val)}" onchange="updateCV(${c.id},'val',this.value)">`}
+    <button onclick="removeCV(${c.id})">🗑</button></div>`).join('');
+}
+function addClassVar(){ classVars.push({id:uid(),ann:'',name:'new_var',type:'',val:''}); renderClassVars(); }
+function removeCV(id){ classVars=classVars.filter(c=>c.id!==id); renderClassVars(); }
+function updateCV(id,field,val){ let c=classVars.find(c=>c.id===id); if(c) c[field]=val; }
+
+// ============================================
+// SECTION 5: ENUM MAKER (MODAL + AUTO MATCH)
+// ============================================
+function openEnumModal(){
+  let name=prompt("Enum name (e.g., WeaponType)");
+  if(!name) return;
+  let newEnum={ id:uid(), name:name, values:[], exportDropdown:false, autoMatch:false, matchFuncName:`handle_${name.toLowerCase()}` };
+  enums.push(newEnum);
+  renderEnumsUI();
+}
+function renderEnumsUI(){
+  const container=document.getElementById('enumList');
+  if(!enums.length){ container.innerHTML=''; return; }
+  container.innerHTML=enums.map(e=>`<div style="background:var(--bg3);margin-top:8px;padding:8px;border-radius:6px"><strong>${esc(e.name)}</strong> 
+    <button onclick="editEnum(${e.id})">✏️ Edit</button> <button onclick="removeEnum(${e.id})">🗑</button>
+    <div><label><input type="checkbox" ${e.exportDropdown?'checked':''} onchange="toggleEnumExport(${e.id},this.checked)"> @export_enum (dropdown)</label>
+    <label><input type="checkbox" ${e.autoMatch?'checked':''} onchange="toggleEnumAutoMatch(${e.id},this.checked)"> Auto‑generate match function</label></div>
+    <div>Values: ${e.values.map(v=>v.name).join(', ')}</div></div>`).join('');
+}
+function editEnum(id){
+  let e=enums.find(e=>e.id===id); if(!e) return;
+  let vals=prompt("Values (comma separated):", e.values.map(v=>v.name).join(','));
+  if(vals) e.values=vals.split(',').map((s,i)=>({name:s.trim(),value:i}));
+  renderEnumsUI();
+}
+function removeEnum(id){ enums=enums.filter(e=>e.id!==id); renderEnumsUI(); }
+function toggleEnumExport(id,val){ let e=enums.find(e=>e.id===id); if(e) e.exportDropdown=val; }
+function toggleEnumAutoMatch(id,val){ let e=enums.find(e=>e.id===id); if(e){ e.autoMatch=val; if(val && !functions.some(f=>f.name===e.matchFuncName)) addAutoMatchFunction(e); } }
+function addAutoMatchFunction(enumDef){
+  let id=uid();
+  let actions=[];
+  for(let v of enumDef.values){
+    actions.push({ id:uid(), type:'comment', value:`Case: ${enumDef.name}.${v.name}`, indent:1 });
+    actions.push({ id:uid(), type:'pass', indent:1 });
+  }
+  actions.push({ id:uid(), type:'comment', value:'default:', indent:1 });
+  actions.push({ id:uid(), type:'pass', indent:1 });
+  let newFn={ id, name:enumDef.matchFuncName, isBuiltin:false, returnType:'void', params:[{name:enumDef.name.toLowerCase(),type:enumDef.name}], actions, isStatic:false, rpcMode:'none' };
+  functions.push(newFn);
+  activeFnId=id;
+  renderTabs(); renderEditor(); updateStatus();
+}
+
+// ============================================
+// SECTION 6: FUNCTION MANAGEMENT (BUILT-IN + CUSTOM)
+// ============================================
+function getBuiltInSelectorHtml(){
+  let opts='';
+  for(let [key,def] of Object.entries(BUILTIN_TYPES)){
+    if(!builtInAdded[key]) opts+=`<option value="${key}">${def.name} (built-in)</option>`;
+  }
+  return `<select id="builtinSelect" style="width:auto;margin-right:6px"><option value="">➕ Built‑in...</option>${opts}</select>`;
+}
+function addBuiltinFromSelect(){ let sel=document.getElementById('builtinSelect'); if(!sel||!sel.value) return; let key=sel.value; if(builtInAdded[key]){ alert("Already added"); return; }
+  let def=BUILTIN_TYPES[key];
+  let newFn={ id:uid(), name:def.name, isBuiltin:true, builtinKey:key, returnType:def.ret, params:def.params.map(p=>({...p,id:uid()})), actions:[], isStatic:false, rpcMode:'none' };
+  functions.push(newFn); builtInAdded[key]=true; activeFnId=newFn.id; renderTabs(); renderEditor(); updateStatus();
+  sel.value='';
+}
+function addCustomFunction(){
+  let name=prompt("Custom function name (e.g., take_damage):","my_func");
+  if(!name||!name.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)){ alert("Invalid function name"); return; }
+  let newFn={ id:uid(), name, isBuiltin:false, returnType:'void', params:[], actions:[], isStatic:false, rpcMode:'none' };
+  functions.push(newFn); activeFnId=newFn.id; renderTabs(); renderEditor(); updateStatus();
+}
+function removeFunc(id){
+  let fn=functions.find(f=>f.id===id);
+  if(fn && fn.isBuiltin && fn.builtinKey) builtInAdded[fn.builtinKey]=false;
+  functions=functions.filter(f=>f.id!==id);
+  if(activeFnId===id) activeFnId=functions.length?functions[0].id:null;
+  renderTabs(); renderEditor(); updateStatus();
+}
+function setActiveFunc(id){ activeFnId=id; renderTabs(); renderEditor(); }
+function getActiveFn(){ return functions.find(f=>f.id===activeFnId)||null; }
+function updateFn(field,val){ let fn=getActiveFn(); if(fn){ fn[field]=val; if(field==='name') renderTabs(); } }
+function addParam(){ let fn=getActiveFn(); if(fn){ fn.params.push({id:uid(),name:`param${fn.params.length+1}`,type:'',defaultValue:''}); renderEditor(); } }
+function removeParam(id){ let fn=getActiveFn(); if(fn) fn.params=fn.params.filter(p=>p.id!==id); renderEditor(); }
+function updateParam(pid,field,val){ let fn=getActiveFn(); let p=fn?.params.find(p=>p.id===pid); if(p) p[field]=val; }
+
+// ============================================
+// SECTION 7: ACTIONS (IF/MATCH/WHILE/ETC)
+// ============================================
+function addAction(type='pass'){
+  let fn=getActiveFn(); if(!fn) return;
+  let last=fn.actions[fn.actions.length-1];
+  let indent=last?(last.indent||0):0;
+  if(last && ['if','for','while','match'].includes(last.type)) indent++;
+  fn.actions.push({id:uid(),type,value:'',name:'',indent,conditions:['if','while'].includes(type)?[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}]:[], patterns:type==='match'?[{id:uid(),values:['_'],isDefault:true,actions:[]}]:[] });
+  renderEditor(); updateStatus();
+}
+function removeAction(id){ let fn=getActiveFn(); if(fn) fn.actions=fn.actions.filter(a=>a.id!==id); renderEditor(); updateStatus(); }
+function updateAction(id,field,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a){ if(field==='type'){ a.type=val; if(val==='match' && !a.patterns) a.patterns=[{id:uid(),values:['_'],isDefault:true,actions:[]}]; } else a[field]=val; renderEditor(); } }
+function moveAction(id,dir){ let fn=getActiveFn(); let idx=fn?.actions.findIndex(a=>a.id===id); if(idx!==undefined){ let nxt=idx+dir; if(nxt>=0 && nxt<fn.actions.length){ [fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]]; renderEditor(); } } }
+function changeIndent(id,delta){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a){ a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta)); renderEditor(); } }
+
+// ============================================
+// SECTION 8: CONDITION BUILDER (AND/OR/NOT)
+// ============================================
+function buildCondStr(condArray){
+  if(!condArray.length) return 'true';
+  return condArray.map((c,i)=>{
+    let notStr=c.not?'not ':'';
+    let cmpStr=c.cmp?` ${c.cmp} ${c.right||'null'}`:'';
+    let part=`${notStr}${c.left||'condition'}${cmpStr}`;
+    return i===0?part:` ${c.op} ${part}`;
   }).join('');
 }
+function addCondRow(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a){ a.conditions.push({id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}); renderEditor(); } }
+function removeCondRow(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.conditions.length>1) a.conditions=a.conditions.filter(c=>c.id!==cid); renderEditor(); }
+function updateCond(aid,cid,field,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let c=a?.conditions.find(c=>c.id===cid); if(c) c[field]=val; renderEditor(); }
+function toggleCondNot(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let c=a?.conditions.find(c=>c.id===cid); if(c) c.not=!c.not; renderEditor(); }
+function toggleCondOp(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let idx=a?.conditions.findIndex(c=>c.id===cid); if(idx>0){ a.conditions[idx-1].op=a.conditions[idx-1].op==='and'?'or':'and'; renderEditor(); } }
 
-// ── ACTION GROUPS & SPECS ────────────────────────────────────────
-const ACTION_GROUPS = {
-  '— Flow —':['raw','comment','blank','if','elif','else','match','case','for','while','break','continue','pass'],
-  '— Variables —':['var','const','assign'],
-  '— Functions —':['return','call','await','await_signal'],
-  '— Signals —':['emit_signal'],
-  '— Multiplayer —':['rpc_call','rpc_id_call','is_authority','set_authority'],
-  '— Debug —':['print','push_error','push_warning','assert'],
-  '— Node —':['queue_free'],
-};
-const ACTION_SPECS = {
-  raw:          {needsValue:true, valuePlaceholder:'any GDScript expression (raw code)',rawStyle:true},
-  comment:      {needsValue:true, valuePlaceholder:'explain what this block does',commentStyle:true},
-  blank:{}, if:{}, elif:{}, else:{}, while:{},
-  match:        {needsValue:true, valuePlaceholder:'expression to match (state, mode)'},
-  case:         {needsValue:true, valuePlaceholder:'"idle", 42, Vector2.ZERO, or _'},
-  for:          {needsValue:true, valuePlaceholder:'item in array  OR  i in range(10)'},
-  break:{},continue:{},pass:{},
-  var:          {needsName:true,needsValue:true,namePlaceholder:'variable_name',valuePlaceholder:'initial value (0, null, [])'},
-  const:        {needsName:true,needsValue:true,namePlaceholder:'CONST_NAME',valuePlaceholder:'value (100, "GAME")'},
-  assign:       {needsName:true,needsValue:true,namePlaceholder:'target (speed, pos.x)',valuePlaceholder:'new value'},
-  return:       {needsValue:true,valuePlaceholder:'value (leave empty for bare return)'},
-  call:         {needsValue:true,valuePlaceholder:'function_name(args)'},
-  await:        {needsValue:true,valuePlaceholder:'seconds (e.g., 1.0, 0.5)'},
-  await_signal: {needsValue:true,valuePlaceholder:'signal_source.signal_name'},
-  emit_signal:  {needsName:true,needsValue:false,namePlaceholder:'signal_name'},
-  rpc_call:     {needsName:true,needsValue:true,namePlaceholder:'method_name',valuePlaceholder:'args (comma separated)'},
-  rpc_id_call:  {needsValue:true,valuePlaceholder:'peer_id, "method_name", args…'},
-  is_authority:{},
-  set_authority:{needsValue:true,valuePlaceholder:'peer_id (int)'},
-  print:        {needsValue:true,valuePlaceholder:'value or "Debug text"'},
-  push_error:   {needsValue:true,valuePlaceholder:'"error message"'},
-  push_warning: {needsValue:true,valuePlaceholder:'"warning message"'},
-  assert:       {needsValue:true,valuePlaceholder:'condition, "message"'},
-  queue_free:{},
-};
+// ============================================
+// SECTION 9: MATCH STATEMENT PATTERN BUILDER
+// ============================================
+function addMatchPattern(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.type==='match'){ a.patterns.push({id:uid(),values:['new'],isDefault:false,actions:[]}); renderEditor(); } }
+function addPatternValue(pid,aid,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p && val.trim()){ p.values=val.split(',').map(v=>v.trim()); renderEditor(); } }
+function addPatternAction(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p){ p.actions.push({id:uid(),type:'pass',value:'',indent:2}); renderEditor(); } }
+function removePattern(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.patterns.length>1){ a.patterns=a.patterns.filter(p=>p.id!==pid); renderEditor(); } }
 
-// ── CONDITION BUILDER ────────────────────────────────────────────
-function buildCondStr(a){
-  if(!a.conditions||!a.conditions.length) return a.value||'true';
-  return a.conditions.map((c,i)=>{
-    const notStr = c.not?'not ':'';
-    const cmpStr = c.cmp?` ${c.cmp} ${c.right||'null'}`:'';
-    const part   = `${notStr}${c.left||'condition'}${cmpStr}`;
-    return i===0 ? part : ` ${a.conditions[i-1].op} ${part}`;
-  }).join('').trim();
-}
-
-function renderActionFields(a){
-  const spec=ACTION_SPECS[a.type]||{};
-  if(COND_TYPES.has(a.type)){
-    const conds=a.conditions&&a.conditions.length?a.conditions:[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}];
-    return `<div class="cond-builder">
-      ${conds.map((c,i)=>`<div class="cond-row">
-        ${i>0
-          ?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})" title="Toggle AND/OR">${(conds[i-1].op||'and').toUpperCase()}</button>`
-          :`<span class="cond-if-label">${a.type.toUpperCase()}</span>`}
-        <button class="cond-not${c.not?' active':''}" onclick="toggleCondNot(${a.id},${c.id})">not</button>
-        <input class="cond-left" value="${esc(c.left)}" placeholder="variable / func()" onchange="updateCond(${a.id},${c.id},'left',this.value)">
-        <select class="cond-cmp" onchange="updateCond(${a.id},${c.id},'cmp',this.value)">
-          ${['','==','!=','<','<=','>','>=','in','not in','is','has'].map(op=>`<option ${c.cmp===op?'selected':''}>${op||'(bool)'}</option>`).join('')}
-        </select>
-        ${c.cmp?`<input class="cond-right" value="${esc(c.right)}" placeholder="value" onchange="updateCond(${a.id},${c.id},'right',this.value)">`:'<span style="flex:1"></span>'}
-        ${conds.length>1?`<button class="cond-del" onclick="removeCond(${a.id},${c.id})">✕</button>`:''}
-      </div>`).join('')}
-      <button class="cond-add" onclick="addCond(${a.id})">+ AND/OR condition</button>
-    </div>`;
+// ============================================
+// SECTION 10: INPUT EVENT WIZARD (QUICK INSERT)
+// ============================================
+function openInputWizard(){
+  let type=prompt("Event type: screen_touch, screen_drag, mouse_button, key_press","key_press");
+  if(!type) return;
+  let fn=getActiveFn(); if(!fn) return;
+  let codeComment=`# INPUT: ${type} handler`;
+  fn.actions.push({id:uid(),type:'comment',value:codeComment,indent:0});
+  if(type==='key_press'){
+    fn.actions.push({id:uid(),type:'raw',value:`if event is InputEventKey and event.pressed and not event.echo:\n    match event.keycode:\n        KEY_W:\n            pass\n        _:\n            pass`,indent:0});
+  } else if(type==='screen_touch'){
+    fn.actions.push({id:uid(),type:'raw',value:`if event is InputEventScreenTouch:\n    if event.pressed:\n        print("Touch at ", event.position)`,indent:0});
+  } else if(type==='mouse_button'){
+    fn.actions.push({id:uid(),type:'raw',value:`if event is InputEventMouseButton and event.pressed:\n    if event.button_index == MOUSE_BUTTON_LEFT:\n        print("Left click")`,indent:0});
+  } else {
+    fn.actions.push({id:uid(),type:'raw',value:`# Custom event: ${type}\npass`,indent:0});
   }
-  let html='';
-  if(spec.needsName) html+=`<input type="text" value="${esc(a.name||'')}" placeholder="${esc(spec.namePlaceholder||'name')}" onchange="updateAction(${a.id},'name',this.value)">`;
-  if(spec.needsValue) html+=`<input type="text" class="${spec.rawStyle?'raw-input':spec.commentStyle?'comment-input':''}" value="${esc(a.value||'')}" placeholder="${esc(spec.valuePlaceholder||'value')}" onchange="updateAction(${a.id},'value',this.value)">`;
-  return html;
+  renderEditor();
 }
 
-// ── CODE GENERATION ──────────────────────────────────────────────
+// ============================================
+// SECTION 11: CODE GENERATION ENGINE
+// ============================================
 function genLine(a){
-  const v=a.value||'', n=a.name||'';
-  switch(a.type){
-    case 'raw':return v;
-    case 'comment':return `# ${v}`;
-    case 'blank':return '';
-    case 'if':return `if ${buildCondStr(a)}:`;
-    case 'elif':return `elif ${buildCondStr(a)}:`;
-    case 'else':return 'else:';
-    case 'match':return `match ${v}:`;
-    case 'case':return `${v}:`;
-    case 'for':return `for ${v}:`;
-    case 'while':return `while ${buildCondStr(a)}:`;
-    case 'break':return 'break';
-    case 'continue':return 'continue';
-    case 'pass':return 'pass';
-    case 'var':return `var ${n} = ${v}`;
-    case 'const':return `const ${n} = ${v}`;
-    case 'assign':return `${n} = ${v}`;
-    case 'return':return v?`return ${v}`:'return';
-    case 'call':return v;
-    case 'await':return `await get_tree().create_timer(${v}).timeout`;
-    case 'await_signal':return `await ${v}`;
-    case 'emit_signal':return n?`${n}.emit()`:'# emit: missing signal name';
-    case 'rpc_call':return v?`rpc("${n}", ${v})`:`rpc("${n}")`;
-    case 'rpc_id_call':return `rpc_id(${v})`;
-    case 'is_authority':return 'if not is_multiplayer_authority(): return';
-    case 'set_authority':return `set_multiplayer_authority(${v})`;
-    case 'print':return `print(${v})`;
-    case 'push_error':return `push_error(${v})`;
-    case 'push_warning':return `push_warning(${v})`;
-    case 'assert':return `assert(${v})`;
-    case 'queue_free':return 'queue_free()';
-    default:return v||'pass';
+  if(a.type==='raw') return a.value;
+  if(a.type==='comment') return `# ${a.value}`;
+  if(a.type==='if') return `if ${buildCondStr(a.conditions)}:`;
+  if(a.type==='while') return `while ${buildCondStr(a.conditions)}:`;
+  if(a.type==='for') return `for ${a.value || 'item in array'}:`;
+  if(a.type==='var') return `var ${a.name || 'var_name'} = ${a.value || 'value'}`;
+  if(a.type==='assign') return `${a.name || 'target'} = ${a.value || 'value'}`;
+  if(a.type==='return') return a.value?`return ${a.value}`:'return';
+  if(a.type==='print') return `print(${a.value || ''})`;
+  if(a.type==='pass') return 'pass';
+  if(a.type==='match'){
+    let out=`match ${a.value || 'value'}:\n`;
+    for(let p of (a.patterns||[])){
+      let vals=p.values.join(',');
+      out+=`    ${vals}:\n`;
+      for(let act of (p.actions||[])){
+        out+=`        ${genLine(act)}\n`;
+      }
+    }
+    return out;
   }
+  return 'pass';
 }
-
-function genFunction(fn){
-  const lines=[];
-  if(fn.rpcMode&&fn.rpcMode!=='none') lines.push(`@rpc(${fn.rpcMode})`);
-  const params=fn.params.map(p=>{let s=p.type?`${p.name}: ${p.type}`:p.name;if(p.defaultValue)s+=` = ${p.defaultValue}`;return s;}).join(', ');
-  const staticStr=fn.isStatic?'static ':'';
-  const retStr=fn.returnType!=='inferred'?` -> ${fn.returnType}`:'';
-  lines.push(`${staticStr}func ${fn.name}(${params})${retStr}:`);
-  if(!fn.actions||fn.actions.length===0) lines.push('\tpass');
-  else for(const a of fn.actions) lines.push(`${'\t'.repeat((a.indent||0)+1)}${genLine(a)}`);
-  return lines.join('\n');
-}
-
-function genClassVarLine(cv){
-  const ann=cv.annotation||'';
-  const typeVal=(cv.type&&cv.type!==': Type')?cv.type:'';
-  const type=typeVal?`: ${typeVal}`:'';
-  const val=cv.value?` = ${cv.value}`:'';
-  if(ann==='signal') return `signal ${cv.name}`;
-  if(ann==='const')  return `const ${cv.name}${type}${val}`;
-  if(ann) return `${ann}\nvar ${cv.name}${type}${val}`;
-  return `var ${cv.name}${type}${val}`;
-}
-
 function generateAll(){
-  const blocks=[];
-  const cn=document.getElementById('classNameInput').value.trim();
-  const ex=document.getElementById('extendsInput').value.trim();
+  let blocks=[];
+  let cn=document.getElementById('classNameInput').value.trim();
+  let ex=document.getElementById('extendsInput').value.trim();
   if(cn) blocks.push(`class_name ${cn}`);
-  if(ex){ blocks.push(`extends ${ex}`); }
-  else { document.getElementById('statusText').textContent='⚠ extends is empty!'; blocks.push(`# ⚠ WARNING: Add an "extends" value`); }
-  if(blocks.length) blocks.push('');
-  const order=['const','signal','@export','@export_range','@export_enum','@onready','@static_unload',''];
-  const sorted=[...classVars].sort((a,b)=>{
-    const ai=order.indexOf(a.annotation)===-1?order.length:order.indexOf(a.annotation);
-    const bi=order.indexOf(b.annotation)===-1?order.length:order.indexOf(b.annotation);
-    return ai-bi;
-  });
-  if(sorted.length){blocks.push(sorted.map(genClassVarLine).join('\n'));blocks.push('');}
-  for(const fn of functions){blocks.push(genFunction(fn));blocks.push('');}
-  setOutput(blocks.length>2?highlight(blocks.join('\n').trim()):'<span class="cmt"># No declarations or functions defined yet.</span>');
+  if(ex) blocks.push(`extends ${ex}`);
+  else blocks.push(`# WARNING: extends required`);
+  blocks.push('');
+  // Declarations
+  for(let cv of classVars){
+    if(cv.ann==='signal') blocks.push(`signal ${cv.name}`);
+    else if(cv.ann==='const') blocks.push(`const ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
+    else if(cv.ann) blocks.push(`${cv.ann}\nvar ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
+    else blocks.push(`var ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
+  }
+  // Enums
+  for(let e of enums){
+    if(e.exportDropdown){
+      let opts=e.values.map(v=>v.name).join('","');
+      blocks.push(`@export_enum("${opts}") var ${e.name.toLowerCase()}: int = 0`);
+    } else {
+      blocks.push(`enum ${e.name} { ${e.values.map(v=>v.name).join(', ')} }`);
+    }
+    if(e.autoMatch && !functions.some(f=>f.name===e.matchFuncName)) addAutoMatchFunction(e);
+  }
+  if(classVars.length||enums.length) blocks.push('');
+  // Functions
+  for(let fn of functions){
+    let params=fn.params.map(p=>`${p.name}${p.type?`: ${p.type}`:''}${p.defaultValue?` = ${p.defaultValue}`:''}`).join(', ');
+    let ret=fn.returnType&&fn.returnType!=='void'?` -> ${fn.returnType}`:'';
+    blocks.push(`func ${fn.name}(${params})${ret}:`);
+    if(!fn.actions.length) blocks.push('\tpass');
+    else for(let a of fn.actions){
+      let indent='\t'.repeat((a.indent||0)+1);
+      let line=genLine(a);
+      if(line) blocks.push(`${indent}${line}`);
+    }
+    blocks.push('');
+  }
+  let final=blocks.join('\n').trim();
+  _lastGeneratedCode=final;
+  document.getElementById('outputCode').innerHTML=highlight(final);
   updateStatus();
 }
-
-// ── SYNTAX HIGHLIGHT ─────────────────────────────────────────────
 function highlight(code){
   let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  h=h.replace(/(@\w+(?:\([^)]*\))?)/g,'<span class="ann">$1</span>');
   h=h.replace(/(#.*$)/gm,'<span class="cmt">$1</span>');
-  const stash=[];
-  h=h.replace(/(<span class="(?:cmt|ann)">[^<]*<\/span>)/g,m=>{stash.push(m);return `\x00${stash.length-1}\x00`;});
-  h=h.replace(/"([^"]*)"/g,'\x01<span class="str">"$1"</span>\x01');
-  const KW=['func','var','const','if','elif','else','for','while','match','return','pass','break','continue','and','or','not','in','is','null','true','false','await','static','signal','enum','class_name','class','extends','self','super'];
-  const KW2=['rpc','rpc_id','emit','print','push_error','push_warning','assert','queue_free','move_and_slide','move_toward','is_on_floor','normalized','length'];
-  const TY=['void','bool','int','float','String','Vector2','Vector3','Color','Dictionary','Array','Node','Node2D','Node3D','CharacterBody2D','CharacterBody3D','VehicleBody3D','RigidBody3D','Area2D','Area3D','AnimationPlayer','Camera3D','Input'];
-  h=h.replace(new RegExp(`\\b(${KW.join('|')})\\b`,'g'),'<span class="kw">$1</span>');
-  h=h.replace(new RegExp(`\\b(${KW2.join('|')})\\b`,'g'),'<span class="kw2">$1</span>');
-  h=h.replace(new RegExp(`\\b(${TY.join('|')})\\b`,'g'),'<span class="ty">$1</span>');
-  h=h.replace(/\b(\d+(?:\.\d+)?)\b/g,'<span class="num">$1</span>');
-  h=h.replace(/\b(\w+)(\s*\()/g,(m,p1,p2)=>KW.includes(p1)?m:`<span class="fn">${p1}</span>${p2}`);
-  h=h.replace(/\x01([^\x01]*)\x01/g,'$1');
-  h=h.replace(/\x00(\d+)\x00/g,(_,i)=>stash[parseInt(i)]);
+  h=h.replace(/"[^"]*"/g,'<span class="str">$&</span>');
+  h=h.replace(/\b(func|var|const|if|for|while|match|return|pass|enum|signal)\b/g,'<span class="kw">$1</span>');
+  h=h.replace(/@\w+/g,'<span class="ann">$&</span>');
+  h=h.replace(/\b(CharacterBody3D|Vector3|Node3D|Area3D|AnimationPlayer|int|float|String|bool|void)\b/g,'<span class="ty">$1</span>');
   return h;
 }
+function copyCode(){ navigator.clipboard.writeText(_lastGeneratedCode); alert("Copied!"); }
+function updateStatus(){ document.getElementById('funcCount').innerText=`${functions.length} functions · ${functions.reduce((s,f)=>s+f.actions.length,0)} actions`; }
 
-// ── RENDER ───────────────────────────────────────────────────────
+// ============================================
+// SECTION 12: RENDER UI (TABS, EDITOR, ETC)
+// ============================================
 function renderTabs(){
-  const bar=document.getElementById('funcTabBar');
-  bar.innerHTML=functions.map(fn=>`<div class="func-tab ${fn.id===activeFnId?'active':''}" onclick="setActiveFunc(${fn.id})">${esc(fn.name)}<span class="tab-del" onclick="event.stopPropagation();removeFunc(${fn.id})">✕</span></div>`).join('')+'<button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>';
+  let bar=document.getElementById('funcTabBar');
+  let html=functions.map(f=>`<div class="func-tab ${f.id===activeFnId?'active':''}" onclick="setActiveFunc(${f.id})" style="display:inline-block;padding:6px 12px;cursor:pointer">${esc(f.name)}<span onclick="event.stopPropagation();removeFunc(${f.id})" style="margin-left:6px">✕</span></div>`).join('');
+  bar.innerHTML=html+`<div style="display:inline-flex;gap:4px;align-items:center">${getBuiltInSelectorHtml()}<button onclick="addBuiltinFromSelect()" class="add-func-btn" style="background:none;border:none">➕ Add Built‑in</button><button onclick="addCustomFunction()" class="add-func-btn" style="background:none;border:none">➕ Custom</button><button onclick="openInputWizard()" style="background:var(--bg4);border-radius:6px;padding:4px 8px">🎮 Input Wizard</button></div>`;
 }
-
 function renderEditor(){
-  const fn=getActiveFn();
-  const ed=document.getElementById('funcEditor');
-  if(!fn){ed.innerHTML='<div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building.</div>';return;}
-  ed.innerHTML=`
-  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--purple)"></div>Function Signature<span class="arrow">▶</span></div>
-    <div class="sec-body open">
-      <div class="row2">
-        <div class="field"><div class="field-label">Name</div><input type="text" value="${esc(fn.name)}" placeholder="e.g., take_damage, _ready" onchange="updateFn('name',this.value)"></div>
-        <div class="field"><div class="field-label">Return Type</div><select onchange="updateFn('returnType',this.value)">${['void','bool','int','float','String','Variant','Vector2','Vector3','Dictionary','Array','inferred'].map(t=>`<option ${fn.returnType===t?'selected':''}>${t}</option>`).join('')}</select></div>
-      </div>
-      <div class="toggle-row"><div class="toggle ${fn.isStatic?'active':''}" onclick="toggleFn('isStatic')"><input type="checkbox" ${fn.isStatic?'checked':''}> static func</div></div>
-      <div class="field"><div class="field-label">@rpc Annotation</div><select onchange="updateFn('rpcMode',this.value)"><option value="none">no @rpc</option><option value='"any_peer","call_local","reliable"'>any_peer · local · reliable</option><option value='"any_peer","call_remote","reliable"'>any_peer · remote · reliable</option><option value='"authority","call_local","reliable"'>authority · local · reliable</option><option value='"authority","call_remote","reliable"'>authority · remote · reliable</option></select></div>
-    </div>
-  </div>
-  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--blue)"></div>Parameters<span class="arrow">▶</span></div>
-    <div class="sec-body open">
-      <div class="param-list">${fn.params.map(p=>`<div class="param-item"><input type="text" value="${esc(p.name)}" placeholder="param_name" onchange="updateParam(${p.id},'name',this.value)"><select onchange="updateParam(${p.id},'type',this.value)">${['Variant','int','float','String','bool','Vector2','Vector3','Node','Node3D','CharacterBody3D','Area3D','Dictionary','Array'].map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select><input type="text" value="${esc(p.defaultValue)}" placeholder="= default (0, null)" onchange="updateParam(${p.id},'defaultValue',this.value)"><button class="param-del" onclick="removeParam(${p.id})">🗑</button></div>`).join('')}</div>
-      <button class="add-btn" onclick="addParam()">+ Add Parameter</button>
-    </div>
-  </div>
-  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Action Sequence<span class="arrow">▶</span></div>
-    <div class="sec-body open">
-      <div class="action-list">${fn.actions.map(a=>`<div class="action-row ${BLOCK_OPENERS.has(a.type)?'is-block-opener':''} ${ELSE_TYPES.has(a.type)?'is-else-row':''}" data-indent="${a.indent||0}" data-id="${a.id}">
-        <div class="indent-strip"></div>
-        <div class="action-move"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},+1)">▼</button></div>
-        <select class="action-type-sel" onchange="updateAction(${a.id},'type',this.value)">${Object.entries(ACTION_GROUPS).map(([grp,types])=>`<optgroup label="${grp}">${types.map(t=>`<option ${a.type===t?'selected':''}>${t}</option>`).join('')}</optgroup>`).join('')}</select>
-        <div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span class="indent-val">${a.indent||0}</span><button onclick="changeIndent(${a.id},+1)">▶</button></div>
-        <div class="action-fields">${renderActionFields(a)}</div>
-        <button class="action-del" onclick="removeAction(${a.id})">🗑</button>
-      </div>`).join('')}</div>
-      <div style="display:flex;gap:6px;margin-top:2px">
-        <button class="add-btn green" style="flex:2" onclick="addAction()">+ Add Action</button>
-        <button class="add-btn" style="flex:1" onclick="addAction('raw')">+ Raw Code</button>
-        <button class="add-btn" style="flex:1" onclick="addAction('blank')">+ Blank Line</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ── MUTATIONS ────────────────────────────────────────────────────
-function setOutput(html){document.getElementById('outputCode').innerHTML=html;}
-function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function toggleSec(hdr){hdr.classList.toggle('open');const b=hdr.nextElementSibling;if(b)b.classList.toggle('open');}
-function toggleGuide(){const b=document.getElementById('guideBody'),a=document.getElementById('guideArrow');b.classList.toggle('open');a.classList.toggle('open');document.querySelector('.guide-header').classList.toggle('open');}
-
-function addClassVar(){classVars.push({id:uid(),annotation:'',name:'new_var',type:'',value:''});renderClassVars();}
-function removeCV(id){classVars=classVars.filter(c=>c.id!==id);renderClassVars();}
-function updateCV(id,field,val){const c=classVars.find(c=>c.id===id);if(c){c[field]=val;if(field==='annotation')renderClassVars();}}
-
-function addFunction(template){
-  const id=uid();
-  functions.push({id,name:template?.name||`func_${id}`,returnType:template?.returnType||'void',isStatic:false,rpcMode:'none',params:(template?.params||[]).map(p=>({...p,id:uid()})),actions:(template?.actions||[]).map(a=>({...a,id:uid(),conditions:a.conditions||[]}))});
-  activeFnId=id;renderTabs();renderEditor();updateStatus();
-}
-function removeFunc(id){functions=functions.filter(f=>f.id!==id);if(activeFnId===id)activeFnId=functions.length?functions[0].id:null;renderTabs();renderEditor();updateStatus();}
-function setActiveFunc(id){activeFnId=id;renderTabs();renderEditor();}
-function getActiveFn(){return functions.find(f=>f.id===activeFnId)||null;}
-function updateFn(field,val){const fn=getActiveFn();if(fn){fn[field]=val;if(field==='name')renderTabs();}}
-function toggleFn(field){const fn=getActiveFn();if(fn){fn[field]=!fn[field];renderEditor();}}
-
-function addParam(){const fn=getActiveFn();if(fn){fn.params.push({id:uid(),name:`param${fn.params.length+1}`,type:'Variant',defaultValue:''});renderEditor();}}
-function removeParam(id){const fn=getActiveFn();if(fn){fn.params=fn.params.filter(p=>p.id!==id);renderEditor();}}
-function updateParam(id,field,val){const fn=getActiveFn();if(fn){const p=fn.params.find(p=>p.id===id);if(p)p[field]=val;}}
-
-function addAction(type='pass'){
-  const fn=getActiveFn(); if(!fn) return;
-  const last=fn.actions.length?fn.actions[fn.actions.length-1]:null;
-  let indent=last?(last.indent||0):0;
-  if(last&&BLOCK_OPENERS.has(last.type)) indent=Math.min(8,indent+1);
-  if(ELSE_TYPES.has(type)&&fn.actions.length){
-    for(let i=fn.actions.length-1;i>=0;i--){
-      const a=fn.actions[i];
-      if(a.type==='if'||a.type==='elif'){indent=a.indent||0;break;}
+  let fn=getActiveFn();
+  let ed=document.getElementById('funcEditor');
+  if(!fn){ ed.innerHTML='<div class="empty-hint">Select or add function</div>'; return; }
+  let paramsHtml=`<div class="param-list">${fn.params.map(p=>`<div style="display:flex;gap:6px;margin-bottom:4px"><input value="${esc(p.name)}" placeholder="name" onchange="updateParam(${p.id},'name',this.value)"><select onchange="updateParam(${p.id},'type',this.value)"><option value="">(no type)</option><option>int</option><option>float</option><option>String</option><option>bool</option><option>Vector3</option></select><input value="${esc(p.defaultValue)}" placeholder="default" onchange="updateParam(${p.id},'defaultValue',this.value)"><button onclick="removeParam(${p.id})">🗑</button></div>`).join('')}<button class="add-btn" onclick="addParam()">+ Param</button></div>`;
+  let actionsHtml=fn.actions.map(a=>{
+    if(a.type==='match'){
+      let patternsHtml=(a.patterns||[]).map(p=>`<div class="pattern-row"><input placeholder="values (comma)" value="${p.values.join(',')}" onchange="addPatternValue(${p.id},${a.id},this.value)"><button onclick="addPatternAction(${p.id},${a.id})">+ act</button><button onclick="removePattern(${p.id},${a.id})">🗑</button><div style="margin-left:20px">${(p.actions||[]).map(act=>`<div>${genLine(act)} <button onclick="removeAction(${act.id})">✕</button></div>`).join('')}</div></div>`).join('');
+      return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>match</option><option>if</option><option>for</option><option>pass</option></select><input placeholder="match expression" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)"><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addMatchPattern(${a.id})">+ Pattern</button><button onclick="removeAction(${a.id})">🗑</button>${patternsHtml}</div>`;
     }
-  }
-  fn.actions.push({id:uid(),type,value:'',name:'',indent,conditions:COND_TYPES.has(type)?[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}]:[]});
-  renderEditor();updateStatus();
+    if(a.type==='if' || a.type==='while'){
+      let condHtml=(a.conditions||[]).map((c,i)=>`<div class="cond-row">${i>0?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})">${(a.conditions[i-1].op||'and').toUpperCase()}</button>`:''}<button class="cond-not${c.not?' active':''}" onclick="toggleCondNot(${a.id},${c.id})">not</button><input placeholder="left" value="${esc(c.left)}" onchange="updateCond(${a.id},${c.id},'left',this.value)"><select onchange="updateCond(${a.id},${c.id},'cmp',this.value)"><option value="">cmp</option><option>==</option><option>!=</option><option><</option><option>></option></select><input placeholder="right" value="${esc(c.right)}" onchange="updateCond(${a.id},${c.id},'right',this.value)"><button onclick="removeCondRow(${a.id},${c.id})">✕</button></div>`).join('');
+      return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>if</option><option>while</option><option>pass</option></select><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addCondRow(${a.id})">+ AND/OR</button><button onclick="removeAction(${a.id})">🗑</button>${condHtml}</div>`;
+    }
+    return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>pass</option><option>raw</option><option>comment</option><option>var</option><option>assign</option><option>return</option><option>print</option><option>for</option><option>match</option><option>if</option></select><input placeholder="${a.type==='comment'?'comment':a.type==='var'?'name':'value'}" value="${esc(a.type==='var'?a.name:a.value)}" onchange="updateAction(${a.id},'${a.type==='var'?'name':'value'}',this.value)"><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="removeAction(${a.id})">🗑</button></div>`;
+  }).join('');
+  ed.innerHTML=`<div class="sec"><div class="sec-hdr open"><div class="dot" style="background:var(--purple)"></div>Signature</div><div class="sec-body open"><div><label>Name: <input value="${esc(fn.name)}" onchange="updateFn('name',this.value)"></label><label>Return: <select onchange="updateFn('returnType',this.value)"><option>void</option><option>int</option><option>bool</option><option>String</option></select></label></div>${paramsHtml}</div></div>
+  <div class="sec"><div class="sec-hdr open"><div class="dot" style="background:var(--green)"></div>Actions</div><div class="sec-body open"><div class="action-list">${actionsHtml}</div><div style="display:flex;gap:6px;margin-top:8px"><button class="add-btn" onclick="addAction('pass')">+ Action</button><button class="add-btn" onclick="addAction('raw')">+ Raw</button><button class="add-btn" onclick="addAction('comment')">+ Comment</button></div></div></div>`;
 }
-function removeAction(id){const fn=getActiveFn();if(fn){fn.actions=fn.actions.filter(a=>a.id!==id);renderEditor();updateStatus();}}
-function updateAction(id,field,val){
-  const fn=getActiveFn();if(!fn)return;
-  const a=fn.actions.find(a=>a.id===id);if(!a)return;
-  if(field==='type'){
-    a.type=val;
-    if(COND_TYPES.has(val)&&(!a.conditions||!a.conditions.length))
-      a.conditions=[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}];
-    renderEditor();
-  } else { a[field]=val; }
-}
-function moveAction(id,dir){const fn=getActiveFn();if(fn){const idx=fn.actions.findIndex(a=>a.id===id);const nxt=idx+dir;if(nxt>=0&&nxt<fn.actions.length){[fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]];renderEditor();}}}
-function changeIndent(id,delta){const fn=getActiveFn();if(fn){const a=fn.actions.find(a=>a.id===id);if(a){a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta));renderEditor();}}}
-
-// condition row mutations
-function updateCond(aid,cid,field,val){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c[field]=val;renderEditor();}
-function toggleCondNot(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c.not=!c.not;renderEditor();}
-function toggleCondOp(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c.op=c.op==='and'?'or':'and';renderEditor();}
-function addCond(aid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;if(!a.conditions)a.conditions=[];a.conditions.push({id:uid(),not:false,left:'',cmp:'',right:'',op:'and'});renderEditor();}
-function removeCond(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;if(a.conditions.length<=1)return;a.conditions=a.conditions.filter(c=>c.id!==cid);renderEditor();}
-
-function updateStatus(){const total=functions.reduce((s,f)=>s+f.actions.length,0);document.getElementById('funcCount').textContent=`${functions.length} function${functions.length!==1?'s':''} · ${total} action${total!==1?'s':''}`;if(document.getElementById('statusText').textContent!=='⚠ extends is empty!')document.getElementById('statusText').textContent='Ready';}
-function copyCode(){const code=document.getElementById('outputCode').textContent||'';navigator.clipboard.writeText(code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy All';btn.classList.remove('ok');},1800);});}
-function exportJSON(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({classVars,functions},null,2)],{type:'application/json'}));a.download='gdscript_config.json';a.click();}
-function importJSON(input){
-  const file=input.files[0];if(!file)return;
-  const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);classVars=d.classVars||[];functions=d.functions||[];activeFnId=functions.length?functions[0].id:null;
-  const allIds=[...classVars.map(c=>c.id),...functions.flatMap(f=>[f.id,...f.params.map(p=>p.id),...f.actions.map(a=>a.id)])].filter(Number.isFinite);
-  _nextId=allIds.length?Math.max(...allIds)+1:1;renderClassVars();renderTabs();renderEditor();updateStatus();document.getElementById('statusText').textContent='Config imported ✓';}catch(ex){alert('Invalid JSON: '+ex.message);}};r.readAsText(file);input.value='';
-}
-
-// ── SAMPLE SCRIPT ────────────────────────────────────────────────
-const SAMPLE_RAW = `# ─────────────────────────────────────────────────────────────────
-# SAMPLE: CharacterBody3D — 3D Player Movement
-# Read this to understand how a GDScript file is structured.
-# ─────────────────────────────────────────────────────────────────
-
-# (1) class_name — optional. Lets other scripts reference "Player" by name.
-class_name Player
-
-# (2) extends — REQUIRED. Tells Godot this script drives a CharacterBody3D node.
+// ============================================
+// SECTION 13: INIT & SAMPLE
+// ============================================
+const SAMPLE=`# SAMPLE: Player controller
 extends CharacterBody3D
 
-# (3) CONSTANTS — values that never change (use UPPER_CASE by convention)
-const GRAVITY: float = 9.8
-
-# (4) @export vars — appear as sliders/fields in the Godot Inspector
 @export var speed: float = 5.0
-@export var jump_force: float = 4.5
+@export var jump: float = 4.5
+signal died
 
-# (5) @onready vars — fetch node references once the scene is fully loaded
-@onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var camera: Camera3D = $Camera3D
-
-# (6) Regular vars — internal state, not visible in Inspector
-var is_dead: bool = false
-
-# (7) Signals — custom events other nodes can connect to and listen for
-signal jumped
-
-# ─── FUNCTIONS ────────────────────────────────────────────────────
-
-# _ready() runs ONCE when the node enters the scene tree
 func _ready() -> void:
-	print("Player ready!")
+    print("Ready!")
 
-# _physics_process(delta) runs EVERY physics frame (~60fps)
-# delta = time since last frame — use it to keep movement frame-rate independent
 func _physics_process(delta: float) -> void:
-	# Apply gravity when the player is NOT on the floor
-	if not is_on_floor():
-		velocity.y -= GRAVITY * delta
-
-	# Read directional input from the Input Map (set up in Project Settings)
-	var direction := Vector3(
-		Input.get_axis("move_left", "move_right"),
-		0,
-		Input.get_axis("move_forward", "move_back")
-	)
-
-	# Move if there is input, otherwise slow down smoothly
-	if direction.length() > 0:
-		direction = direction.normalized()
-		velocity.x = direction.x * speed
-		velocity.z = direction.z * speed
-	else:
-		velocity.x = move_toward(velocity.x, 0, speed)
-		velocity.z = move_toward(velocity.z, 0, speed)
-
-	# Jump — only allowed when standing on the floor
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = jump_force
-		jumped.emit()   # fire the signal — other nodes can react to this
-
-	# Apply all velocity calculations and move the character
-	move_and_slide()`;
-
-let sampleVisible=true;
-function toggleSample(){
-  const block=document.getElementById('sampleBlock'),btn=document.getElementById('sampleToggleBtn');
-  sampleVisible=!sampleVisible;
-  block.style.display=sampleVisible?'block':'none';
-  btn.textContent=sampleVisible?'Hide Sample':'Show Sample';
-}
-
-// ── INIT ─────────────────────────────────────────────────────────
-document.getElementById('sampleBlock').innerHTML=highlight(SAMPLE_RAW);
-renderClassVars();renderTabs();renderEditor();updateStatus();
+    if not is_on_floor():
+        velocity.y -= 9.8 * delta
+    move_and_slide()`;
+document.getElementById('sampleBlock').innerHTML=highlight(SAMPLE);
+renderClassVars(); renderTabs(); renderEditor(); updateStatus();
+window.toggleSec=toggleSec; window.addClassVar=addClassVar; window.updateCV=updateCV; window.removeCV=removeCV; window.addBuiltinFromSelect=addBuiltinFromSelect; window.addCustomFunction=addCustomFunction; window.removeFunc=removeFunc; window.setActiveFunc=setActiveFunc; window.updateFn=updateFn; window.addParam=addParam; window.removeParam=removeParam; window.updateParam=updateParam; window.addAction=addAction; window.removeAction=removeAction; window.updateAction=updateAction; window.moveAction=moveAction; window.changeIndent=changeIndent; window.addCondRow=addCondRow; window.removeCondRow=removeCondRow; window.updateCond=updateCond; window.toggleCondNot=toggleCondNot; window.toggleCondOp=toggleCondOp; window.addMatchPattern=addMatchPattern; window.addPatternValue=addPatternValue; window.addPatternAction=addPatternAction; window.removePattern=removePattern; window.openEnumModal=openEnumModal; window.editEnum=editEnum; window.removeEnum=removeEnum; window.toggleEnumExport=toggleEnumExport; window.toggleEnumAutoMatch=toggleEnumAutoMatch; window.generateAll=generateAll; window.copyCode=copyCode; window.openInputWizard=openInputWizard;
 </script>
 </body>
 </html>
