@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GDScript Pro Generator</title>
+<title>GDScript Pro Generator — Godot 4</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -22,19 +22,12 @@
 }
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5}
-
-/* ══════════════════════ SCROLLBARS ══════════════════════ */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border3);border-radius:3px}
 
-/* ══════════════════════ HEADER ══════════════════════ */
-.header{
-  display:flex;align-items:center;gap:16px;
-  padding:0 20px;height:52px;
-  background:var(--bg2);border-bottom:1px solid var(--border2);
-  position:fixed;top:0;left:0;right:0;z-index:200;
-}
+/* header */
+.header{display:flex;align-items:center;gap:16px;padding:0 20px;height:52px;background:var(--bg2);border-bottom:1px solid var(--border2);position:fixed;top:0;left:0;right:0;z-index:200;}
 .logo{font-size:15px;font-weight:700;color:var(--green);letter-spacing:-0.5px}
 .logo span{color:var(--text3)}
 .header-sep{color:var(--text4);font-size:10px}
@@ -44,28 +37,16 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .pill-green{color:var(--green);border-color:rgba(57,211,83,0.3);background:var(--green-dim)}
 .pill-blue{color:var(--blue);border-color:rgba(88,166,255,0.3);background:var(--blue-dim)}
 
-/* ══════════════════════ LAYOUT ══════════════════════ */
-.workspace{
-  display:grid;grid-template-columns:1fr 1fr;
-  height:calc(100vh - 52px);margin-top:52px;
-  overflow:hidden;
-}
-.left-panel{
-  display:flex;flex-direction:column;
-  border-right:1px solid var(--border2);
-  overflow:hidden;
-}
+/* layout */
+.workspace{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 52px);margin-top:52px;overflow:hidden;}
+.left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border2);overflow:hidden;}
 .right-panel{display:flex;flex-direction:column;overflow:hidden}
+.output-code{flex:1;overflow-y:auto;padding:16px;font-size:12.5px;line-height:1.75;white-space:pre;font-family:'JetBrains Mono',monospace;tab-size:4}
+.sample-code{overflow-y:auto;max-height:42vh;padding:14px 16px;font-size:12px;line-height:1.75;white-space:pre;font-family:'JetBrains Mono',monospace;opacity:0.78;border-bottom:2px solid var(--border2);flex-shrink:0}
 
-/* ══════════════════════ SECTIONS ══════════════════════ */
+/* sections */
 .sec{border-bottom:1px solid var(--border);flex-shrink:0}
-.sec-hdr{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 14px;cursor:pointer;user-select:none;
-  font-size:11px;font-weight:600;color:var(--text3);
-  text-transform:uppercase;letter-spacing:0.8px;
-  transition:color 0.15s;
-}
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;transition:color 0.15s;}
 .sec-hdr:hover{color:var(--text2)}
 .sec-hdr .arrow{margin-left:auto;font-size:9px;transition:transform 0.2s}
 .sec-hdr.open .arrow{transform:rotate(90deg)}
@@ -73,331 +54,215 @@ body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospa
 .sec-body.open{display:flex}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-/* ══════════════════════ FUNC TABS ══════════════════════ */
-.func-tab-bar{
-  display:flex;align-items:center;gap:0;
-  background:var(--bg2);border-bottom:1px solid var(--border2);
-  overflow-x:auto;flex-shrink:0;min-height:40px;
-}
-.func-tab{
-  display:flex;align-items:center;gap:6px;
-  padding:0 12px;height:40px;flex-shrink:0;
-  font-size:11px;cursor:pointer;color:var(--text3);
-  border-right:1px solid var(--border);
-  transition:all 0.15s;white-space:nowrap;
-  border-bottom:2px solid transparent;
-}
+/* script header badges */
+.script-header-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:5px}
+.badge-opt{font-size:9px;background:var(--bg4);border:1px solid var(--border3);color:var(--text3);padding:1px 5px;border-radius:10px}
+.badge-req{font-size:9px;background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.3);color:var(--red);padding:1px 5px;border-radius:10px}
+
+/* tabs */
+.func-tab-bar{display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border2);overflow-x:auto;flex-shrink:0;min-height:40px;}
+.func-tab{display:flex;align-items:center;gap:6px;padding:0 12px;height:40px;flex-shrink:0;font-size:11px;cursor:pointer;color:var(--text3);border-right:1px solid var(--border);transition:all 0.15s;white-space:nowrap;border-bottom:2px solid transparent;}
 .func-tab:hover{color:var(--text2);background:var(--bg3)}
-.func-tab.active{
-  color:var(--blue);background:var(--bg3);
-  border-bottom-color:var(--blue);
-}
-.func-tab .tab-del{
-  color:var(--text4);font-size:14px;line-height:1;
-  padding:0 2px;border-radius:3px;
-}
+.func-tab.active{color:var(--blue);background:var(--bg3);border-bottom-color:var(--blue);}
+.func-tab .tab-del{color:var(--text4);font-size:14px;line-height:1;padding:0 2px;border-radius:3px;}
 .func-tab .tab-del:hover{color:var(--red);background:var(--red-dim)}
-.add-func-btn{
-  display:flex;align-items:center;gap:5px;
-  padding:0 14px;height:40px;flex-shrink:0;
-  font-size:11px;font-family:inherit;
-  background:none;border:none;color:var(--text3);cursor:pointer;
-}
+.add-func-btn{display:flex;align-items:center;gap:5px;padding:0 14px;height:40px;flex-shrink:0;font-size:11px;font-family:inherit;background:none;border:none;color:var(--text3);cursor:pointer;}
 .add-func-btn:hover{color:var(--green)}
 
-/* ══════════════════════ FUNC EDITOR ══════════════════════ */
-.func-editor{
-  flex:1;overflow-y:auto;
-  display:flex;flex-direction:column;gap:0;
-}
-
-/* ══════════════════════ FORMS ══════════════════════ */
+/* forms */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .field{display:flex;flex-direction:column;gap:4px}
 .field-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px}
-
-input,select,textarea{
-  background:var(--bg4);
-  border:1px solid var(--border2);
-  border-radius:var(--r);
-  padding:7px 10px;
-  color:var(--text);
-  font-family:'JetBrains Mono',monospace;
-  font-size:12px;
-  outline:none;
-  transition:border-color 0.15s;
-  width:100%;
-}
+input,select,textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color 0.15s;width:100%;}
 input:focus,select:focus,textarea:focus{border-color:var(--border3)}
-input::placeholder,textarea::placeholder{color:var(--text4)}
+input::placeholder,textarea::placeholder{color:var(--text4);opacity:0.7;font-style:italic}
 select option{background:var(--bg4)}
 
-/* ══════════════════════ CHECKBOXES ══════════════════════ */
+/* toggles */
 .toggle-row{display:flex;gap:16px;flex-wrap:wrap}
-.toggle{
-  display:flex;align-items:center;gap:7px;
-  cursor:pointer;padding:6px 10px;border-radius:var(--r);
-  border:1px solid var(--border);font-size:11px;color:var(--text2);
-  transition:all 0.15s;
-}
+.toggle{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 10px;border-radius:var(--r);border:1px solid var(--border);font-size:11px;color:var(--text2);transition:all 0.15s;}
 .toggle:hover{border-color:var(--border3)}
 .toggle.active{border-color:rgba(88,166,255,0.4);background:var(--blue-dim);color:var(--blue)}
 .toggle input{display:none}
 
-/* ══════════════════════ PARAMS ══════════════════════ */
+/* params */
 .param-list{display:flex;flex-direction:column;gap:6px}
-.param-item{
-  display:flex;align-items:center;gap:6px;
-  background:var(--bg4);border:1px solid var(--border);
-  border-radius:var(--r);padding:6px 8px;
-}
-.param-item input,
-.param-item select{flex:1;min-width:60px;padding:5px 8px;font-size:11px}
-.param-item .param-del{
-  background:none;border:none;color:var(--text4);
-  cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;
-}
+.param-item{display:flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:6px 8px;}
+.param-item input,.param-item select{flex:1;min-width:60px;padding:5px 8px;font-size:11px}
+.param-item .param-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:16px;padding:0 4px}
 .param-item .param-del:hover{color:var(--red)}
 
-/* ══════════════════════ ACTIONS ══════════════════════ */
-.action-list{
-  display:flex;flex-direction:column;gap:4px;
-  min-height:50px;
-}
-.action-row{
-  display:flex;align-items:flex-start;gap:5px;
-  background:var(--bg4);border:1px solid var(--border);
-  border-radius:var(--r);padding:5px 6px;
-  position:relative;transition:border-color 0.15s;
-}
-.action-row:hover{border-color:var(--border3)}
-
-/* Indent color coding */
-.action-row[data-indent="0"] .indent-strip{background:var(--text4)}
-.action-row[data-indent="1"] .indent-strip{background:var(--blue);opacity:0.5}
-.action-row[data-indent="2"] .indent-strip{background:var(--purple);opacity:0.5}
-.action-row[data-indent="3"] .indent-strip{background:var(--green);opacity:0.5}
-.action-row[data-indent="4"] .indent-strip{background:var(--amber);opacity:0.5}
-
-.indent-strip{
-  width:3px;border-radius:2px;flex-shrink:0;
-  align-self:stretch;min-height:22px;
-}
-.action-move{
-  display:flex;flex-direction:column;gap:0;flex-shrink:0;
-}
-.action-move button{
-  background:none;border:none;color:var(--text4);
-  cursor:pointer;font-size:10px;padding:1px 3px;line-height:1;
-  font-family:inherit;
-}
-.action-move button:hover{color:var(--text2)}
-
-.action-type-sel{
-  width:120px;flex-shrink:0;
-  padding:4px 6px;font-size:11px;
-}
-.indent-ctrl{
-  display:flex;align-items:center;gap:3px;flex-shrink:0;
-}
-.indent-ctrl button{
-  background:var(--bg3);border:1px solid var(--border2);
-  color:var(--text3);cursor:pointer;
-  width:18px;height:22px;font-size:10px;
-  border-radius:3px;font-family:inherit;
-  display:flex;align-items:center;justify-content:center;
-}
-.indent-ctrl button:hover{color:var(--text);border-color:var(--border3)}
-.indent-val{
-  width:20px;text-align:center;font-size:11px;
-  color:var(--text2);line-height:22px;flex-shrink:0;
-}
-.action-fields{
-  flex:1;display:flex;gap:5px;flex-wrap:wrap;min-width:0;
-}
-.action-fields input,
-.action-fields select{
-  flex:1;min-width:80px;
-  padding:4px 7px;font-size:11px;
-}
-.action-fields .raw-input{
-  flex:1;min-width:200px;
-  font-size:11px;padding:4px 7px;
-  background:var(--bg3);border-color:rgba(57,211,83,0.2);
-  color:var(--green);
-}
-.action-fields .comment-input{
-  flex:1;font-size:11px;padding:4px 7px;
-  background:var(--bg3);border-color:rgba(74,95,114,0.3);
-  color:var(--text3);
-}
-.action-del{
-  background:none;border:none;color:var(--text4);
-  cursor:pointer;font-size:15px;padding:0 4px;
-  flex-shrink:0;line-height:22px;
-}
-.action-del:hover{color:var(--red)}
-
-/* ══════════════════════ ADD BUTTONS ══════════════════════ */
-.add-btn{
-  width:100%;padding:8px;
-  background:var(--bg3);border:1px dashed var(--border3);
-  border-radius:var(--r);color:var(--text3);
-  font-size:11px;font-family:inherit;cursor:pointer;
-  transition:all 0.15s;
-}
-.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
-.add-btn.green:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
-
-/* ══════════════════════ TEMPLATES ══════════════════════ */
-.tmpl-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-  gap:6px;
-}
-.tmpl-btn{
-  padding:7px 8px;background:var(--bg4);
-  border:1px solid var(--border);border-radius:var(--r);
-  font-size:10px;font-family:inherit;cursor:pointer;
-  color:var(--text2);text-align:left;line-height:1.4;
-  transition:all 0.15s;
-}
-.tmpl-btn:hover{border-color:var(--border3);background:var(--bg5);color:var(--text)}
-.tmpl-btn span{display:block;font-size:16px;margin-bottom:2px}
-
-/* ══════════════════════ BOTTOM BAR ══════════════════════ */
-.bottom-bar{
-  padding:12px 14px;border-top:1px solid var(--border2);
-  display:flex;gap:8px;flex-shrink:0;background:var(--bg2);
-}
-.btn{
-  flex:1;padding:10px 16px;border:none;border-radius:var(--r);
-  font-size:12px;font-weight:700;font-family:inherit;
-  cursor:pointer;transition:all 0.15s;
-}
-.btn-primary{
-  background:linear-gradient(135deg,#238636,#196c2e);
-  color:white;
-}
-.btn-primary:hover{background:linear-gradient(135deg,#2ea043,#238636)}
-.btn-primary:active{transform:scale(0.98)}
-.btn-sm{
-  padding:7px 12px;font-size:11px;
-  background:var(--bg4);border:1px solid var(--border2);
-  border-radius:var(--r);color:var(--text2);
-  font-family:inherit;cursor:pointer;
-}
-.btn-sm:hover{border-color:var(--border3);color:var(--text)}
-
-/* ══════════════════════ OUTPUT PANEL ══════════════════════ */
-.output-header{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;border-bottom:1px solid var(--border2);
-  background:var(--bg2);flex-shrink:0;
-}
-.output-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px}
-.output-actions{display:flex;gap:6px;margin-left:auto}
-.copy-btn{
-  padding:5px 12px;background:var(--bg4);
-  border:1px solid var(--border2);border-radius:var(--r);
-  color:var(--text2);font-size:10px;font-family:inherit;cursor:pointer;
-  transition:all 0.15s;
-}
-.copy-btn:hover{border-color:var(--green);color:var(--green)}
-.copy-btn.ok{background:var(--green-dim);border-color:var(--green);color:var(--green)}
-
-.output-code{
-  flex:1;overflow-y:auto;
-  padding:16px;
-  font-size:12.5px;line-height:1.75;
-  white-space:pre;
-  font-family:'JetBrains Mono',monospace;
-  tab-size:4;
-}
-
-/* ══════════════════════ SYNTAX HIGHLIGHTING ══════════════════════ */
-.kw{color:var(--red)}
-.kw2{color:var(--purple)}
-.fn{color:var(--blue)}
-.ty{color:var(--cyan)}
-.str{color:var(--amber)}
-.num{color:var(--orange)}
-.cmt{color:var(--text3);font-style:italic}
-.ann{color:var(--purple)}
-.op{color:var(--text2)}
-
-/* ══════════════════════ CLASS VARS ══════════════════════ */
-.cvar-item{
-  display:flex;align-items:center;gap:6px;
-  background:var(--bg4);border:1px solid var(--border);
-  border-radius:var(--r);padding:5px 8px;
-}
-.cvar-ann{
-  width:100px;flex-shrink:0;padding:4px 6px;font-size:11px;
-}
-.cvar-name,.cvar-type,.cvar-val{
-  flex:1;min-width:60px;padding:4px 7px;font-size:11px;
-}
-.cvar-del{
-  background:none;border:none;color:var(--text4);
-  cursor:pointer;font-size:14px;padding:0 3px;
-}
+/* declarations */
+.cvar-header{display:flex;gap:6px;padding:0 8px 4px;font-size:9px;color:var(--text4);text-transform:uppercase;letter-spacing:0.5px}
+.cvar-header span:nth-child(1){width:110px;flex-shrink:0}
+.cvar-header span:nth-child(2){width:48px;flex-shrink:0}
+.cvar-header span:nth-child(3){flex:1.2;min-width:70px}
+.cvar-header span:nth-child(4){flex:1;min-width:60px}
+.cvar-header span:nth-child(5){flex:1.2;min-width:70px}
+.cvar-item{display:flex;align-items:center;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:5px 8px}
+.cvar-ann{width:110px;flex-shrink:0;padding:4px 6px;font-size:11px}
+.cvar-keyword{width:48px;flex-shrink:0;padding:3px 6px;font-size:11px;background:var(--bg3);color:var(--red);border:1px solid rgba(248,81,73,0.2);border-radius:var(--r);text-align:center}
+.cvar-name{flex:1.2;min-width:70px;padding:4px 7px;font-size:11px}
+.cvar-type{flex:1;min-width:60px;padding:4px 6px;font-size:11px}
+.cvar-val{flex:1.2;min-width:70px;padding:4px 7px;font-size:11px}
+.cvar-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:14px;flex-shrink:0}
 .cvar-del:hover{color:var(--red)}
 
-/* ══════════════════════ SCROLLABLE AREAS ══════════════════════ */
+/* action rows */
+.action-list{display:flex;flex-direction:column;gap:4px;min-height:50px}
+.action-row{display:flex;align-items:flex-start;gap:5px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:5px 6px;position:relative;transition:border-color 0.15s;}
+.action-row:hover{border-color:var(--border3)}
+.action-row[data-indent="0"]{margin-left:0}
+.action-row[data-indent="1"]{margin-left:16px;border-left:2px solid rgba(88,166,255,0.5)}
+.action-row[data-indent="2"]{margin-left:32px;border-left:2px solid rgba(188,140,255,0.5)}
+.action-row[data-indent="3"]{margin-left:48px;border-left:2px solid rgba(57,211,83,0.5)}
+.action-row[data-indent="4"]{margin-left:64px;border-left:2px solid rgba(227,179,65,0.5)}
+.action-row[data-indent="5"]{margin-left:80px;border-left:2px solid rgba(248,81,73,0.5)}
+.action-row[data-indent="6"]{margin-left:96px;border-left:2px solid rgba(118,227,234,0.5)}
+.action-row[data-indent="0"] .indent-strip{background:var(--text4)}
+.action-row[data-indent="1"] .indent-strip{background:var(--blue)}
+.action-row[data-indent="2"] .indent-strip{background:var(--purple)}
+.action-row[data-indent="3"] .indent-strip{background:var(--green)}
+.action-row[data-indent="4"] .indent-strip{background:var(--amber)}
+.action-row[data-indent="5"] .indent-strip{background:var(--red)}
+.action-row[data-indent="6"] .indent-strip{background:var(--cyan)}
+.action-row.is-block-opener{background:var(--bg3)}
+.action-row.is-else-row{background:var(--bg3);border-style:dashed}
+.indent-strip{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:22px}
+.action-move{display:flex;flex-direction:column;gap:0;flex-shrink:0}
+.action-move button{background:none;border:none;color:var(--text4);cursor:pointer;font-size:10px;padding:1px 3px}
+.action-move button:hover{color:var(--text2)}
+.action-type-sel{width:120px;flex-shrink:0;padding:4px 6px;font-size:11px}
+.indent-ctrl{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.indent-ctrl button{background:var(--bg3);border:1px solid var(--border2);color:var(--text3);cursor:pointer;width:18px;height:22px;font-size:10px;border-radius:3px}
+.indent-ctrl button:hover{color:var(--text);border-color:var(--border3)}
+.indent-val{width:20px;text-align:center;font-size:11px;color:var(--text2)}
+.action-fields{flex:1;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.action-fields input,.action-fields select{flex:1;min-width:80px;padding:4px 7px;font-size:11px}
+.action-fields .raw-input{flex:1;min-width:200px;background:var(--bg3);border-color:rgba(57,211,83,0.2);color:var(--green)}
+.action-fields .comment-input{flex:1;background:var(--bg3);border-color:rgba(74,95,114,0.3);color:var(--text3)}
+.action-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:15px;padding:0 4px;line-height:22px}
+.action-del:hover{color:var(--red)}
+
+/* condition builder */
+.cond-builder{display:flex;flex-direction:column;gap:4px;flex:1}
+.cond-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.cond-op{width:48px;flex-shrink:0;padding:3px 5px;font-size:10px;font-weight:700;background:var(--bg3);border:1px solid var(--border3);border-radius:4px;color:var(--purple);cursor:pointer;text-align:center}
+.cond-op:hover{background:var(--purple-dim)}
+.cond-left{flex:1;min-width:80px;padding:4px 7px;font-size:11px}
+.cond-cmp{width:72px;flex-shrink:0;padding:4px 5px;font-size:11px}
+.cond-right{flex:1;min-width:60px;padding:4px 7px;font-size:11px}
+.cond-not{padding:3px 7px;font-size:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;color:var(--text3);cursor:pointer;flex-shrink:0}
+.cond-not.active{background:var(--red-dim);border-color:rgba(248,81,73,0.4);color:var(--red)}
+.cond-del{background:none;border:none;color:var(--text4);cursor:pointer;font-size:13px;padding:0 2px;flex-shrink:0}
+.cond-del:hover{color:var(--red)}
+.cond-add{font-size:10px;padding:3px 9px;background:var(--bg3);border:1px dashed var(--border3);border-radius:4px;color:var(--text3);cursor:pointer;align-self:flex-start;margin-top:2px}
+.cond-add:hover{color:var(--blue);border-color:var(--blue)}
+.cond-if-label{width:48px;flex-shrink:0;font-size:9px;color:var(--text4);text-align:center;text-transform:uppercase;letter-spacing:0.5px}
+
+/* buttons */
+.add-btn{width:100%;padding:8px;background:var(--bg3);border:1px dashed var(--border3);border-radius:var(--r);color:var(--text3);font-size:11px;font-family:inherit;cursor:pointer}
+.add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.add-btn.green:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.bottom-bar{padding:12px 14px;border-top:1px solid var(--border2);display:flex;gap:8px;flex-shrink:0;background:var(--bg2)}
+.btn{flex:1;padding:10px 16px;border:none;border-radius:var(--r);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,#238636,#196c2e);color:white}
+.btn-primary:hover{background:linear-gradient(135deg,#2ea043,#238636)}
+.btn-sm{padding:7px 12px;font-size:11px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);cursor:pointer}
+.btn-sm:hover{border-color:var(--border3);color:var(--text)}
+
+/* output */
+.output-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border2);background:var(--bg2)}
+.output-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase}
+.output-actions{display:flex;gap:6px;margin-left:auto}
+.copy-btn{padding:5px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:10px;cursor:pointer}
+.copy-btn:hover{border-color:var(--green);color:var(--green)}
+.copy-btn.ok{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.sample-banner{padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sample-tag{font-size:9px;font-weight:700;letter-spacing:0.8px;padding:2px 7px;border-radius:10px;background:rgba(57,211,83,0.12);border:1px solid rgba(57,211,83,0.3);color:var(--green)}
+.sample-label{font-size:11px;color:var(--text3)}
+
+/* syntax highlight */
+.kw{color:var(--red)} .kw2{color:var(--purple)} .fn{color:var(--blue)} .ty{color:var(--cyan)} .str{color:var(--amber)} .num{color:var(--orange)} .cmt{color:var(--text3);font-style:italic} .ann{color:var(--purple)}
+
 .scrollable{overflow-y:auto;flex:1}
-.func-editor .sec{flex-shrink:0}
-
-/* ══════════════════════ STATUS BAR ══════════════════════ */
-.status-bar{
-  display:flex;align-items:center;gap:10px;
-  padding:4px 14px;border-top:1px solid var(--border);
-  font-size:10px;color:var(--text3);flex-shrink:0;
-  background:var(--bg2);
-}
-.status-item{display:flex;align-items:center;gap:5px}
+.status-bar{display:flex;align-items:center;gap:10px;padding:4px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);background:var(--bg2)}
 .status-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.empty-hint{color:var(--text3);font-size:11px;line-height:1.8}
 
-/* ══════════════════════ IMPORT ══════════════════════ */
-.import-zone{
-  padding:12px;border:1px dashed var(--border3);
-  border-radius:var(--r);cursor:pointer;
-  font-size:11px;color:var(--text3);text-align:center;
-  transition:all 0.15s;
-}
-.import-zone:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+/* guide */
+.guide-footer{background:var(--bg3);border-top:1px solid var(--border2);flex-shrink:0;font-size:11px;}
+.guide-header{padding:6px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--bg2);border-bottom:1px solid var(--border);user-select:none;color:var(--text2);}
+.guide-header:hover{color:var(--text);background:var(--bg3);}
+.guide-header .arrow{font-size:9px;transition:transform 0.2s;margin-left:auto}
+.guide-header.open .arrow{transform:rotate(90deg)}
+.guide-body{display:none;padding:14px 16px;background:var(--bg);max-height:180px;overflow-y:auto;line-height:1.6;color:var(--text2);}
+.guide-body.open{display:block}
+.guide-body h4{color:var(--green);margin:8px 0 4px;font-size:11px;letter-spacing:0.5px}
+.guide-body p{margin:4px 0}
+.guide-body code{background:var(--bg4);padding:2px 5px;border-radius:4px;font-size:10px;color:var(--cyan)}
+.guide-body .grid-guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.guide-body hr{border-color:var(--border);margin:6px 0}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ -->
 <div class="header">
   <div class="logo">GDS<span>cript</span>PRO</div>
   <div class="header-sep">▸</div>
-  <div class="header-desc">Universal Function Generator · Extended Blocks</div>
+  <div class="header-desc">Visual GDScript Generator · Godot 4</div>
   <div class="header-pills">
-    <span class="pill pill-green">INDENT AWARE</span>
-    <span class="pill pill-blue">MULTI-FUNCTION BLOCKS</span>
+    <span class="pill pill-green">GODOT 4</span>
+    <span class="pill pill-blue">BEGINNER FRIENDLY</span>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ WORKSPACE ═══════════════════════════════════════ -->
 <div class="workspace">
-
-  <!-- ══════════════════ LEFT ══════════════════ -->
   <div class="left-panel">
 
-    <!-- Class Variables -->
+    <!-- Script Header -->
+    <div class="sec">
+      <div class="sec-hdr open" onclick="toggleSec(this)">
+        <div class="dot" style="background:var(--green)"></div>
+        Script Header
+        <span class="arrow">▶</span>
+      </div>
+      <div class="sec-body open">
+        <div class="row2">
+          <div class="field">
+            <div class="script-header-label">class_name <span class="badge-opt">optional</span></div>
+            <input type="text" id="classNameInput" placeholder="e.g., Player, Enemy" oninput="updateScriptHeader()">
+          </div>
+          <div class="field">
+            <div class="script-header-label">extends <span class="badge-req">required</span></div>
+            <input type="text" id="extendsInput" list="extendsList" placeholder="CharacterBody3D" oninput="updateScriptHeader()">
+            <datalist id="extendsList">
+              <option value="Node"><option value="Node2D"><option value="Node3D">
+              <option value="CharacterBody2D"><option value="CharacterBody3D">
+              <option value="RigidBody2D"><option value="RigidBody3D">
+              <option value="Area2D"><option value="Area3D">
+              <option value="StaticBody2D"><option value="StaticBody3D">
+              <option value="AnimationPlayer"><option value="Control">
+              <option value="CanvasLayer"><option value="Resource"><option value="RefCounted">
+            </datalist>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Declarations -->
     <div class="sec">
       <div class="sec-hdr" onclick="toggleSec(this)">
         <div class="dot" style="background:var(--amber)"></div>
-        Class-Level Declarations
+        Declarations
         <span class="arrow">▶</span>
       </div>
       <div class="sec-body">
+        <div class="cvar-header">
+          <span>Annotation</span><span>Keyword</span><span>Name</span><span>: Type</span><span>= Value</span>
+        </div>
         <div id="cvarList" class="param-list"></div>
-        <button class="add-btn" onclick="addClassVar()">+ Add @export / @onready / signal / var</button>
+        <button class="add-btn" onclick="addClassVar()">+ Add Declaration</button>
       </div>
     </div>
 
@@ -406,39 +271,20 @@ select option{background:var(--bg4)}
       <button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>
     </div>
 
-    <!-- Function Editor (scrollable) -->
+    <!-- Function Editor -->
     <div class="func-editor scrollable" id="funcEditor">
-      <div class="empty-hint" style="margin:20px">
-        Click <strong>＋ Add Function</strong> to start building,<br>
-        or load a <strong>template</strong> from the panel below.
-      </div>
+      <div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building.</div>
     </div>
 
-    <!-- Templates -->
-    <div class="sec">
-      <div class="sec-hdr" onclick="toggleSec(this)">
-        <div class="dot" style="background:var(--cyan)"></div>
-        Templates
-        <span class="arrow">▶</span>
-      </div>
-      <div class="sec-body">
-        <div class="tmpl-grid" id="tmplGrid"></div>
-      </div>
-    </div>
-
-    <!-- Bottom Buttons -->
     <div class="bottom-bar">
-      <button class="btn btn-primary" onclick="generateAll()">⚡ Generate All Code</button>
+      <button class="btn btn-primary" onclick="generateAll()">⚡ Generate GDScript</button>
     </div>
-
-    <!-- Status -->
     <div class="status-bar">
-      <div class="status-item"><div class="status-dot"></div><span id="statusText">Ready</span></div>
+      <div class="status-dot"></div><span id="statusText">Ready</span>
       <span id="funcCount" style="margin-left:auto">0 functions · 0 actions</span>
     </div>
   </div>
 
-  <!-- ══════════════════ RIGHT ══════════════════ -->
   <div class="right-panel">
     <div class="output-header">
       <span class="output-title">⬡ Generated GDScript</span>
@@ -449,34 +295,96 @@ select option{background:var(--bg4)}
         <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy All</button>
       </div>
     </div>
-    <div class="output-code" id="outputCode"><span class="cmt"># Click ⚡ Generate All Code to build your GDScript
-# or load a template from the left panel
+    <div class="sample-banner">
+      <span class="sample-tag">EXAMPLE</span>
+      <span class="sample-label">CharacterBody3D movement — read this to understand GDScript structure</span>
+      <button class="btn-sm" id="sampleToggleBtn" style="margin-left:auto;font-size:10px" onclick="toggleSample()">Hide Sample</button>
+    </div>
+    <div id="sampleBlock" class="sample-code"></div>
+    <div class="output-code" id="outputCode"><span class="cmt"># Press ⚡ Generate GDScript to see your code here</span></div>
+  </div>
+</div>
 
-# ─── HOW THE INDENT SYSTEM WORKS ─────────────────────────────
-# Each action has an explicit indent level [◀ N ▶]
-# 0 = first level inside function body
-# 1 = inside if/for/match block
-# 2 = nested block
-# Use "raw" action type for any complex expression
-# ─────────────────────────────────────────────────────────────</span></div>
+<div class="guide-footer">
+  <div class="guide-header" onclick="toggleGuide()">
+    <div class="dot" style="background:var(--blue)"></div>
+    📘 User Guide
+    <span class="arrow" id="guideArrow">▶</span>
+  </div>
+  <div class="guide-body" id="guideBody">
+    <h4>🗂️ Script structure — always in this order</h4>
+    <p><code>class_name</code> (optional) → gives your script a reusable name across the project.<br>
+    <code>extends</code> (required) → tells Godot what kind of node this script belongs to. Without it, nothing works.<br>
+    <strong>Declarations</strong> → constants, exported vars, onready refs, signals — all before functions.<br>
+    <strong>Functions</strong> → <code>_ready()</code> runs once on load · <code>_physics_process(delta)</code> runs every physics frame.</p>
+    <hr>
+    <h4>🏷️ Annotation quick reference</h4>
+    <div class="grid-guide">
+      <div><code>@export</code> → <em>variable appears in the Godot Inspector</em></div>
+      <div><code>@onready</code> → <em>gets a node reference when scene loads (use $NodeName)</em></div>
+      <div><code>const</code> → <em>value that never changes (use UPPER_CASE)</em></div>
+      <div><code>signal</code> → <em>custom event other nodes can listen to</em></div>
+    </div>
+    <hr>
+    <h4>🔀 Nested logic tips</h4>
+    <p>After adding <code>if</code> / <code>for</code> / <code>while</code>, the next action auto-indents inside it. Use <code>◀ ▶</code> to adjust manually. Block openers show a darker background; <code>else/elif</code> show dashed borders and snap back to the correct indent automatically.</p>
+    <hr>
+    <h4>🔗 Condition builder (if / elif / while)</h4>
+    <p>Each condition row has: <code>not</code> toggle · left operand · comparator · right operand. Click <code>+ AND/OR condition</code> to chain multiple bools. Click the <code>AND</code>/<code>OR</code> badge between rows to toggle the operator.</p>
   </div>
 </div>
 
 <script>
 'use strict';
 
-// ══════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════
 let classVars = [];
-let functions  = [];   // { id, name, returnType, isStatic, rpcMode, params[], actions[] }
+let functions  = [];
 let activeFnId = null;
 let _nextId    = 1;
 const uid = () => _nextId++;
 
-// ══════════════════════════════════════════════════════
-//  ACTION TYPES — grouped, with field specs
-// ══════════════════════════════════════════════════════
+let scriptClassName = '';
+let scriptExtends   = '';
+
+function updateScriptHeader(){
+  scriptClassName = document.getElementById('classNameInput').value.trim();
+  scriptExtends   = document.getElementById('extendsInput').value.trim();
+}
+
+// ── BLOCK SETS ───────────────────────────────────────────────────
+const BLOCK_OPENERS = new Set(['if','elif','else','for','while','match','case']);
+const ELSE_TYPES    = new Set(['elif','else']);
+const COND_TYPES    = new Set(['if','elif','while']);
+
+// ── DECLARATIONS ─────────────────────────────────────────────────
+function getKeyword(ann){ return ann==='signal'?'signal':ann==='const'?'const':'var'; }
+
+function renderClassVars(){
+  const el=document.getElementById('cvarList');
+  if(!classVars.length){el.innerHTML='<div class="empty-hint" style="padding:8px;text-align:center">✨ Add @export, @onready, signal, const, or var</div>';return;}
+  el.innerHTML=classVars.map(cv=>{
+    const kw=getKeyword(cv.annotation);
+    const isSig=cv.annotation==='signal';
+    return `<div class="cvar-item">
+      <select class="cvar-ann" onchange="updateCV(${cv.id},'annotation',this.value)">
+        ${['','@export','@onready','@export_range','@export_enum','const','signal','@static_unload'].map(a=>`<option ${cv.annotation===a?'selected':''}>${a||'none'}</option>`).join('')}
+      </select>
+      <div class="cvar-keyword">${kw}</div>
+      <input class="cvar-name" value="${esc(cv.name)}" placeholder="var_name" onchange="updateCV(${cv.id},'name',this.value)">
+      ${isSig
+        ?`<input class="cvar-type" placeholder="(none)" disabled style="opacity:0.3">`
+        :`<select class="cvar-type" onchange="updateCV(${cv.id},'type',this.value)" style="padding:4px 6px;font-size:11px">
+            ${['','int','float','String','bool','Vector2','Vector3','Color','Node','Node3D','CharacterBody3D','Area3D','AnimationPlayer','Camera3D','RigidBody3D','Dictionary','Array','Variant'].map(t=>`<option ${cv.type===t?'selected':''}>${t||': Type'}</option>`).join('')}
+          </select>`}
+      ${isSig
+        ?`<input class="cvar-val" placeholder="(none)" disabled style="opacity:0.3">`
+        :`<input class="cvar-val" value="${esc(cv.value)}" placeholder="${cv.annotation==='@onready'?'$NodeName':'= value'}" onchange="updateCV(${cv.id},'value',this.value)">`}
+      <button class="cvar-del" onclick="removeCV(${cv.id})">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+// ── ACTION GROUPS & SPECS ────────────────────────────────────────
 const ACTION_GROUPS = {
   '— Flow —':['raw','comment','blank','if','elif','else','match','case','for','while','break','continue','pass'],
   '— Variables —':['var','const','assign'],
@@ -486,223 +394,210 @@ const ACTION_GROUPS = {
   '— Debug —':['print','push_error','push_warning','assert'],
   '— Node —':['queue_free'],
 };
-
 const ACTION_SPECS = {
-  raw:            { needsValue:true,  valuePlaceholder:'any GDScript expression…', rawStyle:true },
-  comment:        { needsValue:true,  valuePlaceholder:'comment text', commentStyle:true },
-  blank:          {},
-  if:             { needsValue:true,  valuePlaceholder:'condition (without "if" and ":")' },
-  elif:           { needsValue:true,  valuePlaceholder:'condition' },
-  else:           {},
-  match:          { needsValue:true,  valuePlaceholder:'expression to match' },
-  case:           { needsValue:true,  valuePlaceholder:'"state", 0, Vector2(…), or _' },
-  for:            { needsValue:true,  valuePlaceholder:'item in collection' },
-  while:          { needsValue:true,  valuePlaceholder:'condition' },
-  break:          {},
-  continue:       {},
-  pass:           {},
-  var:            { needsName:true,   needsValue:true, namePlaceholder:'name', valuePlaceholder:'initial value' },
-  const:          { needsName:true,   needsValue:true, namePlaceholder:'NAME', valuePlaceholder:'value' },
-  assign:         { needsName:true,   needsValue:true, namePlaceholder:'variable / property', valuePlaceholder:'new value' },
-  return:         { needsValue:true,  valuePlaceholder:'value (empty for bare return)' },
-  call:           { needsValue:true,  valuePlaceholder:'any_function(args)' },
-  await:          { needsValue:true,  valuePlaceholder:'seconds (creates timer)' },
-  await_signal:   { needsValue:true,  valuePlaceholder:'signal_source.signal_name' },
-  emit_signal:    { needsName:true,   needsValue:true, namePlaceholder:'signal_name', valuePlaceholder:'args (optional)' },
-  rpc_call:       { needsName:true,   needsValue:true, namePlaceholder:'method_name', valuePlaceholder:'args (optional)' },
-  rpc_id_call:    { needsValue:true,  valuePlaceholder:'peer_id, "method_name", args…' },
-  is_authority:   {},
-  set_authority:  { needsValue:true,  valuePlaceholder:'peer_id' },
-  print:          { needsValue:true,  valuePlaceholder:'value or "string"' },
-  push_error:     { needsValue:true,  valuePlaceholder:'"error message"' },
-  push_warning:   { needsValue:true,  valuePlaceholder:'"warning message"' },
-  assert:         { needsValue:true,  valuePlaceholder:'condition, "message"' },
-  queue_free:     {},
+  raw:          {needsValue:true, valuePlaceholder:'any GDScript expression (raw code)',rawStyle:true},
+  comment:      {needsValue:true, valuePlaceholder:'explain what this block does',commentStyle:true},
+  blank:{}, if:{}, elif:{}, else:{}, while:{},
+  match:        {needsValue:true, valuePlaceholder:'expression to match (state, mode)'},
+  case:         {needsValue:true, valuePlaceholder:'"idle", 42, Vector2.ZERO, or _'},
+  for:          {needsValue:true, valuePlaceholder:'item in array  OR  i in range(10)'},
+  break:{},continue:{},pass:{},
+  var:          {needsName:true,needsValue:true,namePlaceholder:'variable_name',valuePlaceholder:'initial value (0, null, [])'},
+  const:        {needsName:true,needsValue:true,namePlaceholder:'CONST_NAME',valuePlaceholder:'value (100, "GAME")'},
+  assign:       {needsName:true,needsValue:true,namePlaceholder:'target (speed, pos.x)',valuePlaceholder:'new value'},
+  return:       {needsValue:true,valuePlaceholder:'value (leave empty for bare return)'},
+  call:         {needsValue:true,valuePlaceholder:'function_name(args)'},
+  await:        {needsValue:true,valuePlaceholder:'seconds (e.g., 1.0, 0.5)'},
+  await_signal: {needsValue:true,valuePlaceholder:'signal_source.signal_name'},
+  emit_signal:  {needsName:true,needsValue:false,namePlaceholder:'signal_name'},
+  rpc_call:     {needsName:true,needsValue:true,namePlaceholder:'method_name',valuePlaceholder:'args (comma separated)'},
+  rpc_id_call:  {needsValue:true,valuePlaceholder:'peer_id, "method_name", args…'},
+  is_authority:{},
+  set_authority:{needsValue:true,valuePlaceholder:'peer_id (int)'},
+  print:        {needsValue:true,valuePlaceholder:'value or "Debug text"'},
+  push_error:   {needsValue:true,valuePlaceholder:'"error message"'},
+  push_warning: {needsValue:true,valuePlaceholder:'"warning message"'},
+  assert:       {needsValue:true,valuePlaceholder:'condition, "message"'},
+  queue_free:{},
 };
 
-function genLine(a) {
-  const v = a.value || '';
-  const n = a.name  || '';
-  switch (a.type) {
-    case 'raw':           return v;
-    case 'comment':       return `# ${v}`;
-    case 'blank':         return '';
-    case 'if':            return `if ${v}:`;
-    case 'elif':          return `elif ${v}:`;
-    case 'else':          return 'else:';
-    case 'match':         return `match ${v}:`;
-    case 'case':          return `${v}:`;
-    case 'for':           return `for ${v}:`;
-    case 'while':         return `while ${v}:`;
-    case 'break':         return 'break';
-    case 'continue':      return 'continue';
-    case 'pass':          return 'pass';
-    case 'var':           return `var ${n} = ${v}`;
-    case 'const':         return `const ${n} = ${v}`;
-    case 'assign':        return `${n} = ${v}`;
-    case 'return':        return v ? `return ${v}` : 'return';
-    case 'call':          return v;
-    case 'await':         return `await get_tree().create_timer(${v}).timeout`;
-    case 'await_signal':  return `await ${v}`;
-    case 'emit_signal':   return v ? `${n}.emit(${v})` : `${n}.emit()`;
-    case 'rpc_call':      return v ? `rpc("${n}", ${v})` : `rpc("${n}")`;
-    case 'rpc_id_call':   return `rpc_id(${v})`;
-    case 'is_authority':  return 'if not is_multiplayer_authority(): return';
-    case 'set_authority': return `set_multiplayer_authority(${v})`;
-    case 'print':         return `print(${v})`;
-    case 'push_error':    return `push_error(${v})`;
-    case 'push_warning':  return `push_warning(${v})`;
-    case 'assert':        return `assert(${v})`;
-    case 'queue_free':    return 'queue_free()';
-    default:              return v || 'pass';
+// ── CONDITION BUILDER ────────────────────────────────────────────
+function buildCondStr(a){
+  if(!a.conditions||!a.conditions.length) return a.value||'true';
+  return a.conditions.map((c,i)=>{
+    const notStr = c.not?'not ':'';
+    const cmpStr = c.cmp?` ${c.cmp} ${c.right||'null'}`:'';
+    const part   = `${notStr}${c.left||'condition'}${cmpStr}`;
+    return i===0 ? part : ` ${a.conditions[i-1].op} ${part}`;
+  }).join('').trim();
+}
+
+function renderActionFields(a){
+  const spec=ACTION_SPECS[a.type]||{};
+  if(COND_TYPES.has(a.type)){
+    const conds=a.conditions&&a.conditions.length?a.conditions:[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}];
+    return `<div class="cond-builder">
+      ${conds.map((c,i)=>`<div class="cond-row">
+        ${i>0
+          ?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})" title="Toggle AND/OR">${(conds[i-1].op||'and').toUpperCase()}</button>`
+          :`<span class="cond-if-label">${a.type.toUpperCase()}</span>`}
+        <button class="cond-not${c.not?' active':''}" onclick="toggleCondNot(${a.id},${c.id})">not</button>
+        <input class="cond-left" value="${esc(c.left)}" placeholder="variable / func()" onchange="updateCond(${a.id},${c.id},'left',this.value)">
+        <select class="cond-cmp" onchange="updateCond(${a.id},${c.id},'cmp',this.value)">
+          ${['','==','!=','<','<=','>','>=','in','not in','is','has'].map(op=>`<option ${c.cmp===op?'selected':''}>${op||'(bool)'}</option>`).join('')}
+        </select>
+        ${c.cmp?`<input class="cond-right" value="${esc(c.right)}" placeholder="value" onchange="updateCond(${a.id},${c.id},'right',this.value)">`:'<span style="flex:1"></span>'}
+        ${conds.length>1?`<button class="cond-del" onclick="removeCond(${a.id},${c.id})">✕</button>`:''}
+      </div>`).join('')}
+      <button class="cond-add" onclick="addCond(${a.id})">+ AND/OR condition</button>
+    </div>`;
+  }
+  let html='';
+  if(spec.needsName) html+=`<input type="text" value="${esc(a.name||'')}" placeholder="${esc(spec.namePlaceholder||'name')}" onchange="updateAction(${a.id},'name',this.value)">`;
+  if(spec.needsValue) html+=`<input type="text" class="${spec.rawStyle?'raw-input':spec.commentStyle?'comment-input':''}" value="${esc(a.value||'')}" placeholder="${esc(spec.valuePlaceholder||'value')}" onchange="updateAction(${a.id},'value',this.value)">`;
+  return html;
+}
+
+// ── CODE GENERATION ──────────────────────────────────────────────
+function genLine(a){
+  const v=a.value||'', n=a.name||'';
+  switch(a.type){
+    case 'raw':return v;
+    case 'comment':return `# ${v}`;
+    case 'blank':return '';
+    case 'if':return `if ${buildCondStr(a)}:`;
+    case 'elif':return `elif ${buildCondStr(a)}:`;
+    case 'else':return 'else:';
+    case 'match':return `match ${v}:`;
+    case 'case':return `${v}:`;
+    case 'for':return `for ${v}:`;
+    case 'while':return `while ${buildCondStr(a)}:`;
+    case 'break':return 'break';
+    case 'continue':return 'continue';
+    case 'pass':return 'pass';
+    case 'var':return `var ${n} = ${v}`;
+    case 'const':return `const ${n} = ${v}`;
+    case 'assign':return `${n} = ${v}`;
+    case 'return':return v?`return ${v}`:'return';
+    case 'call':return v;
+    case 'await':return `await get_tree().create_timer(${v}).timeout`;
+    case 'await_signal':return `await ${v}`;
+    case 'emit_signal':return n?`${n}.emit()`:'# emit: missing signal name';
+    case 'rpc_call':return v?`rpc("${n}", ${v})`:`rpc("${n}")`;
+    case 'rpc_id_call':return `rpc_id(${v})`;
+    case 'is_authority':return 'if not is_multiplayer_authority(): return';
+    case 'set_authority':return `set_multiplayer_authority(${v})`;
+    case 'print':return `print(${v})`;
+    case 'push_error':return `push_error(${v})`;
+    case 'push_warning':return `push_warning(${v})`;
+    case 'assert':return `assert(${v})`;
+    case 'queue_free':return 'queue_free()';
+    default:return v||'pass';
   }
 }
 
-function genFunction(fn) {
-  const lines = [];
-  if (fn.rpcMode && fn.rpcMode !== 'none') lines.push(`@rpc(${fn.rpcMode})`);
-  const params = fn.params.map(p => {
-    let s = p.type ? `${p.name}: ${p.type}` : p.name;
-    if (p.defaultValue) s += ` = ${p.defaultValue}`;
-    return s;
-  }).join(', ');
-  const staticStr = fn.isStatic ? 'static ' : '';
-  const retStr    = fn.returnType !== 'inferred' ? ` -> ${fn.returnType}` : '';
+function genFunction(fn){
+  const lines=[];
+  if(fn.rpcMode&&fn.rpcMode!=='none') lines.push(`@rpc(${fn.rpcMode})`);
+  const params=fn.params.map(p=>{let s=p.type?`${p.name}: ${p.type}`:p.name;if(p.defaultValue)s+=` = ${p.defaultValue}`;return s;}).join(', ');
+  const staticStr=fn.isStatic?'static ':'';
+  const retStr=fn.returnType!=='inferred'?` -> ${fn.returnType}`:'';
   lines.push(`${staticStr}func ${fn.name}(${params})${retStr}:`);
-  if (!fn.actions || fn.actions.length === 0) lines.push('\tpass');
-  else for (const a of fn.actions) lines.push(`${'\t'.repeat((a.indent||0)+1)}${genLine(a)}`);
+  if(!fn.actions||fn.actions.length===0) lines.push('\tpass');
+  else for(const a of fn.actions) lines.push(`${'\t'.repeat((a.indent||0)+1)}${genLine(a)}`);
   return lines.join('\n');
 }
 
-function genClassVarLine(cv) {
-  const ann  = cv.annotation || '';
-  const type = cv.type ? `: ${cv.type}` : '';
-  const val  = cv.value ? ` = ${cv.value}` : '';
-  if (ann === 'signal') return `signal ${cv.name}`;
-  if (ann) return `${ann}\nvar ${cv.name}${type}${val}`;
+function genClassVarLine(cv){
+  const ann=cv.annotation||'';
+  const typeVal=(cv.type&&cv.type!==': Type')?cv.type:'';
+  const type=typeVal?`: ${typeVal}`:'';
+  const val=cv.value?` = ${cv.value}`:'';
+  if(ann==='signal') return `signal ${cv.name}`;
+  if(ann==='const')  return `const ${cv.name}${type}${val}`;
+  if(ann) return `${ann}\nvar ${cv.name}${type}${val}`;
   return `var ${cv.name}${type}${val}`;
 }
 
-function highlight(code) {
-  let h = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  h = h.replace(/(@\w+(?:\([^)]*\))?)/g, '<span class="ann">$1</span>');
-  h = h.replace(/(#.*$)/gm, '<span class="cmt">$1</span>');
-  const stash = [];
-  h = h.replace(/(<span class="(?:cmt|ann)">[^<]*<\/span>)/g, m => { stash.push(m); return `\x00${stash.length-1}\x00`; });
-  h = h.replace(/"([^"]*)"/g, '\x01<span class="str">"$1"</span>\x01');
-  const KEYWORDS = ['func','var','const','if','elif','else','for','while','match','return','pass','break','continue','and','or','not','in','is','null','true','false','await','static','signal','enum','class','extends','self','super','new','preload','load'];
-  const KW2 = ['rpc','rpc_id','emit','connect','disconnect','set_multiplayer_authority','is_multiplayer_authority','get_multiplayer_authority','print','push_error','push_warning','assert','queue_free'];
-  const TYPES = ['void','bool','int','float','String','Vector2','Vector3','Vector2i','Vector3i','Color','Transform2D','Transform3D','Basis','Quaternion','AABB','Rect2','Plane','Node','Node2D','Node3D','CharacterBody2D','CharacterBody3D','RigidBody3D','VehicleBody3D','Area3D','CollisionShape3D','RayCast3D','AnimationPlayer','Dictionary','Array','Variant','PackedStringArray','PackedVector3Array'];
-  h = h.replace(new RegExp(`\\b(${KEYWORDS.join('|')})\\b`, 'g'), '<span class="kw">$1</span>');
-  h = h.replace(new RegExp(`\\b(${KW2.join('|')})\\b`, 'g'), '<span class="kw2">$1</span>');
-  h = h.replace(new RegExp(`\\b(${TYPES.join('|')})\\b`, 'g'), '<span class="ty">$1</span>');
-  h = h.replace(/\b(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\b/g, '<span class="num">$1</span>');
+function generateAll(){
+  const blocks=[];
+  const cn=document.getElementById('classNameInput').value.trim();
+  const ex=document.getElementById('extendsInput').value.trim();
+  if(cn) blocks.push(`class_name ${cn}`);
+  if(ex){ blocks.push(`extends ${ex}`); }
+  else { document.getElementById('statusText').textContent='⚠ extends is empty!'; blocks.push(`# ⚠ WARNING: Add an "extends" value`); }
+  if(blocks.length) blocks.push('');
+  const order=['const','signal','@export','@export_range','@export_enum','@onready','@static_unload',''];
+  const sorted=[...classVars].sort((a,b)=>{
+    const ai=order.indexOf(a.annotation)===-1?order.length:order.indexOf(a.annotation);
+    const bi=order.indexOf(b.annotation)===-1?order.length:order.indexOf(b.annotation);
+    return ai-bi;
+  });
+  if(sorted.length){blocks.push(sorted.map(genClassVarLine).join('\n'));blocks.push('');}
+  for(const fn of functions){blocks.push(genFunction(fn));blocks.push('');}
+  setOutput(blocks.length>2?highlight(blocks.join('\n').trim()):'<span class="cmt"># No declarations or functions defined yet.</span>');
+  updateStatus();
+}
 
-  // FIX #1: The original regex used a lookahead (?=\() which does NOT consume the "(",
-  // but the replacement string also appended "(", causing double parentheses like "func((".
-  // Fix: use a capturing group to consume the "(" and include it correctly in the replacement.
-  h = h.replace(/\b(\w+)(\s*\()/g, (m, p1, p2) => KEYWORDS.includes(p1) ? m : `<span class="fn">${p1}</span>${p2}`);
-
-  h = h.replace(/\x01([^\x01]*)\x01/g,'$1');
-  h = h.replace(/\x00(\d+)\x00/g, (_,i) => stash[parseInt(i)]);
+// ── SYNTAX HIGHLIGHT ─────────────────────────────────────────────
+function highlight(code){
+  let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h=h.replace(/(@\w+(?:\([^)]*\))?)/g,'<span class="ann">$1</span>');
+  h=h.replace(/(#.*$)/gm,'<span class="cmt">$1</span>');
+  const stash=[];
+  h=h.replace(/(<span class="(?:cmt|ann)">[^<]*<\/span>)/g,m=>{stash.push(m);return `\x00${stash.length-1}\x00`;});
+  h=h.replace(/"([^"]*)"/g,'\x01<span class="str">"$1"</span>\x01');
+  const KW=['func','var','const','if','elif','else','for','while','match','return','pass','break','continue','and','or','not','in','is','null','true','false','await','static','signal','enum','class_name','class','extends','self','super'];
+  const KW2=['rpc','rpc_id','emit','print','push_error','push_warning','assert','queue_free','move_and_slide','move_toward','is_on_floor','normalized','length'];
+  const TY=['void','bool','int','float','String','Vector2','Vector3','Color','Dictionary','Array','Node','Node2D','Node3D','CharacterBody2D','CharacterBody3D','VehicleBody3D','RigidBody3D','Area2D','Area3D','AnimationPlayer','Camera3D','Input'];
+  h=h.replace(new RegExp(`\\b(${KW.join('|')})\\b`,'g'),'<span class="kw">$1</span>');
+  h=h.replace(new RegExp(`\\b(${KW2.join('|')})\\b`,'g'),'<span class="kw2">$1</span>');
+  h=h.replace(new RegExp(`\\b(${TY.join('|')})\\b`,'g'),'<span class="ty">$1</span>');
+  h=h.replace(/\b(\d+(?:\.\d+)?)\b/g,'<span class="num">$1</span>');
+  h=h.replace(/\b(\w+)(\s*\()/g,(m,p1,p2)=>KW.includes(p1)?m:`<span class="fn">${p1}</span>${p2}`);
+  h=h.replace(/\x01([^\x01]*)\x01/g,'$1');
+  h=h.replace(/\x00(\d+)\x00/g,(_,i)=>stash[parseInt(i)]);
   return h;
 }
 
-// DOM rendering helpers
-function toggleSec(hdr) { hdr.classList.toggle('open'); const body = hdr.nextElementSibling; if(body) body.classList.toggle('open'); }
-function esc(s) { return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-function renderClassVars() {
-  const el=document.getElementById('cvarList');
-  if(!classVars.length){el.innerHTML='';return;}
-  el.innerHTML=classVars.map(cv=>`<div class="cvar-item">
-    <select class="cvar-ann" onchange="updateCV(${cv.id},'annotation',this.value)">
-      ${['','@export','@onready','@export_range','signal','@static_unload'].map(a=>`<option ${cv.annotation===a?'selected':''}>${a}</option>`).join('')}
-    </select>
-    <input class="cvar-name" value="${esc(cv.name)}" onchange="updateCV(${cv.id},'name',this.value)">
-    <input class="cvar-type" value="${esc(cv.type)}" onchange="updateCV(${cv.id},'type',this.value)">
-    <input class="cvar-val"  value="${esc(cv.value)}" onchange="updateCV(${cv.id},'value',this.value)">
-    <button class="cvar-del" onclick="removeCV(${cv.id})">🗑</button>
-  </div>`).join('');
-}
-
-function renderTabs() {
+// ── RENDER ───────────────────────────────────────────────────────
+function renderTabs(){
   const bar=document.getElementById('funcTabBar');
   bar.innerHTML=functions.map(fn=>`<div class="func-tab ${fn.id===activeFnId?'active':''}" onclick="setActiveFunc(${fn.id})">${esc(fn.name)}<span class="tab-del" onclick="event.stopPropagation();removeFunc(${fn.id})">✕</span></div>`).join('')+'<button class="add-func-btn" onclick="addFunction()">＋ Add Function</button>';
 }
 
-function renderEditor() {
+function renderEditor(){
   const fn=getActiveFn();
   const ed=document.getElementById('funcEditor');
-  if(!fn){
-    ed.innerHTML='<div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building,<br>or load a template from the panel below.</div>';
-    return;
-  }
+  if(!fn){ed.innerHTML='<div class="empty-hint" style="margin:20px">Click <strong>＋ Add Function</strong> to start building.</div>';return;}
   ed.innerHTML=`
-  <div class="sec">
-    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--purple)"></div>Function Signature<span class="arrow">▶</span></div>
+  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--purple)"></div>Function Signature<span class="arrow">▶</span></div>
     <div class="sec-body open">
       <div class="row2">
-        <div class="field"><div class="field-label">Name</div><input type="text" value="${esc(fn.name)}" onchange="updateFn('name',this.value)"></div>
+        <div class="field"><div class="field-label">Name</div><input type="text" value="${esc(fn.name)}" placeholder="e.g., take_damage, _ready" onchange="updateFn('name',this.value)"></div>
         <div class="field"><div class="field-label">Return Type</div><select onchange="updateFn('returnType',this.value)">${['void','bool','int','float','String','Variant','Vector2','Vector3','Dictionary','Array','inferred'].map(t=>`<option ${fn.returnType===t?'selected':''}>${t}</option>`).join('')}</select></div>
       </div>
-      <div class="toggle-row">
-        <div class="toggle ${fn.isStatic?'active':''}" onclick="toggleFn('isStatic')"><input type="checkbox" ${fn.isStatic?'checked':''}> static func</div>
-      </div>
-      <div class="field">
-        <div class="field-label">@rpc Annotation</div>
-        <select onchange="updateFn('rpcMode',this.value)">
-          <option value="none" ${fn.rpcMode==='none'?'selected':''}>no @rpc</option>
-          <option value='"any_peer","call_local","reliable"'   ${fn.rpcMode==='"any_peer","call_local","reliable"'?'selected':''}  >any_peer · local · reliable</option>
-          <option value='"any_peer","call_remote","reliable"'  ${fn.rpcMode==='"any_peer","call_remote","reliable"'?'selected':''} >any_peer · remote · reliable</option>
-          <option value='"authority","call_local","reliable"'  ${fn.rpcMode==='"authority","call_local","reliable"'?'selected':''} >authority · local · reliable</option>
-          <option value='"authority","call_remote","reliable"' ${fn.rpcMode==='"authority","call_remote","reliable"'?'selected':''}>authority · remote · reliable</option>
-          <option value='"any_peer","call_local","unreliable_ordered"' ${fn.rpcMode==='"any_peer","call_local","unreliable_ordered"'?'selected':''}>any_peer · local · unrel-ordered</option>
-        </select>
-      </div>
+      <div class="toggle-row"><div class="toggle ${fn.isStatic?'active':''}" onclick="toggleFn('isStatic')"><input type="checkbox" ${fn.isStatic?'checked':''}> static func</div></div>
+      <div class="field"><div class="field-label">@rpc Annotation</div><select onchange="updateFn('rpcMode',this.value)"><option value="none">no @rpc</option><option value='"any_peer","call_local","reliable"'>any_peer · local · reliable</option><option value='"any_peer","call_remote","reliable"'>any_peer · remote · reliable</option><option value='"authority","call_local","reliable"'>authority · local · reliable</option><option value='"authority","call_remote","reliable"'>authority · remote · reliable</option></select></div>
     </div>
   </div>
-  <div class="sec">
-    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--blue)"></div>Parameters<span class="arrow">▶</span></div>
+  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--blue)"></div>Parameters<span class="arrow">▶</span></div>
     <div class="sec-body open">
-      <div class="param-list">
-        ${fn.params.map(p=>`<div class="param-item">
-          <input type="text" value="${esc(p.name)}" onchange="updateParam(${p.id},'name',this.value)">
-          <select onchange="updateParam(${p.id},'type',this.value)">${['Variant','int','float','String','bool','Vector2','Vector3','Node','Node3D','CharacterBody3D','VehicleBody3D','Area3D','RayCast3D','Dictionary','Array'].map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select>
-          <input type="text" value="${esc(p.defaultValue)}" placeholder="= default" onchange="updateParam(${p.id},'defaultValue',this.value)">
-          <button class="param-del" onclick="removeParam(${p.id})">🗑</button>
-        </div>`).join('')}
-        ${fn.params.length===0?'<div class="empty-hint">No parameters. Click + to add.</div>':''}
-      </div>
+      <div class="param-list">${fn.params.map(p=>`<div class="param-item"><input type="text" value="${esc(p.name)}" placeholder="param_name" onchange="updateParam(${p.id},'name',this.value)"><select onchange="updateParam(${p.id},'type',this.value)">${['Variant','int','float','String','bool','Vector2','Vector3','Node','Node3D','CharacterBody3D','Area3D','Dictionary','Array'].map(t=>`<option ${p.type===t?'selected':''}>${t}</option>`).join('')}</select><input type="text" value="${esc(p.defaultValue)}" placeholder="= default (0, null)" onchange="updateParam(${p.id},'defaultValue',this.value)"><button class="param-del" onclick="removeParam(${p.id})">🗑</button></div>`).join('')}</div>
       <button class="add-btn" onclick="addParam()">+ Add Parameter</button>
     </div>
   </div>
-  <div class="sec">
-    <div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Action Sequence<span class="arrow">▶</span></div>
+  <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Action Sequence<span class="arrow">▶</span></div>
     <div class="sec-body open">
-      <div class="action-list" id="actionList">
-        ${fn.actions.map((a)=>`<div class="action-row" data-indent="${a.indent||0}" data-id="${a.id}">
-          <div class="indent-strip"></div>
-          <div class="action-move">
-            <button onclick="moveAction(${a.id},-1)">▲</button>
-            <button onclick="moveAction(${a.id},+1)">▼</button>
-          </div>
-          <select class="action-type-sel" onchange="updateAction(${a.id},'type',this.value)">
-            ${Object.entries(ACTION_GROUPS).map(([grp,types])=>`<optgroup label="${grp}">${types.map(t=>`<option ${a.type===t?'selected':''}>${t}</option>`).join('')}</optgroup>`).join('')}
-          </select>
-          <div class="indent-ctrl">
-            <button onclick="changeIndent(${a.id},-1)">◀</button>
-            <span class="indent-val">${a.indent||0}</span>
-            <button onclick="changeIndent(${a.id},+1)">▶</button>
-          </div>
-          <div class="action-fields">
-            ${(ACTION_SPECS[a.type]||{}).needsName?`<input type="text" value="${esc(a.name||'')}" placeholder="name" onchange="updateAction(${a.id},'name',this.value)">` :''}
-            ${(ACTION_SPECS[a.type]||{}).needsValue?`<input type="text" class="${(ACTION_SPECS[a.type]||{}).rawStyle?'raw-input':(ACTION_SPECS[a.type]||{}).commentStyle?'comment-input':''}" value="${esc(a.value||'')}" placeholder="${esc((ACTION_SPECS[a.type]||{}).valuePlaceholder||'')}" onchange="updateAction(${a.id},'value',this.value)">` :''}
-          </div>
-          <button class="action-del" onclick="removeAction(${a.id})">🗑</button>
-        </div>`).join('')}
-      </div>
-      <div style="display:flex;gap:6px">
+      <div class="action-list">${fn.actions.map(a=>`<div class="action-row ${BLOCK_OPENERS.has(a.type)?'is-block-opener':''} ${ELSE_TYPES.has(a.type)?'is-else-row':''}" data-indent="${a.indent||0}" data-id="${a.id}">
+        <div class="indent-strip"></div>
+        <div class="action-move"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},+1)">▼</button></div>
+        <select class="action-type-sel" onchange="updateAction(${a.id},'type',this.value)">${Object.entries(ACTION_GROUPS).map(([grp,types])=>`<optgroup label="${grp}">${types.map(t=>`<option ${a.type===t?'selected':''}>${t}</option>`).join('')}</optgroup>`).join('')}</select>
+        <div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span class="indent-val">${a.indent||0}</span><button onclick="changeIndent(${a.id},+1)">▶</button></div>
+        <div class="action-fields">${renderActionFields(a)}</div>
+        <button class="action-del" onclick="removeAction(${a.id})">🗑</button>
+      </div>`).join('')}</div>
+      <div style="display:flex;gap:6px;margin-top:2px">
         <button class="add-btn green" style="flex:2" onclick="addAction()">+ Add Action</button>
         <button class="add-btn" style="flex:1" onclick="addAction('raw')">+ Raw Code</button>
         <button class="add-btn" style="flex:1" onclick="addAction('blank')">+ Blank Line</button>
@@ -711,135 +606,153 @@ function renderEditor() {
   </div>`;
 }
 
-function generateAll() {
-  const blocks=[];
-  if(classVars.length) blocks.push(classVars.map(genClassVarLine).join('\n'),'');
-  for(const fn of functions) blocks.push(genFunction(fn),'');
-  setOutput(blocks.length?highlight(blocks.join('\n').trim()):'<span class="cmt"># No functions defined yet.</span>');
-  updateStatus();
-}
-
+// ── MUTATIONS ────────────────────────────────────────────────────
 function setOutput(html){document.getElementById('outputCode').innerHTML=html;}
-function addClassVar(){classVars.push({id:uid(),annotation:'',name:'my_var',type:'',value:''});renderClassVars();}
-function removeCV(id){classVars=classVars.filter(c=>c.id!==id);renderClassVars();}
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function toggleSec(hdr){hdr.classList.toggle('open');const b=hdr.nextElementSibling;if(b)b.classList.toggle('open');}
+function toggleGuide(){const b=document.getElementById('guideBody'),a=document.getElementById('guideArrow');b.classList.toggle('open');a.classList.toggle('open');document.querySelector('.guide-header').classList.toggle('open');}
 
-// FIX #3: updateCV previously called renderClassVars() which destroyed and recreated
-// all DOM nodes, causing a flicker on every blur. Now it only re-renders when needed
-// (annotation change triggers re-render since the select is already blurred anyway).
-function updateCV(id, field, val) {
-  const c = classVars.find(c => c.id === id);
-  if (c) {
-    c[field] = val;
-    // Only re-render for annotation changes (select dropdown).
-    // For text inputs, update is already reflected via the input's own value — no re-render needed.
-    if (field === 'annotation') renderClassVars();
-  }
-}
+function addClassVar(){classVars.push({id:uid(),annotation:'',name:'new_var',type:'',value:''});renderClassVars();}
+function removeCV(id){classVars=classVars.filter(c=>c.id!==id);renderClassVars();}
+function updateCV(id,field,val){const c=classVars.find(c=>c.id===id);if(c){c[field]=val;if(field==='annotation')renderClassVars();}}
 
 function addFunction(template){
   const id=uid();
-  functions.push({
-    id,
-    name:template?.name||`my_function_${id}`,
-    returnType:template?.returnType||'void',
-    isStatic:template?.isStatic||false,
-    rpcMode:template?.rpcMode||'none',
-    params:(template?.params||[]).map(p=>({...p,id:uid()})),
-    actions:(template?.actions||[]).map(a=>({...a,id:uid()}))
-  });
-  activeFnId=id;
-  renderTabs();
-  renderEditor();
-  updateStatus();
+  functions.push({id,name:template?.name||`func_${id}`,returnType:template?.returnType||'void',isStatic:false,rpcMode:'none',params:(template?.params||[]).map(p=>({...p,id:uid()})),actions:(template?.actions||[]).map(a=>({...a,id:uid(),conditions:a.conditions||[]}))});
+  activeFnId=id;renderTabs();renderEditor();updateStatus();
 }
-
-function removeFunc(id){functions=functions.filter(f=>f.id!==id);if(activeFnId===id)activeFnId=functions.length?functions[functions.length-1].id:null;renderTabs();renderEditor();updateStatus();}
+function removeFunc(id){functions=functions.filter(f=>f.id!==id);if(activeFnId===id)activeFnId=functions.length?functions[0].id:null;renderTabs();renderEditor();updateStatus();}
 function setActiveFunc(id){activeFnId=id;renderTabs();renderEditor();}
 function getActiveFn(){return functions.find(f=>f.id===activeFnId)||null;}
 function updateFn(field,val){const fn=getActiveFn();if(fn){fn[field]=val;if(field==='name')renderTabs();}}
 function toggleFn(field){const fn=getActiveFn();if(fn){fn[field]=!fn[field];renderEditor();}}
-function addParam(){const fn=getActiveFn();if(fn)fn.params.push({id:uid(),name:`param${fn.params.length+1}`,type:'Variant',defaultValue:''});renderEditor();}
-function removeParam(id){const fn=getActiveFn();if(fn)fn.params=fn.params.filter(p=>p.id!==id);renderEditor();}
+
+function addParam(){const fn=getActiveFn();if(fn){fn.params.push({id:uid(),name:`param${fn.params.length+1}`,type:'Variant',defaultValue:''});renderEditor();}}
+function removeParam(id){const fn=getActiveFn();if(fn){fn.params=fn.params.filter(p=>p.id!==id);renderEditor();}}
 function updateParam(id,field,val){const fn=getActiveFn();if(fn){const p=fn.params.find(p=>p.id===id);if(p)p[field]=val;}}
-function addAction(type='pass'){const fn=getActiveFn();if(fn){const lastIndent=fn.actions.length?fn.actions[fn.actions.length-1].indent:0;fn.actions.push({id:uid(),type,value:'',name:'',indent:lastIndent});renderEditor();updateStatus();}}
-function removeAction(id){const fn=getActiveFn();if(fn){fn.actions=fn.actions.filter(a=>a.id!==id);renderEditor();updateStatus();}}
-function updateAction(id,field,val){const fn=getActiveFn();if(fn){const a=fn.actions.find(a=>a.id===id);if(a){a[field]=val;if(field==='type')renderEditor();}}}
-function moveAction(id,dir){const fn=getActiveFn();if(fn){const idx=fn.actions.findIndex(a=>a.id===id);const nxt=idx+dir;if(nxt>=0&&nxt<fn.actions.length){[fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]];renderEditor();}}}
-function changeIndent(id,delta){const fn=getActiveFn();if(fn){const a=fn.actions.find(a=>a.id===id);if(a){a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta));renderEditor();}}}
-function updateStatus(){const total=functions.reduce((s,f)=>s+f.actions.length,0);document.getElementById('funcCount').textContent=`${functions.length} function${functions.length!==1?'s':''} · ${total} action${total!==1?'s':''}`;document.getElementById('statusText').textContent='Ready';}
-function copyCode(){const code=document.getElementById('outputCode').textContent||'';navigator.clipboard.writeText(code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy All';btn.classList.remove('ok');},1800);});}
-function exportJSON(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({classVars,functions},null,2)],{type:'application/json'}));a.download='gdscript_config.json';a.click();}
 
-function importJSON(input) {
-  const file=input.files[0];
-  if(!file) return;
-  const r=new FileReader();
-  r.onload=e=>{
-    try {
-      const d=JSON.parse(e.target.result);
-      classVars=d.classVars||[];
-      functions=d.functions||[];
-      activeFnId=functions.length?functions[0].id:null;
-
-      // FIX #2: After importing, _nextId must be set above all existing IDs to prevent
-      // collisions when new items are added. Collect all IDs from the imported data.
-      const allIds = [
-        ...classVars.map(c => c.id),
-        ...functions.flatMap(f => [f.id, ...f.params.map(p=>p.id), ...f.actions.map(a=>a.id)])
-      ].filter(Number.isFinite);
-      _nextId = allIds.length ? Math.max(...allIds) + 1 : 1;
-
-      renderClassVars();
-      renderTabs();
-      renderEditor();
-      updateStatus();
-      document.getElementById('statusText').textContent='Config imported ✓';
-    } catch(ex) {
-      alert('Invalid JSON file: '+ex.message);
-    }
-  };
-  r.readAsText(file);
-  input.value='';
-}
-
-// FIX #4: buildTemplateGrid previously used JSON.stringify() inside an onclick=""
-// attribute, which breaks when template strings contain single or double quotes.
-// Now we store templates in a map and reference them by index — no serialization needed.
-const TEMPLATES = [
-  {
-    label:'🚗 Enter Vehicle',
-    template:{
-      name:'enter_vehicle',
-      returnType:'bool',
-      params:[{name:'vehicle',type:'VehicleBody3D'},{name:'seat_index',type:'int',defaultValue:'0'}],
-      actions:[
-        {type:'if',    value:'not vehicle or not is_multiplayer_authority()', indent:0},
-        {type:'return',value:'false', indent:1},
-        {type:'assign',name:'current_vehicle',value:'vehicle', indent:0},
-        {type:'return',value:'true', indent:0}
-      ]
+function addAction(type='pass'){
+  const fn=getActiveFn(); if(!fn) return;
+  const last=fn.actions.length?fn.actions[fn.actions.length-1]:null;
+  let indent=last?(last.indent||0):0;
+  if(last&&BLOCK_OPENERS.has(last.type)) indent=Math.min(8,indent+1);
+  if(ELSE_TYPES.has(type)&&fn.actions.length){
+    for(let i=fn.actions.length-1;i>=0;i--){
+      const a=fn.actions[i];
+      if(a.type==='if'||a.type==='elif'){indent=a.indent||0;break;}
     }
   }
-];
+  fn.actions.push({id:uid(),type,value:'',name:'',indent,conditions:COND_TYPES.has(type)?[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}]:[]});
+  renderEditor();updateStatus();
+}
+function removeAction(id){const fn=getActiveFn();if(fn){fn.actions=fn.actions.filter(a=>a.id!==id);renderEditor();updateStatus();}}
+function updateAction(id,field,val){
+  const fn=getActiveFn();if(!fn)return;
+  const a=fn.actions.find(a=>a.id===id);if(!a)return;
+  if(field==='type'){
+    a.type=val;
+    if(COND_TYPES.has(val)&&(!a.conditions||!a.conditions.length))
+      a.conditions=[{id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}];
+    renderEditor();
+  } else { a[field]=val; }
+}
+function moveAction(id,dir){const fn=getActiveFn();if(fn){const idx=fn.actions.findIndex(a=>a.id===id);const nxt=idx+dir;if(nxt>=0&&nxt<fn.actions.length){[fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]];renderEditor();}}}
+function changeIndent(id,delta){const fn=getActiveFn();if(fn){const a=fn.actions.find(a=>a.id===id);if(a){a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta));renderEditor();}}}
 
-function buildTemplateGrid() {
-  document.getElementById('tmplGrid').innerHTML = TEMPLATES.map((t,i) =>
-    `<button class="tmpl-btn" onclick="loadTemplate(${i})">
-      <span>${t.label.split(' ')[0]}</span>${t.label.split(' ').slice(1).join(' ')}
-    </button>`
-  ).join('');
+// condition row mutations
+function updateCond(aid,cid,field,val){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c[field]=val;renderEditor();}
+function toggleCondNot(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c.not=!c.not;renderEditor();}
+function toggleCondOp(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;const c=a.conditions.find(c=>c.id===cid);if(!c)return;c.op=c.op==='and'?'or':'and';renderEditor();}
+function addCond(aid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;if(!a.conditions)a.conditions=[];a.conditions.push({id:uid(),not:false,left:'',cmp:'',right:'',op:'and'});renderEditor();}
+function removeCond(aid,cid){const fn=getActiveFn();if(!fn)return;const a=fn.actions.find(a=>a.id===aid);if(!a)return;if(a.conditions.length<=1)return;a.conditions=a.conditions.filter(c=>c.id!==cid);renderEditor();}
+
+function updateStatus(){const total=functions.reduce((s,f)=>s+f.actions.length,0);document.getElementById('funcCount').textContent=`${functions.length} function${functions.length!==1?'s':''} · ${total} action${total!==1?'s':''}`;if(document.getElementById('statusText').textContent!=='⚠ extends is empty!')document.getElementById('statusText').textContent='Ready';}
+function copyCode(){const code=document.getElementById('outputCode').textContent||'';navigator.clipboard.writeText(code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy All';btn.classList.remove('ok');},1800);});}
+function exportJSON(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({classVars,functions},null,2)],{type:'application/json'}));a.download='gdscript_config.json';a.click();}
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);classVars=d.classVars||[];functions=d.functions||[];activeFnId=functions.length?functions[0].id:null;
+  const allIds=[...classVars.map(c=>c.id),...functions.flatMap(f=>[f.id,...f.params.map(p=>p.id),...f.actions.map(a=>a.id)])].filter(Number.isFinite);
+  _nextId=allIds.length?Math.max(...allIds)+1:1;renderClassVars();renderTabs();renderEditor();updateStatus();document.getElementById('statusText').textContent='Config imported ✓';}catch(ex){alert('Invalid JSON: '+ex.message);}};r.readAsText(file);input.value='';
 }
 
-function loadTemplate(index) {
-  const t = TEMPLATES[index];
-  if (t) { addFunction(t.template); generateAll(); }
+// ── SAMPLE SCRIPT ────────────────────────────────────────────────
+const SAMPLE_RAW = `# ─────────────────────────────────────────────────────────────────
+# SAMPLE: CharacterBody3D — 3D Player Movement
+# Read this to understand how a GDScript file is structured.
+# ─────────────────────────────────────────────────────────────────
+
+# (1) class_name — optional. Lets other scripts reference "Player" by name.
+class_name Player
+
+# (2) extends — REQUIRED. Tells Godot this script drives a CharacterBody3D node.
+extends CharacterBody3D
+
+# (3) CONSTANTS — values that never change (use UPPER_CASE by convention)
+const GRAVITY: float = 9.8
+
+# (4) @export vars — appear as sliders/fields in the Godot Inspector
+@export var speed: float = 5.0
+@export var jump_force: float = 4.5
+
+# (5) @onready vars — fetch node references once the scene is fully loaded
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var camera: Camera3D = $Camera3D
+
+# (6) Regular vars — internal state, not visible in Inspector
+var is_dead: bool = false
+
+# (7) Signals — custom events other nodes can connect to and listen for
+signal jumped
+
+# ─── FUNCTIONS ────────────────────────────────────────────────────
+
+# _ready() runs ONCE when the node enters the scene tree
+func _ready() -> void:
+	print("Player ready!")
+
+# _physics_process(delta) runs EVERY physics frame (~60fps)
+# delta = time since last frame — use it to keep movement frame-rate independent
+func _physics_process(delta: float) -> void:
+	# Apply gravity when the player is NOT on the floor
+	if not is_on_floor():
+		velocity.y -= GRAVITY * delta
+
+	# Read directional input from the Input Map (set up in Project Settings)
+	var direction := Vector3(
+		Input.get_axis("move_left", "move_right"),
+		0,
+		Input.get_axis("move_forward", "move_back")
+	)
+
+	# Move if there is input, otherwise slow down smoothly
+	if direction.length() > 0:
+		direction = direction.normalized()
+		velocity.x = direction.x * speed
+		velocity.z = direction.z * speed
+	else:
+		velocity.x = move_toward(velocity.x, 0, speed)
+		velocity.z = move_toward(velocity.z, 0, speed)
+
+	# Jump — only allowed when standing on the floor
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_force
+		jumped.emit()   # fire the signal — other nodes can react to this
+
+	# Apply all velocity calculations and move the character
+	move_and_slide()`;
+
+let sampleVisible=true;
+function toggleSample(){
+  const block=document.getElementById('sampleBlock'),btn=document.getElementById('sampleToggleBtn');
+  sampleVisible=!sampleVisible;
+  block.style.display=sampleVisible?'block':'none';
+  btn.textContent=sampleVisible?'Hide Sample':'Show Sample';
 }
 
-buildTemplateGrid();
-renderClassVars();
-renderTabs();
-renderEditor();
-updateStatus();
+// ── INIT ─────────────────────────────────────────────────────────
+document.getElementById('sampleBlock').innerHTML=highlight(SAMPLE_RAW);
+renderClassVars();renderTabs();renderEditor();updateStatus();
 </script>
 </body>
 </html>
