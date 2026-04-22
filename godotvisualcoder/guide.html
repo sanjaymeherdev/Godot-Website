@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>GDScript Pro Generator — User Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #080b0f;
+      --bg2: #0d1117;
+      --bg3: #141b22;
+      --bg4: #1c2430;
+      --border: #1e2a38;
+      --border2: #253040;
+      --border3: #2e3d50;
+      --text: #d4dde8;
+      --text2: #7f96b0;
+      --text3: #4a5f72;
+      --green: #39d353;
+      --green-dim: rgba(57, 211, 83, 0.08);
+      --blue: #58a6ff;
+      --blue-dim: rgba(88, 166, 255, 0.08);
+      --purple: #bc8cff;
+      --amber: #e3b341;
+      --red: #f85149;
+      --cyan: #76e3ea;
+      --orange: #ffa657;
+      --r: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 15px;
+      line-height: 1.55;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* guide container */
+    .guide-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* header */
+    .guide-header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border2);
+      padding-bottom: 1.5rem;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--green), #6fdb7c);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      display: inline-block;
+    }
+
+    .logo span {
+      color: var(--text3);
+      background: none;
+      background-clip: unset;
+      -webkit-background-clip: unset;
+      color: var(--text3);
+    }
+
+    .sub {
+      color: var(--text2);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      border-left: 3px solid var(--green);
+      padding-left: 1rem;
+    }
+
+    /* cards & sections */
+    .section-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .section-card:hover {
+      border-color: var(--border3);
+    }
+
+    .section-title {
+      background: var(--bg3);
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.2px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .section-content {
+      padding: 1.5rem;
+    }
+
+    /* tables */
+    .guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.2rem;
+      font-size: 0.85rem;
+    }
+
+    .guide-table th {
+      text-align: left;
+      background: var(--bg4);
+      padding: 10px 12px;
+      color: var(--text2);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border2);
+    }
+
+    .guide-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .guide-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--bg4);
+      border: 1px solid var(--border3);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      font-family: monospace;
+      color: var(--cyan);
+    }
+
+    .badge-req {
+      background: rgba(248, 81, 73, 0.12);
+      border-color: rgba(248, 81, 73, 0.3);
+      color: var(--red);
+    }
+
+    .badge-opt {
+      background: var(--bg4);
+      border-color: var(--border3);
+      color: var(--text3);
+    }
+
+    code, .code-inline {
+      background: var(--bg4);
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      border: 1px solid var(--border2);
+    }
+
+    pre {
+      background: var(--bg3);
+      padding: 1rem;
+      border-radius: var(--r);
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      border: 1px solid var(--border2);
+      margin: 1rem 0;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 680px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+      .guide-container {
+        padding: 1rem;
+      }
+    }
+
+    .feature-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+
+    .feature-item {
+      background: var(--bg4);
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 1.2rem 0;
+    }
+
+    .tip-box {
+      background: var(--blue-dim);
+      border-left: 4px solid var(--blue);
+      padding: 1rem;
+      border-radius: var(--r);
+      margin: 1rem 0;
+    }
+
+    .tip-box strong {
+      color: var(--blue);
+    }
+
+    .action-table {
+      font-size: 0.85rem;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border2);
+      color: var(--text3);
+      font-size: 0.75rem;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin: 1.2rem 0 0.8rem 0;
+      color: var(--green);
+    }
+
+    h4 {
+      font-size: 1rem;
+      margin: 1rem 0 0.5rem;
+      color: var(--text2);
+      letter-spacing: -0.2px;
+    }
+
+    .dot-blue {
+      background: var(--blue);
+    }
+    .dot-amber {
+      background: var(--amber);
+    }
+    .dot-purple {
+      background: var(--purple);
+    }
+  </style>
+</head>
+<body>
+<div class="guide-container">
+  <div class="guide-header">
+    <div class="logo">GDS<span>cript</span>PRO</div>
+    <div class="sub">Visual GDScript Generator for Godot 4 — full user guide & reference</div>
+  </div>
+
+  <!-- ==================== QUICK START ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot"></div>
+      🚀 Quick Start Guide
+    </div>
+    <div class="section-content">
+      <p><strong>The tool is divided into two panels:</strong></p>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><strong>Left Panel</strong> — Build your script (header, declarations, functions + actions)</li>
+        <li><strong>Right Panel</strong> — See the generated GDScript code with syntax highlighting</li>
+      </ul>
+      <div class="grid-2col">
+        <div class="tip-box">
+          <strong>⚡ 3 steps to generate code</strong><br>
+          1️⃣ Set <code>extends</code> (required)<br>
+          2️⃣ Add declarations & functions<br>
+          3️⃣ Press <strong>⚡ Generate GDScript</strong> → copy & paste into Godot.
+        </div>
+        <div class="tip-box">
+          <strong>📋 Pro tips</strong><br>
+          • Export/Import JSON to save your work.<br>
+          • Use <strong>raw</strong> action for custom GDScript.<br>
+          • Indent actions with ◀/▶ buttons.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 1: SCRIPT HEADER ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--green);"></div>
+      1. Script Header
+    </div>
+    <div class="section-content">
+      <table class="guide-table">
+        <tr><th style="width: 140px;">Field</th><th>Description</th><th>Example</th></tr>
+        <tr><td><code>class_name</code> <span class="badge badge-opt">optional</span></td><td>Makes your script a reusable type across the project.</td><td><code>Player</code>, <code>EnemyShip</code></td></tr>
+        <tr><td><code>extends</code> <span class="badge badge-req">required</span></td><td>Specifies which node type this script inherits from.</td><td><code>CharacterBody3D</code>, <code>Node2D</code>, <code>Area3D</code></td></tr>
+      </table>
+      <div class="tip-box"><strong>⚠️ Important:</strong> Without <code>extends</code>, the generator shows a warning and the script won't work in Godot.</div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 2: DECLARATIONS ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--amber);"></div>
+      2. Declarations (variables, signals, constants)
+    </div>
+    <div class="section-content">
+      <p>Click <strong>"+ Add Declaration"</strong> and configure annotation, name, type and optional value.</p>
+      <table class="guide-table">
+        <thead>
+          <tr><th>Annotation</th><th>What it does</th><th>Example output</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>none</code></td><td>Regular variable</td><td><code>var health = 100</code></td></tr>
+          <tr><td><code>@export</code></td><td>Visible in Godot Inspector</td><td><code>@export var speed: float = 5.0</code></td></tr>
+          <tr><td><code>@onready</code></td><td>Gets node reference when scene loads</td><td><code>@onready var player: CharacterBody3D = $Player</code></td></tr>
+          <tr><td><code>@export_range</code></td><td>Slider in Inspector</td><td><code>@export_range(0, 100) var volume: int</code></td></tr>
+          <tr><td><code>@export_enum</code></td><td>Dropdown in Inspector</td><td><code>@export_enum("Easy","Hard") var difficulty: String</code></td></tr>
+          <tr><td><code>const</code></td><td>Constant value (never changes)</td><td><code>const GRAVITY: float = 9.8</code></td></tr>
+          <tr><td><code>signal</code></td><td>Custom event emitter</td><td><code>signal health_depleted</code></td></tr>
+        </tbody>
+      </table>
+      <h4>📌 Type hints (optional but recommended)</h4>
+      <p>Choose from <strong>40+ Godot types</strong>: <code>int, float, String, bool, Vector2, Vector3, CharacterBody3D, Area2D, Control, AnimationPlayer, Camera3D, Dictionary, Array, Resource</code> and many more. If you leave type empty, Godot will infer it automatically.</p>
+      <div class="tip-box"><strong>💡 Signals:</strong> When you select <code>signal</code>, type and value fields are disabled — just pick a name.</div>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 3: FUNCTIONS ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--purple);"></div>
+      3. Create & Configure Functions
+    </div>
+    <div class="section-content">
+      <p>Click <strong>"＋ Add Function"</strong> to start building reusable logic blocks.</p>
+      <div class="grid-2col">
+        <div>
+          <h4>⚙️ Function settings</h4>
+          <ul style="margin-left: 1.2rem;">
+            <li><strong>Name</strong> – <code>_ready</code>, <code>_physics_process</code>, <code>take_damage</code></li>
+            <li><strong>Return type</strong> – <code>void</code>, <code>int</code>, <code>bool</code>, <code>String</code>, <code>Vector3</code> or leave empty for inferred.</li>
+            <li><strong>static func</strong> – toggle for static methods.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>📥 Parameters</h4>
+          <p>Add parameters with name, type and optional default value.</p>
+          <code>func apply_damage(amount: int, source: Node = null) -> void:</code>
+        </div>
+      </div>
+      <hr>
+      <h4>➕ Adding parameters</h4>
+      <p>Click <strong>"+ Add Parameter"</strong> → fill name, type (int, String, Node, etc.) and a default value if needed (e.g., <code>0</code>, <code>null</code>, <code>"default"</code>).</p>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 4: ACTIONS (THE HEART) ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--cyan);"></div>
+      4. Actions — Build the function body
+    </div>
+    <div class="section-content">
+      <p>Actions are lines of code inside your function. Click <strong>"+ Add Action"</strong> and choose from the list.</p>
+      <table class="guide-table action-table">
+        <thead><tr><th>Action</th><th>Purpose</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>if</code></td><td>Conditional branch</td><td><code>if health > 0:</code></td></tr>
+          <tr><td><code>for</code></td><td>Loop over array / range</td><td><code>for i in range(10):</code></td></tr>
+          <tr><td><code>while</code></td><td>Loop while condition true</td><td><code>while count < 5:</code></td></tr>
+          <tr><td><code>var</code></td><td>Declare new variable</td><td><code>var score = 0</code></td></tr>
+          <tr><td><code>assign</code></td><td>Change variable value</td><td><code>health = health - damage</code></td></tr>
+          <tr><td><code>return</code></td><td>Exit function (optional value)</td><td><code>return result</code></td></tr>
+          <tr><td><code>print</code></td><td>Output to console</td><td><code>print("Player died")</code></td></tr>
+          <tr><td><code>pass</code></td><td>Do nothing placeholder</td><td><code>pass</code></td></tr>
+          <tr><td><code>raw</code></td><td>Write any GDScript expression</td><td><code>move_and_slide()</code></td></tr>
+          <tr><td><code>comment</code></td><td>Add explanatory comment</td><td><code># TODO: add cooldown</code></td></tr>
+        </tbody>
+      </table>
+
+      <h4>🎮 Indentation & block control</h4>
+      <p>Use <strong>◀</strong> and <strong>▶</strong> buttons to increase/decrease indent level. Actions after <code>if</code>, <code>for</code>, <code>while</code> auto-indent by one level. You can also reorder actions with ▲/▼ arrows.</p>
+
+      <h4>🔁 Condition builder (if / while)</h4>
+      <p>For <code>if</code> and <code>while</code>, the condition builder appears:</p>
+      <ul style="margin-left: 1.5rem;">
+        <li><strong>not</strong> toggle – negates condition</li>
+        <li><strong>Left operand</strong> – variable, property or function call</li>
+        <li><strong>Comparator</strong> – <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>in</code>, <code>is</code></li>
+        <li><strong>Right operand</strong> – value to compare</li>
+        <li><strong>+ AND/OR condition</strong> – chain multiple conditions with AND/OR operators (click the badge to toggle).</li>
+      </ul>
+      <pre>Example: if not is_on_floor() and velocity.y > 0:</pre>
+    </div>
+  </div>
+
+  <!-- ==================== STEP 5: GENERATE & USE ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--orange);"></div>
+      5. Generate & Copy Code
+    </div>
+    <div class="section-content">
+      <ol style="margin-left: 1.5rem;">
+        <li>Click <strong>⚡ Generate GDScript</strong> – the right panel updates with formatted code.</li>
+        <li>Syntax highlighting makes keywords, strings, comments and annotations easy to read.</li>
+        <li>Press <strong>Copy All</strong> – copies clean GDScript (no HTML, no extra characters).</li>
+        <li>Paste directly into Godot 4 script editor.</li>
+      </ol>
+      <div class="tip-box">
+        <strong>💡 Export/Import JSON:</strong> Save your entire configuration (declarations + functions + actions) as a JSON file, share it or reload later.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REAL EXAMPLE ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--green);"></div>
+      🎮 Example: 3D Player Movement (CharacterBody3D)
+    </div>
+    <div class="section-content">
+      <p><strong>Goal:</strong> Create a simple player with speed, jump, gravity and a signal.</p>
+      <div class="grid-2col">
+        <div>
+          <h4>1. Header</h4>
+          <pre>extends CharacterBody3D
+class_name Player</pre>
+          <h4>2. Declarations</h4>
+          <pre>@export var speed: float = 5.0
+@export var jump_force: float = 4.5
+@onready var camera: Camera3D = $Camera3D
+signal died</pre>
+        </div>
+        <div>
+          <h4>3. _physics_process(delta)</h4>
+          <pre>func _physics_process(delta: float) -> void:
+    if not is_on_floor():
+        velocity.y -= 9.8 * delta
+    
+    var direction = Input.get_vector("left", "right", "forward", "back")
+    velocity.x = direction.x * speed
+    velocity.z = direction.y * speed
+    
+    if Input.is_action_just_pressed("jump") and is_on_floor():
+        velocity.y = jump_force
+        died.emit()
+    
+    move_and_slide()</pre>
+        </div>
+      </div>
+      <div class="tip-box"><strong>⚡ Build it in the generator:</strong> Add <code>_physics_process</code> function → add <code>if</code> action with condition <code>not is_on_floor()</code> → inside assign <code>velocity.y = velocity.y - 9.8 * delta</code> → then add another <code>if</code> for jump and finally <code>raw</code> action with <code>move_and_slide()</code>.</div>
+    </div>
+  </div>
+
+  <!-- ==================== FEATURE REFERENCE ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--blue);"></div>
+      🧰 Additional Features & Shortcuts
+    </div>
+    <div class="section-content">
+      <div class="feature-list">
+        <span class="feature-item">📁 Export / Import JSON</span>
+        <span class="feature-item">📋 Copy clean GDScript</span>
+        <span class="feature-item">📖 Hide/Show sample script</span>
+        <span class="feature-item">🗑️ Delete declarations / actions with ✕</span>
+        <span class="feature-item">🔼 🔽 Reorder actions</span>
+        <span class="feature-item">🎨 Live syntax highlighting</span>
+        <span class="feature-item">📌 Function tabs for multi-function scripts</span>
+        <span class="feature-item">🔁 Auto-indent after block openers</span>
+      </div>
+      <hr>
+      <h4>📖 Common Godot 4 built-in methods</h4>
+      <table class="guide-table">
+        <tr><th>Method</th><th>When it runs</th></tr>
+        <tr><td><code>_ready()</code></td><td>Once when node enters scene tree</td></tr>
+        <tr><td><code>_process(delta)</code></td><td>Every frame (frame-rate dependent)</td></tr>
+        <tr><td><code>_physics_process(delta)</code></td><td>Every physics frame (60 fps fixed) — ideal for movement</td></tr>
+        <tr><td><code>_input(event)</code></td><td>When input event occurs (key, mouse)</td></tr>
+        <tr><td><code>_unhandled_input(event)</code></td><td>For unhandled input (UI / gameplay)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==================== TIPS & BEST PRACTICES ==================== -->
+  <div class="section-card">
+    <div class="section-title">
+      <div class="dot" style="background: var(--green);"></div>
+      💎 Tips & Best Practices
+    </div>
+    <div class="section-content">
+      <div class="grid-2col">
+        <div class="tip-box">
+          <strong>✅ Extends is mandatory</strong> – without it Godot won't know what node your script belongs to. The generator shows a warning if missing.
+        </div>
+        <div class="tip-box">
+          <strong>🧠 Empty type = inferred</strong> – leave type empty to let Godot guess the type automatically.
+        </div>
+        <div class="tip-box">
+          <strong>🔌 @onready + $NodePath</strong> – perfect for referencing child nodes: <code>@onready var anim: AnimationPlayer = $AnimationPlayer</code>
+        </div>
+        <div class="tip-box">
+          <strong>✏️ Raw action is powerful</strong> – when an action doesn't fit the predefined list, use "raw" to write any valid GDScript (e.g. <code>await get_tree().create_timer(1).timeout</code>).
+        </div>
+        <div class="tip-box">
+          <strong>🎯 Signals decouple code</strong> – use <code>signal</code> declarations to emit events (damage taken, level up) and connect them in other nodes.
+        </div>
+        <div class="tip-box">
+          <strong>📦 JSON backup</strong> – export your script configuration to JSON before closing the browser. Re-import later to continue editing.
+        </div>
+      </div>
+      <hr>
+      <p style="text-align: center; margin-top: 0.5rem;">📌 Generated code is <strong>100% clean GDScript</strong> — no HTML artifacts, ready to paste into Godot 4.</p>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    GDScript Pro Generator — Inspired by Godot 4 best practices. Build visual logic, export GDScript, supercharge your workflow.
+  </div>
+</div>
+</body>
+</html>
