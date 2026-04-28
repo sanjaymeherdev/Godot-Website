@@ -3,97 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>GDScript Forge | Modular Visual Coder</title>
+  <title>GDScript Forge PRO | Smart Visual Coder</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
-    /* ============================================ */
-    /* SECTION 1: CSS VARIABLES & THEME              */
-    /* ============================================ */
     :root {
       --bg:#080b0f; --bg2:#0d1117; --bg3:#141b22; --bg4:#1c2430;
       --border:#1e2a38; --border2:#253040; --border3:#2e3d50;
       --text:#d4dde8; --text2:#7f96b0; --text3:#4a5f72;
-      --green:#39d353; --green-dim:rgba(57,211,83,0.08);
-      --blue:#58a6ff; --blue-dim:rgba(88,166,255,0.08);
-      --purple:#bc8cff; --amber:#e3b341; --red:#f85149; --cyan:#76e3ea;
-      --r:8px; --r2:12px;
+      --green:#39d353; --blue:#58a6ff; --purple:#bc8cff;
+      --amber:#e3b341; --red:#f85149; --cyan:#76e3ea;
+      --r:8px;
     }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5;overflow-x:hidden}
-    .workspace{display:flex;flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
-    @media (min-width:860px){ .workspace{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 52px);overflow:hidden} }
-    .left-panel{background:var(--bg);width:100%;display:flex;flex-direction:column;overflow:hidden}
-    .right-panel{width:100%;margin-top:16px;border-top:2px solid var(--border2);display:flex;flex-direction:column}
-    @media (min-width:860px){ .right-panel{margin-top:0;border-top:none;overflow:hidden;height:100%} }
+    body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.5}
+    .workspace{display:flex;flex-direction:column;min-height:100vh}
+    @media (min-width:860px){ .workspace{display:grid;grid-template-columns:1fr 1fr;height:100vh;overflow:hidden} }
+    .left-panel{background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+    .right-panel{display:flex;flex-direction:column;border-left:1px solid var(--border2)}
     .output-code,.sample-code{white-space:pre-wrap;word-break:break-word;font-family:'JetBrains Mono',monospace;padding:16px;overflow-y:auto}
     .output-code{flex:1;background:var(--bg);max-height:60vh}
     .sample-code{background:var(--bg3);border-bottom:2px solid var(--border2);max-height:40vh}
     .sec{border-bottom:1px solid var(--border)}
-    .sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-weight:600;color:var(--text3);text-transform:uppercase;user-select:none}
+    .sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-weight:600;color:var(--text3);text-transform:uppercase}
     .sec-hdr .arrow{margin-left:auto;font-size:9px;transition:transform 0.2s}
     .sec-hdr.open .arrow{transform:rotate(90deg)}
     .sec-body{display:none;padding:12px 14px;gap:10px;flex-direction:column}
     .sec-body.open{display:flex}
     .dot{width:7px;height:7px;border-radius:50%}
-    input,select,textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;width:100%}
-    button{background:var(--bg3);border:1px solid var(--border3);border-radius:var(--r);padding:6px 10px;color:var(--text);cursor:pointer;font-family:inherit;font-size:11px;transition:all 0.1s}
+    input,select,textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-family:monospace;font-size:12px;width:100%}
+    button{background:var(--bg3);border:1px solid var(--border3);border-radius:var(--r);padding:6px 10px;color:var(--text);cursor:pointer}
     button:hover{border-color:var(--blue);color:var(--blue)}
     .btn-primary{background:linear-gradient(135deg,#238636,#196c2e);color:white;border:none;padding:10px;font-weight:700}
-    .btn-primary:hover{background:linear-gradient(135deg,#2ea043,#1f6e2e);color:white}
     .copy-btn{padding:5px 12px;background:var(--bg4);border:1px solid var(--border2)}
     .add-btn{width:100%;padding:8px;background:var(--bg3);border:1px dashed var(--border3);border-radius:var(--r);margin-top:4px}
-    .action-row{display:flex;flex-wrap:wrap;gap:5px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:6px;margin-bottom:6px;align-items:center}
+    .action-row{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:8px;margin-bottom:8px;align-items:center}
     .cond-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--bg3);padding:5px;border-radius:6px;margin-top:4px}
-    .cond-op{background:var(--bg2);border:1px solid var(--border3);border-radius:4px;padding:2px 8px;font-size:10px}
-    .pattern-row{background:var(--bg3);border-radius:var(--r);padding:8px;margin:5px 0;border-left:3px solid var(--purple)}
-    .func-tab-bar{display:flex;overflow-x:auto;background:var(--bg2);border-bottom:1px solid var(--border2);min-height:42px;gap:2px;padding:4px 8px;flex-wrap:wrap}
-    .func-tab{background:var(--bg3);padding:5px 12px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;font-size:12px;display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border2);border-bottom:none}
+    .func-tab-bar{display:flex;overflow-x:auto;background:var(--bg2);border-bottom:1px solid var(--border2);padding:4px 8px;gap:2px}
+    .func-tab{background:var(--bg3);padding:5px 12px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border2);border-bottom:none}
     .func-tab.active{background:var(--bg4);color:var(--blue);border-color:var(--blue)}
-    .status-bar{font-size:10px;padding:4px 14px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:10px}
-    .cvar-item{display:flex;flex-wrap:wrap;gap:6px;background:var(--bg4);margin-bottom:5px;padding:5px;align-items:center;border-radius:6px}
-    .indent-ctrl{display:inline-flex;gap:4px;align-items:center;background:var(--bg2);padding:2px 6px;border-radius:12px}
-    .kw{color:#ff7b72} .fn{color:#79c0ff} .ty{color:#79c0ff} .str{color:#a5d6ff} .num{color:#79c0ff} .cmt{color:#8b949e;font-style:italic} .ann{color:#ff7b72}
-    .empty-hint{color:var(--text3);padding:12px;text-align:center;font-style:italic}
-    ::-webkit-scrollbar{width:6px;height:6px}
-    ::-webkit-scrollbar-track{background:var(--bg2)}
-    ::-webkit-scrollbar-thumb{background:var(--border3);border-radius:4px}
+    .status-bar{font-size:10px;padding:4px 14px;border-top:1px solid var(--border);background:var(--bg2);display:flex}
+    .kw{color:#ff7b72} .fn{color:#79c0ff} .ty{color:#79c0ff} .str{color:#a5d6ff} .cmt{color:#8b949e}
+    .empty-hint{color:var(--text3);padding:12px;text-align:center}
+    .param-row{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;background:var(--bg4);padding:6px;border-radius:6px}
   </style>
 </head>
 <body>
 <div class="workspace">
   <div class="left-panel">
-    <div class="sec"><div class="sec-hdr open" onclick="toggleSec(this)"><div class="dot" style="background:var(--green)"></div>Script Header<span class="arrow">▶</span></div>
-      <div class="sec-body open"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="sec"><div class="sec-hdr open"><div class="dot" style="background:var(--green)"></div>Script Header<span class="arrow">▶</span></div>
+      <div class="sec-body open"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <input type="text" id="classNameInput" placeholder="class_name (optional)">
         <input type="text" id="extendsInput" list="extendsList" placeholder="extends (required)">
-        <datalist id="extendsList"><option>CharacterBody3D</option><option>Node2D</option><option>Node3D</option><option>Area3D</option><option>Node</option><option>Resource</option></datalist>
+        <select id="toolModeSelect"><option value="">Normal</option><option value="@tool">@tool (Editor)</option></select>
+        <datalist id="extendsList"><option>CharacterBody3D</option><option>Node2D</option><option>Node3D</option><option>Area3D</option><option>Node</option></datalist>
       </div></div>
     </div>
-    <div class="sec"><div class="sec-hdr" onclick="toggleSec(this)"><div class="dot" style="background:var(--amber)"></div>Declarations & Enums<span class="arrow">▶</span></div>
-      <div class="sec-body"><div id="cvarList"></div><button class="add-btn" onclick="addClassVar()">+ Add Declaration</button><hr><button class="add-btn" onclick="openEnumModal()">🏷️ + Add Enum</button><div id="enumList" style="margin-top:8px"></div></div>
+    <div class="sec"><div class="sec-hdr"><div class="dot" style="background:var(--amber)"></div>Declarations & Enums<span class="arrow">▶</span></div>
+      <div class="sec-body"><div id="cvarList"></div><button class="add-btn" onclick="addClassVar()">+ Add Declaration</button><hr><button class="add-btn" onclick="openEnumModal()">🏷️ + Add Enum</button><div id="enumList"></div></div>
     </div>
     <div class="func-tab-bar" id="funcTabBar"></div>
     <div id="funcEditor" style="overflow-y:auto;flex:1"></div>
-    <div class="bottom-bar" style="padding:12px;display:flex;gap:8px"><button class="btn-primary" style="flex:1" onclick="generateAll()">⚡ Generate GDScript</button></div>
-    <div class="status-bar"><div class="status-dot" style="background:var(--green)"></div><span id="statusText">Ready</span><span id="funcCount" style="margin-left:auto">0 functions</span></div>
+    <div style="padding:12px;display:flex;gap:8px"><button class="btn-primary" style="flex:1" onclick="generateAll()">⚡ Generate GDScript</button></div>
+    <div class="status-bar"><span id="funcCount">0 functions</span><span style="flex:1"></span><span id="statusText">Ready</span></div>
   </div>
-  <div class="right-panel"><div class="output-header" style="padding:10px 14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border2)"><span>⬡ Generated GDScript</span><button class="copy-btn" onclick="copyCode()">Copy All</button></div>
-  <div id="sampleBlock" class="sample-code"></div><div id="outputCode" class="output-code"><span class="cmt"># Press Generate</span></div></div>
+  <div class="right-panel">
+    <div style="padding:10px 14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border2)"><span>⬡ Generated GDScript</span><button class="copy-btn" onclick="copyCode()">Copy</button></div>
+    <div id="outputCode" class="output-code"><span class="cmt"># Press Generate</span></div>
+    <div class="sample-code" id="sampleBlock"></div>
+  </div>
 </div>
 <script>
 // ============================================
-// SAFE TYPE REGISTRY - Hardcoded types that work
+// SMART EXPRESSION HELPERS (YOUR LOGIC)
 // ============================================
-const SAFE_TYPES = {
-    "int": true, "float": true, "String": true, "bool": true, "Variant": true, "void": true,
-    "Node": true, "Node2D": true, "Node3D": true, "CharacterBody3D": true, "Area3D": true,
-    "RigidBody3D": true, "StaticBody3D": true, "AnimationPlayer": true, "AudioStreamPlayer": true,
-    "AudioStreamPlayer3D": true, "Camera3D": true, "SpringArm3D": true, "RayCast3D": true,
-    "Label3D": true, "MeshInstance3D": true, "CollisionShape3D": true, "CollisionShape2D": true,
-    "Vector2": true, "Vector3": true, "Vector2i": true, "Vector3i": true, "Color": true,
-    "Array": true, "Dictionary": true, "Resource": true, "PackedScene": true, "Label": true,
-    "Button": true, "LineEdit": true, "TextureRect": true, "Control": true, "CanvasLayer": true
-};
+function smartInfer(value) {
+    if (!value) return null;
+    if (value.includes("Vector3")) return "Vector3";
+    if (value.includes("Vector2")) return "Vector2";
+    if (value.includes("get_vector")) return "Vector2";
+    if (value.match(/^\d+$/)) return "int";
+    if (value.match(/^\d+\.\d+$/)) return "float";
+    if (value === "true" || value === "false") return "bool";
+    return null;
+}
+
+function formatVar(name, value, type) {
+    let inferred = smartInfer(value);
+    if (!type && inferred) {
+        return `var ${name} := ${value}`;
+    }
+    return `var ${name}${type ? `: ${type}` : ''}${value ? ` = ${value}` : ''}`;
+}
 
 // ============================================
 // GLOBAL STATE
@@ -107,44 +107,29 @@ let _lastGeneratedCode = "";
 
 const uid = () => _nextId++;
 
-// Built-in function templates
 const BUILTIN_TYPES = {
     enter_tree: { name:"_enter_tree", params:[], ret:"void" },
     ready: { name:"_ready", params:[], ret:"void" },
     process: { name:"_process", params:[{name:"delta",type:"float"}], ret:"void" },
     physics_process: { name:"_physics_process", params:[{name:"delta",type:"float"}], ret:"void" },
-    input: { name:"_input", params:[{name:"event",type:"InputEvent"}], ret:"void" },
-    unhandled_input: { name:"_unhandled_input", params:[{name:"event",type:"InputEvent"}], ret:"void" }
+    input: { name:"_input", params:[{name:"event",type:"InputEvent"}], ret:"void" }
 };
-let builtInAdded = { enter_tree:false, ready:false, process:false, physics_process:false, input:false, unhandled_input:false };
+let builtInAdded = { enter_tree:false, ready:false, process:false, physics_process:false, input:false };
 
-// ============================================
-// UTILITIES
-// ============================================
 function esc(s){ return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function toggleSec(hdr){ hdr.classList.toggle('open'); let b=hdr.nextElementSibling; if(b)b.classList.toggle('open'); }
 
-// Safe type hint formatter - avoids colons inside dictionaries
-function formatTypeHint(type, value) {
-    if (!type || type === "") return "";
-    if (!SAFE_TYPES[type]) return "";
-    // Detect dictionary/array literals with colons
-    const hasInternalColon = value && (value.includes('":') || value.includes("':") || (value.includes('{') && value.includes(':')));
-    if (hasInternalColon) return "";
-    return `: ${type}`;
-}
-
 // ============================================
-// DECLARATIONS (VAR/SIGNAL/CONST)
+// DECLARATIONS
 // ============================================
 function renderClassVars(){
     const el=document.getElementById('cvarList');
     if(!classVars.length){ el.innerHTML='<div class="empty-hint">✨ Add @export, @onready, signal, const</div>'; return; }
-    el.innerHTML=classVars.map(c=>`<div class="cvar-item">
+    el.innerHTML=classVars.map(c=>`<div style="display:flex;flex-wrap:wrap;gap:6px;background:var(--bg4);margin-bottom:5px;padding:5px">
         <select onchange="updateCV(${c.id},'ann',this.value)" style="width:100px">${['','@export','@onready','const','signal'].map(a=>`<option ${c.ann===a?'selected':''}>${a||'none'}</option>`).join('')}</select>
         <input value="${esc(c.name)}" placeholder="name" onchange="updateCV(${c.id},'name',this.value)" style="flex:1">
-        ${c.ann!=='signal'?`<select onchange="updateCV(${c.id},'type',this.value)" style="width:100px"><option value="">(no type)</option><option>int</option><option>float</option><option>String</option><option>bool</option><option>Vector3</option><option>Vector2</option><option>Node3D</option><option>CharacterBody3D</option><option>Area3D</option><option>AnimationPlayer</option></select>
-        <input placeholder="= value" value="${esc(c.val)}" onchange="updateCV(${c.id},'val',this.value)" style="flex:1">`:`<span style="color:var(--text3);padding:0 8px">(signal — no type/value)</span>`}
+        ${c.ann!=='signal'?`<select onchange="updateCV(${c.id},'type',this.value)" style="width:100px"><option value="">(type)</option><option>int</option><option>float</option><option>String</option><option>bool</option><option>Vector3</option><option>Node</option></select>
+        <input placeholder="= value" value="${esc(c.val)}" onchange="updateCV(${c.id},'val',this.value)" style="flex:1">`:`<span style="color:var(--text3)">(signal)</span>`}
         <button onclick="removeCV(${c.id})">🗑</button></div>`).join('');
 }
 function addClassVar(){ classVars.push({id:uid(),ann:'',name:'new_var',type:'',val:''}); renderClassVars(); }
@@ -152,66 +137,48 @@ function removeCV(id){ classVars=classVars.filter(c=>c.id!==id); renderClassVars
 function updateCV(id,field,val){ let c=classVars.find(c=>c.id===id); if(c) c[field]=val; }
 
 // ============================================
-// ENUM MAKER (HARDCODED)
+// ENUMS
 // ============================================
 function openEnumModal(){
-    let name=prompt("Enum name (e.g., WeaponType)");
-    if(!name || !name.match(/^[A-Z][a-zA-Z0-9_]*$/)){ alert("Enum name must start with capital letter"); return; }
-    let newEnum={ id:uid(), name:name, values:[], exportDropdown:false, autoMatch:false, matchFuncName:`handle_${name.toLowerCase()}` };
-    enums.push(newEnum);
-    editEnum(newEnum.id);
+    let name=prompt("Enum name:"); if(!name) return;
+    enums.push({ id:uid(), name, values:[], exportDropdown:false, autoMatch:false, matchFuncName:`handle_${name.toLowerCase()}` });
+    editEnum(enums[enums.length-1].id);
 }
 function renderEnumsUI(){
     const container=document.getElementById('enumList');
     if(!enums.length){ container.innerHTML=''; return; }
     container.innerHTML=enums.map(e=>`<div style="background:var(--bg3);margin-top:8px;padding:8px;border-radius:6px"><strong>${esc(e.name)}</strong> 
-        <button onclick="editEnum(${e.id})">✏️ Edit</button> <button onclick="removeEnum(${e.id})">🗑</button>
-        <div><label><input type="checkbox" ${e.exportDropdown?'checked':''} onchange="toggleEnumExport(${e.id},this.checked)"> @export_enum (dropdown)</label>
-        <label><input type="checkbox" ${e.autoMatch?'checked':''} onchange="toggleEnumAutoMatch(${e.id},this.checked)"> Generate match function</label></div>
-        <div>Values: ${e.values.map(v=>v.name).join(', ')}</div></div>`).join('');
+        <button onclick="editEnum(${e.id})">✏️</button> <button onclick="removeEnum(${e.id})">🗑</button>
+        <div><label><input type="checkbox" ${e.exportDropdown?'checked':''} onchange="toggleEnumExport(${e.id},this.checked)"> @export_enum</label>
+        <label><input type="checkbox" ${e.autoMatch?'checked':''} onchange="toggleEnumAutoMatch(${e.id},this.checked)"> Auto-match</label></div>
+        <div>${e.values.map(v=>v.name).join(', ')}</div></div>`).join('');
 }
 function editEnum(id){
     let e=enums.find(e=>e.id===id); if(!e) return;
-    let vals=prompt("Values (comma separated):", e.values.map(v=>v.name).join(','));
+    let vals=prompt("Values (comma):", e.values.map(v=>v.name).join(','));
     if(vals) e.values=vals.split(',').map((s,i)=>({name:s.trim(),value:i}));
     renderEnumsUI();
 }
 function removeEnum(id){ enums=enums.filter(e=>e.id!==id); renderEnumsUI(); }
 function toggleEnumExport(id,val){ let e=enums.find(e=>e.id===id); if(e) e.exportDropdown=val; }
-function toggleEnumAutoMatch(id,val){ let e=enums.find(e=>e.id===id); if(e){ e.autoMatch=val; if(val && !functions.some(f=>f.name===e.matchFuncName)) addAutoMatchFunction(e); } }
-function addAutoMatchFunction(enumDef){
-    let id=uid();
-    let actions=[];
-    for(let v of enumDef.values){
-        actions.push({ id:uid(), type:'comment', value:`Case: ${enumDef.name}.${v.name}`, indent:1 });
-        actions.push({ id:uid(), type:'raw', value:`print("${v.name} selected")`, indent:1 });
-        actions.push({ id:uid(), type:'raw', value:`return`, indent:1 });
-    }
-    actions.push({ id:uid(), type:'comment', value:'default fallback', indent:1 });
-    actions.push({ id:uid(), type:'raw', value:`print("Unknown ${enumDef.name.toLowerCase()}")`, indent:1 });
-    let newFn={ id, name:enumDef.matchFuncName, isBuiltin:false, returnType:'void', params:[{id:uid(),name:enumDef.name.toLowerCase(),type:enumDef.name,defaultValue:''}], actions, isStatic:false, rpcMode:'none' };
-    functions.push(newFn);
-    activeFnId=id;
-    renderTabs(); renderEditor(); updateStatus();
-}
+function toggleEnumAutoMatch(id,val){ let e=enums.find(e=>e.id===id); if(e) e.autoMatch=val; }
 
 // ============================================
-// FUNCTION MANAGEMENT
+// FUNCTIONS
 // ============================================
 function addCustomFunction(){
-    let name=prompt("Function name (e.g., take_damage):","my_func");
-    if(!name||!name.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)){ alert("Invalid function name"); return; }
-    let newFn={ id:uid(), name, isBuiltin:false, returnType:'void', params:[], actions:[], isStatic:false, rpcMode:'none' };
-    functions.push(newFn); activeFnId=newFn.id; renderTabs(); renderEditor(); updateStatus();
+    let name=prompt("Function name:"); if(!name) return;
+    functions.push({ id:uid(), name, isBuiltin:false, returnType:'void', params:[], actions:[], isStatic:false, rpcMode:'none' });
+    activeFnId = functions[functions.length-1].id;
+    renderTabs(); renderEditor(); updateStatus();
 }
-function addBuiltinFromSelect(){ 
-    let sel=document.getElementById('builtinSelect'); 
-    if(!sel||!sel.value) return; 
-    let key=sel.value; 
-    if(builtInAdded[key]){ alert("Already added"); return; }
+function addBuiltinFromSelect(){
+    let sel=document.getElementById('builtinSelect'); if(!sel||!sel.value) return;
+    let key=sel.value; if(builtInAdded[key]){ alert("Already added"); return; }
     let def=BUILTIN_TYPES[key];
-    let newFn={ id:uid(), name:def.name, isBuiltin:true, builtinKey:key, returnType:def.ret, params:def.params.map(p=>({...p,id:uid()})), actions:[], isStatic:false, rpcMode:'none' };
-    functions.push(newFn); builtInAdded[key]=true; activeFnId=newFn.id; renderTabs(); renderEditor(); updateStatus();
+    functions.push({ id:uid(), name:def.name, isBuiltin:true, builtinKey:key, returnType:def.ret, params:def.params.map(p=>({...p,id:uid()})), actions:[], isStatic:false, rpcMode:'none' });
+    builtInAdded[key]=true; activeFnId = functions[functions.length-1].id;
+    renderTabs(); renderEditor(); updateStatus();
     sel.value='';
 }
 function removeFunc(id){
@@ -224,63 +191,77 @@ function removeFunc(id){
 function setActiveFunc(id){ activeFnId=id; renderTabs(); renderEditor(); }
 function getActiveFn(){ return functions.find(f=>f.id===activeFnId)||null; }
 function updateFn(field,val){ let fn=getActiveFn(); if(fn){ fn[field]=val; if(field==='name') renderTabs(); } }
-function addParam(){ let fn=getActiveFn(); if(fn){ fn.params.push({id:uid(),name:`param${fn.params.length+1}`,type:'',defaultValue:''}); renderEditor(); } }
+function addParam(){ let fn=getActiveFn(); if(fn){ fn.params.push({id:uid(),name:`p${fn.params.length+1}`,type:'',defaultValue:''}); renderEditor(); } }
 function removeParam(id){ let fn=getActiveFn(); if(fn) fn.params=fn.params.filter(p=>p.id!==id); renderEditor(); }
 function updateParam(pid,field,val){ let fn=getActiveFn(); let p=fn?.params.find(p=>p.id===pid); if(p) p[field]=val; }
 
 // ============================================
-// ACTIONS
+// ACTIONS (WITH SMART VAR + METHOD/CALL/MATH)
 // ============================================
 function addAction(type='pass'){
     let fn=getActiveFn(); if(!fn) return;
     let last=fn.actions[fn.actions.length-1];
     let indent=last?(last.indent||0):0;
     if(last && ['if','while','match','for'].includes(last.type)) indent++;
-    fn.actions.push({id:uid(),type,value:'',name:'',indent,conditions: ['if','while'].includes(type) ? [{id:uid(), not:false, left:'', cmp:'', right:'', op:'and'}] : [], patterns:type==='match'?[{id:uid(),values:['_'],isDefault:true,actions:[]}]:[] });
+    
+    let newAction = { id:uid(), type, value:'', name:'', object:'', left:'', right:'', op:'+', indent, conditions:[], patterns:[] };
+    if(type === 'if' || type === 'while') {
+        newAction.conditions = [{ id:uid(), not:false, left:'', cmp:'', right:'', op:'and' }];
+    } else if(type === 'match') {
+        newAction.patterns = [{ id:uid(), values:['_'], isDefault:true, actions:[] }];
+    }
+    fn.actions.push(newAction);
     renderEditor(); updateStatus();
 }
-function removeAction(id){ let fn=getActiveFn(); if(fn) fn.actions=fn.actions.filter(a=>a.id!==id); renderEditor(); updateStatus(); }
-function updateAction(id,field,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a){ if(field==='type'){ a.type=val; if(val==='match' && !a.patterns) a.patterns=[{id:uid(),values:['_'],isDefault:true,actions:[]}]; } else a[field]=val; renderEditor(); } }
+function removeAction(id){ let fn=getActiveFn(); if(fn) fn.actions=fn.actions.filter(a=>a.id!==id); renderEditor(); }
+function updateAction(id,field,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a) a[field]=val; renderEditor(); }
 function moveAction(id,dir){ let fn=getActiveFn(); let idx=fn?.actions.findIndex(a=>a.id===id); if(idx!==undefined){ let nxt=idx+dir; if(nxt>=0 && nxt<fn.actions.length){ [fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]]; renderEditor(); } } }
 function changeIndent(id,delta){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a){ a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta)); renderEditor(); } }
-function buildCondStrSafe(condArray){
+
+// Conditions for if/while
+function buildCondStr(condArray){
     if(!condArray.length) return 'true';
     return condArray.map((c,i)=>{
         let notStr=c.not?'not ':'';
         let cmpStr=c.cmp?` ${c.cmp} ${c.right||'null'}`:'';
-        let part=`${notStr}${c.left||'condition'}${cmpStr}`;
-        return i===0?part:` ${c.op} ${part}`;
+        let part = `${notStr}${c.left||'condition'}${cmpStr}`;
+        return i===0 ? part : ` ${c.op} ${part}`;
     }).join('');
 }
 function addCondRow(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a){ a.conditions.push({id:uid(),not:false,left:'',cmp:'',right:'',op:'and'}); renderEditor(); } }
-function removeCondRow(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.conditions.length>1) a.conditions=a.conditions.filter(c=>c.id!==cid); renderEditor(); }
+function removeCondRow(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a) a.conditions=a.conditions.filter(c=>c.id!==cid); renderEditor(); }
 function updateCond(aid,cid,field,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let c=a?.conditions.find(c=>c.id===cid); if(c) c[field]=val; renderEditor(); }
 function toggleCondNot(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let c=a?.conditions.find(c=>c.id===cid); if(c) c.not=!c.not; renderEditor(); }
-function toggleCondOp(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let idx=a?.conditions.findIndex(c=>c.id===cid); if(idx>0){ a.conditions[idx-1].op=a.conditions[idx-1].op==='and'?'or':'and'; renderEditor(); } }
-function addMatchPattern(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.type==='match'){ a.patterns.push({id:uid(),values:['new'],isDefault:false,actions:[]}); renderEditor(); } }
+function toggleCondOp(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let idx=a?.conditions.findIndex(c=>c.id===cid); if(idx>0){ a.conditions[idx-1].op = a.conditions[idx-1].op==='and'?'or':'and'; renderEditor(); } }
+
+// Match patterns
+function addMatchPattern(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a?.type==='match'){ a.patterns.push({id:uid(),values:['new'],isDefault:false,actions:[]}); renderEditor(); } }
 function addPatternValue(pid,aid,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p && val.trim()){ p.values=val.split(',').map(v=>v.trim()); renderEditor(); } }
 function addPatternAction(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p){ p.actions.push({id:uid(),type:'pass',value:'',indent:2}); renderEditor(); } }
-function removePattern(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a && a.patterns.length>1){ a.patterns=a.patterns.filter(p=>p.id!==pid); renderEditor(); } }
+function removePattern(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a?.patterns?.length>1){ a.patterns=a.patterns.filter(p=>p.id!==pid); renderEditor(); } }
 
-function genLineSafe(a){
+// SMART genLine with var formatting and new action types
+function genLine(a){
     if(a.type==='raw') return a.value;
     if(a.type==='comment') return `# ${a.value}`;
-    if(a.type==='if') return `if ${buildCondStrSafe(a.conditions)}:`;
-    if(a.type==='while') return `while ${buildCondStrSafe(a.conditions)}:`;
+    if(a.type==='if') return `if ${buildCondStr(a.conditions)}:`;
+    if(a.type==='while') return `while ${buildCondStr(a.conditions)}:`;
     if(a.type==='for') return `for ${a.value || 'item in array'}:`;
-    if(a.type==='var') return `var ${a.name || 'var_name'} = ${a.value || 'value'}`;
+    if(a.type==='await') return `await ${a.value || 'signal'}`;
+    if(a.type==='assert') return `assert(${a.value || 'condition'}, "${a.name || 'message'}")`;
+    if(a.type==='var') return formatVar(a.name || 'var_name', a.value || '', a.varType);
     if(a.type==='assign') return `${a.name || 'target'} = ${a.value || 'value'}`;
-    if(a.type==='return') return a.value?`return ${a.value}`:'return';
+    if(a.type==='call') return `${a.value || 'function'}()`;
+    if(a.type==='method') return `${a.object || 'obj'}.${a.value || 'method'}()`;
+    if(a.type==='math') return `${a.left || 'a'} ${a.op || '+'} ${a.right || 'b'}`;
+    if(a.type==='return') return a.value ? `return ${a.value}` : 'return';
     if(a.type==='print') return `print(${a.value || ''})`;
     if(a.type==='pass') return 'pass';
     if(a.type==='match'){
-        let out=`match ${a.value || 'value'}:\n`;
-        for(let p of (a.patterns||[])){
-            let vals=p.values.join(', ');
-            out+=`    ${vals}:\n`;
-            for(let act of (p.actions||[])){
-                out+=`        ${genLineSafe(act)}\n`;
-            }
+        let out = `match ${a.value || 'value'}:\n`;
+        for(let p of (a.patterns||[])) {
+            out += `    ${p.values.join(', ')}:\n`;
+            for(let act of (p.actions||[])) out += `        ${genLine(act)}\n`;
         }
         return out.trimEnd();
     }
@@ -288,88 +269,52 @@ function genLineSafe(a){
 }
 
 // ============================================
-// CODE GENERATION ENGINE (FIXED TYPE HANDLING)
+// GENERATE FINAL GDScript
 // ============================================
 function generateAll(){
     let blocks=[];
     let cn=document.getElementById('classNameInput').value.trim();
     let ex=document.getElementById('extendsInput').value.trim();
+    let toolMode=document.getElementById('toolModeSelect').value;
+    if(toolMode) blocks.push(toolMode);
     if(cn) blocks.push(`class_name ${cn}`);
     if(ex) blocks.push(`extends ${ex}`);
-    else blocks.push(`# WARNING: extends required (Node, Node3D, CharacterBody3D, etc.)`);
+    else blocks.push(`# WARNING: extends required`);
     blocks.push('');
     
-    // Declarations
     for(let cv of classVars){
-        if(cv.ann==='signal'){
-            blocks.push(`signal ${cv.name}`);
-        } else if(cv.ann==='const'){
-            let typeHint=formatTypeHint(cv.type, cv.val);
-            blocks.push(`const ${cv.name}${typeHint}${cv.val?` = ${cv.val}`:''}`);
-        } else if(cv.ann==='@export'){
-            let typeHint=formatTypeHint(cv.type, cv.val);
-            blocks.push(`@export var ${cv.name}${typeHint}${cv.val?` = ${cv.val}`:''}`);
-        } else if(cv.ann==='@onready'){
-            if(cv.val && cv.val.startsWith('$')){
-                blocks.push(`@onready var ${cv.name} := ${cv.val}`);
-            } else {
-                let typeHint=formatTypeHint(cv.type, cv.val);
-                blocks.push(`@onready var ${cv.name}${typeHint}${cv.val?` = ${cv.val}`:''}`);
-            }
+        if(cv.ann==='signal') blocks.push(`signal ${cv.name}`);
+        else if(cv.ann==='const') blocks.push(`const ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
+        else if(cv.ann==='@export') blocks.push(`@export var ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
+        else if(cv.ann==='@onready'){
+            if(cv.val && cv.val.startsWith('$')) blocks.push(`@onready var ${cv.name} := ${cv.val}`);
+            else blocks.push(`@onready var ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
         } else {
-            let useInference=cv.val && (cv.val.includes('get_node') || cv.val.includes('$'));
-            if(useInference && !cv.type){
-                blocks.push(`var ${cv.name} := ${cv.val}`);
-            } else {
-                let typeHint=formatTypeHint(cv.type, cv.val);
-                blocks.push(`var ${cv.name}${typeHint}${cv.val?` = ${cv.val}`:''}`);
-            }
+            let useInference = cv.val && (cv.val.includes('get_node') || cv.val.includes('$'));
+            if(useInference && !cv.type) blocks.push(`var ${cv.name} := ${cv.val}`);
+            else blocks.push(`var ${cv.name}${cv.type?`: ${cv.type}`:''}${cv.val?` = ${cv.val}`:''}`);
         }
     }
-    
-    // Enums with fixed export syntax
     for(let e of enums){
-        if(e.exportDropdown){
-            let opts=e.values.map(v=>v.name).join('", "');
-            blocks.push(`@export_enum("${opts}") var ${e.name.toLowerCase()}: int = 0`);
-        } else {
-            let values=e.values.map(v=>`${v.name}${v.val!==undefined?` = ${v.val}`:''}`).join(', ');
-            blocks.push(`enum ${e.name} { ${values} }`);
-        }
-        if(e.autoMatch && !functions.some(f=>f.name===e.matchFuncName)){
-            blocks.push(`\nfunc ${e.matchFuncName}(${e.name.toLowerCase()}: ${e.name}) -> void:`);
-            for(let v of e.values){
-                blocks.push(`\tif ${e.name.toLowerCase()} == ${e.name}.${v.name}:`);
-                blocks.push(`\t\tprint("${v.name} selected")`);
-                blocks.push(`\t\treturn`);
-            }
-            blocks.push(`\tprint("Unknown ${e.name.toLowerCase()}")`);
-        }
+        if(e.exportDropdown) blocks.push(`@export_enum("${e.values.map(v=>v.name).join('", "')}") var ${e.name.toLowerCase()}: int = 0`);
+        else blocks.push(`enum ${e.name} { ${e.values.map(v=>v.name).join(', ')} }`);
     }
     if(classVars.length||enums.length) blocks.push('');
     
-    // Functions
     for(let fn of functions){
-        let params=fn.params.map(p=>{
-            let typeStr=(p.type && SAFE_TYPES[p.type])?`: ${p.type}`:'';
-            let defaultStr=p.defaultValue?` = ${p.defaultValue}`:'';
-            return `${p.name}${typeStr}${defaultStr}`;
-        }).join(', ');
-        let returnStr=(fn.returnType && fn.returnType!=='void' && SAFE_TYPES[fn.returnType])?` -> ${fn.returnType}`:'';
-        let rpcStr=fn.rpcMode && fn.rpcMode!=='none'?`@rpc("${fn.rpcMode}")\n`:'';
-        blocks.push(`${rpcStr}func ${fn.name}(${params})${returnStr}:`);
+        let params=fn.params.map(p=>`${p.name}${p.type?`: ${p.type}`:''}${p.defaultValue?` = ${p.defaultValue}`:''}`).join(', ');
+        let returnStr = (fn.returnType && fn.returnType!=='void') ? ` -> ${fn.returnType}` : '';
+        blocks.push(`func ${fn.name}(${params})${returnStr}:`);
         if(!fn.actions.length) blocks.push('\tpass');
         else for(let a of fn.actions){
             let indent='\t'.repeat((a.indent||0)+1);
-            let line=genLineSafe(a);
+            let line=genLine(a);
             if(line) blocks.push(`${indent}${line}`);
         }
         blocks.push('');
     }
-    
-    let final=blocks.join('\n').trim();
-    _lastGeneratedCode=final;
-    document.getElementById('outputCode').innerHTML=highlight(final);
+    _lastGeneratedCode = blocks.join('\n').trim();
+    document.getElementById('outputCode').innerHTML = highlight(_lastGeneratedCode);
     updateStatus();
 }
 
@@ -377,81 +322,102 @@ function highlight(code){
     let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     h=h.replace(/(#.*$)/gm,'<span class="cmt">$1</span>');
     h=h.replace(/"[^"]*"/g,'<span class="str">$&</span>');
-    h=h.replace(/\b(func|var|const|if|for|while|match|return|pass|enum|signal|class_name|extends|@export|@onready|@rpc)\b/g,'<span class="kw">$1</span>');
+    h=h.replace(/\b(func|var|const|if|for|while|match|return|pass|enum|signal|class_name|extends|@export|@onready|@tool|await|assert)\b/g,'<span class="kw">$1</span>');
     h=h.replace(/@\w+/g,'<span class="ann">$&</span>');
-    h=h.replace(/\b(CharacterBody3D|Vector3|Vector2|Node3D|Area3D|AnimationPlayer|int|float|String|bool|void|Node|Resource)\b/g,'<span class="ty">$1</span>');
+    h=h.replace(/\b(CharacterBody3D|Vector3|Vector2|Node3D|Area3D|AnimationPlayer|int|float|String|bool|void|Node)\b/g,'<span class="ty">$1</span>');
     return h;
 }
 function copyCode(){ navigator.clipboard.writeText(_lastGeneratedCode); alert("Copied!"); }
-function updateStatus(){ document.getElementById('funcCount').innerText=`${functions.length} functions · ${functions.reduce((s,f)=>s+f.actions.length,0)} actions`; }
+function updateStatus(){ document.getElementById('funcCount').innerText = `${functions.length} functions · ${functions.reduce((s,f)=>s+f.actions.length,0)} actions`; }
 
 // ============================================
-// RENDER UI
+// RENDER UI (WITH ALL ACTION TYPES)
 // ============================================
-function getBuiltInSelectorHtml(){
-    let opts='';
-    for(let [key,def] of Object.entries(BUILTIN_TYPES)){
-        if(!builtInAdded[key]) opts+=`<option value="${key}">${def.name}</option>`;
-    }
-    return `<select id="builtinSelect" style="width:auto;margin-right:6px"><option value="">➕ Built‑in...</option>${opts}</select>`;
-}
 function renderTabs(){
     let bar=document.getElementById('funcTabBar');
-    let html=functions.map(f=>`<div class="func-tab ${f.id===activeFnId?'active':''}" onclick="setActiveFunc(${f.id})">${esc(f.name)}<span onclick="event.stopPropagation();removeFunc(${f.id})" style="margin-left:8px;color:var(--red)">✕</span></div>`).join('');
-    bar.innerHTML=html+`<div style="display:inline-flex;gap:4px;align-items:center;margin-left:8px">${getBuiltInSelectorHtml()}<button onclick="addBuiltinFromSelect()" style="padding:4px 8px">Add</button><button onclick="addCustomFunction()" style="padding:4px 8px">+ Custom</button></div>`;
+    let opts=''; for(let [key,def] of Object.entries(BUILTIN_TYPES)) if(!builtInAdded[key]) opts+=`<option value="${key}">${def.name}</option>`;
+    let html=functions.map(f=>`<div class="func-tab ${f.id===activeFnId?'active':''}" onclick="setActiveFunc(${f.id})">${esc(f.name)}<span onclick="event.stopPropagation();removeFunc(${f.id})" style="margin-left:6px;color:var(--red)">✕</span></div>`).join('');
+    bar.innerHTML = html + `<div style="display:inline-flex;gap:4px;margin-left:8px"><select id="builtinSelect"><option value="">➕ Built‑in</option>${opts}</select><button onclick="addBuiltinFromSelect()">Add</button><button onclick="addCustomFunction()">+ Custom</button></div>`;
 }
+
 function renderEditor(){
     let fn=getActiveFn();
     let ed=document.getElementById('funcEditor');
     if(!fn){ ed.innerHTML='<div class="empty-hint">Select or add a function</div>'; return; }
-    let paramsHtml=`<div>${fn.params.map(p=>`<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap"><input value="${esc(p.name)}" placeholder="name" onchange="updateParam(${p.id},'name',this.value)" style="flex:1"><select onchange="updateParam(${p.id},'type',this.value)"><option value="">(type)</option><option>int</option><option>float</option><option>String</option><option>bool</option><option>Vector3</option><option>Node</option></select><input value="${esc(p.defaultValue)}" placeholder="default" onchange="updateParam(${p.id},'defaultValue',this.value)" style="width:100px"><button onclick="removeParam(${p.id})">🗑</button></div>`).join('')}<button class="add-btn" onclick="addParam()" style="margin-top:4px">+ Parameter</button></div>`;
-    let actionsHtml=fn.actions.map(a=>{
-        if(a.type==='match'){
-            let patternsHtml=(a.patterns||[]).map(p=>`<div class="pattern-row"><input placeholder="values (comma)" value="${p.values.join(',')}" onchange="addPatternValue(${p.id},${a.id},this.value)" style="width:200px"><button onclick="addPatternAction(${p.id},${a.id})">+ act</button><button onclick="removePattern(${p.id},${a.id})">🗑</button><div style="margin-left:20px">${(p.actions||[]).map(act=>`<div>📌 ${genLineSafe(act)} <button onclick="removeAction(${act.id})">✕</button></div>`).join('')}</div></div>`).join('');
-            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>match</option><option>if</option><option>for</option><option>pass</option></select><input placeholder="expression" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px"><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addMatchPattern(${a.id})">+ Pattern</button><button onclick="removeAction(${a.id})">🗑</button>${patternsHtml}</div>`;
+    
+    let paramsHtml = `<div>${fn.params.map(p => `<div class="param-row">
+        <input value="${esc(p.name)}" placeholder="name" onchange="updateParam(${p.id},'name',this.value)" style="flex:1;min-width:120px">
+        <select onchange="updateParam(${p.id},'type',this.value)" style="min-width:110px">
+            <option value="">type</option><option ${p.type==='int'?'selected':''}>int</option><option ${p.type==='float'?'selected':''}>float</option>
+            <option ${p.type==='String'?'selected':''}>String</option><option ${p.type==='bool'?'selected':''}>bool</option><option ${p.type==='Vector3'?'selected':''}>Vector3</option>
+        </select>
+        <input placeholder="default value" value="${esc(p.defaultValue)}" onchange="updateParam(${p.id},'defaultValue',this.value)" style="flex:0.8;min-width:120px">
+        <button onclick="removeParam(${p.id})">🗑</button>
+    </div>`).join('')}<button class="add-btn" onclick="addParam()">+ Parameter</button></div>`;
+    
+    let actionsHtml = fn.actions.map(a => {
+        if(a.type==='match') {
+            let patternsHtml = (a.patterns||[]).map(p=>`<div style="margin-left:20px;margin-top:5px"><input placeholder="values (comma)" value="${p.values.join(',')}" onchange="addPatternValue(${p.id},${a.id},this.value)" style="width:150px"><button onclick="addPatternAction(${p.id},${a.id})">+act</button><button onclick="removePattern(${p.id},${a.id})">🗑</button><div>${(p.actions||[]).map(act=>`<div>📌 ${genLine(act)} <button onclick="removeAction(${act.id})">✕</button></div>`).join('')}</div></div>`).join('');
+            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>match</option><option>if</option><option>for</option><option>pass</option></select><input placeholder="expression" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px"><div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addMatchPattern(${a.id})">+Pattern</button><button onclick="removeAction(${a.id})">🗑</button>${patternsHtml}</div>`;
         }
-        if(a.type==='if' || a.type==='while'){
-            let condHtml=(a.conditions||[]).map((c,i)=>`<div class="cond-row">
-    ${i > 0 ? `<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})">${(a.conditions[i-1].op || 'and').toUpperCase()}</button>` : ''}
-    <button onclick="toggleCondNot(${a.id},${c.id})" 
-            style="background: ${c.not ? 'var(--blue-dim)' : 'var(--bg2)'}; padding: 3px 8px; border-radius: 4px;">
-        not
-    </button>
-    <input placeholder="left" value="${esc(c.left)}" 
-           onchange="updateCond(${a.id},${c.id},'left',this.value)" 
-           style="width: 100px;">
-    <select onchange="updateCond(${a.id},${c.id},'cmp',this.value)" 
-            style="min-width: 60px; text-align: center;">
-        <option value="" ${c.cmp === '' ? 'selected' : ''}>cmp</option>
-        <option value="==" ${c.cmp === '==' ? 'selected' : ''}>==</option>
-        <option value="!=" ${c.cmp === '!=' ? 'selected' : ''}>!=</option>
-        <option value="<" ${c.cmp === '<' ? 'selected' : ''}>&lt;</option>
-        <option value=">" ${c.cmp === '>' ? 'selected' : ''}>&gt;</option>
-        <option value="<=" ${c.cmp === '<=' ? 'selected' : ''}>&lt;=</option>
-        <option value=">=" ${c.cmp === '>=' ? 'selected' : ''}>&gt;=</option>
-    </select>
-    <input placeholder="right" value="${esc(c.right)}" 
-           onchange="updateCond(${a.id},${c.id},'right',this.value)" 
-           style="width: 100px;">
-    <button onclick="removeCondRow(${a.id},${c.id})" style="padding: 2px 6px;">✕</button>
-</div>`).join('');
-            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>if</option><option>while</option><option>pass</option></select><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addCondRow(${a.id})">+ AND/OR</button><button onclick="removeAction(${a.id})">🗑</button>${condHtml}</div>`;
+        if(a.type==='if' || a.type==='while') {
+            let condHtml = (a.conditions||[]).map((c,i)=>`<div class="cond-row">${i>0?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})">${(a.conditions[i-1].op||'and').toUpperCase()}</button>`:''}<button onclick="toggleCondNot(${a.id},${c.id})" style="background:${c.not?'var(--blue-dim)':'var(--bg2)'}">not</button><input placeholder="left" value="${esc(c.left)}" onchange="updateCond(${a.id},${c.id},'left',this.value)" style="width:100px"><select onchange="updateCond(${a.id},${c.id},'cmp',this.value)" style="min-width:55px"><option value="">cmp</option><option ${c.cmp==='=='?'selected':''} value="==">==</option><option ${c.cmp==='!='?'selected':''} value="!=">!=</option><option ${c.cmp==='<'?'selected':''} value="<">&lt;</option><option ${c.cmp==='>'?'selected':''} value=">">&gt;</option><option ${c.cmp==='<='?'selected':''} value="<=">&lt;=</option><option ${c.cmp==='>='?'selected':''} value=">=">&gt;=</option></select><input placeholder="right" value="${esc(c.right)}" onchange="updateCond(${a.id},${c.id},'right',this.value)" style="width:100px"><button onclick="removeCondRow(${a.id},${c.id})">✕</button></div>`).join('');
+            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>if</option><option>while</option><option>pass</option></select><div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addCondRow(${a.id})">+ AND/OR</button><button onclick="removeAction(${a.id})">🗑</button>${condHtml}</div>`;
         }
-        return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>pass</option><option>raw</option><option>comment</option><option>var</option><option>assign</option><option>return</option><option>print</option><option>for</option><option>if</option><option>match</option></select><input placeholder="${a.type==='comment'?'comment':a.type==='var'?'name':'value'}" value="${esc(a.type==='var'?a.name:a.value)}" onchange="updateAction(${a.id},'${a.type==='var'?'name':'value'}',this.value)" style="flex:1"><div class="indent-ctrl"><button onclick="changeIndent(${a.id},-1)">◀</button><span>${a.indent||0}</span><button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="removeAction(${a.id})">🗑</button></div>`;
+        // For other action types: pass, raw, comment, var, assign, call, method, math, return, print, await, assert
+        let inputField = '';
+        if(a.type === 'method') {
+            inputField = `<input placeholder="object" value="${esc(a.object)}" onchange="updateAction(${a.id},'object',this.value)" style="width:100px">
+                         <input placeholder="method" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px">`;
+        } else if(a.type === 'math') {
+            inputField = `<input placeholder="left" value="${esc(a.left)}" onchange="updateAction(${a.id},'left',this.value)" style="width:80px">
+                         <select onchange="updateAction(${a.id},'op',this.value)" style="width:60px"><option>+</option><option>-</option><option>*</option><option>/</option></select>
+                         <input placeholder="right" value="${esc(a.right)}" onchange="updateAction(${a.id},'right',this.value)" style="width:80px">`;
+        } else if(a.type === 'var') {
+            inputField = `<input placeholder="var name" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">
+                         <input placeholder="= value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+        } else if(a.type === 'assign') {
+            inputField = `<input placeholder="target" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">
+                         <input placeholder="= value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+        } else if(a.type === 'call') {
+            inputField = `<input placeholder="function name" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">()`;
+        } else {
+            let placeholder = (a.type === 'await' ? 'signal/timer' : (a.type === 'assert' ? 'condition' : (a.type === 'return' ? 'value' : (a.type === 'print' ? 'text' : 'value'))));
+            inputField = `<input placeholder="${placeholder}" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+        }
+        return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button>
+                <select onchange="updateAction(${a.id},'type',this.value)"><option>pass</option><option>raw</option><option>comment</option><option>var</option><option>assign</option><option>call</option><option>method</option><option>math</option><option>return</option><option>print</option><option>for</option><option>if</option><option>match</option><option>await</option><option>assert</option></select>
+                ${inputField}
+                <div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div>
+                <button onclick="removeAction(${a.id})">🗑</button></div>`;
     }).join('');
-    ed.innerHTML=`<div class="sec"><div class="sec-hdr open"><div class="dot" style="background:var(--purple)"></div>Signature</div><div class="sec-body open"><div style="display:flex;gap:12px;flex-wrap:wrap"><label>Name: <input value="${esc(fn.name)}" onchange="updateFn('name',this.value)" style="width:200px"></label><label>Return: <select onchange="updateFn('returnType',this.value)"><option ${fn.returnType==='void'?'selected':''}>void</option><option ${fn.returnType==='int'?'selected':''}>int</option><option ${fn.returnType==='bool'?'selected':''}>bool</option><option ${fn.returnType==='String'?'selected':''}>String</option><option ${fn.returnType==='float'?'selected':''}>float</option></select></label><label>RPC: <select onchange="updateFn('rpcMode',this.value)"><option ${fn.rpcMode==='none'?'selected':''}>none</option><option ${fn.rpcMode==='any_peer'?'selected':''}>any_peer</option><option ${fn.rpcMode==='authority'?'selected':''}>authority</option></select></label></div><hr>${paramsHtml}</div></div>
-    <div class="sec"><div class="sec-hdr open"><div class="dot" style="background:var(--green)"></div>Actions</div><div class="sec-body open"><div>${actionsHtml||'<div class="empty-hint">No actions. Click + to add.</div>'}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="add-btn" onclick="addAction('pass')" style="width:auto">+ Pass</button><button class="add-btn" onclick="addAction('raw')" style="width:auto">+ Raw Code</button><button class="add-btn" onclick="addAction('comment')" style="width:auto">+ Comment</button><button class="add-btn" onclick="addAction('if')" style="width:auto">+ If</button><button class="add-btn" onclick="addAction('match')" style="width:auto">+ Match</button><button class="add-btn" onclick="addAction('for')" style="width:auto">+ For</button></div></div></div>`;
+    
+    ed.innerHTML = `<div style="padding:12px;background:var(--bg3);border-bottom:1px solid var(--border)">
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><label>Name: <input value="${esc(fn.name)}" onchange="updateFn('name',this.value)" style="width:180px"></label>
+        <label>Return: <select onchange="updateFn('returnType',this.value)"><option ${fn.returnType==='void'?'selected':''}>void</option><option ${fn.returnType==='int'?'selected':''}>int</option><option ${fn.returnType==='bool'?'selected':''}>bool</option><option ${fn.returnType==='String'?'selected':''}>String</option></select></label></div>
+        <hr>${paramsHtml}</div>
+        <div style="padding:12px"><div><strong>Actions</strong> 
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('var')">+ Var</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('assign')">+ Assign</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('call')">+ Call</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('method')">+ Method</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('math')">+ Math</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('if')">+ If</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('raw')">+ Raw</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('await')">+ Await</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('assert')">+ Assert</button>
+        </div><div style="margin-top:12px">${actionsHtml || '<div class="empty-hint">No actions. Click + to add.</div>'}</div></div>`;
 }
 
 // ============================================
-// INIT & SAMPLE
+// INIT
 // ============================================
-const SAMPLE=`# SAMPLE: Player Controller
+const SAMPLE = `# SAMPLE: Player Controller
 extends CharacterBody3D
 
 @export var speed: float = 5.0
 @export var jump_velocity: float = 4.5
-@onready var camera := $SpringArm3D/Camera3D
+@onready var camera := $Camera3D
 
 var health: int = 100
 signal player_died
@@ -465,10 +431,8 @@ func _physics_process(delta: float) -> void:
     else:
         velocity.x = move_toward(velocity.x, 0, speed)
         velocity.z = move_toward(velocity.z, 0, speed)
-    
     if Input.is_action_just_pressed("jump") and is_on_floor():
         velocity.y = jump_velocity
-    
     move_and_slide()
 
 func take_damage(amount: int) -> void:
@@ -476,19 +440,24 @@ func take_damage(amount: int) -> void:
     if health <= 0:
         health = 0
         player_died.emit()`;
-document.getElementById('sampleBlock').innerHTML=highlight(SAMPLE);
-renderClassVars(); renderTabs(); renderEditor(); updateStatus();
+document.getElementById('sampleBlock').innerHTML = highlight(SAMPLE);
+renderClassVars(); renderEnumsUI(); renderTabs(); renderEditor(); updateStatus();
 
-window.toggleSec=toggleSec; window.addClassVar=addClassVar; window.updateCV=updateCV; window.removeCV=removeCV;
-window.addBuiltinFromSelect=addBuiltinFromSelect; window.addCustomFunction=addCustomFunction; window.removeFunc=removeFunc;
-window.setActiveFunc=setActiveFunc; window.updateFn=updateFn; window.addParam=addParam; window.removeParam=removeParam;
-window.updateParam=updateParam; window.addAction=addAction; window.removeAction=removeAction; window.updateAction=updateAction;
-window.moveAction=moveAction; window.changeIndent=changeIndent; window.addCondRow=addCondRow; window.removeCondRow=removeCondRow;
-window.updateCond=updateCond; window.toggleCondNot=toggleCondNot; window.toggleCondOp=toggleCondOp;
-window.addMatchPattern=addMatchPattern; window.addPatternValue=addPatternValue; window.addPatternAction=addPatternAction;
-window.removePattern=removePattern; window.openEnumModal=openEnumModal; window.editEnum=editEnum; window.removeEnum=removeEnum;
-window.toggleEnumExport=toggleEnumExport; window.toggleEnumAutoMatch=toggleEnumAutoMatch; window.generateAll=generateAll;
-window.copyCode=copyCode;
+document.querySelectorAll('.sec-hdr').forEach(hdr => hdr.addEventListener('click', () => toggleSec(hdr)));
+
+window.toggleSec = toggleSec; window.addClassVar = addClassVar; window.removeCV = removeCV; window.updateCV = updateCV;
+window.openEnumModal = openEnumModal; window.editEnum = editEnum; window.removeEnum = removeEnum;
+window.toggleEnumExport = toggleEnumExport; window.toggleEnumAutoMatch = toggleEnumAutoMatch;
+window.addCustomFunction = addCustomFunction; window.addBuiltinFromSelect = addBuiltinFromSelect;
+window.removeFunc = removeFunc; window.setActiveFunc = setActiveFunc; window.updateFn = updateFn;
+window.addParam = addParam; window.removeParam = removeParam; window.updateParam = updateParam;
+window.addAction = addAction; window.removeAction = removeAction; window.updateAction = updateAction;
+window.moveAction = moveAction; window.changeIndent = changeIndent;
+window.addCondRow = addCondRow; window.removeCondRow = removeCondRow; window.updateCond = updateCond;
+window.toggleCondNot = toggleCondNot; window.toggleCondOp = toggleCondOp;
+window.addMatchPattern = addMatchPattern; window.addPatternValue = addPatternValue;
+window.addPatternAction = addPatternAction; window.removePattern = removePattern;
+window.generateAll = generateAll; window.copyCode = copyCode;
 </script>
 </body>
 </html>
