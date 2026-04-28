@@ -356,7 +356,7 @@ function filterProducts() {
     let filtered = [...allProducts];
 
     // Category filter
-    if (currentCategory !== 'all') {
+    if (currentCategory !== 'live') {
         const types = CATEGORY_TYPE_MAP[currentCategory] || [];
         filtered = filtered.filter(p => types.includes(p.type));
     }
