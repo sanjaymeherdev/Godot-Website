@@ -258,9 +258,9 @@ function buildCard(product) {
         : `<div class="product-price"><span class="product-price-currency">${symbol}</span>${price}</div>`;
 
     // YouTube link
-    const ytHtml = product.youtubeUrl
-        ? `<a href="${product.youtubeUrl}" target="_blank" rel="noopener noreferrer" class="youtube-link" onclick="event.stopPropagation()">🎥 Watch Demo</a>`
-        : '';
+ const ytHtml = product.youtubeUrl
+    ? `<a href="${product.youtubeUrl}" target="_blank" rel="noopener noreferrer" class="youtube-link" onclick="event.stopPropagation(); gtag('event', 'watch_demo', {'product_name': '${product.name.replace(/'/g, "\\'")}', 'product_id': '${product.id}'});">🎥 Watch Demo</a>`
+    : '';
 
     return `
         <div class="product-card ${isComingSoon ? 'coming-soon' : ''}" data-product-id="${product.id}" data-type="${product.type}">
