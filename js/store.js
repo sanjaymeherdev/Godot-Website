@@ -158,10 +158,8 @@ function loadProducts() {
         })
         .then(data => {
             allProducts = data;
-            filteredProducts = [...allProducts];
-            renderProducts(filteredProducts);
             hideLoading();
-            updateResultsCount();
+            filterProducts(); // ← apply live filter (and any active state) on load
         })
         .catch(error => {
             console.error('Error loading products.json:', error);
