@@ -20,10 +20,10 @@ const SECTION_CONFIG = [
 // ============================================
 // GLOBAL STATE
 // ============================================
-let allProducts      = [];
+let allProducts     = [];
 let filteredProducts = [];
 let currentCategory  = 'all';
-let currentSubcategory = 'live'; // ← changed from 'all' to 'live'
+let currentSubcategory = 'all';
 let currentSearch    = '';
 let currentCurrency  = 'inr';
 let appliedCoupon    = null;
@@ -42,12 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setupSearch();
     setupCurrencySwitch();
     handlePayPalReturn();
-
-    // ← Set "Live" as the default active subcategory button on load
-    document.querySelectorAll('.subcategory-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.subcategory === 'live') btn.classList.add('active');
-    });
 });
 
 // ============================================
@@ -158,8 +152,10 @@ function loadProducts() {
         })
         .then(data => {
             allProducts = data;
+            filteredProducts = [...allProducts];
+            renderProducts(filteredProducts);
             hideLoading();
-            filterProducts(); // ← apply live filter (and any active state) on load
+            updateResultsCount();
         })
         .catch(error => {
             console.error('Error loading products.json:', error);
@@ -322,7 +318,7 @@ function setupCategoryButtons() {
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentCategory    = this.dataset.category;
-            currentSubcategory = 'live'; // ← reset to 'live' instead of 'all'
+            currentSubcategory = 'all';
             updateSubcategoryButtons();
             filterProducts();
         });
@@ -341,12 +337,10 @@ function setupSubcategoryButtons() {
 }
 
 function updateSubcategoryButtons() {
-    // ← Reset to 'live' instead of 'all' when switching categories
     document.querySelectorAll('.subcategory-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.subcategory === 'live') btn.classList.add('active');
+        if (btn.dataset.subcategory === 'all') btn.classList.add('active');
     });
-    currentSubcategory = 'live'; // ← keep state in sync
 }
 
 // ── Category → type mapping ──
@@ -448,16 +442,15 @@ function setCurrency(currency) {
     }
 
     localStorage.setItem('preferredCurrency', currency);
-
+    
     // Close modal if open (to avoid coupon visibility mismatch)
     const modal = document.getElementById('emailModal');
     if (modal && modal.classList.contains('active')) {
         closeEmailModal();
     }
-
+    
     renderProducts(filteredProducts.length ? filteredProducts : allProducts);
 }
-
 function loadSavedCurrency() {
     const saved = localStorage.getItem('preferredCurrency');
     if (saved === 'inr' || saved === 'usd') currentCurrency = saved;
@@ -507,7 +500,6 @@ function openEmailModal(productId) {
     document.getElementById('emailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
-
 function closeEmailModal() {
     document.getElementById('emailModal').classList.remove('active');
     document.body.style.overflow = 'auto';
@@ -587,9 +579,9 @@ async function applyCoupon() {
         } else {
             appliedCoupon    = null;
             discountedAmount = null;
-            if (result.expired)          { statusDiv.className = 'coupon-status expired'; statusDiv.textContent = `⏰ ${result.message}`; }
+            if (result.expired)     { statusDiv.className = 'coupon-status expired'; statusDiv.textContent = `⏰ ${result.message}`; }
             else if (result.alreadyUsed) { statusDiv.className = 'coupon-status invalid'; statusDiv.textContent = `🚫 ${result.message}`; }
-            else                         { statusDiv.className = 'coupon-status invalid'; statusDiv.textContent = `❌ ${result.message}`; }
+            else                    { statusDiv.className = 'coupon-status invalid'; statusDiv.textContent = `❌ ${result.message}`; }
             applyBtn.disabled    = false;
             applyBtn.textContent = 'Apply';
         }
