@@ -463,7 +463,13 @@ function loadSavedCurrency() {
 function openEmailModal(productId) {
     selectedProduct = allProducts.find(p => p.id === productId);
     if (!selectedProduct || !selectedProduct.live) return;
-
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'buy_click', {
+            'product_name': selectedProduct.name,
+            'product_id': selectedProduct.id,
+            'product_price': currentCurrency === 'inr' ? selectedProduct.price_inr : selectedProduct.price_usd
+        });
+    }
     appliedCoupon    = null;
     discountedAmount = null;
 
