@@ -1,17 +1,3 @@
-// Header Component
-(function initAnalytics() {
-    if (!document.querySelector('script[src*="gtag/js?id=G-19BMGCBK6C"]')) {
-        const gaScript = document.createElement('script');
-        gaScript.async = true;
-        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-19BMGCBK6C';
-        document.head.appendChild(gaScript);
-        
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function(){dataLayer.push(arguments);};
-        gtag('js', new Date());
-        gtag('config', 'G-19BMGCBK6C');
-    }
-})();
 const HeaderComponent = {
     render: function() {
         const basePath = this.getBasePath();
