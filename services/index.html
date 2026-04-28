@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta property="og:title" content="Services — SanjayMeherDev · Game Backend & AI Integration Studio">
+    <meta property="og:description" content="Production-tested game backend services — multiplayer, auth, payments, AI, and more. Built and running in real shipped games.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services — SanjayMeherDev · Game Backend Studio</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/chat-widget.css">
+    <style>
+        :root {
+            --sv-primary: #ff6b35;
+            --sv-accent: #00d9ff;
+            --sv-success: #10b981;
+            --sv-purple: #7c3aed;
+            --sv-gold: #ffc439;
+            --sv-blue: #2d8cf0;
+            --sv-bg: #0a0a0a;
+            --sv-card: #0f0f0f;
+            --sv-border: rgba(255,255,255,0.08);
+        }
+
+        /* ── HERO ── */
+        .sv-hero {
+            background:
+                radial-gradient(ellipse at 70% 0%, rgba(255,107,53,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse at 10% 90%, rgba(0,217,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%),
+                #0a0a0a;
+            padding: 5.5rem 0 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .sv-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+        }
+        .sv-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,107,53,0.1);
+            color: var(--sv-primary);
+            border: 1px solid rgba(255,107,53,0.3);
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.03em;
+        }
+        .sv-hero h1 {
+            font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+            font-weight: 800;
+            color: #f0f0f0;
+            line-height: 1.15;
+            margin-bottom: 1.2rem;
+        }
+        .sv-hero h1 .hl { color: var(--sv-primary); }
+        .sv-hero-sub {
+            color: #999;
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.75;
+        }
+        .sv-hero-pills {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+        .sv-pill {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #bbb;
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .sv-pill.green { background: rgba(16,185,129,0.1); color: var(--sv-success); border-color: rgba(16,185,129,0.3); }
+        .sv-pill.orange { background: rgba(255,107,53,0.1); color: var(--sv-primary); border-color: rgba(255,107,53,0.3); }
+        .sv-pill.blue { background: rgba(45,140,240,0.1); color: var(--sv-blue); border-color: rgba(45,140,240,0.3); }
+        .sv-pill.cyan { background: rgba(0,217,255,0.08); color: var(--sv-accent); border-color: rgba(0,217,255,0.25); }
+
+        /* ── PROOF BAR ── */
+        .sv-proof-bar {
+            background: #0f0f0f;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 1.4rem 0;
+        }
+        .sv-proof-bar-inner {
+            display: flex;
+            gap: 2.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sv-proof-item { text-align: center; }
+        .sv-proof-num {
+            display: block;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--sv-primary);
+        }
+        .sv-proof-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+
+        /* ── CURRENCY TOGGLE ── */
+        .sv-currency-bar {
+            background: var(--sv-bg);
+            padding: 1.5rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--sv-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .sv-currency-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            background: #0f0f0f;
+            border: 1px solid var(--sv-border);
+            border-radius: 40px;
+            padding: 0.5rem 1.2rem;
+        }
+        .sv-cur-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #555;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        .sv-cur-label.active { color: var(--sv-primary); }
+        .sv-toggle-track {
+            width: 42px; height: 22px;
+            background: #222;
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s;
+        }
+        .sv-toggle-track.usd { background: rgba(0,112,186,0.4); }
+        .sv-toggle-knob {
+            width: 16px; height: 16px;
+            background: var(--sv-primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px; left: 3px;
+            transition: transform 0.3s;
+        }
+        .sv-toggle-track.usd .sv-toggle-knob { transform: translateX(20px); background: #0070ba; }
+        .sv-cur-note {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+
+        /* ── LAYOUT ── */
+        .sv-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .sv-section { padding: 5rem 0; }
+        .sv-section-dark { background: #050505; padding: 5rem 0; }
+        .sv-section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 0.5rem;
+        }
+        .sv-section-sub {
+            color: #888;
+            font-size: 0.92rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+        .sv-section-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--sv-border);
+        }
+        .sv-category-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--sv-accent);
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        /* ── SERVICE CARDS ── */
+        .sv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .sv-card {
+            background: var(--sv-card);
+            border: 1px solid var(--sv-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .sv-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .sv-card.accent-orange { border-color: rgba(255,107,53,0.25); }
+        .sv-card.accent-cyan   { border-color: rgba(0,217,255,0.2); }
+        .sv-card.accent-green  { border-color: rgba(16,185,129,0.2); }
+        .sv-card.accent-purple { border-color: rgba(124,58,237,0.25); }
+        .sv-card.accent-gold   { border-color: rgba(255,196,57,0.25); }
+        .sv-card.accent-blue   { border-color: rgba(45,140,240,0.25); }
+        .sv-card.featured {
+            border-color: var(--sv-primary);
+            box-shadow: 0 0 0 1px rgba(255,107,53,0.2), 0 8px 32px rgba(255,107,53,0.1);
+        }
+
+        .sv-card-top {
+            padding: 1.6rem 1.6rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .sv-card-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .sv-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.22rem 0.65rem;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .sv-badge-orange { background: rgba(255,107,53,0.15); color: var(--sv-primary); }
+        .sv-badge-cyan   { background: rgba(0,217,255,0.1); color: var(--sv-accent); }
+        .sv-badge-green  { background: rgba(16,185,129,0.12); color: var(--sv-success); }
+        .sv-badge-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        .sv-badge-gold   { background: rgba(255,196,57,0.12); color: var(--sv-gold); }
+        .sv-badge-blue   { background: rgba(45,140,240,0.12); color: var(--sv-blue); }
+        .sv-badge-pop    { background: var(--sv-primary); color: white; }
+        .sv-badge-new    { background: var(--sv-success); color: white; }
+
+        .sv-card-icon { font-size: 2rem; margin-bottom: 0.7rem; display: block; }
+        .sv-card-top h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        .sv-card-top p {
+            color: #888;
+            font-size: 0.85rem;
+            line-height: 1.65;
+        }
+
+        .sv-card-body {
+            padding: 1.4rem 1.6rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .sv-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
+        }
+        .sv-price {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--sv-primary);
+        }
+        .sv-price-note {
+            font-size: 0.8rem;
+            color: #555;
+        }
+        .sv-price-alt {
+            font-size: 0.82rem;
+            color: #444;
+            margin-left: auto;
+        }
+
+        .sv-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.4rem;
+            flex: 1;
+        }
+        .sv-features li {
+            font-size: 0.84rem;
+            color: #aaa;
+            padding: 0.32rem 0;
+            padding-left: 1.4rem;
+            position: relative;
+            line-height: 1.5;
+        }
+        .sv-features li::before {
+            content: "✓";
+            color: var(--sv-success);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        .sv-features li.hl { color: #e0e0e0; }
+        .sv-features li.warn::before { content: "⚡"; color: var(--sv-primary); }
+
+        .sv-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all 0.25s;
+            width: 100%;
+        }
+        .sv-btn-primary { background: var(--sv-primary); color: white; }
+        .sv-btn-primary:hover { background: #e55a2b; transform: translateY(-1px); }
+        .sv-btn-wa { background: #25d366; color: white; }
+        .sv-btn-wa:hover { background: #1ebe5a; }
+        .sv-btn-outline { background: transparent; color: var(--sv-primary); border: 1px solid var(--sv-primary); }
+        .sv-btn-outline:hover { background: rgba(255,107,53,0.08); }
+        .sv-btn-cyan { background: rgba(0,217,255,0.12); color: var(--sv-accent); border: 1px solid rgba(0,217,255,0.3); }
+        .sv-btn-cyan:hover { background: rgba(0,217,255,0.2); }
+
+        /* ── FULL-WIDTH BUNDLE CARD ── */
+        .sv-card-full {
+            background: var(--sv-card);
+            border: 1px solid rgba(255,107,53,0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: center;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 0 1px rgba(255,107,53,0.1), 0 8px 32px rgba(255,107,53,0.08);
+        }
+        .sv-card-full:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .sv-card-full h3 { font-size: 1.4rem; font-weight: 800; color: #f0f0f0; margin-bottom: 0.5rem; }
+        .sv-card-full p { color: #888; font-size: 0.9rem; line-height: 1.65; max-width: 600px; }
+        .sv-card-full-price { text-align: right; min-width: 160px; }
+        .sv-card-full-price .sv-price { font-size: 2rem; display: block; margin-bottom: 0.3rem; }
+        .sv-card-full-includes {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .sv-include-tag {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #888;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        /* ── CTA SECTION ── */
+        .sv-cta-box {
+            background: linear-gradient(135deg, rgba(255,107,53,0.12) 0%, rgba(0,217,255,0.07) 100%);
+            border: 1px solid rgba(255,107,53,0.2);
+            border-radius: 20px;
+            padding: 3.5rem 2rem;
+            text-align: center;
+        }
+        .sv-cta-box h2 { font-size: 2rem; color: #f0f0f0; margin-bottom: 0.8rem; }
+        .sv-cta-box p { color: #999; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.7; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .sv-cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .sv-cta-row .sv-btn { width: auto; }
+
+        /* ── GUARANTEE BAR ── */
+        .sv-guarantee {
+            background: rgba(16,185,129,0.06);
+            border: 1px solid rgba(16,185,129,0.18);
+            border-left: 3px solid var(--sv-success);
+            border-radius: 10px;
+            padding: 1.1rem 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            color: #aaa;
+        }
+        .sv-guarantee strong { color: var(--sv-success); }
+
+        /* ── HOW IT WORKS ── */
+        .sv-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+        .sv-step {
+            background: var(--sv-card);
+            border: 1px solid var(--sv-border);
+            border-radius: 12px;
+            padding: 1.4rem;
+            text-align: center;
+        }
+        .sv-step-num {
+            width: 36px; height: 36px;
+            background: var(--sv-primary);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.9rem; color: white;
+            margin: 0 auto 0.9rem;
+        }
+        .sv-step h4 { color: #f0f0f0; font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .sv-step p { color: #666; font-size: 0.8rem; line-height: 1.6; }
+
+        @media (max-width: 768px) {
+            .sv-card-full { grid-template-columns: 1fr; }
+            .sv-card-full-price { text-align: left; }
+            .sv-hero { padding: 3.5rem 0 3rem; }
+            .sv-section-title { font-size: 1.6rem; }
+            .sv-cta-box h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sanjay-header"></div>
+
+    <!-- Hero -->
+    <section class="sv-hero">
+        <div class="sv-container">
+            <div class="sv-hero-badge">🛠️ Every service runs live in a shipped game</div>
+            <h1>Game Backend<br><span class="hl">Services</span> &amp; Integrations</h1>
+            <p class="sv-hero-sub">Multiplayer, auth, payments, AI NPCs, social systems — built and tested in real games. You get the same production code, set up in your project.</p>
+            <div class="sv-hero-pills">
+                <span class="sv-pill green">✓ Pay After It Works</span>
+                <span class="sv-pill green">✓ Same-Day Delivery</span>
+                <span class="sv-pill orange">Any Engine</span>
+                <span class="sv-pill blue">Godot · Unity · Web</span>
+                <span class="sv-pill cyan">WhatsApp Support</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof Bar -->
+    <div class="sv-proof-bar">
+        <div class="sv-container">
+            <div class="sv-proof-bar-inner">
+                <div class="sv-proof-item"><span class="sv-proof-num">70+</span><span class="sv-proof-label">Systems Built</span></div>
+                <div class="sv-proof-item"><span class="sv-proof-num">4</span><span class="sv-proof-label">Shipped Games</span></div>
+                <div class="sv-proof-item"><span class="sv-proof-num">Live</span><span class="sv-proof-label">In Production</span></div>
+                <div class="sv-proof-item"><span class="sv-proof-num">24h</span><span class="sv-proof-label">Avg Delivery</span></div>
+                <div class="sv-proof-item"><span class="sv-proof-num">0</span><span class="sv-proof-label">Upfront Risk</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Toggle -->
+    <div class="sv-currency-bar">
+        <div class="sv-currency-toggle" onclick="toggleCurrency()">
+            <span class="sv-cur-label active" id="inrLabel">₹ INR</span>
+            <div class="sv-toggle-track" id="toggleTrack">
+                <div class="sv-toggle-knob"></div>
+            </div>
+            <span class="sv-cur-label" id="usdLabel">$ USD</span>
+        </div>
+        <div class="sv-cur-note" id="curNote">Showing prices in INR · Razorpay</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 1 — MULTIPLAYER
+    ══════════════════════════════════════════ -->
+    <section class="sv-section">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">🌐 Multiplayer</div>
+                    <div class="sv-section-title">Multiplayer Setup</div>
+                    <div class="sv-section-sub">Relay, P2P, and dedicated server — choose what fits your game.</div>
+                </div>
+            </div>
+
+            <!-- Full Bundle Card -->
+            <div class="sv-card-full">
+                <div>
+                    <div class="sv-card-badges">
+                        <span class="sv-badge sv-badge-pop">Best Value</span>
+                        <span class="sv-badge sv-badge-orange">Bundle</span>
+                    </div>
+                    <h3>🌐 Complete Multiplayer Bundle</h3>
+                    <p>All three network architectures in one package. I set up Relay, P2P with host migration, and Dedicated Server — you pick the one that fits your game or get all three for different game modes.</p>
+                    <div class="sv-card-full-includes">
+                        <span class="sv-include-tag">CGRelay WebSocket</span>
+                        <span class="sv-include-tag">ENet P2P + Host Migration</span>
+                        <span class="sv-include-tag">Dedicated Server</span>
+                        <span class="sv-include-tag">State Sync</span>
+                        <span class="sv-include-tag">Lobby + Auth</span>
+                    </div>
+                </div>
+                <div class="sv-card-full-price">
+                    <span class="sv-price" data-inr="₹2500" data-usd="$32">₹2500</span>
+                    <span class="sv-price-note">one-time · save ₹500</span>
+                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20the%20Complete%20Multiplayer%20Bundle" target="_blank" class="sv-btn sv-btn-wa" style="margin-top:1rem;">💬 Get Bundle</a>
+                </div>
+            </div>
+
+            <div class="sv-grid">
+                <div class="sv-card accent-cyan">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-cyan">Relay</span>
+                            <span class="sv-badge sv-badge-green">Most Popular</span>
+                        </div>
+                        <span class="sv-card-icon">📡</span>
+                        <h3>CGRelay Setup</h3>
+                        <p>Always-on WebSocket relay — no server knowledge needed. Drop-in script, real-time sync, works from any device. My own relay server included free for 1 month.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹800" data-usd="$11">₹800</span>
+                            <span class="sv-price-note">one-time setup</span>
+                            <span class="sv-price-alt" data-inr="+ ₹200/mo relay" data-usd="+ $3/mo relay">+ ₹200/mo relay</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">CGRelay WebSocket drop-in</li>
+                            <li>Realtime, on-change, once sync modes</li>
+                            <li>Game-agnostic — any genre</li>
+                            <li>1 month relay server free</li>
+                            <li>WhatsApp support during setup</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20CGRelay%20setup" target="_blank" class="sv-btn sv-btn-primary">Get CGRelay Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-purple">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-purple">P2P</span>
+                        </div>
+                        <span class="sv-card-icon">🔗</span>
+                        <h3>P2P + Host Migration</h3>
+                        <p>Direct ENet P2P via Zerotier — no IP exposed to players. Low latency of P2P, privacy of a relay. Host migration built in so the game survives when the host leaves.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹1000" data-usd="$13">₹1000</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">ENet + Zerotier P2P</li>
+                            <li>Host migration — auto new host</li>
+                            <li>State sync included</li>
+                            <li>Up to 50 players</li>
+                            <li>Lobby + auth flow</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20P2P%20setup" target="_blank" class="sv-btn sv-btn-primary">Get P2P Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-blue">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-blue">Dedicated</span>
+                        </div>
+                        <span class="sv-card-icon">🖥️</span>
+                        <h3>Dedicated Server Setup</h3>
+                        <p>Authoritative headless server on Render or Replit — free cloud hosting, always on. For competitive games that need server-authoritative logic.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹1200" data-usd="$15">₹1200</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Headless WebSocket server</li>
+                            <li>Render + Replit deploy</li>
+                            <li>Free tier hosting compatible</li>
+                            <li>Anti-cheat architecture</li>
+                            <li>24h delivery</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Dedicated%20Server%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Server Setup →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sv-guarantee">
+                <span>🏭</span>
+                <span>All three network types power real games — <strong>CGRelay</strong> runs casual MP, <strong>P2P</strong> powers my BR game, <strong>Dedicated Server</strong> runs the open world. Not demos.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 2 — AUTH + BACKEND
+    ══════════════════════════════════════════ -->
+    <section class="sv-section-dark">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">🔐 Auth & Backend</div>
+                    <div class="sv-section-title">Auth & Data Storage</div>
+                    <div class="sv-section-sub">Supabase-powered auth, storage and cloud saves — for any engine or web app.</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <div class="sv-card accent-green featured">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-pop">Popular</span>
+                            <span class="sv-badge sv-badge-green">Auth</span>
+                        </div>
+                        <span class="sv-card-icon">🔐</span>
+                        <h3>Supabase Auth Setup</h3>
+                        <p>Full authentication — email/password, Google OAuth, Discord OAuth. Password reset, session handling, user profiles, RLS policies. Works in Godot, Unity, or any web app.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹800" data-usd="$11">₹800</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Email + Google + Discord auth</li>
+                            <li>Password reset flow</li>
+                            <li>RLS policies configured</li>
+                            <li>User profile table</li>
+                            <li>Session management</li>
+                            <li>Any engine compatible</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Supabase%20Auth%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Auth Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-cyan">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-cyan">Storage</span>
+                        </div>
+                        <span class="sv-card-icon">🗄️</span>
+                        <h3>Cloud Storage Setup</h3>
+                        <p>Supabase cloud saves — store any game data, player progress, JSON, images in bucket. Upload, download, manage files from your game or app.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹600" data-usd="$8">₹600</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Supabase storage bucket setup</li>
+                            <li>Text, JSON, image support</li>
+                            <li>Upload + download from game</li>
+                            <li>RLS per user</li>
+                            <li>Profile picture storage included</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Cloud%20Storage%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Storage Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-orange">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-orange">Bundle</span>
+                            <span class="sv-badge sv-badge-new">Save ₹200</span>
+                        </div>
+                        <span class="sv-card-icon">🏗️</span>
+                        <h3>Full Backend Bundle</h3>
+                        <p>Auth + cloud storage + local storage managers all wired together. The complete backend layer any game needs — profiles, saves, assets, session management.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹1200" data-usd="$16">₹1200</span>
+                            <span class="sv-price-note">one-time · save ₹200</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Everything in Auth + Storage</li>
+                            <li>Local storage manager autoload</li>
+                            <li>Cloud storage manager autoload</li>
+                            <li>Auth manager autoload</li>
+                            <li>Priority delivery</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Full%20Backend%20Bundle" target="_blank" class="sv-btn sv-btn-wa">💬 Get Backend Bundle</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 3 — PAYMENTS
+    ══════════════════════════════════════════ -->
+    <section class="sv-section">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">💳 Payments</div>
+                    <div class="sv-section-title">Payment Integration</div>
+                    <div class="sv-section-sub">Razorpay for India, PayPal for the world — with webhook verification and Supabase Edge Functions.</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <div class="sv-card accent-blue">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-blue">Razorpay · INR</span>
+                        </div>
+                        <span class="sv-card-icon">🇮🇳</span>
+                        <h3>Razorpay Gateway</h3>
+                        <p>Payment links, webhook verification, idempotent processing. Works for any product — game assets, subscriptions, SaaS, digital downloads.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹800" data-usd="$11">₹800</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Supabase Edge Function</li>
+                            <li>HMAC webhook verification</li>
+                            <li>Idempotent payment processing</li>
+                            <li>DB schema + RLS</li>
+                            <li>Test page included</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Razorpay%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Razorpay Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-gold">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-gold">PayPal · USD</span>
+                        </div>
+                        <span class="sv-card-icon">🌍</span>
+                        <h3>PayPal Gateway</h3>
+                        <p>Orders API, auto-capture, dual-path idempotency. For international buyers paying in USD — webhook verified, serverless.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹800" data-usd="$11">₹800</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">PayPal Orders API</li>
+                            <li>Webhook signature verification</li>
+                            <li>Auto-capture flow</li>
+                            <li>DB schema + RLS</li>
+                            <li>Test page included</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20PayPal%20setup" target="_blank" class="sv-btn sv-btn-primary" style="background:var(--sv-gold);color:#000;">Get PayPal Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-orange featured">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-pop">Best Value</span>
+                            <span class="sv-badge sv-badge-orange">Both Gateways</span>
+                        </div>
+                        <span class="sv-card-icon">💳</span>
+                        <h3>Both Gateways</h3>
+                        <p>Full payment coverage — INR for Indian buyers, USD for international. Same type + metadata pattern across both so your business logic stays clean.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹1200" data-usd="$16">₹1200</span>
+                            <span class="sv-price-note">one-time · save ₹400</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Razorpay + PayPal Edge Functions</li>
+                            <li>Unified type + metadata pattern</li>
+                            <li>Indian + international buyers</li>
+                            <li>Coupon system add-on available</li>
+                            <li>Priority WhatsApp support</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Both%20Gateways%20setup" target="_blank" class="sv-btn sv-btn-wa">💬 Get Both Gateways</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-green">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-green">Add-on</span>
+                        </div>
+                        <span class="sv-card-icon">🎟️</span>
+                        <h3>Redeem Store System</h3>
+                        <p>Players buy codes outside your game, redeem inside. Bypass Google IAP and keep 97% of revenue. Code validation, reward delivery, expiry support.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹600" data-usd="$8">₹600</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Bypass Google IAP 30% cut</li>
+                            <li>Code generation + validation</li>
+                            <li>Reward delivery on redeem</li>
+                            <li>Expiry + single-use support</li>
+                            <li>Works with any payment gateway</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Redeem%20Store%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Redeem System →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 4 — AI INTEGRATION
+    ══════════════════════════════════════════ -->
+    <section class="sv-section-dark">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">🤖 AI Integration</div>
+                    <div class="sv-section-title">AI Systems</div>
+                    <div class="sv-section-sub">Real AI NPCs, mission generation, voice, image gen — not gimmicks, actually in production.</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <div class="sv-card accent-purple featured">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-pop">Flagship</span>
+                            <span class="sv-badge sv-badge-purple">AI NPC</span>
+                        </div>
+                        <span class="sv-card-icon">🤖</span>
+                        <h3>AI NPC Full Setup</h3>
+                        <p>Groq/Gemini powered conversational NPC with Google TTS voice. Human-like responses, memory context, mission triggers, voice output. The full stack.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹1500" data-usd="$20">₹1500</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Groq (Llama 3.3 70B) integration</li>
+                            <li>Google TTS voice output</li>
+                            <li>Conversation context memory</li>
+                            <li>Mission / quest trigger system</li>
+                            <li>Voice command input option</li>
+                            <li>Any engine compatible</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20AI%20NPC%20setup" target="_blank" class="sv-btn sv-btn-primary">Get AI NPC Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-cyan">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-cyan">Image Gen</span>
+                        </div>
+                        <span class="sv-card-icon">🎨</span>
+                        <h3>AI Image Generation</h3>
+                        <p>Generate images at runtime inside your game and apply to any mesh or UI element. Freepik, Cloudflare Workers AI, or Stability AI — your pick.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹600" data-usd="$8">₹600</span>
+                            <span class="sv-price-note">one-time · per provider</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Runtime image generation in game</li>
+                            <li>Apply to mesh, UI, or texture</li>
+                            <li>Freepik / Cloudflare / Stability</li>
+                            <li>Prompt from GDScript / code</li>
+                            <li>All 3 providers: ₹1200 / $16</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20AI%20Image%20Generation%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Image Gen Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-orange">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-orange">Translate</span>
+                        </div>
+                        <span class="sv-card-icon">🌍</span>
+                        <h3>Language Translator</h3>
+                        <p>Switch your entire game UI to any language with one click at runtime. AI powered, no manual translation files, no restart needed.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹500" data-usd="$7">₹500</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Runtime language switching</li>
+                            <li>Any language supported</li>
+                            <li>No manual translation files</li>
+                            <li>One-click toggle in game</li>
+                            <li>Works on all UI nodes</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Language%20Translator%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Translator Setup →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 5 — SOCIAL SYSTEMS
+    ══════════════════════════════════════════ -->
+    <section class="sv-section">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">👥 Social</div>
+                    <div class="sv-section-title">Social Layer</div>
+                    <div class="sv-section-sub">Chat, friends, presence, voice — the full social stack for multiplayer games.</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <div class="sv-card accent-green">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-green">Chat</span>
+                        </div>
+                        <span class="sv-card-icon">💬</span>
+                        <h3>Private + Global Chat</h3>
+                        <p>Real-time chat — private messages, team chat, guild chat, global channel. Fully networked via Ably or Supabase realtime.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹700" data-usd="$9">₹700</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Private + global channels</li>
+                            <li>Team / guild chat rooms</li>
+                            <li>Real-time message delivery</li>
+                            <li>Message history</li>
+                            <li>Ably or Supabase backend</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Chat%20system%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Chat Setup →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-cyan">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-cyan">Friends</span>
+                        </div>
+                        <span class="sv-card-icon">🤝</span>
+                        <h3>Friend System</h3>
+                        <p>Full friend management — add, remove, send requests, accept, block. Online presence per friend. Works over any backend.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹700" data-usd="$9">₹700</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Add / remove / block friends</li>
+                            <li>Friend request flow</li>
+                            <li>Online / offline presence</li>
+                            <li>Friend list UI</li>
+                            <li>Signal based</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Friend%20System%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Friend System →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-purple">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-purple">Voice</span>
+                        </div>
+                        <span class="sv-card-icon">🎙️</span>
+                        <h3>Voice Chat</h3>
+                        <p>Private voice chat over network — push-to-talk or open mic, mute per player, low latency. Private channels only, no proximity or global.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹900" data-usd="$12">₹900</span>
+                            <span class="sv-price-note">one-time</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Private voice channels</li>
+                            <li>Push-to-talk or open mic</li>
+                            <li>Mute / unmute per player</li>
+                            <li>Low latency networked</li>
+                            <li>Works alongside text chat</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Voice%20Chat%20setup" target="_blank" class="sv-btn sv-btn-primary">Get Voice Chat →</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-orange">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-orange">Bundle</span>
+                            <span class="sv-badge sv-badge-pop">Best Value</span>
+                        </div>
+                        <span class="sv-card-icon">👥</span>
+                        <h3>Full Social Bundle</h3>
+                        <p>Presence + private and global chat + friend system + voice chat — all coupled and wired together. The complete social layer.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹2000" data-usd="$26">₹2000</span>
+                            <span class="sv-price-note">one-time · save ₹300</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Presence (online/offline status)</li>
+                            <li>Private + global + team chat</li>
+                            <li>Full friend management</li>
+                            <li>Voice chat</li>
+                            <li>All systems linked together</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Full%20Social%20Bundle" target="_blank" class="sv-btn sv-btn-wa">💬 Get Social Bundle</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 6 — RETENTION SYSTEMS
+    ══════════════════════════════════════════ -->
+    <section class="sv-section-dark">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">🏆 Retention</div>
+                    <div class="sv-section-title">Player Retention Systems</div>
+                    <div class="sv-section-sub">Daily rewards, achievements, season pass, quests — everything that keeps players coming back.</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <div class="sv-card accent-orange featured">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-pop">Full Stack</span>
+                            <span class="sv-badge sv-badge-orange">Bundle</span>
+                        </div>
+                        <span class="sv-card-icon">🏆</span>
+                        <h3>Retention Bundle</h3>
+                        <p>Daily rewards, achievements, season pass, profile, level system, quest system, economy + store — all coupled together. The complete retention layer.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹2500" data-usd="$32">₹2500</span>
+                            <span class="sv-price-note">one-time setup</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">8 systems linked together</li>
+                            <li>Daily Reward + Achievements</li>
+                            <li>Season Pass + Level System</li>
+                            <li>Quest + Economy + Store</li>
+                            <li>Profile with cloud save</li>
+                            <li>Signal based — clean integration</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20Retention%20Bundle%20setup" target="_blank" class="sv-btn sv-btn-wa">💬 Get Retention Bundle</a>
+                    </div>
+                </div>
+
+                <div class="sv-card accent-cyan">
+                    <div class="sv-card-top">
+                        <div class="sv-card-badges">
+                            <span class="sv-badge sv-badge-cyan">Individual</span>
+                        </div>
+                        <span class="sv-card-icon">🎁</span>
+                        <h3>Individual Retention Systems</h3>
+                        <p>Don't need the full bundle? Get just what you need — any individual system set up in your project.</p>
+                    </div>
+                    <div class="sv-card-body">
+                        <div class="sv-price-row">
+                            <span class="sv-price" data-inr="₹400" data-usd="$5">₹400</span>
+                            <span class="sv-price-note">per system</span>
+                        </div>
+                        <ul class="sv-features">
+                            <li class="hl">Daily Rewards</li>
+                            <li>Achievements System</li>
+                            <li>Season Pass</li>
+                            <li>Quest System</li>
+                            <li>Economy + Store</li>
+                            <li class="warn">Message to discuss what you need</li>
+                        </ul>
+                        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20specific%20retention%20system%20set%20up" target="_blank" class="sv-btn sv-btn-primary">Get Individual System →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 7 — CUSTOM / FULL BUILD
+    ══════════════════════════════════════════ -->
+    <section class="sv-section">
+        <div class="sv-container">
+            <div class="sv-section-header">
+                <div>
+                    <div class="sv-category-tag">⚡ Custom</div>
+                    <div class="sv-section-title">Full Game Backend Build</div>
+                    <div class="sv-section-sub">Need everything set up? I scope it, build it, we test together. Pay after it works.</div>
+                </div>
+            </div>
+
+            <div class="sv-card-full" style="grid-template-columns:1fr auto;">
+                <div>
+                    <div class="sv-card-badges" style="margin-bottom:1rem;">
+                        <span class="sv-badge sv-badge-pop">Done For You</span>
+                        <span class="sv-badge sv-badge-orange">Custom Quote</span>
+                    </div>
+                    <h3>⚡ Complete Backend Build</h3>
+                    <p>Multiplayer + auth + payments + AI NPCs + social + retention — the full stack set up in your game. I've built all of this in my own open world game. You tell me what you need, I scope it, build it, we test together on WhatsApp. Pay only after everything works.</p>
+                    <div class="sv-card-full-includes">
+                        <span class="sv-include-tag">Any combination of services</span>
+                        <span class="sv-include-tag">Any engine</span>
+                        <span class="sv-include-tag">Pay after it works</span>
+                        <span class="sv-include-tag">Free consultation</span>
+                        <span class="sv-include-tag">WhatsApp support</span>
+                    </div>
+                </div>
+                <div class="sv-card-full-price">
+                    <span class="sv-price" style="font-size:1.4rem;display:block;margin-bottom:0.3rem;" data-inr="₹5,000+" data-usd="$65+">₹5,000+</span>
+                    <span class="sv-price-note">scoped per project</span>
+                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20full%20game%20backend%20built" target="_blank" class="sv-btn sv-btn-wa" style="margin-top:1rem;">💬 Free Consultation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="sv-section-dark">
+        <div class="sv-container">
+            <h2 class="sv-section-title" style="text-align:center;margin-bottom:0.5rem;">⚡ How It Works</h2>
+            <p style="text-align:center;color:#777;font-size:0.9rem;margin-bottom:2rem;">Simple, low-risk, fast.</p>
+            <div class="sv-steps">
+                <div class="sv-step"><div class="sv-step-num">1</div><h4>Message on WhatsApp</h4><p>Tell me what you need — engine, current setup, what you want built.</p></div>
+                <div class="sv-step"><div class="sv-step-num">2</div><h4>Free Consultation</h4><p>I review your project, confirm scope, give you a fixed price. No surprises.</p></div>
+                <div class="sv-step"><div class="sv-step-num">3</div><h4>I Build It</h4><p>Files delivered same day for standard services. Complex builds within 48h.</p></div>
+                <div class="sv-step"><div class="sv-step-num">4</div><h4>We Test Together</h4><p>We test on WhatsApp until everything works. 3 free changes after delivery.</p></div>
+                <div class="sv-step"><div class="sv-step-num">5</div><h4>Pay After It Works</h4><p>Payment only after you confirm everything is running in your project.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="sv-section">
+        <div class="sv-container">
+            <div class="sv-cta-box">
+                <h2>Not Sure What You Need?</h2>
+                <p>Tell me about your game — genre, player count, platform. I'll recommend the right services and give you a free scope. No commitment.</p>
+                <div class="sv-cta-row">
+                    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20help%20choosing%20services%20for%20my%20game" target="_blank" class="sv-btn sv-btn-wa">💬 Free Consultation on WhatsApp</a>
+                    <a href="cgstore" class="sv-btn sv-btn-outline">Browse Asset Store →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="sanjay-footer"></div>
+    <div class="chat-widget"></div>
+
+    <script src="js/components.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chat-loader.js"></script>
+    <script src="js/chat-widget.js"></script>
+
+    <script>
+        let isUSD = false;
+
+        function toggleCurrency() {
+            isUSD = !isUSD;
+            const track   = document.getElementById('toggleTrack');
+            const inrLbl  = document.getElementById('inrLabel');
+            const usdLbl  = document.getElementById('usdLabel');
+            const note    = document.getElementById('curNote');
+
+            track.classList.toggle('usd', isUSD);
+            inrLbl.classList.toggle('active', !isUSD);
+            usdLbl.classList.toggle('active', isUSD);
+            note.textContent = isUSD
+                ? 'Showing prices in USD · PayPal'
+                : 'Showing prices in INR · Razorpay';
+
+            // Update all price elements
+            document.querySelectorAll('[data-inr][data-usd]').forEach(el => {
+                el.textContent = isUSD ? el.dataset.usd : el.dataset.inr;
+            });
+        }
+    </script>
+</body>
+</html>
