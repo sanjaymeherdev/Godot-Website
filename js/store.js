@@ -120,7 +120,21 @@ async function pollPayPalUntilComplete(orderId) {
         }
     }, 2000);
 }
-
+// Track product click for GA4 (even if not purchased)
+function trackProductClick(product) {
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'view_item', {
+            'event_category': 'engagement',
+            'items': [{
+                'item_id': product.id,
+                'item_name': product.name,
+                'price': currentCurrency === 'inr' ? product.price_inr : product.price_usd,
+                'item_category': product.type,
+                'currency': currentCurrency === 'inr' ? 'INR' : 'USD'
+            }]
+        });
+    }
+}
 function showStatusBanner(message, color, persist = false) {
     const existing = document.getElementById('status-banner');
     if (existing) existing.remove();
@@ -304,6 +318,16 @@ function toggleReadMore(productId) {
     const fullEl  = document.getElementById(`full-${productId}`);
     const btn     = document.getElementById(`btn-${productId}`);
     const isExpanded = fullEl.style.display === 'block';
+    
+    // 🆕 Track without product lookup (just send productId)
+    if (!isExpanded && typeof gtag !== 'undefined') {
+        gtag('event', 'select_content', {
+            'content_type': 'product_details',
+            'item_id': productId,
+            'event_category': 'engagement'
+        });
+    }
+    
     fullEl.style.display  = isExpanded ? 'none'  : 'block';
     shortEl.style.display = isExpanded ? 'block' : 'none';
     btn.textContent       = isExpanded ? 'Read More ▾' : 'Read Less ▴';
