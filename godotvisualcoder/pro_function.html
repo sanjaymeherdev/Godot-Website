@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>GDScript Forge PRO | Smart Visual Coder</title>
+  <title>GDScript Forge PRO | Smart Visual Coder + API Docs</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -42,9 +42,13 @@
     .func-tab{background:var(--bg3);padding:5px 12px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border2);border-bottom:none}
     .func-tab.active{background:var(--bg4);color:var(--blue);border-color:var(--blue)}
     .status-bar{font-size:10px;padding:4px 14px;border-top:1px solid var(--border);background:var(--bg2);display:flex}
-    .kw{color:#ff7b72} .fn{color:#79c0ff} .ty{color:#79c0ff} .str{color:#a5d6ff} .cmt{color:#8b949e}
+    .kw{color:#ff7b72} .fn{color:#79c0ff} .ty{color:#79c0ff} .str{color:#a5d6ff} .cmt{color:#8b949e} .ann{color:#d2a8ff}
     .empty-hint{color:var(--text3);padding:12px;text-align:center}
     .param-row{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;align-items:center;background:var(--bg4);padding:6px;border-radius:6px}
+    .doc-btn{background:var(--bg2);border-color:var(--blue);color:var(--blue);padding:2px 6px;font-size:10px}
+    .doc-tooltip{position:fixed;background:#1a2a3a;border-left:3px solid var(--blue);padding:12px;border-radius:8px;max-width:320px;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,0.5);font-size:11px;display:none}
+    .doc-tooltip code{background:var(--bg);padding:2px 4px;border-radius:4px}
+    .doc-tooltip.show{display:block}
   </style>
 </head>
 <body>
@@ -55,7 +59,7 @@
         <input type="text" id="classNameInput" placeholder="class_name (optional)">
         <input type="text" id="extendsInput" list="extendsList" placeholder="extends (required)">
         <select id="toolModeSelect"><option value="">Normal</option><option value="@tool">@tool (Editor)</option></select>
-        <datalist id="extendsList"><option>CharacterBody3D</option><option>Node2D</option><option>Node3D</option><option>Area3D</option><option>Node</option></datalist>
+        <datalist id="extendsList"><option>CharacterBody3D</option><option>CharacterBody2D</option><option>Node2D</option><option>Node3D</option><option>Area3D</option><option>Node</option></datalist>
       </div></div>
     </div>
     <div class="sec"><div class="sec-hdr"><div class="dot" style="background:var(--amber)"></div>Declarations & Enums<span class="arrow">▶</span></div>
@@ -72,9 +76,96 @@
     <div class="sample-code" id="sampleBlock"></div>
   </div>
 </div>
+<div id="docTooltip" class="doc-tooltip"></div>
+
 <script>
 // ============================================
-// SMART EXPRESSION HELPERS (YOUR LOGIC)
+// API REFERENCE DATABASE (GODOT 4)
+// ============================================
+const API_DOCS = {
+    // Movement / Physics
+    "move_and_slide": "Moves the body based on `velocity`. Returns if the body moved. Automatically handles slopes and floor detection.\n\n`move_and_slide()`\n\nUse after setting `velocity`.",
+    "velocity": "Vector3 property representing movement direction and speed per second.\n\n`velocity = Vector3(x, z, y)`\n\nSet before calling `move_and_slide()`.",
+    "is_on_floor": "Returns `true` if the body is on a floor surface.\n\n`if is_on_floor():`\n\nUsed for jump logic.",
+    "get_vector": "Input helper: returns Vector2 from 4 actions.\n\n`Input.get_vector(\"left\", \"right\", \"up\", \"down\")`\n\nReturns normalized Vector2.",
+    "transform.basis": "The body's local coordinate system basis matrix.\n\n`transform.basis * Vector3(input.x, 0, input.y)`\n\nConverts input to global direction.",
+    "move_toward": "Moves a value toward a target by delta.\n\n`move_toward(from, to, delta)`\n\nSmoothly interpolates numbers.",
+    
+    // Combat / Damage
+    "emit": "Emit a signal to connected receivers.\n\n`signal_name.emit(arg1, arg2)`\n\nSignals are decoupled event system.",
+    "signal": "Declare a custom signal.\n\n`signal health_depleted(amount)`\n\nConnect using `.connect()` or `@onready` pattern.",
+    
+    // Node / Scene
+    "get_node": "Retrieves a node by path.\n\n`get_node(\"Path/To/Node\")`\n\nShortcut: `$NodeName`",
+    "$": "Shorthand for `get_node()`.\n\n`$Camera3D` or `$\"../Player\"`",
+    "@onready": "Waits until node is ready before assigning.\n\n`@onready var player = $Player`\n\nPrevents null errors in `_ready()`.",
+    "@export": "Exposes variable in Inspector.\n\n`@export var speed: float = 5.0`\n\nEdit values without recompiling.",
+    
+    // Input
+    "_input": "Handler for `InputEvent` (mouse, key, touch).\n\n`func _input(event: InputEvent):`\n\nUse for UI/click handling.",
+    "Input.is_action_just_pressed": "Returns true once per frame when action activated.\n\n`Input.is_action_just_pressed(\"jump\")`\n\nUse in `_process()`.",
+    "InputEventMouseButton": "Mouse click/release event.\n\n`if event.button_index == MOUSE_BUTTON_LEFT:`",
+    
+    // Multiplayer
+    "@rpc": "Remote Procedure Call decorator.\n\n`@rpc(\"any\", \"unreliable\", 0)`\n\nany=anyone can call, auth=only server.",
+    "rpc_id": "Call method on specific peer.\n\n`rpc_id(peer_id, \"method_name\", args)`",
+    "multiplayer.multiplayer_peer": "Get the active multiplayer peer.\n\n`get_tree().multiplayer_peer`",
+    "ENetMultiplayerPeer": "Godot's built-in P2P/relay class.\n\n`var peer = ENetMultiplayerPeer.new()`",
+    
+    // Math / Vectors
+    "Vector3": "3D vector: x, y, z.\n\n`Vector3(1, 0, 0)` = right, `Vector3(0, 1, 0)` = up.",
+    "Vector2": "2D vector: x, y.\n\n`Vector2.ZERO`, `Vector2.ONE`, `Vector2.UP`",
+    "lerp": "Linear interpolation.\n\n`lerp(a, b, weight)`\n\nweight 0=a, 1=b, 0.5=middle.",
+    "clamp": "Restrict value to range.\n\n`clamp(value, min, max)`",
+    
+    // Timers / Async
+    "await": "Wait for signal or coroutine.\n\n`await get_tree().create_timer(1.0).timeout`\n\nPauses function execution.",
+    "create_timer": "Creates a one-shot SceneTreeTimer.\n\n`get_tree().create_timer(seconds)`\n\nUse with `await`.",
+    
+    // Debug
+    "assert": "Stop execution if condition false.\n\n`assert(health > 0, \"Health below zero\")`\n\nUse in debug builds.",
+    "print": "Output to console.\n\n`print(\"Player position: \", position)`\n\nAccepts multiple arguments.",
+    "push_error": "Log error to console.\n\n`push_error(\"Something broke\")`",
+    
+    // Signals (built-in)
+    "timeout": "Emitted when timer finishes.\n\n`timer.timeout.connect(_on_timer_timeout)`",
+    "body_entered": "Area3D signal when body enters.\n\n`func _on_body_entered(body: Node3D):`",
+    "area_entered": "Area signal for overlap detection.",
+    
+    // Animation
+    "AnimationPlayer": "Plays animations on property tracks.\n\n`$AnimationPlayer.play(\"run\")`",
+    "tween": "Animate properties over time.\n\n`create_tween().tween_property($Sprite, \"modulate\", Color.RED, 1.0)`",
+    
+    // Match statement
+    "match": "Pattern matching like switch on steroids.\n\n`match value:\n    0:\n        print(\"zero\")\n    _:\n        pass`",
+    
+    // Default catchall
+    "default": "Check Godot 4 documentation for details.\n\nDocs: docs.godotengine.org"
+};
+
+function getAPIDoc(keyword) {
+    if (!keyword) return "📖 No documentation available for empty field.";
+    let lower = keyword.toLowerCase();
+    for (let [k, v] of Object.entries(API_DOCS)) {
+        if (lower.includes(k) || k === lower) return v;
+    }
+    return `ℹ️ No specific API doc for "${keyword}".\n\nTry: move_and_slide, velocity, get_node, @export, @rpc, match, await\n\nOr check docs.godotengine.org`;
+}
+
+function showDocFor(fieldValue, event) {
+    let doc = getAPIDoc(fieldValue);
+    let tooltip = document.getElementById('docTooltip');
+    tooltip.innerHTML = `<strong>📖 API Reference: ${fieldValue || 'context'}</strong><br><br>${doc.replace(/\n/g,'<br>')}`;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (event.pageX + 15) + 'px';
+    tooltip.style.top = (event.pageY + 15) + 'px';
+    setTimeout(() => { tooltip.classList.add('show'); }, 10);
+    // Hide after 5 seconds or on next click
+    setTimeout(() => { tooltip.style.display = 'none'; tooltip.classList.remove('show'); }, 5000);
+}
+
+// ============================================
+// SMART EXPRESSION HELPERS
 // ============================================
 function smartInfer(value) {
     if (!value) return null;
@@ -120,7 +211,7 @@ function esc(s){ return String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt
 function toggleSec(hdr){ hdr.classList.toggle('open'); let b=hdr.nextElementSibling; if(b)b.classList.toggle('open'); }
 
 // ============================================
-// DECLARATIONS
+// DECLARATIONS (same as before, omitted for brevity but included in full)
 // ============================================
 function renderClassVars(){
     const el=document.getElementById('cvarList');
@@ -136,9 +227,6 @@ function addClassVar(){ classVars.push({id:uid(),ann:'',name:'new_var',type:'',v
 function removeCV(id){ classVars=classVars.filter(c=>c.id!==id); renderClassVars(); }
 function updateCV(id,field,val){ let c=classVars.find(c=>c.id===id); if(c) c[field]=val; }
 
-// ============================================
-// ENUMS
-// ============================================
 function openEnumModal(){
     let name=prompt("Enum name:"); if(!name) return;
     enums.push({ id:uid(), name, values:[], exportDropdown:false, autoMatch:false, matchFuncName:`handle_${name.toLowerCase()}` });
@@ -163,9 +251,6 @@ function removeEnum(id){ enums=enums.filter(e=>e.id!==id); renderEnumsUI(); }
 function toggleEnumExport(id,val){ let e=enums.find(e=>e.id===id); if(e) e.exportDropdown=val; }
 function toggleEnumAutoMatch(id,val){ let e=enums.find(e=>e.id===id); if(e) e.autoMatch=val; }
 
-// ============================================
-// FUNCTIONS
-// ============================================
 function addCustomFunction(){
     let name=prompt("Function name:"); if(!name) return;
     functions.push({ id:uid(), name, isBuiltin:false, returnType:'void', params:[], actions:[], isStatic:false, rpcMode:'none' });
@@ -195,9 +280,6 @@ function addParam(){ let fn=getActiveFn(); if(fn){ fn.params.push({id:uid(),name
 function removeParam(id){ let fn=getActiveFn(); if(fn) fn.params=fn.params.filter(p=>p.id!==id); renderEditor(); }
 function updateParam(pid,field,val){ let fn=getActiveFn(); let p=fn?.params.find(p=>p.id===pid); if(p) p[field]=val; }
 
-// ============================================
-// ACTIONS (WITH SMART VAR + METHOD/CALL/MATH)
-// ============================================
 function addAction(type='pass'){
     let fn=getActiveFn(); if(!fn) return;
     let last=fn.actions[fn.actions.length-1];
@@ -218,7 +300,6 @@ function updateAction(id,field,val){ let fn=getActiveFn(); let a=fn?.actions.fin
 function moveAction(id,dir){ let fn=getActiveFn(); let idx=fn?.actions.findIndex(a=>a.id===id); if(idx!==undefined){ let nxt=idx+dir; if(nxt>=0 && nxt<fn.actions.length){ [fn.actions[idx],fn.actions[nxt]]=[fn.actions[nxt],fn.actions[idx]]; renderEditor(); } } }
 function changeIndent(id,delta){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===id); if(a){ a.indent=Math.max(0,Math.min(8,(a.indent||0)+delta)); renderEditor(); } }
 
-// Conditions for if/while
 function buildCondStr(condArray){
     if(!condArray.length) return 'true';
     return condArray.map((c,i)=>{
@@ -234,13 +315,11 @@ function updateCond(aid,cid,field,val){ let fn=getActiveFn(); let a=fn?.actions.
 function toggleCondNot(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let c=a?.conditions.find(c=>c.id===cid); if(c) c.not=!c.not; renderEditor(); }
 function toggleCondOp(aid,cid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let idx=a?.conditions.findIndex(c=>c.id===cid); if(idx>0){ a.conditions[idx-1].op = a.conditions[idx-1].op==='and'?'or':'and'; renderEditor(); } }
 
-// Match patterns
 function addMatchPattern(aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a?.type==='match'){ a.patterns.push({id:uid(),values:['new'],isDefault:false,actions:[]}); renderEditor(); } }
 function addPatternValue(pid,aid,val){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p && val.trim()){ p.values=val.split(',').map(v=>v.trim()); renderEditor(); } }
 function addPatternAction(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); let p=a?.patterns.find(p=>p.id===pid); if(p){ p.actions.push({id:uid(),type:'pass',value:'',indent:2}); renderEditor(); } }
 function removePattern(pid,aid){ let fn=getActiveFn(); let a=fn?.actions.find(a=>a.id===aid); if(a?.patterns?.length>1){ a.patterns=a.patterns.filter(p=>p.id!==pid); renderEditor(); } }
 
-// SMART genLine with var formatting and new action types
 function genLine(a){
     if(a.type==='raw') return a.value;
     if(a.type==='comment') return `# ${a.value}`;
@@ -268,9 +347,6 @@ function genLine(a){
     return 'pass';
 }
 
-// ============================================
-// GENERATE FINAL GDScript
-// ============================================
 function generateAll(){
     let blocks=[];
     let cn=document.getElementById('classNameInput').value.trim();
@@ -322,17 +398,14 @@ function highlight(code){
     let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     h=h.replace(/(#.*$)/gm,'<span class="cmt">$1</span>');
     h=h.replace(/"[^"]*"/g,'<span class="str">$&</span>');
-    h=h.replace(/\b(func|var|const|if|for|while|match|return|pass|enum|signal|class_name|extends|@export|@onready|@tool|await|assert)\b/g,'<span class="kw">$1</span>');
+    h=h.replace(/\b(func|var|const|if|for|while|match|return|pass|enum|signal|class_name|extends|@export|@onready|@tool|await|assert|@rpc)\b/g,'<span class="kw">$1</span>');
     h=h.replace(/@\w+/g,'<span class="ann">$&</span>');
-    h=h.replace(/\b(CharacterBody3D|Vector3|Vector2|Node3D|Area3D|AnimationPlayer|int|float|String|bool|void|Node)\b/g,'<span class="ty">$1</span>');
+    h=h.replace(/\b(CharacterBody3D|CharacterBody2D|Vector3|Vector2|Node3D|Area3D|AnimationPlayer|int|float|String|bool|void|Node|InputEvent)\b/g,'<span class="ty">$1</span>');
     return h;
 }
 function copyCode(){ navigator.clipboard.writeText(_lastGeneratedCode); alert("Copied!"); }
 function updateStatus(){ document.getElementById('funcCount').innerText = `${functions.length} functions · ${functions.reduce((s,f)=>s+f.actions.length,0)} actions`; }
 
-// ============================================
-// RENDER UI (WITH ALL ACTION TYPES)
-// ============================================
 function renderTabs(){
     let bar=document.getElementById('funcTabBar');
     let opts=''; for(let [key,def] of Object.entries(BUILTIN_TYPES)) if(!builtInAdded[key]) opts+=`<option value="${key}">${def.name}</option>`;
@@ -356,35 +429,49 @@ function renderEditor(){
     </div>`).join('')}<button class="add-btn" onclick="addParam()">+ Parameter</button></div>`;
     
     let actionsHtml = fn.actions.map(a => {
+        // Helper to add doc button next to relevant inputs
+        let docBtn = (fieldValue, inputHtml) => {
+            return `<div style="display:inline-flex;align-items:center;gap:4px;">${inputHtml}<button class="doc-btn" onclick="showDocFor('${fieldValue.replace(/'/g, "\\'")}', event)">📖 Doc</button></div>`;
+        };
+        
         if(a.type==='match') {
             let patternsHtml = (a.patterns||[]).map(p=>`<div style="margin-left:20px;margin-top:5px"><input placeholder="values (comma)" value="${p.values.join(',')}" onchange="addPatternValue(${p.id},${a.id},this.value)" style="width:150px"><button onclick="addPatternAction(${p.id},${a.id})">+act</button><button onclick="removePattern(${p.id},${a.id})">🗑</button><div>${(p.actions||[]).map(act=>`<div>📌 ${genLine(act)} <button onclick="removeAction(${act.id})">✕</button></div>`).join('')}</div></div>`).join('');
-            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>match</option><option>if</option><option>for</option><option>pass</option></select><input placeholder="expression" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px"><div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addMatchPattern(${a.id})">+Pattern</button><button onclick="removeAction(${a.id})">🗑</button>${patternsHtml}</div>`;
+            return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>match</option><option>if</option><option>for</option><option>pass</option></select>${docBtn('match', `<input placeholder="expression" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px">`)}<div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addMatchPattern(${a.id})">+Pattern</button><button onclick="removeAction(${a.id})">🗑</button>${patternsHtml}</div>`;
         }
         if(a.type==='if' || a.type==='while') {
-            let condHtml = (a.conditions||[]).map((c,i)=>`<div class="cond-row">${i>0?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})">${(a.conditions[i-1].op||'and').toUpperCase()}</button>`:''}<button onclick="toggleCondNot(${a.id},${c.id})" style="background:${c.not?'var(--blue-dim)':'var(--bg2)'}">not</button><input placeholder="left" value="${esc(c.left)}" onchange="updateCond(${a.id},${c.id},'left',this.value)" style="width:100px"><select onchange="updateCond(${a.id},${c.id},'cmp',this.value)" style="min-width:55px"><option value="">cmp</option><option ${c.cmp==='=='?'selected':''} value="==">==</option><option ${c.cmp==='!='?'selected':''} value="!=">!=</option><option ${c.cmp==='<'?'selected':''} value="<">&lt;</option><option ${c.cmp==='>'?'selected':''} value=">">&gt;</option><option ${c.cmp==='<='?'selected':''} value="<=">&lt;=</option><option ${c.cmp==='>='?'selected':''} value=">=">&gt;=</option></select><input placeholder="right" value="${esc(c.right)}" onchange="updateCond(${a.id},${c.id},'right',this.value)" style="width:100px"><button onclick="removeCondRow(${a.id},${c.id})">✕</button></div>`).join('');
+            let condHtml = (a.conditions||[]).map((c,i)=>`<div class="cond-row">${i>0?`<button class="cond-op" onclick="toggleCondOp(${a.id},${c.id})">${(a.conditions[i-1].op||'and').toUpperCase()}</button>`:''}<button onclick="toggleCondNot(${a.id},${c.id})" style="background:${c.not?'var(--blue-dim)':'var(--bg2)'}">not</button>${docBtn(c.left, `<input placeholder="left" value="${esc(c.left)}" onchange="updateCond(${a.id},${c.id},'left',this.value)" style="width:100px">`)}<select onchange="updateCond(${a.id},${c.id},'cmp',this.value)" style="min-width:55px"><option value="">cmp</option><option ${c.cmp==='=='?'selected':''} value="==">==</option><option ${c.cmp==='!='?'selected':''} value="!=">!=</option><option ${c.cmp==='<'?'selected':''} value="<">&lt;</option><option ${c.cmp==='>'?'selected':''} value=">">&gt;</option><option ${c.cmp==='<='?'selected':''} value="<=">&lt;=</option><option ${c.cmp==='>='?'selected':''} value=">=">&gt;=</option></select>${docBtn(c.right, `<input placeholder="right" value="${esc(c.right)}" onchange="updateCond(${a.id},${c.id},'right',this.value)" style="width:100px">`)}<button onclick="removeCondRow(${a.id},${c.id})">✕</button></div>`).join('');
             return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button><select onchange="updateAction(${a.id},'type',this.value)"><option>if</option><option>while</option><option>pass</option></select><div><button onclick="changeIndent(${a.id},-1)">◀</button>${a.indent||0}<button onclick="changeIndent(${a.id},1)">▶</button></div><button onclick="addCondRow(${a.id})">+ AND/OR</button><button onclick="removeAction(${a.id})">🗑</button>${condHtml}</div>`;
         }
-        // For other action types: pass, raw, comment, var, assign, call, method, math, return, print, await, assert
+        
         let inputField = '';
         if(a.type === 'method') {
-            inputField = `<input placeholder="object" value="${esc(a.object)}" onchange="updateAction(${a.id},'object',this.value)" style="width:100px">
-                         <input placeholder="method" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px">`;
+            inputField = `<div style="display:inline-flex;gap:4px;flex-wrap:wrap;">${docBtn(a.object, `<input placeholder="object" value="${esc(a.object)}" onchange="updateAction(${a.id},'object',this.value)" style="width:100px">`)}${docBtn(a.value, `<input placeholder="method" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="width:120px">`)}</div>`;
         } else if(a.type === 'math') {
-            inputField = `<input placeholder="left" value="${esc(a.left)}" onchange="updateAction(${a.id},'left',this.value)" style="width:80px">
-                         <select onchange="updateAction(${a.id},'op',this.value)" style="width:60px"><option>+</option><option>-</option><option>*</option><option>/</option></select>
-                         <input placeholder="right" value="${esc(a.right)}" onchange="updateAction(${a.id},'right',this.value)" style="width:80px">`;
+            inputField = `<div style="display:inline-flex;gap:4px;flex-wrap:wrap;">${docBtn(a.left, `<input placeholder="left" value="${esc(a.left)}" onchange="updateAction(${a.id},'left',this.value)" style="width:80px">`)}<select onchange="updateAction(${a.id},'op',this.value)" style="width:60px"><option>+</option><option>-</option><option>*</option><option>/</option></select>${docBtn(a.right, `<input placeholder="right" value="${esc(a.right)}" onchange="updateAction(${a.id},'right',this.value)" style="width:80px">`)}</div>`;
         } else if(a.type === 'var') {
-            inputField = `<input placeholder="var name" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">
-                         <input placeholder="= value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+            inputField = `<div style="display:inline-flex;gap:4px;flex-wrap:wrap;">${docBtn(a.name, `<input placeholder="var name" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">`)}${docBtn(a.value, `<input placeholder="= value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1;min-width:150px">`)}</div>`;
         } else if(a.type === 'assign') {
-            inputField = `<input placeholder="target" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">
-                         <input placeholder="= value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+            inputField = `<div style="display:inline-flex;gap:4px;flex-wrap:wrap;">${docBtn(a.name, `<input placeholder="target" value="${esc(a.name)}" onchange="updateAction(${a.id},'name',this.value)" style="width:120px">`)} = ${docBtn(a.value, `<input placeholder="value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1;min-width:150px">`)}</div>`;
         } else if(a.type === 'call') {
-            inputField = `<input placeholder="function name" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">()`;
+            inputField = docBtn(a.value, `<input placeholder="function name" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1;min-width:150px">`) + `()`;
+        } else if(a.type === 'await') {
+            inputField = docBtn(a.value, `<input placeholder="signal/timer" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
+        } else if(a.type === 'assert') {
+            inputField = docBtn(a.value, `<input placeholder="condition" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
+        } else if(a.type === 'return') {
+            inputField = docBtn(a.value, `<input placeholder="value (optional)" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
+        } else if(a.type === 'print') {
+            inputField = docBtn(a.value, `<input placeholder="text/variable" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
+        } else if(a.type === 'raw') {
+            inputField = `<input placeholder="raw GDScript" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+        } else if(a.type === 'comment') {
+            inputField = `<input placeholder="comment text" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+        } else if(a.type === 'for') {
+            inputField = docBtn(a.value, `<input placeholder="item in array" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
         } else {
-            let placeholder = (a.type === 'await' ? 'signal/timer' : (a.type === 'assert' ? 'condition' : (a.type === 'return' ? 'value' : (a.type === 'print' ? 'text' : 'value'))));
-            inputField = `<input placeholder="${placeholder}" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`;
+            inputField = docBtn(a.value, `<input placeholder="value" value="${esc(a.value)}" onchange="updateAction(${a.id},'value',this.value)" style="flex:1">`);
         }
+        
         return `<div class="action-row"><button onclick="moveAction(${a.id},-1)">▲</button><button onclick="moveAction(${a.id},1)">▼</button>
                 <select onchange="updateAction(${a.id},'type',this.value)"><option>pass</option><option>raw</option><option>comment</option><option>var</option><option>assign</option><option>call</option><option>method</option><option>math</option><option>return</option><option>print</option><option>for</option><option>if</option><option>match</option><option>await</option><option>assert</option></select>
                 ${inputField}
@@ -406,12 +493,11 @@ function renderEditor(){
         <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('raw')">+ Raw</button>
         <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('await')">+ Await</button>
         <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('assert')">+ Assert</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('for')">+ For</button>
+        <button class="add-btn" style="width:auto;display:inline-block;margin:2px" onclick="addAction('comment')">+ Comment</button>
         </div><div style="margin-top:12px">${actionsHtml || '<div class="empty-hint">No actions. Click + to add.</div>'}</div></div>`;
 }
 
-// ============================================
-// INIT
-// ============================================
 const SAMPLE = `# SAMPLE: Player Controller
 extends CharacterBody3D
 
@@ -445,6 +531,7 @@ renderClassVars(); renderEnumsUI(); renderTabs(); renderEditor(); updateStatus()
 
 document.querySelectorAll('.sec-hdr').forEach(hdr => hdr.addEventListener('click', () => toggleSec(hdr)));
 
+// Expose globals for inline handlers
 window.toggleSec = toggleSec; window.addClassVar = addClassVar; window.removeCV = removeCV; window.updateCV = updateCV;
 window.openEnumModal = openEnumModal; window.editEnum = editEnum; window.removeEnum = removeEnum;
 window.toggleEnumExport = toggleEnumExport; window.toggleEnumAutoMatch = toggleEnumAutoMatch;
@@ -458,6 +545,7 @@ window.toggleCondNot = toggleCondNot; window.toggleCondOp = toggleCondOp;
 window.addMatchPattern = addMatchPattern; window.addPatternValue = addPatternValue;
 window.addPatternAction = addPatternAction; window.removePattern = removePattern;
 window.generateAll = generateAll; window.copyCode = copyCode;
+window.showDocFor = showDocFor;
 </script>
 </body>
 </html>
