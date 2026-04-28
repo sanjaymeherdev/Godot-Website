@@ -1029,33 +1029,7 @@
     popup.style.display = 'block';
     localStorage.setItem(POPUP_KEY, 'true');
   }
-      /* ── Lazy load YouTube video on click ── */
-    function lazyLoadVideo(placeholder) {
-        const videoId = placeholder.getAttribute('data-video-id');
-        if (!videoId) return;
-        
-        // Create iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-        iframe.setAttribute('allowfullscreen', 'true');
-        
-        // Clear placeholder and insert iframe
-        placeholder.innerHTML = '';
-        placeholder.style.padding = '0';
-        placeholder.style.position = 'relative';
-        placeholder.style.paddingBottom = '56.25%'; // 16:9 aspect ratio
-        placeholder.appendChild(iframe);
-        
-        // Remove the onclick to prevent double-loading
-        placeholder.onclick = null;
-    }
+
   function hidePopup() {
     popup.style.display = 'none';
     if (timeoutId) clearTimeout(timeoutId);
@@ -1318,7 +1292,33 @@
             document.getElementById('panel-' + this.dataset.panel).classList.add('active');
         });
     });
-
+      /* ── Lazy load YouTube video on click ── */
+    function lazyLoadVideo(placeholder) {
+        const videoId = placeholder.getAttribute('data-video-id');
+        if (!videoId) return;
+        
+        // Create iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', 'true');
+        
+        // Clear placeholder and insert iframe
+        placeholder.innerHTML = '';
+        placeholder.style.padding = '0';
+        placeholder.style.position = 'relative';
+        placeholder.style.paddingBottom = '56.25%'; // 16:9 aspect ratio
+        placeholder.appendChild(iframe);
+        
+        // Remove the onclick to prevent double-loading
+        placeholder.onclick = null;
+    }
     /* ── Video placeholder — KEEP AS IS ── */
     function playVideo() {
         window.open('https://youtube.com/your-video-id', '_blank');
