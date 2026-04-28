@@ -35,6 +35,23 @@
             font-weight: bold;
             font-size: 0.95rem;
         }
+        .video-placeholder {
+    background: rgba(0,0,0,0.5);
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.video-placeholder iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
         .hero-stats {
             display: flex;
             gap: 2rem;
@@ -805,7 +822,7 @@
             <h2 class="section-title">⚡ Real Systems. Real Projects.</h2>
             <p class="section-subtitle">Everything you see was built and used in actual games — not demos.</p>
             <div class="video-wrap">
-                <div class="video-placeholder" onclick="playVideo()">
+                <div class="video-placeholder" data-video-id="1KlGyhSuNI4" onclick="lazyLoadVideo(this)">
                     <div class="play-btn">▶</div>
                     <div class="video-label">Car MP + AI Zombies + BR Gameplay</div>
                 </div>
@@ -1012,7 +1029,33 @@
     popup.style.display = 'block';
     localStorage.setItem(POPUP_KEY, 'true');
   }
-  
+      /* ── Lazy load YouTube video on click ── */
+    function lazyLoadVideo(placeholder) {
+        const videoId = placeholder.getAttribute('data-video-id');
+        if (!videoId) return;
+        
+        // Create iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', 'true');
+        
+        // Clear placeholder and insert iframe
+        placeholder.innerHTML = '';
+        placeholder.style.padding = '0';
+        placeholder.style.position = 'relative';
+        placeholder.style.paddingBottom = '56.25%'; // 16:9 aspect ratio
+        placeholder.appendChild(iframe);
+        
+        // Remove the onclick to prevent double-loading
+        placeholder.onclick = null;
+    }
   function hidePopup() {
     popup.style.display = 'none';
     if (timeoutId) clearTimeout(timeoutId);
