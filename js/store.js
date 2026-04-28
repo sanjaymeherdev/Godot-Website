@@ -23,7 +23,7 @@ const SECTION_CONFIG = [
 let allProducts     = [];
 let filteredProducts = [];
 let currentCategory  = 'all';
-let currentSubcategory = 'all';
+let currentSubcategory = 'live';
 let currentSearch    = '';
 let currentCurrency  = 'inr';
 let appliedCoupon    = null;
@@ -335,14 +335,20 @@ function setupSubcategoryButtons() {
         });
     });
 }
-
+const liveButton = document.querySelector('.subcategory-btn[data-subcategory="live"]');
+    if (liveButton) {
+        liveButton.classList.add('active');
+    }
+}
 function updateSubcategoryButtons() {
     document.querySelectorAll('.subcategory-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.subcategory === 'all') btn.classList.add('active');
+        // Set live as active instead of all
+        if (btn.dataset.subcategory === currentSubcategory) {
+            btn.classList.add('active');
+        }
     });
 }
-
 // ── Category → type mapping ──
 const CATEGORY_TYPE_MAP = {
     'bundle':    ['bundle'],
@@ -356,7 +362,7 @@ function filterProducts() {
     let filtered = [...allProducts];
 
     // Category filter
-    if (currentCategory !== 'live') {
+    if (currentCategory !== 'all') {
         const types = CATEGORY_TYPE_MAP[currentCategory] || [];
         filtered = filtered.filter(p => types.includes(p.type));
     }
