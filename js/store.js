@@ -23,7 +23,7 @@ const SECTION_CONFIG = [
 let allProducts     = [];
 let filteredProducts = [];
 let currentCategory  = 'all';
-let currentSubcategory = 'live';
+let currentSubcategory = 'all';
 let currentSearch    = '';
 let currentCurrency  = 'inr';
 let appliedCoupon    = null;
@@ -335,20 +335,14 @@ function setupSubcategoryButtons() {
         });
     });
 }
-const liveButton = document.querySelector('.subcategory-btn[data-subcategory="live"]');
-    if (liveButton) {
-        liveButton.classList.add('active');
-    }
-}
+
 function updateSubcategoryButtons() {
     document.querySelectorAll('.subcategory-btn').forEach(btn => {
         btn.classList.remove('active');
-        // Set live as active instead of all
-        if (btn.dataset.subcategory === currentSubcategory) {
-            btn.classList.add('active');
-        }
+        if (btn.dataset.subcategory === 'all') btn.classList.add('active');
     });
 }
+
 // ── Category → type mapping ──
 const CATEGORY_TYPE_MAP = {
     'bundle':    ['bundle'],
