@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Store System – Setup Guide | CGGodotAssets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --accent: #00d9ff;
+            --dark: #0a0a0f;
+            --secondary: #111118;
+            --card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #e8e8f0;
+            --muted: #888899;
+            --success: #00e676;
+            --warning: #ffab40;
+            --danger: #ff5252;
+            --info: #40c4ff;
+            --code-bg: #0d0d14;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Syne', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: var(--font-display);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        header nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 1.5rem;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            color: white;
+            text-decoration: none;
+        }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: white; }
+        .cta-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .cta-button:hover { opacity: 0.88; }
+
+        /* Hero */
+        .guide-hero {
+            padding: 130px 2rem 70px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .guide-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,107,53,0.12);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .guide-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.2rem;
+        }
+        .guide-hero h1 span { color: var(--primary); }
+        .guide-subtitle {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 620px;
+            margin: 0 auto 2.5rem;
+        }
+
+        /* Layout */
+        .guide-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem 6rem;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .guide-wrap { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 84px;
+        }
+        .sidebar-nav {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .sidebar-nav h4 {
+            padding: 1rem 1.2rem 0.8rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-nav ul { list-style: none; padding: 0.6rem 0; }
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 1.2rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .sidebar-nav li a:hover,
+        .sidebar-nav li a.active {
+            color: white;
+            background: rgba(255,107,53,0.08);
+            border-right: 2px solid var(--primary);
+        }
+
+        /* Cards & Steps */
+        .step-section { margin-bottom: 4rem; scroll-margin-top: 84px; }
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .step-num {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-header h2 { font-size: 1.4rem; font-weight: 800; }
+        .step-header h2 span { color: var(--accent); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        /* Callouts */
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: 10px;
+            margin: 1.2rem 0;
+        }
+        .callout.warning { background: rgba(255,171,64,0.08); border: 1px solid rgba(255,171,64,0.25); }
+        .callout.danger  { background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.25); }
+        .callout.success { background: rgba(0,230,118,0.07); border: 1px solid rgba(0,230,118,0.2); }
+        .callout.info    { background: rgba(64,196,255,0.07); border: 1px solid rgba(64,196,255,0.2); }
+        .callout-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .callout.warning .callout-icon { color: var(--warning); }
+        .callout.danger .callout-icon { color: var(--danger); }
+        .callout.success .callout-icon { color: var(--success); }
+        .callout.info .callout-icon { color: var(--info); }
+
+        /* Code Blocks */
+        .code-wrap {
+            background: var(--code-bg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1.2rem 0;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .code-filename {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.06);
+            border: none;
+            color: var(--muted);
+            font-size: 0.72rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+        pre {
+            padding: 1.2rem 1.4rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            line-height: 1.65;
+            color: #cdd6f4;
+        }
+        .kw  { color: #cba6f7; }
+        .fn  { color: #89b4fa; }
+        .str { color: #a6e3a1; }
+        .cm  { color: #585b70; }
+        .num { color: #fab387; }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .steps-list li {
+            counter-increment: step-counter;
+            display: flex;
+            gap: 1rem;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .steps-list li::before {
+            content: counter(step-counter);
+            min-width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: rgba(255,107,53,0.15);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2rem 0;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 2.5rem 2rem;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="#" class="logo">CG<span>GodotAssets</span></a>
+        <div class="nav-links">
+            <a href="#">Store</a>
+            <a href="#">Docs</a>
+            <a href="#">Support</a>
+        </div>
+        <a href="#" class="cta-button">Get the System →</a>
+    </nav>
+</header>
+
+<section class="guide-hero">
+    <div class="hero-badge">📖 COMPLETE SETUP GUIDE</div>
+    <h1>Asset Store System<br>for <span>Godot 4</span></h1>
+    <p class="guide-subtitle">
+        Dual payment providers (Razorpay + PayPal) • Auto redeem codes • Email delivery • In-game redemption
+    </p>
+</section>
+
+<div class="guide-wrap">
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <h4>CONTENTS</h4>
+            <ul>
+                <li><a href="#disclaimer">⚠️ Disclaimer</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#database">Database Setup</a></li>
+                <li><a href="#edge">Edge Function</a></li>
+                <li><a href="#frontend">Frontend Setup</a></li>
+                <li><a href="#godot">Godot Integration</a></li>
+                <li><a href="#payments">Payment Providers</a></li>
+                <li><a href="#testing">Testing Guide</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <!-- DISCLAIMER -->
+        <section class="step-section" id="disclaimer">
+            <div class="step-header">
+                <div class="step-num">⚠️</div>
+                <h2>Security <span>Disclaimer</span></h2>
+            </div>
+            <div class="callout danger">
+                <span class="callout-icon">⚠️</span>
+                <div>
+                    <strong>SECURITY NOTICE</strong><br>
+                    This software is provided "AS IS" without warranty. The user assumes all responsibility for security implementation including: securing Supabase (RLS policies, API keys), protecting payment provider secrets, implementing rate limiting, validating user inputs, and GDPR compliance. <strong>Security is NOT the responsibility of the author.</strong>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- ARCHITECTURE -->
+        <section class="step-section" id="architecture">
+            <div class="step-header">
+                <div class="step-num">1</div>
+                <h2>System <span>Architecture</span></h2>
+            </div>
+            <div class="card">
+                <h3>How It Works</h3>
+                <div class="code-wrap">
+                    <pre><span class="cm">┌─────────────┐    ┌─────────────┐    ┌─────────────┐</span>
+<span class="cm">│   Website   │───▶│   Edge      │───▶│  Razorpay/  │</span>
+<span class="cm">│  (Products) │    │  Function   │    │   PayPal    │</span>
+<span class="cm">└─────────────┘    └─────────────┘    └─────────────┘</span>
+                          │                    │
+                          ▼                    ▼
+<span class="cm">┌─────────────┐    ┌─────────────┐    ┌─────────────┐</span>
+<span class="cm">│   Godot     │◀───│  Redeem     │◀───│  Email +    │</span>
+<span class="cm">│   Game      │    │  Codes DB   │    │  Redeem Code│</span>
+<span class="cm">└─────────────┘    └─────────────┘    └─────────────┘</span></pre>
+                </div>
+                <p>User buys → Payment processed → Redeem code generated → Email sent → Godot validates code → Product unlocked</p>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- DATABASE -->
+        <section class="step-section" id="database">
+            <div class="step-header">
+                <div class="step-num">2</div>
+                <h2>Database <span>Setup</span></h2>
+            </div>
+            <div class="card">
+                <h3>Create the `redeem_codes` table</h3>
+                <div class="code-wrap">
+                    <div class="code-header">
+                        <span class="code-filename">Supabase SQL Editor</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><span class="kw">CREATE TABLE</span> <span class="fn">public.redeem_codes</span> (
+  <span class="kw">id</span> <span class="fn">uuid</span> <span class="kw">PRIMARY KEY</span> <span class="kw">DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  <span class="kw">code</span> <span class="fn">varchar</span>(6) <span class="kw">UNIQUE</span>,
+  <span class="kw">email</span> <span class="fn">text</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">product_id</span> <span class="fn">text</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">product_name</span> <span class="fn">text</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">payment_provider</span> <span class="fn">text</span> <span class="kw">CHECK</span> (<span class="kw">payment_provider</span> <span class="kw">IN</span> (<span class="str">'razorpay'</span>, <span class="str">'paypal'</span>)),
+  <span class="kw">payment_provider_id</span> <span class="fn">text</span>,
+  <span class="kw">amount</span> <span class="fn">numeric</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">currency</span> <span class="fn">text</span> <span class="kw">NOT NULL</span> <span class="kw">CHECK</span> (<span class="kw">currency</span> <span class="kw">IN</span> (<span class="str">'INR'</span>, <span class="str">'USD'</span>)),
+  <span class="kw">payment_status</span> <span class="fn">text</span> <span class="kw">DEFAULT</span> <span class="str">'pending'</span>,
+  <span class="kw">used</span> <span class="fn">boolean</span> <span class="kw">DEFAULT</span> <span class="kw">false</span>,
+  <span class="kw">used_at</span> <span class="fn">timestamptz</span>,
+  <span class="kw">created_at</span> <span class="fn">timestamptz</span> <span class="kw">DEFAULT</span> <span class="fn">now</span>(),
+  <span class="kw">updated_at</span> <span class="fn">timestamptz</span> <span class="kw">DEFAULT</span> <span class="fn">now</span>()
+);
+
+<span class="kw">CREATE INDEX</span> <span class="fn">idx_redeem_codes_code</span> <span class="kw">ON</span> <span class="fn">redeem_codes</span>(<span class="kw">code</span>);
+<span class="kw">CREATE INDEX</span> <span class="fn">idx_redeem_codes_email</span> <span class="kw">ON</span> <span class="fn">redeem_codes</span>(<span class="kw">email</span>);</pre>
+                </div>
+                <div class="callout warning">
+                    <span class="callout-icon">⚠️</span>
+                    <div>Your existing `products` table should have: `uuid`, `itemid`, `itemname`, `price`, `type`, `category`, `texture`</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- EDGE FUNCTION -->
+        <section class="step-section" id="edge">
+            <div class="step-header">
+                <div class="step-num">3</div>
+                <h2>Edge Function <span>(gamestore-redeem)</span></h2>
+            </div>
+            <div class="card">
+                <h3>Deploy to Supabase</h3>
+                <div class="code-wrap">
+                    <div class="code-header">
+                        <span class="code-filename">Terminal</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><span class="cm"># Deploy the edge function</span>
+supabase functions deploy gamestore-redeem
+
+<span class="cm"># Set required secrets</span>
+supabase secrets set RP_LIVE_API=your_razorpay_key_id
+supabase secrets set RP_LIVE_SECRET=your_razorpay_secret
+supabase secrets set PP_LIVE_API=your_paypal_client_id
+supabase secrets set PP_LIVE_SECRET=your_paypal_secret
+supabase secrets set RESEND_API_KEY=your_resend_key</pre>
+                </div>
+                <div class="callout success">
+                    <span class="callout-icon">✅</span>
+                    <div>The edge function handles 3 actions: <strong>createPayment</strong> (Razorpay/PayPal), <strong>pollStatus</strong> (check payment), <strong>redeem</strong> (Godot validation)</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- FRONTEND -->
+        <section class="step-section" id="frontend">
+            <div class="step-header">
+                <div class="step-num">4</div>
+                <h2>Frontend <span>Setup</span></h2>
+            </div>
+            <div class="card">
+                <h3>Update Configuration</h3>
+                <div class="code-wrap">
+                    <div class="code-header">
+                        <span class="code-filename">index.html → JavaScript</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><span class="cm">// Replace these with your actual values</span>
+<span class="kw">const</span> <span class="fn">SUPABASE_URL</span> = <span class="str">'https://your-project.supabase.co'</span>;
+<span class="kw">const</span> <span class="fn">SUPABASE_ANON_KEY</span> = <span class="str">'your-anon-key-here'</span>;
+<span class="kw">const</span> <span class="fn">EDGE_FUNCTION_URL</span> = <span class="str">`${SUPABASE_URL}/functions/v1/gamestore-redeem`</span>;
+
+<span class="cm">// Currency conversion (INR to USD)</span>
+<span class="kw">const</span> <span class="fn">INR_TO_USD_RATE</span> = <span class="num">85</span>;</pre>
+                </div>
+                <div class="callout info">
+                    <span class="callout-icon">ℹ️</span>
+                    <div>Find your anon key: Supabase Dashboard → Project Settings → API → Project API Keys → `anon public`</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- GODOT INTEGRATION -->
+        <section class="step-section" id="godot">
+            <div class="step-header">
+                <div class="step-num">5</div>
+                <h2>Godot <span>Integration</span></h2>
+            </div>
+            <div class="card">
+                <h3>Redeem Code Script</h3>
+                <div class="code-wrap">
+                    <div class="code-header">
+                        <span class="code-filename">redeem.gd</span>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><span class="kw">extends</span> <span class="fn">Node</span>
+
+<span class="kw">const</span> <span class="fn">EDGE_URL</span> = <span class="str">"https://your-project.supabase.co/functions/v1/gamestore-redeem"</span>
+
+<span class="kw">func</span> <span class="fn">redeem_product</span>(email: <span class="kw">String</span>, code: <span class="kw">String</span>, product_id: <span class="kw">String</span>):
+    <span class="kw">var</span> http = <span class="fn">HTTPRequest</span>.<span class="fn">new</span>()
+    <span class="fn">add_child</span>(http)
+    
+    <span class="kw">var</span> body = <span class="fn">JSON</span>.<span class="fn">stringify</span>({
+        <span class="str">"action"</span>: <span class="str">"redeem"</span>,
+        <span class="str">"email"</span>: email,
+        <span class="str">"code"</span>: code,
+        <span class="str">"product_id"</span>: product_id
+    })
+    
+    <span class="kw">var</span> headers = [<span class="str">"Content-Type: application/json"</span>]
+    http.<span class="fn">request</span>(EDGE_URL, headers, <span class="fn">HTTPClient</span>.<span class="fn">METHOD_POST</span>, body)
+    http.<span class="fn">request_completed</span>.<span class="fn">connect</span>(<span class="fn">_on_redeem_completed</span>)
+
+<span class="kw">func</span> <span class="fn">_on_redeem_completed</span>(result, response_code, headers, body):
+    <span class="kw">var</span> json = <span class="fn">JSON</span>.<span class="fn">new</span>()
+    json.<span class="fn">parse</span>(body.<span class="fn">get_string_from_utf8</span>())
+    <span class="kw">var</span> response = json.<span class="kw">data</span>
+    
+    <span class="kw">if</span> response.<span class="kw">success</span>:
+        <span class="fn">print</span>(<span class="str">"✅ Unlocked: "</span>, response.<span class="kw">product_id</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="str">"❌ Failed: "</span>, response.<span class="kw">message</span>)</pre>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- PAYMENT PROVIDERS -->
+        <section class="step-section" id="payments">
+            <div class="step-header">
+                <div class="step-num">6</div>
+                <h2>Payment <span>Providers</span></h2>
+            </div>
+            <div class="card">
+                <h3>Razorpay (INR) & PayPal (USD) Setup</h3>
+                <div class="callout warning">
+                    <span class="callout-icon">⚠️</span>
+                    <div><strong>Razorpay:</strong> Enable "Payment Links" feature in dashboard. Create API keys (Live mode for production).</div>
+                </div>
+                <div class="callout warning">
+                    <span class="callout-icon">⚠️</span>
+                    <div><strong>PayPal:</strong> Create a REST API app in Developer Dashboard. Get Client ID and Secret. Enable webhooks with your edge function URL.</div>
+                </div>
+                <div class="callout success">
+                    <span class="callout-icon">✅</span>
+                    <div><strong>Resend (Email):</strong> Create API key. Verify your domain. Add `RESEND_API_KEY` and `RESEND_FROM_EMAIL` to secrets.</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- TESTING -->
+        <section class="step-section" id="testing">
+            <div class="step-header">
+                <div class="step-num">7</div>
+                <h2>Testing <span>Guide</span></h2>
+            </div>
+            <div class="card">
+                <h3>Test Flows</h3>
+                <ul class="steps-list">
+                    <li>Test with [TEST] mode on Razorpay/PayPal first</li>
+                    <li>Use test card numbers (Razorpay: 4111 1111 1111 1111, PayPal: buyer@personal.com)</li>
+                    <li>Verify redeem code appears in success popup</li>
+                    <li>Check email for delivery (Resend logs)</li>
+                    <li>Test Godot redemption with the received code</li>
+                    <li>Verify `redeem_codes` table shows `used: true` after redemption</li>
+                </ul>
+                <div class="callout danger">
+                    <span class="callout-icon">🚨</span>
+                    <div><strong>Before production:</strong> Swap test API keys for LIVE keys. Update all webhook URLs. Test with real small payments (₹10 / $1).</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="download-banner" style="background: linear-gradient(135deg, rgba(255,107,53,0.12) 0%, rgba(0,217,255,0.08) 100%); border: 1px solid rgba(255,107,53,0.3); border-radius: 16px; padding: 2.5rem; text-align: center; margin: 2rem 0;">
+            <h2 style="font-size: 1.6rem; margin-bottom: 0.8rem;">Get the Complete System</h2>
+            <p style="color: var(--muted); margin-bottom: 1.8rem;">Full source code: Edge function + HTML store page + Documentation</p>
+            <a href="#" class="cta-button" style="padding: 0.9rem 2.2rem;">Contact for Purchase →</a>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <p>© 2025 CGGodotAssets · Complete Asset Store System for Godot 4</p>
+    <p style="margin-top:0.4rem; opacity:0.5;">Razorpay and PayPal are trademarks of their respective owners. Godot is a trademark of the Godot Foundation.</p>
+</footer>
+
+<script>
+    function copyCode(btn) {
+        const pre = btn.closest('.code-wrap').querySelector('pre');
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        });
+    }
+
+    // Active sidebar link on scroll
+    const sections = document.querySelectorAll('.step-section');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                navLinks.forEach(a => a.classList.remove('active'));
+                const active = document.querySelector(`.sidebar-nav a[href="#${e.target.id}"]`);
+                if (active) active.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    sections.forEach(s => observer.observe(s));
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                window.scrollTo({ top: target.offsetTop - 84, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
