@@ -385,6 +385,12 @@
             100% { transform: rotate(360deg); }
         }
 
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: #ff6b35;
+        }
+
         @media (max-width: 768px) {
             .store-body {
                 flex-direction: column;
@@ -472,15 +478,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     // ============================================================
-    // CONFIGURATION
+    // CONFIGURATION - UPDATE THESE!
     // ============================================================
     const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'; // REPLACE THIS
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';  // ← REPLACE THIS
     
     const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/gamestore-redeem`;
     const INR_TO_USD_RATE = 85;
     
-    let supabase;
+    let supabaseClient;
     let allProducts = [];
     let currentCurrency = 'INR';
     let currentCategory = 'all';
@@ -492,21 +498,73 @@
     // INITIALIZE
     // ============================================================
     async function init() {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        await fetchProducts();
-        setupEventListeners();
-        checkPaymentReturn();
+        // Check if Supabase is configured
+        if (SUPABASE_ANON_KEY === 'YOUR_ANON_KEY_HERE') {
+            document.getElementById('productsContainer').innerHTML = `
+                <div class="error-message">
+                    <h3>⚠️ Configuration Required</h3>
+                    <p>Please update SUPABASE_ANON_KEY in the JavaScript section.</p>
+                    <p style="margin-top: 1rem; font-size: 0.8rem;">Find your anon key in Supabase Dashboard → Project Settings → API</p>
+                </div>
+            `;
+            return;
+        }
+        
+        try {
+            // Initialize Supabase client
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Test connection
+            const { error: testError } = await supabaseClient.from('products').select('count', { count: 'exact', head: true });
+            if (testError) {
+                throw new Error(`Supabase connection failed: ${testError.message}`);
+            }
+            
+            await fetchProducts();
+            setupEventListeners();
+            checkPaymentReturn();
+        } catch (err) {
+            console.error('Init error:', err);
+            document.getElementById('productsContainer').innerHTML = `
+                <div class="error-message">
+                    <h3>❌ Failed to Load Products</h3>
+                    <p>${err.message}</p>
+                    <p style="margin-top: 1rem; font-size: 0.8rem;">Check that your products table exists and has data.</p>
+                </div>
+            `;
+        }
     }
     
     async function fetchProducts() {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('type', { ascending: true });
-        
-        if (!error && data) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('products')
+                .select('*')
+                .order('type', { ascending: true })
+                .order('itemname', { ascending: true });
+            
+            if (error) throw error;
+            
+            if (!data || data.length === 0) {
+                document.getElementById('productsContainer').innerHTML = `
+                    <div class="error-message">
+                        <h3>📦 No Products Found</h3>
+                        <p>Your products table is empty. Add some products first!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             allProducts = data;
             renderProducts();
+        } catch (err) {
+            console.error('Fetch error:', err);
+            document.getElementById('productsContainer').innerHTML = `
+                <div class="error-message">
+                    <h3>❌ Error Loading Products</h3>
+                    <p>${err.message}</p>
+                </div>
+            `;
         }
     }
     
@@ -528,19 +586,19 @@
         let html = '';
         
         if (outfits.length > 0) {
-            html += `<h2 style="margin: 1rem 0;">👗 Outfits & Characters</h2><div class="products-grid">`;
+            html += `<h2 style="margin: 1rem 0 1.5rem 0;">👗 Outfits & Characters</h2><div class="products-grid">`;
             outfits.forEach(p => html += renderProductCard(p));
             html += `</div>`;
         }
         
         if (guns.length > 0) {
-            html += `<h2 style="margin: 1rem 0;">🔫 Guns & Weapons</h2><div class="products-grid">`;
+            html += `<h2 style="margin: 2rem 0 1.5rem 0;">🔫 Guns & Weapons</h2><div class="products-grid">`;
             guns.forEach(p => html += renderProductCard(p));
             html += `</div>`;
         }
         
         if (filtered.length === 0) {
-            html = `<div class="loading"><p>No products found</p></div>`;
+            html = `<div class="loading"><p>No products match your filters</p></div>`;
         }
         
         document.getElementById('productsContainer').innerHTML = html;
@@ -558,20 +616,30 @@
             <div class="product-card">
                 <div style="position: relative;">
                     <div class="product-image">
-                        <img src="${imageUrl}" alt="${product.itemname}" onerror="this.src='https://placehold.co/400x300/2d1b69/ff6b35?text=Image+Error'">
+                        <img src="${imageUrl}" alt="${escapeHtml(product.itemname)}" onerror="this.src='https://placehold.co/400x300/2d1b69/ff6b35?text=Image+Error'">
                     </div>
                     <span class="badge" style="background: ${badgeColor};">${product.type}</span>
                 </div>
                 <div class="product-content">
-                    <div class="product-category">${product.category || 'Godot 4'}</div>
-                    <h3 class="product-title">${product.itemname}</h3>
+                    <div class="product-category">${escapeHtml(product.category || 'Godot 4')}</div>
+                    <h3 class="product-title">${escapeHtml(product.itemname)}</h3>
                     <div class="product-footer">
                         <div class="product-price">${displayPrice}</div>
-                        <button class="buy-btn" onclick="openPurchaseModal('${product.uuid}', '${product.itemname}', ${product.price})">Buy →</button>
+                        <button class="buy-btn" onclick="openPurchaseModal('${product.uuid}', '${escapeHtml(product.itemname)}', ${product.price})">Buy →</button>
                     </div>
                 </div>
             </div>
         `;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
     
     // ============================================================
@@ -581,6 +649,7 @@
         currentProduct = { id: productId, name: productName, price: priceInr };
         const displayPrice = currentCurrency === 'INR' ? `₹${priceInr}` : `$${(priceInr / INR_TO_USD_RATE).toFixed(2)}`;
         document.getElementById('modalProductInfo').innerHTML = `<strong>${productName}</strong><br>Amount: ${displayPrice} ${currentCurrency}`;
+        document.getElementById('customerEmail').value = '';
         document.getElementById('emailModal').classList.add('active');
     }
     
@@ -675,18 +744,18 @@
                         sessionStorage.removeItem('pendingPaymentId');
                         window.history.replaceState({}, document.title, window.location.pathname);
                         showSuccessPopup(data.redeem_code);
-                        renderProducts();
+                        fetchProducts();
                     } else if (attempts >= maxAttempts) {
                         clearInterval(pollInterval);
                         alert('Payment is being processed. You will receive an email shortly.');
                         sessionStorage.removeItem('pendingPaymentId');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        renderProducts();
+                        fetchProducts();
                     }
                 } catch (err) {
                     if (attempts >= maxAttempts) {
                         clearInterval(pollInterval);
-                        renderProducts();
+                        fetchProducts();
                     }
                 }
             }, 1000);
