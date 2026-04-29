@@ -1,30 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-19BMGCBK6C"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-19BMGCBK6C');
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store — CGGodotAssets | Production-Ready Godot 4 Systems</title>
-    <meta name="description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks. Indian & international payments.">
+    <meta name="description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks.">
     <link rel="canonical" href="https://cggodotassets.shop/cgstore">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Store — CGGodotAssets | Production-Ready Godot 4 Systems">
     <meta property="og:description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks.">
     <meta property="og:image" content="https://cggodotassets.shop/images/og-store.jpg">
     <meta property="og:url" content="https://cggodotassets.shop/cgstore">
-    <meta property="og:site_name" content="SanjayMeherDev">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Store — CGGodotAssets | Production-Ready Godot 4 Systems">
-    <meta name="twitter:description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks.">
-    <meta name="twitter:image" content="https://cggodotassets.shop/images/og-store.jpg">
-    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
     
     <style>
@@ -51,7 +37,7 @@
             padding: 0 20px;
         }
 
-        /* Header placeholder styles */
+        /* Header */
         .header-placeholder {
             background: rgba(0,0,0,0.95);
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -84,7 +70,7 @@
             color: var(--primary);
         }
 
-        /* Footer placeholder styles */
+        /* Footer */
         .footer-placeholder {
             background: var(--secondary);
             border-top: 1px solid rgba(255,255,255,0.07);
@@ -266,6 +252,7 @@
             justify-content: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             overflow: hidden;
+            position: relative;
         }
         .product-image img {
             width: 100%;
@@ -403,7 +390,7 @@
             letter-spacing: 0.05em; 
         }
 
-        /* Modal */
+        /* Email Modal (Payment) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -485,6 +472,7 @@
             color: white;
         }
         .modal-button-primary:hover { background: #e55a2b; }
+        .modal-button-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .modal-button-secondary {
             background: rgba(255,255,255,0.1);
             color: var(--light);
@@ -495,6 +483,119 @@
             color: #aaa; 
             margin-top: 1rem; 
             text-align: center; 
+        }
+
+        /* Success Popup (Redeem Code) */
+        .success-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .success-popup-overlay.active { display: flex; }
+        .success-popup {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 550px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .success-popup h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        .success-popup p {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .redeem-code-container {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255,107,53,0.3);
+        }
+        .redeem-code-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+        .redeem-code-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            background: rgba(255,107,53,0.1);
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .copy-btn {
+            background: rgba(255,107,53,0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .copy-feedback {
+            font-size: 0.8rem;
+            color: #10b981;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        .close-success-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+        .close-success-btn:hover {
+            background: #e55a2b;
+            transform: scale(1.02);
         }
 
         /* Responsive */
@@ -516,6 +617,7 @@
             .store-main { padding: 1rem; }
             .store-hero h1 { font-size: 2rem; }
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+            .redeem-code-value { font-size: 1.5rem; letter-spacing: 4px; }
         }
         @media (max-width: 480px) {
             .products-grid { grid-template-columns: 1fr; }
@@ -543,7 +645,7 @@
         <div class="store-stats">
             <div class="store-stat"><div class="store-stat-num" id="totalProducts">0</div><div class="store-stat-label">Products</div></div>
             <div class="store-stat"><div class="store-stat-num">2</div><div class="store-stat-label">Categories</div></div>
-            <div class="store-stat"><div class="store-stat-num">₹</div><div class="store-stat-label">Indian Rupee</div></div>
+            <div class="store-stat"><div class="store-stat-num">$</div><div class="store-stat-label">USD</div></div>
         </div>
     </div>
 </section>
@@ -567,8 +669,8 @@
         <div class="filter-group">
             <div class="filter-label">Info</div>
             <div style="padding: 0.5rem 0.75rem; font-size: 0.8rem; color: #666;">
-                All prices in INR (₹)<br>
-                GST included where applicable
+                Payments via PayPal<br>
+                Receive redeem code by email
             </div>
         </div>
     </aside>
@@ -597,11 +699,11 @@
     </main>
 </div>
 
-<!-- Modal -->
+<!-- Email Modal (for payment) -->
 <div class="modal-overlay" id="emailModal">
     <div class="email-modal">
         <button class="modal-close" onclick="closeEmailModal()">✕</button>
-        <h2 class="modal-title">Enter Your Email</h2>
+        <h2 class="modal-title">Complete Your Purchase</h2>
         <div class="modal-product-info">
             <div class="modal-product-name" id="modalProductName"></div>
             <div class="modal-product-price" id="modalProductPrice"></div>
@@ -609,9 +711,36 @@
         <input type="email" class="email-input" id="customerEmail" placeholder="your@email.com" required>
         <div class="modal-buttons">
             <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">Cancel</button>
-            <button class="modal-button modal-button-primary" onclick="proceedToPayment()">Continue to Payment</button>
+            <button class="modal-button modal-button-primary" id="proceedPaymentBtn" onclick="proceedToPayment()">Pay with PayPal →</button>
         </div>
-        <p class="modal-note">We'll send the purchase instructions and download link to this email.</p>
+        <p class="modal-note">You'll receive a redeem code by email after payment.</p>
+    </div>
+</div>
+
+<!-- Success Popup (Redeem Code) -->
+<div class="success-popup-overlay" id="successPopup">
+    <div class="success-popup">
+        <div class="success-icon">🎉</div>
+        <h2>Payment Successful!</h2>
+        <p>Thank you for your purchase. Your redeem code is below. A copy has also been sent to your email.</p>
+        <div class="redeem-code-container">
+            <div class="redeem-code-label">Your Redeem Code</div>
+            <div class="redeem-code-value" id="redeemCodeValue">XXXXXX</div>
+            <div>
+                <button class="copy-btn" onclick="copyRedeemCode()">📋 Copy Code</button>
+            </div>
+            <div class="copy-feedback" id="copyFeedback">✓ Copied to clipboard!</div>
+        </div>
+        <div class="redeem-code-container" style="background: rgba(255,107,53,0.05);">
+            <div class="redeem-code-label" style="color: var(--primary);">How to Redeem in Godot 4</div>
+            <p style="font-size: 0.85rem; margin: 0.5rem 0 0 0;">
+                1. Open your Godot 4 project<br>
+                2. Go to the in-game redeem section<br>
+                3. Enter your email and this code<br>
+                4. Your asset will be unlocked instantly
+            </p>
+        </div>
+        <button class="close-success-btn" onclick="closeSuccessPopup()">Continue Shopping →</button>
     </div>
 </div>
 
@@ -636,6 +765,10 @@
     let allProducts = [];
     let currentCategory = 'all';
     let currentSearchTerm = '';
+    let currentProductId = null;
+    let currentProductName = '';
+    let currentProductPrice = 0;
+    let currentPayPalOrderId = null;
 
     // Initialize Supabase
     function initSupabase() {
@@ -669,7 +802,6 @@
                 created_at: product.created_at
             }));
             
-            // Update total products count
             const totalProductsEl = document.getElementById('totalProducts');
             if (totalProductsEl) {
                 totalProductsEl.textContent = allProducts.length;
@@ -682,7 +814,12 @@
         }
     }
 
-    // Render products to grid
+    // Convert INR to USD (approx)
+    function inrToUsd(inr) {
+        return (inr / 85).toFixed(2);
+    }
+
+    // Render products
     function renderProducts() {
         const productsContainer = document.getElementById('productsContainer');
         const loadingState = document.getElementById('loadingState');
@@ -691,12 +828,10 @@
         
         let filteredProducts = [...allProducts];
         
-        // Filter by category
         if (currentCategory !== 'all') {
             filteredProducts = filteredProducts.filter(p => p.type === currentCategory);
         }
         
-        // Filter by search term
         if (currentSearchTerm) {
             const term = currentSearchTerm.toLowerCase();
             filteredProducts = filteredProducts.filter(p => 
@@ -706,12 +841,10 @@
             );
         }
         
-        // Update results count
         if (resultsCount) {
             resultsCount.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`;
         }
         
-        // Show/hide states
         loadingState.style.display = 'none';
         
         if (filteredProducts.length === 0) {
@@ -723,13 +856,11 @@
         productsContainer.style.display = 'block';
         noProductsState.style.display = 'none';
         
-        // Group products by type
         const outfits = filteredProducts.filter(p => p.type === 'Outfit');
         const guns = filteredProducts.filter(p => p.type === 'Guns');
         
         let html = '';
         
-        // Outfits section
         if (outfits.length > 0) {
             html += `
                 <div class="section-header">
@@ -744,7 +875,6 @@
             html += `</div>`;
         }
         
-        // Guns section
         if (guns.length > 0) {
             html += `
                 <div class="section-header">
@@ -762,10 +892,9 @@
         productsContainer.innerHTML = html;
     }
 
-    // Render individual product card
     function renderProductCard(product) {
         const imageUrl = product.texture || 'https://placehold.co/400x300/2d1b69/ff6b35?text=No+Image';
-        const priceDisplay = `₹${product.price.toFixed(2)}`;
+        const priceDisplay = `$${inrToUsd(product.price)} USD`;
         
         const badgeColor = product.type === 'Outfit' ? '#7000f3' : '#e55a2b';
         const badgeIcon = product.type === 'Outfit' ? '👕' : '🔫';
@@ -801,7 +930,6 @@
         `;
     }
 
-    // Escape HTML
     function escapeHtml(str) {
         if (!str) return '';
         return str
@@ -812,18 +940,14 @@
             .replace(/'/g, '&#39;');
     }
 
-    // Purchase modal variables
-    let currentProductId = null;
-    let currentProductName = '';
-    let currentProductPrice = 0;
-
-    function openPurchaseModal(productId, productName, price) {
+    // Payment functions
+    function openPurchaseModal(productId, productName, priceInr) {
         currentProductId = productId;
         currentProductName = productName;
-        currentProductPrice = price;
+        currentProductPrice = priceInr;
         
         document.getElementById('modalProductName').textContent = productName;
-        document.getElementById('modalProductPrice').innerHTML = `₹${price.toFixed(2)}`;
+        document.getElementById('modalProductPrice').innerHTML = `$${inrToUsd(priceInr)} USD`;
         document.getElementById('customerEmail').value = '';
         document.getElementById('emailModal').classList.add('active');
     }
@@ -833,7 +957,7 @@
         currentProductId = null;
     }
 
-    function proceedToPayment() {
+    async function proceedToPayment() {
         const email = document.getElementById('customerEmail').value;
         
         if (!email || !email.includes('@')) {
@@ -841,36 +965,150 @@
             return;
         }
         
-        // Store purchase info in localStorage
-        const purchase = {
-            productId: currentProductId,
-            productName: currentProductName,
-            price: currentProductPrice,
-            email: email,
-            date: new Date().toISOString()
-        };
+        const proceedBtn = document.getElementById('proceedPaymentBtn');
+        const originalText = proceedBtn.textContent;
+        proceedBtn.textContent = 'Creating order...';
+        proceedBtn.disabled = true;
         
-        let purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
-        purchases.push(purchase);
-        localStorage.setItem('purchases', JSON.stringify(purchases));
-        
-        alert(`Thank you for your interest in ${currentProductName}!\n\nWe'll send purchase instructions to ${email}\n\nAmount: ₹${currentProductPrice.toFixed(2)}`);
-        
-        closeEmailModal();
-        
-        // Track with Google Analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'begin_checkout', {
-                currency: 'INR',
-                value: currentProductPrice,
-                items: [{ id: currentProductId, name: currentProductName }]
+        try {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/cgstore-paypal`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'createOrder',
+                    email: email,
+                    amount: inrToUsd(currentProductPrice),
+                    currency: 'USD',
+                    type: currentProductId,
+                    description: currentProductName,
+                    return_url: `${window.location.origin}${window.location.pathname}?success=true`,
+                    cancel_url: `${window.location.origin}${window.location.pathname}?canceled=true`
+                })
             });
+            
+            const data = await response.json();
+            
+            if (data.success && data.approval_url) {
+                currentPayPalOrderId = data.paypal_order_id;
+                sessionStorage.setItem('pendingPayPalOrder', currentPayPalOrderId);
+                sessionStorage.setItem('pendingProductId', currentProductId);
+                sessionStorage.setItem('pendingEmail', email);
+                window.location.href = data.approval_url;
+            } else {
+                alert('Failed to create payment: ' + (data.message || 'Unknown error'));
+                proceedBtn.textContent = originalText;
+                proceedBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Network error. Please try again.');
+            proceedBtn.textContent = originalText;
+            proceedBtn.disabled = false;
+        }
+    }
+
+    // Show success popup with redeem code
+    function showSuccessPopup(redeemCode) {
+        document.getElementById('redeemCodeValue').textContent = redeemCode;
+        document.getElementById('successPopup').classList.add('active');
+    }
+
+    function closeSuccessPopup() {
+        document.getElementById('successPopup').classList.remove('active');
+    }
+
+    function copyRedeemCode() {
+        const code = document.getElementById('redeemCodeValue').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.style.display = 'block';
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 2000);
+        });
+    }
+
+    // Check payment status when returning from PayPal
+    async function checkPaymentStatus() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        const canceled = urlParams.get('canceled');
+        const orderId = sessionStorage.getItem('pendingPayPalOrder');
+        
+        if (canceled) {
+            alert('Payment was cancelled.');
+            sessionStorage.removeItem('pendingPayPalOrder');
+            sessionStorage.removeItem('pendingProductId');
+            sessionStorage.removeItem('pendingEmail');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
+        
+        if (success && orderId) {
+            // Show processing message
+            const productsContainer = document.getElementById('productsContainer');
+            const originalContent = productsContainer.innerHTML;
+            productsContainer.innerHTML = `
+                <div class="loading" style="display:block">
+                    <div class="loading-spinner"></div>
+                    <p>Verifying your payment...</p>
+                </div>
+            `;
+            
+            // Poll for completion
+            let attempts = 0;
+            const maxAttempts = 30;
+            
+            const pollInterval = setInterval(async () => {
+                attempts++;
+                
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/cgstore-paypal`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'pollStatus',
+                            paypal_order_id: orderId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.status === 'completed' && data.redeem_code) {
+                        clearInterval(pollInterval);
+                        sessionStorage.removeItem('pendingPayPalOrder');
+                        sessionStorage.removeItem('pendingProductId');
+                        sessionStorage.removeItem('pendingEmail');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Show success popup with redeem code
+                        showSuccessPopup(data.redeem_code);
+                        
+                        // Restore products view
+                        renderProducts();
+                        
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        alert('Payment is being processed. You will receive an email with your redeem code shortly.');
+                        sessionStorage.removeItem('pendingPayPalOrder');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        renderProducts();
+                    }
+                } catch (err) {
+                    console.error('Poll error:', err);
+                    if (attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        renderProducts();
+                    }
+                }
+            }, 1000);
         }
     }
 
     // Setup filters
     function setupFilters() {
-        // Category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -880,7 +1118,6 @@
             });
         });
         
-        // Search input
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -890,7 +1127,7 @@
         }
     }
 
-    // Mobile sidebar handlers
+    // Mobile sidebar
     function setupMobileSidebar() {
         const filterToggleBtn = document.getElementById('filterToggleBtn');
         const storeSidebar = document.getElementById('storeSidebar');
@@ -924,45 +1161,50 @@
 
     // Initialize store
     async function initStore() {
-        // Show loading state
         document.getElementById('loadingState').style.display = 'block';
         document.getElementById('productsContainer').style.display = 'none';
         document.getElementById('noProductsState').style.display = 'none';
         
-        // Check if Supabase is configured
         if (SUPABASE_URL === 'https://your-project.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key') {
             document.getElementById('loadingState').innerHTML = `
                 <div style="text-align:center;padding:2rem;">
                     <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
                     <h3>Supabase Not Configured</h3>
                     <p>Please update SUPABASE_URL and SUPABASE_ANON_KEY in the script section.</p>
-                    <p style="margin-top:1rem;font-size:0.85rem;color:#666;">Look for the TODO comment in the JavaScript section.</p>
                 </div>
             `;
             return;
         }
         
-        // Initialize Supabase
         if (!initSupabase()) {
             document.getElementById('loadingState').innerHTML = `
                 <div style="text-align:center;padding:2rem;">
                     <div style="font-size:3rem;margin-bottom:1rem;">❌</div>
                     <h3>Failed to load Supabase</h3>
-                    <p>Please check your internet connection and refresh the page.</p>
+                    <p>Please check your internet connection.</p>
                 </div>
             `;
             return;
         }
         
-        // Fetch and display products
         await fetchProducts();
         setupFilters();
         setupMobileSidebar();
         renderProducts();
+        await checkPaymentStatus();
     }
 
-    // Start the app when DOM is ready
     document.addEventListener('DOMContentLoaded', initStore);
+
+    // Close popup on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const popup = document.getElementById('successPopup');
+            if (popup.classList.contains('active')) {
+                closeSuccessPopup();
+            }
+        }
+    });
 </script>
 
 </body>
