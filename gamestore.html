@@ -3,14 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store — CGGodotAssets | Production-Ready Godot 4 Systems</title>
-    <meta name="description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks.">
-    <link rel="canonical" href="https://cggodotassets.shop/cgstore">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Store — CGGodotAssets | Production-Ready Godot 4 Systems">
-    <meta property="og:description" content="Production-tested Godot 4 systems — AI tools, multiplayer, retention, monetization, social bundles and complete game frameworks.">
-    <meta property="og:image" content="https://cggodotassets.shop/images/og-store.jpg">
-    <meta property="og:url" content="https://cggodotassets.shop/cgstore">
+    <title>Store — CGGodotAssets | Godot 4 Systems</title>
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo.png">
     
     <style>
@@ -24,11 +17,10 @@
             --dark: #0a0a0a;
             --secondary: #111115;
             --primary: #ff6b35;
-            --accent: #7000f3;
             --light: #ffffff;
             background: var(--dark);
             color: var(--light);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         .container {
@@ -37,7 +29,8 @@
             padding: 0 20px;
         }
 
-        .header-placeholder {
+        /* Header */
+        .header {
             background: rgba(0,0,0,0.95);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding: 1rem 0;
@@ -45,7 +38,7 @@
             top: 0;
             z-index: 100;
         }
-        .header-placeholder .container {
+        .header .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -63,188 +56,150 @@
         .nav-links a {
             color: #ccc;
             text-decoration: none;
-            transition: color 0.3s;
         }
         .nav-links a:hover {
             color: var(--primary);
         }
 
-        .footer-placeholder {
-            background: var(--secondary);
-            border-top: 1px solid rgba(255,255,255,0.07);
-            padding: 2rem 0;
-            margin-top: 3rem;
-            text-align: center;
-            color: #666;
-        }
-
-        .store-hero {
+        /* Hero */
+        .hero {
             text-align: center;
             background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
-            padding: 80px 0 48px;
+            padding: 60px 0 40px;
         }
-        .store-hero h1 { 
-            font-size: 2.8rem; 
-            margin-bottom: 0.8rem; 
-            color: var(--primary); 
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
         }
-        .store-hero p { 
-            color: #ccc; 
-            font-size: 1rem; 
-        }
-
-        .store-body { 
-            display: flex; 
-            align-items: flex-start; 
-            min-height: 80vh; 
+        .hero p {
+            color: #ccc;
         }
 
-        .store-sidebar {
-            width: 260px;
+        /* Currency Toggle */
+        .currency-toggle-section {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50px;
+            display: inline-flex;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .currency-option {
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .currency-option.active {
+            background: var(--primary);
+            color: white;
+        }
+        .currency-option:not(.active) {
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+        }
+        .currency-option:not(.active):hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Layout */
+        .store-body {
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
             flex-shrink: 0;
             background: var(--secondary);
-            border-right: 1px solid rgba(255,255,255,0.07);
-            padding: 1.5rem 1rem 3rem;
+            border-radius: 16px;
+            padding: 1.5rem;
+            height: fit-content;
             position: sticky;
-            top: 76px;
-            height: calc(100vh - 76px);
-            overflow-y: auto;
-            scrollbar-width: thin;
+            top: 80px;
         }
-        .store-sidebar::-webkit-scrollbar { width: 4px; }
-        .store-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-        .sidebar-close {
-            display: none;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--light);
-            font-size: 1.3rem;
-            cursor: pointer;
-        }
-
-        .sidebar-search {
+        .sidebar input {
             width: 100%;
-            padding: 0.65rem 0.9rem;
+            padding: 0.75rem;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             background: rgba(255,255,255,0.05);
             color: var(--light);
-            font-size: 0.875rem;
             margin-bottom: 1.5rem;
-            box-sizing: border-box;
         }
-        .sidebar-search:focus { outline: none; border-color: var(--primary); }
-        .sidebar-search::placeholder { color: #777; }
-
-        .filter-group { margin-bottom: 1.4rem; }
+        .sidebar input::placeholder {
+            color: #666;
+        }
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
         .filter-label {
             font-size: 0.7rem;
-            font-weight: bold;
             color: #666;
             text-transform: uppercase;
-            letter-spacing: 0.07em;
             margin-bottom: 0.5rem;
-            padding: 0 0.2rem;
         }
-
         .category-btn {
             display: block;
             width: 100%;
             text-align: left;
             padding: 0.5rem 0.75rem;
-            border-radius: 7px;
-            border: none;
+            border-radius: 8px;
             background: none;
+            border: none;
             color: #aaa;
-            font-size: 0.875rem;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .category-btn:hover { background: rgba(255,255,255,0.06); color: var(--light); }
-        .category-btn.active { background: rgba(255,107,53,0.15); color: var(--primary); font-weight: bold; }
-
-        .sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 1rem 0; }
-
-        .store-main { 
-            flex: 1; 
-            min-width: 0; 
-            padding: 2rem 2rem 4rem; 
-        }
-
-        .mobile-filter-bar {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.2rem;
-        }
-        .results-label { font-size: 0.875rem; color: #aaa; }
-        .filter-toggle-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 1.1rem;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 20px;
+        .category-btn:hover {
             background: rgba(255,255,255,0.05);
             color: var(--light);
-            font-size: 0.875rem;
-            cursor: pointer;
+        }
+        .category-btn.active {
+            background: rgba(255,107,53,0.15);
+            color: var(--primary);
         }
 
-        .products-section { min-height: 50vh; }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin: 2.5rem 0 1.2rem;
-            padding-bottom: 0.6rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .section-header:first-child { margin-top: 0; }
-        .section-title { font-size: 1.1rem; color: var(--light); font-weight: bold; }
-        .section-count {
-            font-size: 0.75rem;
-            color: #555;
-            background: rgba(255,255,255,0.05);
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
+        /* Main Content */
+        .main-content {
+            flex: 1;
         }
 
+        /* Products Grid */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 1rem;
         }
 
         .product-card {
             background: rgba(255,255,255,0.05);
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
         }
         .product-card:hover {
             transform: translateY(-4px);
             border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(255,107,53,0.15);
         }
 
         .product-image {
             width: 100%;
             height: 200px;
-            background: linear-gradient(135deg, #2d1b69 0%, var(--dark) 100%);
+            background: linear-gradient(135deg, #2d1b69, var(--dark));
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
             overflow: hidden;
             position: relative;
         }
@@ -260,128 +215,50 @@
             right: 10px;
             padding: 0.25rem 0.7rem;
             border-radius: 12px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: bold;
         }
 
-        .product-content { 
-            padding: 1.2rem; 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
+        .product-content {
+            padding: 1.2rem;
         }
-        .product-category { 
-            color: var(--primary); 
-            font-size: 0.78rem; 
-            font-weight: bold; 
-            margin-bottom: 0.4rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.04em; 
+        .product-category {
+            color: var(--primary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
         }
-        .product-title { 
-            font-size: 1.05rem; 
-            color: var(--light); 
-            margin-bottom: 0.5rem; 
-            font-weight: bold; 
-            line-height: 1.3; 
+        .product-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
         }
-        .product-description { 
-            color: #bbb; 
-            font-size: 0.82rem; 
-            line-height: 1.6; 
-            margin-bottom: 0.8rem; 
-            flex: 1; 
-        }
-
-        .product-tags { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 0.3rem; 
-            margin-bottom: 0.8rem; 
-        }
-        .product-tag {
-            font-size: 0.68rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #777;
-        }
-
         .product-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 0.9rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
             border-top: 1px solid rgba(255,255,255,0.08);
         }
-        .product-price { 
-            font-size: 1.5rem; 
-            color: var(--primary); 
-            font-weight: bold; 
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary);
         }
-
-        .buy-button {
+        .buy-btn {
             background: var(--primary);
             color: white;
-            padding: 0.6rem 1.1rem;
+            padding: 0.5rem 1rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.82rem;
-            transition: all 0.3s;
-            white-space: nowrap;
         }
-        .buy-button:hover { 
-            background: #e55a2b; 
-            transform: scale(1.04); 
+        .buy-btn:hover {
+            background: #e55a2b;
         }
 
-        .no-products { 
-            text-align: center; 
-            padding: 4rem 2rem; 
-            color: #aaa; 
-        }
-        .no-products-icon { font-size: 3.5rem; margin-bottom: 1rem; }
-        .loading { 
-            text-align: center; 
-            padding: 4rem 2rem; 
-            color: var(--primary); 
-        }
-        .loading-spinner {
-            border: 4px solid rgba(255,107,53,0.1);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        @keyframes spin { 
-            0%{ transform: rotate(0deg); } 
-            100%{ transform: rotate(360deg); } 
-        }
-
-        .store-stats {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            margin-top: 1.2rem;
-            flex-wrap: wrap;
-        }
-        .store-stat { text-align: center; }
-        .store-stat-num { 
-            font-size: 1.6rem; 
-            font-weight: bold; 
-            color: var(--primary); 
-        }
-        .store-stat-label { 
-            font-size: 0.75rem; 
-            color: #666; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em; 
-        }
-
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -395,88 +272,55 @@
             justify-content: center;
             align-items: center;
         }
-        .modal-overlay.active { display: flex; }
-        .email-modal {
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
             background: var(--secondary);
             border: 2px solid var(--primary);
-            border-radius: 15px;
+            border-radius: 16px;
             padding: 2rem;
             max-width: 500px;
             width: 90%;
-            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .modal-header h2 {
+            color: var(--primary);
         }
         .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
             background: none;
             border: none;
             color: var(--light);
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             cursor: pointer;
         }
-        .modal-title { 
-            color: var(--primary); 
-            font-size: 1.4rem; 
-            margin-bottom: 1rem; 
-        }
-        .modal-product-info {
-            background: rgba(255,255,255,0.05);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.2rem;
-        }
-        .modal-product-name { 
-            font-size: 1rem; 
-            color: var(--light); 
-            margin-bottom: 0.4rem; 
-        }
-        .modal-product-price { 
-            font-size: 1.4rem; 
-            color: var(--primary); 
-            font-weight: bold; 
-        }
-        .email-input {
+        .modal input {
             width: 100%;
-            padding: 0.9rem 1rem;
-            border: 2px solid rgba(255,255,255,0.1);
+            padding: 0.75rem;
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             background: rgba(255,255,255,0.05);
             color: var(--light);
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            box-sizing: border-box;
+            margin: 1rem 0;
         }
-        .email-input:focus { outline: none; border-color: var(--primary); }
-        .modal-buttons { display: flex; gap: 1rem; }
-        .modal-button {
-            flex: 1;
-            padding: 0.9rem;
+        .modal button {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-        .modal-button-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .modal-button-primary:hover { background: #e55a2b; }
-        .modal-button-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        .modal-button-secondary {
-            background: rgba(255,255,255,0.1);
-            color: var(--light);
-        }
-        .modal-button-secondary:hover { background: rgba(255,255,255,0.18); }
-        .modal-note { 
-            font-size: 0.82rem; 
-            color: #aaa; 
-            margin-top: 1rem; 
-            text-align: center; 
         }
 
-        .success-popup-overlay {
+        /* Success Popup */
+        .success-popup {
             position: fixed;
             top: 0;
             left: 0;
@@ -489,559 +333,324 @@
             justify-content: center;
             align-items: center;
         }
-        .success-popup-overlay.active { display: flex; }
-        .success-popup {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        .success-popup.active {
+            display: flex;
+        }
+        .success-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid var(--primary);
             border-radius: 20px;
-            padding: 2.5rem;
-            max-width: 550px;
-            width: 90%;
+            padding: 2rem;
             text-align: center;
-            position: relative;
-            animation: slideIn 0.3s ease;
+            max-width: 500px;
+            width: 90%;
         }
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .success-icon { font-size: 4rem; margin-bottom: 1rem; }
-        .success-popup h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 1rem; }
-        .success-popup p { color: #ccc; margin-bottom: 1.5rem; line-height: 1.6; }
-        .redeem-code-container {
-            background: #0a0a0a;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border: 1px solid rgba(255,107,53,0.3);
-        }
-        .redeem-code-label {
-            font-size: 0.8rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-        .redeem-code-value {
-            font-size: 2.5rem;
+        .redeem-code {
+            font-size: 2rem;
             font-weight: bold;
-            letter-spacing: 8px;
+            letter-spacing: 4px;
             color: var(--primary);
-            font-family: 'Courier New', monospace;
-            background: rgba(255,107,53,0.1);
-            padding: 0.5rem;
-            border-radius: 8px;
-            display: inline-block;
+            background: #0a0a0a;
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-family: monospace;
         }
         .copy-btn {
             background: rgba(255,107,53,0.2);
             border: 1px solid var(--primary);
             color: var(--primary);
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1rem;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            transition: all 0.3s;
+            margin: 0.5rem 0;
         }
-        .copy-btn:hover {
-            background: var(--primary);
-            color: white;
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
         }
-        .copy-feedback {
-            font-size: 0.8rem;
-            color: #10b981;
-            margin-top: 0.5rem;
-            display: none;
+        .spinner {
+            border: 4px solid rgba(255,107,53,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
-        .close-success-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 1rem;
-            transition: all 0.3s;
-        }
-        .close-success-btn:hover {
-            background: #e55a2b;
-            transform: scale(1.02);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
-            .store-body { display: block; }
-            .store-sidebar {
-                position: fixed;
-                top: 0;
-                left: -280px;
-                width: 280px;
-                height: 100vh;
-                z-index: 200;
-                transition: left 0.3s ease;
-                padding-top: 3.5rem;
+            .store-body {
+                flex-direction: column;
             }
-            .store-sidebar.open { left: 0; }
-            .sidebar-close { display: block; }
-            .mobile-filter-bar { display: flex; }
-            .store-main { padding: 1rem; }
-            .store-hero h1 { font-size: 2rem; }
-            .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-            .redeem-code-value { font-size: 1.5rem; letter-spacing: 4px; }
-        }
-        @media (max-width: 480px) {
-            .products-grid { grid-template-columns: 1fr; }
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="header-placeholder">
+<div class="header">
     <div class="container">
         <a href="/" class="logo">CGGodotAssets</a>
         <div class="nav-links">
             <a href="/">Home</a>
-            <a href="/cgstore">Store</a>
-            <a href="/contact">Contact</a>
+            <a href="/store">Store</a>
         </div>
     </div>
 </div>
 
-<section class="store-hero">
+<section class="hero">
     <div class="container">
         <h1>🎮 CGGodotAssets Store</h1>
-        <p>Production-tested systems, bundles, and game frameworks for Godot 4</p>
-        <div class="store-stats">
-            <div class="store-stat"><div class="store-stat-num" id="totalProducts">0</div><div class="store-stat-label">Products</div></div>
-            <div class="store-stat"><div class="store-stat-num">2</div><div class="store-stat-label">Categories</div></div>
-            <div class="store-stat"><div class="store-stat-num">$</div><div class="store-stat-label">USD</div></div>
+        <p>Production-tested systems for Godot 4</p>
+        
+        <div class="currency-toggle-section">
+            <div class="currency-option active" data-currency="INR">🇮🇳 INR (Razorpay)</div>
+            <div class="currency-option" data-currency="USD">🇺🇸 USD (PayPal)</div>
         </div>
     </div>
 </section>
 
 <div class="store-body">
-
-    <aside class="store-sidebar" id="storeSidebar">
-        <button class="sidebar-close" id="sidebarClose">✕</button>
-        <input type="text" id="searchInput" class="sidebar-search" placeholder="🔍 Search products...">
-        
+    <aside class="sidebar">
+        <input type="text" id="searchInput" placeholder="🔍 Search products...">
         <div class="filter-group">
             <div class="filter-label">Category</div>
             <button class="category-btn active" data-category="all">All Products</button>
             <button class="category-btn" data-category="Outfit">👗 Outfits</button>
-            <button class="category-btn" data-category="Guns">🔫 Guns/Weapons</button>
-        </div>
-        
-        <hr class="sidebar-divider">
-        
-        <div class="filter-group">
-            <div class="filter-label">Info</div>
-            <div style="padding: 0.5rem 0.75rem; font-size: 0.8rem; color: #666;">
-                Payments via PayPal<br>
-                Receive redeem code by email
-            </div>
+            <button class="category-btn" data-category="Guns">🔫 Guns & Weapons</button>
         </div>
     </aside>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <main class="store-main">
-        <div class="mobile-filter-bar">
-            <span class="results-label" id="resultsCount"></span>
-            <button class="filter-toggle-btn" id="filterToggleBtn">☰ Filters</button>
+    <main class="main-content">
+        <div id="productsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading products...</p>
+            </div>
         </div>
-
-        <section class="products-section" id="products">
-            <div class="loading" id="loadingState">
-                <div class="loading-spinner"></div>
-                <p>Loading products from database...</p>
-            </div>
-            <div id="productsContainer" style="display:none;"></div>
-            <div class="no-products" id="noProductsState" style="display:none;">
-                <div class="no-products-icon">🔍</div>
-                <h3>No products found</h3>
-                <p>Try adjusting your filters or search terms</p>
-            </div>
-        </section>
     </main>
 </div>
 
+<!-- Email Modal -->
 <div class="modal-overlay" id="emailModal">
-    <div class="email-modal">
-        <button class="modal-close" onclick="closeEmailModal()">✕</button>
-        <h2 class="modal-title">Complete Your Purchase</h2>
-        <div class="modal-product-info">
-            <div class="modal-product-name" id="modalProductName"></div>
-            <div class="modal-product-price" id="modalProductPrice"></div>
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Complete Purchase</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
         </div>
-        <input type="email" class="email-input" id="customerEmail" placeholder="your@email.com" required>
-        <div class="modal-buttons">
-            <button class="modal-button modal-button-secondary" onclick="closeEmailModal()">Cancel</button>
-            <button class="modal-button modal-button-primary" id="proceedPaymentBtn" onclick="proceedToPayment()">Pay with PayPal →</button>
-        </div>
-        <p class="modal-note">You'll receive a redeem code by email after payment.</p>
+        <p id="modalProductInfo" style="margin-bottom: 1rem;"></p>
+        <input type="email" id="customerEmail" placeholder="Enter your email" required>
+        <button id="payBtn" onclick="processPayment()">Pay Now →</button>
     </div>
 </div>
 
-<div class="success-popup-overlay" id="successPopup">
-    <div class="success-popup">
-        <div class="success-icon">🎉</div>
-        <h2>Payment Successful!</h2>
-        <p>Thank you for your purchase. Your redeem code is below. A copy has also been sent to your email.</p>
-        <div class="redeem-code-container">
-            <div class="redeem-code-label">Your Redeem Code</div>
-            <div class="redeem-code-value" id="redeemCodeValue">XXXXXX</div>
-            <div>
-                <button class="copy-btn" onclick="copyRedeemCode()">📋 Copy Code</button>
-            </div>
-            <div class="copy-feedback" id="copyFeedback">✓ Copied to clipboard!</div>
-        </div>
-        <div class="redeem-code-container" style="background: rgba(255,107,53,0.05);">
-            <div class="redeem-code-label" style="color: var(--primary);">How to Redeem in Godot 4</div>
-            <p style="font-size: 0.85rem; margin: 0.5rem 0 0 0;">
-                1. Open your Godot 4 project<br>
-                2. Go to the in-game redeem section<br>
-                3. Enter your email and this code<br>
-                4. Your asset will be unlocked instantly
-            </p>
-        </div>
-        <button class="close-success-btn" onclick="closeSuccessPopup()">Continue Shopping →</button>
-    </div>
-</div>
-
-<div class="footer-placeholder">
-    <div class="container">
-        <p>© 2024 CGGodotAssets. All rights reserved. Made with ❤️ for Godot developers.</p>
+<!-- Success Popup -->
+<div class="success-popup" id="successPopup">
+    <div class="success-content">
+        <h2>🎉 Payment Successful!</h2>
+        <p>Your redeem code is:</p>
+        <div class="redeem-code" id="redeemCodeDisplay"></div>
+        <button class="copy-btn" onclick="copyRedeemCode()">📋 Copy Code</button>
+        <p style="margin-top: 1rem; font-size: 0.8rem;">A copy has also been sent to your email.</p>
+        <button onclick="closeSuccessPopup()" style="margin-top: 1rem; background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">Close</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
     // ============================================================
-    // SUPABASE CONFIGURATION
+    // CONFIGURATION
     // ============================================================
     const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';  // ← REPLACE WITH YOUR ACTUAL ANON KEY
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'; // REPLACE THIS
     
-    // Edge function endpoint (SAME function handles everything)
     const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/gamestore-redeem`;
+    const INR_TO_USD_RATE = 85;
     
-    // ============================================================
-    // CONVERSION RATE (INR to USD)
-    // ============================================================
-    const INR_TO_USD = 85;
-    
-    function inrToUsd(inr) {
-        return (inr / INR_TO_USD).toFixed(2);
-    }
-    
-    // ============================================================
-    // STATE
-    // ============================================================
-    let supabaseClient;
+    let supabase;
     let allProducts = [];
+    let currentCurrency = 'INR';
     let currentCategory = 'all';
-    let currentSearchTerm = '';
-    let currentProductId = null;
-    let currentProductName = '';
-    let currentProductPrice = 0;
-    let currentPayPalOrderId = null;
+    let currentSearch = '';
+    let currentProduct = null;
+    let currentPaymentProviderId = null;
     
     // ============================================================
-    // INITIALIZE SUPABASE
+    // INITIALIZE
     // ============================================================
-    function initSupabase() {
-        if (typeof supabase !== 'undefined' && supabase.createClient) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            return true;
-        }
-        return false;
+    async function init() {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        await fetchProducts();
+        setupEventListeners();
+        checkPaymentReturn();
     }
     
-    // ============================================================
-    // FETCH PRODUCTS FROM YOUR products TABLE
-    // ============================================================
     async function fetchProducts() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('products')
-                .select('*')
-                .order('type', { ascending: true })
-                .order('itemname', { ascending: true });
-                
-            if (error) throw error;
-            
-            allProducts = data.map(product => ({
-                id: product.uuid,
-                sku: product.itemid,
-                name: product.itemname,
-                price: parseFloat(product.price),
-                type: product.type,
-                category: product.category,
-                texture: product.texture,
-                downloadtexture: product.downloadtexture,
-                created_at: product.created_at
-            }));
-            
-            const totalProductsEl = document.getElementById('totalProducts');
-            if (totalProductsEl) {
-                totalProductsEl.textContent = allProducts.length;
-            }
-            
-            return allProducts;
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            return [];
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('type', { ascending: true });
+        
+        if (!error && data) {
+            allProducts = data;
+            renderProducts();
         }
     }
     
-    // ============================================================
-    // RENDER PRODUCTS
-    // ============================================================
     function renderProducts() {
-        const productsContainer = document.getElementById('productsContainer');
-        const loadingState = document.getElementById('loadingState');
-        const noProductsState = document.getElementById('noProductsState');
-        const resultsCount = document.getElementById('resultsCount');
-        
-        let filteredProducts = [...allProducts];
+        let filtered = [...allProducts];
         
         if (currentCategory !== 'all') {
-            filteredProducts = filteredProducts.filter(p => p.type === currentCategory);
+            filtered = filtered.filter(p => p.type === currentCategory);
         }
-        
-        if (currentSearchTerm) {
-            const term = currentSearchTerm.toLowerCase();
-            filteredProducts = filteredProducts.filter(p => 
-                p.name.toLowerCase().includes(term) || 
-                p.sku.toLowerCase().includes(term) ||
-                p.category.toLowerCase().includes(term)
+        if (currentSearch) {
+            filtered = filtered.filter(p => 
+                p.itemname.toLowerCase().includes(currentSearch.toLowerCase())
             );
         }
         
-        if (resultsCount) {
-            resultsCount.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`;
-        }
-        
-        loadingState.style.display = 'none';
-        
-        if (filteredProducts.length === 0) {
-            productsContainer.style.display = 'none';
-            noProductsState.style.display = 'block';
-            return;
-        }
-        
-        productsContainer.style.display = 'block';
-        noProductsState.style.display = 'none';
-        
-        const outfits = filteredProducts.filter(p => p.type === 'Outfit');
-        const guns = filteredProducts.filter(p => p.type === 'Guns');
+        const outfits = filtered.filter(p => p.type === 'Outfit');
+        const guns = filtered.filter(p => p.type === 'Guns');
         
         let html = '';
         
         if (outfits.length > 0) {
-            html += `
-                <div class="section-header">
-                    <h2 class="section-title">👗 Outfits & Characters</h2>
-                    <span class="section-count">${outfits.length} items</span>
-                </div>
-                <div class="products-grid">
-            `;
-            outfits.forEach(product => {
-                html += renderProductCard(product);
-            });
+            html += `<h2 style="margin: 1rem 0;">👗 Outfits & Characters</h2><div class="products-grid">`;
+            outfits.forEach(p => html += renderProductCard(p));
             html += `</div>`;
         }
         
         if (guns.length > 0) {
-            html += `
-                <div class="section-header">
-                    <h2 class="section-title">🔫 Guns & Weapons</h2>
-                    <span class="section-count">${guns.length} items</span>
-                </div>
-                <div class="products-grid">
-            `;
-            guns.forEach(product => {
-                html += renderProductCard(product);
-            });
+            html += `<h2 style="margin: 1rem 0;">🔫 Guns & Weapons</h2><div class="products-grid">`;
+            guns.forEach(p => html += renderProductCard(p));
             html += `</div>`;
         }
         
-        productsContainer.innerHTML = html;
+        if (filtered.length === 0) {
+            html = `<div class="loading"><p>No products found</p></div>`;
+        }
+        
+        document.getElementById('productsContainer').innerHTML = html;
     }
     
     function renderProductCard(product) {
-        const imageUrl = product.texture || 'https://placehold.co/400x300/2d1b69/ff6b35?text=No+Image';
-        const priceDisplay = `$${inrToUsd(product.price)} USD`;
+        const displayPrice = currentCurrency === 'INR' 
+            ? `₹${product.price}`
+            : `$${(product.price / INR_TO_USD_RATE).toFixed(2)}`;
         
+        const imageUrl = product.texture || 'https://placehold.co/400x300/2d1b69/ff6b35?text=No+Image';
         const badgeColor = product.type === 'Outfit' ? '#7000f3' : '#e55a2b';
-        const badgeIcon = product.type === 'Outfit' ? '👕' : '🔫';
         
         return `
             <div class="product-card">
                 <div style="position: relative;">
                     <div class="product-image">
-                        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.name)}" onerror="this.src='https://placehold.co/400x300/2d1b69/ff6b35?text=Image+Not+Found'">
+                        <img src="${imageUrl}" alt="${product.itemname}" onerror="this.src='https://placehold.co/400x300/2d1b69/ff6b35?text=Image+Error'">
                     </div>
-                    <span class="badge" style="background: ${badgeColor};">${badgeIcon} ${escapeHtml(product.type)}</span>
+                    <span class="badge" style="background: ${badgeColor};">${product.type}</span>
                 </div>
                 <div class="product-content">
-                    <div class="product-category">${escapeHtml(product.category)}</div>
-                    <h3 class="product-title">${escapeHtml(product.name)}</h3>
-                    <div class="product-description">
-                        ${escapeHtml(product.type)} asset for Godot 4<br>
-                        SKU: ${escapeHtml(product.sku)}
-                    </div>
-                    <div class="product-tags">
-                        <span class="product-tag">${escapeHtml(product.type)}</span>
-                        <span class="product-tag">Godot 4</span>
-                        <span class="product-tag">${escapeHtml(product.category)}</span>
-                    </div>
+                    <div class="product-category">${product.category || 'Godot 4'}</div>
+                    <h3 class="product-title">${product.itemname}</h3>
                     <div class="product-footer">
-                        <div class="product-price">${priceDisplay}</div>
-                        <button class="buy-button" onclick="openPurchaseModal('${product.id}', '${escapeHtml(product.name)}', ${product.price})">
-                            Buy Now →
-                        </button>
+                        <div class="product-price">${displayPrice}</div>
+                        <button class="buy-btn" onclick="openPurchaseModal('${product.uuid}', '${product.itemname}', ${product.price})">Buy →</button>
                     </div>
                 </div>
             </div>
         `;
     }
     
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-    
     // ============================================================
-    // PAYMENT FLOW (calls gamestore-redeem edge function)
+    // PAYMENT FLOW
     // ============================================================
     function openPurchaseModal(productId, productName, priceInr) {
-        currentProductId = productId;
-        currentProductName = productName;
-        currentProductPrice = priceInr;
-        
-        document.getElementById('modalProductName').textContent = productName;
-        document.getElementById('modalProductPrice').innerHTML = `$${inrToUsd(priceInr)} USD`;
-        document.getElementById('customerEmail').value = '';
+        currentProduct = { id: productId, name: productName, price: priceInr };
+        const displayPrice = currentCurrency === 'INR' ? `₹${priceInr}` : `$${(priceInr / INR_TO_USD_RATE).toFixed(2)}`;
+        document.getElementById('modalProductInfo').innerHTML = `<strong>${productName}</strong><br>Amount: ${displayPrice} ${currentCurrency}`;
         document.getElementById('emailModal').classList.add('active');
     }
     
-    function closeEmailModal() {
+    function closeModal() {
         document.getElementById('emailModal').classList.remove('active');
-        currentProductId = null;
+        currentProduct = null;
     }
     
-    async function proceedToPayment() {
+    async function processPayment() {
         const email = document.getElementById('customerEmail').value;
-        
         if (!email || !email.includes('@')) {
-            alert('Please enter a valid email address');
+            alert('Please enter a valid email');
             return;
         }
         
-        const proceedBtn = document.getElementById('proceedPaymentBtn');
-        const originalText = proceedBtn.textContent;
-        proceedBtn.textContent = 'Creating order...';
-        proceedBtn.disabled = true;
+        const payBtn = document.getElementById('payBtn');
+        payBtn.textContent = 'Creating order...';
+        payBtn.disabled = true;
+        
+        const amount = currentCurrency === 'INR' 
+            ? currentProduct.price 
+            : (currentProduct.price / INR_TO_USD_RATE).toFixed(2);
+        
+        const body = {
+            action: 'createPayment',
+            provider: currentCurrency === 'INR' ? 'razorpay' : 'paypal',
+            email: email,
+            amount: amount,
+            product_id: currentProduct.id,
+            product_name: currentProduct.name,
+            callback_url: `${window.location.origin}${window.location.pathname}?success=true`,
+            cancel_url: `${window.location.origin}${window.location.pathname}?canceled=true`
+        };
         
         try {
-            // Call the SAME edge function with action 'createOrder'
             const response = await fetch(EDGE_FUNCTION_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'createOrder',
-                    email: email,
-                    amount: inrToUsd(currentProductPrice),
-                    currency: 'USD',
-                    product_id: currentProductId,
-                    product_name: currentProductName,
-                    return_url: `${window.location.origin}${window.location.pathname}?success=true`,
-                    cancel_url: `${window.location.origin}${window.location.pathname}?canceled=true`
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
             
             const data = await response.json();
             
-            if (data.success && data.approval_url) {
-                currentPayPalOrderId = data.paypal_order_id;
-                sessionStorage.setItem('pendingPayPalOrder', currentPayPalOrderId);
-                sessionStorage.setItem('pendingProductId', currentProductId);
-                sessionStorage.setItem('pendingEmail', email);
+            if (data.success && data.payment_url) {
+                // Razorpay
+                sessionStorage.setItem('pendingPaymentId', data.payment_provider_id);
+                window.location.href = data.payment_url;
+            } else if (data.success && data.approval_url) {
+                // PayPal
+                sessionStorage.setItem('pendingPaymentId', data.payment_provider_id);
                 window.location.href = data.approval_url;
             } else {
-                alert('Failed to create payment: ' + (data.message || 'Unknown error'));
-                proceedBtn.textContent = originalText;
-                proceedBtn.disabled = false;
+                alert('Payment creation failed: ' + (data.message || 'Unknown error'));
+                payBtn.textContent = 'Pay Now →';
+                payBtn.disabled = false;
             }
-        } catch (error) {
-            console.error('Payment error:', error);
-            alert('Network error. Please try again.');
-            proceedBtn.textContent = originalText;
-            proceedBtn.disabled = false;
+        } catch (err) {
+            alert('Network error: ' + err.message);
+            payBtn.textContent = 'Pay Now →';
+            payBtn.disabled = false;
         }
     }
     
-    // ============================================================
-    // SUCCESS POPUP
-    // ============================================================
-    function showSuccessPopup(redeemCode) {
-        document.getElementById('redeemCodeValue').textContent = redeemCode;
-        document.getElementById('successPopup').classList.add('active');
-    }
-    
-    function closeSuccessPopup() {
-        document.getElementById('successPopup').classList.remove('active');
-    }
-    
-    function copyRedeemCode() {
-        const code = document.getElementById('redeemCodeValue').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            const feedback = document.getElementById('copyFeedback');
-            feedback.style.display = 'block';
-            setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 2000);
-        });
-    }
-    
-    // ============================================================
-    // CHECK PAYMENT STATUS (polling)
-    // ============================================================
-    async function checkPaymentStatus() {
+    async function checkPaymentReturn() {
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
-        const canceled = urlParams.get('canceled');
-        const orderId = sessionStorage.getItem('pendingPayPalOrder');
+        const paymentId = sessionStorage.getItem('pendingPaymentId');
         
-        if (canceled) {
-            alert('Payment was cancelled.');
-            sessionStorage.removeItem('pendingPayPalOrder');
-            sessionStorage.removeItem('pendingProductId');
-            sessionStorage.removeItem('pendingEmail');
-            window.history.replaceState({}, document.title, window.location.pathname);
-            return;
-        }
-        
-        if (success && orderId) {
-            const productsContainer = document.getElementById('productsContainer');
-            productsContainer.innerHTML = `
-                <div class="loading" style="display:block">
-                    <div class="loading-spinner"></div>
-                    <p>Verifying your payment...</p>
-                </div>
-            `;
+        if (success && paymentId) {
+            document.getElementById('productsContainer').innerHTML = `<div class="loading"><div class="spinner"></div><p>Verifying payment...</p></div>`;
             
             let attempts = 0;
             const maxAttempts = 30;
@@ -1050,13 +659,12 @@
                 attempts++;
                 
                 try {
-                    // Call the SAME edge function with action 'pollStatus'
                     const response = await fetch(EDGE_FUNCTION_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'pollStatus',
-                            paypal_order_id: orderId
+                            payment_provider_id: paymentId
                         })
                     });
                     
@@ -1064,23 +672,18 @@
                     
                     if (data.success && data.status === 'completed' && data.redeem_code) {
                         clearInterval(pollInterval);
-                        sessionStorage.removeItem('pendingPayPalOrder');
-                        sessionStorage.removeItem('pendingProductId');
-                        sessionStorage.removeItem('pendingEmail');
+                        sessionStorage.removeItem('pendingPaymentId');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                        
                         showSuccessPopup(data.redeem_code);
                         renderProducts();
-                        
                     } else if (attempts >= maxAttempts) {
                         clearInterval(pollInterval);
-                        alert('Payment is being processed. You will receive an email with your redeem code shortly.');
-                        sessionStorage.removeItem('pendingPayPalOrder');
+                        alert('Payment is being processed. You will receive an email shortly.');
+                        sessionStorage.removeItem('pendingPaymentId');
                         window.history.replaceState({}, document.title, window.location.pathname);
                         renderProducts();
                     }
                 } catch (err) {
-                    console.error('Poll error:', err);
                     if (attempts >= maxAttempts) {
                         clearInterval(pollInterval);
                         renderProducts();
@@ -1090,10 +693,36 @@
         }
     }
     
+    function showSuccessPopup(code) {
+        document.getElementById('redeemCodeDisplay').textContent = code;
+        document.getElementById('successPopup').classList.add('active');
+    }
+    
+    function closeSuccessPopup() {
+        document.getElementById('successPopup').classList.remove('active');
+    }
+    
+    function copyRedeemCode() {
+        const code = document.getElementById('redeemCodeDisplay').textContent;
+        navigator.clipboard.writeText(code);
+        alert('Code copied!');
+    }
+    
     // ============================================================
-    // FILTERS & UI
+    // UI EVENT LISTENERS
     // ============================================================
-    function setupFilters() {
+    function setupEventListeners() {
+        // Currency toggle
+        document.querySelectorAll('.currency-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.currency-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                currentCurrency = opt.dataset.currency;
+                renderProducts();
+            });
+        });
+        
+        // Category filter
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -1103,82 +732,15 @@
             });
         });
         
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                currentSearchTerm = e.target.value;
-                renderProducts();
-            });
-        }
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            renderProducts();
+        });
     }
     
-    function setupMobileSidebar() {
-        const filterToggleBtn = document.getElementById('filterToggleBtn');
-        const storeSidebar = document.getElementById('storeSidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const sidebarClose = document.getElementById('sidebarClose');
-        
-        if (filterToggleBtn) {
-            filterToggleBtn.addEventListener('click', () => {
-                storeSidebar.classList.add('open');
-                sidebarOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            });
-        }
-        
-        if (sidebarClose) {
-            sidebarClose.addEventListener('click', () => {
-                storeSidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        }
-        
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', () => {
-                storeSidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        }
-    }
-    
-    // ============================================================
-    // INITIALIZE STORE
-    // ============================================================
-    async function initStore() {
-        document.getElementById('loadingState').style.display = 'block';
-        document.getElementById('productsContainer').style.display = 'none';
-        document.getElementById('noProductsState').style.display = 'none';
-        
-        if (!initSupabase()) {
-            document.getElementById('loadingState').innerHTML = `
-                <div style="text-align:center;padding:2rem;">
-                    <div style="font-size:3rem;margin-bottom:1rem;">❌</div>
-                    <h3>Failed to load Supabase</h3>
-                    <p>Please check your internet connection.</p>
-                </div>
-            `;
-            return;
-        }
-        
-        await fetchProducts();
-        setupFilters();
-        setupMobileSidebar();
-        renderProducts();
-        await checkPaymentStatus();
-    }
-    
-    document.addEventListener('DOMContentLoaded', initStore);
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const popup = document.getElementById('successPopup');
-            if (popup.classList.contains('active')) {
-                closeSuccessPopup();
-            }
-        }
-    });
+    // Start
+    init();
 </script>
 
 </body>
