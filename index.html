@@ -999,85 +999,66 @@
   to { transform: rotate(360deg); }
 }
 </style>
- <!-- New Visitor Popup -->
-<div id="starterPopup" style="display: none; position: fixed; bottom: 24px; right: 24px; z-index: 9999; max-width: 320px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); box-shadow: 0 8px 24px rgba(0,0,0,0.4); overflow: hidden; backdrop-filter: blur(8px);">
-  <div style="padding: 20px;">
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-      <span style="font-size: 28px;">🎯</span>
-      <span style="font-weight: 700; font-size: 18px;">New here?</span>
+<!-- New Visitor Popup -->
+<div id="starterPopup" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="max-width:380px; width:90%; background:#1a1a2e; border:1px solid rgba(255,255,255,0.12); border-radius:16px; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.6);">
+    <div style="padding:28px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <span style="font-size:32px;">🎯</span>
+        <span style="font-weight:700; font-size:20px; color:white;">New here?</span>
+      </div>
+      <div style="color:#aaa; font-size:14px; line-height:1.6; margin-bottom:24px;">
+        Start with our <strong style="color:#00d9ff;">Starter Guide</strong> — find the right systems for your game in 2 minutes.
+      </div>
+      <div style="display:flex; gap:12px;">
+        <a href="/starter-guide" id="starterGuideBtn" style="flex:1; background:linear-gradient(135deg,#238636,#196c2e); color:white; text-align:center; padding:12px; border-radius:10px; text-decoration:none; font-weight:600; font-size:14px;">📖 Take me to the Guide →</a>
+        <button id="closePopupBtn" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:12px 16px; cursor:pointer; color:#aaa; font-size:16px;">✕</button>
+      </div>
     </div>
-    <div style="color: var(--text2); font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
-      Start with our <strong style="color: var(--blue);">Starter Guide</strong> — find the right systems for your game in 2 minutes.
+    <div style="background:rgba(255,255,255,0.04); padding:10px 28px; border-top:1px solid rgba(255,255,255,0.07); font-size:11px; color:#555; display:flex; justify-content:space-between;">
+      <span>⚡ Shows once per visit</span>
+      <span>Made in India 🇮🇳</span>
     </div>
-    <div style="display: flex; gap: 12px;">
-      <a href="/starter-guide" id="starterGuideBtn" style="flex: 1; background: linear-gradient(135deg, #238636, #196c2e); color: white; text-align: center; padding: 10px; border-radius: var(--r); text-decoration: none; font-weight: 600; font-size: 13px;">📖 Take me to the Guide →</a>
-      <button id="closePopupBtn" style="background: var(--bg4); border: 1px solid var(--border2); border-radius: var(--r); padding: 10px 14px; cursor: pointer; color: var(--text2);">✕</button>
-    </div>
-  </div>
-  <div style="background: var(--bg4); padding: 8px 20px; border-top: 1px solid var(--border); font-size: 10px; color: var(--text3); display: flex; justify-content: space-between;">
-    <span>⚡ Shows once per device</span>
-    <span>Made in India 🇮🇳</span>
   </div>
 </div>
 
 <script>
 (function() {
-  const POPUP_KEY = 'cg_starter_guide_shown';
-  
-  // Check if popup has been shown before
-  if (localStorage.getItem(POPUP_KEY) === 'true') {
-    return; // Already shown, exit
-  }
-  
   const popup = document.getElementById('starterPopup');
-  let timeoutId = null;
-  let mouseLeft = false;
-  
+  let shown = false;
+
   function showPopup() {
-    if (popup.style.display === 'block') return;
-    popup.style.display = 'block';
-    localStorage.setItem(POPUP_KEY, 'true');
+    if (shown) return;
+    shown = true;
+    popup.style.display = 'flex';
   }
 
   function hidePopup() {
     popup.style.display = 'none';
-    if (timeoutId) clearTimeout(timeoutId);
   }
-  
-  // Close button handler
+
+  // Close button
   document.getElementById('closePopupBtn').addEventListener('click', hidePopup);
-  
-  // Also close when clicking the guide button (it will navigate anyway)
-  document.getElementById('starterGuideBtn').addEventListener('click', function() {
-    localStorage.setItem(POPUP_KEY, 'true');
+
+  // Click outside the card to close
+  popup.addEventListener('click', function(e) {
+    if (e.target === popup) hidePopup();
   });
-  
-  // ---- Trigger conditions ----
-  
-  // 1. Show after 45 seconds of page idle (genuine browsing)
-  timeoutId = setTimeout(showPopup, 5000);
-  
-  // 2. Show if user moves mouse to top of page (trying to leave)
-  document.addEventListener('mouseleave', function(event) {
-    if (event.clientY <= 0 && !mouseLeft) {
-      mouseLeft = true;
-      showPopup();
-    }
+
+  // Trigger 1: after 20 seconds
+  setTimeout(showPopup, 20000);
+
+  // Trigger 2: exit intent (mouse leaves top of page)
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY <= 0) showPopup();
   });
-  
-  // 3. Show on scroll depth (if user reads 60% of page)
-  let scrollTriggered = false;
+
+  // Trigger 3: scroll 60% of page
   window.addEventListener('scroll', function() {
-    if (scrollTriggered) return;
-    const scrollPercent = (window.scrollY + window.innerHeight) / document.body.scrollHeight;
-    if (scrollPercent > 0.6) {
-      scrollTriggered = true;
-      // Delay a bit so they finish reading
-      setTimeout(showPopup, 2000);
-    }
+    if (shown) return;
+    const pct = (window.scrollY + window.innerHeight) / document.body.scrollHeight;
+    if (pct > 0.6) setTimeout(showPopup, 2000);
   });
-  
-  // 4. If user clicks anywhere outside popup after it's shown? No — keep it open until dismissed.
 })();
 </script>
 <script>
