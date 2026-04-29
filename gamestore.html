@@ -37,7 +37,6 @@
             padding: 0 20px;
         }
 
-        /* Header */
         .header-placeholder {
             background: rgba(0,0,0,0.95);
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -70,7 +69,6 @@
             color: var(--primary);
         }
 
-        /* Footer */
         .footer-placeholder {
             background: var(--secondary);
             border-top: 1px solid rgba(255,255,255,0.07);
@@ -80,7 +78,6 @@
             color: #666;
         }
 
-        /* Store Hero */
         .store-hero {
             text-align: center;
             background: radial-gradient(circle at center, #2d1b69 0%, var(--dark) 70%);
@@ -96,14 +93,12 @@
             font-size: 1rem; 
         }
 
-        /* Layout */
         .store-body { 
             display: flex; 
             align-items: flex-start; 
             min-height: 80vh; 
         }
 
-        /* Sidebar */
         .store-sidebar {
             width: 260px;
             flex-shrink: 0;
@@ -174,7 +169,6 @@
 
         .sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 1rem 0; }
 
-        /* Main */
         .store-main { 
             flex: 1; 
             min-width: 0; 
@@ -343,7 +337,6 @@
             transform: scale(1.04); 
         }
 
-        /* Loading & Empty States */
         .no-products { 
             text-align: center; 
             padding: 4rem 2rem; 
@@ -369,7 +362,6 @@
             100%{ transform: rotate(360deg); } 
         }
 
-        /* Stats bar */
         .store-stats {
             display: flex;
             gap: 2rem;
@@ -390,7 +382,6 @@
             letter-spacing: 0.05em; 
         }
 
-        /* Email Modal (Payment) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -485,7 +476,6 @@
             text-align: center; 
         }
 
-        /* Success Popup (Redeem Code) */
         .success-popup-overlay {
             position: fixed;
             top: 0;
@@ -512,29 +502,12 @@
             animation: slideIn 0.3s ease;
         }
         @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        .success-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-        .success-popup h2 {
-            color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        .success-popup p {
-            color: #ccc;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
+        .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .success-popup h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 1rem; }
+        .success-popup p { color: #ccc; margin-bottom: 1.5rem; line-height: 1.6; }
         .redeem-code-container {
             background: #0a0a0a;
             border-radius: 12px;
@@ -598,7 +571,6 @@
             transform: scale(1.02);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .store-body { display: block; }
             .store-sidebar {
@@ -626,7 +598,6 @@
 </head>
 <body>
 
-<!-- Simple Header -->
 <div class="header-placeholder">
     <div class="container">
         <a href="/" class="logo">CGGodotAssets</a>
@@ -652,7 +623,6 @@
 
 <div class="store-body">
 
-    <!-- Sidebar -->
     <aside class="store-sidebar" id="storeSidebar">
         <button class="sidebar-close" id="sidebarClose">✕</button>
         <input type="text" id="searchInput" class="sidebar-search" placeholder="🔍 Search products...">
@@ -677,7 +647,6 @@
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- Main Content -->
     <main class="store-main">
         <div class="mobile-filter-bar">
             <span class="results-label" id="resultsCount"></span>
@@ -699,7 +668,6 @@
     </main>
 </div>
 
-<!-- Email Modal (for payment) -->
 <div class="modal-overlay" id="emailModal">
     <div class="email-modal">
         <button class="modal-close" onclick="closeEmailModal()">✕</button>
@@ -717,7 +685,6 @@
     </div>
 </div>
 
-<!-- Success Popup (Redeem Code) -->
 <div class="success-popup-overlay" id="successPopup">
     <div class="success-popup">
         <div class="success-icon">🎉</div>
@@ -750,17 +717,30 @@
     </div>
 </div>
 
-<!-- Supabase JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
     // ============================================================
-    // TODO: REPLACE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+    // SUPABASE CONFIGURATION
     // ============================================================
-    const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';  // ← REPLACE THIS
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';                // ← REPLACE THIS
+    const SUPABASE_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg';  // ← REPLACE WITH YOUR ACTUAL ANON KEY
+    
+    // Edge function endpoint (SAME function handles everything)
+    const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/gamestore-redeem`;
+    
     // ============================================================
-
+    // CONVERSION RATE (INR to USD)
+    // ============================================================
+    const INR_TO_USD = 85;
+    
+    function inrToUsd(inr) {
+        return (inr / INR_TO_USD).toFixed(2);
+    }
+    
+    // ============================================================
+    // STATE
+    // ============================================================
     let supabaseClient;
     let allProducts = [];
     let currentCategory = 'all';
@@ -769,8 +749,10 @@
     let currentProductName = '';
     let currentProductPrice = 0;
     let currentPayPalOrderId = null;
-
-    // Initialize Supabase
+    
+    // ============================================================
+    // INITIALIZE SUPABASE
+    // ============================================================
     function initSupabase() {
         if (typeof supabase !== 'undefined' && supabase.createClient) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -778,8 +760,10 @@
         }
         return false;
     }
-
-    // Fetch products from Supabase
+    
+    // ============================================================
+    // FETCH PRODUCTS FROM YOUR products TABLE
+    // ============================================================
     async function fetchProducts() {
         try {
             const { data, error } = await supabaseClient
@@ -787,7 +771,7 @@
                 .select('*')
                 .order('type', { ascending: true })
                 .order('itemname', { ascending: true });
-
+                
             if (error) throw error;
             
             allProducts = data.map(product => ({
@@ -813,13 +797,10 @@
             return [];
         }
     }
-
-    // Convert INR to USD (approx)
-    function inrToUsd(inr) {
-        return (inr / 85).toFixed(2);
-    }
-
-    // Render products
+    
+    // ============================================================
+    // RENDER PRODUCTS
+    // ============================================================
     function renderProducts() {
         const productsContainer = document.getElementById('productsContainer');
         const loadingState = document.getElementById('loadingState');
@@ -891,7 +872,7 @@
         
         productsContainer.innerHTML = html;
     }
-
+    
     function renderProductCard(product) {
         const imageUrl = product.texture || 'https://placehold.co/400x300/2d1b69/ff6b35?text=No+Image';
         const priceDisplay = `$${inrToUsd(product.price)} USD`;
@@ -929,7 +910,7 @@
             </div>
         `;
     }
-
+    
     function escapeHtml(str) {
         if (!str) return '';
         return str
@@ -939,8 +920,10 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
-
-    // Payment functions
+    
+    // ============================================================
+    // PAYMENT FLOW (calls gamestore-redeem edge function)
+    // ============================================================
     function openPurchaseModal(productId, productName, priceInr) {
         currentProductId = productId;
         currentProductName = productName;
@@ -951,12 +934,12 @@
         document.getElementById('customerEmail').value = '';
         document.getElementById('emailModal').classList.add('active');
     }
-
+    
     function closeEmailModal() {
         document.getElementById('emailModal').classList.remove('active');
         currentProductId = null;
     }
-
+    
     async function proceedToPayment() {
         const email = document.getElementById('customerEmail').value;
         
@@ -971,7 +954,8 @@
         proceedBtn.disabled = true;
         
         try {
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/cgstore-paypal`, {
+            // Call the SAME edge function with action 'createOrder'
+            const response = await fetch(EDGE_FUNCTION_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -981,8 +965,8 @@
                     email: email,
                     amount: inrToUsd(currentProductPrice),
                     currency: 'USD',
-                    type: currentProductId,
-                    description: currentProductName,
+                    product_id: currentProductId,
+                    product_name: currentProductName,
                     return_url: `${window.location.origin}${window.location.pathname}?success=true`,
                     cancel_url: `${window.location.origin}${window.location.pathname}?canceled=true`
                 })
@@ -1008,17 +992,19 @@
             proceedBtn.disabled = false;
         }
     }
-
-    // Show success popup with redeem code
+    
+    // ============================================================
+    // SUCCESS POPUP
+    // ============================================================
     function showSuccessPopup(redeemCode) {
         document.getElementById('redeemCodeValue').textContent = redeemCode;
         document.getElementById('successPopup').classList.add('active');
     }
-
+    
     function closeSuccessPopup() {
         document.getElementById('successPopup').classList.remove('active');
     }
-
+    
     function copyRedeemCode() {
         const code = document.getElementById('redeemCodeValue').textContent;
         navigator.clipboard.writeText(code).then(() => {
@@ -1029,8 +1015,10 @@
             }, 2000);
         });
     }
-
-    // Check payment status when returning from PayPal
+    
+    // ============================================================
+    // CHECK PAYMENT STATUS (polling)
+    // ============================================================
     async function checkPaymentStatus() {
         const urlParams = new URLSearchParams(window.location.search);
         const success = urlParams.get('success');
@@ -1047,9 +1035,7 @@
         }
         
         if (success && orderId) {
-            // Show processing message
             const productsContainer = document.getElementById('productsContainer');
-            const originalContent = productsContainer.innerHTML;
             productsContainer.innerHTML = `
                 <div class="loading" style="display:block">
                     <div class="loading-spinner"></div>
@@ -1057,7 +1043,6 @@
                 </div>
             `;
             
-            // Poll for completion
             let attempts = 0;
             const maxAttempts = 30;
             
@@ -1065,7 +1050,8 @@
                 attempts++;
                 
                 try {
-                    const response = await fetch(`${SUPABASE_URL}/functions/v1/cgstore-paypal`, {
+                    // Call the SAME edge function with action 'pollStatus'
+                    const response = await fetch(EDGE_FUNCTION_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1083,10 +1069,7 @@
                         sessionStorage.removeItem('pendingEmail');
                         window.history.replaceState({}, document.title, window.location.pathname);
                         
-                        // Show success popup with redeem code
                         showSuccessPopup(data.redeem_code);
-                        
-                        // Restore products view
                         renderProducts();
                         
                     } else if (attempts >= maxAttempts) {
@@ -1106,8 +1089,10 @@
             }, 1000);
         }
     }
-
-    // Setup filters
+    
+    // ============================================================
+    // FILTERS & UI
+    // ============================================================
     function setupFilters() {
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1126,14 +1111,13 @@
             });
         }
     }
-
-    // Mobile sidebar
+    
     function setupMobileSidebar() {
         const filterToggleBtn = document.getElementById('filterToggleBtn');
         const storeSidebar = document.getElementById('storeSidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const sidebarClose = document.getElementById('sidebarClose');
-
+        
         if (filterToggleBtn) {
             filterToggleBtn.addEventListener('click', () => {
                 storeSidebar.classList.add('open');
@@ -1158,23 +1142,14 @@
             });
         }
     }
-
-    // Initialize store
+    
+    // ============================================================
+    // INITIALIZE STORE
+    // ============================================================
     async function initStore() {
         document.getElementById('loadingState').style.display = 'block';
         document.getElementById('productsContainer').style.display = 'none';
         document.getElementById('noProductsState').style.display = 'none';
-        
-        if (SUPABASE_URL === 'https://your-project.supabase.co' || SUPABASE_ANON_KEY === 'your-anon-key') {
-            document.getElementById('loadingState').innerHTML = `
-                <div style="text-align:center;padding:2rem;">
-                    <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
-                    <h3>Supabase Not Configured</h3>
-                    <p>Please update SUPABASE_URL and SUPABASE_ANON_KEY in the script section.</p>
-                </div>
-            `;
-            return;
-        }
         
         if (!initSupabase()) {
             document.getElementById('loadingState').innerHTML = `
@@ -1193,10 +1168,9 @@
         renderProducts();
         await checkPaymentStatus();
     }
-
+    
     document.addEventListener('DOMContentLoaded', initStore);
-
-    // Close popup on escape key
+    
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             const popup = document.getElementById('successPopup');
