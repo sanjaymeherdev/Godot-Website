@@ -141,7 +141,7 @@
                                     <a href="${basePath}godotmp.html">⚡ Done-For-You Networking</a>
                                     <a href="${basePath}godotconnect.html">🔒 Privacy P2P Backend</a>
                                     <a href="${basePath}cgrelay.html">🔄 Managed Relay Server</a>
-                                    <a href="${basePath}customdev.html">🛠️ Custom Development</a>
+                                    <a href="${basePath}services.html">🛠️ Custom Development</a>
                                 </div>
                             </div>
                             <a href="${basePath}freegodotassets.html">Free Tools</a>
@@ -151,7 +151,7 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <a href="${basePath}cgstore.html" class="cta-button-primary">🎮 Shop</a>
-                            <a href="${basePath}services.html#consult" class="cta-button-secondary">💬 Consult</a>
+                            <a href="${basePath}services.html" class="cta-button-secondary">💬 Consult</a>
                         </div>
                         <button class="mobile-menu-btn" id="sanjayMobileMenuBtn">☰</button>
                     </nav>
@@ -177,14 +177,14 @@
                         <a href="${basePath}godotmp.html">→ Done-For-You Networking</a>
                         <a href="${basePath}godotconnect.html">→ Privacy P2P Backend</a>
                         <a href="${basePath}cgrelay.html">→ Managed Relay Server</a>
-                        <a href="${basePath}customdev.html">→ Custom Development</a>
+                        <a href="${basePath}services.html">→ Custom Development</a>
                     </div>
                     <a href="${basePath}freegodotassets.html">Free Tools</a>
                     <a href="${basePath}learn.html">Learn</a>
                     <a href="${basePath}blog.html">Blog</a>
                     <a href="${basePath}contact.html">Contact</a>
                     <a href="${basePath}cgstore.html" class="cta-button-primary" style="display: block; text-align: center; margin: 1rem;">Shop Now</a>
-                    <a href="${basePath}services.html#consult" class="cta-button-secondary" style="display: block; text-align: center; margin: 1rem;">Free Consultation</a>
+                    <a href="${basePath}services.html" class="cta-button-secondary" style="display: block; text-align: center; margin: 1rem;">Free Consultation</a>
                 </div>
             </div>
             <div id="sanjayMobileMenuOverlay"></div>
@@ -230,8 +230,8 @@
                             <a href="${basePath}godotmp.html">⚡ Done-For-You Networking</a>
                             <a href="${basePath}godotconnect.html">🔒 Privacy P2P Backend</a>
                             <a href="${basePath}cgrelay.html">🔄 Managed Relay Server</a>
-                            <a href="${basePath}customdev.html">🛠️ Custom Development</a>
-                            <a href="${basePath}services.html#consult">💬 Free Consultation</a>
+                            <a href="${basePath}services.html">🛠️ Custom Development</a>
+                            <a href="${basePath}services.html">💬 Free Consultation</a>
                         </div>
                         <div class="footer-section">
                             <h4>Resources</h4>
