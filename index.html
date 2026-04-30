@@ -1026,9 +1026,13 @@
 (function() {
   const popup = document.getElementById('starterPopup');
   let shown = false;
+  const PAGE_LOAD = Date.now(); // ← record when page loaded
+  const MIN_DELAY = 10000;      // ← never show before 10s
 
   function showPopup() {
     if (shown) return;
+    // Block if not enough time has passed
+    if (Date.now() - PAGE_LOAD < MIN_DELAY) return;
     shown = true;
     popup.style.display = 'flex';
   }
@@ -1037,10 +1041,7 @@
     popup.style.display = 'none';
   }
 
-  // Close button
   document.getElementById('closePopupBtn').addEventListener('click', hidePopup);
-
-  // Click outside the card to close
   popup.addEventListener('click', function(e) {
     if (e.target === popup) hidePopup();
   });
@@ -1048,12 +1049,12 @@
   // Trigger 1: after 25 seconds
   setTimeout(showPopup, 25000);
 
-  // Trigger 2: exit intent (mouse leaves top of page)
+  // Trigger 2: exit intent
   document.addEventListener('mouseleave', function(e) {
     if (e.clientY <= 0) showPopup();
   });
 
-  // Trigger 3: scroll 60% of page
+  // Trigger 3: scroll 60% — added delay before attempting
   window.addEventListener('scroll', function() {
     if (shown) return;
     const pct = (window.scrollY + window.innerHeight) / document.body.scrollHeight;
