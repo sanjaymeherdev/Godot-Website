@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Live Admin | Bridge + Database Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0b0e17;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            padding: 2rem;
+            color: #eef2ff;
+        }
+        .dashboard { max-width: 1600px; margin: 0 auto; }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #11161f;
+            border-radius: 60px;
+            padding: 0.6rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,229,255,0.2);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .connection { display: flex; align-items: center; gap: 0.6rem; font-weight: 500; }
+        .status-led {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #6c757d; transition: all 0.2s;
+        }
+        .status-led.connected { background: #28a745; box-shadow: 0 0 6px #28a745; }
+        .player-count {
+            background: #1e2a3a; padding: 0.3rem 1rem; border-radius: 40px;
+            font-size: 0.9rem; font-weight: 600; color: #00e5ff;
+        }
+        .badge { background: #ff6b3522; color: #ff6b35; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; }
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.8rem;
+        }
+        .card {
+            background: rgba(18, 22, 35, 0.8);
+            backdrop-filter: blur(2px);
+            border-radius: 24px;
+            border: 1px solid rgba(0,229,255,0.15);
+            overflow: hidden;
+            margin-bottom: 1.8rem;
+        }
+        .card-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.2);
+        }
+        .card-body { padding: 1.5rem; }
+        .task-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.8rem;
+            border-bottom: 1px solid #1e2a3a;
+            padding-bottom: 1.2rem;
+        }
+        .task-btn {
+            background: #11161f; border: 1px solid #2a3440; color: #b0c4de;
+            padding: 0.5rem 1rem; border-radius: 40px; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .task-btn.active { background: #ff6b35; border-color: #ff6b35; color: white; box-shadow: 0 0 8px rgba(255,107,53,0.4); }
+        .who-group {
+            background: #0f1119; border-radius: 16px; padding: 1.2rem; margin-bottom: 1.5rem;
+        }
+        .radio-group { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 0.8rem 0 1rem; }
+        .radio-group label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; }
+        select, input {
+            background: #0b0e17; border: 1px solid #2a3440; padding: 0.6rem 1rem;
+            border-radius: 12px; color: white; font-size: 0.9rem; width: 100%;
+            margin-top: 0.3rem;
+        }
+        .param-row { margin-bottom: 1.2rem; }
+        .param-row label { font-size: 0.8rem; color: #8e9eae; display: block; margin-bottom: 0.3rem; }
+        .execute-btn {
+            background: #00e5ff; border: none; color: #0b0e17; font-weight: 800;
+            padding: 0.8rem 1.8rem; border-radius: 40px; width: 100%; font-size: 1rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .player-list { max-height: 320px; overflow-y: auto; }
+        .player-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.7rem 0; border-bottom: 1px solid #1e2a3a;
+        }
+        .preset-list { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+        .preset-chip {
+            background: #1e2a3a; border-radius: 40px; padding: 0.3rem 1rem;
+            font-size: 0.75rem; cursor: pointer; transition: 0.1s;
+        }
+        .log-area {
+            background: #0a0c12; border-radius: 16px; padding: 1rem;
+            font-family: monospace; font-size: 0.75rem; height: 200px; overflow-y: auto;
+        }
+        .log-line { border-bottom: 1px solid #1a1f2a; padding: 0.3rem 0; color: #b0c4de; font-family: monospace; }
+        .raw-json textarea {
+            width: 100%; background: #0b0e17; border: 1px solid #2a3440;
+            border-radius: 12px; padding: 0.8rem; color: #00e5ff;
+            font-family: monospace; font-size: 0.8rem;
+        }
+        .ws-config {
+            background: #0f1119; border-radius: 16px; padding: 0.8rem 1rem;
+            margin-bottom: 1rem; font-size: 0.75rem; display: flex; gap: 1rem;
+            flex-wrap: wrap; align-items: center;
+        }
+        .btn-sm { background: #2a3440; border: none; padding: 0.4rem 1rem; border-radius: 30px; color: white; cursor: pointer; }
+        @media (max-width: 900px) { .grid-2col { grid-template-columns: 1fr; } body { padding: 1rem; } }
+        
+        /* DB Manager styles */
+        .db-section {
+            margin-top: 3rem;
+            border-top: 2px solid rgba(0,229,255,0.2);
+            padding-top: 2rem;
+        }
+        .db-manager {
+            background: rgba(10, 14, 23, 0.9);
+            border-radius: 28px;
+            border: 1px solid rgba(0,229,255,0.3);
+            overflow: hidden;
+        }
+        .db-header {
+            background: #0f1220;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 1px solid #2a3440;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .db-header h3 {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .db-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .db-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .db-control-group label {
+            font-size: 0.7rem;
+            color: #8e9eae;
+            letter-spacing: 0.5px;
+        }
+        .table-input {
+            background: #0b0e17;
+            border: 1px solid #ff6b35;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            width: 180px;
+        }
+        .column-picker {
+            background: #11161f;
+            border-radius: 20px;
+            padding: 1rem;
+            margin: 1rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 1px solid #2a3440;
+        }
+        .column-check {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #1e2a3a;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+        .data-table-wrapper {
+            overflow-x: auto;
+            padding: 0 1rem 1rem 1rem;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #2a3440;
+            padding: 0.5rem 0.8rem;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .data-table th {
+            background: #0f1220;
+            color: #00e5ff;
+        }
+        .data-table input {
+            background: #0b0e17;
+            border: 1px solid #3a4455;
+            padding: 0.3rem;
+            border-radius: 8px;
+            color: white;
+            width: 100%;
+            min-width: 100px;
+        }
+        .action-bar {
+            display: flex;
+            gap: 0.8rem;
+            margin: 1rem 1.5rem;
+            justify-content: flex-end;
+        }
+        .db-refresh {
+            background: #2a3440;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+        .status-msg {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: #a0d6ff;
+        }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <!-- ========== STATUS BAR ========== -->
+    <div class="status-bar">
+        <div class="connection">
+            <span class="status-led" id="statusLed"></span>
+            <span id="connectionStatusText">Disconnected</span>
+            <span class="player-count" id="playerCountDisplay">👥 0 players online</span>
+        </div>
+        <div><span class="badge">⚡ LIVE ADMIN · Edge Bridge + DB Manager</span></div>
+    </div>
+
+    <!-- WebSocket connection (pre-configured) -->
+    <div class="ws-config">
+        <span style="font-weight: 600;">🔌 Edge WebSocket:</span>
+        <span id="wsUrlDisplay" style="font-family:monospace; font-size:0.8rem;">wss://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin</span>
+        <button id="connectBtn" class="btn-sm">Connect</button>
+        <button id="disconnectBtn" class="btn-sm" disabled>Disconnect</button>
+        <span id="wsStatus" style="font-size:0.7rem; color:#aaa;"></span>
+    </div>
+
+    <div class="grid-2col">
+        <!-- LEFT: COMMAND BUILDER -->
+        <div>
+            <div class="card">
+                <div class="card-header">📝 COMMAND BUILDER (Task → Who → Params)</div>
+                <div class="card-body">
+                    <div class="task-selector" id="taskSelector">
+                        <button data-task="get_player" class="task-btn active">Get player</button>
+                        <button data-task="kick" class="task-btn">Kick</button>
+                        <button data-task="add_item" class="task-btn">Add item</button>
+                        <button data-task="remove_item" class="task-btn">Remove item</button>
+                        <button data-task="notify" class="task-btn">Notification</button>
+                        <button data-task="mesh" class="task-btn">Change mesh</button>
+                        <button data-task="theme" class="task-btn">UI Theme</button>
+                        <button data-task="game_state" class="task-btn">Game State</button>
+                        <button data-task="custom" class="task-btn">🎮 Custom</button>
+                    </div>
+                    <div class="who-group">
+                        <div style="font-weight: 600;">🎯 Who</div>
+                        <div class="radio-group" id="whoRadios">
+                            <label><input type="radio" name="whoType" value="all" checked> All players</label>
+                            <label><input type="radio" name="whoType" value="single"> Single player</label>
+                            <label><input type="radio" name="whoType" value="group"> Group</label>
+                        </div>
+                        <div id="whoDetails">
+                            <select id="singlePlayerSelect" style="display: none;"></select>
+                            <select id="groupSelect" style="display: none;"><option>Admins</option><option>Premium</option></select>
+                        </div>
+                    </div>
+                    <div id="paramsPanel"></div>
+                    <button class="execute-btn" id="executeCmd">▶ EXECUTE COMMAND</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">🔧 RAW JSON (custom command)</div>
+                <div class="card-body">
+                    <div class="raw-json">
+                        <textarea id="rawJsonArea" rows="4">{"target":"all","command":{"task":"custom_raw","parameters":{"method":"ping"}}}</textarea>
+                        <button id="sendRawBtn" style="margin-top:0.8rem; background:#2a3440; width:100%; padding:0.5rem; border-radius:30px;">📡 Send Raw JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- RIGHT: PLAYERS + PRESETS + LOG -->
+        <div>
+            <div class="card">
+                <div class="card-header">👥 ONLINE PLAYERS <button id="refreshPlayersBtn" style="margin-left:auto; background:none;">🔄</button></div>
+                <div class="card-body"><div class="player-list" id="playerListContainer">💡 Connect to WebSocket</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header">📋 QUICK PRESETS</div>
+                <div class="card-body">
+                    <div class="preset-list" id="presetContainer">
+                        <div class="preset-chip" data-preset='{"task":"add_item","who":"single","what":"coin","amount":100}'>💰 Give 100 Coins</div>
+                        <div class="preset-chip" data-preset='{"task":"notify","who":"all","message":"Maintenance in 5 min","style":"banner"}'>📢 Server Restart</div>
+                    </div>
+                    <div style="margin-top:1rem;"><input type="text" id="newPresetName" placeholder="Preset name"><button id="saveCurrentAsPreset" style="background:#ff6b35;">+ Save</button></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">📨 CALLBACK LOG</div>
+                <div class="card-body"><div class="log-area" id="logPanel"></div><button id="clearLogBtn" style="margin-top:0.6rem; background:none; border:1px solid #2a3440;">Clear log</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DATABASE MANAGER (via Edge Function Proxy) ========== -->
+    <div class="db-section">
+        <div class="db-manager">
+            <div class="db-header">
+                <h3>🗄️ DATABASE MANAGER <span style="font-size:0.7rem;">(read/edit any table via edge proxy)</span></h3>
+                <div class="db-controls">
+                    <div class="db-control-group">
+                        <label>📋 TABLE NAME</label>
+                        <input type="text" id="tableNameInput" class="table-input" placeholder="users, products, ..." value="users">
+                    </div>
+                    <button id="loadTableBtn" class="btn-sm" style="background:#ff6b35;">🔌 Load Table</button>
+                </div>
+            </div>
+            <div id="columnPickerContainer" class="column-picker" style="display: none;">
+                <span style="font-size:0.7rem; color:#aaa;">📌 Select columns:</span>
+                <div id="columnChecklist" style="display:flex; flex-wrap:wrap; gap:0.5rem;"></div>
+            </div>
+            <div id="dataTableWrapper" class="data-table-wrapper" style="display: none;">
+                <table class="data-table" id="dataTable">
+                    <thead id="tableHeader"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <div class="action-bar" id="dbActionBar" style="display: none;">
+                <button id="refreshDataBtn" class="db-refresh">🔄 Refresh</button>
+                <button id="addRowBtn" class="db-refresh" style="background:#28a745;">➕ Add Row</button>
+                <span id="dbStatusMsg" class="status-msg"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIGURATION (HARDCODED) ====================
+    const SUPABASE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co";
+    const EDGE_WS_URL = "wss://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin";
+    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg";
+    
+    // Display WS URL in UI
+    document.getElementById("wsUrlDisplay").innerText = EDGE_WS_URL;
+    
+    // ==================== WEBSOCKET BRIDGE (same as before) ====================
+    let ws = null, connected = false, currentOnlinePlayers = [];
+    let currentTask = "get_player";
+    const singlePlayerSelect = document.getElementById("singlePlayerSelect");
+    const groupSelect = document.getElementById("groupSelect");
+    const logPanel = document.getElementById("logPanel");
+    const playerCountSpan = document.getElementById("playerCountDisplay");
+    const playerListContainer = document.getElementById("playerListContainer");
+    const statusLed = document.getElementById("statusLed");
+    const connectionStatusText = document.getElementById("connectionStatusText");
+    const wsStatusSpan = document.getElementById("wsStatus");
+
+    function addLog(msg, isError = false) {
+        let div = document.createElement("div"); div.className = "log-line"; div.style.color = isError ? "#ff6b35" : "#b0c4de";
+        div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logPanel.appendChild(div); div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        if(logPanel.children.length > 80) logPanel.removeChild(logPanel.children[0]);
+    }
+    function updateConnectionUI(conn) {
+        connected = conn;
+        if(conn) {
+            statusLed.className = "status-led connected"; connectionStatusText.innerText = "Connected (admin)";
+            document.getElementById("connectBtn").disabled = true; document.getElementById("disconnectBtn").disabled = false;
+            wsStatusSpan.innerText = "● live";
+        } else {
+            statusLed.className = "status-led"; connectionStatusText.innerText = "Disconnected";
+            document.getElementById("connectBtn").disabled = false; document.getElementById("disconnectBtn").disabled = true;
+            playerListContainer.innerHTML = "<div class='log-line'>🔌 Disconnected.</div>"; playerCountSpan.innerText = "👥 0 players";
+            currentOnlinePlayers = []; wsStatusSpan.innerText = "○ offline";
+        }
+    }
+    function renderPlayerList() {
+        if(!playerListContainer) return;
+        if(currentOnlinePlayers.length === 0) { playerListContainer.innerHTML = "<div class='log-line'>✨ No players connected.</div>"; playerCountSpan.innerText = "👥 0 players"; return; }
+        let html = ""; currentOnlinePlayers.forEach(p => { html += `<div class="player-item"><div><span class="player-name">${escapeHtml(p.username || p.id.slice(0,6))}</span><span class="player-meta"> 🆔 ${p.id.slice(0,8)}</span></div><div><button onclick="setTargetPlayer('${p.id}')">🎯</button></div></div>`; });
+        playerListContainer.innerHTML = html; playerCountSpan.innerText = `👥 ${currentOnlinePlayers.length} players`;
+        let selectHtml = `<option value="">-- Select player --</option>`; currentOnlinePlayers.forEach(p => { selectHtml += `<option value="${p.id}">${escapeHtml(p.username || p.id)}</option>`; }); singlePlayerSelect.innerHTML = selectHtml;
+    }
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function handleWebSocketMessage(data) {
+        if(data.type === "player_list") { currentOnlinePlayers = data.players || []; renderPlayerList(); }
+        else if(data.type === "player_joined") { if(data.playerId && !currentOnlinePlayers.find(p=>p.id===data.playerId)) currentOnlinePlayers.push({ id: data.playerId, username: data.username }); renderPlayerList(); }
+        else if(data.type === "player_disconnected") { currentOnlinePlayers = currentOnlinePlayers.filter(p => p.id !== data.playerId); renderPlayerList(); }
+        else if(data.type === "callback") addLog(`📞 Callback: ${JSON.stringify(data.data).substring(0,100)}`);
+        else if(data.type === "forward_ack") addLog(`✅ Command delivered to ${data.target}`);
+        else addLog(`📨 ${JSON.stringify(data).substring(0,120)}`);
+    }
+    function sendCommandToEdge(commandPayload, targetId = null) {
+        if(!ws || ws.readyState !== WebSocket.OPEN) { addLog("❌ WebSocket not connected", true); return false; }
+        let target = "all"; let whoType = document.querySelector('input[name="whoType"]:checked')?.value;
+        if(whoType === "single" && targetId) target = targetId;
+        else if(whoType === "single" && singlePlayerSelect?.value) target = singlePlayerSelect.value;
+        else if(whoType === "group") target = groupSelect?.value || "group";
+        let msg = { type: "command", target: target, command: commandPayload, callback_id: crypto.randomUUID() };
+        ws.send(JSON.stringify(msg)); addLog(`📤 → [${target}] ${commandPayload.task || commandPayload}`);
+        return true;
+    }
+    function buildCommandFromUI() {
+        let task = currentTask, params = {};
+        if(task === "kick") { params.reason = document.getElementById("kickReason")?.value || ""; params.duration = parseInt(document.getElementById("kickDuration")?.value) || 0; }
+        else if(task === "add_item") { let what = document.getElementById("itemWhat")?.value; let amount = parseInt(document.getElementById("itemAmount")?.value); if(what === "item_id") what = document.getElementById("customItemId")?.value; params.what = what; params.amount = amount; }
+        else if(task === "notify") { params.message = document.getElementById("notifyMsg")?.value; params.style = document.getElementById("notifyStyle")?.value; }
+        else if(task === "mesh") { params.target = document.getElementById("meshTarget")?.value; params.url = document.getElementById("meshUrl")?.value; }
+        else if(task === "theme") params.theme_id = document.getElementById("themeId")?.value;
+        else if(task === "game_state") { params.manager = document.getElementById("stateManager")?.value; params.state = document.getElementById("stateName")?.value; params.value = document.getElementById("stateValue")?.value; }
+        else if(task === "custom") { params.autoload = document.getElementById("customAutoload")?.value; params.method = document.getElementById("customMethod")?.value; try { params.args = JSON.parse(document.getElementById("customArgs")?.value || "[]"); } catch(e) { params.args = []; } }
+        return { task, parameters: params };
+    }
+    function renderParams() {
+        let html = "";
+        if (currentTask === "get_player") html = `<div class="param-row"><label>📋 Fetch online players</label></div>`;
+        else if (currentTask === "kick") html = `<div class="param-row"><label>Reason</label><input id="kickReason"></div><div class="param-row"><label>Soft ban (min)</label><input id="kickDuration" value="0"></div>`;
+        else if (currentTask === "add_item") html = `<div class="param-row"><label>What</label><select id="itemWhat"><option>coin</option><option>gem</option><option>item_id</option></select></div><div class="param-row"><label>Amount</label><input id="itemAmount" value="100"></div><div id="customItemDiv" style="display:none;"><label>Item ID</label><input id="customItemId"></div>`;
+        else if (currentTask === "notify") html = `<div class="param-row"><label>Message</label><input id="notifyMsg"></div><div class="param-row"><label>Style</label><select id="notifyStyle"><option>toast</option><option>banner</option></select></div>`;
+        else if (currentTask === "mesh") html = `<div class="param-row"><label>Target</label><select id="meshTarget"><option>character</option></select></div><div class="param-row"><label>URL</label><input id="meshUrl"></div>`;
+        else if (currentTask === "theme") html = `<div class="param-row"><label>Theme ID</label><input id="themeId"></div>`;
+        else if (currentTask === "game_state") html = `<div class="param-row"><label>Manager</label><input id="stateManager"></div><div class="param-row"><label>State</label><input id="stateName"></div><div class="param-row"><label>Value</label><input id="stateValue"></div>`;
+        else if (currentTask === "custom") html = `<div class="param-row"><label>Autoload</label><input id="customAutoload"></div><div class="param-row"><label>Method</label><input id="customMethod"></div><div class="param-row"><label>Args (JSON)</label><textarea id="customArgs" rows="2">[]</textarea></div>`;
+        document.getElementById("paramsPanel").innerHTML = html;
+        if (currentTask === "add_item") document.getElementById("itemWhat")?.addEventListener("change", (e) => { let div = document.getElementById("customItemDiv"); if(div) div.style.display = e.target.value === "item_id" ? "block" : "none"; });
+    }
+    document.getElementById("connectBtn")?.addEventListener("click", () => {
+        ws = new WebSocket(EDGE_WS_URL);
+        ws.onopen = () => { updateConnectionUI(true); ws.send(JSON.stringify({ type: "register", username: "AdminWeb" })); addLog("Connected to edge."); setTimeout(() => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type: "get_players" })); }, 500); };
+        ws.onmessage = (e) => { try { handleWebSocketMessage(JSON.parse(e.data)); } catch(err){} };
+        ws.onclose = () => { updateConnectionUI(false); addLog("Disconnected"); };
+    });
+    document.getElementById("disconnectBtn")?.addEventListener("click", () => { if(ws) ws.close(); });
+    document.getElementById("refreshPlayersBtn")?.addEventListener("click", () => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type: "get_players" })); });
+    document.getElementById("executeCmd")?.addEventListener("click", () => { let cmd = buildCommandFromUI(); sendCommandToEdge(cmd); });
+    document.getElementById("sendRawBtn")?.addEventListener("click", () => { try { let raw = JSON.parse(document.getElementById("rawJsonArea").value); sendCommandToEdge(raw); } catch(e){ addLog("Invalid JSON", true); } });
+    document.getElementById("clearLogBtn")?.addEventListener("click", () => { logPanel.innerHTML = ""; });
+    document.querySelectorAll(".task-btn").forEach(btn => { btn.addEventListener("click", () => { document.querySelectorAll(".task-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); currentTask = btn.dataset.task; renderParams(); }); });
+    window.setTargetPlayer = (playerId) => { let radio = document.querySelector('input[value="single"]'); if(radio) radio.checked = true; singlePlayerSelect.value = playerId; addLog(`🎯 target: ${playerId}`); };
+    renderParams();
+    
+    // ==================== DATABASE MANAGER (via EDGE FUNCTION HTTP) ====================
+    const DB_EDGE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin/db";
+    let currentTable = "";
+    let availableColumns = [];
+    let selectedColumns = [];
+    let tableRows = [];
+    
+    const tableNameInput = document.getElementById("tableNameInput");
+    const loadTableBtn = document.getElementById("loadTableBtn");
+    const columnPickerContainerDb = document.getElementById("columnPickerContainer");
+    const dataTableWrapperDb = document.getElementById("dataTableWrapper");
+    const dbActionBarDb = document.getElementById("dbActionBar");
+    const columnChecklistDb = document.getElementById("columnChecklist");
+    const tableHeaderDb = document.getElementById("tableHeader");
+    const tableBodyDb = document.getElementById("tableBody");
+    const refreshDataBtnDb = document.getElementById("refreshDataBtn");
+    const addRowBtnDb = document.getElementById("addRowBtn");
+    const dbStatusMsgDb = document.getElementById("dbStatusMsg");
+    
+    async function callDbEdge(action, table, payload = null, id = null) {
+        let url = `${DB_EDGE_URL}?table=${encodeURIComponent(table)}&action=${action}`;
+        if(id) url += `&id=${encodeURIComponent(id)}`;
+        const options = { method: "GET", headers: { "Content-Type": "application/json" } };
+        if(payload && (action === "insert" || action === "update")) {
+            options.method = "POST";
+            options.body = JSON.stringify(payload);
+        }
+        try {
+            const res = await fetch(url, options);
+            return await res.json();
+        } catch(e) { return { error: e.message }; }
+    }
+    
+    async function loadTableMetadata(tableName) {
+        const result = await callDbEdge("columns", tableName);
+        if(result.error) { dbStatusMsgDb.innerText = `❌ ${result.error}`; return null; }
+        return result.columns || [];
+    }
+    
+    async function loadTableData(tableName, columns) {
+        const result = await callDbEdge("data", tableName);
+        if(result.error) { dbStatusMsgDb.innerText = `❌ ${result.error}`; return []; }
+        return result.data || [];
+    }
+    
+    async function updateRow(tableName, id, updates) {
+        return await callDbEdge("update", tableName, updates, id);
+    }
+    
+    async function deleteRow(tableName, id) {
+        return await callDbEdge("delete", tableName, null, id);
+    }
+    
+    async function insertRow(tableName, rowData) {
+        return await callDbEdge("insert", tableName, rowData);
+    }
+    
+    function renderDataTable(rows, columns) {
+        if(!rows.length) { tableBodyDb.innerHTML = `<tr><td colspan="99">📭 No data in this table. Click "Add Row".</td></tr>`; tableHeaderDb.innerHTML = `<td>${columns.map(c => `<th>${c}</th>`).join('')}<th>Actions</th></tr>`; return; }
+        const pkCol = columns.includes("id") ? "id" : columns[0];
+        tableHeaderDb.innerHTML = `<td>${columns.map(c => `<th>${c} ${c === pkCol ? '🔑' : ''}</th>`).join('')}<th>Actions</th></tr>`;
+        tableBodyDb.innerHTML = rows.map((row, idx) => {
+            const pkValue = row[pkCol];
+            let rowHtml = `<tr data-pk="${escapeHtml(pkValue)}">`;
+            columns.forEach(col => {
+                let val = row[col] !== undefined && row[col] !== null ? String(row[col]) : '';
+                if(col === pkCol) rowHtml += `<td class="pk-cell" style="font-weight:bold;">${escapeHtml(val)}</td>`;
+                else rowHtml += `<td><input type="text" class="edit-field-db" data-col="${col}" data-pk="${escapeHtml(pkValue)}" value="${escapeHtml(val)}" style="width:100%; background:#0b0e17; border:1px solid #3a4455; padding:0.3rem; border-radius:6px;"></td>`;
+            });
+            rowHtml += `<td><button class="save-row-db" data-pk="${escapeHtml(pkValue)}" style="background:#28a745; border:none; padding:0.2rem 0.6rem; margin-right:0.3rem;">💾 Save</button><button class="delete-row-db" data-pk="${escapeHtml(pkValue)}" style="background:#ff6b35; border:none; padding:0.2rem 0.6rem;">🗑️</button></td></tr>`;
+            return rowHtml;
+        }).join('');
+        document.querySelectorAll('.save-row-db').forEach(btn => btn.addEventListener('click', async (e) => {
+            const pk = btn.getAttribute('data-pk');
+            const updates = {};
+            document.querySelectorAll(`.edit-field-db[data-pk="${pk}"]`).forEach(input => {
+                let col = input.getAttribute('data-col');
+                let newVal = input.value;
+                if(!isNaN(newVal) && newVal.trim() !== '') newVal = Number(newVal);
+                if(newVal === 'true') newVal = true; if(newVal === 'false') newVal = false;
+                updates[col] = newVal;
+            });
+            const res = await updateRow(currentTable, pk, updates);
+            if(res.error) dbStatusMsgDb.innerText = `❌ Update failed: ${res.error}`;
+            else { dbStatusMsgDb.innerText = `✅ Updated ${pk}`; await refreshData(); }
+        }));
+        document.querySelectorAll('.delete-row-db').forEach(btn => btn.addEventListener('click', async (e) => {
+            const pk = btn.getAttribute('data-pk');
+            if(!confirm(`Delete row ${pk}?`)) return;
+            const res = await deleteRow(currentTable, pk);
+            if(res.error) dbStatusMsgDb.innerText = `❌ Delete failed: ${res.error}`;
+            else { dbStatusMsgDb.innerText = `🗑️ Deleted ${pk}`; await refreshData(); }
+        }));
+    }
+    
+    async function refreshData() {
+        if(!currentTable || !selectedColumns.length) return;
+        const data = await loadTableData(currentTable, selectedColumns);
+        tableRows = data;
+        renderDataTable(data, selectedColumns);
+        dbStatusMsgDb.innerText = `🔄 Refreshed — ${data.length} rows`;
+    }
+    
+    loadTableBtn.addEventListener("click", async () => {
+        const tableName = tableNameInput.value.trim();
+        if(!tableName) { dbStatusMsgDb.innerText = "❌ Enter table name"; return; }
+        currentTable = tableName;
+        dbStatusMsgDb.innerText = `Loading ${tableName}...`;
+        const cols = await loadTableMetadata(tableName);
+        if(!cols || cols.length === 0) { dbStatusMsgDb.innerText = `❌ No columns found for ${tableName}`; return; }
+        availableColumns = cols;
+        selectedColumns = [...cols];
+        columnChecklistDb.innerHTML = cols.map(col => `<label class="column-check"><input type="checkbox" value="${col}" checked> ${col}</label>`).join('');
+        const data = await loadTableData(tableName, selectedColumns);
+        tableRows = data;
+        renderDataTable(data, selectedColumns);
+        columnPickerContainerDb.style.display = "flex";
+        dataTableWrapperDb.style.display = "block";
+        dbActionBarDb.style.display = "flex";
+        dbStatusMsgDb.innerText = `✅ Loaded ${tableName} (${data.length} rows)`;
+        document.querySelectorAll('#columnChecklist input').forEach(cb => cb.addEventListener('change', async () => {
+            selectedColumns = Array.from(document.querySelectorAll('#columnChecklist input:checked')).map(c => c.value);
+            if(selectedColumns.length) await refreshData();
+        }));
+    });
+    
+    refreshDataBtnDb.addEventListener("click", refreshData);
+    addRowBtnDb.addEventListener("click", async () => {
+        if(!currentTable) return;
+        const newRow = {};
+        availableColumns.forEach(col => { if(col !== 'id' && col !== 'created_at') newRow[col] = ''; });
+        const res = await insertRow(currentTable, newRow);
+        if(res.error) dbStatusMsgDb.innerText = `❌ Insert failed: ${res.error}`;
+        else { dbStatusMsgDb.innerText = `➕ New row added`; await refreshData(); }
+    });
+    updateConnectionUI(false);
+</script>
+</body>
+</html>
