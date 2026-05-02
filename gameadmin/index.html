@@ -362,7 +362,7 @@
 <script>
     // ==================== CONFIGURATION (HARDCODED) ====================
     const SUPABASE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co";
-    const EDGE_WS_URL = "wss://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin";
+    const EDGE_WS_URL = "wss://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin?type=admin";
     const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg";
     
     // Display WS URL in UI
@@ -466,6 +466,7 @@
     
     // ==================== DATABASE MANAGER (via EDGE FUNCTION HTTP) ====================
     const DB_EDGE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin/db";
+    const ADMIN_SECRET = "myadmin"; // must match ADMIN_SECRET env var on edge
     let currentTable = "";
     let availableColumns = [];
     let selectedColumns = [];
@@ -486,7 +487,7 @@
     async function callDbEdge(action, table, payload = null, id = null) {
         let url = `${DB_EDGE_URL}?table=${encodeURIComponent(table)}&action=${action}`;
         if(id) url += `&id=${encodeURIComponent(id)}`;
-        const options = { method: "GET", headers: { "Content-Type": "application/json" } };
+        const options = { method: "GET", headers: { "Content-Type": "application/json", "X-Admin-Secret": ADMIN_SECRET } };
         if(payload && (action === "insert" || action === "update")) {
             options.method = "POST";
             options.body = JSON.stringify(payload);
