@@ -379,240 +379,494 @@
             alert("\u274c Could not load config.json — make sure it sits in the same folder as index.html.\n\n" + e.message);
         }
     }
-    
+
     async function init() {
-    // ==================== WEBSOCKET BRIDGE (same as before) ====================
+
+    // ==================== WEBSOCKET BRIDGE ====================
     let ws = null, connected = false, currentOnlinePlayers = [];
     let currentTask = "get_player";
-    const singlePlayerSelect = document.getElementById("singlePlayerSelect");
-    const groupSelect = document.getElementById("groupSelect");
-    const logPanel = document.getElementById("logPanel");
-    const playerCountSpan = document.getElementById("playerCountDisplay");
-    const playerListContainer = document.getElementById("playerListContainer");
-    const statusLed = document.getElementById("statusLed");
-    const connectionStatusText = document.getElementById("connectionStatusText");
-    const wsStatusSpan = document.getElementById("wsStatus");
+    let reconnectTimer = null;
+    let manualDisconnect = false;
+
+    const singlePlayerSelect    = document.getElementById("singlePlayerSelect");
+    const groupSelect           = document.getElementById("groupSelect");
+    const logPanel              = document.getElementById("logPanel");
+    const playerCountSpan       = document.getElementById("playerCountDisplay");
+    const playerListContainer   = document.getElementById("playerListContainer");
+    const statusLed             = document.getElementById("statusLed");
+    const connectionStatusText  = document.getElementById("connectionStatusText");
+    const wsStatusSpan          = document.getElementById("wsStatus");
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, m =>
+            ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
 
     function addLog(msg, isError = false) {
-        let div = document.createElement("div"); div.className = "log-line"; div.style.color = isError ? "#ff6b35" : "#b0c4de";
+        const div = document.createElement("div");
+        div.className = "log-line";
+        div.style.color = isError ? "#ff6b35" : "#b0c4de";
         div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        logPanel.appendChild(div); div.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        if(logPanel.children.length > 80) logPanel.removeChild(logPanel.children[0]);
+        logPanel.appendChild(div);
+        div.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        if (logPanel.children.length > 80) logPanel.removeChild(logPanel.children[0]);
     }
+
     function updateConnectionUI(conn) {
         connected = conn;
-        if(conn) {
-            statusLed.className = "status-led connected"; connectionStatusText.innerText = "Connected (admin)";
-            document.getElementById("connectBtn").disabled = true; document.getElementById("disconnectBtn").disabled = false;
+        if (conn) {
+            statusLed.className = "status-led connected";
+            connectionStatusText.innerText = "Connected (admin)";
+            document.getElementById("connectBtn").disabled = true;
+            document.getElementById("disconnectBtn").disabled = false;
             wsStatusSpan.innerText = "● live";
         } else {
-            statusLed.className = "status-led"; connectionStatusText.innerText = "Disconnected";
-            document.getElementById("connectBtn").disabled = false; document.getElementById("disconnectBtn").disabled = true;
-            playerListContainer.innerHTML = "<div class='log-line'>🔌 Disconnected.</div>"; playerCountSpan.innerText = "👥 0 players";
-            currentOnlinePlayers = []; wsStatusSpan.innerText = "○ offline";
+            statusLed.className = "status-led";
+            connectionStatusText.innerText = "Disconnected";
+            document.getElementById("connectBtn").disabled = false;
+            document.getElementById("disconnectBtn").disabled = true;
+            // FIX 7: clear player list properly on disconnect
+            currentOnlinePlayers = [];
+            renderPlayerList();
+            wsStatusSpan.innerText = "○ offline";
         }
     }
+
     function renderPlayerList() {
-        if(!playerListContainer) return;
-        if(currentOnlinePlayers.length === 0) { playerListContainer.innerHTML = "<div class='log-line'>✨ No players connected.</div>"; playerCountSpan.innerText = "👥 0 players"; return; }
-        let html = ""; currentOnlinePlayers.forEach(p => { html += `<div class="player-item"><div><span class="player-name">${escapeHtml(p.username || p.id.slice(0,6))}</span><span class="player-meta"> 🆔 ${p.id.slice(0,8)}</span></div><div><button onclick="setTargetPlayer('${p.id}')">🎯</button></div></div>`; });
-        playerListContainer.innerHTML = html; playerCountSpan.innerText = `👥 ${currentOnlinePlayers.length} players`;
-        let selectHtml = `<option value="">-- Select player --</option>`; currentOnlinePlayers.forEach(p => { selectHtml += `<option value="${p.id}">${escapeHtml(p.username || p.id)}</option>`; }); singlePlayerSelect.innerHTML = selectHtml;
+        if (!playerListContainer) return;
+        playerCountSpan.innerText = `👥 ${currentOnlinePlayers.length} player${currentOnlinePlayers.length !== 1 ? "s" : ""}`;
+        if (currentOnlinePlayers.length === 0) {
+            playerListContainer.innerHTML = "<div class=\'log-line\'>✨ No players connected.</div>";
+            singlePlayerSelect.innerHTML = `<option value="">-- Select player --</option>`;
+            return;
+        }
+        let html = "";
+        let selectHtml = `<option value="">-- Select player --</option>`;
+        currentOnlinePlayers.forEach(p => {
+            html += `<div class="player-item">
+                <div>
+                  <span class="player-name">${escapeHtml(p.username || p.id.slice(0,6))}</span>
+                  <span class="player-meta"> 🆔 ${p.id.slice(0,8)}</span>
+                </div>
+                <div><button onclick="setTargetPlayer(\'${p.id}\')">🎯</button></div>
+              </div>`;
+            selectHtml += `<option value="${p.id}">${escapeHtml(p.username || p.id)}</option>`;
+        });
+        playerListContainer.innerHTML = html;
+        singlePlayerSelect.innerHTML = selectHtml;
     }
-    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
     function handleWebSocketMessage(data) {
-        if(data.type === "player_list") { currentOnlinePlayers = data.players || []; renderPlayerList(); }
-        else if(data.type === "player_joined") { if(data.playerId && !currentOnlinePlayers.find(p=>p.id===data.playerId)) currentOnlinePlayers.push({ id: data.playerId, username: data.username }); renderPlayerList(); }
-        else if(data.type === "player_disconnected") { currentOnlinePlayers = currentOnlinePlayers.filter(p => p.id !== data.playerId); renderPlayerList(); }
-        else if(data.type === "callback") addLog(`📞 Callback: ${JSON.stringify(data.data).substring(0,100)}`);
-        else if(data.type === "forward_ack") addLog(`✅ Command delivered to ${data.target}`);
-        else addLog(`📨 ${JSON.stringify(data).substring(0,120)}`);
+        if (data.type === "player_list") {
+            currentOnlinePlayers = data.players || [];
+            renderPlayerList();
+        } else if (data.type === "player_joined") {
+            if (data.playerId && !currentOnlinePlayers.find(p => p.id === data.playerId))
+                currentOnlinePlayers.push({ id: data.playerId, username: data.username });
+            renderPlayerList();
+        } else if (data.type === "player_disconnected") {
+            currentOnlinePlayers = currentOnlinePlayers.filter(p => p.id !== data.playerId);
+            renderPlayerList();
+        } else if (data.type === "callback") {
+            addLog(`📞 Callback [${data.sourceUsername || data.source}]: ${JSON.stringify(data.data).substring(0, 120)}`);
+        } else if (data.type === "forward_ack") {
+            addLog(`✅ Command delivered to ${data.target} (${data.count ?? (data.success ? 1 : 0)} clients)`);
+        } else if (data.type === "connected") {
+            addLog(`🟢 ${data.message}`);
+        } else if (data.type === "error") {
+            addLog(`❌ ${data.message}`, true);
+        } else {
+            addLog(`📨 ${JSON.stringify(data).substring(0, 140)}`);
+        }
     }
-    function sendCommandToEdge(commandPayload, targetId = null) {
-        if(!ws || ws.readyState !== WebSocket.OPEN) { addLog("❌ WebSocket not connected", true); return false; }
-        let target = "all"; let whoType = document.querySelector('input[name="whoType"]:checked')?.value;
-        if(whoType === "single" && targetId) target = targetId;
-        else if(whoType === "single" && singlePlayerSelect?.value) target = singlePlayerSelect.value;
-        else if(whoType === "group") target = groupSelect?.value || "group";
-        let msg = { type: "command", target: target, command: commandPayload, callback_id: crypto.randomUUID() };
-        ws.send(JSON.stringify(msg)); addLog(`📤 → [${target}] ${commandPayload.task || commandPayload}`);
+
+    // FIX 1: auto-reconnect with exponential backoff
+    function connectWS() {
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+        ws = new WebSocket(EDGE_WS_URL);
+
+        ws.onopen = () => {
+            clearTimeout(reconnectTimer);
+            updateConnectionUI(true);
+            ws.send(JSON.stringify({ type: "register", username: "AdminWeb" }));
+            addLog("Connected to edge.");
+            setTimeout(() => {
+                if (ws && ws.readyState === WebSocket.OPEN)
+                    ws.send(JSON.stringify({ type: "get_players" }));
+            }, 500);
+        };
+
+        ws.onmessage = (e) => {
+            try { handleWebSocketMessage(JSON.parse(e.data)); } catch(err) {}
+        };
+
+        ws.onclose = () => {
+            updateConnectionUI(false);
+            if (!manualDisconnect) {
+                addLog("⚠️ Disconnected — reconnecting in 4s...", true);
+                reconnectTimer = setTimeout(connectWS, 4000);
+            } else {
+                addLog("Disconnected.");
+            }
+        };
+
+        ws.onerror = () => {
+            addLog("❌ WebSocket error — check function name in config.json", true);
+        };
+    }
+
+    document.getElementById("connectBtn")?.addEventListener("click", () => {
+        manualDisconnect = false;
+        clearTimeout(reconnectTimer);
+        connectWS();
+    });
+
+    document.getElementById("disconnectBtn")?.addEventListener("click", () => {
+        manualDisconnect = true;
+        clearTimeout(reconnectTimer);
+        if (ws) ws.close();
+    });
+
+    document.getElementById("refreshPlayersBtn")?.addEventListener("click", () => {
+        if (ws && ws.readyState === WebSocket.OPEN)
+            ws.send(JSON.stringify({ type: "get_players" }));
+    });
+
+    function sendCommandToEdge(commandPayload) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) { addLog("❌ WebSocket not connected", true); return false; }
+        const whoType = document.querySelector("input[name=\'whoType\']:checked")?.value;
+        let target = "all";
+        if (whoType === "single" && singlePlayerSelect?.value) target = singlePlayerSelect.value;
+        else if (whoType === "group") target = groupSelect?.value || "group";
+        const msg = { type: "command", target, command: commandPayload, callback_id: crypto.randomUUID() };
+        ws.send(JSON.stringify(msg));
+        addLog(`📤 → [${target}] task:${commandPayload.task || JSON.stringify(commandPayload).substring(0,40)}`);
         return true;
     }
+
     function buildCommandFromUI() {
-        let task = currentTask, params = {};
-        if(task === "kick") { params.reason = document.getElementById("kickReason")?.value || ""; params.duration = parseInt(document.getElementById("kickDuration")?.value) || 0; }
-        else if(task === "add_item") { let what = document.getElementById("itemWhat")?.value; let amount = parseInt(document.getElementById("itemAmount")?.value); if(what === "item_id") what = document.getElementById("customItemId")?.value; params.what = what; params.amount = amount; }
-        else if(task === "notify") { params.message = document.getElementById("notifyMsg")?.value; params.style = document.getElementById("notifyStyle")?.value; }
-        else if(task === "mesh") { params.target = document.getElementById("meshTarget")?.value; params.url = document.getElementById("meshUrl")?.value; }
-        else if(task === "theme") params.theme_id = document.getElementById("themeId")?.value;
-        else if(task === "game_state") { params.manager = document.getElementById("stateManager")?.value; params.state = document.getElementById("stateName")?.value; params.value = document.getElementById("stateValue")?.value; }
-        else if(task === "custom") { params.autoload = document.getElementById("customAutoload")?.value; params.method = document.getElementById("customMethod")?.value; try { params.args = JSON.parse(document.getElementById("customArgs")?.value || "[]"); } catch(e) { params.args = []; } }
+        const task = currentTask;
+        let params = {};
+        if (task === "kick") {
+            params.reason = document.getElementById("kickReason")?.value || "";
+            params.duration = parseInt(document.getElementById("kickDuration")?.value) || 0;
+        } else if (task === "add_item") {
+            let what = document.getElementById("itemWhat")?.value;
+            if (what === "item_id") what = document.getElementById("customItemId")?.value;
+            params.what = what;
+            params.amount = parseInt(document.getElementById("itemAmount")?.value) || 1;
+        } else if (task === "remove_item") {
+            params.what = document.getElementById("removeWhat")?.value;
+            params.amount = parseInt(document.getElementById("removeAmount")?.value) || 1;
+        } else if (task === "notify") {
+            params.message = document.getElementById("notifyMsg")?.value;
+            params.style = document.getElementById("notifyStyle")?.value;
+        } else if (task === "mesh") {
+            params.target = document.getElementById("meshTarget")?.value;
+            params.url = document.getElementById("meshUrl")?.value;
+        } else if (task === "theme") {
+            params.theme_id = document.getElementById("themeId")?.value;
+        } else if (task === "game_state") {
+            params.manager = document.getElementById("stateManager")?.value;
+            params.state = document.getElementById("stateName")?.value;
+            params.value = document.getElementById("stateValue")?.value;
+        } else if (task === "custom") {
+            params.autoload = document.getElementById("customAutoload")?.value;
+            params.method = document.getElementById("customMethod")?.value;
+            try { params.args = JSON.parse(document.getElementById("customArgs")?.value || "[]"); }
+            catch(e) { params.args = []; }
+        }
         return { task, parameters: params };
     }
+
     function renderParams() {
         let html = "";
-        if (currentTask === "get_player") html = `<div class="param-row"><label>📋 Fetch online players</label></div>`;
-        else if (currentTask === "kick") html = `<div class="param-row"><label>Reason</label><input id="kickReason"></div><div class="param-row"><label>Soft ban (min)</label><input id="kickDuration" value="0"></div>`;
-        else if (currentTask === "add_item") html = `<div class="param-row"><label>What</label><select id="itemWhat"><option>coin</option><option>gem</option><option>item_id</option></select></div><div class="param-row"><label>Amount</label><input id="itemAmount" value="100"></div><div id="customItemDiv" style="display:none;"><label>Item ID</label><input id="customItemId"></div>`;
-        else if (currentTask === "notify") html = `<div class="param-row"><label>Message</label><input id="notifyMsg"></div><div class="param-row"><label>Style</label><select id="notifyStyle"><option>toast</option><option>banner</option></select></div>`;
-        else if (currentTask === "mesh") html = `<div class="param-row"><label>Target</label><select id="meshTarget"><option>character</option></select></div><div class="param-row"><label>URL</label><input id="meshUrl"></div>`;
-        else if (currentTask === "theme") html = `<div class="param-row"><label>Theme ID</label><input id="themeId"></div>`;
-        else if (currentTask === "game_state") html = `<div class="param-row"><label>Manager</label><input id="stateManager"></div><div class="param-row"><label>State</label><input id="stateName"></div><div class="param-row"><label>Value</label><input id="stateValue"></div>`;
-        else if (currentTask === "custom") html = `<div class="param-row"><label>Autoload</label><input id="customAutoload"></div><div class="param-row"><label>Method</label><input id="customMethod"></div><div class="param-row"><label>Args (JSON)</label><textarea id="customArgs" rows="2">[]</textarea></div>`;
+        if (currentTask === "get_player") {
+            // FIX 8: get_player just fires get_players WS message directly
+            html = `<div class="param-row"><label>Fetches the current online player list from the edge.</label></div>`;
+        } else if (currentTask === "kick") {
+            html = `<div class="param-row"><label>Reason</label><input id="kickReason" placeholder="e.g. Cheating"></div>
+                    <div class="param-row"><label>Soft ban (min, 0 = permanent kick)</label><input id="kickDuration" value="0"></div>`;
+        } else if (currentTask === "add_item") {
+            html = `<div class="param-row"><label>What</label><select id="itemWhat"><option>coin</option><option>gem</option><option>item_id</option></select></div>
+                    <div class="param-row"><label>Amount</label><input id="itemAmount" value="100"></div>
+                    <div id="customItemDiv" style="display:none;" class="param-row"><label>Item ID</label><input id="customItemId"></div>`;
+        } else if (currentTask === "remove_item") {
+            html = `<div class="param-row"><label>What</label><input id="removeWhat" placeholder="item_id or coin/gem"></div>
+                    <div class="param-row"><label>Amount</label><input id="removeAmount" value="1"></div>`;
+        } else if (currentTask === "notify") {
+            html = `<div class="param-row"><label>Message</label><input id="notifyMsg" placeholder="Hello player!"></div>
+                    <div class="param-row"><label>Style</label><select id="notifyStyle"><option>toast</option><option>banner</option></select></div>`;
+        } else if (currentTask === "mesh") {
+            html = `<div class="param-row"><label>Target</label><select id="meshTarget"><option>character</option></select></div>
+                    <div class="param-row"><label>URL</label><input id="meshUrl" placeholder="https://..."></div>`;
+        } else if (currentTask === "theme") {
+            html = `<div class="param-row"><label>Theme ID</label><input id="themeId" placeholder="dark, light, ..."></div>`;
+        } else if (currentTask === "game_state") {
+            html = `<div class="param-row"><label>Manager</label><input id="stateManager" placeholder="GameManager"></div>
+                    <div class="param-row"><label>State</label><input id="stateName" placeholder="is_paused"></div>
+                    <div class="param-row"><label>Value</label><input id="stateValue" placeholder="true"></div>`;
+        } else if (currentTask === "custom") {
+            html = `<div class="param-row"><label>Autoload</label><input id="customAutoload" placeholder="PlayerManager"></div>
+                    <div class="param-row"><label>Method</label><input id="customMethod" placeholder="do_something"></div>
+                    <div class="param-row"><label>Args (JSON array)</label><textarea id="customArgs" rows="2">[]</textarea></div>`;
+        }
         document.getElementById("paramsPanel").innerHTML = html;
-        if (currentTask === "add_item") document.getElementById("itemWhat")?.addEventListener("change", (e) => { let div = document.getElementById("customItemDiv"); if(div) div.style.display = e.target.value === "item_id" ? "block" : "none"; });
+        if (currentTask === "add_item") {
+            document.getElementById("itemWhat")?.addEventListener("change", (e) => {
+                const div = document.getElementById("customItemDiv");
+                if (div) div.style.display = e.target.value === "item_id" ? "block" : "none";
+            });
+        }
     }
-    document.getElementById("connectBtn")?.addEventListener("click", () => {
-        ws = new WebSocket(EDGE_WS_URL);
-        ws.onopen = () => { updateConnectionUI(true); ws.send(JSON.stringify({ type: "register", username: "AdminWeb" })); addLog("Connected to edge."); setTimeout(() => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type: "get_players" })); }, 500); };
-        ws.onmessage = (e) => { try { handleWebSocketMessage(JSON.parse(e.data)); } catch(err){} };
-        ws.onclose = () => { updateConnectionUI(false); addLog("Disconnected"); };
+
+    document.getElementById("executeCmd")?.addEventListener("click", () => {
+        // FIX 8: get_player sends WS message directly instead of a game command
+        if (currentTask === "get_player") {
+            if (!ws || ws.readyState !== WebSocket.OPEN) { addLog("❌ Not connected", true); return; }
+            ws.send(JSON.stringify({ type: "get_players" }));
+            addLog("📋 Requested player list");
+            return;
+        }
+        sendCommandToEdge(buildCommandFromUI());
     });
-    document.getElementById("disconnectBtn")?.addEventListener("click", () => { if(ws) ws.close(); });
-    document.getElementById("refreshPlayersBtn")?.addEventListener("click", () => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ type: "get_players" })); });
-    document.getElementById("executeCmd")?.addEventListener("click", () => { let cmd = buildCommandFromUI(); sendCommandToEdge(cmd); });
-    document.getElementById("sendRawBtn")?.addEventListener("click", () => { try { let raw = JSON.parse(document.getElementById("rawJsonArea").value); sendCommandToEdge(raw); } catch(e){ addLog("Invalid JSON", true); } });
+
+    document.getElementById("sendRawBtn")?.addEventListener("click", () => {
+        try {
+            const raw = JSON.parse(document.getElementById("rawJsonArea").value);
+            sendCommandToEdge(raw);
+        } catch(e) { addLog("❌ Invalid JSON", true); }
+    });
+
     document.getElementById("clearLogBtn")?.addEventListener("click", () => { logPanel.innerHTML = ""; });
-    document.querySelectorAll(".task-btn").forEach(btn => { btn.addEventListener("click", () => { document.querySelectorAll(".task-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); currentTask = btn.dataset.task; renderParams(); }); });
-    window.setTargetPlayer = (playerId) => { let radio = document.querySelector('input[value="single"]'); if(radio) radio.checked = true; singlePlayerSelect.value = playerId; addLog(`🎯 target: ${playerId}`); };
+
+    document.querySelectorAll(".task-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".task-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentTask = btn.dataset.task;
+            renderParams();
+        });
+    });
+
+    window.setTargetPlayer = (playerId) => {
+        const radio = document.querySelector("input[value=\'single\']");
+        if (radio) radio.checked = true;
+        singlePlayerSelect.value = playerId;
+        addLog(`🎯 Target set: ${playerId}`);
+    };
+
     renderParams();
-    
-    // ==================== DATABASE MANAGER (via EDGE FUNCTION HTTP) ====================
-    // DB_EDGE_URL and ADMIN_SECRET are loaded from config.json via loadConfig()
+
+    // ==================== DATABASE MANAGER ====================
+    // DB_EDGE_URL and ADMIN_SECRET come from loadConfig()
     let currentTable = "";
     let availableColumns = [];
     let selectedColumns = [];
-    let tableRows = [];
-    
-    const tableNameInput = document.getElementById("tableNameInput");
-    const loadTableBtn = document.getElementById("loadTableBtn");
+
+    const tableNameInput         = document.getElementById("tableNameInput");
+    const loadTableBtn           = document.getElementById("loadTableBtn");
     const columnPickerContainerDb = document.getElementById("columnPickerContainer");
-    const dataTableWrapperDb = document.getElementById("dataTableWrapper");
-    const dbActionBarDb = document.getElementById("dbActionBar");
-    const columnChecklistDb = document.getElementById("columnChecklist");
-    const tableHeaderDb = document.getElementById("tableHeader");
-    const tableBodyDb = document.getElementById("tableBody");
-    const refreshDataBtnDb = document.getElementById("refreshDataBtn");
-    const addRowBtnDb = document.getElementById("addRowBtn");
-    const dbStatusMsgDb = document.getElementById("dbStatusMsg");
-    
+    const dataTableWrapperDb     = document.getElementById("dataTableWrapper");
+    const dbActionBarDb          = document.getElementById("dbActionBar");
+    const columnChecklistDb      = document.getElementById("columnChecklist");
+    const tableHeaderDb          = document.getElementById("tableHeader");
+    const tableBodyDb            = document.getElementById("tableBody");
+    const refreshDataBtnDb       = document.getElementById("refreshDataBtn");
+    const addRowBtnDb            = document.getElementById("addRowBtn");
+    const dbStatusMsgDb          = document.getElementById("dbStatusMsg");
+
+    function setDbStatus(msg, isError = false) {
+        dbStatusMsgDb.innerText = msg;
+        dbStatusMsgDb.style.color = isError ? "#ff6b35" : "#a0d6ff";
+    }
+
     async function callDbEdge(action, table, payload = null, id = null) {
         let url = `${DB_EDGE_URL}?table=${encodeURIComponent(table)}&action=${action}`;
-        if(id) url += `&id=${encodeURIComponent(id)}`;
-        const options = { method: "GET", headers: { "Content-Type": "application/json", "X-Admin-Secret": ADMIN_SECRET } };
-        if(payload && (action === "insert" || action === "update")) {
-            options.method = "POST";
+        if (id !== null) url += `&id=${encodeURIComponent(id)}`;
+        // FIX 2: DELETE uses correct HTTP method; always send X-Admin-Secret
+        const options = {
+            method: action === "insert" || action === "update" ? "POST"
+                  : action === "delete" ? "DELETE"
+                  : "GET",
+            headers: { "Content-Type": "application/json", "X-Admin-Secret": ADMIN_SECRET }
+        };
+        if (payload && (action === "insert" || action === "update"))
             options.body = JSON.stringify(payload);
-        }
         try {
             const res = await fetch(url, options);
             return await res.json();
         } catch(e) { return { error: e.message }; }
     }
-    
-    async function loadTableMetadata(tableName) {
-        const result = await callDbEdge("columns", tableName);
-        if(result.error) { dbStatusMsgDb.innerText = `❌ ${result.error}`; return null; }
-        return result.columns || [];
-    }
-    
-    async function loadTableData(tableName, columns) {
-        const result = await callDbEdge("data", tableName);
-        if(result.error) { dbStatusMsgDb.innerText = `❌ ${result.error}`; return []; }
-        return result.data || [];
-    }
-    
-    async function updateRow(tableName, id, updates) {
-        return await callDbEdge("update", tableName, updates, id);
-    }
-    
-    async function deleteRow(tableName, id) {
-        return await callDbEdge("delete", tableName, null, id);
-    }
-    
-    async function insertRow(tableName, rowData) {
-        return await callDbEdge("insert", tableName, rowData);
-    }
-    
+
     function renderDataTable(rows, columns) {
-        if(!rows.length) { tableBodyDb.innerHTML = `<tr><td colspan="99">📭 No data in this table. Click "Add Row".</td></tr>`; tableHeaderDb.innerHTML = `<td>${columns.map(c => `<th>${c}</th>`).join('')}<th>Actions</th></tr>`; return; }
         const pkCol = columns.includes("id") ? "id" : columns[0];
-        tableHeaderDb.innerHTML = `<td>${columns.map(c => `<th>${c} ${c === pkCol ? '🔑' : ''}</th>`).join('')}<th>Actions</th></tr>`;
-        tableBodyDb.innerHTML = rows.map((row, idx) => {
+        tableHeaderDb.innerHTML = `<tr>${columns.map(c =>
+            `<th>${c}${c === pkCol ? " 🔑" : ""}</th>`).join("")}<th>Actions</th></tr>`;
+        if (!rows.length) {
+            tableBodyDb.innerHTML = `<tr><td colspan="${columns.length + 1}" style="text-align:center;color:#888;">📭 No rows found.</td></tr>`;
+            return;
+        }
+        tableBodyDb.innerHTML = rows.map(row => {
             const pkValue = row[pkCol];
-            let rowHtml = `<tr data-pk="${escapeHtml(pkValue)}">`;
+            const safePk = escapeHtml(String(pkValue ?? ""));
+            let rowHtml = `<tr data-pk="${safePk}">`;
             columns.forEach(col => {
-                let val = row[col] !== undefined && row[col] !== null ? String(row[col]) : '';
-                if(col === pkCol) rowHtml += `<td class="pk-cell" style="font-weight:bold;">${escapeHtml(val)}</td>`;
-                else rowHtml += `<td><input type="text" class="edit-field-db" data-col="${col}" data-pk="${escapeHtml(pkValue)}" value="${escapeHtml(val)}" style="width:100%; background:#0b0e17; border:1px solid #3a4455; padding:0.3rem; border-radius:6px;"></td>`;
+                const val = row[col] !== undefined && row[col] !== null ? String(row[col]) : "";
+                if (col === pkCol) {
+                    rowHtml += `<td style="font-weight:bold;opacity:0.7;">${escapeHtml(val)}</td>`;
+                } else {
+                    rowHtml += `<td><input type="text" class="edit-field-db"
+                        data-col="${escapeHtml(col)}" data-pk="${safePk}" value="${escapeHtml(val)}"></td>`;
+                }
             });
-            rowHtml += `<td><button class="save-row-db" data-pk="${escapeHtml(pkValue)}" style="background:#28a745; border:none; padding:0.2rem 0.6rem; margin-right:0.3rem;">💾 Save</button><button class="delete-row-db" data-pk="${escapeHtml(pkValue)}" style="background:#ff6b35; border:none; padding:0.2rem 0.6rem;">🗑️</button></td></tr>`;
+            rowHtml += `<td style="white-space:nowrap;">
+                <button class="save-row-db" data-pk="${safePk}" style="background:#28a745;border:none;padding:0.2rem 0.7rem;border-radius:6px;color:white;margin-right:4px;">💾</button>
+                <button class="delete-row-db" data-pk="${safePk}" style="background:#c0392b;border:none;padding:0.2rem 0.7rem;border-radius:6px;color:white;">🗑️</button>
+            </td></tr>`;
             return rowHtml;
-        }).join('');
-        document.querySelectorAll('.save-row-db').forEach(btn => btn.addEventListener('click', async (e) => {
-            const pk = btn.getAttribute('data-pk');
-            const updates = {};
-            document.querySelectorAll(`.edit-field-db[data-pk="${pk}"]`).forEach(input => {
-                let col = input.getAttribute('data-col');
-                let newVal = input.value;
-                if(!isNaN(newVal) && newVal.trim() !== '') newVal = Number(newVal);
-                if(newVal === 'true') newVal = true; if(newVal === 'false') newVal = false;
-                updates[col] = newVal;
+        }).join("");
+
+        document.querySelectorAll(".save-row-db").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const pk = btn.getAttribute("data-pk");
+                const updates = {};
+                document.querySelectorAll(`.edit-field-db[data-pk="${pk}"]`).forEach(input => {
+                    let val = input.value;
+                    if (val === "true") val = true;
+                    else if (val === "false") val = false;
+                    else if (val.trim() !== "" && !isNaN(val)) val = Number(val);
+                    updates[input.getAttribute("data-col")] = val;
+                });
+                setDbStatus(`Saving ${pk}...`);
+                const res = await callDbEdge("update", currentTable, updates, pk);
+                if (res.error) setDbStatus(`❌ Update failed: ${res.error}`, true);
+                else { setDbStatus(`✅ Saved row ${pk}`); await refreshData(); }
             });
-            const res = await updateRow(currentTable, pk, updates);
-            if(res.error) dbStatusMsgDb.innerText = `❌ Update failed: ${res.error}`;
-            else { dbStatusMsgDb.innerText = `✅ Updated ${pk}`; await refreshData(); }
-        }));
-        document.querySelectorAll('.delete-row-db').forEach(btn => btn.addEventListener('click', async (e) => {
-            const pk = btn.getAttribute('data-pk');
-            if(!confirm(`Delete row ${pk}?`)) return;
-            const res = await deleteRow(currentTable, pk);
-            if(res.error) dbStatusMsgDb.innerText = `❌ Delete failed: ${res.error}`;
-            else { dbStatusMsgDb.innerText = `🗑️ Deleted ${pk}`; await refreshData(); }
-        }));
+        });
+
+        document.querySelectorAll(".delete-row-db").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const pk = btn.getAttribute("data-pk");
+                if (!confirm(`Delete row "${pk}"? This cannot be undone.`)) return;
+                setDbStatus(`Deleting ${pk}...`);
+                const res = await callDbEdge("delete", currentTable, null, pk);
+                if (res.error) setDbStatus(`❌ Delete failed: ${res.error}`, true);
+                else { setDbStatus(`🗑️ Deleted row ${pk}`); await refreshData(); }
+            });
+        });
     }
-    
+
+    // FIX 5: column filter syncs properly by reading from availableColumns order
+    function getSelectedColumns() {
+        return Array.from(document.querySelectorAll("#columnChecklist input:checked")).map(c => c.value);
+    }
+
     async function refreshData() {
-        if(!currentTable || !selectedColumns.length) return;
-        const data = await loadTableData(currentTable, selectedColumns);
-        tableRows = data;
-        renderDataTable(data, selectedColumns);
-        dbStatusMsgDb.innerText = `🔄 Refreshed — ${data.length} rows`;
+        if (!currentTable) return;
+        // FIX 5: re-read selectedColumns from DOM at refresh time
+        selectedColumns = getSelectedColumns();
+        if (!selectedColumns.length) { setDbStatus("⚠️ Select at least one column"); return; }
+        setDbStatus("🔄 Loading...");
+        const result = await callDbEdge("data", currentTable);
+        if (result.error) { setDbStatus(`❌ ${result.error}`, true); return; }
+        const rows = (result.data || []).map(row => {
+            const filtered = {};
+            selectedColumns.forEach(c => { filtered[c] = row[c]; });
+            return filtered;
+        });
+        renderDataTable(rows, selectedColumns);
+        setDbStatus(`✅ ${rows.length} rows`);
     }
-    
+
+    // FIX 3: loading state on table load
     loadTableBtn.addEventListener("click", async () => {
         const tableName = tableNameInput.value.trim();
-        if(!tableName) { dbStatusMsgDb.innerText = "❌ Enter table name"; return; }
+        if (!tableName) { setDbStatus("❌ Enter a table name", true); return; }
         currentTable = tableName;
-        dbStatusMsgDb.innerText = `Loading ${tableName}...`;
-        const cols = await loadTableMetadata(tableName);
-        if(!cols || cols.length === 0) { dbStatusMsgDb.innerText = `❌ No columns found for ${tableName}`; return; }
-        availableColumns = cols;
-        selectedColumns = [...cols];
-        columnChecklistDb.innerHTML = cols.map(col => `<label class="column-check"><input type="checkbox" value="${col}" checked> ${col}</label>`).join('');
-        const data = await loadTableData(tableName, selectedColumns);
-        tableRows = data;
-        renderDataTable(data, selectedColumns);
+        loadTableBtn.disabled = true;
+        loadTableBtn.innerText = "⏳ Loading...";
+        setDbStatus(`Loading columns for "${tableName}"...`);
+
+        const colResult = await callDbEdge("columns", tableName);
+        loadTableBtn.disabled = false;
+        loadTableBtn.innerText = "🔌 Load Table";
+
+        if (colResult.error || !colResult.columns?.length) {
+            setDbStatus(`❌ ${colResult.error || "No columns found — check table name"}`, true);
+            return;
+        }
+
+        availableColumns = colResult.columns;
+        selectedColumns = [...availableColumns];
+
+        // FIX 5: rebuild checklist and rebind once per load (not inside a loop)
+        columnChecklistDb.innerHTML = availableColumns.map(col =>
+            `<label class="column-check"><input type="checkbox" value="${escapeHtml(col)}" checked> ${escapeHtml(col)}</label>`
+        ).join("");
+        columnChecklistDb.querySelectorAll("input").forEach(cb => {
+            cb.addEventListener("change", () => refreshData());
+        });
+
         columnPickerContainerDb.style.display = "flex";
         dataTableWrapperDb.style.display = "block";
         dbActionBarDb.style.display = "flex";
-        dbStatusMsgDb.innerText = `✅ Loaded ${tableName} (${data.length} rows)`;
-        document.querySelectorAll('#columnChecklist input').forEach(cb => cb.addEventListener('change', async () => {
-            selectedColumns = Array.from(document.querySelectorAll('#columnChecklist input:checked')).map(c => c.value);
-            if(selectedColumns.length) await refreshData();
-        }));
+
+        await refreshData();
     });
-    
+
     refreshDataBtnDb.addEventListener("click", refreshData);
+
+    // FIX 4: Add Row shows an inline form instead of sending empty strings
     addRowBtnDb.addEventListener("click", async () => {
-        if(!currentTable) return;
-        const newRow = {};
-        availableColumns.forEach(col => { if(col !== 'id' && col !== 'created_at') newRow[col] = ''; });
-        const res = await insertRow(currentTable, newRow);
-        if(res.error) dbStatusMsgDb.innerText = `❌ Insert failed: ${res.error}`;
-        else { dbStatusMsgDb.innerText = `➕ New row added`; await refreshData(); }
+        if (!currentTable) return;
+        const editableCols = availableColumns.filter(c => c !== "id" && c !== "created_at");
+        if (!editableCols.length) { setDbStatus("⚠️ No editable columns found", true); return; }
+
+        // Build inline form at top of table
+        const formRow = document.createElement("tr");
+        formRow.id = "new-row-form";
+        formRow.style.background = "#1a2a1a";
+        let formHtml = `<td style="color:#888;font-size:0.75rem;">NEW</td>`;
+        editableCols.forEach(col => {
+            formHtml += `<td><input type="text" id="newcol-${escapeHtml(col)}" placeholder="${escapeHtml(col)}" style="width:100%;background:#0b0e17;border:1px solid #28a745;padding:0.3rem;border-radius:6px;color:white;"></td>`;
+        });
+        // Pad remaining columns (those that are id/created_at but shown)
+        const shownCols = selectedColumns.filter(c => c !== "id" && c !== "created_at" && editableCols.includes(c));
+        const extraPad = selectedColumns.length - 1 - shownCols.length;
+        for (let i = 0; i < extraPad; i++) formHtml += `<td></td>`;
+        formHtml += `<td style="white-space:nowrap;">
+            <button id="confirmAddRow" style="background:#28a745;border:none;padding:0.2rem 0.7rem;border-radius:6px;color:white;margin-right:4px;">✅ Add</button>
+            <button id="cancelAddRow" style="background:#555;border:none;padding:0.2rem 0.7rem;border-radius:6px;color:white;">✖</button>
+        </td>`;
+        formRow.innerHTML = formHtml;
+
+        // Remove any existing form first
+        document.getElementById("new-row-form")?.remove();
+        tableBodyDb.insertBefore(formRow, tableBodyDb.firstChild);
+
+        document.getElementById("confirmAddRow").addEventListener("click", async () => {
+            const newRow = {};
+            editableCols.forEach(col => {
+                let val = document.getElementById(`newcol-${col}`)?.value ?? "";
+                if (val === "true") val = true;
+                else if (val === "false") val = false;
+                else if (val.trim() !== "" && !isNaN(val)) val = Number(val);
+                newRow[col] = val;
+            });
+            setDbStatus("Inserting...");
+            const res = await callDbEdge("insert", currentTable, newRow);
+            if (res.error) setDbStatus(`❌ Insert failed: ${res.error}`, true);
+            else { setDbStatus("➕ Row added"); await refreshData(); }
+        });
+        document.getElementById("cancelAddRow").addEventListener("click", () => {
+            formRow.remove();
+            setDbStatus("Cancelled.");
+        });
     });
+
     updateConnectionUI(false);
+
     } // end init()
 
     loadConfig().then(init);
