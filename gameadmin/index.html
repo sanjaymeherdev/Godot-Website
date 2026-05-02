@@ -360,14 +360,27 @@
 </div>
 
 <script>
-    // ==================== CONFIGURATION (HARDCODED) ====================
-    const SUPABASE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co";
-    const EDGE_WS_URL = "wss://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin?type=admin";
-    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg";
+    // ==================== CONFIGURATION (loaded from config.json) ====================
+    let SUPABASE_URL = "", EDGE_WS_URL = "", ANON_KEY = "", ADMIN_SECRET = "", DB_EDGE_URL = "";
+
+    async function loadConfig() {
+        try {
+            const res = await fetch("config.json");
+            if (!res.ok) throw new Error("config.json not found");
+            const cfg = await res.json();
+            SUPABASE_URL = cfg.supabase_url.replace(/\/$/, "");
+            ANON_KEY     = cfg.anon_key;
+            ADMIN_SECRET = cfg.admin_secret;
+            const fn     = cfg.function_name || "gameadmin";
+            EDGE_WS_URL  = SUPABASE_URL.replace("https://", "wss://") + `/functions/v1/${fn}?type=admin`;
+            DB_EDGE_URL  = `${SUPABASE_URL}/functions/v1/${fn}/db`;
+            document.getElementById("wsUrlDisplay").innerText = EDGE_WS_URL;
+        } catch(e) {
+            alert("\u274c Could not load config.json — make sure it sits in the same folder as index.html.\n\n" + e.message);
+        }
+    }
     
-    // Display WS URL in UI
-    document.getElementById("wsUrlDisplay").innerText = EDGE_WS_URL;
-    
+    async function init() {
     // ==================== WEBSOCKET BRIDGE (same as before) ====================
     let ws = null, connected = false, currentOnlinePlayers = [];
     let currentTask = "get_player";
@@ -465,8 +478,7 @@
     renderParams();
     
     // ==================== DATABASE MANAGER (via EDGE FUNCTION HTTP) ====================
-    const DB_EDGE_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/gameadmin/db";
-    const ADMIN_SECRET = "myadmin"; // must match ADMIN_SECRET env var on edge
+    // DB_EDGE_URL and ADMIN_SECRET are loaded from config.json via loadConfig()
     let currentTable = "";
     let availableColumns = [];
     let selectedColumns = [];
@@ -601,6 +613,9 @@
         else { dbStatusMsgDb.innerText = `➕ New row added`; await refreshData(); }
     });
     updateConnectionUI(false);
+    } // end init()
+
+    loadConfig().then(init);
 </script>
 </body>
 </html>
