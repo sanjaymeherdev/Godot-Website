@@ -3,845 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanjay — Fullstack & AI Developer</title>
+    <title>Sanjay — Fullstack & AI Dev for Indian Businesses</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            background: #0A0C14;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* Animated Background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: linear-gradient(135deg, #0A0C14 0%, #11131f 50%, #0A0C14 100%);
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: radial-gradient(circle at 30% 40%, rgba(0,229,255,0.03) 0%, transparent 50%);
-            animation: bgPulse 15s ease-in-out infinite;
-        }
-
-        @keyframes bgPulse {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-            50% { transform: translate(2%, 1%) scale(1.05); opacity: 0.8; }
-        }
-
-        /* Floating Orbs */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(60px);
-            z-index: -1;
-            animation: float 20s infinite ease-in-out;
-        }
-
-        .orb-1 { width: 400px; height: 400px; background: rgba(255,107,53,0.08); top: -100px; right: -100px; animation-delay: 0s; }
-        .orb-2 { width: 500px; height: 500px; background: rgba(0,229,255,0.05); bottom: -150px; left: -150px; animation-delay: -5s; }
-        .orb-3 { width: 300px; height: 300px; background: rgba(255,107,53,0.06); top: 50%; right: 20%; animation-delay: -10s; }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
-        }
-
-        /* CSS Variables */
         :root {
             --primary: #FF6B35;
             --primary-dark: #e55a2b;
             --accent: #00e5ff;
-            --accent-glow: rgba(0,229,255,0.15);
             --dark: #0A0C14;
-            --dark-card: rgba(15, 16, 24, 0.7);
-            --darker: #06070c;
+            --card: rgba(15,17,26,0.75);
             --secondary: #11131f;
-            --light: #F5F7FF;
-            --gray-mid: #7a8a9a;
-            --gray-light: #a0aab8;
-            --success: #28a745;
-            --border: rgba(255,255,255,0.08);
-            --shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            --shadow-glow: 0 0 30px rgba(0,229,255,0.1);
-            --font-sans: 'Inter', sans-serif;
+            --light: #F0F4FF;
+            --gray: #6b7a8d;
+            --gray-light: #9aa5b4;
+            --border: rgba(255,255,255,0.07);
+            --glow: rgba(0,229,255,0.12);
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 2rem;
+        body {
+            background: var(--dark);
+            font-family: var(--font-body);
+            color: var(--light);
+            overflow-x: hidden;
         }
 
-        /* Scroll Reveal */
+        /* Background */
+        .bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: radial-gradient(ellipse 80% 60% at 70% 10%, rgba(0,229,255,0.04) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 50% at 10% 80%, rgba(255,107,53,0.05) 0%, transparent 60%),
+                        #0A0C14;
+        }
+
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1;
+            background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Util */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
         .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0; transform: translateY(24px);
+            transition: opacity 0.65s cubic-bezier(0.4,0,0.2,1), transform 0.65s cubic-bezier(0.4,0,0.2,1);
         }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
         /* Header */
-        .header {
-            padding: 1.5rem 0;
+        header {
+            padding: 1.25rem 0;
             border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(10, 12, 20, 0.8);
+            backdrop-filter: blur(14px);
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,12,20,0.85);
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+        .header-inner {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), var(--primary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .logo span {
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .nav a {
-            color: var(--gray-mid);
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(120deg, var(--accent), var(--primary));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
             text-decoration: none;
-            margin-left: 2rem;
-            transition: color 0.3s;
-            font-weight: 500;
         }
 
-        .nav a:hover {
-            color: var(--accent);
+        nav { display: flex; gap: 0.25rem; }
+        nav a {
+            color: var(--gray); text-decoration: none;
+            padding: 0.5rem 1rem; border-radius: 30px;
+            font-size: 0.875rem; font-weight: 500;
+            transition: color 0.2s, background 0.2s;
         }
+        nav a:hover { color: var(--light); background: rgba(255,255,255,0.05); }
 
-        /* Hero Section */
+        .nav-cta {
+            background: var(--primary); color: #fff !important;
+            border-radius: 30px; padding: 0.5rem 1.25rem;
+        }
+        .nav-cta:hover { background: var(--primary-dark) !important; }
+
+        /* Hero */
         .hero {
-            padding: 4rem 0 3rem;
+            padding: 5rem 0 3.5rem;
             text-align: center;
         }
 
-        .badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 5px 14px;
-            border-radius: 30px;
-            background: rgba(0,229,255,0.1);
-            color: var(--accent);
-            margin-bottom: 1.5rem;
-            font-family: var(--font-mono);
-            border: 1px solid rgba(0,229,255,0.2);
-            letter-spacing: 1px;
+        .trust-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+            color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase;
+            background: rgba(0,229,255,0.07); border: 1px solid rgba(0,229,255,0.18);
+            padding: 6px 16px; border-radius: 30px; margin-bottom: 1.75rem;
         }
+        .trust-badge::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); animation: blink 1.6s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
         .hero h1 {
-            font-size: 52px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff, var(--accent), var(--primary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1rem;
-            line-height: 1.2;
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.75rem);
+            font-weight: 800; line-height: 1.15;
+            margin-bottom: 1.25rem;
         }
 
-        .hero p {
-            font-size: 18px;
-            color: var(--gray-mid);
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(120deg, var(--accent), var(--primary));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
         }
 
-        /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin: 3rem 0;
+        .hero-sub {
+            font-size: 1.1rem; color: var(--gray-light);
+            max-width: 540px; margin: 0 auto 0.75rem; line-height: 1.7;
         }
 
-        .stat-card {
-            background: var(--dark-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .stat-number {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--gray-mid);
-            margin-top: 5px;
+        .domain-note {
+            font-size: 0.8rem; color: var(--gray);
             font-family: var(--font-mono);
+            max-width: 480px; margin: 0 auto 2.5rem;
         }
+        .domain-note strong { color: var(--gray-light); }
 
-        /* Section Header */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin: 3rem 0 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .section-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-family: var(--font-mono);
-        }
-
-        .section-subtitle {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--light);
-            margin-top: 0.5rem;
-        }
-
-        /* Project Cards with Images */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .project-card {
-            background: var(--dark-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .project-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .project-image {
-            height: 180px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .project-image::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0,229,255,0.2), transparent);
-        }
-
-        .project-tag {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 600;
-            z-index: 2;
-            backdrop-filter: blur(5px);
-        }
-
-        .project-content {
-            padding: 1.25rem;
-        }
-
-        .project-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--light);
-            margin-bottom: 0.5rem;
-        }
-
-        .project-desc {
-            font-size: 13px;
-            color: var(--gray-mid);
-            line-height: 1.5;
-            margin-bottom: 1rem;
-        }
-
-        .project-desc-full {
-            font-size: 13px;
-            color: var(--gray-mid);
-            line-height: 1.6;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease, margin 0.3s ease;
-        }
-
-        .project-desc-full.show {
-            max-height: 300px;
-            margin-bottom: 1rem;
-        }
-
-        .read-more-btn {
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            font-size: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-family: var(--font-mono);
-            margin-top: 0.5rem;
-            transition: gap 0.2s;
-        }
-
-        .read-more-btn:hover {
-            gap: 8px;
-        }
-
-        .tech-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 1rem;
-        }
-
-        .tech-tag {
-            font-size: 10px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            color: var(--gray-light);
-            font-family: var(--font-mono);
-        }
-
-        /* Services Tabs */
-        .services-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            padding: 0.75rem 1.5rem;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            color: var(--gray-mid);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .tab-btn:hover, .tab-btn.active {
-            background: var(--accent);
-            color: var(--dark);
-            border-color: var(--accent);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .service-card {
-            background: var(--dark-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s;
-            display: none;
-        }
-
-            .service-card.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .service-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-3px);
-        }
-
-        .service-icon {
-            font-size: 32px;
-            margin-bottom: 1rem;
-        }
-
-        .service-card h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--light);
-            margin-bottom: 0.5rem;
-        }
-
-        .service-card p {
-            font-size: 13px;
-            color: var(--gray-mid);
-            line-height: 1.5;
-        }
-
-        /* CTA */
-        .cta-section {
-            background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(0,229,255,0.05));
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin: 3rem 0;
-        }
-
-        .cta-text h3 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--light);
-            margin-bottom: 0.5rem;
-        }
-
-        .cta-text p {
-            color: var(--gray-mid);
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1rem;
+        .hero-ctas {
+            display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: #fff;
-            padding: 12px 28px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--primary); color: #fff;
+            padding: 0.85rem 1.75rem; border-radius: 40px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; transition: all 0.25s;
+            border: none; cursor: pointer;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,53,0.3); }
+
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: transparent; color: var(--light);
+            padding: 0.85rem 1.75rem; border-radius: 40px;
+            font-weight: 500; font-size: 0.95rem;
+            text-decoration: none; transition: all 0.25s;
+            border: 1px solid var(--border); cursor: pointer;
+        }
+        .btn-ghost:hover { border-color: rgba(0,229,255,0.3); color: var(--accent); }
+
+        /* Stats */
+        .stats {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+            margin: 3.5rem 0;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+        .stat {
+            background: var(--card); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 16px;
+            padding: 1.5rem 1rem; text-align: center;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .stat:hover { border-color: rgba(0,229,255,0.25); transform: translateY(-4px); }
+
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: 2.25rem; font-weight: 800; color: var(--accent);
+        }
+        .stat-lbl {
+            font-size: 0.75rem; color: var(--gray);
+            font-family: var(--font-mono); margin-top: 4px; letter-spacing: 0.5px;
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--light);
-            padding: 12px 28px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid var(--border);
-            transition: all 0.3s;
-            cursor: pointer;
+        /* Section labels */
+        .label {
+            font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+            letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
+            margin-bottom: 0.5rem;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700; color: var(--light);
         }
+
+        .section-head {
+            margin: 4rem 0 1.75rem;
+        }
+
+        /* Projects */
+        .projects-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-card {
+            background: var(--card); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 20px;
+            overflow: hidden; transition: all 0.3s;
+        }
+        .project-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-6px); }
+
+        .project-thumb {
+            height: 160px; position: relative; overflow: hidden;
+        }
+        .project-thumb::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, rgba(10,12,20,0.7));
+        }
+
+        .project-pill {
+            position: absolute; top: 1rem; left: 1rem; z-index: 2;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+            padding: 4px 12px; border-radius: 20px;
+            font-family: var(--font-mono);
+        }
+        .pill-live { background: rgba(40,167,69,0.9); color: #fff; }
+        .pill-built { background: rgba(0,229,255,0.9); color: #0A0C14; }
+        .pill-client { background: rgba(150,150,200,0.85); color: #0A0C14; }
+
+        .project-body { padding: 1.25rem; }
+        .project-name {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700; color: var(--light); margin-bottom: 0.4rem;
+        }
+        .project-blurb { font-size: 0.8rem; color: var(--gray-light); line-height: 1.55; margin-bottom: 0.75rem; }
+
+        .outcome-chip {
+            display: inline-block; font-size: 10px; font-weight: 600;
+            padding: 4px 10px; border-radius: 20px;
+            background: rgba(255,107,53,0.12); border: 1px solid rgba(255,107,53,0.25);
+            color: var(--primary); font-family: var(--font-mono); margin-bottom: 0.75rem;
+        }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag {
+            font-size: 10px; padding: 3px 9px; border-radius: 20px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            color: var(--gray-light); font-family: var(--font-mono);
+        }
+
+        /* Services */
+        .services-section { margin: 4rem 0; }
+
+        .services-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;
+        }
+
+        .svc-card {
+            background: var(--card); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 1.5rem; transition: all 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .svc-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-4px); }
+
+        .svc-icon { font-size: 2rem; margin-bottom: 1rem; }
+
+        .svc-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem; }
+
+        .svc-name {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700; color: var(--light);
+        }
+
+        .svc-price {
+            font-family: var(--font-mono); font-size: 0.9rem; font-weight: 600;
+            color: var(--accent); white-space: nowrap; padding-top: 2px;
+        }
+
+        .svc-desc { font-size: 0.82rem; color: var(--gray-light); line-height: 1.6; margin-bottom: 1.25rem; flex: 1; }
+
+        .svc-cta {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.2);
+            color: #25d366; border-radius: 30px; padding: 0.55rem 1.1rem;
+            font-size: 0.8rem; font-weight: 600; text-decoration: none;
+            transition: all 0.2s; width: fit-content;
+        }
+        .svc-cta:hover { background: rgba(37,211,102,0.18); transform: translateX(2px); }
+
+        /* How It Works */
+        .how-section {
+            background: var(--card); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 2.5rem; margin: 4rem 0;
+        }
+
+        .how-header { margin-bottom: 2.5rem; }
+
+        .steps {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;
+            position: relative;
+        }
+
+        .step { position: relative; }
+
+        .step-num {
+            font-family: var(--font-display); font-size: 2.5rem; font-weight: 800;
+            color: rgba(0,229,255,0.12); line-height: 1; margin-bottom: 0.75rem;
+        }
+
+        .step-title {
+            font-family: var(--font-display); font-weight: 700; font-size: 0.95rem;
+            color: var(--light); margin-bottom: 0.35rem;
+        }
+
+        .step-desc { font-size: 0.8rem; color: var(--gray-light); line-height: 1.6; }
+
+        /* CTA Section */
+        .cta-block {
+            background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(0,229,255,0.04));
+            border: 1px solid rgba(255,107,53,0.2); border-radius: 24px;
+            padding: 3rem 2.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 2rem; margin: 4rem 0;
+        }
+
+        .cta-left h2 {
+            font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 800; margin-bottom: 0.5rem;
+        }
+
+        .cta-left p { color: var(--gray-light); font-size: 0.95rem; }
+
+        .pay-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.78rem; font-weight: 600;
+            color: #25d366; background: rgba(37,211,102,0.08);
+            border: 1px solid rgba(37,211,102,0.2);
+            padding: 4px 12px; border-radius: 20px; margin-top: 0.75rem;
+            font-family: var(--font-mono);
+        }
+
+        .cta-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
 
         /* Footer */
-        .footer {
+        footer {
             border-top: 1px solid var(--border);
-            padding: 2rem 0;
-            margin-top: 3rem;
-            text-align: center;
-            color: var(--gray-mid);
-            font-size: 12px;
+            padding: 2rem 0; margin-top: 2rem;
+            text-align: center; color: var(--gray);
+            font-size: 0.78rem; font-family: var(--font-mono);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            .hero h1 {
-                font-size: 32px;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .section-subtitle {
-                font-size: 22px;
-            }
-            .cta-section {
-                flex-direction: column;
-                text-align: center;
-            }
-            .nav a {
-                margin-left: 1rem;
-            }
+            .container { padding: 0 1.25rem; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .cta-block { flex-direction: column; text-align: center; }
+            .cta-btns { justify-content: center; }
+            .hero { padding: 3.5rem 0 2.5rem; }
+            .svc-header { flex-direction: column; gap: 0.25rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="bg-animation"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
+<div class="bg"></div>
+<div class="grid-overlay"></div>
 
-<header class="header">
+<header>
     <div class="container">
-        <div class="header-content">
-            <div class="logo">Sanjay<span>Meher</span></div>
-            <div class="nav">
+        <div class="header-inner">
+            <a href="/" class="logo">SanjayMeher</a>
+            <nav>
                 <a href="#">Work</a>
                 <a href="#">Services</a>
-                <a href="#">Contact</a>
-            </div>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20discuss%20a%20project" class="nav-cta">
+                    <i class="fab fa-whatsapp"></i> Chat Now
+                </a>
+            </nav>
         </div>
     </div>
 </header>
 
 <main class="container">
+
     <!-- Hero -->
     <section class="hero reveal">
-        <div class="badge">✦ Fullstack & AI Development ✦</div>
-        <h1>Beyond games —<br>real products for real businesses</h1>
-        <p>The same production systems I build for games — AI integrations, realtime backends, cross-platform apps, and automations — available for your business. Solo dev, fast delivery, pay after it works.</p>
+        <div class="trust-badge">For Indian businesses &amp; startups</div>
+        <h1>Your business needs<br><em>custom tech.</em><br>Not another SaaS.</h1>
+        <p class="hero-sub">WhatsApp automation, AI integrations, web &amp; mobile apps — built and shipped in days, not months. Solo dev. Fixed price. Pay after it works.</p>
+        <p class="domain-note">
+            <strong>Yes, the domain says games.</strong> That's where I built these systems — multiplayer backends, AI NPCs, realtime infra. Now available for your business.
+        </p>
+        <div class="hero-ctas">
+            <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20something%20built%20for%20my%20business" class="btn-primary">
+                <i class="fab fa-whatsapp"></i> Free Consultation
+            </a>
+            <a href="#services" class="btn-ghost">See Pricing ↓</a>
+        </div>
     </section>
 
     <!-- Stats -->
-    <div class="stats-grid reveal">
-        <div class="stat-card">
-            <div class="stat-number">5+</div>
-            <div class="stat-label">Live Products</div>
+    <div class="stats reveal">
+        <div class="stat">
+            <div class="stat-num">5+</div>
+            <div class="stat-lbl">Live Products</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">12+</div>
-            <div class="stat-label">AI Integrations</div>
+        <div class="stat">
+            <div class="stat-num">12+</div>
+            <div class="stat-lbl">AI Integrations</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">6</div>
-            <div class="stat-label">Platforms Covered</div>
+        <div class="stat">
+            <div class="stat-num">24h</div>
+            <div class="stat-lbl">Avg Delivery</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">24h</div>
-            <div class="stat-label">Avg Delivery</div>
-        </div>
-    </div>
-
-    <!-- Projects Section -->
-    <div class="section-header reveal">
-        <div>
-            <div class="section-title">PORTFOLIO</div>
-            <div class="section-subtitle">Live Projects</div>
+        <div class="stat">
+            <div class="stat-num">₹0</div>
+            <div class="stat-lbl">Upfront Risk</div>
         </div>
     </div>
 
-    <div class="projects-grid" id="projectsGrid">
-        <!-- Project 1 -->
+    <!-- Portfolio -->
+    <div class="section-head reveal">
+        <div class="label">Portfolio</div>
+        <div class="section-title">What I've Already Built</div>
+    </div>
+
+    <div class="projects-grid">
         <div class="project-card reveal">
-            <div class="project-image" style="background-image: linear-gradient(135deg, #0f6e56, #1D9E75);">
-                <span class="project-tag" style="background: rgba(40,167,69,0.9); color: white;">● LIVE</span>
+            <div class="project-thumb" style="background: linear-gradient(135deg, #0f6e56, #1D9E75);">
+                <span class="project-pill pill-live">● LIVE</span>
             </div>
-            <div class="project-content">
-                <h3 class="project-title">Indian Income Tax Calculator</h3>
-                <p class="project-desc">Full tax computation across all income heads — salary, capital gains, house property, business. Old and new regime with Groq AI integration.</p>
-                <div class="project-desc-full" id="desc1">
-                    <strong>🔍 Features:</strong><br>
-                    • Real-time tax calculation for FY 2024-25<br>
-                    • AI-powered Q&A for tax queries via Groq<br>
-                    • Compare old vs new regime instantly<br>
-                    • Section 80C, HRA, and deductions included<br>
-                    • Export reports as PDF
-                </div>
-                <button class="read-more-btn" onclick="toggleReadMore('desc1', this)">Read more <i class="fas fa-arrow-right"></i></button>
-                <div class="tech-tags">
-                    <span class="tech-tag">Groq AI</span>
-                    <span class="tech-tag">React</span>
-                    <span class="tech-tag">Fintech</span>
-                    <span class="tech-tag">FY 2024-25</span>
+            <div class="project-body">
+                <div class="project-name">Indian Income Tax Calculator</div>
+                <p class="project-blurb">Full tax computation across all income heads. Old &amp; new regime comparison with Groq AI Q&amp;A — users get answers to tax questions instantly.</p>
+                <div class="outcome-chip">⚡ AI-powered fintech, live in production</div>
+                <div class="tags">
+                    <span class="tag">Groq AI</span>
+                    <span class="tag">React</span>
+                    <span class="tag">Fintech</span>
                 </div>
             </div>
         </div>
 
-        <!-- Project 2 -->
         <div class="project-card reveal">
-            <div class="project-image" style="background-image: linear-gradient(135deg, #1a237e, #00e5ff);">
-                <span class="project-tag" style="background: rgba(40,167,69,0.9); color: white;">● LIVE</span>
+            <div class="project-thumb" style="background: linear-gradient(135deg, #1a237e, #1b6ca8);">
+                <span class="project-pill pill-live">● LIVE</span>
             </div>
-            <div class="project-content">
-                <h3 class="project-title">GOwa — WhatsApp API Server</h3>
-                <p class="project-desc">Self-hosted WhatsApp automation infrastructure. Send messages, handle webhooks, build business workflows — no $50/month SaaS needed.</p>
-                <div class="project-desc-full" id="desc2">
-                    <strong>⚙️ Features:</strong><br>
-                    • Send/receive WhatsApp messages programmatically<br>
-                    • Webhook support for automated replies<br>
-                    • Multi-device support<br>
-                    • Message templates and bulk broadcasting<br>
-                    • Docker-ready, deploy anywhere
-                </div>
-                <button class="read-more-btn" onclick="toggleReadMore('desc2', this)">Read more <i class="fas fa-arrow-right"></i></button>
-                <div class="tech-tags">
-                    <span class="tech-tag">WhatsApp API</span>
-                    <span class="tech-tag">Go</span>
-                    <span class="tech-tag">Self-hosted</span>
-                    <span class="tech-tag">Automation</span>
+            <div class="project-body">
+                <div class="project-name">GOwa — WhatsApp API Server</div>
+                <p class="project-blurb">Self-hosted WhatsApp automation. Send bulk messages, handle webhooks, automate replies — no ₹4,000/month SaaS subscriptions needed.</p>
+                <div class="outcome-chip">💰 Saves clients ₹48,000+/year vs WATI/Interakt</div>
+                <div class="tags">
+                    <span class="tag">WhatsApp API</span>
+                    <span class="tag">Go</span>
+                    <span class="tag">Self-hosted</span>
                 </div>
             </div>
         </div>
 
-        <!-- Project 3 -->
         <div class="project-card reveal">
-            <div class="project-image" style="background-image: linear-gradient(135deg, #e65100, #ff9800);">
-                <span class="project-tag" style="background: rgba(0,229,255,0.9); color: #0A0C14;">BUILT</span>
+            <div class="project-thumb" style="background: linear-gradient(135deg, #e65100, #bf360c);">
+                <span class="project-pill pill-built">BUILT</span>
             </div>
-            <div class="project-content">
-                <h3 class="project-title">Local Business Rank Tracker</h3>
-                <p class="project-desc">Cross-platform desktop and mobile app for tracking local SEO rankings. Built for business owners monitoring Google Maps visibility.</p>
-                <div class="project-desc-full" id="desc3">
-                    <strong>📊 Features:</strong><br>
-                    • Track keyword rankings on Google Maps<br>
-                    • Daily/weekly ranking reports<br>
-                    • Competitor analysis<br>
-                    • Desktop (Windows/Mac) + Mobile (iOS/Android)<br>
-                    • Export data to CSV/PDF
-                </div>
-                <button class="read-more-btn" onclick="toggleReadMore('desc3', this)">Read more <i class="fas fa-arrow-right"></i></button>
-                <div class="tech-tags">
-                    <span class="tech-tag">Flutter</span>
-                    <span class="tech-tag">Local SEO</span>
-                    <span class="tech-tag">Cross-platform</span>
+            <div class="project-body">
+                <div class="project-name">Local Business Rank Tracker</div>
+                <p class="project-blurb">Cross-platform app for tracking Google Maps rankings. Desktop + mobile, daily reports, competitor tracking — for business owners who rely on local SEO.</p>
+                <div class="outcome-chip">📊 Desktop + mobile, one codebase</div>
+                <div class="tags">
+                    <span class="tag">Flutter</span>
+                    <span class="tag">Local SEO</span>
+                    <span class="tag">Cross-platform</span>
                 </div>
             </div>
         </div>
 
-        <!-- Project 4 -->
         <div class="project-card reveal">
-            <div class="project-image" style="background-image: linear-gradient(135deg, #4a148c, #7c4dff);">
-                <span class="project-tag" style="background: rgba(150,150,200,0.9); color: #0A0C14;">CLIENT</span>
+            <div class="project-thumb" style="background: linear-gradient(135deg, #4a148c, #6a1b9a);">
+                <span class="project-pill pill-client">CLIENT</span>
             </div>
-            <div class="project-content">
-                <h3 class="project-title">Activity Tracker Chrome Extension</h3>
-                <p class="project-desc">Custom browser extension for tracking activity data. Works in background, native browser APIs — no framework bloat.</p>
-                <div class="project-desc-full" id="desc4">
-                    <strong>🔄 Features:</strong><br>
-                    • Tracks time spent on websites<br>
-                    • Daily/weekly productivity reports<br>
-                    • Customizable categories and goals<br>
-                    • Works offline, stores data locally<br>
-                    • Export activity logs
-                </div>
-                <button class="read-more-btn" onclick="toggleReadMore('desc4', this)">Read more <i class="fas fa-arrow-right"></i></button>
-                <div class="tech-tags">
-                    <span class="tech-tag">Chrome Extension</span>
-                    <span class="tech-tag">Vanilla JS</span>
-                    <span class="tech-tag">Browser APIs</span>
+            <div class="project-body">
+                <div class="project-name">Activity Tracker Chrome Extension</div>
+                <p class="project-blurb">Custom browser extension for a client — tracks time, generates productivity reports, works offline with local storage. No framework bloat.</p>
+                <div class="outcome-chip">🔌 Client delivery, no framework bloat</div>
+                <div class="tags">
+                    <span class="tag">Chrome Extension</span>
+                    <span class="tag">Vanilla JS</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Services with Tabs -->
-    <div class="section-header reveal">
-        <div>
-            <div class="section-title">SERVICES</div>
-            <div class="section-subtitle">What I Can Build For You</div>
+    <!-- Services -->
+    <div class="services-section" id="services">
+        <div class="section-head reveal">
+            <div class="label">Services &amp; Pricing</div>
+            <div class="section-title">What I Can Build For You</div>
+        </div>
+
+        <div class="services-grid">
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">💬</div>
+                <div class="svc-header">
+                    <div class="svc-name">WhatsApp Automation</div>
+                    <div class="svc-price">from ₹2,500</div>
+                </div>
+                <p class="svc-desc">Self-hosted GOwa setup — send bulk messages, automate replies, handle webhooks, connect to your CRM. No ₹4,000/month WATI subscription.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20WhatsApp%20Automation%20for%20my%20business" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🧠</div>
+                <div class="svc-header">
+                    <div class="svc-name">AI Integration</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <p class="svc-desc">Groq, Gemini, OpenAI, ElevenLabs wired into your product. Chatbots, content generation, voice synthesis, document Q&amp;A — real AI, not gimmicks.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20an%20AI%20integration%20for%20my%20business" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">📱</div>
+                <div class="svc-header">
+                    <div class="svc-name">Web &amp; Mobile App</div>
+                    <div class="svc-price">from ₹5,000</div>
+                </div>
+                <p class="svc-desc">Frontend, backend, Android &amp; iOS — cross-platform and production-ready. React, Flutter, Node.js, Supabase stack. One build, all platforms.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20web%20or%20mobile%20app%20built" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">⚙️</div>
+                <div class="svc-header">
+                    <div class="svc-name">Business Automation</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <p class="svc-desc">Workflow automations, API integrations, scheduled jobs, data pipelines. Replace hours of manual work with scripts that run themselves.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20business%20automation%20built" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🗄️</div>
+                <div class="svc-header">
+                    <div class="svc-name">Backend &amp; APIs</div>
+                    <div class="svc-price">from ₹2,000</div>
+                </div>
+                <p class="svc-desc">Supabase, custom servers, payment gateways (Razorpay + PayPal), auth systems, realtime features. Scalable, secure, production-ready.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20backend%20or%20API%20built" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🌐</div>
+                <div class="svc-header">
+                    <div class="svc-name">Chrome Extension</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <p class="svc-desc">Custom browser tools, background workers, productivity extensions. Reach your users directly in their browser — no app store needed.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20Chrome%20Extension%20built" class="svc-cta">
+                    <i class="fab fa-whatsapp"></i> Get this →
+                </a>
+            </div>
+
         </div>
     </div>
 
-    <div class="services-tabs reveal">
-        <button class="tab-btn active" onclick="switchTab('all')">All Services</button>
-        <button class="tab-btn" onclick="switchTab('backend')">Backend & APIs</button>
-        <button class="tab-btn" onclick="switchTab('frontend')">Web & Mobile</button>
-        <button class="tab-btn" onclick="switchTab('ai')">AI & Automation</button>
-    </div>
-
-    <div class="services-grid" id="servicesGrid">
-        <div class="service-card active" data-category="backend ai">
-            <div class="service-icon">💬</div>
-            <h4>WhatsApp Automation</h4>
-            <p>Self-hosted GOwa setup, message flows, webhook handling for your business. Send bulk messages, automate replies, integrate with your CRM.</p>
+    <!-- How It Works -->
+    <div class="how-section reveal">
+        <div class="how-header">
+            <div class="label">Process</div>
+            <div class="section-title">How It Works</div>
         </div>
-        <div class="service-card active" data-category="ai">
-            <div class="service-icon">🧠</div>
-            <h4>AI Integrations</h4>
-            <p>Groq, Gemini, OpenRouter, ElevenLabs, OpenAI — wired into your product. Chatbots, content generation, voice synthesis, and more.</p>
-        </div>
-        <div class="service-card active" data-category="frontend">
-            <div class="service-icon">📱</div>
-            <h4>Web & Mobile Apps</h4>
-            <p>Frontend, backend, Android/iOS — cross-platform, production-ready. React, Flutter, Node.js, Supabase stack.</p>
-        </div>
-        <div class="service-card active" data-category="ai backend">
-            <div class="service-icon">⚙️</div>
-            <h4>Business Automations</h4>
-            <p>Workflow automations, API integrations, scheduled jobs, data pipelines. Save hours of manual work with custom scripts.</p>
-        </div>
-        <div class="service-card active" data-category="backend">
-            <div class="service-icon">🗄️</div>
-            <h4>Backend & APIs</h4>
-            <p>Supabase, custom servers, payment gateways, auth systems, realtime features. Scalable, secure, production-ready backends.</p>
-        </div>
-        <div class="service-card active" data-category="frontend">
-            <div class="service-icon">🌐</div>
-            <h4>Chrome Extensions</h4>
-            <p>Custom browser tools, background workers, productivity extensions. Reach users directly in their browser.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <div class="step-title">Message on WhatsApp</div>
+                <p class="step-desc">Tell me what you need — your business, the problem, and what you want built. Takes 2 minutes.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <div class="step-title">Free Consultation</div>
+                <p class="step-desc">I review your requirements, confirm scope, and give you a fixed price. No surprises, no vague estimates.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <div class="step-title">I Build It Fast</div>
+                <p class="step-desc">Standard services delivered same day. Complex builds within 48h. You get updates on WhatsApp throughout.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">04</div>
+                <div class="step-title">We Test Together</div>
+                <p class="step-desc">We test on WhatsApp until everything works perfectly. 3 free revisions included after delivery.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">05</div>
+                <div class="step-title">Pay After It Works</div>
+                <p class="step-desc">Payment only after you confirm everything is running. Zero upfront. Zero risk on your side.</p>
+            </div>
         </div>
     </div>
 
     <!-- CTA -->
-    <div class="cta-section reveal">
-        <div class="cta-text">
-            <h3>Need something built?</h3>
-            <p>Free consultation. Fixed price. Pay after it works.</p>
+    <div class="cta-block reveal">
+        <div class="cta-left">
+            <h2>Tell me what<br>you need built.</h2>
+            <p>Free consultation. Fixed price. No agency markups.</p>
+            <div class="pay-badge">✓ Pay after it works — always</div>
         </div>
-        <div class="cta-buttons">
-            <button class="btn-primary" onclick="alert('📋 Let\'s plan your project! Book a free consultation.')">Plan my project →</button>
-            <button class="btn-secondary" onclick="window.open('https://wa.me/917504704502?text=Hi%20Sanjay,%20I%20need%20help%20building%20a%20project', '_blank')">Chat on WhatsApp</button>
+        <div class="cta-btns">
+            <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20something%20built%20for%20my%20business" class="btn-primary">
+                <i class="fab fa-whatsapp"></i> Start on WhatsApp
+            </a>
+            <a href="https://cggodotassets.shop/services" class="btn-ghost">See Game Services →</a>
         </div>
     </div>
+
 </main>
 
-<footer class="footer">
+<footer>
     <div class="container">
-        <p>© 2025 Sanjay Meher — Built for real businesses. Solo dev, fast delivery.</p>
+        <p>© 2025 Sanjay Meher · Solo dev · Fast delivery · Pay after it works</p>
     </div>
 </footer>
 
 <script>
-    // Scroll Reveal Animation
     const reveals = document.querySelectorAll('.reveal');
-    
-    function checkReveal() {
-        reveals.forEach(element => {
-            const windowHeight = window.innerHeight;
-            const elementTop = element.getBoundingClientRect().top;
-            const revealPoint = 100;
-            
-            if (elementTop < windowHeight - revealPoint) {
-                element.classList.add('active');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('active'), i * 60);
+                observer.unobserve(e.target);
             }
         });
-    }
-    
-    window.addEventListener('scroll', checkReveal);
-    window.addEventListener('load', checkReveal);
-    
-    // Read More Toggle
-    function toggleReadMore(id, btn) {
-        const desc = document.getElementById(id);
-        desc.classList.toggle('show');
-        
-        if (desc.classList.contains('show')) {
-            btn.innerHTML = 'Read less <i class="fas fa-arrow-up"></i>';
-        } else {
-            btn.innerHTML = 'Read more <i class="fas fa-arrow-right"></i>';
-        }
-    }
-    
-    // Services Tab Filter
-    function switchTab(category) {
-        const cards = document.querySelectorAll('.service-card');
-        const buttons = document.querySelectorAll('.tab-btn');
-        
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        if (category === 'all') {
-            cards.forEach(card => {
-                card.classList.add('active');
-            });
-        } else {
-            cards.forEach(card => {
-                if (card.getAttribute('data-category').includes(category)) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
-            });
-        }
-    }
-    
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
 </script>
 </body>
 </html>
