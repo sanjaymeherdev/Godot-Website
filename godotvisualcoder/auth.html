@@ -121,8 +121,8 @@
     </div>
 
     <script>
-        // Your App Script URL - REPLACE WITH YOUR ACTUAL URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbwHZwutK_Zvt3QUhRnrkGm0i3S0hq3SmDtXOKToUlDih14CvrvHKpH9QgPq860lsLxO/exec";
+        // Using your proxy URL
+        const API_URL = "https://cggodotassets.shop/proxy.php";
         
         // Session management
         class SessionManager {
@@ -150,24 +150,29 @@
                 const session = this.getSession();
                 if (!session.sessionId) return false;
                 
-                // Optional: Add session expiry (e.g., 24 hours)
+                // Session expires after 24 hours
                 const sessionAge = Date.now() - parseInt(session.sessionStart || '0');
-                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                const maxAge = 24 * 60 * 60 * 1000;
                 
                 return sessionAge < maxAge;
             }
         }
         
-        // API calls to App Script
+        // API calls through proxy
         async function callAPI(action, data) {
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
+                    mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ action, data })
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
                 return await response.json();
             } catch (error) {
@@ -200,7 +205,7 @@
             const result = await callAPI('login', { username, password });
             
             if (result.success) {
-                // Generate a simple session ID (in production, server would provide this)
+                // Generate session ID
                 const sessionId = btoa(username + ':' + Date.now() + ':' + Math.random());
                 SessionManager.setSession(sessionId, {
                     username: result.username,
@@ -222,11 +227,10 @@
             return await callAPI('verifyAnswer', { username, answer });
         }
         
-        // Logout
+        // Logout and redirect
         function logout() {
             SessionManager.clearSession();
-            // Redirect to "access denied" page or refresh to show popup
-            window.location.href = "access-denied.html"; // Or use your redirect URL
+            window.location.href = "https://cggodotassets.shop/access-denied.html";
         }
         
         // Check session on page load
@@ -257,9 +261,8 @@
             const overlay = document.createElement('div');
             overlay.className = 'auth-overlay';
             
-            let mode = 'login'; // 'login' or 'register'
+            let mode = 'login';
             let recoveryMode = false;
-            let recoveryData = null;
             
             function renderPopup() {
                 if (recoveryMode) {
@@ -317,7 +320,7 @@
                     
                     if (result.success) {
                         overlay.remove();
-                        location.reload(); // Reload to show protected content
+                        location.reload();
                     } else {
                         errorDiv.textContent = result.message;
                     }
@@ -414,9 +417,7 @@
         
         // Initialize on page load
         window.onload = function() {
-            if (!checkSessionAndRedirect()) {
-                // Popup already shown by checkSessionAndRedirect
-            }
+            checkSessionAndRedirect();
         };
     </script>
 </body>
