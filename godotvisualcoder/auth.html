@@ -205,7 +205,7 @@
   <script>
     // ── Config ────────────────────────────────────────────────────────────────
     // ✅ Replace this with your deployed Apps Script URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbzrUson7zP7lAVgpFcSylC48lT1zBCqmFkv16bMcZ7thDIfSLI3EHrpwR6uRsTphwcY/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw8UjXezsaFFgOYdjvm3oH9uWfUrKz_6BZMccg6TD-_8Ksd2mM7V65l1PWSQj5HqJpd/exec";
 
     // ── Session Manager ───────────────────────────────────────────────────────
     const SessionManager = {
@@ -235,95 +235,64 @@
       }
     };
 
-    // ── Form POST via hidden iframe (bypasses CORS preflight) ─────────────────
-    // Apps Script deployed as "Anyone" returns JSON that the iframe CAN read
-    // because the redirect lands on script.googleusercontent.com (same-origin rules relaxed).
-    function submitForm(action, fields, callback) {
-      const uid     = Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      const ifrId   = 'ifr_' + uid;
-      const formId  = 'frm_' + uid;
-
-      // Create hidden iframe
-      const iframe  = Object.assign(document.createElement('iframe'), {
-        name: ifrId, id: ifrId, style: 'display:none'
-      });
-      document.body.appendChild(iframe);
-
-      // Create hidden form
-      const form = Object.assign(document.createElement('form'), {
-        method: 'POST', action: API_URL, target: ifrId, id: formId, style: 'display:none'
-      });
-
-      // Append all fields as hidden inputs
-      const allFields = { action, ...fields };
-      for (const [k, v] of Object.entries(allFields)) {
-        const inp = Object.assign(document.createElement('input'), {
-          type: 'hidden', name: k, value: v
-        });
-        form.appendChild(inp);
-      }
-      document.body.appendChild(form);
-
-      function cleanup() {
-        setTimeout(() => {
-          document.getElementById(formId)?.remove();
-          document.getElementById(ifrId)?.remove();
-        }, 1000);
-      }
+    // ── JSONP request — the only truly CORS-safe way from Netlify → Apps Script ─
+    // All params go in the GET query string. Apps Script doGet wraps the JSON
+    // response in the callback function name, which the injected <script> tag calls.
+    function jsonpRequest(params, callback) {
+      const cbName = '__gs_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      const scriptId = cbName + '_script';
 
       // Timeout guard
       const timer = setTimeout(() => {
-        iframe.onload = null;
         cleanup();
         callback({ success: false, message: 'Request timed out. Please try again.' });
       }, 15000);
 
-      iframe.onload = function () {
+      // Global callback that Apps Script will call
+      window[cbName] = function (data) {
         clearTimeout(timer);
-        let result;
-        try {
-          const doc  = iframe.contentDocument || iframe.contentWindow.document;
-          const text = (doc.body?.innerText || doc.body?.textContent || '').trim();
-
-          if (text) {
-            try {
-              result = JSON.parse(text);
-            } catch {
-              // Server returned non-JSON (unexpected)
-              result = { success: false, message: 'Unexpected server response: ' + text.slice(0, 100) };
-            }
-          } else {
-            // Empty body — Apps Script sometimes redirects; treat as success only for write actions
-            result = { success: true, message: 'Action completed' };
-          }
-        } catch (crossOriginErr) {
-          // Cross-origin block — form submitted but we can't read reply.
-          // This usually means the script URL is wrong or not deployed as "Anyone".
-          console.warn('Cross-origin response blocked. Check your Apps Script deployment settings.');
-          result = { success: false, message: 'Could not read server response. Ensure Apps Script is deployed as "Anyone".' };
-        }
-
         cleanup();
-        callback(result);
+        callback(data);
       };
 
-      form.submit();
+      function cleanup() {
+        delete window[cbName];
+        document.getElementById(scriptId)?.remove();
+      }
+
+      // Build query string
+      const qs = Object.entries({ ...params, callback: cbName })
+        .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+        .join('&');
+
+      const script = Object.assign(document.createElement('script'), {
+        id: scriptId,
+        src: API_URL + '?' + qs
+      });
+
+      script.onerror = function () {
+        clearTimeout(timer);
+        cleanup();
+        callback({ success: false, message: 'Network error — could not reach server.' });
+      };
+
+      document.body.appendChild(script);
     }
 
     // ── API helpers ───────────────────────────────────────────────────────────
     function apiRegister(u, e, p, q, a, cb) {
-      submitForm('register', { username: u, email: e, password: p, securityQuestion: q, securityAnswer: a }, cb);
+      jsonpRequest({ action: 'register', username: u, email: e, password: p, securityQuestion: q, securityAnswer: a }, cb);
     }
 
     function apiLogin(u, p, cb) {
-      submitForm('login', { username: u, password: p }, function (res) {
+      jsonpRequest({ action: 'login', username: u, password: p }, function (res) {
         if (res.success && !res.username) res.username = u;
         cb(res);
       });
     }
 
-    function apiGetQuestion(u, cb) { submitForm('getSecurityQuestion', { username: u }, cb); }
-    function apiVerifyAnswer(u, a, cb) { submitForm('verifyAnswer', { username: u, answer: a }, cb); }
+    function apiGetQuestion(u, cb) { jsonpRequest({ action: 'getSecurityQuestion', username: u }, cb); }
+    function apiVerifyAnswer(u, a, cb) { jsonpRequest({ action: 'verifyAnswer', username: u, answer: a }, cb); }
 
     // ── Logout ────────────────────────────────────────────────────────────────
     function logout() {
