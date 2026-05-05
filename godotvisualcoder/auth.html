@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth System</title>
+    <style>
+        /* Popup styles */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .auth-popup {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+            max-width: 90%;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .auth-popup h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .auth-popup input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        .auth-popup button {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .auth-popup button:hover {
+            background: #45a049;
+        }
+        
+        .toggle-mode {
+            text-align: center;
+            margin-top: 15px;
+            cursor: pointer;
+            color: #4CAF50;
+        }
+        
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+        
+        .security-question {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        
+        /* Protected content */
+        .protected-content {
+            display: none;
+            padding: 50px;
+            text-align: center;
+            background: #f0f0f0;
+            min-height: 100vh;
+        }
+        
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .session-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Main protected content (hidden until login) -->
+    <div class="protected-content" id="protectedContent">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        <div class="session-info" id="sessionInfo"></div>
+        <h1>Welcome to Protected Area!</h1>
+        <p>You are now logged in and can see this content.</p>
+        <p>Your session is active.</p>
+    </div>
+
+    <script>
+        // Your App Script URL - REPLACE WITH YOUR ACTUAL URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbwHZwutK_Zvt3QUhRnrkGm0i3S0hq3SmDtXOKToUlDih14CvrvHKpH9QgPq860lsLxO/exec";
+        
+        // Session management
+        class SessionManager {
+            static setSession(sessionId, userData) {
+                localStorage.setItem('session_id', sessionId);
+                localStorage.setItem('user_data', JSON.stringify(userData));
+                localStorage.setItem('session_start', Date.now().toString());
+            }
+            
+            static getSession() {
+                return {
+                    sessionId: localStorage.getItem('session_id'),
+                    userData: JSON.parse(localStorage.getItem('user_data') || 'null'),
+                    sessionStart: localStorage.getItem('session_start')
+                };
+            }
+            
+            static clearSession() {
+                localStorage.removeItem('session_id');
+                localStorage.removeItem('user_data');
+                localStorage.removeItem('session_start');
+            }
+            
+            static isSessionValid() {
+                const session = this.getSession();
+                if (!session.sessionId) return false;
+                
+                // Optional: Add session expiry (e.g., 24 hours)
+                const sessionAge = Date.now() - parseInt(session.sessionStart || '0');
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                
+                return sessionAge < maxAge;
+            }
+        }
+        
+        // API calls to App Script
+        async function callAPI(action, data) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action, data })
+                });
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { success: false, message: 'Network error: ' + error.message };
+            }
+        }
+        
+        // Register function
+        async function register(username, email, password, securityQuestion, securityAnswer) {
+            if (!username || !email || !password || !securityQuestion || !securityAnswer) {
+                return { success: false, message: 'All fields required' };
+            }
+            
+            return await callAPI('register', {
+                username,
+                email,
+                password,
+                securityQuestion,
+                securityAnswer
+            });
+        }
+        
+        // Login function
+        async function login(username, password) {
+            if (!username || !password) {
+                return { success: false, message: 'Username and password required' };
+            }
+            
+            const result = await callAPI('login', { username, password });
+            
+            if (result.success) {
+                // Generate a simple session ID (in production, server would provide this)
+                const sessionId = btoa(username + ':' + Date.now() + ':' + Math.random());
+                SessionManager.setSession(sessionId, {
+                    username: result.username,
+                    email: result.email,
+                    lastLogin: result.lastLogin
+                });
+            }
+            
+            return result;
+        }
+        
+        // Get security question for recovery
+        async function getSecurityQuestion(username) {
+            return await callAPI('getSecurityQuestion', { username });
+        }
+        
+        // Verify security answer and get password
+        async function verifyAnswer(username, answer) {
+            return await callAPI('verifyAnswer', { username, answer });
+        }
+        
+        // Logout
+        function logout() {
+            SessionManager.clearSession();
+            // Redirect to "access denied" page or refresh to show popup
+            window.location.href = "access-denied.html"; // Or use your redirect URL
+        }
+        
+        // Check session on page load
+        function checkSessionAndRedirect() {
+            if (SessionManager.isSessionValid()) {
+                // Session valid - show protected content
+                document.getElementById('protectedContent').style.display = 'block';
+                const session = SessionManager.getSession();
+                document.getElementById('sessionInfo').innerHTML = `
+                    Logged in as: <strong>${session.userData.username}</strong><br>
+                    Session active
+                `;
+                return true;
+            } else {
+                // No valid session - show popup
+                SessionManager.clearSession();
+                showAuthPopup();
+                return false;
+            }
+        }
+        
+        // Popup UI
+        function showAuthPopup() {
+            // Remove existing popup if any
+            const existing = document.querySelector('.auth-overlay');
+            if (existing) existing.remove();
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'auth-overlay';
+            
+            let mode = 'login'; // 'login' or 'register'
+            let recoveryMode = false;
+            let recoveryData = null;
+            
+            function renderPopup() {
+                if (recoveryMode) {
+                    overlay.innerHTML = `
+                        <div class="auth-popup">
+                            <h2>Account Recovery</h2>
+                            <div id="errorMsg" class="error-msg"></div>
+                            <input type="text" id="recoveryUsername" placeholder="Username" autocomplete="off">
+                            <button onclick="window.authActions.requestQuestion()">Get Security Question</button>
+                            <div id="questionArea" style="display:none;">
+                                <div class="security-question" id="securityQuestion"></div>
+                                <input type="text" id="securityAnswer" placeholder="Your answer">
+                                <button onclick="window.authActions.verifyRecovery()">Recover Password</button>
+                            </div>
+                            <div id="passwordResult" style="display:none; margin-top:10px; padding:10px; background:#e8f5e9; border-radius:5px;"></div>
+                            <div class="toggle-mode" onclick="window.authActions.backToLogin()">← Back to Login</div>
+                        </div>
+                    `;
+                } else if (mode === 'login') {
+                    overlay.innerHTML = `
+                        <div class="auth-popup">
+                            <h2>Login</h2>
+                            <div id="errorMsg" class="error-msg"></div>
+                            <input type="text" id="username" placeholder="Username" autocomplete="off">
+                            <input type="password" id="password" placeholder="Password">
+                            <button onclick="window.authActions.doLogin()">Login</button>
+                            <div class="toggle-mode" onclick="window.authActions.switchToRegister()">Don't have an account? Register</div>
+                            <div class="toggle-mode" onclick="window.authActions.switchToRecovery()">Forgot Password?</div>
+                        </div>
+                    `;
+                } else {
+                    overlay.innerHTML = `
+                        <div class="auth-popup">
+                            <h2>Register</h2>
+                            <div id="errorMsg" class="error-msg"></div>
+                            <input type="text" id="regUsername" placeholder="Username" autocomplete="off">
+                            <input type="email" id="regEmail" placeholder="Email">
+                            <input type="password" id="regPassword" placeholder="Password">
+                            <input type="text" id="regQuestion" placeholder="Security Question (e.g., Favorite color?)">
+                            <input type="text" id="regAnswer" placeholder="Security Answer">
+                            <button onclick="window.authActions.doRegister()">Register</button>
+                            <div class="toggle-mode" onclick="window.authActions.switchToLogin()">Already have an account? Login</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            window.authActions = {
+                async doLogin() {
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    const errorDiv = document.getElementById('errorMsg');
+                    
+                    const result = await login(username, password);
+                    
+                    if (result.success) {
+                        overlay.remove();
+                        location.reload(); // Reload to show protected content
+                    } else {
+                        errorDiv.textContent = result.message;
+                    }
+                },
+                
+                async doRegister() {
+                    const username = document.getElementById('regUsername').value;
+                    const email = document.getElementById('regEmail').value;
+                    const password = document.getElementById('regPassword').value;
+                    const question = document.getElementById('regQuestion').value;
+                    const answer = document.getElementById('regAnswer').value;
+                    const errorDiv = document.getElementById('errorMsg');
+                    
+                    const result = await register(username, email, password, question, answer);
+                    
+                    if (result.success) {
+                        errorDiv.style.color = 'green';
+                        errorDiv.textContent = 'Registration successful! Please login.';
+                        setTimeout(() => {
+                            mode = 'login';
+                            recoveryMode = false;
+                            renderPopup();
+                        }, 2000);
+                    } else {
+                        errorDiv.textContent = result.message;
+                    }
+                },
+                
+                switchToRegister() {
+                    mode = 'register';
+                    recoveryMode = false;
+                    renderPopup();
+                },
+                
+                switchToLogin() {
+                    mode = 'login';
+                    recoveryMode = false;
+                    renderPopup();
+                },
+                
+                switchToRecovery() {
+                    recoveryMode = true;
+                    mode = null;
+                    renderPopup();
+                },
+                
+                backToLogin() {
+                    recoveryMode = false;
+                    mode = 'login';
+                    renderPopup();
+                },
+                
+                async requestQuestion() {
+                    const username = document.getElementById('recoveryUsername').value;
+                    const errorDiv = document.getElementById('errorMsg');
+                    
+                    if (!username) {
+                        errorDiv.textContent = 'Enter username';
+                        return;
+                    }
+                    
+                    const result = await getSecurityQuestion(username);
+                    
+                    if (result.success) {
+                        document.getElementById('questionArea').style.display = 'block';
+                        document.getElementById('securityQuestion').textContent = 'Question: ' + result.question;
+                        errorDiv.textContent = '';
+                    } else {
+                        errorDiv.textContent = result.message;
+                    }
+                },
+                
+                async verifyRecovery() {
+                    const username = document.getElementById('recoveryUsername').value;
+                    const answer = document.getElementById('securityAnswer').value;
+                    const errorDiv = document.getElementById('errorMsg');
+                    const resultDiv = document.getElementById('passwordResult');
+                    
+                    const result = await verifyAnswer(username, answer);
+                    
+                    if (result.success) {
+                        resultDiv.style.display = 'block';
+                        resultDiv.innerHTML = `<strong>Your password is:</strong> ${result.password}<br><br>Please login with this password.`;
+                        errorDiv.textContent = '';
+                    } else {
+                        errorDiv.textContent = result.message;
+                    }
+                }
+            };
+            
+            renderPopup();
+            document.body.appendChild(overlay);
+        }
+        
+        // Initialize on page load
+        window.onload = function() {
+            if (!checkSessionAndRedirect()) {
+                // Popup already shown by checkSessionAndRedirect
+            }
+        };
+    </script>
+</body>
+</html>
