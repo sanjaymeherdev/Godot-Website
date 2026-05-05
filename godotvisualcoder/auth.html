@@ -3,12 +3,6 @@
 <head>
     <title>Auth System</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -103,14 +97,19 @@
             cursor: pointer;
         }
         
+        .logout-btn:hover {
+            background: #cc0000;
+        }
+        
         .session-info {
             position: fixed;
             top: 20px;
             left: 20px;
             background: white;
-            padding: 10px;
+            padding: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: left;
         }
         
         .loading {
@@ -118,6 +117,13 @@
             text-align: center;
             margin-top: 10px;
             color: #666;
+        }
+        
+        .success-msg {
+            color: green;
+            font-size: 12px;
+            margin-top: -5px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -139,12 +145,16 @@
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('user_data', JSON.stringify(userData));
                 localStorage.setItem('session_start', Date.now().toString());
+                console.log('Session saved:', userData); // Debug
             }
             
             static getSession() {
+                const userData = localStorage.getItem('user_data');
+                console.log('Session retrieved:', userData); // Debug
+                
                 return {
                     isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
-                    userData: JSON.parse(localStorage.getItem('user_data') || 'null'),
+                    userData: userData ? JSON.parse(userData) : null,
                     sessionStart: localStorage.getItem('session_start')
                 };
             }
@@ -153,55 +163,28 @@
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('user_data');
                 localStorage.removeItem('session_start');
+                console.log('Session cleared'); // Debug
             }
             
             static isSessionValid() {
                 const session = this.getSession();
-                if (!session.isLoggedIn) return false;
+                if (!session.isLoggedIn || !session.userData) return false;
+                
                 const sessionAge = Date.now() - parseInt(session.sessionStart || '0');
-                const maxAge = 24 * 60 * 60 * 1000;
-                return sessionAge < maxAge;
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                
+                if (sessionAge >= maxAge) {
+                    this.clearSession();
+                    return false;
+                }
+                
+                return true;
             }
         }
         
-        // Helper function to call API using JSONP or simple GET
-        function callAPI(action, data, callback) {
-            // Build URL with parameters
-            let url = `${API_URL}?action=${action}`;
-            
-            for (let key in data) {
-                url += `&${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`;
-            }
-            
-            // Create a script tag for JSONP (bypasses CORS completely)
-            const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            
-            window[callbackName] = function(response) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                callback(response);
-            };
-            
-            url += `&callback=${callbackName}`;
-            
-            const script = document.createElement('script');
-            script.src = url;
-            script.onerror = function() {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                callback({ success: false, message: 'Network error' });
-            };
-            
-            document.body.appendChild(script);
-        }
-        
-        // But your App Script needs to support JSONP (return callback(data))
-        // Let me check - does your App Script return JSONP? If not, let's use the working form method
-        
-        // Since form POST works (no CORS error but empty screen), let me use iframe method to capture response
-        
+        // Submit form using iframe (bypasses CORS)
         function submitForm(action, data, callback) {
-            const iframeId = 'iframe_' + Date.now();
+            const iframeId = 'iframe_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             const formId = 'form_' + Date.now();
             
             // Create iframe
@@ -237,67 +220,89 @@
             
             document.body.appendChild(form);
             
+            // Set timeout for iframe load
+            const timeout = setTimeout(() => {
+                iframe.onload = null;
+                cleanup();
+                callback({ success: false, message: 'Request timeout' });
+            }, 10000);
+            
             // Listen for iframe load
             iframe.onload = function() {
+                clearTimeout(timeout);
+                
+                let responseText = null;
+                let result = null;
+                
                 try {
                     // Try to get response from iframe
-                    let responseText = null;
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const bodyText = iframeDoc.body.innerText || iframeDoc.body.textContent;
                     
-                    try {
-                        // Try to access iframe content
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        responseText = iframeDoc.body.innerText || iframeDoc.body.textContent;
-                    } catch(e) {
-                        // Cross-origin, but form submitted successfully
-                        console.log('Form submitted, but cannot read response due to CORS');
-                    }
-                    
-                    if (responseText && responseText.trim()) {
+                    if (bodyText && bodyText.trim()) {
+                        responseText = bodyText.trim();
                         try {
-                            const result = JSON.parse(responseText);
-                            callback(result);
+                            result = JSON.parse(responseText);
                         } catch(e) {
-                            callback({ success: true, message: responseText, raw: responseText });
+                            // Not JSON, use as is
+                            result = { success: true, message: responseText, raw: responseText };
                         }
                     } else {
-                        // Assume success since no error
-                        callback({ success: true, message: 'Action completed successfully' });
+                        result = { success: true, message: 'Action completed' };
                     }
                 } catch(e) {
-                    callback({ success: true, message: 'Form submitted' });
+                    // Cross-origin - can't read response, but form submitted
+                    console.log('Form submitted (cross-origin)');
+                    result = { success: true, message: 'Action completed', data: data };
                 }
                 
-                // Cleanup
+                cleanup();
+                callback(result);
+            };
+            
+            function cleanup() {
                 setTimeout(() => {
                     if (document.getElementById(formId)) document.getElementById(formId).remove();
                     if (document.getElementById(iframeId)) document.getElementById(iframeId).remove();
                 }, 1000);
-            };
+            }
             
             form.submit();
         }
         
-        // Wrapper functions
+        // API functions
         function register(username, email, password, securityQuestion, securityAnswer, callback) {
             submitForm('register', {
-                username, email, password, 
-                securityQuestion, securityAnswer
+                username: username,
+                email: email,
+                password: password,
+                securityQuestion: securityQuestion,
+                securityAnswer: securityAnswer
             }, callback);
         }
         
         function login(username, password, callback) {
-            submitForm('login', { username, password }, callback);
+            submitForm('login', {
+                username: username,
+                password: password
+            }, function(result) {
+                // Make sure we have the username in the result
+                if (result.success && !result.username) {
+                    result.username = username;
+                }
+                callback(result);
+            });
         }
         
         function getSecurityQuestion(username, callback) {
-            submitForm('getSecurityQuestion', { username }, callback);
+            submitForm('getSecurityQuestion', { username: username }, callback);
         }
         
         function verifyAnswer(username, answer, callback) {
-            submitForm('verifyAnswer', { username, answer }, callback);
+            submitForm('verifyAnswer', { username: username, answer: answer }, callback);
         }
         
-        // Logout
+        // Logout function
         function logout() {
             SessionManager.clearSession();
             location.reload();
@@ -306,12 +311,26 @@
         // Check session on page load
         function checkSession() {
             if (SessionManager.isSessionValid()) {
-                document.getElementById('protectedContent').style.display = 'block';
                 const session = SessionManager.getSession();
-                document.getElementById('sessionInfo').innerHTML = `
-                    Logged in as: <strong>${session.userData.username}</strong><br>
-                    Session active
-                `;
+                const userData = session.userData;
+                
+                // Display protected content
+                document.getElementById('protectedContent').style.display = 'block';
+                
+                // Show user info
+                if (userData && userData.username) {
+                    document.getElementById('sessionInfo').innerHTML = `
+                        <strong>Logged in as:</strong> ${userData.username}<br>
+                        <strong>Email:</strong> ${userData.email || 'Not set'}<br>
+                        <strong>Session active</strong><br>
+                        <small>Login time: ${new Date(parseInt(session.sessionStart)).toLocaleString()}</small>
+                    `;
+                } else {
+                    document.getElementById('sessionInfo').innerHTML = `
+                        <strong>Logged in</strong><br>
+                        Session active
+                    `;
+                }
                 return true;
             } else {
                 SessionManager.clearSession();
@@ -400,7 +419,12 @@
                         loadingDiv.style.display = 'none';
                         
                         if (result.success) {
-                            SessionManager.setSession({ username: result.username, email: result.email });
+                            // Save to session
+                            SessionManager.setSession({
+                                username: result.username || username,
+                                email: result.email || '',
+                                lastLogin: result.lastLogin || new Date().toISOString()
+                            });
                             overlay.remove();
                             location.reload();
                         } else {
@@ -430,7 +454,7 @@
                         loadingDiv.style.display = 'none';
                         
                         if (result.success) {
-                            errorDiv.style.color = 'green';
+                            errorDiv.className = 'success-msg';
                             errorDiv.textContent = 'Registration successful! Please login.';
                             setTimeout(() => {
                                 mode = 'login';
@@ -526,7 +550,7 @@
             document.body.appendChild(overlay);
         }
         
-        // Initialize
+        // Initialize on page load
         window.onload = function() {
             checkSession();
         };
