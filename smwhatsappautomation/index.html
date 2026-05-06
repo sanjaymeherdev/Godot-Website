@@ -1871,6 +1871,9 @@ function processSend(){
   if(sendIndex >= contacts.length){
     sendState = 'idle';
     document.getElementById('currentContact').textContent = '✅ Campaign complete!';
+    document.getElementById('queueStatus').textContent = contacts.length + ' / ' + contacts.length + ' contacts processed';
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressPct').textContent = '100%';
     showToast('All messages sent ✅');
     saveContacts();
     return;
@@ -1928,7 +1931,7 @@ function processSend(){
   })
   .then(r => r.json())
   .then(res => {
-    const success = res.status === 'SUCCESS' || res.success === true;
+    const success = res.code === 'SUCCESS';
     contacts[sendIndex].status = success ? 'sent' : 'failed';
     sendIndex++;
     if(success){ todaySent++; hourSent++; }
