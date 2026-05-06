@@ -1486,16 +1486,25 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  // First get the QR link from the API
-  fetch(url + '/app/login?output=json&t=' + Date.now())
+  // Convert HTTP to HTTPS if the page is on HTTPS
+  const isHttps = window.location.protocol === 'https:';
+  const apiUrl = isHttps ? url.replace('http://', 'https://') : url;
+  
+  fetch(apiUrl + '/app/login?output=json&t=' + Date.now())
     .then(r => r.json())
     .then(data => {
       console.log('QR Response:', data);
       
       if (data.code === 'SUCCESS' && data.results && data.results.qr_link) {
-        const qrImageUrl = data.results.qr_link;
+        let qrImageUrl = data.results.qr_link;
+        
+        // Convert QR image URL to HTTPS if needed
+        if (isHttps && qrImageUrl.startsWith('http://')) {
+          qrImageUrl = qrImageUrl.replace('http://', 'https://');
+        }
+        
         // Make sure URL is absolute
-        const fullQrUrl = qrImageUrl.startsWith('http') ? qrImageUrl : url + qrImageUrl;
+        const fullQrUrl = qrImageUrl.startsWith('http') ? qrImageUrl : apiUrl + qrImageUrl;
         
         const qrImg = new Image();
         qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
@@ -1513,9 +1522,11 @@ function _fetchAndShowQR(url, username){
         
         qrImg.onerror = function() {
           console.error('Failed to load QR image from:', fullQrUrl);
-          wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
-            <div class="qr-hint" style="color:var(--accent3)">Could not load QR image.<br/>URL: ${fullQrUrl.substring(0, 80)}...</div>`;
-          setDeviceStatus('disconnected');
+          // Try using the raw base64 or fallback
+          wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">📱</div>
+            <div class="qr-hint" style="color:var(--accent3)">QR ready but couldn't display.<br/>
+            <strong>Open this link on your phone:</strong><br/>
+            <a href="${qrImageUrl}" target="_blank" style="color:var(--accent);word-break:break-all;">${qrImageUrl.substring(0,60)}...</a></div>`;
         };
         
         qrImg.src = fullQrUrl;
@@ -1583,11 +1594,15 @@ function startQrCountdown(seconds){
 
 function startDevicePollingForLinking(username){
   stopDevicePolling();
-  const url = getGowaUrl();
+  let url = getGowaUrl();
   if(!url) return;
+  
+  // Convert to HTTPS if page is HTTPS
+  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+    url = url.replace('http://', 'https://');
+  }
 
   devicePollTimer = setInterval(() => {
-    // Try different endpoints that GoWA might use
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
@@ -1605,7 +1620,6 @@ function startDevicePollingForLinking(username){
         apiGetUserDevice(username, existingRes => {
           const existingId = (existingRes && existingRes.success) ? existingRes.deviceId : null;
 
-          // Find new device not matching existing
           const newDevice = devices.find(d => {
             const did = d.device || d.id || d.jid || d.deviceId;
             return did && did !== existingId;
@@ -1639,10 +1653,12 @@ function startDevicePollingForLinking(username){
         });
       })
       .catch(err => {
-        console.log('Device polling error (normal if no devices yet):', err);
+        console.log('Device polling:', err);
       });
   }, 3000);
 }
+
+  
 function stopDevicePolling(){ clearInterval(devicePollTimer); }
 
 function disconnectDevice(){
