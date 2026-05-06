@@ -571,23 +571,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-  </div><!-- /content -->
+  </div>
 </main>
-</div><!-- /dashboard-wrap -->
+</div>
 
-<!-- Toast element -->
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════════
+// ======================================================
+// CONFIG - USE YOUR WORKING REPLIT SERVER
+// ======================================================
 const API_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
 const GOWA_URL = "https://graphicy-wa--testhimrealty.replit.app";
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // SESSION MANAGER
-// ══════════════════════════════════════════════════════
+// ======================================================
 const SessionManager = {
   set(u){ localStorage.setItem('auth_logged_in','true'); localStorage.setItem('auth_user',JSON.stringify(u)); localStorage.setItem('auth_started',Date.now().toString()); },
   get(){ const r=localStorage.getItem('auth_user'); return {isLoggedIn:localStorage.getItem('auth_logged_in')==='true',userData:r?JSON.parse(r):null,sessionStart:localStorage.getItem('auth_started')}; },
@@ -597,9 +596,9 @@ const SessionManager = {
   getDeviceId(){ const s=this.get(); return s.userData?.deviceId||null; }
 };
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // JSONP — Apps Script communication
-// ══════════════════════════════════════════════════════
+// ======================================================
 function jsonpRequest(params, cb){
   const cbName = '__gs_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   const scriptId = cbName + '_s';
@@ -627,18 +626,12 @@ function jsonpRequest(params, cb){
   script.onerror = function(){
     clearTimeout(timeout);
     cleanup();
-    cb({success:false, message:'Network error — check your connection.'});
+    cb({success:false, message:'Network error'});
   };
   document.body.appendChild(script);
 }
 
-function apiGet(action, data){
-  return new Promise(resolve => {
-    jsonpRequest({action, ...data}, resolve);
-  });
-}
-
-// API wrappers
+function apiGet(action, data){ return new Promise(resolve => { jsonpRequest({action, ...data}, resolve); }); }
 function apiLogin(u,p,cb){ jsonpRequest({action:'login',username:u,password:p},cb); }
 function apiRegister(u,p,q,a,cb){ jsonpRequest({action:'register',username:u,password:p,securityQuestion:q,securityAnswer:a},cb); }
 function apiGetQuestion(u,cb){ jsonpRequest({action:'getSecurityQuestion',username:u},cb); }
@@ -649,19 +642,18 @@ function apiLinkDevice(u,id,cb){ jsonpRequest({action:'linkDevice',username:u,de
 function apiUnlinkDevice(u,cb){ jsonpRequest({action:'unlinkDevice',username:u},cb); }
 function apiValidateDevice(u,id,cb){ jsonpRequest({action:'validateDevice',username:u,deviceId:id},cb); }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // STATE
-// ══════════════════════════════════════════════════════
+// ======================================================
 let contacts = [], logs = [], sendState = 'idle', sendIndex = 0, sendTimer = null;
 let selectedAttach = 'none', selectedGroup = null, todaySent = 0, hourSent = 0;
 let deviceId = null;
-let qrPollTimer = null;
 let devicePollTimer = null;
 let qrCountdown = null;
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // AUTH UI
-// ══════════════════════════════════════════════════════
+// ======================================================
 function showAuth(){
   const ov = document.getElementById('authOverlay');
   ov.style.display = 'flex';
@@ -792,9 +784,9 @@ function showAuth(){
   render();
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // SHOW DASHBOARD
-// ══════════════════════════════════════════════════════
+// ======================================================
 function showDashboard(serverData){
   document.getElementById('authOverlay').style.display = 'none';
   document.getElementById('dashboardWrap').style.display = 'flex';
@@ -850,9 +842,9 @@ function checkUserDevice(){
   });
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // INIT
-// ══════════════════════════════════════════════════════
+// ======================================================
 window.onload = function(){
   if(SessionManager.isValid()){
     reloadSessionData();
@@ -887,9 +879,9 @@ function logout(){
   showAuth();
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // TABS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -905,9 +897,9 @@ function switchTab(name){
   if(name === 'device'){ checkUserDevice(); checkDeviceStatus(); }
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // CONTACTS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function togglePaste(){
   const el = document.getElementById('pasteArea');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -1015,9 +1007,9 @@ function saveContacts(){
   sendChunk(0);
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // GROUP IMPORT
-// ══════════════════════════════════════════════════════
+// ======================================================
 function openGroupImport(){
   const c = document.getElementById('groupImportCard');
   c.style.display = c.style.display === 'none' ? 'block' : 'none';
@@ -1042,7 +1034,6 @@ function fetchGroups(){
       }).join('');
     })
     .catch(() => {
-      // Fallback demo groups
       const g = [
         {id:'g1',name:'Sales Team',members:24},
         {id:'g2',name:'VIP Clients',members:11},
@@ -1067,9 +1058,9 @@ function importGroupContacts(){
   showToast('Group contacts imported — click Save to Sheet ✅');
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // COMPOSE
-// ══════════════════════════════════════════════════════
+// ======================================================
 function updateCharCount(el){ document.getElementById('charCount').textContent = el.value.length; }
 
 function insertVar(v){
@@ -1140,9 +1131,9 @@ function saveCompose(){
   });
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // SEND
-// ══════════════════════════════════════════════════════
+// ======================================================
 function startSend(){
   if(!contacts.length){ showToast('No contacts to send', true); return; }
   if(sendState === 'running') return;
@@ -1153,7 +1144,6 @@ function startSend(){
   const serverUrl = GOWA_URL;
   if(!serverUrl){ showToast('GoWA server not configured', true); return; }
 
-  // Validate device ownership
   apiValidateDevice(username, deviceId, valid => {
     if(!valid || !valid.success || !valid.valid){
       showToast('Your device is not linked to your account. Please re-link your device.', true);
@@ -1267,12 +1257,11 @@ function updateSendStats(){
   document.getElementById('hourBar').style.width = Math.min(100, (hourSent/hl)*100) + '%';
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // SETTINGS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function applySettings(s){
   if(!s) return;
-  // serverUrl is hardcoded — skip
   if(s.hourLimit)  document.getElementById('hourLimit').value = s.hourLimit;
   if(s.dayLimit)   document.getElementById('dayLimit').value = s.dayLimit;
   if(s.minGap){    document.getElementById('minGap').value = s.minGap;  document.getElementById('minGapVal').textContent = s.minGap + 's'; }
@@ -1306,14 +1295,16 @@ function saveSettings(){
 function testServer(){
   const url = GOWA_URL;
   const el = document.getElementById('testResult');
-  el.style.color = 'var(--text2)';
-  el.textContent = 'Testing…';
-  fetch(url)
-    .then(r => {
-      if(r.ok){ el.style.color = 'var(--accent)'; el.textContent = '● Connected'; }
-      else { el.style.color = 'var(--accent3)'; el.textContent = '● Error ' + r.status; }
-    })
-    .catch(() => { el.style.color = 'var(--accent3)'; el.textContent = '● Unreachable'; });
+  if(el){
+    el.style.color = 'var(--text2)';
+    el.textContent = 'Testing…';
+    fetch(url)
+      .then(r => {
+        if(r.ok){ el.style.color = 'var(--accent)'; el.textContent = '● Connected'; }
+        else { el.style.color = 'var(--accent3)'; el.textContent = '● Error ' + r.status; }
+      })
+      .catch(() => { el.style.color = 'var(--accent3)'; el.textContent = '● Unreachable'; });
+  }
 }
 
 function toggleAutoReply(){
@@ -1321,9 +1312,9 @@ function toggleAutoReply(){
     document.getElementById('autoReplyToggle').checked ? 'block' : 'none';
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // LOGS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function addLog(entry){ logs.unshift(entry); renderLogs(); }
 
 function renderLogs(filter){
@@ -1347,12 +1338,10 @@ function renderLogs(filter){
 function filterLogs(){ renderLogs(document.getElementById('logFilter').value); }
 function clearLogs(){ logs = []; renderLogs(); }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // DEVICE MANAGEMENT
-// ══════════════════════════════════════════════════════
-function getGowaUrl(){
-  return GOWA_URL;
-}
+// ======================================================
+function getGowaUrl(){ return GOWA_URL; }
 
 function setDeviceStatus(state, id){
   const dot    = document.getElementById('pollDot');
@@ -1417,7 +1406,10 @@ function checkDeviceStatus(){
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
-        const devices = data.results || data.data || (Array.isArray(data) ? data : []);
+        let devices = [];
+        if(data.code === 'SUCCESS' && data.results){
+          devices = data.results.devices || (Array.isArray(data.results) ? data.results : []);
+        }
         const myDevice = devices.find(d => (d.device || d.id || d.jid) === myDeviceId);
         if(myDevice){
           setDeviceStatus('connected', myDeviceId);
@@ -1425,32 +1417,27 @@ function checkDeviceStatus(){
           setDeviceStatus('disconnected');
         }
       })
-      .catch(() => {
-        // Server not reachable — keep last known status
-      });
+      .catch(() => {});
   });
 }
 
-// ══════════════════════════════════════════════════════
-// QR LOADING — FIXED
-// ══════════════════════════════════════════════════════
+// ======================================================
+// QR LOADING - FIXED
+// ======================================================
 function loadQR(){
   const url = getGowaUrl();
   const username = SessionManager.getUsername();
 
   if(!url){
-    showToast('Set GoWA server URL in Settings first ⚙️', true);
-    switchTab('settings');
+    showToast('GoWA server URL not configured', true);
     return;
   }
 
   const wrap = document.getElementById('qrWrap');
   wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Checking device status…</div>';
 
-  // Check if user already has a linked + active device
   if(username){
     apiGetUserDevice(username, userDeviceRes => {
-      // If API fails or returns no device, proceed to show QR
       const alreadyLinked = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice && deviceId;
 
       if(alreadyLinked){
@@ -1460,7 +1447,6 @@ function loadQR(){
         return;
       }
 
-      // No device — show QR
       document.getElementById('deviceWarning').style.display = 'none';
       _fetchAndShowQR(url, username);
     });
@@ -1476,8 +1462,13 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  // Get QR link from server (same as your working debug)
-  fetch(url + '/app/login?output=json&t=' + Date.now())
+  // Convert URL to HTTPS if page is HTTPS
+  let apiUrl = url;
+  if (window.location.protocol === 'https:' && apiUrl.startsWith('http://')) {
+    apiUrl = apiUrl.replace('http://', 'https://');
+  }
+
+  fetch(apiUrl + '/app/login?output=json&t=' + Date.now())
     .then(r => r.json())
     .then(data => {
       console.log('QR Response:', data);
@@ -1485,7 +1476,7 @@ function _fetchAndShowQR(url, username){
       if (data.code === 'SUCCESS' && data.results && data.results.qr_link) {
         let qrImageUrl = data.results.qr_link;
         
-        // Convert HTTP to HTTPS if the page is on HTTPS (fixes mixed content)
+        // Convert HTTP to HTTPS for the image URL
         if (window.location.protocol === 'https:' && qrImageUrl.startsWith('http://')) {
           qrImageUrl = qrImageUrl.replace('http://', 'https://');
         }
@@ -1522,36 +1513,12 @@ function _fetchAndShowQR(url, username){
       _showQrError(wrap);
     });
 }
-  
-  function displayQR(src, duration, username) {
-    const wrap = document.getElementById('qrWrap');
-    wrap.innerHTML = '';
-    const qrImg = document.createElement('img');
-    qrImg.src = src;
-    qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-    qrImg.onload = function() {
-      const hint = document.createElement('div');
-      hint.className = 'qr-hint';
-      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-      wrap.appendChild(qrImg);
-      wrap.appendChild(hint);
-      startQrCountdown(duration);
-      if (username) startDevicePollingForLinking(username);
-    };
-    qrImg.onerror = function() {
-      wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">❌</div><div class="qr-hint">Failed to load QR</div>';
-    };
-  }
-  
-  tryEndpoint();
-}
-  
-function _showQrError(wrap, urlHint){
+
+function _showQrError(wrap){
   wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
-    <div class="qr-hint" style="color:var(--accent3)">Could not load QR code.<br/>
-    Make sure your GoWA server is running at:<br/>
-    <strong style="color:var(--accent)">${GOWA_URL}</strong><br/><br/>
-    <small>Check server console for errors.</small></div>`;
+    <div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>
+    Make sure your GoWA server is running.<br/>
+    <small>URL: ${GOWA_URL}</small></div>`;
   setDeviceStatus('disconnected');
 }
 
@@ -1578,7 +1545,6 @@ function startDevicePollingForLinking(username){
   let url = getGowaUrl();
   if(!url) return;
 
-  // Convert to HTTPS for API calls if page is HTTPS
   if (window.location.protocol === 'https:' && url.startsWith('http://')) {
     url = url.replace('http://', 'https://');
   }
@@ -1636,7 +1602,7 @@ function startDevicePollingForLinking(username){
       });
   }, 3000);
 }
-  
+
 function stopDevicePolling(){ clearInterval(devicePollTimer); }
 
 function disconnectDevice(){
@@ -1646,7 +1612,6 @@ function disconnectDevice(){
 
   apiUnlinkDevice(username, unlinkRes => {
     if(unlinkRes && unlinkRes.success){
-      // Also try to logout from GoWA server
       const url = getGowaUrl();
       if(url && deviceId){
         fetch(url + '/app/logout?device=' + deviceId).catch(() => {});
@@ -1658,7 +1623,6 @@ function disconnectDevice(){
       const timerEl = document.getElementById('qrTimer');
       if(timerEl) timerEl.textContent = '';
       showToast('Device unlinked successfully');
-      // Remove from session
       const sess = SessionManager.get();
       if(sess.userData){
         delete sess.userData.deviceId;
@@ -1670,9 +1634,9 @@ function disconnectDevice(){
   });
 }
 
-// ══════════════════════════════════════════════════════
+// ======================================================
 // UTILS
-// ══════════════════════════════════════════════════════
+// ======================================================
 function esc(s){
   if(s === null || s === undefined) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1691,7 +1655,7 @@ function showToast(msg, isError){
   toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
 
-// Expose all key functions to global scope (fixes JSONP callback scope issues)
+// Expose functions to global scope
 window.renderContacts   = renderContacts;
 window.showDashboard    = showDashboard;
 window.checkUserDevice  = checkUserDevice;
@@ -1709,7 +1673,21 @@ window.stopSend         = stopSend;
 window.disconnectDevice = disconnectDevice;
 window.filterLogs       = filterLogs;
 window.clearLogs        = clearLogs;
-window.authActions      = null; // set by showAuth()
+window.removeContact    = removeContact;
+window.filterContacts   = filterContacts;
+window.togglePaste      = togglePaste;
+window.parsePaste       = parsePaste;
+window.handleFileUpload = handleFileUpload;
+window.openGroupImport  = openGroupImport;
+window.fetchGroups      = fetchGroups;
+window.importGroupContacts = importGroupContacts;
+window.updateCharCount  = updateCharCount;
+window.insertVar        = insertVar;
+window.selectAttach     = selectAttach;
+window.handleAttachUpload = handleAttachUpload;
+window.clearAttach      = clearAttach;
+window.addPollOption    = addPollOption;
+window.toggleAutoReply  = toggleAutoReply;
 </script>
 </body>
 </html>
