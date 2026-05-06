@@ -907,31 +907,206 @@ function togglePaste(){
 
 function parsePaste(){
   const raw = document.getElementById('pasteInput').value.trim();
-  if(!raw) return;
-  contacts = raw.split('\n').filter(r => r.trim()).map((r, i) => {
-    const c = r.split('\t');
-    return { id: Date.now() + i, name: (c[0]||'').trim(), phone: (c[1]||'').trim().replace(/\D/g,''), message: (c[2]||'').trim(), status: 'pending' };
-  }).filter(c => c.phone);
+  if(!raw){
+    showToast('Paste some data first', true);
+    return;
+  }
+  
+  const lines = raw.split(/\r?\n/);
+  const newContacts = [];
+  let headerSkipped = false;
+  
+  // Take last 10 lines only (skip empty lines)
+  const nonEmptyLines = lines.filter(l => l.trim());
+  const last10Lines = nonEmptyLines.slice(-10);
+  
+  for(let i = 0; i < last10Lines.length; i++){
+    const line = last10Lines[i].trim();
+    if(!line) continue;
+    
+    // Try tab first, then comma, then space
+    let columns;
+    if(line.includes('\t')){
+      columns = line.split('\t');
+    } else if(line.includes(',')){
+      columns = line.split(',');
+    } else {
+      columns = line.split(/\s+/);
+    }
+    
+    // Clean each column
+    columns = columns.map(c => c.trim().replace(/^["']|["']$/g, ''));
+    
+    // Skip header row if it looks like headers
+    const firstCol = columns[0].toLowerCase();
+    if(!headerSkipped && (firstCol === 'name' || firstCol === 'nama' || firstCol === 'phone' || firstCol === 'no' || firstCol === 'nomor')){
+      headerSkipped = true;
+      continue;
+    }
+    
+    let name = columns[0] || '';
+    let phone = columns[1] || '';
+    let message = columns[2] || '';
+    
+    // If only 2 columns, assume name and phone
+    if(columns.length === 2){
+      message = '';
+    }
+    
+    // Clean phone number for INDIA (+91)
+    phone = phone.toString().replace(/\D/g, '');
+    
+    if(phone && phone.length >= 10){
+      // Remove any existing country code if present
+      if(phone.startsWith('91') && phone.length > 10){
+        phone = phone.substring(2);
+      }
+      if(phone.startsWith('0')){
+        phone = phone.substring(1);
+      }
+      // Add +91 country code
+      phone = '91' + phone;
+      
+      newContacts.push({
+        id: Date.now() + i,
+        name: name || phone,
+        phone: phone,
+        message: message || '',
+        status: 'pending'
+      });
+    }
+  }
+  
+  // Pick only last 10 contacts if more than 10 were parsed
+  const finalContacts = newContacts.slice(-10);
+  
+  if(finalContacts.length === 0){
+    showToast('No valid contacts found. Use format: Name[TAB]Phone[TAB]Message', true);
+    return;
+  }
+  
+  contacts = [...contacts, ...finalContacts];
   renderContacts();
   document.getElementById('pasteArea').style.display = 'none';
-  showToast(contacts.length + ' contacts imported — click Save to Sheet ✅');
+  document.getElementById('pasteInput').value = '';
+  showToast(`✅ Imported ${finalContacts.length} contacts from paste (last ${finalContacts.length} from ${newContacts.length} parsed)`);
 }
+
+
 
 function handleFileUpload(input){
   const file = input.files[0];
-  if(!file) return;
-  showToast('Parsing ' + file.name + '…');
-  setTimeout(() => {
-    contacts = [
-      {id:1, name:'Demo User', phone:'919876543210', message:'Hi Demo, special offer for you!', status:'pending'},
-      {id:2, name:'Test User', phone:'919123456789', message:'', status:'pending'}
-    ];
-    renderContacts();
-    showToast('File parsed — ' + contacts.length + ' contacts loaded. Click Save to Sheet ✅');
-  }, 800);
-  input.value = '';
+  if(!file){
+    showToast('No file selected', true);
+    return;
+  }
+  
+  const fileName = file.name;
+  const fileExt = fileName.split('.').pop().toLowerCase();
+  
+  showToast(`Reading ${fileName}...`);
+  
+  if(fileExt === 'csv'){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const content = e.target.result;
+      parseCSVContent(content);
+    };
+    reader.onerror = function(){
+      showToast('Error reading CSV file', true);
+    };
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    showToast('Please use CSV format. Excel coming soon!', true);
+  }
+  
+  input.value = ''; // Clear so same file can be selected again
 }
 
+function parseCSVContent(csvText){
+  const lines = csvText.split(/\r?\n/);
+  const newContacts = [];
+  let headerSkipped = false;
+  
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+    
+    // Parse CSV respecting quotes
+    let columns = [];
+    let inQuotes = false;
+    let current = '';
+    
+    for(let j = 0; j < line.length; j++){
+      const char = line[j];
+      if(char === '"'){
+        inQuotes = !inQuotes;
+      } else if(char === ',' && !inQuotes){
+        columns.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    columns.push(current.trim());
+    
+    // Remove quotes from each column
+    columns = columns.map(c => c.replace(/^"|"$/g, '').trim());
+    
+    // Skip header row
+    const firstCol = columns[0].toLowerCase();
+    if(!headerSkipped && (firstCol === 'name' || firstCol === 'nama' || firstCol === 'phone' || firstCol === 'no' || firstCol === 'nomor' || firstCol === 'contact')){
+      headerSkipped = true;
+      continue;
+    }
+    
+    let name = columns[0] || '';
+    let phone = columns[1] || '';
+    let message = columns[2] || '';
+    
+    // If only 2 columns, assume name and phone
+    if(columns.length === 2){
+      message = '';
+    }
+    
+    // Clean phone number for INDIA (+91)
+    phone = phone.toString().replace(/\D/g, '');
+    
+    if(phone && phone.length >= 10){
+      // Remove any existing country code if present
+      if(phone.startsWith('91') && phone.length > 10){
+        phone = phone.substring(2);
+      }
+      if(phone.startsWith('0')){
+        phone = phone.substring(1);
+      }
+      // Add +91 country code
+      phone = '91' + phone;
+      
+      newContacts.push({
+        id: Date.now() + i,
+        name: name || phone,
+        phone: phone,
+        message: message || '',
+        status: 'pending'
+      });
+    }
+  }
+  
+  // Pick only last 10 contacts from CSV
+  const finalContacts = newContacts.slice(-10);
+  
+  if(finalContacts.length === 0){
+    showToast('No valid contacts found in CSV. Expected columns: Name, Phone, Message', true);
+    return;
+  }
+  
+  contacts = [...contacts, ...finalContacts];
+  renderContacts();
+  showToast(`✅ Imported ${finalContacts.length} contacts from CSV (last ${finalContacts.length} from ${newContacts.length} parsed)`);
+}
+
+  
 function renderContacts(list){
   const data = list || contacts;
   document.getElementById('contactCount').textContent = contacts.length;
