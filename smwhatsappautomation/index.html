@@ -1486,74 +1486,54 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  // Try multiple endpoints that GoWA might use
-  const endpoints = [
-    url + '/app/login?output=image&t=' + Date.now(),
-    url + '/qr?t=' + Date.now(),
-    url + '/auth/qr?t=' + Date.now(),
-    url + '/session/qr?t=' + Date.now()
-  ];
-  
-  let attempt = 0;
-  
-  function tryEndpoint() {
-    if (attempt >= endpoints.length) {
-      // All endpoints failed — try JSON method
-      fetch(url + '/app/login?output=json&t=' + Date.now())
-        .then(r => r.json())
-        .then(data => {
-          const qrData = data.qr || data.code || data.image || data.data || data.qrcode;
-          if (qrData) {
-            wrap.innerHTML = '';
-            const img = document.createElement('img');
-            // Handle base64 or direct URL
-            if (qrData.startsWith('data:') || qrData.startsWith('http')) {
-              img.src = qrData;
-            } else {
-              img.src = 'data:image/png;base64,' + qrData;
-            }
-            img.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-            img.onerror = () => _showQrError(wrap);
-            wrap.appendChild(img);
-            const hint = document.createElement('div');
-            hint.className = 'qr-hint';
-            hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-            wrap.appendChild(hint);
-            startQrCountdown(60);
-            if (username) startDevicePollingForLinking(username);
-          } else {
-            _showQrError(wrap);
-          }
-        })
-        .catch(() => _showQrError(wrap));
-      return;
-    }
-    
-    const qrUrl = endpoints[attempt];
-    const qrImg = new Image();
-    qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-    
-    qrImg.onload = function() {
-      // Success - image loaded
-      wrap.innerHTML = '';
-      wrap.appendChild(qrImg);
-      const hint = document.createElement('div');
-      hint.className = 'qr-hint';
-      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-      wrap.appendChild(hint);
-      startQrCountdown(60);
-      if (username) startDevicePollingForLinking(username);
-    };
-    
-    qrImg.onerror = function() {
-      attempt++;
-      tryEndpoint();
-    };
-    
-    qrImg.src = qrUrl;
-  }
-  
-  tryEndpoint();
+  // First get the QR link from the API
+  fetch(url + '/app/login?output=json&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      console.log('QR Response:', data);
+      
+      if (data.code === 'SUCCESS' && data.results && data.results.qr_link) {
+        const qrImageUrl = data.results.qr_link;
+        // Make sure URL is absolute
+        const fullQrUrl = qrImageUrl.startsWith('http') ? qrImageUrl : url + qrImageUrl;
+        
+        const qrImg = new Image();
+        qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+        
+        qrImg.onload = function() {
+          wrap.innerHTML = '';
+          wrap.appendChild(qrImg);
+          const hint = document.createElement('div');
+          hint.className = 'qr-hint';
+          hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+          wrap.appendChild(hint);
+          startQrCountdown(data.results.qr_duration || 60);
+          if (username) startDevicePollingForLinking(username);
+        };
+        
+        qrImg.onerror = function() {
+          console.error('Failed to load QR image from:', fullQrUrl);
+          wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
+            <div class="qr-hint" style="color:var(--accent3)">Could not load QR image.<br/>URL: ${fullQrUrl.substring(0, 80)}...</div>`;
+          setDeviceStatus('disconnected');
+        };
+        
+        qrImg.src = fullQrUrl;
+      } else {
+        _showQrError(wrap);
+      }
+    })
+    .catch(err => {
+      console.error('Failed to fetch QR:', err);
+      _showQrError(wrap);
+    });
+}
+
+function _showQrError(wrap){
+  wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
+    <div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>Check your server connection.<br/>
+    <small style="color:var(--muted)">Make sure your GoWA server is running</small></div>`;
+  setDeviceStatus('disconnected');
 }
 
 // Add this function to debug the GoWA server response
@@ -1607,10 +1587,19 @@ function startDevicePollingForLinking(username){
   if(!url) return;
 
   devicePollTimer = setInterval(() => {
+    // Try different endpoints that GoWA might use
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
-        const devices = data.results || data.data || (Array.isArray(data) ? data : []);
+        let devices = [];
+        if (data.code === 'SUCCESS' && data.results) {
+          devices = data.results.devices || data.results || [];
+        } else if (Array.isArray(data)) {
+          devices = data;
+        } else if (data.devices) {
+          devices = data.devices;
+        }
+        
         if(!devices.length) return;
 
         apiGetUserDevice(username, existingRes => {
@@ -1618,13 +1607,13 @@ function startDevicePollingForLinking(username){
 
           // Find new device not matching existing
           const newDevice = devices.find(d => {
-            const did = d.device || d.id || d.jid;
+            const did = d.device || d.id || d.jid || d.deviceId;
             return did && did !== existingId;
           });
 
           if(!newDevice) return;
 
-          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
+          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid || newDevice.deviceId;
 
           apiLinkDevice(username, newDeviceId, linkRes => {
             if(linkRes && linkRes.success){
@@ -1636,22 +1625,24 @@ function startDevicePollingForLinking(username){
               if(wrap) wrap.innerHTML = '<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>' + newDeviceId + '</div>';
               setDeviceStatus('connected', newDeviceId);
               showToast('WhatsApp connected successfully! 🎉');
-              // Update session
+              
               const sess = SessionManager.get();
               if(sess.userData){
                 sess.userData.deviceId = newDeviceId;
                 SessionManager.set(sess.userData);
               }
+              deviceId = newDeviceId;
             } else {
               showToast('Failed to link device: ' + (linkRes && linkRes.message), true);
             }
           });
         });
       })
-      .catch(() => { /* ignore poll errors */ });
+      .catch(err => {
+        console.log('Device polling error (normal if no devices yet):', err);
+      });
   }, 3000);
 }
-
 function stopDevicePolling(){ clearInterval(devicePollTimer); }
 
 function disconnectDevice(){
