@@ -1349,20 +1349,15 @@ function fetchGroups(){
   const groupListDiv = document.getElementById('groupList');
   groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">📡 Fetching your groups...</div>';
   
-  fetch(url + '/group/list')
-    .then(r => {
-      if(!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
+  fetch(url + '/user/my/groups')
+    .then(r => r.json())
     .then(data => {
       console.log('Groups response:', data);
       
-      // Handle different response formats
       let groups = [];
-      if(data.success && data.groups) groups = data.groups;
-      else if(data.groups) groups = data.groups;
-      else if(Array.isArray(data)) groups = data;
-      else if(data.results && Array.isArray(data.results)) groups = data.results;
+      if(data.code === 'SUCCESS' && data.results && data.results.data){
+        groups = data.results.data;
+      }
       
       if(!groups.length){
         groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">📭 No groups found. Make sure WhatsApp is connected.</div>';
@@ -1370,9 +1365,9 @@ function fetchGroups(){
       }
       
       groupListDiv.innerHTML = groups.map(g => {
-        const groupId = g.id || g.group_id || g.jid || '';
-        const groupName = g.name || g.subject || groupId;
-        const memberCount = g.participants || g.members || g.size || 0;
+        const groupId = g.JID || g.id || '';
+        const groupName = g.Name || g.subject || groupId;
+        const memberCount = g.Participants ? g.Participants.length : 0;
         
         return `<div class="group-item" onclick="selectGroup('${escapeHtml(groupId)}', '${escapeHtml(groupName)}')">
           <input type="radio" name="groupSel" value="${escapeHtml(groupId)}" id="group_${escapeHtml(groupId)}"/>
@@ -1389,20 +1384,26 @@ function fetchGroups(){
       </div>`;
     });
 }
-  
+
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 let selectedGroupId = null;
 let selectedGroupName = '';
 
 function selectGroup(id, name){
   selectedGroupId = id;
   selectedGroupName = name;
-  // Update radio button visual
+  // Update visual selection
   document.querySelectorAll('.group-item').forEach(el => {
     el.style.background = 'transparent';
   });
-  event.currentTarget.style.background = 'rgba(0,229,160,.08)';
+  if(event && event.currentTarget){
+    event.currentTarget.style.background = 'rgba(0,229,160,.08)';
+  }
 }
-  
 
 function importGroupContacts(){
   if(!selectedGroupId){
@@ -1418,39 +1419,45 @@ function importGroupContacts(){
   
   showToast(`Fetching members from ${selectedGroupName}...`);
   
-  fetch(url + '/group/members?groupId=' + encodeURIComponent(selectedGroupId))
-    .then(r => {
-      if(!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
+  // Fetch the specific group data to get members
+  fetch(url + '/user/my/groups')
+    .then(r => r.json())
     .then(data => {
-      console.log('Group members response:', data);
+      if(data.code !== 'SUCCESS' || !data.results || !data.results.data){
+        throw new Error('Failed to fetch group data');
+      }
       
-      // Handle different response formats
-      let members = [];
-      if(data.success && data.members) members = data.members;
-      else if(data.members) members = data.members;
-      else if(Array.isArray(data)) members = data;
-      else if(data.results && Array.isArray(data.results)) members = data.results;
+      // Find the selected group
+      const groups = data.results.data;
+      const selectedGroup = groups.find(g => g.JID === selectedGroupId);
       
-      if(!members.length){
+      if(!selectedGroup){
+        showToast('Group not found', true);
+        return;
+      }
+      
+      const participants = selectedGroup.Participants || [];
+      
+      if(!participants.length){
         showToast('No members found in this group', true);
         return;
       }
       
+      // Get existing phone numbers to avoid duplicates
+      const existingPhones = new Set(contacts.map(c => c.phone));
+      
       const newContacts = [];
       
-      for(let i = 0; i < members.length; i++){
-        const m = members[i];
-        let name = m.name || m.pushname || m.contact_name || m.displayName || 'Group Member';
-        let phone = m.phone || m.number || m.id || '';
+      for(let i = 0; i < participants.length; i++){
+        const p = participants[i];
+        let phone = p.PhoneNumber || '';
         
-        // Extract phone from JID format (1234567890@s.whatsapp.net)
-        if(phone.includes('@')){
+        // Extract phone from format: 919337373881@s.whatsapp.net
+        if(phone && phone.includes('@')){
           phone = phone.split('@')[0];
         }
         
-        // Clean phone number
+        // Clean phone number (remove any non-digits)
         phone = phone.toString().replace(/\D/g, '');
         
         if(phone && phone.length >= 10){
@@ -1463,32 +1470,30 @@ function importGroupContacts(){
           }
           phone = '91' + phone;
           
-          // Avoid duplicates (check if phone already exists)
-          const exists = contacts.some(c => c.phone === phone);
-          if(!exists){
+          // Skip duplicates
+          if(!existingPhones.has(phone)){
             newContacts.push({
               id: Date.now() + i,
-              name: name || phone,
+              name: phone,  // Use phone number as name
               phone: phone,
               message: '',
               status: 'pending'
             });
+            existingPhones.add(phone); // Add to set to avoid duplicates within same import
           }
         }
       }
       
-      // Take only last 10 new contacts
-      const finalContacts = newContacts.slice(-10);
-      
-      if(finalContacts.length === 0){
+      if(newContacts.length === 0){
         showToast('No new valid contacts found in this group', true);
         return;
       }
       
-      contacts = [...contacts, ...finalContacts];
+      // Add all new contacts (no limit)
+      contacts = [...contacts, ...newContacts];
       renderContacts();
       document.getElementById('groupImportCard').style.display = 'none';
-      showToast(`✅ Imported ${finalContacts.length} members from "${selectedGroupName}" (last ${finalContacts.length} from ${newContacts.length} new members)`);
+      showToast(`✅ Imported ${newContacts.length} members from "${selectedGroupName}"`);
       
       // Reset selection
       selectedGroupId = null;
