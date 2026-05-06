@@ -421,6 +421,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <button class="btn btn-secondary btn-sm" onclick="insertVar('{name}')">+ {name}</button>
           <button class="btn btn-secondary btn-sm" onclick="insertVar('{phone}')">+ {phone}</button>
           <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-secondary btn-sm" onclick="generateAIVariations()">✨ AI Generate 10 Variations</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetVariations()">🔄 Reset Variations</button>
             <span style="font-size:12px;color:var(--text2)">AI Rewrite</span>
             <label class="toggle"><input type="checkbox" id="aiRewriteToggle" onchange="document.getElementById('aiRewriteCard').style.display=this.checked?'block':'none'"/><span class="toggle-slider"></span></label>
           </div>
@@ -653,7 +655,8 @@ let selectedAttach = 'none', selectedGroup = null, todaySent = 0, hourSent = 0;
 let deviceId = null;
 let devicePollTimer = null;
 let qrCountdown = null;
-
+let messageVariations = [];  // Store AI generated variations
+let currentVariationIndex = 0;  // Track which variation to use next
 // ======================================================
 // AUTH UI
 // ======================================================
@@ -786,7 +789,66 @@ function showAuth(){
 
   render();
 }
-
+async function generateAIVariations() {
+  const msgTemplate = document.getElementById('msgTemplate');
+  const originalMsg = msgTemplate.value.trim();
+  
+  if(!originalMsg){
+    showToast('Write a message first', true);
+    return;
+  }
+  
+  showToast('🤖 AI is generating 10 variations... (may take 20-30 seconds)', false);
+  
+  const variations = [];
+  
+  for(let i = 1; i <= 10; i++) {
+    try {
+      const response = await fetch(GOWA_URL + '/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: `Generate variation #${i} of this WhatsApp message. Make it sound different from the others. Keep the same core meaning but change wording, tone, and emojis. Keep it friendly and professional. Original: "${originalMsg}"`
+        })
+      });
+      
+      const data = await response.json();
+      
+      if(data.code === 'SUCCESS'){
+        variations.push(data.results.response);
+        showToast(`Generated ${i}/10 variations...`, false);
+      } else {
+        throw new Error(data.message);
+      }
+      
+      // Small delay between requests to avoid rate limits
+      await new Promise(r => setTimeout(r, 500));
+      
+    } catch(err) {
+      console.error('Variation generation error:', err);
+      showToast(`Failed at variation ${i}: ${err.message}`, true);
+      return;
+    }
+  }
+  
+  if(variations.length === 10){
+    messageVariations = variations;
+    currentVariationIndex = 0;
+    
+    // Show preview of variations
+    let preview = '📝 10 Variations Generated:\n\n';
+    for(let i = 0; i < variations.length; i++) {
+      preview += `${i+1}. ${variations[i].substring(0, 60)}...\n\n`;
+    }
+    console.log(preview);
+    
+    // Update template with first variation
+    msgTemplate.value = variations[0];
+    updateCharCount(msgTemplate);
+    
+    showToast(`✅ Generated ${variations.length} variations! Will cycle through during send.`);
+  }
+}
   
   // Contact Deduplication - Keep only unique phone numbers
 function deduplicateContacts(){
@@ -1711,9 +1773,20 @@ function processSend(){
   const username = SessionManager.getUsername();
   const serverUrl = GOWA_URL;
   const template = document.getElementById('msgTemplate').value;
-  const msgBody = (c.message || template).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
+  
+  // Select message: use variation if available, otherwise use template
+  let msgBody;
+  if(messageVariations.length > 0){
+    // Get current variation and cycle to next
+    msgBody = messageVariations[currentVariationIndex];
+    currentVariationIndex = (currentVariationIndex + 1) % messageVariations.length;
+    // Still replace variables
+    msgBody = msgBody.replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
+  } else {
+    msgBody = (c.message || template).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
+  }
 
-  document.getElementById('currentContact').textContent = '📤 Sending to ' + c.name;
+  document.getElementById('currentContact').textContent = `📤 Sending to ${c.name} (Var ${(currentVariationIndex || 10)})`;
   document.getElementById('queueStatus').textContent = sendIndex + ' / ' + contacts.length + ' contacts processed';
   document.getElementById('progressBar').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
@@ -1735,7 +1808,7 @@ function processSend(){
     updateSendStats();
     const prevContact = contacts[sendIndex - 1];
     if(username) apiGet('saveLog', {username, type: prevContact.status, name: c.name, phone: c.phone, message: msgBody, status: prevContact.status});
-    addLog({type: prevContact.status, name: c.name, msg: msgBody, time: new Date()});
+    addLog({type: prevContact.status, name: c.name, msg: msgBody.substring(0, 100), time: new Date()});
     renderContacts();
     if(username && c.id) apiGet('updateContact', {username, rowIndex: c.id, status: prevContact.status});
     scheduleNext();
@@ -1749,14 +1822,18 @@ function processSend(){
     scheduleNext();
   });
 }
-
+  
 function scheduleNext(){
   const minG = parseInt(document.getElementById('minGap').value) * 1000;
   const maxG = parseInt(document.getElementById('maxGap').value) * 1000;
   const gap = Math.floor(Math.random() * (maxG - minG + 1)) + minG;
   sendTimer = setTimeout(processSend, gap);
 }
-
+function resetVariations(){
+  messageVariations = [];
+  currentVariationIndex = 0;
+  showToast('Variations cleared. Using single template.');
+}
 function updateSendStats(){
   const dl = parseInt(document.getElementById('dayLimit').value) || 200;
   const hl = parseInt(document.getElementById('hourLimit').value) || 30;
