@@ -2107,12 +2107,12 @@ function checkDeviceStatus(){
   const username = SessionManager.getUsername();
   if(!url || !username) return;
 
+  // First check what device user owns in sheet
   apiGetUserDevice(username, userDeviceRes => {
-    if(!userDeviceRes || !userDeviceRes.success || !userDeviceRes.hasDevice){
-      setDeviceStatus('disconnected');
-      return;
-    }
-    const myDeviceId = userDeviceRes.deviceId;
+    const hasStoredDevice = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice;
+    const storedDeviceId = hasStoredDevice ? userDeviceRes.deviceId : null;
+    
+    // Then check what devices are actually connected on GoWA
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
@@ -2120,17 +2120,35 @@ function checkDeviceStatus(){
         if(data.code === 'SUCCESS' && data.results){
           devices = data.results.devices || (Array.isArray(data.results) ? data.results : []);
         }
-        const myDevice = devices.find(d => (d.device || d.id || d.jid) === myDeviceId);
-        if(myDevice){
-          setDeviceStatus('connected', myDeviceId);
+        
+        // If GoWA has at least one device, use it
+        if(devices.length > 0){
+          const firstDevice = devices[0];
+          const actualDeviceId = firstDevice.device || firstDevice.id || firstDevice.jid;
+          
+          // If stored device doesn't match actual, update it
+          if(storedDeviceId !== actualDeviceId){
+            apiLinkDevice(username, actualDeviceId, () => {});
+          }
+          
+          setDeviceStatus('connected', actualDeviceId);
+          deviceId = actualDeviceId;
         } else {
+          // No device on GoWA - mark as disconnected
           setDeviceStatus('disconnected');
+          deviceId = null;
+          
+          // Clear stale device from sheet if exists
+          if(hasStoredDevice){
+            apiUnlinkDevice(username, () => {});
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setDeviceStatus('disconnected');
+      });
   });
 }
-
 // ======================================================
 // QR LOADING - FIXED
 // ======================================================
