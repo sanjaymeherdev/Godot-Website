@@ -514,14 +514,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
       </div>
       <div class="card">
-        <div class="card-title">GoWA Server</div>
-        <div class="form-group"><label>Server URL</label><input type="url" id="serverUrl" placeholder="https://your-server.onrender.com"/></div>
-        <div style="margin-top:10px;display:flex;align-items:center;gap:12px">
-          <button class="btn btn-secondary btn-sm" onclick="testServer()">🔌 Test Connection</button>
-          <span id="testResult" style="font-size:12px;font-family:var(--mono)"></span>
-        </div>
-      </div>
-      <div class="card">
         <div class="card-title">Send Limits</div>
         <div class="form-grid">
           <div class="form-group"><label>Max per Hour</label><input type="number" id="hourLimit" value="30" min="1" max="60"/></div>
@@ -591,6 +583,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 // CONFIG
 // ══════════════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
+const GOWA_URL = "https://whatsappautomation-47yb.onrender.com/"; // ← set your GoWA server URL here
 
 // ══════════════════════════════════════════════════════
 // SESSION MANAGER
@@ -1031,8 +1024,7 @@ function openGroupImport(){
 }
 
 function fetchGroups(){
-  const serverUrl = document.getElementById('serverUrl').value.trim();
-  if(!serverUrl){ showToast('Set your GoWA server URL in Settings first', true); return; }
+  const serverUrl = GOWA_URL;
   document.getElementById('groupList').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
   fetch(serverUrl + '/group/list')
     .then(r => r.json())
@@ -1158,8 +1150,8 @@ function startSend(){
   if(!username){ showToast('Not logged in', true); return; }
   if(!deviceId){ showToast('No device linked. Please link your WhatsApp device first.', true); switchTab('device'); return; }
 
-  const serverUrl = document.getElementById('serverUrl').value.trim();
-  if(!serverUrl){ showToast('Set GoWA server URL in Settings first', true); return; }
+  const serverUrl = GOWA_URL;
+  if(!serverUrl){ showToast('GoWA server not configured', true); return; }
 
   // Validate device ownership
   apiValidateDevice(username, deviceId, valid => {
@@ -1212,7 +1204,7 @@ function processSend(){
   const c = contacts[sendIndex];
   const pct = Math.round((sendIndex / contacts.length) * 100);
   const username = SessionManager.getUsername();
-  const serverUrl = document.getElementById('serverUrl').value.trim();
+  const serverUrl = GOWA_URL;
   const template = document.getElementById('msgTemplate').value;
   const msgBody = (c.message || template).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
 
@@ -1280,7 +1272,7 @@ function updateSendStats(){
 // ══════════════════════════════════════════════════════
 function applySettings(s){
   if(!s) return;
-  if(s.serverUrl)  document.getElementById('serverUrl').value = s.serverUrl;
+  // serverUrl is hardcoded — skip
   if(s.hourLimit)  document.getElementById('hourLimit').value = s.hourLimit;
   if(s.dayLimit)   document.getElementById('dayLimit').value = s.dayLimit;
   if(s.minGap){    document.getElementById('minGap').value = s.minGap;  document.getElementById('minGapVal').textContent = s.minGap + 's'; }
@@ -1296,7 +1288,6 @@ function saveSettings(){
   if(!username){ showToast('Not logged in', true); return; }
   const s = {
     username,
-    serverUrl:       document.getElementById('serverUrl').value,
     hourLimit:       document.getElementById('hourLimit').value,
     dayLimit:        document.getElementById('dayLimit').value,
     minGap:          document.getElementById('minGap').value,
@@ -1313,8 +1304,7 @@ function saveSettings(){
 }
 
 function testServer(){
-  const url = document.getElementById('serverUrl').value.trim();
-  if(!url){ showToast('Enter server URL first', true); return; }
+  const url = GOWA_URL;
   const el = document.getElementById('testResult');
   el.style.color = 'var(--text2)';
   el.textContent = 'Testing…';
@@ -1361,7 +1351,7 @@ function clearLogs(){ logs = []; renderLogs(); }
 // DEVICE MANAGEMENT
 // ══════════════════════════════════════════════════════
 function getGowaUrl(){
-  return (document.getElementById('serverUrl') ? document.getElementById('serverUrl').value : '').trim();
+  return GOWA_URL;
 }
 
 function setDeviceStatus(state, id){
@@ -1486,85 +1476,50 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  // Convert HTTP to HTTPS if the page is on HTTPS
-  const isHttps = window.location.protocol === 'https:';
-  const apiUrl = isHttps ? url.replace('http://', 'https://') : url;
-  
-  fetch(apiUrl + '/app/login?output=json&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      console.log('QR Response:', data);
-      
-      if (data.code === 'SUCCESS' && data.results && data.results.qr_link) {
-        let qrImageUrl = data.results.qr_link;
-        
-        // Convert QR image URL to HTTPS if needed
-        if (isHttps && qrImageUrl.startsWith('http://')) {
-          qrImageUrl = qrImageUrl.replace('http://', 'https://');
-        }
-        
-        // Make sure URL is absolute
-        const fullQrUrl = qrImageUrl.startsWith('http') ? qrImageUrl : apiUrl + qrImageUrl;
-        
-        const qrImg = new Image();
-        qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-        
-        qrImg.onload = function() {
+  const qrUrl = url + '/app/login?output=image&t=' + Date.now();
+
+  // Use an Image object to avoid CORS issues with fetch
+  const qrImg = new Image();
+  qrImg.crossOrigin = 'anonymous';
+  qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+
+  qrImg.onload = function(){
+    wrap.innerHTML = '';
+    wrap.appendChild(qrImg);
+    const hint = document.createElement('div');
+    hint.className = 'qr-hint';
+    hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+    wrap.appendChild(hint);
+    startQrCountdown(60);
+    if(username) startDevicePollingForLinking(username);
+  };
+
+  qrImg.onerror = function(){
+    // Try fetching as JSON/text fallback (some servers return base64)
+    fetch(url + '/app/login?output=json&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const b64 = data.qr || data.code || data.image || data.data;
+        if(b64){
           wrap.innerHTML = '';
-          wrap.appendChild(qrImg);
+          const img = document.createElement('img');
+          img.src = 'data:image/png;base64,' + b64;
+          img.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+          wrap.appendChild(img);
           const hint = document.createElement('div');
           hint.className = 'qr-hint';
           hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
           wrap.appendChild(hint);
-          startQrCountdown(data.results.qr_duration || 60);
-          if (username) startDevicePollingForLinking(username);
-        };
-        
-        qrImg.onerror = function() {
-          console.error('Failed to load QR image from:', fullQrUrl);
-          // Try using the raw base64 or fallback
-          wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">📱</div>
-            <div class="qr-hint" style="color:var(--accent3)">QR ready but couldn't display.<br/>
-            <strong>Open this link on your phone:</strong><br/>
-            <a href="${qrImageUrl}" target="_blank" style="color:var(--accent);word-break:break-all;">${qrImageUrl.substring(0,60)}...</a></div>`;
-        };
-        
-        qrImg.src = fullQrUrl;
-      } else {
-        _showQrError(wrap);
-      }
-    })
-    .catch(err => {
-      console.error('Failed to fetch QR:', err);
-      _showQrError(wrap);
-    });
-}
+          startQrCountdown(60);
+          if(username) startDevicePollingForLinking(username);
+        } else {
+          _showQrError(wrap);
+        }
+      })
+      .catch(() => _showQrError(wrap));
+  };
 
-function _showQrError(wrap){
-  wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
-    <div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>Check your server connection.<br/>
-    <small style="color:var(--muted)">Make sure your GoWA server is running</small></div>`;
-  setDeviceStatus('disconnected');
-}
-
-// Add this function to debug the GoWA server response
-function debugGoWAServer() {
-  const url = getGowaUrl();
-  if (!url) {
-    console.log('No server URL set');
-    return;
-  }
-  
-  fetch(url + '/app/login?output=json&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      console.log('GoWA /app/login JSON response:', data);
-      showToast('Check console (F12) for server response');
-    })
-    .catch(err => {
-      console.error('GoWA server error:', err);
-      showToast('Server error: ' + err.message, true);
-    });
+  qrImg.src = qrUrl;
 }
 
 function _showQrError(wrap){
@@ -1594,40 +1549,28 @@ function startQrCountdown(seconds){
 
 function startDevicePollingForLinking(username){
   stopDevicePolling();
-  let url = getGowaUrl();
+  const url = getGowaUrl();
   if(!url) return;
-  
-  // Convert to HTTPS if page is HTTPS
-  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-    url = url.replace('http://', 'https://');
-  }
 
   devicePollTimer = setInterval(() => {
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
-        let devices = [];
-        if (data.code === 'SUCCESS' && data.results) {
-          devices = data.results.devices || data.results || [];
-        } else if (Array.isArray(data)) {
-          devices = data;
-        } else if (data.devices) {
-          devices = data.devices;
-        }
-        
+        const devices = data.results || data.data || (Array.isArray(data) ? data : []);
         if(!devices.length) return;
 
         apiGetUserDevice(username, existingRes => {
           const existingId = (existingRes && existingRes.success) ? existingRes.deviceId : null;
 
+          // Find new device not matching existing
           const newDevice = devices.find(d => {
-            const did = d.device || d.id || d.jid || d.deviceId;
+            const did = d.device || d.id || d.jid;
             return did && did !== existingId;
           });
 
           if(!newDevice) return;
 
-          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid || newDevice.deviceId;
+          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
 
           apiLinkDevice(username, newDeviceId, linkRes => {
             if(linkRes && linkRes.success){
@@ -1639,26 +1582,22 @@ function startDevicePollingForLinking(username){
               if(wrap) wrap.innerHTML = '<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>' + newDeviceId + '</div>';
               setDeviceStatus('connected', newDeviceId);
               showToast('WhatsApp connected successfully! 🎉');
-              
+              // Update session
               const sess = SessionManager.get();
               if(sess.userData){
                 sess.userData.deviceId = newDeviceId;
                 SessionManager.set(sess.userData);
               }
-              deviceId = newDeviceId;
             } else {
               showToast('Failed to link device: ' + (linkRes && linkRes.message), true);
             }
           });
         });
       })
-      .catch(err => {
-        console.log('Device polling:', err);
-      });
+      .catch(() => { /* ignore poll errors */ });
   }, 3000);
 }
 
-  
 function stopDevicePolling(){ clearInterval(devicePollTimer); }
 
 function disconnectDevice(){
