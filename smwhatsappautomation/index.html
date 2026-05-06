@@ -1909,7 +1909,16 @@ function processSend(){
   document.getElementById('progressBar').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
 
-  const payload = {phone: c.phone, message: msgBody};
+  // Format phone number for India (+91)
+  let formattedPhone = c.phone.toString().replace(/\D/g, '');
+  if (formattedPhone.length === 10) {
+    formattedPhone = '91' + formattedPhone;
+  } else if (formattedPhone.length === 12 && formattedPhone.startsWith('91')) {
+    formattedPhone = formattedPhone;
+  } else if (formattedPhone.length > 10 && !formattedPhone.startsWith('91')) {
+    formattedPhone = '91' + formattedPhone.substring(formattedPhone.length - 10);
+  }
+  const payload = {phone: formattedPhone, message: msgBody};
   if(deviceId) payload.device = deviceId;
 
   fetch(serverUrl + '/send/message', {
@@ -1919,7 +1928,7 @@ function processSend(){
   })
   .then(r => r.json())
   .then(res => {
-    const success = res.status === 'success' || res.success === true;
+    const success = res.status === 'SUCCESS' || res.success === true;
     contacts[sendIndex].status = success ? 'sent' : 'failed';
     sendIndex++;
     if(success){ todaySent++; hourSent++; }
