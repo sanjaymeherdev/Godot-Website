@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>WA Blast — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#080c10; --surface:#0e1318; --card:#131920; --border:#1e2a35; --border2:#243040;
@@ -1016,11 +1017,159 @@ function handleFileUpload(input){
       showToast('Error reading CSV file', true);
     };
     reader.readAsText(file, 'UTF-8');
-  } else {
-    showToast('Please use CSV format. Excel coming soon!', true);
+  } 
+  else if(fileExt === 'xlsx' || fileExt === 'xls'){
+    // Check if SheetJS is loaded
+    if(typeof XLSX === 'undefined'){
+      showToast('Loading Excel parser...', false);
+      // Wait for SheetJS to load
+      const checkInterval = setInterval(function(){
+        if(typeof XLSX !== 'undefined'){
+          clearInterval(checkInterval);
+          parseExcelFile(file);
+        }
+      }, 500);
+      setTimeout(function(){
+        clearInterval(checkInterval);
+        if(typeof XLSX === 'undefined'){
+          showToast('Failed to load Excel parser. Please refresh and try again.', true);
+        }
+      }, 10000);
+    } else {
+      parseExcelFile(file);
+    }
+  } 
+  else {
+    showToast('Unsupported file type. Please use .csv, .xlsx, or .xls', true);
   }
   
   input.value = ''; // Clear so same file can be selected again
+}
+
+function parseExcelFile(file){
+  const reader = new FileReader();
+  
+  reader.onload = function(e){
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      
+      // Get first sheet
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      
+      // Convert to JSON (header: 1 means first row is headers)
+      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      
+      if(!rows || rows.length < 2){
+        showToast('Excel file has no data rows', true);
+        return;
+      }
+      
+      const newContacts = [];
+      let headers = [];
+      let startRow = 0;
+      
+      // Detect if first row has headers
+      const firstRow = rows[0];
+      const headerKeywords = ['name', 'nama', 'phone', 'no', 'nomor', 'contact', 'number', 'hp'];
+      let hasHeader = false;
+      
+      if(firstRow && firstRow.length > 0){
+        for(let i = 0; i < firstRow.length && i < 3; i++){
+          const cell = String(firstRow[i] || '').toLowerCase();
+          if(headerKeywords.some(keyword => cell.includes(keyword))){
+            hasHeader = true;
+            break;
+          }
+        }
+      }
+      
+      if(hasHeader){
+        headers = rows[0].map(cell => String(cell || '').toLowerCase());
+        startRow = 1;
+      }
+      
+      // Find column indices
+      let nameIdx = 0, phoneIdx = 1, msgIdx = 2;
+      
+      if(hasHeader && headers.length > 0){
+        nameIdx = -1;
+        phoneIdx = -1;
+        msgIdx = -1;
+        
+        for(let i = 0; i < headers.length; i++){
+          const h = headers[i];
+          if(h === 'name' || h === 'nama' || h === 'contact') nameIdx = i;
+          if(h === 'phone' || h === 'no' || h === 'nomor' || h === 'number' || h === 'hp') phoneIdx = i;
+          if(h === 'message' || h === 'pesan' || h === 'msg') msgIdx = i;
+        }
+        
+        // If no name/phone columns found, use first two columns
+        if(nameIdx === -1) nameIdx = 0;
+        if(phoneIdx === -1) phoneIdx = 1;
+        if(msgIdx === -1) msgIdx = 2;
+      }
+      
+      // Process rows (take only last 10)
+      const totalRows = rows.length;
+      const startParseRow = Math.max(startRow, totalRows - 10);
+      
+      for(let i = startParseRow; i < totalRows; i++){
+        const row = rows[i];
+        if(!row || row.length === 0) continue;
+        
+        let name = nameIdx < row.length ? String(row[nameIdx] || '') : '';
+        let phone = phoneIdx < row.length ? String(row[phoneIdx] || '') : '';
+        let message = msgIdx < row.length ? String(row[msgIdx] || '') : '';
+        
+        // Clean phone number for INDIA (+91)
+        phone = phone.toString().replace(/\D/g, '');
+        
+        if(phone && phone.length >= 10){
+          // Remove any existing country code if present
+          if(phone.startsWith('91') && phone.length > 10){
+            phone = phone.substring(2);
+          }
+          if(phone.startsWith('0')){
+            phone = phone.substring(1);
+          }
+          // Add +91 country code
+          phone = '91' + phone;
+          
+          newContacts.push({
+            id: Date.now() + i,
+            name: name || phone,
+            phone: phone,
+            message: message || '',
+            status: 'pending'
+          });
+        }
+      }
+      
+      // Pick only last 10 contacts
+      const finalContacts = newContacts.slice(-10);
+      
+      if(finalContacts.length === 0){
+        showToast('No valid contacts found in Excel file', true);
+        return;
+      }
+      
+      contacts = [...contacts, ...finalContacts];
+      renderContacts();
+      showToast(`✅ Imported ${finalContacts.length} contacts from Excel (last ${finalContacts.length} from ${newContacts.length} parsed)`);
+      
+    } catch(err){
+      console.error('Excel parse error:', err);
+      showToast('Error parsing Excel file: ' + err.message, true);
+    }
+  };
+  
+  reader.onerror = function(){
+    showToast('Error reading Excel file', true);
+  };
+  
+  reader.readAsArrayBuffer(file);
 }
 
 function parseCSVContent(csvText){
