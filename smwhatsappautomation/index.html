@@ -1486,50 +1486,94 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  const qrUrl = url + '/app/login?output=image&t=' + Date.now();
+  // Try multiple endpoints that GoWA might use
+  const endpoints = [
+    url + '/app/login?output=image&t=' + Date.now(),
+    url + '/qr?t=' + Date.now(),
+    url + '/auth/qr?t=' + Date.now(),
+    url + '/session/qr?t=' + Date.now()
+  ];
+  
+  let attempt = 0;
+  
+  function tryEndpoint() {
+    if (attempt >= endpoints.length) {
+      // All endpoints failed — try JSON method
+      fetch(url + '/app/login?output=json&t=' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          const qrData = data.qr || data.code || data.image || data.data || data.qrcode;
+          if (qrData) {
+            wrap.innerHTML = '';
+            const img = document.createElement('img');
+            // Handle base64 or direct URL
+            if (qrData.startsWith('data:') || qrData.startsWith('http')) {
+              img.src = qrData;
+            } else {
+              img.src = 'data:image/png;base64,' + qrData;
+            }
+            img.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+            img.onerror = () => _showQrError(wrap);
+            wrap.appendChild(img);
+            const hint = document.createElement('div');
+            hint.className = 'qr-hint';
+            hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+            wrap.appendChild(hint);
+            startQrCountdown(60);
+            if (username) startDevicePollingForLinking(username);
+          } else {
+            _showQrError(wrap);
+          }
+        })
+        .catch(() => _showQrError(wrap));
+      return;
+    }
+    
+    const qrUrl = endpoints[attempt];
+    const qrImg = new Image();
+    qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+    
+    qrImg.onload = function() {
+      // Success - image loaded
+      wrap.innerHTML = '';
+      wrap.appendChild(qrImg);
+      const hint = document.createElement('div');
+      hint.className = 'qr-hint';
+      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+      wrap.appendChild(hint);
+      startQrCountdown(60);
+      if (username) startDevicePollingForLinking(username);
+    };
+    
+    qrImg.onerror = function() {
+      attempt++;
+      tryEndpoint();
+    };
+    
+    qrImg.src = qrUrl;
+  }
+  
+  tryEndpoint();
+}
 
-  // Use an Image object to avoid CORS issues with fetch
-  const qrImg = new Image();
-  qrImg.crossOrigin = 'anonymous';
-  qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-
-  qrImg.onload = function(){
-    wrap.innerHTML = '';
-    wrap.appendChild(qrImg);
-    const hint = document.createElement('div');
-    hint.className = 'qr-hint';
-    hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-    wrap.appendChild(hint);
-    startQrCountdown(60);
-    if(username) startDevicePollingForLinking(username);
-  };
-
-  qrImg.onerror = function(){
-    // Try fetching as JSON/text fallback (some servers return base64)
-    fetch(url + '/app/login?output=json&t=' + Date.now())
-      .then(r => r.json())
-      .then(data => {
-        const b64 = data.qr || data.code || data.image || data.data;
-        if(b64){
-          wrap.innerHTML = '';
-          const img = document.createElement('img');
-          img.src = 'data:image/png;base64,' + b64;
-          img.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-          wrap.appendChild(img);
-          const hint = document.createElement('div');
-          hint.className = 'qr-hint';
-          hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-          wrap.appendChild(hint);
-          startQrCountdown(60);
-          if(username) startDevicePollingForLinking(username);
-        } else {
-          _showQrError(wrap);
-        }
-      })
-      .catch(() => _showQrError(wrap));
-  };
-
-  qrImg.src = qrUrl;
+// Add this function to debug the GoWA server response
+function debugGoWAServer() {
+  const url = getGowaUrl();
+  if (!url) {
+    console.log('No server URL set');
+    return;
+  }
+  
+  fetch(url + '/app/login?output=json&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      console.log('GoWA /app/login JSON response:', data);
+      showToast('Check console (F12) for server response');
+    })
+    .catch(err => {
+      console.error('GoWA server error:', err);
+      showToast('Server error: ' + err.message, true);
+    });
 }
 
 function _showQrError(wrap){
