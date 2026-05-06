@@ -1340,48 +1340,165 @@ function openGroupImport(){
 }
 
 function fetchGroups(){
-  const serverUrl = GOWA_URL;
-  document.getElementById('groupList').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
-  fetch(serverUrl + '/group/list')
-    .then(r => r.json())
+  const url = getGowaUrl();
+  if(!url){
+    showToast('GoWA server URL not configured', true);
+    return;
+  }
+  
+  const groupListDiv = document.getElementById('groupList');
+  groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">📡 Fetching your groups...</div>';
+  
+  fetch(url + '/group/list')
+    .then(r => {
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(data => {
-      const groups = data.results || data.data || data || [];
+      console.log('Groups response:', data);
+      
+      // Handle different response formats
+      let groups = [];
+      if(data.success && data.groups) groups = data.groups;
+      else if(data.groups) groups = data.groups;
+      else if(Array.isArray(data)) groups = data;
+      else if(data.results && Array.isArray(data.results)) groups = data.results;
+      
       if(!groups.length){
-        document.getElementById('groupList').innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No groups found</div>';
+        groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">📭 No groups found. Make sure WhatsApp is connected.</div>';
         return;
       }
-      document.getElementById('groupList').innerHTML = groups.map(x => {
-        const id = x.group_id || x.id || x.jid || '';
-        const name = x.name || id;
-        const count = x.participants || x.members || 0;
-        return `<div class="group-item"><input type="radio" name="groupSel" value="${esc(id)}" onchange="selectedGroup='${esc(id)}'"/><span>👥 ${esc(name)}</span><span class="group-count">${count} members</span></div>`;
+      
+      groupListDiv.innerHTML = groups.map(g => {
+        const groupId = g.id || g.group_id || g.jid || '';
+        const groupName = g.name || g.subject || groupId;
+        const memberCount = g.participants || g.members || g.size || 0;
+        
+        return `<div class="group-item" onclick="selectGroup('${escapeHtml(groupId)}', '${escapeHtml(groupName)}')">
+          <input type="radio" name="groupSel" value="${escapeHtml(groupId)}" id="group_${escapeHtml(groupId)}"/>
+          <span>👥 ${escapeHtml(groupName)}</span>
+          <span class="group-count">${memberCount} members</span>
+        </div>`;
       }).join('');
     })
-    .catch(() => {
-      const g = [
-        {id:'g1',name:'Sales Team',members:24},
-        {id:'g2',name:'VIP Clients',members:11},
-        {id:'g3',name:'Product Launch',members:47},
-        {id:'g4',name:'Support Group',members:8}
-      ];
-      document.getElementById('groupList').innerHTML = g.map(x =>
-        `<div class="group-item"><input type="radio" name="groupSel" value="${x.id}" onchange="selectedGroup='${x.id}'"/><span>👥 ${esc(x.name)}</span><span class="group-count">${x.members} members</span></div>`
-      ).join('');
+    .catch(err => {
+      console.error('Fetch groups error:', err);
+      groupListDiv.innerHTML = `<div style="padding:16px;text-align:center;color:var(--accent3);font-size:13px">
+        ❌ Failed to fetch groups.<br/>
+        <small>Make sure GoWA server is running and device is connected.</small>
+      </div>`;
     });
 }
+  
+let selectedGroupId = null;
+let selectedGroupName = '';
+
+function selectGroup(id, name){
+  selectedGroupId = id;
+  selectedGroupName = name;
+  // Update radio button visual
+  document.querySelectorAll('.group-item').forEach(el => {
+    el.style.background = 'transparent';
+  });
+  event.currentTarget.style.background = 'rgba(0,229,160,.08)';
+}
+  
 
 function importGroupContacts(){
-  if(!selectedGroup){ showToast('Select a group first', true); return; }
-  const newContacts = [
-    {id:Date.now()+1, name:'Group Member 1', phone:'919999000001', message:'', status:'pending'},
-    {id:Date.now()+2, name:'Group Member 2', phone:'919999000002', message:'', status:'pending'}
-  ];
-  contacts = [...contacts, ...newContacts];
-  renderContacts();
-  document.getElementById('groupImportCard').style.display = 'none';
-  showToast('Group contacts imported — click Save to Sheet ✅');
+  if(!selectedGroupId){
+    showToast('Please select a group first', true);
+    return;
+  }
+  
+  const url = getGowaUrl();
+  if(!url){
+    showToast('GoWA server URL not configured', true);
+    return;
+  }
+  
+  showToast(`Fetching members from ${selectedGroupName}...`);
+  
+  fetch(url + '/group/members?groupId=' + encodeURIComponent(selectedGroupId))
+    .then(r => {
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(data => {
+      console.log('Group members response:', data);
+      
+      // Handle different response formats
+      let members = [];
+      if(data.success && data.members) members = data.members;
+      else if(data.members) members = data.members;
+      else if(Array.isArray(data)) members = data;
+      else if(data.results && Array.isArray(data.results)) members = data.results;
+      
+      if(!members.length){
+        showToast('No members found in this group', true);
+        return;
+      }
+      
+      const newContacts = [];
+      
+      for(let i = 0; i < members.length; i++){
+        const m = members[i];
+        let name = m.name || m.pushname || m.contact_name || m.displayName || 'Group Member';
+        let phone = m.phone || m.number || m.id || '';
+        
+        // Extract phone from JID format (1234567890@s.whatsapp.net)
+        if(phone.includes('@')){
+          phone = phone.split('@')[0];
+        }
+        
+        // Clean phone number
+        phone = phone.toString().replace(/\D/g, '');
+        
+        if(phone && phone.length >= 10){
+          // Format for India (+91)
+          if(phone.startsWith('91') && phone.length > 10){
+            phone = phone.substring(2);
+          }
+          if(phone.startsWith('0')){
+            phone = phone.substring(1);
+          }
+          phone = '91' + phone;
+          
+          // Avoid duplicates (check if phone already exists)
+          const exists = contacts.some(c => c.phone === phone);
+          if(!exists){
+            newContacts.push({
+              id: Date.now() + i,
+              name: name || phone,
+              phone: phone,
+              message: '',
+              status: 'pending'
+            });
+          }
+        }
+      }
+      
+      // Take only last 10 new contacts
+      const finalContacts = newContacts.slice(-10);
+      
+      if(finalContacts.length === 0){
+        showToast('No new valid contacts found in this group', true);
+        return;
+      }
+      
+      contacts = [...contacts, ...finalContacts];
+      renderContacts();
+      document.getElementById('groupImportCard').style.display = 'none';
+      showToast(`✅ Imported ${finalContacts.length} members from "${selectedGroupName}" (last ${finalContacts.length} from ${newContacts.length} new members)`);
+      
+      // Reset selection
+      selectedGroupId = null;
+      selectedGroupName = '';
+    })
+    .catch(err => {
+      console.error('Import group error:', err);
+      showToast('Failed to fetch group members: ' + err.message, true);
+    });
 }
-
 // ======================================================
 // COMPOSE
 // ======================================================
