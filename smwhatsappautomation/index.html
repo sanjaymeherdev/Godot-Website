@@ -513,13 +513,11 @@ function jsonpRequest(params, cb){
   document.body.appendChild(s);
 }
 
-// POST to Apps Script via fetch (for save operations)
-function apiPost(action, data){
-  return fetch(API_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({action, ...data})
-  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+// JSONP GET wrapper returning a Promise (replaces apiPost — no CORS)
+function apiGet(action, data){
+  return new Promise(resolve=>{
+    jsonpRequest({action, ...data}, resolve);
+  });
 }
 
 // ── API Wrappers ──────────────────────────────────────
@@ -749,7 +747,7 @@ function clearContacts(){
   const username=SessionManager.getUsername();
   contacts=[];
   renderContacts();
-  if(username) apiPost('clearContacts',{username}).then(r=>showToast(r.success?'Contacts cleared ✅':'Clear failed',!r.success));
+  if(username) apiGet('clearContacts',{username}).then(r=>showToast(r.success?'Contacts cleared ✅':'Clear failed',!r.success));
   else showToast('Contacts cleared');
 }
 
@@ -758,9 +756,28 @@ function saveContacts(){
   if(!username){ showToast('Not logged in',true); return; }
   if(!contacts.length){ showToast('No contacts to save',true); return; }
   showToast('Saving contacts…');
-  apiPost('saveContacts',{username, contacts:JSON.stringify(contacts)}).then(r=>{
-    showToast(r.success ? contacts.length+' contacts saved to Sheet ✅' : 'Save failed: '+r.message, !r.success);
-  });
+  // Send in chunks of 20 to avoid URL length limits
+  const CHUNK=20;
+  const chunks=[];
+  for(let i=0;i<contacts.length;i+=CHUNK) chunks.push(contacts.slice(i,i+CHUNK));
+  const totalChunks=chunks.length;
+  let sent=0;
+  function sendChunk(i){
+    if(i>=totalChunks){ showToast(contacts.length+' contacts saved to Sheet ✅'); return; }
+    jsonpRequest({
+      action:'saveContactsChunk',
+      username,
+      chunkIndex:i,
+      totalChunks,
+      chunk:JSON.stringify(chunks[i])
+    },r=>{
+      if(!r.success){ showToast('Save failed on chunk '+(i+1)+': '+r.message,true); return; }
+      sent+=chunks[i].length;
+      showToast('Saving… '+sent+'/'+contacts.length);
+      sendChunk(i+1);
+    });
+  }
+  sendChunk(0);
 }
 
 // ══════════════════════════════════════════════════════
@@ -848,7 +865,7 @@ function saveCompose(){
     pollOptions:  JSON.stringify([...document.querySelectorAll('#pollOptions input')].map(i=>i.value).filter(Boolean))
   };
   showToast('Saving template…');
-  apiPost('saveTemplate',{username,...template}).then(r=>{
+  apiGet('saveTemplate',{username,...template}).then(r=>{
     showToast(r.success?'Template saved ✅':'Save failed: '+r.message,!r.success);
   });
 }
@@ -926,11 +943,11 @@ function processSend(){
     sendIndex++; if(success){todaySent++;hourSent++;}
     updateSendStats();
     // Log to sheet
-    if(username) apiPost('saveLog',{username,type:success?'sent':'failed',name:c.name,phone:c.phone,message:msgBody,status:contacts[sendIndex-1].status});
+    if(username) apiGet('saveLog',{username,type:success?'sent':'failed',name:c.name,phone:c.phone,message:msgBody,status:contacts[sendIndex-1].status});
     addLog({type:success?'sent':'failed',name:c.name,msg:msgBody,time:new Date()});
     renderContacts();
     // Update contact status in sheet
-    if(username&&c.id) apiPost('updateContact',{username,rowIndex:c.id,status:contacts[sendIndex-1].status});
+    if(username&&c.id) apiGet('updateContact',{username,rowIndex:c.id,status:contacts[sendIndex-1].status});
     scheduleNext();
   })
   .catch(()=>{
@@ -996,7 +1013,7 @@ function saveSettings(){
     aiRewrite:        document.getElementById('aiRewriteSettingToggle').checked
   };
   showToast('Saving settings…');
-  apiPost('saveSettings',s).then(r=>{
+  apiGet('saveSettings',s).then(r=>{
     showToast(r.success?'Settings saved ✅':'Save failed: '+r.message,!r.success);
   });
 }
