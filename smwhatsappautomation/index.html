@@ -1476,78 +1476,95 @@ function _fetchAndShowQR(url, username){
   clearInterval(qrCountdown);
   stopDevicePolling();
 
-  // Try the working endpoint from your successful test
-  const qrUrl = url + '/app/login?output=image&t=' + Date.now();
-  
-  const qrImg = new Image();
-  qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-  
-  qrImg.onload = function(){
-    wrap.innerHTML = '';
-    wrap.appendChild(qrImg);
-    const hint = document.createElement('div');
-    hint.className = 'qr-hint';
-    hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-    wrap.appendChild(hint);
-    startQrCountdown(60);
-    if(username) startDevicePollingForLinking(username);
-  };
-  
-  qrImg.onerror = function(){
-    // If direct image fails, try the JSON endpoint
-    fetch(url + '/app/login?output=json&t=' + Date.now())
-      .then(r => {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(data => {
-        console.log('QR Response:', data);
-        // Your replit server returns: { code: 'SUCCESS', results: { qr_link: '...' } }
-        let qrImageUrl = null;
-        
-        if (data.results && data.results.qr_link) {
-          qrImageUrl = data.results.qr_link;
-        } else if (data.qr) {
-          qrImageUrl = data.qr;
-        } else if (data.image) {
-          qrImageUrl = data.image;
-        }
-        
-        if (qrImageUrl) {
-          // Make sure URL is absolute
-          if (!qrImageUrl.startsWith('http')) {
-            qrImageUrl = url + qrImageUrl;
-          }
-          
-          const img2 = new Image();
-          img2.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-          img2.onload = function() {
-            wrap.innerHTML = '';
-            wrap.appendChild(img2);
-            const hint = document.createElement('div');
-            hint.className = 'qr-hint';
-            hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-            wrap.appendChild(hint);
-            startQrCountdown(60);
-            if(username) startDevicePollingForLinking(username);
-          };
-          img2.onerror = function() {
-            _showQrError(wrap, qrImageUrl);
-          };
-          img2.src = qrImageUrl;
-        } else {
-          _showQrError(wrap);
-        }
-      })
-      .catch(err => {
-        console.error('QR fetch error:', err);
-        _showQrError(wrap);
-      });
-  };
-  
-  qrImg.src = qrUrl;
-}
+  // Try to get QR as base64 directly
+  let apiUrl = url;
+  if (window.location.protocol === 'https:' && apiUrl.startsWith('http://')) {
+    apiUrl = apiUrl.replace('http://', 'https://');
+  }
 
+  // Try endpoints that might return base64 QR
+  const endpoints = [
+    apiUrl + '/app/login?output=json&t=' + Date.now(),
+    apiUrl + '/app/login?format=base64&t=' + Date.now(),
+    apiUrl + '/qr/base64?t=' + Date.now()
+  ];
+  
+  let attempt = 0;
+  
+  function tryEndpoint() {
+    if (attempt >= endpoints.length) {
+      _showQrError(wrap);
+      return;
+    }
+    
+    fetch(endpoints[attempt])
+      .then(r => r.json())
+      .then(data => {
+        console.log('QR Response from endpoint', attempt, ':', data);
+        
+        // Look for base64 QR data
+        let qrBase64 = null;
+        let qrLink = null;
+        
+        if (data.qr && data.qr.startsWith('data:image')) {
+          qrBase64 = data.qr;
+        } else if (data.qr) {
+          qrBase64 = 'data:image/png;base64,' + data.qr;
+        } else if (data.code === 'SUCCESS' && data.results) {
+          qrLink = data.results.qr_link;
+          // Try to fetch the link and convert to base64
+          if (qrLink) {
+            let httpsLink = qrLink;
+            if (window.location.protocol === 'https:' && httpsLink.startsWith('http://')) {
+              httpsLink = httpsLink.replace('http://', 'https://');
+            }
+            fetch(httpsLink)
+              .then(r => r.blob())
+              .then(blob => {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                  displayQR(reader.result, data.results.qr_duration || 60, username);
+                };
+                reader.readAsDataURL(blob);
+              })
+              .catch(() => { attempt++; tryEndpoint(); });
+            return;
+          }
+        }
+        
+        if (qrBase64) {
+          displayQR(qrBase64, data.qr_duration || 60, username);
+        } else {
+          attempt++;
+          tryEndpoint();
+        }
+      })
+      .catch(() => { attempt++; tryEndpoint(); });
+  }
+  
+  function displayQR(src, duration, username) {
+    const wrap = document.getElementById('qrWrap');
+    wrap.innerHTML = '';
+    const qrImg = document.createElement('img');
+    qrImg.src = src;
+    qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+    qrImg.onload = function() {
+      const hint = document.createElement('div');
+      hint.className = 'qr-hint';
+      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+      wrap.appendChild(qrImg);
+      wrap.appendChild(hint);
+      startQrCountdown(duration);
+      if (username) startDevicePollingForLinking(username);
+    };
+    qrImg.onerror = function() {
+      wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">❌</div><div class="qr-hint">Failed to load QR</div>';
+    };
+  }
+  
+  tryEndpoint();
+}
+  
 function _showQrError(wrap, urlHint){
   wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
     <div class="qr-hint" style="color:var(--accent3)">Could not load QR code.<br/>
@@ -1577,21 +1594,27 @@ function startQrCountdown(seconds){
 
 function startDevicePollingForLinking(username){
   stopDevicePolling();
-  const url = getGowaUrl();
+  let url = getGowaUrl();
   if(!url) return;
+
+  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
+    url = url.replace('http://', 'https://');
+  }
 
   devicePollTimer = setInterval(() => {
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
-        // Handle different response formats
+        console.log('Devices check:', data);
+        
         let devices = [];
-        if (data.results && Array.isArray(data.results)) {
-          devices = data.results;
-        } else if (data.results && data.results.devices) {
-          devices = data.results.devices;
-        } else if (Array.isArray(data)) {
-          devices = data;
+        if (data.code === 'SUCCESS') {
+          // When results is null, no devices yet
+          if (data.results && Array.isArray(data.results)) {
+            devices = data.results;
+          } else if (data.results && data.results.devices) {
+            devices = data.results.devices;
+          }
         }
         
         if(!devices.length) return;
@@ -1629,9 +1652,7 @@ function startDevicePollingForLinking(username){
           });
         });
       })
-      .catch(err => {
-        console.log('Device polling:', err);
-      });
+      .catch(err => console.log('Device polling:', err));
   }, 3000);
 }
 
