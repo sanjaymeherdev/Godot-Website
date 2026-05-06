@@ -211,6 +211,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .group-count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);}
 .divider{height:1px;background:var(--border);margin:20px 0;}
 @media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr);}.form-grid{grid-template-columns:1fr;}.attach-grid{grid-template-columns:repeat(3,1fr);}}
+/* DEVICE TAB */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--radius);min-height:280px;text-align:center;}
+.qr-wrap img{width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;}
+.qr-hint{font-size:13px;color:var(--text2);font-family:var(--mono);}
+.qr-hint strong{color:var(--accent);}
+.device-status-card{display:flex;align-items:center;gap:16px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
+.device-status-icon{font-size:32px;flex-shrink:0;}
+.device-status-info{flex:1;}
+.device-status-title{font-size:15px;font-weight:700;color:#fff;}
+.device-status-id{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:4px;word-break:break-all;}
+.device-connected{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.04);}
+.device-disconnected{border-color:rgba(255,95,126,.2);}
+.poll-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;}
+.poll-dot.scanning{background:#ffd166;}
+.poll-dot.connected{background:var(--accent);}
+.poll-dot.disconnected{background:var(--accent3);}
+.step-list{counter-reset:steps;list-style:none;padding:0;}
+.step-list li{counter-increment:steps;display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
+.step-list li:last-child{border-bottom:none;}
+.step-list li::before{content:counter(steps);width:24px;height:24px;border-radius:50%;background:rgba(0,229,160,.15);color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.warning-banner{background:rgba(255,95,126,.1);border:1px solid rgba(255,95,126,.3);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.warning-banner .icon{font-size:18px;}
+.warning-banner .text{font-size:12px;color:var(--accent3);}
+.warning-banner .text strong{color:#fff;}
 </style>
 </head>
 <body>
@@ -234,6 +258,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
   </div>
   <nav class="nav">
+    <div class="nav-item" onclick="switchTab('device')"><span class="nav-icon">📱</span> Device <span class="nav-badge" id="deviceBadge" style="display:none">!</span></div>
     <div class="nav-item active" onclick="switchTab('contacts')"><span class="nav-icon">👥</span> Contacts <span class="nav-badge" id="contactCount">0</span></div>
     <div class="nav-item" onclick="switchTab('compose')"><span class="nav-icon">✍️</span> Compose</div>
     <div class="nav-item" onclick="switchTab('send')"><span class="nav-icon">🚀</span> Send</div>
@@ -248,11 +273,73 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <main class="main">
   <div class="topbar">
     <div class="topbar-title" id="topbarTitle">Contacts</div>
-    <div class="status-dot"></div>
-    <div class="status-label">DEVICE CONNECTED</div>
+    <div class="status-dot" id="topbarDot" style="background:var(--muted);box-shadow:none"></div>
+    <div class="status-label" id="topbarStatus">NO DEVICE</div>
   </div>
 
   <div class="content">
+
+    <!-- DEVICE -->
+    <div class="tab-panel" id="tab-device">
+      <div class="section-header">
+        <div><div class="section-title">Link Your Device</div><div class="section-sub">Connect your WhatsApp number to start sending</div></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary btn-sm" id="refreshQrBtn" onclick="loadQR()">🔄 Refresh QR</button>
+          <button class="btn btn-danger btn-sm" id="disconnectBtn" onclick="disconnectDevice()" style="display:none">🔌 Unlink Device</button>
+        </div>
+      </div>
+
+      <!-- Warning: One device per user -->
+      <div class="warning-banner" id="deviceWarning" style="display:none">
+        <div class="icon">⚠️</div>
+        <div class="text"><strong>One device per user only.</strong> To link a new device, first unlink your current device.</div>
+      </div>
+
+      <!-- Status card -->
+      <div class="device-status-card" id="deviceStatusCard">
+        <div class="device-status-icon" id="deviceStatusIcon">📵</div>
+        <div class="device-status-info">
+          <div class="device-status-title" id="deviceStatusTitle">No device linked</div>
+          <div class="device-status-id" id="deviceStatusId">Scan the QR code below to link your WhatsApp</div>
+        </div>
+        <div>
+          <span class="poll-dot disconnected" id="pollDot"></span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text2)" id="pollLabel">OFFLINE</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+        <!-- QR Code -->
+        <div class="card">
+          <div class="card-title">QR Code</div>
+          <div class="qr-wrap" id="qrWrap">
+            <div style="font-size:40px;margin-bottom:12px">📱</div>
+            <div class="qr-hint">Enter your GoWA server URL in<br/><strong>Settings</strong> then click Load QR</div>
+          </div>
+          <div style="margin-top:14px;text-align:center">
+            <button class="btn btn-primary" id="loadQrBtn" onclick="loadQR()">Load QR Code</button>
+          </div>
+          <div style="margin-top:10px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)" id="qrTimer"></div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="card">
+          <div class="card-title">How to Link</div>
+          <ul class="step-list">
+            <li>Make sure your GoWA server URL is saved in Settings</li>
+            <li>Click <strong style="color:var(--accent)">Load QR Code</strong> to generate a fresh QR</li>
+            <li>Open WhatsApp on your phone</li>
+            <li>Go to <strong style="color:var(--text)">Settings → Linked Devices → Link a Device</strong></li>
+            <li>Point your camera at the QR code</li>
+            <li>Wait for the green ✅ confirmation — your Device will be linked to YOUR account only</li>
+          </ul>
+          <div style="margin-top:16px;padding:12px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:8px">
+            <div style="font-size:12px;color:#ffd166;font-family:var(--mono)">⚠ QR expires in 60 seconds — refresh if it times out</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:6px">🔒 Each user can link only ONE device. Unlink first to change devices.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- CONTACTS -->
     <div class="tab-panel active" id="tab-contacts">
@@ -294,8 +381,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <input type="text" placeholder="Search..." style="width:180px;padding:7px 12px;font-size:13px" oninput="filterContacts(this.value)"/>
         </div>
         <div class="table-wrap" style="border:none;border-radius:0">
-          <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Custom Message</th><th>Status</th><th></th></tr></thead>
-          <tbody id="contactTableBody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr></tbody></table>
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Custom Message</th><th>Status</th><th></th></tr></thead>
+            <tbody id="contactTableBody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -485,8 +574,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 // ══════════════════════════════════════════════════════
 // CONFIG — replace with your deployed Apps Script URL
 // ══════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbyxH-FNI-e-kLifUPNaxkjW7u6VTYLw3TexgQPmtiqxM5Z7WhqPmH7V6xVrnXkSiSnttQ/exec";
-const GOWA_URL_KEY = "wa_gowa_url"; // fallback key
+const API_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
 
 // ══════════════════════════════════════════════════════
 // SESSION MANAGER
@@ -496,7 +584,8 @@ const SessionManager = {
   get(){ const r=localStorage.getItem('auth_user'); return {isLoggedIn:localStorage.getItem('auth_logged_in')==='true',userData:r?JSON.parse(r):null,sessionStart:localStorage.getItem('auth_started')}; },
   clear(){ ['auth_logged_in','auth_user','auth_started'].forEach(k=>localStorage.removeItem(k)); },
   isValid(){ const s=this.get(); if(!s.isLoggedIn||!s.userData) return false; if(Date.now()-parseInt(s.sessionStart||'0')>=24*60*60*1000){this.clear();return false;} return true; },
-  getUsername(){ const s=this.get(); return s.userData?.username||null; }
+  getUsername(){ const s=this.get(); return s.userData?.username||null; },
+  getDeviceId(){ const s=this.get(); return s.userData?.deviceId||null; }
 };
 
 // ══════════════════════════════════════════════════════
@@ -513,19 +602,22 @@ function jsonpRequest(params, cb){
   document.body.appendChild(s);
 }
 
-// JSONP GET wrapper returning a Promise (replaces apiPost — no CORS)
 function apiGet(action, data){
   return new Promise(resolve=>{
     jsonpRequest({action, ...data}, resolve);
   });
 }
 
-// ── API Wrappers ──────────────────────────────────────
-function apiLogin(u,p,cb){ jsonpRequest({action:'login',username:u,password:p},r=>{if(r.success&&!r.username)r.username=u;cb(r);}); }
+// API wrappers
+function apiLogin(u,p,cb){ jsonpRequest({action:'login',username:u,password:p},cb); }
 function apiRegister(u,p,q,a,cb){ jsonpRequest({action:'register',username:u,password:p,securityQuestion:q,securityAnswer:a},cb); }
 function apiGetQuestion(u,cb){ jsonpRequest({action:'getSecurityQuestion',username:u},cb); }
 function apiVerifyAnswer(u,a,cb){ jsonpRequest({action:'verifyAnswer',username:u,answer:a},cb); }
 function apiLoadLogs(u,cb){ jsonpRequest({action:'loadLogs',username:u,limit:100},cb); }
+function apiGetUserDevice(u,cb){ jsonpRequest({action:'getUserDevice',username:u},cb); }
+function apiLinkDevice(u,id,cb){ jsonpRequest({action:'linkDevice',username:u,deviceId:id},cb); }
+function apiUnlinkDevice(u,cb){ jsonpRequest({action:'unlinkDevice',username:u},cb); }
+function apiValidateDevice(u,id,cb){ jsonpRequest({action:'validateDevice',username:u,deviceId:id},cb); }
 
 // ══════════════════════════════════════════════════════
 // AUTH UI
@@ -587,8 +679,8 @@ function showAuth(){
       apiLogin(u,p,r=>{
         setLoad(btn,box,false);
         if(r.success){
-          SessionManager.set({username:r.username||u,lastLogin:r.lastLogin||new Date().toISOString()});
-          showDashboard(r); // pass server data directly
+          SessionManager.set({username:r.username||u,lastLogin:r.lastLogin||new Date().toISOString(),deviceId:r.deviceId||null});
+          showDashboard(r);
         } else amsg(box,'error',r.message||'Login failed.');
       });
     },
@@ -631,24 +723,39 @@ function showDashboard(serverData){
   document.getElementById('authOverlay').style.display='none';
   document.getElementById('dashboardWrap').style.display='flex';
 
-  // Update sidebar with username
   const username = SessionManager.getUsername();
   if(username){
     document.getElementById('sidebarUsername').textContent = username;
     document.getElementById('avatarInitial').textContent   = username[0].toUpperCase();
   }
 
-  // If serverData came from login response, restore everything
   if(serverData){
     if(serverData.settings) applySettings(serverData.settings);
     if(serverData.template) applyTemplate(serverData.template);
     if(serverData.contacts) { contacts = serverData.contacts; renderContacts(); }
+    if(serverData.deviceId) { deviceId = serverData.deviceId; setDeviceStatus('connected', deviceId); }
+    else { checkUserDevice(); }
   }
 
-  // Always load logs fresh
   if(username) apiLoadLogs(username, r=>{ if(r.success) { logs=r.logs.map(l=>({...l,time:new Date(l.timestamp)})); renderLogs(); } });
 
   updateSendStats();
+  setTimeout(checkDeviceStatus, 500);
+}
+
+function checkUserDevice(){
+  const username = SessionManager.getUsername();
+  if(!username) return;
+  apiGetUserDevice(username, r=>{
+    if(r.success && r.hasDevice){
+      deviceId = r.deviceId;
+      setDeviceStatus('connected', deviceId);
+      document.getElementById('deviceWarning').style.display='none';
+    } else {
+      deviceId = null;
+      setDeviceStatus('disconnected');
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════
@@ -656,27 +763,30 @@ function showDashboard(serverData){
 // ══════════════════════════════════════════════════════
 window.onload=()=>{ SessionManager.isValid() ? reloadSessionData() : showAuth(); };
 
-// If session is valid but no server data (page refresh), reload from server
 function reloadSessionData(){
   const username = SessionManager.getUsername();
   if(!username){ showAuth(); return; }
   showToast('Restoring your session…');
-  jsonpRequest({action:'loadClientData',username},r=>{
+  jsonpRequest({action:'loadClientData',username}, r=>{
     if(r.success){
       showDashboard(r);
     } else {
-      showDashboard(null); // show empty dashboard, not ideal but workable
+      showDashboard(null);
     }
   });
 }
 
-function logout(){ SessionManager.clear(); contacts=[]; logs=[]; showAuth(); }
+function logout(){ SessionManager.clear(); contacts=[]; logs=[]; deviceId=null; showAuth(); }
 
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
 let contacts=[],logs=[],sendState='idle',sendIndex=0,sendTimer=null;
 let selectedAttach='none',selectedGroup=null,todaySent=0,hourSent=0;
+let deviceId = null;
+let qrPollTimer = null;
+let devicePollTimer = null;
+let qrCountdown = null;
 
 // ══════════════════════════════════════════════════════
 // TABS
@@ -685,9 +795,10 @@ function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  const labels=['contacts','compose','send','settings','logs'];
+  const labels=['device','contacts','compose','send','settings','logs'];
   document.querySelectorAll('.nav-item')[labels.indexOf(name)]?.classList.add('active');
   document.getElementById('topbarTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(name==='device') { checkUserDevice(); checkDeviceStatus(); }
 }
 
 // ══════════════════════════════════════════════════════
@@ -709,8 +820,6 @@ function parsePaste(){
 function handleFileUpload(input){
   const file=input.files[0]; if(!file) return;
   showToast('Parsing '+file.name+'… (connect Replit parser for real CSV)');
-  // TODO: POST file to Replit /parse endpoint, get back contacts array
-  // For now simulate with demo data
   setTimeout(()=>{
     contacts=[
       {id:1,name:'Demo User',phone:'919876543210',message:'Hi Demo, special offer for you!',status:'pending'},
@@ -719,7 +828,7 @@ function handleFileUpload(input){
     renderContacts();
     showToast('File parsed — '+contacts.length+' contacts loaded. Click Save to Sheet ✅');
   },800);
-  input.value=''; // reset file input
+  input.value='';
 }
 
 function renderContacts(list){
@@ -756,7 +865,6 @@ function saveContacts(){
   if(!username){ showToast('Not logged in',true); return; }
   if(!contacts.length){ showToast('No contacts to save',true); return; }
   showToast('Saving contacts…');
-  // Send in chunks of 20 to avoid URL length limits
   const CHUNK=20;
   const chunks=[];
   for(let i=0;i<contacts.length;i+=CHUNK) chunks.push(contacts.slice(i,i+CHUNK));
@@ -789,8 +897,6 @@ function fetchGroups(){
   const serverUrl=document.getElementById('serverUrl').value.trim();
   if(!serverUrl){ showToast('Set your GoWA server URL in Settings first',true); return; }
   document.getElementById('groupList').innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
-  // Real call: fetch(serverUrl + '/group/list', {method:'GET',...})
-  // Simulated:
   setTimeout(()=>{
     const g=[{id:'g1',name:'Sales Team',members:24},{id:'g2',name:'VIP Clients',members:11},{id:'g3',name:'Product Launch',members:47},{id:'g4',name:'Support Group',members:8}];
     document.getElementById('groupList').innerHTML=g.map(x=>`<div class="group-item"><input type="radio" name="groupSel" value="${x.id}" onchange="selectedGroup='${x.id}'"/><span>👥 ${esc(x.name)}</span><span class="group-count">${x.members} members</span></div>`).join('');
@@ -799,8 +905,6 @@ function fetchGroups(){
 
 function importGroupContacts(){
   if(!selectedGroup){showToast('Select a group first',true);return;}
-  // Real call: fetch GoWA group members
-  // Simulated:
   const newContacts=[
     {id:Date.now()+1,name:'Group Member 1',phone:'919999000001',message:'',status:'pending'},
     {id:Date.now()+2,name:'Group Member 2',phone:'919999000002',message:'',status:'pending'}
@@ -831,7 +935,6 @@ function handleAttachUpload(input){
   document.getElementById('attachSize').textContent=(f.size/1024).toFixed(1)+' KB';
   document.getElementById('attachEmoji').textContent=f.type.startsWith('image')?'🖼':f.type.startsWith('video')?'🎬':'📄';
   document.getElementById('attachPreview').style.display='block';
-  // TODO: POST to Replit /upload endpoint → get temp URL back
   showToast('File ready — will upload to Replit on send ✅');
 }
 
@@ -878,12 +981,24 @@ function startSend(){
   if(sendState==='running') return;
   const username=SessionManager.getUsername();
   if(!username){showToast('Not logged in',true);return;}
-  const serverUrl=document.getElementById('serverUrl').value.trim();
-  if(!serverUrl){showToast('Set GoWA server URL in Settings first',true);return;}
-  sendState='running';
-  if(sendIndex>=contacts.length) sendIndex=0;
-  document.getElementById('pauseIndicator').style.background='var(--accent)';
-  processSend();
+  
+  // Validate device ownership before starting
+  if(!deviceId){showToast('No device linked. Please link your WhatsApp device first.',true);switchTab('device');return;}
+  
+  apiValidateDevice(username, deviceId, (valid)=>{
+    if(!valid.success || !valid.valid){
+      showToast('Your device is not linked to your account. Please re-link your device.',true);
+      switchTab('device');
+      return;
+    }
+    
+    const serverUrl=document.getElementById('serverUrl').value.trim();
+    if(!serverUrl){showToast('Set GoWA server URL in Settings first',true);return;}
+    sendState='running';
+    if(sendIndex>=contacts.length) sendIndex=0;
+    document.getElementById('pauseIndicator').style.background='var(--accent)';
+    processSend();
+  });
 }
 
 function pauseSend(){
@@ -908,14 +1023,13 @@ function processSend(){
     sendState='idle';
     document.getElementById('currentContact').textContent='✅ Campaign complete!';
     showToast('All messages sent ✅');
-    saveContacts(); // save final statuses
+    saveContacts();
     return;
   }
 
   const hl=parseInt(document.getElementById('hourLimit').value)||30;
   const dl=parseInt(document.getElementById('dayLimit').value)||200;
 
-  // Check limits
   if(hourSent>=hl){ pauseSend(); showToast('⏸ Hourly limit reached — paused',true); return; }
   if(todaySent>=dl){ stopSend(); showToast('Daily limit reached — campaign stopped',true); return; }
 
@@ -924,17 +1038,16 @@ function processSend(){
   const username=SessionManager.getUsername();
   const serverUrl=document.getElementById('serverUrl').value.trim();
   const template=document.getElementById('msgTemplate').value;
+  const msgBody=(c.message||template).replace(/\{name\}/gi,c.name).replace(/\{phone\}/gi,c.phone);
 
   document.getElementById('currentContact').textContent='📤 Sending to '+c.name;
   document.getElementById('queueStatus').textContent=sendIndex+' / '+contacts.length+' contacts processed';
   document.getElementById('progressBar').style.width=pct+'%';
   document.getElementById('progressPct').textContent=pct+'%';
 
-  // Build message — use custom message if exists, else use template with {name} replaced
-  const msgBody=(c.message||template).replace(/\{name\}/gi,c.name).replace(/\{phone\}/gi,c.phone);
-
-  // Send via GoWA
   const gowaPayload={phone:c.phone,message:msgBody};
+  if(deviceId) gowaPayload.device=deviceId;
+  
   fetch(serverUrl+'/send/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gowaPayload)})
   .then(r=>r.json())
   .then(res=>{
@@ -942,11 +1055,9 @@ function processSend(){
     contacts[sendIndex].status=success?'sent':'failed';
     sendIndex++; if(success){todaySent++;hourSent++;}
     updateSendStats();
-    // Log to sheet
     if(username) apiGet('saveLog',{username,type:success?'sent':'failed',name:c.name,phone:c.phone,message:msgBody,status:contacts[sendIndex-1].status});
     addLog({type:success?'sent':'failed',name:c.name,msg:msgBody,time:new Date()});
     renderContacts();
-    // Update contact status in sheet
     if(username&&c.id) apiGet('updateContact',{username,rowIndex:c.id,status:contacts[sendIndex-1].status});
     scheduleNext();
   })
@@ -1055,6 +1166,223 @@ function renderLogs(filter){
 
 function filterLogs(){renderLogs(document.getElementById('logFilter').value);}
 function clearLogs(){logs=[];renderLogs();}
+
+// ══════════════════════════════════════════════════════
+// DEVICE MANAGEMENT — ONE DEVICE PER USER
+// ══════════════════════════════════════════════════════
+
+function getGowaUrl(){
+  return (document.getElementById('serverUrl')?.value||'').trim();
+}
+
+function setDeviceStatus(state, id){
+  const dot   = document.getElementById('pollDot');
+  const label = document.getElementById('pollLabel');
+  const icon  = document.getElementById('deviceStatusIcon');
+  const title = document.getElementById('deviceStatusTitle');
+  const idEl  = document.getElementById('deviceStatusId');
+  const card  = document.getElementById('deviceStatusCard');
+  const topDot= document.getElementById('topbarDot');
+  const topLbl= document.getElementById('topbarStatus');
+  const discBtn=document.getElementById('disconnectBtn');
+  const warning=document.getElementById('deviceWarning');
+
+  if(state==='connected'){
+    dot.className='poll-dot connected'; label.textContent='CONNECTED';
+    icon.textContent='📱'; title.textContent='Device Connected ✅';
+    idEl.textContent='Your Device ID: '+(id||deviceId||'Unknown');
+    card.className='device-status-card device-connected';
+    topDot.style.background='var(--accent)'; topDot.style.boxShadow='0 0 8px var(--accent)';
+    topLbl.textContent='DEVICE CONNECTED'; topLbl.style.color='var(--accent)';
+    discBtn.style.display='inline-flex';
+    document.getElementById('deviceBadge').style.display='none';
+    warning.style.display='none';
+    deviceId = id;
+  } else if(state==='scanning'){
+    dot.className='poll-dot scanning'; label.textContent='SCANNING…';
+    icon.textContent='⏳'; title.textContent='Waiting for QR scan…';
+    idEl.textContent='Open WhatsApp → Settings → Linked Devices → Link a Device';
+    card.className='device-status-card';
+    topDot.style.background='#ffd166'; topDot.style.boxShadow='0 0 8px #ffd166';
+    topLbl.textContent='SCANNING QR'; topLbl.style.color='#ffd166';
+    discBtn.style.display='none';
+  } else {
+    dot.className='poll-dot disconnected'; label.textContent='OFFLINE';
+    icon.textContent='📵'; title.textContent='No device linked';
+    idEl.textContent='Scan the QR code to link your WhatsApp';
+    card.className='device-status-card device-disconnected';
+    topDot.style.background='var(--muted)'; topDot.style.boxShadow='none';
+    topLbl.textContent='NO DEVICE'; topLbl.style.color='var(--text2)';
+    discBtn.style.display='none';
+    document.getElementById('deviceBadge').style.display='inline';
+  }
+}
+
+function checkDeviceStatus(){
+  const url = getGowaUrl();
+  const username = SessionManager.getUsername();
+  if(!url || !username) return;
+  
+  // First check what device this user owns
+  apiGetUserDevice(username, (userDeviceRes)=>{
+    if(!userDeviceRes.success || !userDeviceRes.hasDevice){
+      setDeviceStatus('disconnected');
+      return;
+    }
+    
+    const myDeviceId = userDeviceRes.deviceId;
+    // Now check if that device exists on the GoWA server
+    fetch(url+'/app/devices')
+      .then(r=>r.json())
+      .then(data=>{
+        const devices = data.results || data.data || data || [];
+        const myDevice = devices.find(d => (d.device || d.id || d.jid) === myDeviceId);
+        if(myDevice){
+          setDeviceStatus('connected', myDeviceId);
+        } else {
+          // Device exists in our records but not on server? Unlink it
+          setDeviceStatus('disconnected');
+          showToast('Your linked device was removed from server. Please re-link.', true);
+        }
+      })
+      .catch(()=>{ /* server not reachable yet */ });
+  });
+}
+
+function loadQR(){
+  const url = getGowaUrl();
+  const username = SessionManager.getUsername();
+  if(!url){ showToast('Set GoWA server URL in Settings first ⚙️', true); switchTab('settings'); return; }
+  
+  // Check if user already has a device
+  apiGetUserDevice(username, (userDeviceRes)=>{
+    if(userDeviceRes.success && userDeviceRes.hasDevice){
+      showToast('You already have a device linked. Unlink it first to add a new one.', true);
+      document.getElementById('deviceWarning').style.display='flex';
+      return;
+    }
+    
+    document.getElementById('deviceWarning').style.display='none';
+    const wrap = document.getElementById('qrWrap');
+    wrap.innerHTML='<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Generating QR code…</div>';
+    setDeviceStatus('scanning');
+
+    const qrImg = new Image();
+    const qrUrl = url + '/app/login?output=image&t=' + Date.now();
+
+    qrImg.onload = function(){
+      wrap.innerHTML = '';
+      wrap.appendChild(qrImg);
+      const hint = document.createElement('div');
+      hint.className = 'qr-hint';
+      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+      wrap.appendChild(hint);
+      startQrCountdown(60);
+      startDevicePollingForLinking(username);
+    };
+
+    qrImg.onerror = function(){
+      wrap.innerHTML='<div style="font-size:32px;margin-bottom:10px">❌</div><div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>Check your server URL in Settings.</div>';
+      setDeviceStatus('disconnected');
+    };
+
+    qrImg.style.cssText='width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+    qrImg.src = qrUrl;
+  });
+}
+
+function startQrCountdown(seconds){
+  clearInterval(qrCountdown);
+  let s = seconds;
+  const el = document.getElementById('qrTimer');
+  qrCountdown = setInterval(()=>{
+    s--;
+    if(s<=0){
+      clearInterval(qrCountdown);
+      if(el) el.textContent='⚠ QR expired — click Refresh QR';
+      document.getElementById('qrWrap').innerHTML='<div style="font-size:32px;margin-bottom:10px">⏰</div><div class="qr-hint" style="color:#ffd166">QR expired — click Refresh QR</div>';
+      stopDevicePolling();
+    } else {
+      if(el) el.textContent='QR expires in '+s+'s';
+    }
+  }, 1000);
+}
+
+function startDevicePollingForLinking(username){
+  stopDevicePolling();
+  const url = getGowaUrl();
+  devicePollTimer = setInterval(()=>{
+    fetch(url+'/app/devices')
+      .then(r=>r.json())
+      .then(data=>{
+        const devices = data.results || data.data || data || [];
+        // Get user's existing device from our records
+        apiGetUserDevice(username, (existingRes)=>{
+          const existingId = existingRes.success ? existingRes.deviceId : null;
+          // Find a NEW device (one not linked to any user)
+          const newDevice = devices.find(d => {
+            const did = d.device || d.id || d.jid;
+            return did && did !== existingId;
+          });
+          
+          if(newDevice){
+            const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
+            // Link this device to the user
+            apiLinkDevice(username, newDeviceId, (linkRes)=>{
+              if(linkRes.success){
+                stopDevicePolling();
+                clearInterval(qrCountdown);
+                document.getElementById('qrTimer').textContent='';
+                document.getElementById('qrWrap').innerHTML='<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>'+newDeviceId+'</div>';
+                setDeviceStatus('connected', newDeviceId);
+                showToast('WhatsApp connected successfully! 🎉');
+                // Update session with device ID
+                const sess = SessionManager.get();
+                if(sess.userData){
+                  sess.userData.deviceId = newDeviceId;
+                  SessionManager.set(sess.userData);
+                }
+              } else {
+                showToast('Failed to link device: '+linkRes.message, true);
+              }
+            });
+          }
+        });
+      }).catch(()=>{});
+  }, 3000);
+}
+
+function stopDevicePolling(){ clearInterval(devicePollTimer); }
+
+function disconnectDevice(){
+  if(!confirm('Unlink your WhatsApp device? You will need to scan a new QR code to reconnect.')) return;
+  
+  const username = SessionManager.getUsername();
+  if(!username) return;
+  
+  // First, unlink from our ownership sheet
+  apiUnlinkDevice(username, (unlinkRes)=>{
+    if(unlinkRes.success){
+      // Try to logout from GoWA server as well
+      const url = getGowaUrl();
+      if(url && deviceId){
+        fetch(url+'/app/logout?device='+deviceId, {method:'GET'}).catch(()=>{});
+      }
+      deviceId = null;
+      setDeviceStatus('disconnected');
+      document.getElementById('qrWrap').innerHTML='<div style="font-size:40px;margin-bottom:12px">📱</div><div class="qr-hint">Device unlinked.<br/>Click <strong>Load QR Code</strong> to connect a new device.</div>';
+      showToast('Device unlinked successfully');
+      // Remove deviceId from session
+      const sess = SessionManager.get();
+      if(sess.userData){
+        delete sess.userData.deviceId;
+        SessionManager.set(sess.userData);
+      }
+    } else {
+      showToast('Failed to unlink: '+unlinkRes.message, true);
+    }
+  });
+}
 
 // ══════════════════════════════════════════════════════
 // UTILS
