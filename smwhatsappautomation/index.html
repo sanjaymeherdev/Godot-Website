@@ -357,6 +357,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="section-header">
         <div><div class="section-title">Contact List</div><div class="section-sub">Upload, paste or import from WhatsApp group</div></div>
         <div class="btn-row">
+          <button class="btn btn-secondary btn-sm" onclick="deduplicateContacts()">🔄 Remove Duplicates</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportContactsToCSV()">📥 Export CSV</button>
           <button class="btn btn-blue btn-sm" onclick="openGroupImport()">📲 Import from Group</button>
           <button class="btn btn-secondary btn-sm" onclick="clearContacts()">🗑 Clear All</button>
           <button class="btn btn-primary btn-sm" onclick="saveContacts()">💾 Save to Sheet</button>
@@ -611,6 +613,73 @@ function jsonpRequest(params, cb){
     try { cb(data); } catch(e) { console.error('JSONP callback error:', e); }
   };
 
+  // Contact Deduplication - Keep only unique phone numbers
+function deduplicateContacts(){
+  if(contacts.length === 0){
+    showToast('No contacts to deduplicate', true);
+    return;
+  }
+  
+  const originalCount = contacts.length;
+  const seenPhones = new Set();
+  const uniqueContacts = [];
+  
+  for(const contact of contacts){
+    if(!seenPhones.has(contact.phone)){
+      seenPhones.add(contact.phone);
+      uniqueContacts.push(contact);
+    }
+  }
+  
+  const removedCount = originalCount - uniqueContacts.length;
+  
+  if(removedCount === 0){
+    showToast('✅ No duplicate contacts found');
+    return;
+  }
+  
+  contacts = uniqueContacts;
+  renderContacts();
+  showToast(`✅ Removed ${removedCount} duplicate contacts. ${contacts.length} unique contacts remaining.`);
+}
+
+// Export Contacts to CSV
+function exportContactsToCSV(){
+  if(contacts.length === 0){
+    showToast('No contacts to export', true);
+    return;
+  }
+  
+  // CSV headers
+  const headers = ['Name', 'Phone', 'Message', 'Status'];
+  
+  // Create CSV rows
+  const rows = contacts.map(c => [
+    `"${c.name.replace(/"/g, '""')}"`,  // Escape quotes
+    c.phone,
+    `"${(c.message || '').replace(/"/g, '""')}"`,
+    c.status || 'pending'
+  ]);
+  
+  // Combine headers and rows
+  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  
+  // Add BOM for Excel UTF-8 support
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  
+  // Create download link
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.setAttribute('download', `contacts_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  showToast(`📥 Exported ${contacts.length} contacts to CSV`);
+}
+  
   function cleanup(){
     try { delete window[cbName]; } catch(e){}
     const s = document.getElementById(scriptId);
