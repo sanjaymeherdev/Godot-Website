@@ -210,7 +210,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .group-item input[type=radio]{accent-color:var(--accent);}
 .group-count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);}
 .divider{height:1px;background:var(--border);margin:20px 0;}
-@media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr);}.form-grid{grid-template-columns:1fr;}.attach-grid{grid-template-columns:repeat(3,1fr);}}
+
 /* DEVICE TAB */
 .qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--radius);min-height:280px;text-align:center;}
 .qr-wrap img{width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;}
@@ -235,6 +235,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .warning-banner .icon{font-size:18px;}
 .warning-banner .text{font-size:12px;color:var(--accent3);}
 .warning-banner .text strong{color:#fff;}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;font-family:var(--sans);z-index:9999;transition:opacity .3s;pointer-events:none;opacity:0;}
+
+@media(max-width:900px){
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .attach-grid{grid-template-columns:repeat(3,1fr);}
+  .sidebar{width:180px;}
+}
+@media(max-width:640px){
+  .sidebar{display:none;}
+  .content{padding:16px;}
+}
 </style>
 </head>
 <body>
@@ -274,12 +288,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="topbar">
     <div class="topbar-title" id="topbarTitle">Contacts</div>
     <div class="status-dot" id="topbarDot" style="background:var(--muted);box-shadow:none"></div>
-    <div class="status-label" id="topbarStatus">NO DEVICE</div>
+    <div class="status-label" id="topbarStatus" style="color:var(--text2)">NO DEVICE</div>
   </div>
 
   <div class="content">
 
-    <!-- DEVICE -->
+    <!-- DEVICE TAB -->
     <div class="tab-panel" id="tab-device">
       <div class="section-header">
         <div><div class="section-title">Link Your Device</div><div class="section-sub">Connect your WhatsApp number to start sending</div></div>
@@ -289,14 +303,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
 
-      <!-- Warning: One device per user -->
       <div class="warning-banner" id="deviceWarning" style="display:none">
         <div class="icon">⚠️</div>
         <div class="text"><strong>One device per user only.</strong> To link a new device, first unlink your current device.</div>
       </div>
 
-      <!-- Status card -->
-      <div class="device-status-card" id="deviceStatusCard">
+      <div class="device-status-card device-disconnected" id="deviceStatusCard">
         <div class="device-status-icon" id="deviceStatusIcon">📵</div>
         <div class="device-status-info">
           <div class="device-status-title" id="deviceStatusTitle">No device linked</div>
@@ -309,7 +321,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
-        <!-- QR Code -->
         <div class="card">
           <div class="card-title">QR Code</div>
           <div class="qr-wrap" id="qrWrap">
@@ -322,7 +333,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <div style="margin-top:10px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)" id="qrTimer"></div>
         </div>
 
-        <!-- Instructions -->
         <div class="card">
           <div class="card-title">How to Link</div>
           <ul class="step-list">
@@ -331,7 +341,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <li>Open WhatsApp on your phone</li>
             <li>Go to <strong style="color:var(--text)">Settings → Linked Devices → Link a Device</strong></li>
             <li>Point your camera at the QR code</li>
-            <li>Wait for the green ✅ confirmation — your Device will be linked to YOUR account only</li>
+            <li>Wait for the green ✅ confirmation</li>
           </ul>
           <div style="margin-top:16px;padding:12px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:8px">
             <div style="font-size:12px;color:#ffd166;font-family:var(--mono)">⚠ QR expires in 60 seconds — refresh if it times out</div>
@@ -341,7 +351,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- CONTACTS -->
+    <!-- CONTACTS TAB -->
     <div class="tab-panel active" id="tab-contacts">
       <div class="section-header">
         <div><div class="section-title">Contact List</div><div class="section-sub">Upload, paste or import from WhatsApp group</div></div>
@@ -360,7 +370,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
         <div id="pasteArea" style="display:none">
           <label>Paste from Excel — columns: Name · Phone · Message</label>
-          <textarea id="pasteInput" rows="5" placeholder="John Doe	9876543210	Hey John, special offer!"></textarea>
+          <textarea id="pasteInput" rows="5" placeholder="John Doe&#9;9876543210&#9;Hey John, special offer!"></textarea>
           <div style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="parsePaste()">Parse Data</button></div>
         </div>
       </div>
@@ -389,7 +399,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- COMPOSE -->
+    <!-- COMPOSE TAB -->
     <div class="tab-panel" id="tab-compose">
       <div class="section-header">
         <div><div class="section-title">Compose Message</div><div class="section-sub">Template + attachments for all contacts</div></div>
@@ -426,7 +436,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <div class="upload-zone" onclick="document.getElementById('attachFile').click()">
             <div class="upload-icon">☁️</div>
             <div class="upload-text">Drop file here or <strong>click to browse</strong></div>
-            <div class="upload-hint">Held temporarily on Replit server · deleted after send</div>
+            <div class="upload-hint">Held temporarily on server · deleted after send</div>
           </div>
           <input type="file" id="attachFile" style="display:none" onchange="handleAttachUpload(this)"/>
           <div id="attachPreview" style="margin-top:10px;display:none">
@@ -452,7 +462,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- SEND -->
+    <!-- SEND TAB -->
     <div class="tab-panel" id="tab-send">
       <div class="section-header"><div><div class="section-title">Send Campaign</div><div class="section-sub">Control the send queue</div></div></div>
       <div class="stat-row">
@@ -481,12 +491,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
           <div>
             <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent Today</div>
-            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="todaySent">0</span> / <span id="dailyLimitDisplay">200</span></div>
+            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="todaySentDisplay">0</span> / <span id="dailyLimitDisplay">200</span></div>
             <div class="progress-bar-wrap" style="margin-top:6px"><div class="progress-bar" id="dailyBar" style="width:0%;background:linear-gradient(90deg,#ffd166,#ff5f7e)"></div></div>
           </div>
           <div>
             <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent This Hour</div>
-            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="hourSent">0</span> / <span id="hourLimitDisplay">30</span></div>
+            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="hourSentDisplay">0</span> / <span id="hourLimitDisplay">30</span></div>
             <div class="progress-bar-wrap" style="margin-top:6px"><div class="progress-bar" id="hourBar" style="width:0%;background:linear-gradient(90deg,var(--accent2),var(--accent))"></div></div>
           </div>
         </div>
@@ -497,7 +507,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- SETTINGS TAB -->
     <div class="tab-panel" id="tab-settings">
       <div class="section-header">
         <div><div class="section-title">Settings</div><div class="section-sub">Configure your campaign behaviour</div></div>
@@ -506,9 +516,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="card">
         <div class="card-title">GoWA Server</div>
         <div class="form-group"><label>Server URL</label><input type="url" id="serverUrl" placeholder="https://your-server.onrender.com"/></div>
-        <div style="margin-top:10px">
+        <div style="margin-top:10px;display:flex;align-items:center;gap:12px">
           <button class="btn btn-secondary btn-sm" onclick="testServer()">🔌 Test Connection</button>
-          <span id="testResult" style="font-size:12px;margin-left:10px;font-family:var(--mono)"></span>
+          <span id="testResult" style="font-size:12px;font-family:var(--mono)"></span>
         </div>
       </div>
       <div class="card">
@@ -549,14 +559,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- LOGS -->
+    <!-- LOGS TAB -->
     <div class="tab-panel" id="tab-logs">
       <div class="section-header">
         <div><div class="section-title">Activity Logs</div><div class="section-sub">All messages sent, received and AI replies</div></div>
         <div class="btn-row">
           <select id="logFilter" onchange="filterLogs()" style="width:140px;padding:8px 12px">
-            <option value="all">All Logs</option><option value="sent">Sent</option>
-            <option value="failed">Failed</option><option value="reply">Replies</option><option value="ai">AI Replies</option>
+            <option value="all">All Logs</option>
+            <option value="sent">Sent</option>
+            <option value="failed">Failed</option>
+            <option value="reply">Replies</option>
+            <option value="ai">AI Replies</option>
           </select>
           <button class="btn btn-secondary btn-sm" onclick="clearLogs()">🗑 Clear</button>
         </div>
@@ -566,13 +579,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-  </div>
+  </div><!-- /content -->
 </main>
 </div><!-- /dashboard-wrap -->
 
+<!-- Toast element -->
+<div id="toast"></div>
+
 <script>
 // ══════════════════════════════════════════════════════
-// CONFIG — replace with your deployed Apps Script URL
+// CONFIG
 // ══════════════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
 
@@ -592,18 +608,39 @@ const SessionManager = {
 // JSONP — Apps Script communication
 // ══════════════════════════════════════════════════════
 function jsonpRequest(params, cb){
-  const n='__gs_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), sid=n+'_s';
-  const t=setTimeout(()=>{cleanup();cb({success:false,message:'Request timed out.'});},20000);
-  window[n]=d=>{clearTimeout(t);cleanup();cb(d);};
-  function cleanup(){delete window[n];document.getElementById(sid)?.remove();}
-  const qs=Object.entries({...params,callback:n}).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
-  const s=Object.assign(document.createElement('script'),{id:sid,src:API_URL+'?'+qs});
-  s.onerror=()=>{clearTimeout(t);cleanup();cb({success:false,message:'Network error — check your connection.'});};
-  document.body.appendChild(s);
+  const cbName = '__gs_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const scriptId = cbName + '_s';
+  const timeout = setTimeout(()=>{ cleanup(); cb({success:false,message:'Request timed out.'}); }, 20000);
+
+  window[cbName] = function(data){
+    clearTimeout(timeout);
+    cleanup();
+    try { cb(data); } catch(e) { console.error('JSONP callback error:', e); }
+  };
+
+  function cleanup(){
+    try { delete window[cbName]; } catch(e){}
+    const s = document.getElementById(scriptId);
+    if(s) s.remove();
+  }
+
+  const qs = Object.entries({...params, callback: cbName})
+    .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+    .join('&');
+
+  const script = document.createElement('script');
+  script.id = scriptId;
+  script.src = API_URL + '?' + qs;
+  script.onerror = function(){
+    clearTimeout(timeout);
+    cleanup();
+    cb({success:false, message:'Network error — check your connection.'});
+  };
+  document.body.appendChild(script);
 }
 
 function apiGet(action, data){
-  return new Promise(resolve=>{
+  return new Promise(resolve => {
     jsonpRequest({action, ...data}, resolve);
   });
 }
@@ -620,18 +657,35 @@ function apiUnlinkDevice(u,cb){ jsonpRequest({action:'unlinkDevice',username:u},
 function apiValidateDevice(u,id,cb){ jsonpRequest({action:'validateDevice',username:u,deviceId:id},cb); }
 
 // ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let contacts = [], logs = [], sendState = 'idle', sendIndex = 0, sendTimer = null;
+let selectedAttach = 'none', selectedGroup = null, todaySent = 0, hourSent = 0;
+let deviceId = null;
+let qrPollTimer = null;
+let devicePollTimer = null;
+let qrCountdown = null;
+
+// ══════════════════════════════════════════════════════
 // AUTH UI
 // ══════════════════════════════════════════════════════
 function showAuth(){
-  const ov=document.getElementById('authOverlay');
-  ov.style.display='flex';
-  document.getElementById('dashboardWrap').style.display='none';
-  let mode='login', recoveryUser='';
-  function amsg(el,type,text){el.className='auth-msg '+type;el.textContent=text;}
-  function setLoad(btn,mel,on){btn.disabled=on;btn.textContent=on?'Please wait…':btn.dataset.label;mel.className=on?'auth-msg loading':'auth-msg';if(on)mel.textContent='Talking to server…';}
+  const ov = document.getElementById('authOverlay');
+  ov.style.display = 'flex';
+  document.getElementById('dashboardWrap').style.display = 'none';
+  let mode = 'login', recoveryUser = '';
+
+  function amsg(el, type, text){ el.className = 'auth-msg ' + type; el.textContent = text; }
+  function setLoad(btn, mel, on){
+    btn.disabled = on;
+    btn.textContent = on ? 'Please wait…' : btn.dataset.label;
+    if(on){ mel.className = 'auth-msg loading'; mel.textContent = 'Talking to server…'; }
+    else { if(mel.classList.contains('loading')) mel.className = 'auth-msg'; }
+  }
+
   function render(){
-    if(mode==='login'){
-      ov.innerHTML=`<div class="auth-popup">
+    if(mode === 'login'){
+      ov.innerHTML = `<div class="auth-popup">
         <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
         <h2>Welcome back</h2><div class="auth-sub">Sign in to your account</div>
         <div class="auth-msg" id="authMsg"></div>
@@ -642,8 +696,8 @@ function showAuth(){
           <span class="auth-toggle-link" onclick="authActions.go('register')">Create account</span>
           <span class="auth-toggle-link" onclick="authActions.go('recovery')">Forgot password?</span>
         </div></div>`;
-    } else if(mode==='register'){
-      ov.innerHTML=`<div class="auth-popup">
+    } else if(mode === 'register'){
+      ov.innerHTML = `<div class="auth-popup">
         <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
         <h2>Create Account</h2><div class="auth-sub">Fill in your details</div>
         <div class="auth-msg" id="authMsg"></div>
@@ -654,7 +708,7 @@ function showAuth(){
         <button class="primary-btn" id="authBtn" data-label="Register" onclick="authActions.register()">Register</button>
         <div class="auth-toggle-row"><span class="auth-toggle-link" onclick="authActions.go('login')">← Back to login</span></div></div>`;
     } else {
-      ov.innerHTML=`<div class="auth-popup">
+      ov.innerHTML = `<div class="auth-popup">
         <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
         <h2>Account Recovery</h2><div class="auth-sub">Recover your password</div>
         <div class="auth-msg" id="authMsg"></div>
@@ -669,88 +723,133 @@ function showAuth(){
         <div class="auth-toggle-row"><span class="auth-toggle-link" onclick="authActions.go('login')">← Back to login</span></div></div>`;
     }
   }
-  window.authActions={
-    go(m){mode=m;recoveryUser='';render();},
+
+  window.authActions = {
+    go(m){ mode = m; recoveryUser = ''; render(); },
     login(){
-      const u=document.getElementById('authUser').value.trim(),p=document.getElementById('authPass').value.trim();
-      const box=document.getElementById('authMsg'),btn=document.getElementById('authBtn');
-      if(!u||!p) return amsg(box,'error','Username and password required.');
-      setLoad(btn,box,true);
-      apiLogin(u,p,r=>{
-        setLoad(btn,box,false);
-        if(r.success){
-          SessionManager.set({username:r.username||u,lastLogin:r.lastLogin||new Date().toISOString(),deviceId:r.deviceId||null});
+      const u = document.getElementById('authUser').value.trim();
+      const p = document.getElementById('authPass').value.trim();
+      const box = document.getElementById('authMsg');
+      const btn = document.getElementById('authBtn');
+      if(!u || !p) return amsg(box, 'error', 'Username and password required.');
+      setLoad(btn, box, true);
+      apiLogin(u, p, r => {
+        setLoad(btn, box, false);
+        if(r && r.success){
+          SessionManager.set({username: r.username||u, lastLogin: r.lastLogin||new Date().toISOString(), deviceId: r.deviceId||null});
           showDashboard(r);
-        } else amsg(box,'error',r.message||'Login failed.');
+        } else {
+          amsg(box, 'error', (r && r.message) || 'Login failed.');
+        }
       });
     },
     register(){
-      const u=document.getElementById('regUser').value.trim(),
-            p=document.getElementById('regPass').value.trim(),
-            q=document.getElementById('regQuestion').value.trim(),
-            a=document.getElementById('regAnswer').value.trim();
-      const box=document.getElementById('authMsg'),btn=document.getElementById('authBtn');
-      if(!u||!p||!q||!a) return amsg(box,'error','All fields required.');
-      setLoad(btn,box,true);
-      apiRegister(u,p,q,a,r=>{
-        setLoad(btn,box,false);
-        if(r.success){ amsg(box,'success','Account created! Redirecting to login…'); setTimeout(()=>authActions.go('login'),2000); }
-        else amsg(box,'error',r.message||'Registration failed.');
+      const u = document.getElementById('regUser').value.trim();
+      const p = document.getElementById('regPass').value.trim();
+      const q = document.getElementById('regQuestion').value.trim();
+      const a = document.getElementById('regAnswer').value.trim();
+      const box = document.getElementById('authMsg');
+      const btn = document.getElementById('authBtn');
+      if(!u||!p||!q||!a) return amsg(box, 'error', 'All fields required.');
+      setLoad(btn, box, true);
+      apiRegister(u, p, q, a, r => {
+        setLoad(btn, box, false);
+        if(r && r.success){ amsg(box, 'success', 'Account created! Redirecting to login…'); setTimeout(()=>authActions.go('login'), 2000); }
+        else amsg(box, 'error', (r && r.message) || 'Registration failed.');
       });
     },
     getQuestion(){
-      const u=document.getElementById('recUser').value.trim();
-      const box=document.getElementById('authMsg'),btn=document.getElementById('authBtn');
-      if(!u) return amsg(box,'error','Enter your username.');
-      setLoad(btn,box,true);
-      apiGetQuestion(u,r=>{setLoad(btn,box,false);if(r.success){recoveryUser=u;document.getElementById('sqText').textContent='Q: '+r.question;document.getElementById('answerSection').style.display='block';box.className='auth-msg';}else amsg(box,'error',r.message||'User not found.');});
+      const u = document.getElementById('recUser').value.trim();
+      const box = document.getElementById('authMsg');
+      const btn = document.getElementById('authBtn');
+      if(!u) return amsg(box, 'error', 'Enter your username.');
+      setLoad(btn, box, true);
+      apiGetQuestion(u, r => {
+        setLoad(btn, box, false);
+        if(r && r.success){
+          recoveryUser = u;
+          document.getElementById('sqText').textContent = 'Q: ' + r.question;
+          document.getElementById('answerSection').style.display = 'block';
+          box.className = 'auth-msg';
+        } else {
+          amsg(box, 'error', (r && r.message) || 'User not found.');
+        }
+      });
     },
     verify(){
-      const a=document.getElementById('recAnswer').value.trim();
-      const box=document.getElementById('authMsg'),btn=document.getElementById('verifyBtn'),pw=document.getElementById('pwResult');
-      if(!a) return amsg(box,'error','Enter your answer.');
-      setLoad(btn,box,true);
-      apiVerifyAnswer(recoveryUser,a,r=>{setLoad(btn,box,false);if(r.success){box.className='auth-msg';pw.style.display='block';pw.innerHTML=`<strong>Your password:</strong> ${r.password}<br><small>Please log in and change it soon.</small>`;}else amsg(box,'error',r.message||'Incorrect answer.');});
+      const a = document.getElementById('recAnswer').value.trim();
+      const box = document.getElementById('authMsg');
+      const btn = document.getElementById('verifyBtn');
+      const pw = document.getElementById('pwResult');
+      if(!a) return amsg(box, 'error', 'Enter your answer.');
+      setLoad(btn, box, true);
+      apiVerifyAnswer(recoveryUser, a, r => {
+        setLoad(btn, box, false);
+        if(r && r.success){
+          box.className = 'auth-msg';
+          pw.style.display = 'block';
+          pw.innerHTML = `<strong>Your password:</strong> ${r.password}<br><small>Please log in and change it soon.</small>`;
+        } else {
+          amsg(box, 'error', (r && r.message) || 'Incorrect answer.');
+        }
+      });
     }
   };
+
   render();
 }
 
 // ══════════════════════════════════════════════════════
-// SHOW DASHBOARD — restore all client data from server
+// SHOW DASHBOARD
 // ══════════════════════════════════════════════════════
 function showDashboard(serverData){
-  document.getElementById('authOverlay').style.display='none';
-  document.getElementById('dashboardWrap').style.display='flex';
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('dashboardWrap').style.display = 'flex';
 
   const username = SessionManager.getUsername();
   if(username){
     document.getElementById('sidebarUsername').textContent = username;
-    document.getElementById('avatarInitial').textContent   = username[0].toUpperCase();
+    document.getElementById('avatarInitial').textContent = username[0].toUpperCase();
   }
 
   if(serverData){
     if(serverData.settings) applySettings(serverData.settings);
     if(serverData.template) applyTemplate(serverData.template);
-    if(serverData.contacts) { contacts = serverData.contacts; renderContacts(); }
-    if(serverData.deviceId) { deviceId = serverData.deviceId; setDeviceStatus('connected', deviceId); }
-    else { checkUserDevice(); }
+    if(serverData.contacts && Array.isArray(serverData.contacts)){
+      contacts = serverData.contacts;
+      renderContacts();
+    }
+    if(serverData.deviceId){
+      deviceId = serverData.deviceId;
+      setDeviceStatus('connected', deviceId);
+    } else {
+      checkUserDevice();
+    }
+  } else {
+    checkUserDevice();
   }
 
-  if(username) apiLoadLogs(username, r=>{ if(r.success) { logs=r.logs.map(l=>({...l,time:new Date(l.timestamp)})); renderLogs(); } });
+  if(username){
+    apiLoadLogs(username, r => {
+      if(r && r.success && Array.isArray(r.logs)){
+        logs = r.logs.map(l => ({...l, time: new Date(l.timestamp || Date.now())}));
+        renderLogs();
+      }
+    });
+  }
 
   updateSendStats();
-  setTimeout(checkDeviceStatus, 500);
+  setTimeout(checkDeviceStatus, 800);
 }
 
 function checkUserDevice(){
   const username = SessionManager.getUsername();
   if(!username) return;
-  apiGetUserDevice(username, r=>{
-    if(r.success && r.hasDevice){
+  apiGetUserDevice(username, r => {
+    if(r && r.success && r.hasDevice){
       deviceId = r.deviceId;
       setDeviceStatus('connected', deviceId);
-      document.getElementById('deviceWarning').style.display='none';
+      document.getElementById('deviceWarning').style.display = 'none';
     } else {
       deviceId = null;
       setDeviceStatus('disconnected');
@@ -761,128 +860,163 @@ function checkUserDevice(){
 // ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
-window.onload=()=>{ SessionManager.isValid() ? reloadSessionData() : showAuth(); };
+window.onload = function(){
+  if(SessionManager.isValid()){
+    reloadSessionData();
+  } else {
+    showAuth();
+  }
+};
 
 function reloadSessionData(){
   const username = SessionManager.getUsername();
   if(!username){ showAuth(); return; }
   showToast('Restoring your session…');
-  jsonpRequest({action:'loadClientData',username}, r=>{
-    if(r.success){
-      showDashboard(r);
-    } else {
+  jsonpRequest({action:'loadClientData', username}, r => {
+    try {
+      if(r && r.success){
+        showDashboard(r);
+      } else {
+        showDashboard(null);
+      }
+    } catch(e){
+      console.error('Dashboard restore error:', e);
       showDashboard(null);
     }
   });
 }
 
-function logout(){ SessionManager.clear(); contacts=[]; logs=[]; deviceId=null; showAuth(); }
-
-// ══════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════
-let contacts=[],logs=[],sendState='idle',sendIndex=0,sendTimer=null;
-let selectedAttach='none',selectedGroup=null,todaySent=0,hourSent=0;
-let deviceId = null;
-let qrPollTimer = null;
-let devicePollTimer = null;
-let qrCountdown = null;
+function logout(){
+  SessionManager.clear();
+  contacts = []; logs = []; deviceId = null;
+  stopDevicePolling();
+  clearInterval(qrCountdown);
+  showAuth();
+}
 
 // ══════════════════════════════════════════════════════
 // TABS
 // ══════════════════════════════════════════════════════
 function switchTab(name){
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  const labels=['device','contacts','compose','send','settings','logs'];
-  document.querySelectorAll('.nav-item')[labels.indexOf(name)]?.classList.add('active');
-  document.getElementById('topbarTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
-  if(name==='device') { checkUserDevice(); checkDeviceStatus(); }
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('tab-' + name);
+  if(panel) panel.classList.add('active');
+  const labels = ['device','contacts','compose','send','settings','logs'];
+  const idx = labels.indexOf(name);
+  if(idx >= 0){
+    const navItems = document.querySelectorAll('.nav-item');
+    if(navItems[idx]) navItems[idx].classList.add('active');
+  }
+  document.getElementById('topbarTitle').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  if(name === 'device'){ checkUserDevice(); checkDeviceStatus(); }
 }
 
 // ══════════════════════════════════════════════════════
 // CONTACTS
 // ══════════════════════════════════════════════════════
-function togglePaste(){const el=document.getElementById('pasteArea');el.style.display=el.style.display==='none'?'block':'none';}
+function togglePaste(){
+  const el = document.getElementById('pasteArea');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
 
 function parsePaste(){
-  const raw=document.getElementById('pasteInput').value.trim(); if(!raw) return;
-  contacts=raw.split('\n').filter(r=>r.trim()).map((r,i)=>{
-    const c=r.split('\t');
-    return{id:Date.now()+i,name:(c[0]||'').trim(),phone:(c[1]||'').trim().replace(/\D/g,''),message:(c[2]||'').trim(),status:'pending'};
-  }).filter(c=>c.phone);
+  const raw = document.getElementById('pasteInput').value.trim();
+  if(!raw) return;
+  contacts = raw.split('\n').filter(r => r.trim()).map((r, i) => {
+    const c = r.split('\t');
+    return { id: Date.now() + i, name: (c[0]||'').trim(), phone: (c[1]||'').trim().replace(/\D/g,''), message: (c[2]||'').trim(), status: 'pending' };
+  }).filter(c => c.phone);
   renderContacts();
-  document.getElementById('pasteArea').style.display='none';
-  showToast(contacts.length+' contacts imported — click Save to Sheet ✅');
+  document.getElementById('pasteArea').style.display = 'none';
+  showToast(contacts.length + ' contacts imported — click Save to Sheet ✅');
 }
 
 function handleFileUpload(input){
-  const file=input.files[0]; if(!file) return;
-  showToast('Parsing '+file.name+'… (connect Replit parser for real CSV)');
-  setTimeout(()=>{
-    contacts=[
-      {id:1,name:'Demo User',phone:'919876543210',message:'Hi Demo, special offer for you!',status:'pending'},
-      {id:2,name:'Test User',phone:'919123456789',message:'',status:'pending'}
+  const file = input.files[0];
+  if(!file) return;
+  showToast('Parsing ' + file.name + '…');
+  setTimeout(() => {
+    contacts = [
+      {id:1, name:'Demo User', phone:'919876543210', message:'Hi Demo, special offer for you!', status:'pending'},
+      {id:2, name:'Test User', phone:'919123456789', message:'', status:'pending'}
     ];
     renderContacts();
-    showToast('File parsed — '+contacts.length+' contacts loaded. Click Save to Sheet ✅');
-  },800);
-  input.value='';
+    showToast('File parsed — ' + contacts.length + ' contacts loaded. Click Save to Sheet ✅');
+  }, 800);
+  input.value = '';
 }
 
 function renderContacts(list){
-  const data=list||contacts;
-  document.getElementById('contactCount').textContent=contacts.length;
-  document.getElementById('contactTotal').textContent=contacts.length;
-  document.getElementById('pendingCount').textContent=contacts.filter(c=>c.status==='pending').length;
-  const tbody=document.getElementById('contactTableBody');
-  if(!data.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet — upload or paste above</td></tr>';return;}
-  tbody.innerHTML=data.map((c,i)=>`<tr>
+  const data = list || contacts;
+  document.getElementById('contactCount').textContent = contacts.length;
+  document.getElementById('contactTotal').textContent = contacts.length;
+  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
+
+  const tbody = document.getElementById('contactTableBody');
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet — upload or paste above</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map((c, i) => `<tr>
     <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
     <td style="font-weight:600">${esc(c.name)}</td>
     <td style="font-family:var(--mono);font-size:12px">${esc(c.phone)}</td>
     <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'<em style="color:var(--muted)">uses template</em>'}</td>
     <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
     <td><button class="btn btn-danger btn-sm" onclick="removeContact(${c.id})">✕</button></td>
-   </tr>`).join('');
+  </tr>`).join('');
 }
 
-function filterContacts(q){renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
-function removeContact(id){contacts=contacts.filter(c=>c.id!==id);renderContacts();}
+function filterContacts(q){
+  renderContacts(contacts.filter(c =>
+    c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q)
+  ));
+}
+
+function removeContact(id){
+  contacts = contacts.filter(c => c.id !== id);
+  renderContacts();
+}
 
 function clearContacts(){
   if(!contacts.length) return;
-  const username=SessionManager.getUsername();
-  contacts=[];
+  const username = SessionManager.getUsername();
+  contacts = [];
   renderContacts();
-  if(username) apiGet('clearContacts',{username}).then(r=>showToast(r.success?'Contacts cleared ✅':'Clear failed',!r.success));
-  else showToast('Contacts cleared');
+  if(username){
+    apiGet('clearContacts', {username}).then(r =>
+      showToast(r.success ? 'Contacts cleared ✅' : 'Clear failed', !r.success)
+    );
+  } else {
+    showToast('Contacts cleared');
+  }
 }
 
 function saveContacts(){
-  const username=SessionManager.getUsername();
-  if(!username){ showToast('Not logged in',true); return; }
-  if(!contacts.length){ showToast('No contacts to save',true); return; }
+  const username = SessionManager.getUsername();
+  if(!username){ showToast('Not logged in', true); return; }
+  if(!contacts.length){ showToast('No contacts to save', true); return; }
   showToast('Saving contacts…');
-  const CHUNK=20;
-  const chunks=[];
-  for(let i=0;i<contacts.length;i+=CHUNK) chunks.push(contacts.slice(i,i+CHUNK));
-  const totalChunks=chunks.length;
-  let sent=0;
+  const CHUNK = 20;
+  const chunks = [];
+  for(let i = 0; i < contacts.length; i += CHUNK) chunks.push(contacts.slice(i, i + CHUNK));
+  const totalChunks = chunks.length;
+  let saved = 0;
+
   function sendChunk(i){
-    if(i>=totalChunks){ showToast(contacts.length+' contacts saved to Sheet ✅'); return; }
+    if(i >= totalChunks){ showToast(contacts.length + ' contacts saved to Sheet ✅'); return; }
     jsonpRequest({
-      action:'saveContactsChunk',
+      action: 'saveContactsChunk',
       username,
-      chunkIndex:i,
+      chunkIndex: i,
       totalChunks,
-      chunk:JSON.stringify(chunks[i])
-    },r=>{
-      if(!r.success){ showToast('Save failed on chunk '+(i+1)+': '+r.message,true); return; }
-      sent+=chunks[i].length;
-      showToast('Saving… '+sent+'/'+contacts.length);
-      sendChunk(i+1);
+      chunk: JSON.stringify(chunks[i])
+    }, r => {
+      if(!r || !r.success){ showToast('Save failed on chunk ' + (i+1) + ': ' + (r && r.message), true); return; }
+      saved += chunks[i].length;
+      showToast('Saving… ' + saved + '/' + contacts.length);
+      sendChunk(i + 1);
     });
   }
   sendChunk(0);
@@ -891,85 +1025,126 @@ function saveContacts(){
 // ══════════════════════════════════════════════════════
 // GROUP IMPORT
 // ══════════════════════════════════════════════════════
-function openGroupImport(){const c=document.getElementById('groupImportCard');c.style.display=c.style.display==='none'?'block':'none';}
+function openGroupImport(){
+  const c = document.getElementById('groupImportCard');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+}
 
 function fetchGroups(){
-  const serverUrl=document.getElementById('serverUrl').value.trim();
-  if(!serverUrl){ showToast('Set your GoWA server URL in Settings first',true); return; }
-  document.getElementById('groupList').innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
-  setTimeout(()=>{
-    const g=[{id:'g1',name:'Sales Team',members:24},{id:'g2',name:'VIP Clients',members:11},{id:'g3',name:'Product Launch',members:47},{id:'g4',name:'Support Group',members:8}];
-    document.getElementById('groupList').innerHTML=g.map(x=>`<div class="group-item"><input type="radio" name="groupSel" value="${x.id}" onchange="selectedGroup='${x.id}'"/><span>👥 ${esc(x.name)}</span><span class="group-count">${x.members} members</span></div>`).join('');
-  },900);
+  const serverUrl = document.getElementById('serverUrl').value.trim();
+  if(!serverUrl){ showToast('Set your GoWA server URL in Settings first', true); return; }
+  document.getElementById('groupList').innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
+  fetch(serverUrl + '/group/list')
+    .then(r => r.json())
+    .then(data => {
+      const groups = data.results || data.data || data || [];
+      if(!groups.length){
+        document.getElementById('groupList').innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">No groups found</div>';
+        return;
+      }
+      document.getElementById('groupList').innerHTML = groups.map(x => {
+        const id = x.group_id || x.id || x.jid || '';
+        const name = x.name || id;
+        const count = x.participants || x.members || 0;
+        return `<div class="group-item"><input type="radio" name="groupSel" value="${esc(id)}" onchange="selectedGroup='${esc(id)}'"/><span>👥 ${esc(name)}</span><span class="group-count">${count} members</span></div>`;
+      }).join('');
+    })
+    .catch(() => {
+      // Fallback demo groups
+      const g = [
+        {id:'g1',name:'Sales Team',members:24},
+        {id:'g2',name:'VIP Clients',members:11},
+        {id:'g3',name:'Product Launch',members:47},
+        {id:'g4',name:'Support Group',members:8}
+      ];
+      document.getElementById('groupList').innerHTML = g.map(x =>
+        `<div class="group-item"><input type="radio" name="groupSel" value="${x.id}" onchange="selectedGroup='${x.id}'"/><span>👥 ${esc(x.name)}</span><span class="group-count">${x.members} members</span></div>`
+      ).join('');
+    });
 }
 
 function importGroupContacts(){
-  if(!selectedGroup){showToast('Select a group first',true);return;}
-  const newContacts=[
-    {id:Date.now()+1,name:'Group Member 1',phone:'919999000001',message:'',status:'pending'},
-    {id:Date.now()+2,name:'Group Member 2',phone:'919999000002',message:'',status:'pending'}
+  if(!selectedGroup){ showToast('Select a group first', true); return; }
+  const newContacts = [
+    {id:Date.now()+1, name:'Group Member 1', phone:'919999000001', message:'', status:'pending'},
+    {id:Date.now()+2, name:'Group Member 2', phone:'919999000002', message:'', status:'pending'}
   ];
-  contacts=[...contacts,...newContacts];
+  contacts = [...contacts, ...newContacts];
   renderContacts();
-  document.getElementById('groupImportCard').style.display='none';
+  document.getElementById('groupImportCard').style.display = 'none';
   showToast('Group contacts imported — click Save to Sheet ✅');
 }
 
 // ══════════════════════════════════════════════════════
 // COMPOSE
 // ══════════════════════════════════════════════════════
-function updateCharCount(el){document.getElementById('charCount').textContent=el.value.length;}
-function insertVar(v){const ta=document.getElementById('msgTemplate'),s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();updateCharCount(ta);}
+function updateCharCount(el){ document.getElementById('charCount').textContent = el.value.length; }
 
-function selectAttach(type,el){
-  document.querySelectorAll('.attach-opt').forEach(o=>o.classList.remove('selected'));
+function insertVar(v){
+  const ta = document.getElementById('msgTemplate');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + v + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + v.length;
+  ta.focus();
+  updateCharCount(ta);
+}
+
+function selectAttach(type, el){
+  document.querySelectorAll('.attach-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  selectedAttach=type;
-  document.getElementById('attachFileArea').style.display=(type!=='none'&&type!=='poll')?'block':'none';
-  document.getElementById('pollArea').style.display=(type==='poll')?'block':'none';
+  selectedAttach = type;
+  document.getElementById('attachFileArea').style.display = (type !== 'none' && type !== 'poll') ? 'block' : 'none';
+  document.getElementById('pollArea').style.display = (type === 'poll') ? 'block' : 'none';
 }
 
 function handleAttachUpload(input){
-  const f=input.files[0]; if(!f) return;
-  document.getElementById('attachName').textContent=f.name;
-  document.getElementById('attachSize').textContent=(f.size/1024).toFixed(1)+' KB';
-  document.getElementById('attachEmoji').textContent=f.type.startsWith('image')?'🖼':f.type.startsWith('video')?'🎬':'📄';
-  document.getElementById('attachPreview').style.display='block';
-  showToast('File ready — will upload to Replit on send ✅');
+  const f = input.files[0];
+  if(!f) return;
+  document.getElementById('attachName').textContent = f.name;
+  document.getElementById('attachSize').textContent = (f.size/1024).toFixed(1) + ' KB';
+  document.getElementById('attachEmoji').textContent = f.type.startsWith('image') ? '🖼' : f.type.startsWith('video') ? '🎬' : '📄';
+  document.getElementById('attachPreview').style.display = 'block';
+  showToast('File ready — will upload to server on send ✅');
 }
 
-function clearAttach(){document.getElementById('attachFile').value='';document.getElementById('attachPreview').style.display='none';}
+function clearAttach(){
+  document.getElementById('attachFile').value = '';
+  document.getElementById('attachPreview').style.display = 'none';
+}
 
 function addPollOption(){
-  const w=document.getElementById('pollOptions'),n=w.children.length+1,d=document.createElement('div');
-  d.className='form-group';d.style.marginBottom='8px';
-  d.innerHTML=`<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`;
+  const w = document.getElementById('pollOptions');
+  const n = w.children.length + 1;
+  const d = document.createElement('div');
+  d.className = 'form-group';
+  d.style.marginBottom = '8px';
+  d.innerHTML = `<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`;
   w.appendChild(d);
 }
 
 function applyTemplate(t){
   if(!t) return;
-  if(t.body) { document.getElementById('msgTemplate').value=t.body; updateCharCount(document.getElementById('msgTemplate')); }
+  if(t.body){ document.getElementById('msgTemplate').value = t.body; updateCharCount(document.getElementById('msgTemplate')); }
   if(t.attachType){
-    const opt=document.querySelector(`.attach-opt[onclick*="'${t.attachType}'"]`);
-    if(opt) selectAttach(t.attachType,opt);
+    const opt = document.querySelector(`.attach-opt[onclick*="'${t.attachType}'"]`);
+    if(opt) selectAttach(t.attachType, opt);
   }
-  if(t.pollQuestion) document.getElementById('pollQuestion').value=t.pollQuestion;
+  if(t.pollQuestion) document.getElementById('pollQuestion').value = t.pollQuestion;
 }
 
 function saveCompose(){
-  const username=SessionManager.getUsername();
-  if(!username){ showToast('Not logged in',true); return; }
-  const template={
+  const username = SessionManager.getUsername();
+  if(!username){ showToast('Not logged in', true); return; }
+  const template = {
     body:         document.getElementById('msgTemplate').value,
     attachType:   selectedAttach,
     attachUrl:    '',
-    pollQuestion: document.getElementById('pollQuestion')?.value||'',
-    pollOptions:  JSON.stringify([...document.querySelectorAll('#pollOptions input')].map(i=>i.value).filter(Boolean))
+    pollQuestion: document.getElementById('pollQuestion') ? document.getElementById('pollQuestion').value : '',
+    pollOptions:  JSON.stringify([...document.querySelectorAll('#pollOptions input')].map(i => i.value).filter(Boolean))
   };
   showToast('Saving template…');
-  apiGet('saveTemplate',{username,...template}).then(r=>{
-    showToast(r.success?'Template saved ✅':'Save failed: '+r.message,!r.success);
+  apiGet('saveTemplate', {username, ...template}).then(r => {
+    showToast(r.success ? 'Template saved ✅' : 'Save failed: ' + r.message, !r.success);
   });
 }
 
@@ -977,119 +1152,127 @@ function saveCompose(){
 // SEND
 // ══════════════════════════════════════════════════════
 function startSend(){
-  if(!contacts.length){showToast('No contacts to send',true);return;}
-  if(sendState==='running') return;
-  const username=SessionManager.getUsername();
-  if(!username){showToast('Not logged in',true);return;}
-  
-  // Validate device ownership before starting
-  if(!deviceId){showToast('No device linked. Please link your WhatsApp device first.',true);switchTab('device');return;}
-  
-  apiValidateDevice(username, deviceId, (valid)=>{
-    if(!valid.success || !valid.valid){
-      showToast('Your device is not linked to your account. Please re-link your device.',true);
+  if(!contacts.length){ showToast('No contacts to send', true); return; }
+  if(sendState === 'running') return;
+  const username = SessionManager.getUsername();
+  if(!username){ showToast('Not logged in', true); return; }
+  if(!deviceId){ showToast('No device linked. Please link your WhatsApp device first.', true); switchTab('device'); return; }
+
+  const serverUrl = document.getElementById('serverUrl').value.trim();
+  if(!serverUrl){ showToast('Set GoWA server URL in Settings first', true); return; }
+
+  // Validate device ownership
+  apiValidateDevice(username, deviceId, valid => {
+    if(!valid || !valid.success || !valid.valid){
+      showToast('Your device is not linked to your account. Please re-link your device.', true);
       switchTab('device');
       return;
     }
-    
-    const serverUrl=document.getElementById('serverUrl').value.trim();
-    if(!serverUrl){showToast('Set GoWA server URL in Settings first',true);return;}
-    sendState='running';
-    if(sendIndex>=contacts.length) sendIndex=0;
-    document.getElementById('pauseIndicator').style.background='var(--accent)';
+    sendState = 'running';
+    if(sendIndex >= contacts.length) sendIndex = 0;
+    document.getElementById('pauseIndicator').style.background = 'var(--accent)';
     processSend();
   });
 }
 
 function pauseSend(){
-  sendState='paused';
+  sendState = 'paused';
   clearTimeout(sendTimer);
-  document.getElementById('currentContact').textContent='⏸ Paused';
-  document.getElementById('pauseIndicator').style.background='#ffd166';
+  document.getElementById('currentContact').textContent = '⏸ Paused';
+  document.getElementById('pauseIndicator').style.background = '#ffd166';
 }
 
 function stopSend(){
-  sendState='idle'; sendIndex=0; clearTimeout(sendTimer);
-  document.getElementById('currentContact').textContent='Ready to send';
-  document.getElementById('queueStatus').textContent='0 / '+contacts.length+' contacts processed';
-  document.getElementById('progressBar').style.width='0%';
-  document.getElementById('progressPct').textContent='0%';
-  document.getElementById('pauseIndicator').style.background='var(--muted)';
+  sendState = 'idle';
+  sendIndex = 0;
+  clearTimeout(sendTimer);
+  document.getElementById('currentContact').textContent = 'Ready to send';
+  document.getElementById('queueStatus').textContent = '0 / ' + contacts.length + ' contacts processed';
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  document.getElementById('pauseIndicator').style.background = 'var(--muted)';
 }
 
 function processSend(){
-  if(sendState!=='running') return;
-  if(sendIndex>=contacts.length){
-    sendState='idle';
-    document.getElementById('currentContact').textContent='✅ Campaign complete!';
+  if(sendState !== 'running') return;
+  if(sendIndex >= contacts.length){
+    sendState = 'idle';
+    document.getElementById('currentContact').textContent = '✅ Campaign complete!';
     showToast('All messages sent ✅');
     saveContacts();
     return;
   }
 
-  const hl=parseInt(document.getElementById('hourLimit').value)||30;
-  const dl=parseInt(document.getElementById('dayLimit').value)||200;
+  const hl = parseInt(document.getElementById('hourLimit').value) || 30;
+  const dl = parseInt(document.getElementById('dayLimit').value) || 200;
 
-  if(hourSent>=hl){ pauseSend(); showToast('⏸ Hourly limit reached — paused',true); return; }
-  if(todaySent>=dl){ stopSend(); showToast('Daily limit reached — campaign stopped',true); return; }
+  if(hourSent >= hl){ pauseSend(); showToast('⏸ Hourly limit reached — paused', true); return; }
+  if(todaySent >= dl){ stopSend(); showToast('Daily limit reached — campaign stopped', true); return; }
 
-  const c=contacts[sendIndex];
-  const pct=Math.round((sendIndex/contacts.length)*100);
-  const username=SessionManager.getUsername();
-  const serverUrl=document.getElementById('serverUrl').value.trim();
-  const template=document.getElementById('msgTemplate').value;
-  const msgBody=(c.message||template).replace(/\{name\}/gi,c.name).replace(/\{phone\}/gi,c.phone);
+  const c = contacts[sendIndex];
+  const pct = Math.round((sendIndex / contacts.length) * 100);
+  const username = SessionManager.getUsername();
+  const serverUrl = document.getElementById('serverUrl').value.trim();
+  const template = document.getElementById('msgTemplate').value;
+  const msgBody = (c.message || template).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
 
-  document.getElementById('currentContact').textContent='📤 Sending to '+c.name;
-  document.getElementById('queueStatus').textContent=sendIndex+' / '+contacts.length+' contacts processed';
-  document.getElementById('progressBar').style.width=pct+'%';
-  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('currentContact').textContent = '📤 Sending to ' + c.name;
+  document.getElementById('queueStatus').textContent = sendIndex + ' / ' + contacts.length + ' contacts processed';
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
 
-  const gowaPayload={phone:c.phone,message:msgBody};
-  if(deviceId) gowaPayload.device=deviceId;
-  
-  fetch(serverUrl+'/send/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gowaPayload)})
-  .then(r=>r.json())
-  .then(res=>{
-    const success=res.status==='success'||res.success;
-    contacts[sendIndex].status=success?'sent':'failed';
-    sendIndex++; if(success){todaySent++;hourSent++;}
+  const payload = {phone: c.phone, message: msgBody};
+  if(deviceId) payload.device = deviceId;
+
+  fetch(serverUrl + '/send/message', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(res => {
+    const success = res.status === 'success' || res.success === true;
+    contacts[sendIndex].status = success ? 'sent' : 'failed';
+    sendIndex++;
+    if(success){ todaySent++; hourSent++; }
     updateSendStats();
-    if(username) apiGet('saveLog',{username,type:success?'sent':'failed',name:c.name,phone:c.phone,message:msgBody,status:contacts[sendIndex-1].status});
-    addLog({type:success?'sent':'failed',name:c.name,msg:msgBody,time:new Date()});
+    const prevContact = contacts[sendIndex - 1];
+    if(username) apiGet('saveLog', {username, type: prevContact.status, name: c.name, phone: c.phone, message: msgBody, status: prevContact.status});
+    addLog({type: prevContact.status, name: c.name, msg: msgBody, time: new Date()});
     renderContacts();
-    if(username&&c.id) apiGet('updateContact',{username,rowIndex:c.id,status:contacts[sendIndex-1].status});
+    if(username && c.id) apiGet('updateContact', {username, rowIndex: c.id, status: prevContact.status});
     scheduleNext();
   })
-  .catch(()=>{
-    contacts[sendIndex].status='failed'; sendIndex++;
+  .catch(() => {
+    contacts[sendIndex].status = 'failed';
+    sendIndex++;
     updateSendStats();
-    addLog({type:'failed',name:c.name,msg:'Send failed',time:new Date()});
+    addLog({type:'failed', name: c.name, msg:'Send failed — server unreachable', time: new Date()});
     renderContacts();
     scheduleNext();
   });
 }
 
 function scheduleNext(){
-  const minG=parseInt(document.getElementById('minGap').value)*1000;
-  const maxG=parseInt(document.getElementById('maxGap').value)*1000;
-  const gap=Math.floor(Math.random()*(maxG-minG+1))+minG;
-  sendTimer=setTimeout(processSend,gap);
+  const minG = parseInt(document.getElementById('minGap').value) * 1000;
+  const maxG = parseInt(document.getElementById('maxGap').value) * 1000;
+  const gap = Math.floor(Math.random() * (maxG - minG + 1)) + minG;
+  sendTimer = setTimeout(processSend, gap);
 }
 
 function updateSendStats(){
-  const dl=parseInt(document.getElementById('dayLimit').value)||200;
-  const hl=parseInt(document.getElementById('hourLimit').value)||30;
-  document.getElementById('sentCount').textContent=contacts.filter(c=>c.status==='sent').length;
-  document.getElementById('pendingCount').textContent=contacts.filter(c=>c.status==='pending').length;
-  document.getElementById('failedCount').textContent=contacts.filter(c=>c.status==='failed').length;
-  document.getElementById('repliedCount').textContent=contacts.filter(c=>c.status==='replied').length;
-  document.getElementById('todaySent').textContent=todaySent;
-  document.getElementById('hourSent').textContent=hourSent;
-  document.getElementById('dailyLimitDisplay').textContent=dl;
-  document.getElementById('hourLimitDisplay').textContent=hl;
-  document.getElementById('dailyBar').style.width=Math.min(100,(todaySent/dl)*100)+'%';
-  document.getElementById('hourBar').style.width=Math.min(100,(hourSent/hl)*100)+'%';
+  const dl = parseInt(document.getElementById('dayLimit').value) || 200;
+  const hl = parseInt(document.getElementById('hourLimit').value) || 30;
+  document.getElementById('sentCount').textContent = contacts.filter(c => c.status === 'sent').length;
+  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
+  document.getElementById('failedCount').textContent = contacts.filter(c => c.status === 'failed').length;
+  document.getElementById('repliedCount').textContent = contacts.filter(c => c.status === 'replied').length;
+  document.getElementById('todaySentDisplay').textContent = todaySent;
+  document.getElementById('hourSentDisplay').textContent = hourSent;
+  document.getElementById('dailyLimitDisplay').textContent = dl;
+  document.getElementById('hourLimitDisplay').textContent = hl;
+  document.getElementById('dailyBar').style.width = Math.min(100, (todaySent/dl)*100) + '%';
+  document.getElementById('hourBar').style.width = Math.min(100, (hourSent/hl)*100) + '%';
 }
 
 // ══════════════════════════════════════════════════════
@@ -1097,124 +1280,136 @@ function updateSendStats(){
 // ══════════════════════════════════════════════════════
 function applySettings(s){
   if(!s) return;
-  if(s.serverUrl)  document.getElementById('serverUrl').value=s.serverUrl;
-  if(s.hourLimit)  document.getElementById('hourLimit').value=s.hourLimit;
-  if(s.dayLimit)   document.getElementById('dayLimit').value=s.dayLimit;
-  if(s.minGap)    {document.getElementById('minGap').value=s.minGap;   document.getElementById('minGapVal').textContent=s.minGap+'s';}
-  if(s.maxGap)    {document.getElementById('maxGap').value=s.maxGap;   document.getElementById('maxGapVal').textContent=s.maxGap+'s';}
-  if(s.autoReply) {document.getElementById('autoReplyToggle').checked=s.autoReply; document.getElementById('autoReplyPromptArea').style.display=s.autoReply?'block':'none';}
-  if(s.autoReplyPrompt) document.getElementById('autoReplyPrompt').value=s.autoReplyPrompt;
-  if(s.pauseOnReply!==undefined) document.getElementById('pauseOnReplyToggle').checked=s.pauseOnReply;
-  if(s.aiRewrite) {document.getElementById('aiRewriteSettingToggle').checked=s.aiRewrite;}
+  if(s.serverUrl)  document.getElementById('serverUrl').value = s.serverUrl;
+  if(s.hourLimit)  document.getElementById('hourLimit').value = s.hourLimit;
+  if(s.dayLimit)   document.getElementById('dayLimit').value = s.dayLimit;
+  if(s.minGap){    document.getElementById('minGap').value = s.minGap;  document.getElementById('minGapVal').textContent = s.minGap + 's'; }
+  if(s.maxGap){    document.getElementById('maxGap').value = s.maxGap;  document.getElementById('maxGapVal').textContent = s.maxGap + 's'; }
+  if(s.autoReply !== undefined){ document.getElementById('autoReplyToggle').checked = !!s.autoReply; document.getElementById('autoReplyPromptArea').style.display = s.autoReply ? 'block' : 'none'; }
+  if(s.autoReplyPrompt) document.getElementById('autoReplyPrompt').value = s.autoReplyPrompt;
+  if(s.pauseOnReply !== undefined) document.getElementById('pauseOnReplyToggle').checked = !!s.pauseOnReply;
+  if(s.aiRewrite !== undefined) document.getElementById('aiRewriteSettingToggle').checked = !!s.aiRewrite;
 }
 
 function saveSettings(){
-  const username=SessionManager.getUsername();
-  if(!username){ showToast('Not logged in',true); return; }
-  const s={
+  const username = SessionManager.getUsername();
+  if(!username){ showToast('Not logged in', true); return; }
+  const s = {
     username,
-    serverUrl:        document.getElementById('serverUrl').value,
-    hourLimit:        document.getElementById('hourLimit').value,
-    dayLimit:         document.getElementById('dayLimit').value,
-    minGap:           document.getElementById('minGap').value,
-    maxGap:           document.getElementById('maxGap').value,
-    autoReply:        document.getElementById('autoReplyToggle').checked,
-    autoReplyPrompt:  document.getElementById('autoReplyPrompt')?.value||'',
-    pauseOnReply:     document.getElementById('pauseOnReplyToggle').checked,
-    aiRewrite:        document.getElementById('aiRewriteSettingToggle').checked
+    serverUrl:       document.getElementById('serverUrl').value,
+    hourLimit:       document.getElementById('hourLimit').value,
+    dayLimit:        document.getElementById('dayLimit').value,
+    minGap:          document.getElementById('minGap').value,
+    maxGap:          document.getElementById('maxGap').value,
+    autoReply:       document.getElementById('autoReplyToggle').checked,
+    autoReplyPrompt: document.getElementById('autoReplyPrompt') ? document.getElementById('autoReplyPrompt').value : '',
+    pauseOnReply:    document.getElementById('pauseOnReplyToggle').checked,
+    aiRewrite:       document.getElementById('aiRewriteSettingToggle').checked
   };
   showToast('Saving settings…');
-  apiGet('saveSettings',s).then(r=>{
-    showToast(r.success?'Settings saved ✅':'Save failed: '+r.message,!r.success);
+  apiGet('saveSettings', s).then(r => {
+    showToast(r.success ? 'Settings saved ✅' : 'Save failed: ' + r.message, !r.success);
   });
 }
 
 function testServer(){
-  const url=document.getElementById('serverUrl').value.trim();
-  if(!url){showToast('Enter server URL first',true);return;}
-  const el=document.getElementById('testResult');
-  el.style.color='var(--text2)'; el.textContent='Testing…';
-  fetch(url).then(r=>{
-    if(r.ok){el.style.color='var(--accent)';el.textContent='● Connected';}
-    else{el.style.color='var(--accent3)';el.textContent='● Error '+r.status;}
-  }).catch(()=>{el.style.color='var(--accent3)';el.textContent='● Unreachable';});
+  const url = document.getElementById('serverUrl').value.trim();
+  if(!url){ showToast('Enter server URL first', true); return; }
+  const el = document.getElementById('testResult');
+  el.style.color = 'var(--text2)';
+  el.textContent = 'Testing…';
+  fetch(url)
+    .then(r => {
+      if(r.ok){ el.style.color = 'var(--accent)'; el.textContent = '● Connected'; }
+      else { el.style.color = 'var(--accent3)'; el.textContent = '● Error ' + r.status; }
+    })
+    .catch(() => { el.style.color = 'var(--accent3)'; el.textContent = '● Unreachable'; });
 }
 
 function toggleAutoReply(){
-  document.getElementById('autoReplyPromptArea').style.display=document.getElementById('autoReplyToggle').checked?'block':'none';
+  document.getElementById('autoReplyPromptArea').style.display =
+    document.getElementById('autoReplyToggle').checked ? 'block' : 'none';
 }
 
 // ══════════════════════════════════════════════════════
 // LOGS
 // ══════════════════════════════════════════════════════
-function addLog(entry){logs.unshift(entry);renderLogs();}
+function addLog(entry){ logs.unshift(entry); renderLogs(); }
 
 function renderLogs(filter){
-  const f=filter||document.getElementById('logFilter')?.value||'all';
-  const data=f!=='all'?logs.filter(l=>l.type===f):logs;
-  const el=document.getElementById('logsList');
-  if(!data.length){el.innerHTML='<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No activity yet</div>';return;}
-  el.innerHTML=data.map(l=>`<div class="log-entry">
-    <div class="log-dot ${l.type}"></div>
+  const f = filter || (document.getElementById('logFilter') ? document.getElementById('logFilter').value : 'all');
+  const data = f !== 'all' ? logs.filter(l => l.type === f) : logs;
+  const el = document.getElementById('logsList');
+  if(!data.length){
+    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No activity yet</div>';
+    return;
+  }
+  el.innerHTML = data.map(l => `<div class="log-entry">
+    <div class="log-dot ${l.type||'sent'}"></div>
     <div class="log-body">
-      <div class="log-name">${esc(l.name||'')} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">[${l.type}]</span></div>
+      <div class="log-name">${esc(l.name||'')} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">[${l.type||'sent'}]</span></div>
       <div class="log-msg">${esc(l.msg||l.message||'')}</div>
-      <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : new Date(l.timestamp||l.time).toLocaleTimeString()}</div>
+      <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : new Date(l.timestamp||l.time||Date.now()).toLocaleTimeString()}</div>
     </div>
   </div>`).join('');
 }
 
-function filterLogs(){renderLogs(document.getElementById('logFilter').value);}
-function clearLogs(){logs=[];renderLogs();}
+function filterLogs(){ renderLogs(document.getElementById('logFilter').value); }
+function clearLogs(){ logs = []; renderLogs(); }
 
 // ══════════════════════════════════════════════════════
-// DEVICE MANAGEMENT — ONE DEVICE PER USER (FIXED QR)
+// DEVICE MANAGEMENT
 // ══════════════════════════════════════════════════════
-
 function getGowaUrl(){
-  return (document.getElementById('serverUrl')?.value||'').trim();
+  return (document.getElementById('serverUrl') ? document.getElementById('serverUrl').value : '').trim();
 }
 
 function setDeviceStatus(state, id){
-  const dot   = document.getElementById('pollDot');
-  const label = document.getElementById('pollLabel');
-  const icon  = document.getElementById('deviceStatusIcon');
-  const title = document.getElementById('deviceStatusTitle');
-  const idEl  = document.getElementById('deviceStatusId');
-  const card  = document.getElementById('deviceStatusCard');
-  const topDot= document.getElementById('topbarDot');
-  const topLbl= document.getElementById('topbarStatus');
-  const discBtn=document.getElementById('disconnectBtn');
-  const warning=document.getElementById('deviceWarning');
+  const dot    = document.getElementById('pollDot');
+  const label  = document.getElementById('pollLabel');
+  const icon   = document.getElementById('deviceStatusIcon');
+  const title  = document.getElementById('deviceStatusTitle');
+  const idEl   = document.getElementById('deviceStatusId');
+  const card   = document.getElementById('deviceStatusCard');
+  const topDot = document.getElementById('topbarDot');
+  const topLbl = document.getElementById('topbarStatus');
+  const discBtn= document.getElementById('disconnectBtn');
+  const warning= document.getElementById('deviceWarning');
 
-  if(state==='connected'){
-    dot.className='poll-dot connected'; label.textContent='CONNECTED';
-    icon.textContent='📱'; title.textContent='Device Connected ✅';
-    idEl.textContent='Your Device ID: '+(id||deviceId||'Unknown');
-    card.className='device-status-card device-connected';
-    topDot.style.background='var(--accent)'; topDot.style.boxShadow='0 0 8px var(--accent)';
-    topLbl.textContent='DEVICE CONNECTED'; topLbl.style.color='var(--accent)';
-    discBtn.style.display='inline-flex';
-    document.getElementById('deviceBadge').style.display='none';
-    warning.style.display='none';
+  if(state === 'connected'){
+    if(dot)  { dot.className = 'poll-dot connected'; }
+    if(label){ label.textContent = 'CONNECTED'; }
+    if(icon) { icon.textContent = '📱'; }
+    if(title){ title.textContent = 'Device Connected ✅'; }
+    if(idEl) { idEl.textContent = 'Your Device ID: ' + (id || deviceId || 'Unknown'); }
+    if(card) { card.className = 'device-status-card device-connected'; }
+    if(topDot){ topDot.style.background = 'var(--accent)'; topDot.style.boxShadow = '0 0 8px var(--accent)'; }
+    if(topLbl){ topLbl.textContent = 'DEVICE CONNECTED'; topLbl.style.color = 'var(--accent)'; }
+    if(discBtn){ discBtn.style.display = 'inline-flex'; }
+    document.getElementById('deviceBadge').style.display = 'none';
+    if(warning){ warning.style.display = 'none'; }
     deviceId = id;
-  } else if(state==='scanning'){
-    dot.className='poll-dot scanning'; label.textContent='SCANNING…';
-    icon.textContent='⏳'; title.textContent='Waiting for QR scan…';
-    idEl.textContent='Open WhatsApp → Settings → Linked Devices → Link a Device';
-    card.className='device-status-card';
-    topDot.style.background='#ffd166'; topDot.style.boxShadow='0 0 8px #ffd166';
-    topLbl.textContent='SCANNING QR'; topLbl.style.color='#ffd166';
-    discBtn.style.display='none';
+  } else if(state === 'scanning'){
+    if(dot)  { dot.className = 'poll-dot scanning'; }
+    if(label){ label.textContent = 'SCANNING…'; }
+    if(icon) { icon.textContent = '⏳'; }
+    if(title){ title.textContent = 'Waiting for QR scan…'; }
+    if(idEl) { idEl.textContent = 'Open WhatsApp → Settings → Linked Devices → Link a Device'; }
+    if(card) { card.className = 'device-status-card'; }
+    if(topDot){ topDot.style.background = '#ffd166'; topDot.style.boxShadow = '0 0 8px #ffd166'; }
+    if(topLbl){ topLbl.textContent = 'SCANNING QR'; topLbl.style.color = '#ffd166'; }
+    if(discBtn){ discBtn.style.display = 'none'; }
   } else {
-    dot.className='poll-dot disconnected'; label.textContent='OFFLINE';
-    icon.textContent='📵'; title.textContent='No device linked';
-    idEl.textContent='Scan the QR code to link your WhatsApp';
-    card.className='device-status-card device-disconnected';
-    topDot.style.background='var(--muted)'; topDot.style.boxShadow='none';
-    topLbl.textContent='NO DEVICE'; topLbl.style.color='var(--text2)';
-    discBtn.style.display='none';
-    document.getElementById('deviceBadge').style.display='inline';
+    if(dot)  { dot.className = 'poll-dot disconnected'; }
+    if(label){ label.textContent = 'OFFLINE'; }
+    if(icon) { icon.textContent = '📵'; }
+    if(title){ title.textContent = 'No device linked'; }
+    if(idEl) { idEl.textContent = 'Scan the QR code to link your WhatsApp'; }
+    if(card) { card.className = 'device-status-card device-disconnected'; }
+    if(topDot){ topDot.style.background = 'var(--muted)'; topDot.style.boxShadow = 'none'; }
+    if(topLbl){ topLbl.textContent = 'NO DEVICE'; topLbl.style.color = 'var(--text2)'; }
+    if(discBtn){ discBtn.style.display = 'none'; }
+    document.getElementById('deviceBadge').style.display = 'inline';
   }
 }
 
@@ -1222,189 +1417,226 @@ function checkDeviceStatus(){
   const url = getGowaUrl();
   const username = SessionManager.getUsername();
   if(!url || !username) return;
-  
-  // First check what device this user owns
-  apiGetUserDevice(username, (userDeviceRes)=>{
-    if(!userDeviceRes.success || !userDeviceRes.hasDevice){
+
+  apiGetUserDevice(username, userDeviceRes => {
+    if(!userDeviceRes || !userDeviceRes.success || !userDeviceRes.hasDevice){
       setDeviceStatus('disconnected');
       return;
     }
-    
     const myDeviceId = userDeviceRes.deviceId;
-    // Now check if that device exists on the GoWA server
-    fetch(url+'/app/devices')
-      .then(r=>r.json())
-      .then(data=>{
-        const devices = data.results || data.data || data || [];
+    fetch(url + '/app/devices')
+      .then(r => r.json())
+      .then(data => {
+        const devices = data.results || data.data || (Array.isArray(data) ? data : []);
         const myDevice = devices.find(d => (d.device || d.id || d.jid) === myDeviceId);
         if(myDevice){
           setDeviceStatus('connected', myDeviceId);
         } else {
-          // Device exists in our records but not on server? Unlink it
           setDeviceStatus('disconnected');
-          showToast('Your linked device was removed from server. Please re-link.', true);
         }
       })
-      .catch(()=>{ /* server not reachable yet */ });
+      .catch(() => {
+        // Server not reachable — keep last known status
+      });
   });
 }
 
+// ══════════════════════════════════════════════════════
+// QR LOADING — FIXED
+// ══════════════════════════════════════════════════════
 function loadQR(){
   const url = getGowaUrl();
   const username = SessionManager.getUsername();
-  if(!url){ showToast('Set GoWA server URL in Settings first ⚙️', true); switchTab('settings'); return; }
-  
-  // Check if user already has a device
-  apiGetUserDevice(username, (userDeviceRes)=>{
-    if(userDeviceRes.success && userDeviceRes.hasDevice){
-      showToast('You already have a device linked. Unlink it first to add a new one.', true);
-      document.getElementById('deviceWarning').style.display='flex';
-      return;
-    }
-    
-    document.getElementById('deviceWarning').style.display='none';
-    const wrap = document.getElementById('qrWrap');
-    wrap.innerHTML='<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Generating QR code…</div>';
-    setDeviceStatus('scanning');
 
-    const qrImg = new Image();
-    const qrUrl = url + '/app/login?output=image&t=' + Date.now();
+  if(!url){
+    showToast('Set GoWA server URL in Settings first ⚙️', true);
+    switchTab('settings');
+    return;
+  }
 
-    qrImg.onload = function(){
-      wrap.innerHTML = '';
-      wrap.appendChild(qrImg);
-      const hint = document.createElement('div');
-      hint.className = 'qr-hint';
-      hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-      wrap.appendChild(hint);
-      startQrCountdown(60);
-      startDevicePollingForLinking(username);
-    };
+  const wrap = document.getElementById('qrWrap');
+  wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Checking device status…</div>';
 
-    qrImg.onerror = function(){
-      wrap.innerHTML='<div style="font-size:32px;margin-bottom:10px">❌</div><div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>Check your server URL in Settings.</div>';
-      setDeviceStatus('disconnected');
-    };
+  // Check if user already has a linked + active device
+  if(username){
+    apiGetUserDevice(username, userDeviceRes => {
+      // If API fails or returns no device, proceed to show QR
+      const alreadyLinked = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice && deviceId;
 
-    qrImg.style.cssText='width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-    qrImg.src = qrUrl;
-  });
+      if(alreadyLinked){
+        wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">✅</div><div class="qr-hint">Device already linked.<br>Unlink first to connect a new device.</div>';
+        document.getElementById('deviceWarning').style.display = 'flex';
+        showToast('Device already linked. Unlink first to add a new one.', true);
+        return;
+      }
+
+      // No device — show QR
+      document.getElementById('deviceWarning').style.display = 'none';
+      _fetchAndShowQR(url, username);
+    });
+  } else {
+    _fetchAndShowQR(url, username);
+  }
+}
+
+function _fetchAndShowQR(url, username){
+  const wrap = document.getElementById('qrWrap');
+  wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Generating QR code…</div>';
+  setDeviceStatus('scanning');
+  clearInterval(qrCountdown);
+  stopDevicePolling();
+
+  const qrUrl = url + '/app/login?output=image&t=' + Date.now();
+
+  // Use an Image object to avoid CORS issues with fetch
+  const qrImg = new Image();
+  qrImg.crossOrigin = 'anonymous';
+  qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+
+  qrImg.onload = function(){
+    wrap.innerHTML = '';
+    wrap.appendChild(qrImg);
+    const hint = document.createElement('div');
+    hint.className = 'qr-hint';
+    hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+    wrap.appendChild(hint);
+    startQrCountdown(60);
+    if(username) startDevicePollingForLinking(username);
+  };
+
+  qrImg.onerror = function(){
+    // Try fetching as JSON/text fallback (some servers return base64)
+    fetch(url + '/app/login?output=json&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        const b64 = data.qr || data.code || data.image || data.data;
+        if(b64){
+          wrap.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = 'data:image/png;base64,' + b64;
+          img.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
+          wrap.appendChild(img);
+          const hint = document.createElement('div');
+          hint.className = 'qr-hint';
+          hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
+          wrap.appendChild(hint);
+          startQrCountdown(60);
+          if(username) startDevicePollingForLinking(username);
+        } else {
+          _showQrError(wrap);
+        }
+      })
+      .catch(() => _showQrError(wrap));
+  };
+
+  qrImg.src = qrUrl;
+}
+
+function _showQrError(wrap){
+  wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
+    <div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>Check your server URL in Settings.<br/><br/>
+    <small style="color:var(--muted)">Make sure your GoWA server is running<br>and the URL is correct.</small></div>`;
+  setDeviceStatus('disconnected');
 }
 
 function startQrCountdown(seconds){
   clearInterval(qrCountdown);
   let s = seconds;
   const el = document.getElementById('qrTimer');
-  qrCountdown = setInterval(()=>{
+  qrCountdown = setInterval(() => {
     s--;
-    if(s<=0){
+    if(s <= 0){
       clearInterval(qrCountdown);
-      if(el) el.textContent='⚠ QR expired — click Refresh QR';
-      document.getElementById('qrWrap').innerHTML='<div style="font-size:32px;margin-bottom:10px">⏰</div><div class="qr-hint" style="color:#ffd166">QR expired — click Refresh QR</div>';
+      if(el) el.textContent = '⚠ QR expired — click Refresh QR';
+      const wrap = document.getElementById('qrWrap');
+      if(wrap) wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏰</div><div class="qr-hint" style="color:#ffd166">QR expired — click <strong>Refresh QR</strong></div>';
       stopDevicePolling();
-      setDeviceStatus('disconnected');
     } else {
-      if(el) el.textContent='QR expires in '+s+'s';
+      if(el) el.textContent = 'QR expires in ' + s + 's';
     }
   }, 1000);
 }
 
-// FIXED: Proper device polling that captures the newly scanned device
 function startDevicePollingForLinking(username){
   stopDevicePolling();
   const url = getGowaUrl();
-  let alreadyLinked = false;
-  
+  if(!url) return;
+
   devicePollTimer = setInterval(() => {
-    if(alreadyLinked) return;
-    
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
-        const devices = data.results || data.data || data || [];
-        
-        // Get user's existing device from our records
-        apiGetUserDevice(username, (existingRes) => {
-          const existingId = existingRes.success ? existingRes.deviceId : null;
-          
-          // Look for ANY device on the server that's NOT already linked to this user
-          // This catches the newly scanned device
+        const devices = data.results || data.data || (Array.isArray(data) ? data : []);
+        if(!devices.length) return;
+
+        apiGetUserDevice(username, existingRes => {
+          const existingId = (existingRes && existingRes.success) ? existingRes.deviceId : null;
+
+          // Find new device not matching existing
           const newDevice = devices.find(d => {
             const did = d.device || d.id || d.jid;
             return did && did !== existingId;
           });
-          
-          if(newDevice && !alreadyLinked){
-            alreadyLinked = true;
-            const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
-            
-            // Link this device to the user
-            apiLinkDevice(username, newDeviceId, (linkRes) => {
-              if(linkRes.success){
-                stopDevicePolling();
-                clearInterval(qrCountdown);
-                if(document.getElementById('qrTimer')) document.getElementById('qrTimer').textContent = '';
-                const qrWrap = document.getElementById('qrWrap');
-                if(qrWrap){
-                  qrWrap.innerHTML = '<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>' + newDeviceId + '</div>';
-                }
-                setDeviceStatus('connected', newDeviceId);
-                showToast('WhatsApp connected successfully! 🎉');
-                
-                // Update session with device ID
-                const sess = SessionManager.get();
-                if(sess.userData){
-                  sess.userData.deviceId = newDeviceId;
-                  SessionManager.set(sess.userData);
-                }
-                deviceId = newDeviceId;
-              } else {
-                showToast('Failed to link device: ' + linkRes.message, true);
-                alreadyLinked = false;
+
+          if(!newDevice) return;
+
+          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
+
+          apiLinkDevice(username, newDeviceId, linkRes => {
+            if(linkRes && linkRes.success){
+              stopDevicePolling();
+              clearInterval(qrCountdown);
+              const timerEl = document.getElementById('qrTimer');
+              if(timerEl) timerEl.textContent = '';
+              const wrap = document.getElementById('qrWrap');
+              if(wrap) wrap.innerHTML = '<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>' + newDeviceId + '</div>';
+              setDeviceStatus('connected', newDeviceId);
+              showToast('WhatsApp connected successfully! 🎉');
+              // Update session
+              const sess = SessionManager.get();
+              if(sess.userData){
+                sess.userData.deviceId = newDeviceId;
+                SessionManager.set(sess.userData);
               }
-            });
-          }
+            } else {
+              showToast('Failed to link device: ' + (linkRes && linkRes.message), true);
+            }
+          });
         });
-      }).catch(() => {});
+      })
+      .catch(() => { /* ignore poll errors */ });
   }, 3000);
 }
 
-function stopDevicePolling() {
-  if (devicePollTimer) {
-    clearInterval(devicePollTimer);
-    devicePollTimer = null;
-  }
-}
+function stopDevicePolling(){ clearInterval(devicePollTimer); }
 
 function disconnectDevice(){
   if(!confirm('Unlink your WhatsApp device? You will need to scan a new QR code to reconnect.')) return;
-  
   const username = SessionManager.getUsername();
   if(!username) return;
-  
-  // First, unlink from our ownership sheet
-  apiUnlinkDevice(username, (unlinkRes)=>{
-    if(unlinkRes.success){
-      // Try to logout from GoWA server as well
+
+  apiUnlinkDevice(username, unlinkRes => {
+    if(unlinkRes && unlinkRes.success){
+      // Also try to logout from GoWA server
       const url = getGowaUrl();
       if(url && deviceId){
-        fetch(url+'/app/logout?device='+deviceId, {method:'GET'}).catch(()=>{});
+        fetch(url + '/app/logout?device=' + deviceId).catch(() => {});
       }
       deviceId = null;
       setDeviceStatus('disconnected');
-      const qrWrap = document.getElementById('qrWrap');
-      if(qrWrap){
-        qrWrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">📱</div><div class="qr-hint">Device unlinked.<br/>Click <strong>Load QR Code</strong> to connect a new device.</div>';
-      }
+      const wrap = document.getElementById('qrWrap');
+      if(wrap) wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">📱</div><div class="qr-hint">Device unlinked.<br/>Click <strong>Load QR Code</strong> to connect a new device.</div>';
+      const timerEl = document.getElementById('qrTimer');
+      if(timerEl) timerEl.textContent = '';
       showToast('Device unlinked successfully');
-      // Remove deviceId from session
+      // Remove from session
       const sess = SessionManager.get();
       if(sess.userData){
         delete sess.userData.deviceId;
         SessionManager.set(sess.userData);
       }
     } else {
-      showToast('Failed to unlink: '+unlinkRes.message, true);
+      showToast('Failed to unlink: ' + (unlinkRes && unlinkRes.message), true);
     }
   });
 }
@@ -1412,18 +1644,43 @@ function disconnectDevice(){
 // ══════════════════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════════════════
-function esc(s){if(!s) return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 let toastTimer;
-function showToast(msg,isError){
-  let t=document.getElementById('toast');
-  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;font-family:var(--sans);z-index:9999;transition:opacity .3s;pointer-events:none;';document.body.appendChild(t);}
-  t.style.background=isError?'#2d1a1a':'#0e2d1e';
-  t.style.color=isError?'#ff6b6b':'#00e5a0';
-  t.style.border=`1px solid ${isError?'#5c2020':'#00e5a040'}`;
-  t.textContent=msg; t.style.opacity='1';
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.opacity='0',3500);
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.style.background = isError ? '#2d1a1a' : '#0e2d1e';
+  t.style.color      = isError ? '#ff6b6b' : '#00e5a0';
+  t.style.border     = `1px solid ${isError ? '#5c2020' : '#00e5a040'}`;
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
+
+// Expose all key functions to global scope (fixes JSONP callback scope issues)
+window.renderContacts   = renderContacts;
+window.showDashboard    = showDashboard;
+window.checkUserDevice  = checkUserDevice;
+window.switchTab        = switchTab;
+window.loadQR           = loadQR;
+window.logout           = logout;
+window.saveContacts     = saveContacts;
+window.clearContacts    = clearContacts;
+window.saveCompose      = saveCompose;
+window.saveSettings     = saveSettings;
+window.testServer       = testServer;
+window.startSend        = startSend;
+window.pauseSend        = pauseSend;
+window.stopSend         = stopSend;
+window.disconnectDevice = disconnectDevice;
+window.filterLogs       = filterLogs;
+window.clearLogs        = clearLogs;
+window.authActions      = null; // set by showAuth()
 </script>
 </body>
 </html>
