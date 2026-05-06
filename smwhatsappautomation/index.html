@@ -294,10 +294,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <input type="text" placeholder="Search..." style="width:180px;padding:7px 12px;font-size:13px" oninput="filterContacts(this.value)"/>
         </div>
         <div class="table-wrap" style="border:none;border-radius:0">
-          <table>
-            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Custom Message</th><th>Status</th><th></th></tr></thead>
-            <tbody id="contactTableBody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr></tbody>
-          </table>
+          <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Custom Message</th><th>Status</th><th></th></tr></thead>
+          <tbody id="contactTableBody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr></tbody></table>
         </div>
       </div>
     </div>
@@ -484,34 +482,56 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </div><!-- /dashboard-wrap -->
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// CONFIG — replace with your deployed Apps Script URL
+// ══════════════════════════════════════════════════════
 const API_URL = "https://script.google.com/macros/s/AKfycby1GyNV72cnSKESWjpodsggrxDAxsxvy2Dldy2kJuzv2rafEiurcU4BG7XpYokzcRhpUQ/exec";
+const GOWA_URL_KEY = "wa_gowa_url"; // fallback key
 
-// ── SESSION ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// SESSION MANAGER
+// ══════════════════════════════════════════════════════
 const SessionManager = {
   set(u){ localStorage.setItem('auth_logged_in','true'); localStorage.setItem('auth_user',JSON.stringify(u)); localStorage.setItem('auth_started',Date.now().toString()); },
   get(){ const r=localStorage.getItem('auth_user'); return {isLoggedIn:localStorage.getItem('auth_logged_in')==='true',userData:r?JSON.parse(r):null,sessionStart:localStorage.getItem('auth_started')}; },
   clear(){ ['auth_logged_in','auth_user','auth_started'].forEach(k=>localStorage.removeItem(k)); },
-  isValid(){ const s=this.get(); if(!s.isLoggedIn||!s.userData) return false; if(Date.now()-parseInt(s.sessionStart||'0')>=24*60*60*1000){this.clear();return false;} return true; }
+  isValid(){ const s=this.get(); if(!s.isLoggedIn||!s.userData) return false; if(Date.now()-parseInt(s.sessionStart||'0')>=24*60*60*1000){this.clear();return false;} return true; },
+  getUsername(){ const s=this.get(); return s.userData?.username||null; }
 };
 
-// ── JSONP ─────────────────────────────────────────────────────────────────────
-function jsonpRequest(params,cb){
+// ══════════════════════════════════════════════════════
+// JSONP — Apps Script communication
+// ══════════════════════════════════════════════════════
+function jsonpRequest(params, cb){
   const n='__gs_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), sid=n+'_s';
-  const t=setTimeout(()=>{cleanup();cb({success:false,message:'Timed out.'});},15000);
+  const t=setTimeout(()=>{cleanup();cb({success:false,message:'Request timed out.'});},20000);
   window[n]=d=>{clearTimeout(t);cleanup();cb(d);};
   function cleanup(){delete window[n];document.getElementById(sid)?.remove();}
   const qs=Object.entries({...params,callback:n}).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
   const s=Object.assign(document.createElement('script'),{id:sid,src:API_URL+'?'+qs});
-  s.onerror=()=>{clearTimeout(t);cleanup();cb({success:false,message:'Network error.'});};
+  s.onerror=()=>{clearTimeout(t);cleanup();cb({success:false,message:'Network error — check your connection.'});};
   document.body.appendChild(s);
 }
-function apiLogin(u,p,cb){jsonpRequest({action:'login',username:u,password:p},r=>{if(r.success&&!r.username)r.username=u;cb(r);});}
-function apiRegister(u,e,p,q,a,cb){jsonpRequest({action:'register',username:u,email:e,password:p,securityQuestion:q,securityAnswer:a},cb);}
-function apiGetQuestion(u,cb){jsonpRequest({action:'getSecurityQuestion',username:u},cb);}
-function apiVerifyAnswer(u,a,cb){jsonpRequest({action:'verifyAnswer',username:u,answer:a},cb);}
 
-// ── AUTH UI ───────────────────────────────────────────────────────────────────
+// POST to Apps Script via fetch (for save operations)
+function apiPost(action, data){
+  return fetch(API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action, ...data})
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+}
+
+// ── API Wrappers ──────────────────────────────────────
+function apiLogin(u,p,cb){ jsonpRequest({action:'login',username:u,password:p},r=>{if(r.success&&!r.username)r.username=u;cb(r);}); }
+function apiRegister(u,p,q,a,cb){ jsonpRequest({action:'register',username:u,password:p,securityQuestion:q,securityAnswer:a},cb); }
+function apiGetQuestion(u,cb){ jsonpRequest({action:'getSecurityQuestion',username:u},cb); }
+function apiVerifyAnswer(u,a,cb){ jsonpRequest({action:'verifyAnswer',username:u,answer:a},cb); }
+function apiLoadLogs(u,cb){ jsonpRequest({action:'loadLogs',username:u,limit:100},cb); }
+
+// ══════════════════════════════════════════════════════
+// AUTH UI
+// ══════════════════════════════════════════════════════
 function showAuth(){
   const ov=document.getElementById('authOverlay');
   ov.style.display='flex';
@@ -537,10 +557,9 @@ function showAuth(){
         <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
         <h2>Create Account</h2><div class="auth-sub">Fill in your details</div>
         <div class="auth-msg" id="authMsg"></div>
-        <input type="text" id="regUser" placeholder="Username" autocomplete="off"/>
-        <input type="email" id="regEmail" placeholder="Email"/>
+        <input type="text" id="regUser" placeholder="Username (letters, numbers, underscore)" autocomplete="off"/>
         <input type="password" id="regPass" placeholder="Password"/>
-        <input type="text" id="regQuestion" placeholder="Security question"/>
+        <input type="text" id="regQuestion" placeholder="Security question (e.g. Favourite colour?)"/>
         <input type="text" id="regAnswer" placeholder="Security answer"/>
         <button class="primary-btn" id="authBtn" data-label="Register" onclick="authActions.register()">Register</button>
         <div class="auth-toggle-row"><span class="auth-toggle-link" onclick="authActions.go('login')">← Back to login</span></div></div>`;
@@ -567,16 +586,27 @@ function showAuth(){
       const box=document.getElementById('authMsg'),btn=document.getElementById('authBtn');
       if(!u||!p) return amsg(box,'error','Username and password required.');
       setLoad(btn,box,true);
-      apiLogin(u,p,r=>{setLoad(btn,box,false);if(r.success){SessionManager.set({username:r.username||u,email:r.email||'',lastLogin:r.lastLogin||new Date().toISOString()});showDashboard();}else amsg(box,'error',r.message||'Login failed.');});
+      apiLogin(u,p,r=>{
+        setLoad(btn,box,false);
+        if(r.success){
+          SessionManager.set({username:r.username||u,lastLogin:r.lastLogin||new Date().toISOString()});
+          showDashboard(r); // pass server data directly
+        } else amsg(box,'error',r.message||'Login failed.');
+      });
     },
     register(){
-      const u=document.getElementById('regUser').value.trim(),e=document.getElementById('regEmail').value.trim(),
-            p=document.getElementById('regPass').value.trim(),q=document.getElementById('regQuestion').value.trim(),
+      const u=document.getElementById('regUser').value.trim(),
+            p=document.getElementById('regPass').value.trim(),
+            q=document.getElementById('regQuestion').value.trim(),
             a=document.getElementById('regAnswer').value.trim();
       const box=document.getElementById('authMsg'),btn=document.getElementById('authBtn');
-      if(!u||!e||!p||!q||!a) return amsg(box,'error','All fields required.');
+      if(!u||!p||!q||!a) return amsg(box,'error','All fields required.');
       setLoad(btn,box,true);
-      apiRegister(u,e,p,q,a,r=>{setLoad(btn,box,false);if(r.success){amsg(box,'success','Registered! Redirecting…');setTimeout(()=>authActions.go('login'),2000);}else amsg(box,'error',r.message||'Registration failed.');});
+      apiRegister(u,p,q,a,r=>{
+        setLoad(btn,box,false);
+        if(r.success){ amsg(box,'success','Account created! Redirecting to login…'); setTimeout(()=>authActions.go('login'),2000); }
+        else amsg(box,'error',r.message||'Registration failed.');
+      });
     },
     getQuestion(){
       const u=document.getElementById('recUser').value.trim();
@@ -590,35 +620,69 @@ function showAuth(){
       const box=document.getElementById('authMsg'),btn=document.getElementById('verifyBtn'),pw=document.getElementById('pwResult');
       if(!a) return amsg(box,'error','Enter your answer.');
       setLoad(btn,box,true);
-      apiVerifyAnswer(recoveryUser,a,r=>{setLoad(btn,box,false);if(r.success){box.className='auth-msg';pw.style.display='block';pw.innerHTML=`<strong>Your password:</strong> ${r.password}<br><small>Please change it soon.</small>`;}else amsg(box,'error',r.message||'Incorrect answer.');});
+      apiVerifyAnswer(recoveryUser,a,r=>{setLoad(btn,box,false);if(r.success){box.className='auth-msg';pw.style.display='block';pw.innerHTML=`<strong>Your password:</strong> ${r.password}<br><small>Please log in and change it soon.</small>`;}else amsg(box,'error',r.message||'Incorrect answer.');});
     }
   };
   render();
 }
 
-function showDashboard(){
+// ══════════════════════════════════════════════════════
+// SHOW DASHBOARD — restore all client data from server
+// ══════════════════════════════════════════════════════
+function showDashboard(serverData){
   document.getElementById('authOverlay').style.display='none';
   document.getElementById('dashboardWrap').style.display='flex';
-  loadSession(); loadSettings(); renderContacts();
+
+  // Update sidebar with username
+  const username = SessionManager.getUsername();
+  if(username){
+    document.getElementById('sidebarUsername').textContent = username;
+    document.getElementById('avatarInitial').textContent   = username[0].toUpperCase();
+  }
+
+  // If serverData came from login response, restore everything
+  if(serverData){
+    if(serverData.settings) applySettings(serverData.settings);
+    if(serverData.template) applyTemplate(serverData.template);
+    if(serverData.contacts) { contacts = serverData.contacts; renderContacts(); }
+  }
+
+  // Always load logs fresh
+  if(username) apiLoadLogs(username, r=>{ if(r.success) { logs=r.logs.map(l=>({...l,time:new Date(l.timestamp)})); renderLogs(); } });
+
+  updateSendStats();
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-window.onload=()=>{ SessionManager.isValid() ? showDashboard() : showAuth(); };
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+window.onload=()=>{ SessionManager.isValid() ? reloadSessionData() : showAuth(); };
 
-function loadSession(){
-  const r=localStorage.getItem('auth_user'); if(!r) return;
-  const u=JSON.parse(r);
-  document.getElementById('sidebarUsername').textContent=u.username||'Client';
-  document.getElementById('avatarInitial').textContent=(u.username||'C')[0].toUpperCase();
+// If session is valid but no server data (page refresh), reload from server
+function reloadSessionData(){
+  const username = SessionManager.getUsername();
+  if(!username){ showAuth(); return; }
+  showToast('Restoring your session…');
+  jsonpRequest({action:'loadClientData',username},r=>{
+    if(r.success){
+      showDashboard(r);
+    } else {
+      showDashboard(null); // show empty dashboard, not ideal but workable
+    }
+  });
 }
 
-function logout(){ SessionManager.clear(); showAuth(); }
+function logout(){ SessionManager.clear(); contacts=[]; logs=[]; showAuth(); }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
 let contacts=[],logs=[],sendState='idle',sendIndex=0,sendTimer=null;
 let selectedAttach='none',selectedGroup=null,todaySent=0,hourSent=0;
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -628,7 +692,9 @@ function switchTab(name){
   document.getElementById('topbarTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
 }
 
-// ── CONTACTS ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// CONTACTS
+// ══════════════════════════════════════════════════════
 function togglePaste(){const el=document.getElementById('pasteArea');el.style.display=el.style.display==='none'?'block':'none';}
 
 function parsePaste(){
@@ -637,14 +703,25 @@ function parsePaste(){
     const c=r.split('\t');
     return{id:Date.now()+i,name:(c[0]||'').trim(),phone:(c[1]||'').trim().replace(/\D/g,''),message:(c[2]||'').trim(),status:'pending'};
   }).filter(c=>c.phone);
-  renderContacts(); document.getElementById('pasteArea').style.display='none';
-  showToast(contacts.length+' contacts imported ✅');
+  renderContacts();
+  document.getElementById('pasteArea').style.display='none';
+  showToast(contacts.length+' contacts imported — click Save to Sheet ✅');
 }
 
 function handleFileUpload(input){
   const file=input.files[0]; if(!file) return;
-  showToast('Parsing '+file.name+'…');
-  setTimeout(()=>{ contacts=[{id:1,name:'Demo User',phone:'919876543210',message:'Hi Demo!',status:'pending'},{id:2,name:'Test User',phone:'919123456789',message:'',status:'pending'}]; renderContacts(); showToast('File parsed — '+contacts.length+' contacts ✅'); },800);
+  showToast('Parsing '+file.name+'… (connect Replit parser for real CSV)');
+  // TODO: POST file to Replit /parse endpoint, get back contacts array
+  // For now simulate with demo data
+  setTimeout(()=>{
+    contacts=[
+      {id:1,name:'Demo User',phone:'919876543210',message:'Hi Demo, special offer for you!',status:'pending'},
+      {id:2,name:'Test User',phone:'919123456789',message:'',status:'pending'}
+    ];
+    renderContacts();
+    showToast('File parsed — '+contacts.length+' contacts loaded. Click Save to Sheet ✅');
+  },800);
+  input.value=''; // reset file input
 }
 
 function renderContacts(list){
@@ -653,113 +730,320 @@ function renderContacts(list){
   document.getElementById('contactTotal').textContent=contacts.length;
   document.getElementById('pendingCount').textContent=contacts.filter(c=>c.status==='pending').length;
   const tbody=document.getElementById('contactTableBody');
-  if(!data.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr>';return;}
-  tbody.innerHTML=data.map((c,i)=>`
-    <tr>
-      <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
-      <td style="font-weight:600">${esc(c.name)}</td>
-      <td style="font-family:var(--mono);font-size:12px">${esc(c.phone)}</td>
-      <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'<em style="color:var(--muted)">template</em>'}</td>
-      <td><span class="badge badge-${c.status}">${c.status}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="removeContact(${c.id})">✕</button></td>
-    </tr>`).join('');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet — upload or paste above</td></tr>';return;}
+  tbody.innerHTML=data.map((c,i)=>`<tr>
+    <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
+    <td style="font-weight:600">${esc(c.name)}</td>
+    <td style="font-family:var(--mono);font-size:12px">${esc(c.phone)}</td>
+    <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'<em style="color:var(--muted)">uses template</em>'}</td>
+    <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeContact(${c.id})">✕</button></td>
+  </tr>`).join('');
 }
 
 function filterContacts(q){renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
 function removeContact(id){contacts=contacts.filter(c=>c.id!==id);renderContacts();}
-function clearContacts(){contacts=[];renderContacts();showToast('Contacts cleared');}
-function saveContacts(){showToast('Saving to Google Sheet… ✅');}
 
-// ── GROUPS ────────────────────────────────────────────────────────────────────
+function clearContacts(){
+  if(!contacts.length) return;
+  const username=SessionManager.getUsername();
+  contacts=[];
+  renderContacts();
+  if(username) apiPost('clearContacts',{username}).then(r=>showToast(r.success?'Contacts cleared ✅':'Clear failed',!r.success));
+  else showToast('Contacts cleared');
+}
+
+function saveContacts(){
+  const username=SessionManager.getUsername();
+  if(!username){ showToast('Not logged in',true); return; }
+  if(!contacts.length){ showToast('No contacts to save',true); return; }
+  showToast('Saving contacts…');
+  apiPost('saveContacts',{username, contacts:JSON.stringify(contacts)}).then(r=>{
+    showToast(r.success ? contacts.length+' contacts saved to Sheet ✅' : 'Save failed: '+r.message, !r.success);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// GROUP IMPORT
+// ══════════════════════════════════════════════════════
 function openGroupImport(){const c=document.getElementById('groupImportCard');c.style.display=c.style.display==='none'?'block':'none';}
+
 function fetchGroups(){
+  const serverUrl=document.getElementById('serverUrl').value.trim();
+  if(!serverUrl){ showToast('Set your GoWA server URL in Settings first',true); return; }
   document.getElementById('groupList').innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Fetching groups…</div>';
+  // Real call: fetch(serverUrl + '/group/list', {method:'GET',...})
+  // Simulated:
   setTimeout(()=>{
     const g=[{id:'g1',name:'Sales Team',members:24},{id:'g2',name:'VIP Clients',members:11},{id:'g3',name:'Product Launch',members:47},{id:'g4',name:'Support Group',members:8}];
     document.getElementById('groupList').innerHTML=g.map(x=>`<div class="group-item"><input type="radio" name="groupSel" value="${x.id}" onchange="selectedGroup='${x.id}'"/><span>👥 ${esc(x.name)}</span><span class="group-count">${x.members} members</span></div>`).join('');
   },900);
 }
+
 function importGroupContacts(){
   if(!selectedGroup){showToast('Select a group first',true);return;}
-  contacts=[...contacts,{id:Date.now()+1,name:'Group Member 1',phone:'919999000001',message:'',status:'pending'},{id:Date.now()+2,name:'Group Member 2',phone:'919999000002',message:'',status:'pending'}];
-  renderContacts(); document.getElementById('groupImportCard').style.display='none'; showToast('Group contacts imported ✅');
+  // Real call: fetch GoWA group members
+  // Simulated:
+  const newContacts=[
+    {id:Date.now()+1,name:'Group Member 1',phone:'919999000001',message:'',status:'pending'},
+    {id:Date.now()+2,name:'Group Member 2',phone:'919999000002',message:'',status:'pending'}
+  ];
+  contacts=[...contacts,...newContacts];
+  renderContacts();
+  document.getElementById('groupImportCard').style.display='none';
+  showToast('Group contacts imported — click Save to Sheet ✅');
 }
 
-// ── COMPOSE ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// COMPOSE
+// ══════════════════════════════════════════════════════
 function updateCharCount(el){document.getElementById('charCount').textContent=el.value.length;}
 function insertVar(v){const ta=document.getElementById('msgTemplate'),s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();updateCharCount(ta);}
-function selectAttach(type,el){document.querySelectorAll('.attach-opt').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selectedAttach=type;document.getElementById('attachFileArea').style.display=(type!=='none'&&type!=='poll')?'block':'none';document.getElementById('pollArea').style.display=(type==='poll')?'block':'none';}
-function handleAttachUpload(input){const f=input.files[0];if(!f) return;document.getElementById('attachName').textContent=f.name;document.getElementById('attachSize').textContent=(f.size/1024).toFixed(1)+' KB';document.getElementById('attachEmoji').textContent=f.type.startsWith('image')?'🖼':f.type.startsWith('video')?'🎬':'📄';document.getElementById('attachPreview').style.display='block';showToast('File ready ✅');}
-function clearAttach(){document.getElementById('attachFile').value='';document.getElementById('attachPreview').style.display='none';}
-function addPollOption(){const w=document.getElementById('pollOptions'),n=w.children.length+1,d=document.createElement('div');d.className='form-group';d.style.marginBottom='8px';d.innerHTML=`<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`;w.appendChild(d);}
-function saveCompose(){showToast('Message template saved ✅');}
 
-// ── SEND ──────────────────────────────────────────────────────────────────────
-function startSend(){if(!contacts.length){showToast('No contacts to send',true);return;}if(sendState==='running') return;sendState='running';if(sendIndex>=contacts.length) sendIndex=0;document.getElementById('pauseIndicator').style.background='var(--accent)';processSend();}
-function pauseSend(){sendState='paused';clearTimeout(sendTimer);document.getElementById('currentContact').textContent='⏸ Paused';document.getElementById('pauseIndicator').style.background='#ffd166';}
-function stopSend(){sendState='idle';sendIndex=0;clearTimeout(sendTimer);document.getElementById('currentContact').textContent='Ready to send';document.getElementById('queueStatus').textContent='0 / '+contacts.length+' contacts processed';document.getElementById('progressBar').style.width='0%';document.getElementById('progressPct').textContent='0%';document.getElementById('pauseIndicator').style.background='var(--muted)';}
+function selectAttach(type,el){
+  document.querySelectorAll('.attach-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAttach=type;
+  document.getElementById('attachFileArea').style.display=(type!=='none'&&type!=='poll')?'block':'none';
+  document.getElementById('pollArea').style.display=(type==='poll')?'block':'none';
+}
+
+function handleAttachUpload(input){
+  const f=input.files[0]; if(!f) return;
+  document.getElementById('attachName').textContent=f.name;
+  document.getElementById('attachSize').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('attachEmoji').textContent=f.type.startsWith('image')?'🖼':f.type.startsWith('video')?'🎬':'📄';
+  document.getElementById('attachPreview').style.display='block';
+  // TODO: POST to Replit /upload endpoint → get temp URL back
+  showToast('File ready — will upload to Replit on send ✅');
+}
+
+function clearAttach(){document.getElementById('attachFile').value='';document.getElementById('attachPreview').style.display='none';}
+
+function addPollOption(){
+  const w=document.getElementById('pollOptions'),n=w.children.length+1,d=document.createElement('div');
+  d.className='form-group';d.style.marginBottom='8px';
+  d.innerHTML=`<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`;
+  w.appendChild(d);
+}
+
+function applyTemplate(t){
+  if(!t) return;
+  if(t.body) { document.getElementById('msgTemplate').value=t.body; updateCharCount(document.getElementById('msgTemplate')); }
+  if(t.attachType){
+    const opt=document.querySelector(`.attach-opt[onclick*="'${t.attachType}'"]`);
+    if(opt) selectAttach(t.attachType,opt);
+  }
+  if(t.pollQuestion) document.getElementById('pollQuestion').value=t.pollQuestion;
+}
+
+function saveCompose(){
+  const username=SessionManager.getUsername();
+  if(!username){ showToast('Not logged in',true); return; }
+  const template={
+    body:         document.getElementById('msgTemplate').value,
+    attachType:   selectedAttach,
+    attachUrl:    '',
+    pollQuestion: document.getElementById('pollQuestion')?.value||'',
+    pollOptions:  JSON.stringify([...document.querySelectorAll('#pollOptions input')].map(i=>i.value).filter(Boolean))
+  };
+  showToast('Saving template…');
+  apiPost('saveTemplate',{username,...template}).then(r=>{
+    showToast(r.success?'Template saved ✅':'Save failed: '+r.message,!r.success);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// SEND
+// ══════════════════════════════════════════════════════
+function startSend(){
+  if(!contacts.length){showToast('No contacts to send',true);return;}
+  if(sendState==='running') return;
+  const username=SessionManager.getUsername();
+  if(!username){showToast('Not logged in',true);return;}
+  const serverUrl=document.getElementById('serverUrl').value.trim();
+  if(!serverUrl){showToast('Set GoWA server URL in Settings first',true);return;}
+  sendState='running';
+  if(sendIndex>=contacts.length) sendIndex=0;
+  document.getElementById('pauseIndicator').style.background='var(--accent)';
+  processSend();
+}
+
+function pauseSend(){
+  sendState='paused';
+  clearTimeout(sendTimer);
+  document.getElementById('currentContact').textContent='⏸ Paused';
+  document.getElementById('pauseIndicator').style.background='#ffd166';
+}
+
+function stopSend(){
+  sendState='idle'; sendIndex=0; clearTimeout(sendTimer);
+  document.getElementById('currentContact').textContent='Ready to send';
+  document.getElementById('queueStatus').textContent='0 / '+contacts.length+' contacts processed';
+  document.getElementById('progressBar').style.width='0%';
+  document.getElementById('progressPct').textContent='0%';
+  document.getElementById('pauseIndicator').style.background='var(--muted)';
+}
 
 function processSend(){
   if(sendState!=='running') return;
-  if(sendIndex>=contacts.length){sendState='idle';document.getElementById('currentContact').textContent='✅ Campaign complete!';showToast('All messages sent ✅');return;}
-  const c=contacts[sendIndex],pct=Math.round((sendIndex/contacts.length)*100);
+  if(sendIndex>=contacts.length){
+    sendState='idle';
+    document.getElementById('currentContact').textContent='✅ Campaign complete!';
+    showToast('All messages sent ✅');
+    saveContacts(); // save final statuses
+    return;
+  }
+
+  const hl=parseInt(document.getElementById('hourLimit').value)||30;
+  const dl=parseInt(document.getElementById('dayLimit').value)||200;
+
+  // Check limits
+  if(hourSent>=hl){ pauseSend(); showToast('⏸ Hourly limit reached — paused',true); return; }
+  if(todaySent>=dl){ stopSend(); showToast('Daily limit reached — campaign stopped',true); return; }
+
+  const c=contacts[sendIndex];
+  const pct=Math.round((sendIndex/contacts.length)*100);
+  const username=SessionManager.getUsername();
+  const serverUrl=document.getElementById('serverUrl').value.trim();
+  const template=document.getElementById('msgTemplate').value;
+
   document.getElementById('currentContact').textContent='📤 Sending to '+c.name;
   document.getElementById('queueStatus').textContent=sendIndex+' / '+contacts.length+' contacts processed';
   document.getElementById('progressBar').style.width=pct+'%';
   document.getElementById('progressPct').textContent=pct+'%';
-  contacts[sendIndex].status='sent'; sendIndex++; todaySent++; hourSent++;
-  updateSendStats(); addLog({type:'sent',name:c.name,msg:c.message||'Template message',time:new Date()}); renderContacts();
-  const minG=parseInt(document.getElementById('minGap').value)*1000,maxG=parseInt(document.getElementById('maxGap').value)*1000;
-  sendTimer=setTimeout(processSend,Math.floor(Math.random()*(maxG-minG+1))+minG);
+
+  // Build message — use custom message if exists, else use template with {name} replaced
+  const msgBody=(c.message||template).replace(/\{name\}/gi,c.name).replace(/\{phone\}/gi,c.phone);
+
+  // Send via GoWA
+  const gowaPayload={phone:c.phone,message:msgBody};
+  fetch(serverUrl+'/send/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(gowaPayload)})
+  .then(r=>r.json())
+  .then(res=>{
+    const success=res.status==='success'||res.success;
+    contacts[sendIndex].status=success?'sent':'failed';
+    sendIndex++; if(success){todaySent++;hourSent++;}
+    updateSendStats();
+    // Log to sheet
+    if(username) apiPost('saveLog',{username,type:success?'sent':'failed',name:c.name,phone:c.phone,message:msgBody,status:contacts[sendIndex-1].status});
+    addLog({type:success?'sent':'failed',name:c.name,msg:msgBody,time:new Date()});
+    renderContacts();
+    // Update contact status in sheet
+    if(username&&c.id) apiPost('updateContact',{username,rowIndex:c.id,status:contacts[sendIndex-1].status});
+    scheduleNext();
+  })
+  .catch(()=>{
+    contacts[sendIndex].status='failed'; sendIndex++;
+    updateSendStats();
+    addLog({type:'failed',name:c.name,msg:'Send failed',time:new Date()});
+    renderContacts();
+    scheduleNext();
+  });
+}
+
+function scheduleNext(){
+  const minG=parseInt(document.getElementById('minGap').value)*1000;
+  const maxG=parseInt(document.getElementById('maxGap').value)*1000;
+  const gap=Math.floor(Math.random()*(maxG-minG+1))+minG;
+  sendTimer=setTimeout(processSend,gap);
 }
 
 function updateSendStats(){
-  const dl=parseInt(document.getElementById('dayLimit').value)||200,hl=parseInt(document.getElementById('hourLimit').value)||30;
+  const dl=parseInt(document.getElementById('dayLimit').value)||200;
+  const hl=parseInt(document.getElementById('hourLimit').value)||30;
   document.getElementById('sentCount').textContent=contacts.filter(c=>c.status==='sent').length;
+  document.getElementById('pendingCount').textContent=contacts.filter(c=>c.status==='pending').length;
+  document.getElementById('failedCount').textContent=contacts.filter(c=>c.status==='failed').length;
+  document.getElementById('repliedCount').textContent=contacts.filter(c=>c.status==='replied').length;
   document.getElementById('todaySent').textContent=todaySent;
   document.getElementById('hourSent').textContent=hourSent;
   document.getElementById('dailyLimitDisplay').textContent=dl;
   document.getElementById('hourLimitDisplay').textContent=hl;
   document.getElementById('dailyBar').style.width=Math.min(100,(todaySent/dl)*100)+'%';
   document.getElementById('hourBar').style.width=Math.min(100,(hourSent/hl)*100)+'%';
-  document.getElementById('failedCount').textContent=contacts.filter(c=>c.status==='failed').length;
-  document.getElementById('repliedCount').textContent=contacts.filter(c=>c.status==='replied').length;
 }
 
-// ── SETTINGS ──────────────────────────────────────────────────────────────────
-function loadSettings(){
-  const s=localStorage.getItem('wa_settings'); if(!s) return;
-  const d=JSON.parse(s);
-  if(d.serverUrl) document.getElementById('serverUrl').value=d.serverUrl;
-  if(d.hourLimit) document.getElementById('hourLimit').value=d.hourLimit;
-  if(d.dayLimit)  document.getElementById('dayLimit').value=d.dayLimit;
-  if(d.minGap){document.getElementById('minGap').value=d.minGap;document.getElementById('minGapVal').textContent=d.minGap+'s';}
-  if(d.maxGap){document.getElementById('maxGap').value=d.maxGap;document.getElementById('maxGapVal').textContent=d.maxGap+'s';}
+// ══════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════
+function applySettings(s){
+  if(!s) return;
+  if(s.serverUrl)  document.getElementById('serverUrl').value=s.serverUrl;
+  if(s.hourLimit)  document.getElementById('hourLimit').value=s.hourLimit;
+  if(s.dayLimit)   document.getElementById('dayLimit').value=s.dayLimit;
+  if(s.minGap)    {document.getElementById('minGap').value=s.minGap;   document.getElementById('minGapVal').textContent=s.minGap+'s';}
+  if(s.maxGap)    {document.getElementById('maxGap').value=s.maxGap;   document.getElementById('maxGapVal').textContent=s.maxGap+'s';}
+  if(s.autoReply) {document.getElementById('autoReplyToggle').checked=s.autoReply; document.getElementById('autoReplyPromptArea').style.display=s.autoReply?'block':'none';}
+  if(s.autoReplyPrompt) document.getElementById('autoReplyPrompt').value=s.autoReplyPrompt;
+  if(s.pauseOnReply!==undefined) document.getElementById('pauseOnReplyToggle').checked=s.pauseOnReply;
+  if(s.aiRewrite) {document.getElementById('aiRewriteSettingToggle').checked=s.aiRewrite;}
 }
+
 function saveSettings(){
-  localStorage.setItem('wa_settings',JSON.stringify({serverUrl:document.getElementById('serverUrl').value,hourLimit:document.getElementById('hourLimit').value,dayLimit:document.getElementById('dayLimit').value,minGap:document.getElementById('minGap').value,maxGap:document.getElementById('maxGap').value}));
-  showToast('Settings saved ✅');
+  const username=SessionManager.getUsername();
+  if(!username){ showToast('Not logged in',true); return; }
+  const s={
+    username,
+    serverUrl:        document.getElementById('serverUrl').value,
+    hourLimit:        document.getElementById('hourLimit').value,
+    dayLimit:         document.getElementById('dayLimit').value,
+    minGap:           document.getElementById('minGap').value,
+    maxGap:           document.getElementById('maxGap').value,
+    autoReply:        document.getElementById('autoReplyToggle').checked,
+    autoReplyPrompt:  document.getElementById('autoReplyPrompt')?.value||'',
+    pauseOnReply:     document.getElementById('pauseOnReplyToggle').checked,
+    aiRewrite:        document.getElementById('aiRewriteSettingToggle').checked
+  };
+  showToast('Saving settings…');
+  apiPost('saveSettings',s).then(r=>{
+    showToast(r.success?'Settings saved ✅':'Save failed: '+r.message,!r.success);
+  });
 }
-function testServer(){
-  const url=document.getElementById('serverUrl').value; if(!url){showToast('Enter server URL first',true);return;}
-  const el=document.getElementById('testResult'); el.style.color='var(--text2)'; el.textContent='Testing…';
-  setTimeout(()=>{el.style.color='var(--accent)';el.textContent='● Connected';},1200);
-}
-function toggleAutoReply(){document.getElementById('autoReplyPromptArea').style.display=document.getElementById('autoReplyToggle').checked?'block':'none';}
 
-// ── LOGS ──────────────────────────────────────────────────────────────────────
+function testServer(){
+  const url=document.getElementById('serverUrl').value.trim();
+  if(!url){showToast('Enter server URL first',true);return;}
+  const el=document.getElementById('testResult');
+  el.style.color='var(--text2)'; el.textContent='Testing…';
+  fetch(url).then(r=>{
+    if(r.ok){el.style.color='var(--accent)';el.textContent='● Connected';}
+    else{el.style.color='var(--accent3)';el.textContent='● Error '+r.status;}
+  }).catch(()=>{el.style.color='var(--accent3)';el.textContent='● Unreachable';});
+}
+
+function toggleAutoReply(){
+  document.getElementById('autoReplyPromptArea').style.display=document.getElementById('autoReplyToggle').checked?'block':'none';
+}
+
+// ══════════════════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════════════════
 function addLog(entry){logs.unshift(entry);renderLogs();}
+
 function renderLogs(filter){
-  const data=filter&&filter!=='all'?logs.filter(l=>l.type===filter):logs;
+  const f=filter||document.getElementById('logFilter')?.value||'all';
+  const data=f!=='all'?logs.filter(l=>l.type===f):logs;
   const el=document.getElementById('logsList');
   if(!data.length){el.innerHTML='<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No activity yet</div>';return;}
-  el.innerHTML=data.map(l=>`<div class="log-entry"><div class="log-dot ${l.type}"></div><div class="log-body"><div class="log-name">${esc(l.name)} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">[${l.type}]</span></div><div class="log-msg">${esc(l.msg)}</div><div class="log-time">${l.time.toLocaleTimeString()}</div></div></div>`).join('');
+  el.innerHTML=data.map(l=>`<div class="log-entry">
+    <div class="log-dot ${l.type}"></div>
+    <div class="log-body">
+      <div class="log-name">${esc(l.name||'')} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">[${l.type}]</span></div>
+      <div class="log-msg">${esc(l.msg||l.message||'')}</div>
+      <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : new Date(l.timestamp||l.time).toLocaleTimeString()}</div>
+    </div>
+  </div>`).join('');
 }
+
 function filterLogs(){renderLogs(document.getElementById('logFilter').value);}
 function clearLogs(){logs=[];renderLogs();}
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
 function esc(s){if(!s) return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
 let toastTimer;
 function showToast(msg,isError){
   let t=document.getElementById('toast');
@@ -768,7 +1052,7 @@ function showToast(msg,isError){
   t.style.color=isError?'#ff6b6b':'#00e5a0';
   t.style.border=`1px solid ${isError?'#5c2020':'#00e5a040'}`;
   t.textContent=msg; t.style.opacity='1';
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.opacity='0',3000);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.opacity='0',3500);
 }
 </script>
 </body>
