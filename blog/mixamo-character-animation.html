@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mixamo Batch Importer for Blender – Import All FBX Animations at Once</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --accent: #00d9ff;
+            --dark: #0a0a0f;
+            --secondary: #111118;
+            --card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #e8e8f0;
+            --muted: #888899;
+            --success: #00e676;
+            --warning: #ffab40;
+            --danger: #ff5252;
+            --info: #40c4ff;
+            --code-bg: #0d0d14;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Syne', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--dark);
+            color: var(--text);
+            font-family: var(--font-display);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        header nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 1.5rem;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            color: white;
+            text-decoration: none;
+        }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 1.5rem; }
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: white; }
+        .cta-button {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: opacity 0.2s, transform 0.2s;
+            white-space: nowrap;
+        }
+        .cta-button:hover { opacity: 0.88; transform: translateY(-1px); }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .nav-links, .cta-button { display: none; }
+            .mobile-menu-btn { display: block; }
+        }
+
+        .blog-hero {
+            padding: 130px 2rem 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .blog-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,107,53,0.18) 0%, transparent 70%),
+                        radial-gradient(ellipse 50% 40% at 80% 100%, rgba(0,217,255,0.10) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,107,53,0.12);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.5rem;
+        }
+        .blog-hero h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.02em;
+        }
+        .blog-hero h1 span { color: var(--primary); }
+        .blog-subtitle {
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 620px;
+            margin: 0 auto 2rem;
+        }
+
+        .blog-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(255,255,255,0.12); }
+
+        .card h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.01em;
+        }
+        .card h2 .accent { color: var(--accent); }
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 1.5rem 0 1rem;
+            color: white;
+        }
+        .card p {
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .feature-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .feature-item .emoji { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .feature-item h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .feature-item p { font-size: 0.75rem; margin: 0; }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+            margin: 1.5rem 0;
+        }
+        .steps-list li {
+            counter-increment: step-counter;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .steps-list li:last-child { border-bottom: none; }
+        .steps-list li::before {
+            content: counter(step-counter);
+            min-width: 28px;
+            height: 28px;
+            background: rgba(255,107,53,0.15);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .steps-list li strong { color: white; }
+
+        .code-container {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+        }
+        .code-filename {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .copy-all-btn {
+            background: rgba(255,107,53,0.15);
+            border: 1px solid rgba(255,107,53,0.3);
+            color: var(--primary);
+            padding: 0.3rem 1rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-all-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .copy-all-btn.copied { background: var(--success); color: white; border-color: var(--success); }
+
+        pre {
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #cdd6f4;
+            margin: 0;
+        }
+        .keyword { color: #cba6f7; }
+        .function { color: #89b4fa; }
+        .string { color: #a6e3a1; }
+        .comment { color: #585b70; }
+        .number { color: #fab387; }
+
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+        .callout.info { background: rgba(64,196,255,0.08); border: 1px solid rgba(64,196,255,0.2); }
+        .callout.warning { background: rgba(255,171,64,0.08); border: 1px solid rgba(255,171,64,0.2); }
+        .callout.success { background: rgba(0,230,118,0.07); border: 1px solid rgba(0,230,118,0.2); }
+        .callout .icon { font-size: 1.2rem; flex-shrink: 0; }
+        .callout strong { color: white; }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2rem 0;
+        }
+
+        .download-banner {
+            background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(0,217,255,0.05) 100%);
+            border: 1px solid rgba(255,107,53,0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .download-banner h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .btn-copy-script {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 1rem;
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            text-align: center;
+            padding: 2.5rem 2rem;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="#" class="logo">CHAMP<span>GAMING</span></a>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Scripts</a>
+            <a href="#">Tutorials</a>
+            <a href="#">Contact</a>
+        </div>
+        <a href="#" class="cta-button">Get the Script →</a>
+        <button class="mobile-menu-btn">☰</button>
+    </nav>
+</header>
+
+<section class="blog-hero">
+    <div class="hero-badge">🐍 BLENDER ADDON</div>
+    <h1>Mixamo Batch Importer<br>for <span>Blender</span></h1>
+    <p class="blog-subtitle">
+        Import all your Mixamo FBX animations at once. Each animation becomes an Action with Fake User enabled.<br>
+        No more manual imports — save hours of repetitive work.
+    </p>
+    <button class="cta-button" id="heroCopyBtn" style="background: var(--accent); color: var(--dark);">📋 Copy Full Script</button>
+</section>
+
+<div class="blog-wrap">
+
+    <div class="card">
+        <h2>✨ What This <span class="accent">Script Does</span></h2>
+        <p>If you work with Mixamo animations, you know the pain: importing dozens of FBX files one by one, renaming actions, enabling fake user, cleaning up the scene. This Blender addon automates the entire process.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-item"><div class="emoji">📁</div><h4>Batch Import</h4><p>Select a folder, import all FBX files at once</p></div>
+            <div class="feature-item"><div class="emoji">🏷️</div><h4>Auto-Rename</h4><p>Uses filename as action name, handles duplicates</p></div>
+            <div class="feature-item"><div class="emoji">💾</div><h4>Fake User ON</h4><p>Preserves actions even after deleting armature</p></div>
+            <div class="feature-item"><div class="emoji">🧹</div><h4>Auto Cleanup</h4><p>Removes imported meshes & armatures automatically</p></div>
+            <div class="feature-item"><div class="emoji">📊</div><h4>Action Library Stats</h4><p>See total actions and fake user count</p></div>
+            <div class="feature-item"><div class="emoji">🖥️</div><h4>UI Panel</h4><p>Convenient panel in Animation tab (3D Viewport)</p></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📦 How to <span class="accent">Install</span></h2>
+        <ol class="steps-list">
+            <li><strong>Copy the script</strong> — Use the copy button below to copy the full Python code.</li>
+            <li><strong>Open Blender</strong> → Go to <strong>Edit → Preferences → Add-ons</strong>.</li>
+            <li>Click <strong>"Install…"</strong> and paste the code into a new text file? Actually easier: Save the script as <code style="background:var(--code-bg); padding:2px 6px; border-radius:4px;">mixamo_importer.py</code> on your computer.</li>
+            <li>Click <strong>"Install…"</strong> → select the <code>.py</code> file → <strong>"Install Add-on"</strong>.</li>
+            <li><strong>Enable the add-on</strong> by checking the box next to "Animation: Mixamo Importer".</li>
+            <li>Find the panel in <strong>3D Viewport → Sidebar (N key) → Animation tab</strong>.</li>
+        </ol>
+        
+        <div class="callout success">
+            <span class="icon">✅</span>
+            <div><strong>Alternative: Run as script</strong> — You can also paste the code directly into Blender's Text Editor and click "Run Script". The panel will appear in the 3D Viewport sidebar.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🚀 How to <span class="accent">Use</span></h2>
+        <ol class="steps-list">
+            <li><strong>Prepare your folder</strong> — Download multiple Mixamo animations (FBX format) and place them in a single folder.</li>
+            <li><strong>Open Blender</strong> and switch to the <strong>Animation</strong> workspace or any 3D Viewport.</li>
+            <li>Press <strong>N</strong> to open the sidebar, go to the <strong>Animation</strong> tab.</li>
+            <li>Click <strong>"Import Mixamo Folder"</strong> and select the folder containing your FBX files.</li>
+            <li><strong>Wait a few seconds</strong> — the script imports each FBX, extracts the action, names it after the file, enables Fake User, and deletes the imported armature.</li>
+            <li>Open the <strong>Action Editor</strong> (Dopesheet → Action Editor) to see all your imported actions ready to be assigned to any rig!</li>
+        </ol>
+        
+        <div class="callout info">
+            <span class="icon">💡</span>
+            <div><strong>Pro Tip:</strong> When exporting from Mixamo, make sure to download FBX files with "Skin" and "Animation" only. The script works best with standard Mixamo exports.</div>
+        </div>
+    </div>
+
+    <!-- FULL CODE SECTION -->
+    <div class="code-container" id="full-code">
+        <div class="code-header">
+            <span class="code-filename">📜 mixamo_importer.py – Full Script</span>
+            <button class="copy-all-btn" id="copyFullCodeBtn">📋 Copy All Code</button>
+        </div>
+        <pre id="codeContent"><span class="keyword">import</span> bpy
+<span class="keyword">import</span> os
+<span class="keyword">from</span> pathlib <span class="keyword">import</span> Path
+
+<span class="comment"># ============================================</span>
+<span class="comment"># MAIN IMPORT FUNCTION</span>
+<span class="comment"># ============================================</span>
+
+<span class="keyword">def</span> <span class="function">import_mixamo_animations</span>(folder_path):
+    <span class="string">"""Import all Mixamo FBX files from a folder as actions with fake user enabled"""</span>
+    
+    folder = Path(folder_path)
+    
+    <span class="keyword">if</span> <span class="keyword">not</span> folder.exists():
+        <span class="function">print</span>(<span class="string">f"❌ Folder does not exist: {folder}"</span>)
+        <span class="keyword">return</span> {<span class="string">'CANCELLED'</span>}
+    
+    <span class="comment"># Get all FBX files</span>
+    fbx_files = <span class="function">list</span>(folder.glob(<span class="string">"*.fbx"</span>))
+    
+    <span class="keyword">if</span> <span class="keyword">not</span> fbx_files:
+        <span class="function">print</span>(<span class="string">f"❌ No FBX files found in: {folder}"</span>)
+        <span class="keyword">return</span> {<span class="string">'CANCELLED'</span>}
+    
+    <span class="function">print</span>(<span class="string">f"\n✓ Found {len(fbx_files)} FBX files"</span>)
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">50</span>)
+    
+    imported_count = <span class="number">0</span>
+    
+    <span class="keyword">for</span> fbx_path <span class="keyword">in</span> fbx_files:
+        <span class="function">print</span>(<span class="string">f"\nImporting: {fbx_path.name}"</span>)
+        
+        <span class="comment"># Deselect all</span>
+        bpy.ops.object.select_all(action=<span class="string">'DESELECT'</span>)
+        
+        <span class="comment"># Import FBX</span>
+        bpy.ops.import_scene.fbx(
+            filepath=<span class="function">str</span>(fbx_path),
+            use_anim=<span class="keyword">True</span>,
+            ignore_leaf_bones=<span class="keyword">True</span>,
+            force_connect_children=<span class="keyword">True</span>,
+            automatic_bone_orientation=<span class="keyword">False</span>,
+            use_prepost_rot=<span class="keyword">True</span>
+        )
+        
+        <span class="comment"># Find imported armature</span>
+        imported_armatures = [obj <span class="keyword">for</span> obj <span class="keyword">in</span> bpy.context.selected_objects 
+                            <span class="keyword">if</span> obj.type == <span class="string">'ARMATURE'</span>]
+        
+        <span class="keyword">if</span> imported_armatures:
+            armature = imported_armatures[<span class="number">0</span>]
+            
+            <span class="comment"># Get action name from filename</span>
+            action_name = fbx_path.stem
+            
+            <span class="comment"># Handle duplicate names</span>
+            <span class="keyword">if</span> action_name <span class="keyword">in</span> bpy.data.actions:
+                counter = <span class="number">1</span>
+                new_name = <span class="string">f"{action_name}_{counter:03d}"</span>
+                <span class="keyword">while</span> new_name <span class="keyword">in</span> bpy.data.actions:
+                    counter += <span class="number">1</span>
+                    new_name = <span class="string">f"{action_name}_{counter:03d}"</span>
+                action_name = new_name
+            
+            <span class="comment"># Rename and enable fake user</span>
+            <span class="keyword">if</span> armature.animation_data <span class="keyword">and</span> armature.animation_data.action:
+                action = armature.animation_data.action
+                action.name = action_name
+                action.use_fake_user = <span class="keyword">True</span>
+                
+                <span class="function">print</span>(<span class="string">f"  ✓ Action created: '{action_name}'"</span>)
+                <span class="function">print</span>(<span class="string">f"  ✓ Fake user: ON"</span>)
+                imported_count += <span class="number">1</span>
+            
+            <span class="comment"># Store all imported objects for deletion</span>
+            objects_to_delete = bpy.context.selected_objects.copy()
+            
+            <span class="comment"># Delete all imported objects (armature + meshes)</span>
+            <span class="keyword">for</span> obj <span class="keyword">in</span> objects_to_delete:
+                bpy.data.objects.remove(obj, do_unlink=<span class="keyword">True</span>)
+    
+    <span class="function">print</span>(<span class="string">"\n"</span> + <span class="string">"="</span> * <span class="number">50</span>)
+    <span class="function">print</span>(<span class="string">f"✓ Import complete! {imported_count} actions imported"</span>)
+    <span class="function">print</span>(<span class="string">f"✓ All actions saved with fake user enabled"</span>)
+    
+    <span class="keyword">return</span> {<span class="string">'FINISHED'</span>}
+
+
+<span class="comment"># ============================================</span>
+<span class="comment"># UI OPERATOR AND PANEL</span>
+<span class="comment"># ============================================</span>
+
+<span class="keyword">class</span> <span class="function">MIXAMO_OT_ImportAnimations</span>(bpy.types.Operator):
+    <span class="string">"""Import all Mixamo FBX animations from selected folder"""</span>
+    bl_idname = <span class="string">"import_anim.mixamo_batch"</span>
+    bl_label = <span class="string">"Import Mixamo Animations"</span>
+    bl_options = {<span class="string">'REGISTER'</span>, <span class="string">'UNDO'</span>}
+    
+    directory: bpy.props.StringProperty(
+        name=<span class="string">"Folder Path"</span>,
+        subtype=<span class="string">'DIR_PATH'</span>
+    )
+    
+    <span class="keyword">def</span> <span class="function">execute</span>(self, context):
+        <span class="keyword">if</span> <span class="keyword">not</span> self.directory:
+            self.report({<span class="string">'ERROR'</span>}, <span class="string">"No folder selected"</span>)
+            <span class="keyword">return</span> {<span class="string">'CANCELLED'</span>}
+        
+        result = <span class="function">import_mixamo_animations</span>(self.directory)
+        
+        <span class="keyword">if</span> result == {<span class="string">'FINISHED'</span>}:
+            self.report({<span class="string">'INFO'</span>}, <span class="string">f"Successfully imported animations"</span>)
+        
+        <span class="keyword">return</span> result
+    
+    <span class="keyword">def</span> <span class="function">invoke</span>(self, context, event):
+        context.window_manager.fileselect_add(self)
+        <span class="keyword">return</span> {<span class="string">'RUNNING_MODAL'</span>}
+
+
+<span class="keyword">class</span> <span class="function">MIXAMO_PT_ImportPanel</span>(bpy.types.Panel):
+    <span class="string">"""Panel for Mixamo animation import"""</span>
+    bl_label = <span class="string">"Mixamo Importer"</span>
+    bl_idname = <span class="string">"MIXAMO_PT_import_panel"</span>
+    bl_space_type = <span class="string">'VIEW_3D'</span>
+    bl_region_type = <span class="string">'UI'</span>
+    bl_category = <span class="string">"Animation"</span>
+    
+    <span class="keyword">def</span> <span class="function">draw</span>(self, context):
+        layout = self.layout
+        
+        layout.operator(<span class="string">"import_anim.mixamo_batch"</span>, 
+                       text=<span class="string">"Import Mixamo Folder"</span>, 
+                       icon=<span class="string">'IMPORT'</span>)
+        
+        layout.separator()
+        box = layout.box()
+        box.label(text=<span class="string">"Action Library Stats:"</span>, icon=<span class="string">'INFO'</span>)
+        
+        total = <span class="function">len</span>(bpy.data.actions)
+        fake_user = <span class="function">sum</span>(<span class="number">1</span> <span class="keyword">for</span> a <span class="keyword">in</span> bpy.data.actions <span class="keyword">if</span> a.use_fake_user)
+        
+        row = box.row()
+        row.label(text=<span class="string">f"Total Actions: {total}"</span>)
+        row = box.row()
+        row.label(text=<span class="string">f"With Fake User: {fake_user}"</span>)
+
+
+<span class="comment"># ============================================</span>
+<span class="comment"># REGISTRATION</span>
+<span class="comment"># ============================================</span>
+
+<span class="keyword">def</span> <span class="function">register</span>():
+    bpy.utils.register_class(MIXAMO_OT_ImportAnimations)
+    bpy.utils.register_class(MIXAMO_PT_ImportPanel)
+    <span class="function">print</span>(<span class="string">"Mixamo Importer registered"</span>)
+
+
+<span class="keyword">def</span> <span class="function">unregister</span>():
+    bpy.utils.unregister_class(MIXAMO_PT_ImportPanel)
+    bpy.utils.unregister_class(MIXAMO_OT_ImportAnimations)
+    <span class="function">print</span>(<span class="string">"Mixamo Importer unregistered"</span>)
+
+
+<span class="comment"># ============================================</span>
+<span class="comment"># RUN SCRIPT</span>
+<span class="comment"># ============================================</span>
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="keyword">try</span>:
+        <span class="function">unregister</span>()
+    <span class="keyword">except</span>:
+        <span class="keyword">pass</span>
+    
+    <span class="function">register</span>()
+    
+    <span class="function">print</span>(<span class="string">"\n"</span> + <span class="string">"="</span> * <span class="number">50</span>)
+    <span class="function">print</span>(<span class="string">"Mixamo Importer Ready!"</span>)
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">50</span>)
+    <span class="function">print</span>(<span class="string">"Find the panel in: 3D Viewport > Sidebar (N) > Animation tab"</span>)
+    <span class="function">print</span>(<span class="string">"Click 'Import Mixamo Folder' to select your folder"</span>)
+    <span class="function">print</span>(<span class="string">"="</span> * <span class="number">50</span>)</pre>
+    </div>
+
+    <div class="download-banner">
+        <h3>💾 Get the Script</h3>
+        <p>Click the button below to copy the entire code. Then paste it into Blender's Text Editor or save as .py file.</p>
+        <button class="btn-copy-script" id="bottomCopyBtn">📋 Copy Full Script to Clipboard</button>
+    </div>
+
+    <div class="card">
+        <h2>🛠️ Troubleshooting</h2>
+        <div class="callout warning">
+            <span class="icon">⚠️</span>
+            <div><strong>No actions imported?</strong> Make sure your FBX files actually contain animation data. Mixamo exports without animation if you don't select "Animation" as the download type.</div>
+        </div>
+        <div class="callout info">
+            <span class="icon">🔧</span>
+            <div><strong>Fake User not enabled?</strong> The script automatically enables Fake User on every imported action. Check the Action Editor — actions with a shield icon (🔒) have fake user and won't be deleted when unused.</div>
+        </div>
+        <div class="callout info">
+            <span class="icon">📁</span>
+            <div><strong>Can I import from subfolders?</strong> The script only looks at the root of the selected folder (not recursive). Place all FBX files directly in one folder.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎯 Why This Script?</h2>
+        <p>Manual FBX import in Blender is tedious: select file → import → rename action → enable fake user → delete armature. Repeat 50 times. This script reduces 50 manual imports to <strong>one click</strong>.</p>
+        <p>Perfect for game developers using Mixamo for character animations, indie devs building action libraries, or anyone tired of repetitive Blender tasks.</p>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2025 Champ Gaming · Free Blender Addon · MIT License</p>
+    <p style="margin-top:0.4rem; opacity:0.5;">Made for Blender 3.0+ · Works with Mixamo FBX exports</p>
+</footer>
+
+<script>
+    const fullCode = document.getElementById('codeContent').innerText;
+    
+    function copyToClipboard(text, btnElement) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = btnElement.textContent;
+            btnElement.textContent = '✓ Copied!';
+            btnElement.classList.add('copied');
+            setTimeout(() => {
+                btnElement.textContent = originalText;
+                btnElement.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            alert('Failed to copy. Select and copy manually.');
+        });
+    }
+    
+    const copyBtn = document.getElementById('copyFullCodeBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => copyToClipboard(fullCode, copyBtn));
+    }
+    
+    const bottomBtn = document.getElementById('bottomCopyBtn');
+    if (bottomBtn) {
+        bottomBtn.addEventListener('click', () => copyToClipboard(fullCode, bottomBtn));
+    }
+    
+    const heroBtn = document.getElementById('heroCopyBtn');
+    if (heroBtn) {
+        heroBtn.addEventListener('click', () => copyToClipboard(fullCode, heroBtn));
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+</body>
+</html>
