@@ -733,143 +733,268 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CONFIG TAB                             -->
-    <!-- ═══════════════════════════════════════ -->
-    <div class="tab-panel" id="tab-config">
-      <div class="section-header">
-        <div><div class="section-title">Orchestrator Config</div><div class="section-sub">Set up your lead flow — all keys are stored per account</div></div>
-        <button class="btn btn-primary" onclick="saveConfig()">💾 Save Config</button>
-      </div>
+<!-- ═══════════════════════════════════════ -->
+<!-- CONFIG TAB                             -->
+<!-- ═══════════════════════════════════════ -->
+<div class="tab-panel" id="tab-config">
+  <div class="section-header">
+    <div><div class="section-title">Orchestrator Config</div><div class="section-sub">Set up your lead flow — all keys are stored per account</div></div>
+    <button class="btn btn-primary" onclick="saveConfig()">💾 Save Config</button>
+  </div>
 
-      <div class="info-banner">
-        <div class="icon">🔒</div>
-        <div class="text">Your API keys are stored privately in your own Google Sheet. <strong>No one else can see them.</strong> Each user manages their own keys.</div>
-      </div>
+  <div class="info-banner">
+    <div class="icon">🔒</div>
+    <div class="text">Your API keys are stored privately in your own Google Sheet. <strong>No one else can see them.</strong> Each user manages their own keys.</div>
+  </div>
 
-      <!-- CHANNELS -->
-      <div class="card config-section">
-        <div class="card-title">Outreach Channels</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Choose which channels to use when a new lead arrives. At least one must be enabled.</div>
+  <!-- CHANNELS -->
+  <div class="card config-section">
+    <div class="card-title">Outreach Channels</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Choose which channels to use when a new lead arrives. At least one must be enabled.</div>
 
-        <!-- WhatsApp Channel -->
-        <div class="channel-toggle-card active" id="waChannelCard">
-          <div class="channel-header">
-            <div style="display:flex;align-items:center">
-              <span class="channel-icon">📱</span>
-              <div>
-                <div class="channel-name">WhatsApp</div>
-                <div class="channel-desc">Send via your GoWA server · Phone column required</div>
-              </div>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="enableWhatsApp" checked onchange="toggleChannel('wa', this.checked)"/>
-              <span class="toggle-slider"></span>
-            </label>
+    <!-- WhatsApp Channel -->
+    <div class="channel-toggle-card active" id="waChannelCard">
+      <div class="channel-header">
+        <div style="display:flex;align-items:center">
+          <span class="channel-icon">📱</span>
+          <div>
+            <div class="channel-name">WhatsApp</div>
+            <div class="channel-desc">Send via your GoWA server · Phone column required</div>
           </div>
-          <div class="channel-fields" id="waFields">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>GoWA Server URL</label>
-                <input type="url" id="cfgGowaUrl" placeholder="https://your-gowa-server.replit.app"/>
-              </div>
-              <div class="form-group">
-                <label>WhatsApp Message Template</label>
-                <div class="textarea-wrap">
-                  <textarea id="cfgWaTemplate" rows="3" placeholder="Hi {name}! 👋 We received your enquiry. Click here to chat with us: {link}"></textarea>
-                </div>
-                <div class="template-vars">
-                  <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{name}')">+ {name}</span>
-                  <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{phone}')">+ {phone}</span>
-                  <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{link}')">+ {link}</span>
-                </div>
-              </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enableWhatsApp" checked onchange="toggleChannel('wa', this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="channel-fields" id="waFields">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>WhatsApp Message Template</label>
+            <div class="textarea-wrap">
+              <textarea id="cfgWaTemplate" rows="3" placeholder="Hi {name}! 👋 We received your enquiry. Click here to chat with us: {link}"></textarea>
             </div>
-            <div style="margin-top:12px">
-              <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Follow-up Messages</div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>30-Min Follow-up Message</label>
-                  <textarea id="cfgWaFollowup1" rows="3" placeholder="Hey {name}, noticed you checked out our page 👀 Still interested? Here's the link again: {link}"></textarea>
-                  <div class="template-vars">
-                    <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup1','{name}')">+ {name}</span>
-                    <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup1','{link}')">+ {link}</span>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label>24-Hour Follow-up Message</label>
-                  <textarea id="cfgWaFollowup2" rows="3" placeholder="Hi {name}! 🎁 Special offer just for you — book today and get 10% off: {link}"></textarea>
-                  <div class="template-vars">
-                    <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup2','{name}')">+ {name}</span>
-                    <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup2','{link}')">+ {link}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div style="margin-top:10px">
-              <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaTemplate')">✨ AI Rewrite Initial</button>
-              <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaFollowup1')">✨ AI Rewrite Follow-up 1</button>
-              <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaFollowup2')">✨ AI Rewrite Follow-up 2</button>
+            <div class="template-vars">
+              <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{name}')">+ {name}</span>
+              <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{phone}')">+ {phone}</span>
+              <span class="var-chip" onclick="insertConfigVar('cfgWaTemplate','{link}')">+ {link}</span>
             </div>
           </div>
         </div>
-
-        <!-- Email Channel -->
-        <div class="channel-toggle-card" id="emailChannelCard">
-          <div class="channel-header">
-            <div style="display:flex;align-items:center">
-              <span class="channel-icon">📧</span>
-              <div>
-                <div class="channel-name">Email</div>
-                <div class="channel-desc">Send via Resend API · Email column required</div>
+        <div style="margin-top:12px">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Follow-up Messages</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>30-Min Follow-up Message</label>
+              <textarea id="cfgWaFollowup1" rows="3" placeholder="Hey {name}, noticed you checked out our page 👀 Still interested? Here's the link again: {link}"></textarea>
+              <div class="template-vars">
+                <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup1','{name}')">+ {name}</span>
+                <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup1','{link}')">+ {link}</span>
               </div>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="enableEmail" onchange="toggleChannel('email', this.checked)"/>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="channel-fields" id="emailFields">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Resend API Key</label>
-                <div class="api-key-wrap">
-                  <input type="password" id="cfgResendKey" placeholder="re_xxxxxxxxxxxxxxxx"/>
-                  <span class="api-key-toggle" onclick="toggleKeyVisibility('cfgResendKey', this)">Show</span>
-                </div>
+            <div class="form-group">
+              <label>24-Hour Follow-up Message</label>
+              <textarea id="cfgWaFollowup2" rows="3" placeholder="Hi {name}! 🎁 Special offer just for you — book today and get 10% off: {link}"></textarea>
+              <div class="template-vars">
+                <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup2','{name}')">+ {name}</span>
+                <span class="var-chip" onclick="insertConfigVar('cfgWaFollowup2','{link}')">+ {link}</span>
               </div>
-              <div class="form-group">
-                <label>From Email</label>
-                <input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/>
-              </div>
-              <div class="form-group">
-                <label>From Name</label>
-                <input type="text" id="cfgFromName" placeholder="Your Business Name"/>
-              </div>
-              <div class="form-group">
-                <label>Email Subject</label>
-                <input type="text" id="cfgEmailSubject" placeholder="We received your enquiry, {name}!"/>
-                <div class="template-vars">
-                  <span class="var-chip" onclick="insertConfigVar('cfgEmailSubject','{name}')">+ {name}</span>
-                </div>
-              </div>
-              <div class="form-group full">
-                <label>Email Body (HTML supported)</label>
-                <textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out! Click the link below to book a time with us:&#10;{link}&#10;&#10;Looking forward to speaking with you!"></textarea>
-                <div class="template-vars">
-                  <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{name}')">+ {name}</span>
-                  <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{phone}')">+ {phone}</span>
-                  <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{link}')">+ {link}</span>
-                </div>
-              </div>
-            </div>
-            <div class="test-btn-row">
-              <button class="btn btn-blue btn-sm" onclick="testResend()">🧪 Send Test Email</button>
-              <span id="resendTestResult" class="test-result" style="display:none"></span>
             </div>
           </div>
         </div>
+        <div style="margin-top:10px">
+          <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaTemplate')">✨ AI Rewrite Initial</button>
+          <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaFollowup1')">✨ AI Rewrite Follow-up 1</button>
+          <button class="btn btn-secondary btn-sm" onclick="aiRewriteConfigMsg('cfgWaFollowup2')">✨ AI Rewrite Follow-up 2</button>
+        </div>
       </div>
+    </div>
+
+    <!-- Email Channel -->
+    <div class="channel-toggle-card" id="emailChannelCard">
+      <div class="channel-header">
+        <div style="display:flex;align-items:center">
+          <span class="channel-icon">📧</span>
+          <div>
+            <div class="channel-name">Email</div>
+            <div class="channel-desc">Send via Resend API · Email column required</div>
+          </div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enableEmail" onchange="toggleChannel('email', this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="channel-fields" id="emailFields">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Resend API Key</label>
+            <div class="api-key-wrap">
+              <input type="password" id="cfgResendKey" placeholder="re_xxxxxxxxxxxxxxxx"/>
+              <span class="api-key-toggle" onclick="toggleKeyVisibility('cfgResendKey', this)">Show</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>From Email</label>
+            <input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/>
+          </div>
+          <div class="form-group">
+            <label>From Name</label>
+            <input type="text" id="cfgFromName" placeholder="Your Business Name"/>
+          </div>
+          <div class="form-group">
+            <label>Email Subject</label>
+            <input type="text" id="cfgEmailSubject" placeholder="We received your enquiry, {name}!"/>
+            <div class="template-vars">
+              <span class="var-chip" onclick="insertConfigVar('cfgEmailSubject','{name}')">+ {name}</span>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Email Body (HTML supported)</label>
+            <textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out! Click the link below to book a time with us:&#10;{link}&#10;&#10;Looking forward to speaking with you!"></textarea>
+            <div class="template-vars">
+              <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{name}')">+ {name}</span>
+              <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{phone}')">+ {phone}</span>
+              <span class="var-chip" onclick="insertConfigVar('cfgEmailBody','{link}')">+ {link}</span>
+            </div>
+          </div>
+        </div>
+        <div class="test-btn-row">
+          <button class="btn btn-blue btn-sm" onclick="testResend()">🧪 Send Test Email</button>
+          <span id="resendTestResult" class="test-result" style="display:none"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDLY -->
+  <div class="card config-section">
+    <div class="card-title">Calendly</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Your Booking Link</label>
+        <input type="url" id="cfgCalendlyLink" placeholder="https://calendly.com/yourname/30min"/>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;font-family:var(--mono)">This link is inserted as {link} in your messages</div>
+      </div>
+      <div class="form-group full">
+        <label>Calendly Webhook (for auto booking detection)</label>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:var(--accent);word-break:break-all" id="webhookUrlDisplay">
+          Save config to generate your webhook URL
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">Paste this URL into Calendly → Integrations → Webhooks</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:12px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:8px">
+      <div style="font-size:12px;color:#ffd166;font-family:var(--mono)">ℹ️ Webhook auto-marks leads as booked · You can also mark manually from the Leads tab</div>
+    </div>
+  </div>
+
+  <!-- LEAD SHEET -->
+  <div class="card config-section">
+    <div class="card-title">Lead Source — Google Sheet</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Google Sheet ID</label>
+        <input type="text" id="cfgSheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"/>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;font-family:var(--mono)">Found in the sheet URL between /d/ and /edit</div>
+      </div>
+      <div class="form-group">
+        <label>Tab / Sheet Name</label>
+        <input type="text" id="cfgSheetTab" placeholder="Sheet1"/>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Column Mapping</div>
+      <div style="font-size:12px;color:var(--text2);">Enter the column letter (A, B, C...) for each field. Name and Phone are always required.</div>
+    </div>
+
+    <div class="col-map-grid">
+      <div class="col-map-item required-field">
+        <label>Name Column <span class="required-tag">required</span></label>
+        <input type="text" id="cfgColName" placeholder="A" maxlength="2" style="text-transform:uppercase"/>
+      </div>
+      <div class="col-map-item required-field" id="phoneColItem">
+        <label>Phone Column <span class="required-tag">required</span></label>
+        <input type="text" id="cfgColPhone" placeholder="B" maxlength="2" style="text-transform:uppercase"/>
+      </div>
+      <div class="col-map-item" id="emailColItem" style="display:none">
+        <label>Email Column <span class="required-tag">required</span></label>
+        <input type="text" id="cfgColEmail" placeholder="C" maxlength="2" style="text-transform:uppercase"/>
+      </div>
+      <div class="col-map-item optional-field">
+        <label>Custom Message Column <span class="optional-tag">optional</span></label>
+        <input type="text" id="cfgColMessage" placeholder="D" maxlength="2" style="text-transform:uppercase"/>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-info">Has Header Row</div>
+          <div class="toggle-sub">Skip the first row when reading leads (recommended)</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="cfgHasHeader" checked/><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLLOW-UP TIMING -->
+  <div class="card config-section">
+    <div class="card-title">Follow-up Engine</div>
+
+    <div class="followup-card active" id="followup1Card">
+      <div class="followup-card-header">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff">⏱ First Follow-up</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Sent if lead hasn't booked after X minutes</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="enableFollowup1" checked onchange="toggleFollowupCard('followup1Card',this.checked)"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="followup-fields">
+        <div class="form-grid" style="margin-top:12px">
+          <div class="form-group">
+            <label>Delay (minutes after contact)</label>
+            <input type="number" id="cfgFollowup1Delay" value="30" min="5" max="1440"/>
+          </div>
+          <div class="form-group">
+            <label>Trigger Condition</label>
+            <select id="cfgFollowup1Trigger">
+              <option value="not_booked">Not booked yet</option>
+              <option value="visited_not_booked">Visited but not booked</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="followup-card active" id="followup2Card" style="margin-top:10px">
+      <div class="followup-card-header">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff">⏰ Second Follow-up</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">Final push — sent X hours after first contact</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="enableFollowup2" checked onchange="toggleFollowupCard('followup2Card',this.checked)"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="followup-fields">
+        <div class="form-grid" style="margin-top:12px">
+          <div class="form-group">
+            <label>Delay (hours after contact)</label>
+            <input type="number" id="cfgFollowup2Delay" value="24" min="1" max="168"/>
+          </div>
+          <div class="form-group">
+            <label>Trigger Condition</label>
+            <select id="cfgFollowup2Trigger">
+              <option value="not_booked">Not booked yet</option>
+              <option value="followed_up_not_booked">After follow-up 1, still not booked</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end config tab -->
 
       <!-- CALENDLY -->
       <div class="card config-section">
@@ -1385,7 +1510,7 @@ function saveConfig(){
     username,
     enableWhatsApp: waEnabled,
     enableEmail: emailEnabled,
-    gowaUrl: document.getElementById('cfgGowaUrl').value.trim(),
+    // REMOVED: gowaUrl
     waTemplate: document.getElementById('cfgWaTemplate').value,
     waFollowup1: document.getElementById('cfgWaFollowup1').value,
     waFollowup2: document.getElementById('cfgWaFollowup2').value,
@@ -1415,7 +1540,6 @@ function saveConfig(){
     if(r.success){
       orchConfig=cfg;
       showToast('Config saved ✅');
-      // Show webhook URL after save
       updateWebhookUrl(username);
     } else {
       showToast('Save failed: '+r.message, true);
@@ -1442,7 +1566,8 @@ function applyConfig(cfg){
   toggleChannel('wa', cfg.enableWhatsApp!==false);
   toggleChannel('email', !!cfg.enableEmail);
 
-  set('cfgGowaUrl', cfg.gowaUrl);
+  // REMOVED: cfgGowaUrl
+  
   set('cfgWaTemplate', cfg.waTemplate);
   set('cfgWaFollowup1', cfg.waFollowup1);
   set('cfgWaFollowup2', cfg.waFollowup2);
