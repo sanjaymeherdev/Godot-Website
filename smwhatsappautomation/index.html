@@ -1051,13 +1051,17 @@ function showDashboard(serverData){
       renderContacts();
     }
     if(serverData.deviceId){
+      // Server returned a device ID for this user — use it
       deviceId = serverData.deviceId;
       setDeviceStatus('connected', deviceId);
     } else {
-      checkUserDevice();
+      // No device on record for this user — show disconnected, don't probe GoWA
+      setDeviceStatus('disconnected');
+      deviceId = null;
     }
   } else {
-    checkUserDevice();
+    setDeviceStatus('disconnected');
+    deviceId = null;
   }
 
   if(username){
@@ -1070,9 +1074,12 @@ function showDashboard(serverData){
   }
 
   updateSendStats();
-  setTimeout(checkDeviceStatus, 800);
+  // Only check live device status if user already has one stored
+  if(deviceId){
+    setTimeout(checkDeviceStatus, 800);
+  }
 }
-
+  
 function checkUserDevice(){
   const username = SessionManager.getUsername();
   if(!username) return;
@@ -2121,12 +2128,19 @@ function checkDeviceStatus(){
   const username = SessionManager.getUsername();
   if(!url || !username) return;
 
-  // First check what device user owns in sheet
+  // First check what device THIS user owns in the sheet
   apiGetUserDevice(username, userDeviceRes => {
     const hasStoredDevice = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice;
     const storedDeviceId = hasStoredDevice ? userDeviceRes.deviceId : null;
-    
-    // Then check what devices are actually connected on GoWA
+
+    if(!hasStoredDevice){
+      // User has no device registered — just show disconnected, don't steal from GoWA
+      setDeviceStatus('disconnected');
+      deviceId = null;
+      return;
+    }
+
+    // User HAS a stored device — verify it's still connected on GoWA
     fetch(url + '/app/devices')
       .then(r => r.json())
       .then(data => {
@@ -2134,31 +2148,24 @@ function checkDeviceStatus(){
         if(data.code === 'SUCCESS' && data.results){
           devices = data.results.devices || (Array.isArray(data.results) ? data.results : []);
         }
-        
-        // If GoWA has at least one device, use it
-        if(devices.length > 0){
-          const firstDevice = devices[0];
-          const actualDeviceId = firstDevice.device || firstDevice.id || firstDevice.jid;
-          
-          // If stored device doesn't match actual, update it
-          if(storedDeviceId !== actualDeviceId){
-            apiLinkDevice(username, actualDeviceId, () => {});
-          }
-          
-          setDeviceStatus('connected', actualDeviceId);
-          deviceId = actualDeviceId;
+
+        // Check if the user's stored device is among connected devices
+        const isStillConnected = devices.some(d => {
+          const did = d.device || d.id || d.jid;
+          return did === storedDeviceId;
+        });
+
+        if(isStillConnected){
+          setDeviceStatus('connected', storedDeviceId);
+          deviceId = storedDeviceId;
         } else {
-          // No device on GoWA - mark as disconnected
+          // Their device disconnected from GoWA (e.g. WhatsApp logged out)
           setDeviceStatus('disconnected');
           deviceId = null;
-          
-          // Clear stale device from sheet if exists
-          if(hasStoredDevice){
-            apiUnlinkDevice(username, () => {});
-          }
         }
       })
       .catch(() => {
+        // Can't reach GoWA server — show disconnected
         setDeviceStatus('disconnected');
       });
   });
