@@ -1265,6 +1265,9 @@ function reloadSessionData(){
   showToast('Restoring your session…');
   jsonpRequest({action:'loadClientData',username},r=>{ try{ if(r&&r.success){ showDashboard(r); } else { showDashboard(null); } }catch(e){ showDashboard(null); } });
 }
+window.onload = function(){
+  if(SessionManager.isValid()){ reloadSessionData(); } else { showAuth(); }
+};
 
 function logout(){ SessionManager.clear(); contacts=[]; logs=[]; leads=[]; deviceId=null; stopDevicePolling(); clearInterval(qrCountdown); showAuth(); }
 
