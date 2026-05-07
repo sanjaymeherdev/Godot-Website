@@ -1242,17 +1242,23 @@ function showDashboard(serverData){
     if(serverData.contacts&&Array.isArray(serverData.contacts)){ contacts=serverData.contacts; renderContacts(); }
     if(serverData.config) applyConfig(serverData.config);
     if(serverData.leads&&Array.isArray(serverData.leads)){ leads=serverData.leads; renderLeads(); }
-    if(serverData.deviceId){ deviceId=serverData.deviceId; setDeviceStatus('connected',deviceId); } else { checkUserDevice(); }
-  } else { checkUserDevice(); }
+    if(serverData.deviceId){
+      deviceId=serverData.deviceId;
+      setDeviceStatus('connected',deviceId);
+    } else {
+      // No device on record — show disconnected, don't probe GoWA
+      setDeviceStatus('disconnected');
+      deviceId=null;
+    }
+  } else {
+    setDeviceStatus('disconnected');
+    deviceId=null;
+  }
   if(username){ apiLoadLogs(username,r=>{ if(r&&r.success&&Array.isArray(r.logs)){ logs=r.logs.map(l=>({...l,time:new Date(l.timestamp||Date.now())})); renderLogs(); } }); }
   updateSendStats();
-  setTimeout(checkDeviceStatus,800);
+  // Only check live status if user already has a device registered
+  if(deviceId){ setTimeout(checkDeviceStatus,800); }
 }
-
-window.onload=function(){
-  if(SessionManager.isValid()){ reloadSessionData(); } else { showAuth(); }
-};
-
 function reloadSessionData(){
   const username=SessionManager.getUsername();
   if(!username){ showAuth(); return; }
@@ -2080,21 +2086,38 @@ function setDeviceStatus(state,id){
 function checkDeviceStatus(){
   const url=getGowaUrl(); const username=SessionManager.getUsername();
   if(!url||!username) return;
+
   apiGetUserDevice(username,userDeviceRes=>{
     const hasStored=userDeviceRes&&userDeviceRes.success&&userDeviceRes.hasDevice;
     const storedId=hasStored?userDeviceRes.deviceId:null;
+
+    // No stored device = just show disconnected, don't steal from GoWA
+    if(!hasStored){
+      setDeviceStatus('disconnected');
+      deviceId=null;
+      return;
+    }
+
+    // Has stored device — verify it's still connected on GoWA
     fetch(url+'/app/devices').then(r=>r.json()).then(data=>{
       let devices=[];
       if(data.code==='SUCCESS'&&data.results) devices=data.results.devices||(Array.isArray(data.results)?data.results:[]);
-      if(devices.length>0){
-        const first=devices[0]; const actualId=first.device||first.id||first.jid;
-        if(storedId!==actualId) apiLinkDevice(username,actualId,()=>{});
-        setDeviceStatus('connected',actualId); deviceId=actualId;
-      } else { setDeviceStatus('disconnected'); deviceId=null; if(hasStored) apiUnlinkDevice(username,()=>{}); }
+
+      const isStillConnected=devices.some(d=>{
+        const did=d.device||d.id||d.jid;
+        return did===storedId;
+      });
+
+      if(isStillConnected){
+        setDeviceStatus('connected',storedId);
+        deviceId=storedId;
+      } else {
+        setDeviceStatus('disconnected');
+        deviceId=null;
+      }
     }).catch(()=>{ setDeviceStatus('disconnected'); });
   });
 }
-
 function loadQR(){
   const url=getGowaUrl(); const username=SessionManager.getUsername();
   if(!url){ showToast('GoWA server URL not configured',true); return; }
