@@ -809,6 +809,33 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     </div>
   </div>
 </div>
+  <div id="calendlyResultModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📅 Calendly Sync Results</h3>
+      <button class="modal-close" onclick="document.getElementById('calendlyResultModal').style.display='none'">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="calendlyResultStats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Event Time</th>
+              <th>Match</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="calendlyResultBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
 
@@ -886,26 +913,187 @@ async function testCalendlyToken() {
 }
 
 async function syncCalendlyNow() {
-  const token = document.getElementById('calendlyToken').value.trim();
-  if (!token) {
+  const calToken = document.getElementById('calendlyToken').value.trim();
+  if (!calToken) {
     showToast('Please enter your Calendly token first', true);
     return;
   }
-  
+
   showToast('Syncing bookings from Calendly...');
+
   try {
-    const r = await api('syncCalendlyBookings', { token });
-    if (r.success) {
-      showToast(`✅ Synced! ${r.updated || 0} leads marked as booked`);
-      loadLeads();
-    } else {
-      showToast('Failed: ' + r.message, true);
+    // Step 1: get Calendly user URI
+    const userRes = await fetch('https://api.calendly.com/users/me', {
+      headers: { 'Authorization': `Bearer ${calToken}` }
+    });
+    const userData = await userRes.json();
+    const userUri = userData.resource?.uri;
+    if (!userUri) {
+      showToast('Invalid Calendly token', true);
+      return;
     }
+
+    // Step 2: fetch events from last 30 days
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    const eventsRes = await fetch(
+      `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(userUri)}&count=100&min_start_time=${since.toISOString()}`,
+      { headers: { 'Authorization': `Bearer ${calToken}` } }
+    );
+    const eventsData = await eventsRes.json();
+    const events = eventsData.collection || [];
+
+    if (!events.length) {
+      showToast('No bookings found in last 30 days', true);
+      return;
+    }
+
+    // Step 3: fetch all invitees across all events
+    const rows = [];
+    for (const event of events) {
+      const invRes = await fetch(`${event.uri}/invitees?count=100`, {
+        headers: { 'Authorization': `Bearer ${calToken}` }
+      });
+      const invData = await invRes.json();
+      const invitees = invData.collection || [];
+
+      for (const inv of invitees) {
+        // extract phone from Q&A
+        let phone = '';
+        if (inv.questions_and_answers?.length) {
+          const phoneQ = inv.questions_and_answers.find(q =>
+            q.question?.toLowerCase().includes('phone') ||
+            q.question?.toLowerCase().includes('whatsapp') ||
+            q.question?.toLowerCase().includes('mobile')
+          );
+          if (phoneQ) {
+            phone = phoneQ.answer.replace(/\D/g, '');
+            if (phone.length === 10) phone = '91' + phone;
+          }
+        }
+
+        rows.push({
+          name: inv.name || '—',
+          email: inv.email || '',
+          phone: phone || '',
+          event_time: event.start_time,
+          status: inv.status, // active / canceled
+          matched: false,
+          match_type: '',
+          lead_status: ''
+        });
+      }
+    }
+
+    // Step 4: match against leads & update via API
+    const r = await api('syncCalendlyBookings', { token: calToken });
+
+    // Step 5: match rows against local leads array for display
+    let matched = 0, unmatched = 0, canceled = 0;
+
+    for (const row of rows) {
+      if (row.status === 'canceled') {
+        canceled++;
+        row.match_type = 'canceled';
+        continue;
+      }
+
+      // check email match
+      const byEmail = leads.find(l => l.email && l.email === row.email);
+      if (byEmail) {
+        row.matched = true;
+        row.match_type = 'email';
+        row.lead_status = 'booked';
+        matched++;
+        continue;
+      }
+
+      // check phone match
+      const byPhone = leads.find(l => l.phone && row.phone && l.phone === row.phone);
+      if (byPhone) {
+        row.matched = true;
+        row.match_type = 'phone';
+        row.lead_status = 'booked';
+        matched++;
+        continue;
+      }
+
+      // no match found — new booking not in leads
+      row.matched = false;
+      row.match_type = 'none';
+      row.lead_status = 'not in leads';
+      unmatched++;
+    }
+
+    // Step 6: render the modal
+    renderCalendlyResultModal(rows, matched, unmatched, canceled);
+    await loadLeads(); // refresh leads table
+
   } catch(e) {
     showToast('Error: ' + e.message, true);
+    console.error(e);
   }
 }
 
+function renderCalendlyResultModal(rows, matched, unmatched, canceled) {
+  // Stats bar
+  document.getElementById('calendlyResultStats').innerHTML = `
+    <div class="stat" style="flex:1;min-width:120px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent);">${matched}</div>
+      <div class="stat-lbl">✅ Matched & Booked</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:120px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent3);">${unmatched}</div>
+      <div class="stat-lbl">❌ Not in Leads</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:120px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--muted);">${canceled}</div>
+      <div class="stat-lbl">🚫 Canceled</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:120px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent2);">${rows.length}</div>
+      <div class="stat-lbl">📋 Total Bookings</div>
+    </div>
+  `;
+
+  // Table rows
+  const tbody = document.getElementById('calendlyResultBody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);">No bookings found</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map((r, i) => {
+      const matchBadge = r.match_type === 'canceled'
+        ? `<span class="badge" style="background:rgba(122,149,168,.15);color:var(--text2);">🚫 Canceled</span>`
+        : r.matched
+          ? `<span class="badge badge-connected">✅ ${r.match_type}</span>`
+          : `<span class="badge badge-created">❌ No match</span>`;
+
+      const statusBadge = r.match_type === 'canceled'
+        ? `<span class="badge" style="background:rgba(122,149,168,.15);color:var(--text2);">canceled</span>`
+        : r.matched
+          ? `<span class="badge badge-connected">booked</span>`
+          : `<span class="badge badge-created">not in leads</span>`;
+
+      const eventTime = r.event_time
+        ? new Date(r.event_time).toLocaleString()
+        : '—';
+
+      return `<tr>
+        <td>${i + 1}</td>
+        <td style="font-weight:600;">${escapeHtml(r.name)}</td>
+        <td style="font-size:11px;font-family:var(--mono);">${escapeHtml(r.email)}</td>
+        <td style="font-size:11px;font-family:var(--mono);">${r.phone || '—'}</td>
+        <td style="font-size:11px;color:var(--text2);">${eventTime}</td>
+        <td>${matchBadge}</td>
+        <td>${statusBadge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Show modal
+  document.getElementById('calendlyResultModal').style.display = 'flex';
+}
+  
 async function syncCalendlyIfTokenExists() {
   const token = document.getElementById('calendlyToken')?.value.trim();
   if (!token) return;
