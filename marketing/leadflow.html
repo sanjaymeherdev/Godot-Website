@@ -1243,6 +1243,7 @@ function copyScriptTag() {
     return;
   }
   
+  // Use escaped version for copying
   const scriptTag = `<script 
   src="https://yourdomain.com/leadflow-bot.js" 
   data-leadflow-url="${EDGE}"
@@ -1254,7 +1255,7 @@ function copyScriptTag() {
   data-theme="#00ff88"
   data-business-name="Your Business"
   data-position="right"
-></script>`;
+><\/script>`;
   
   navigator.clipboard.writeText(scriptTag);
   showToast('Script tag copied! ✅');
@@ -1268,7 +1269,8 @@ function updateBotDisplay() {
   if (token && displayInput) {
     displayInput.value = token;
     if (previewPre) {
-      previewPre.innerHTML = `<script 
+      // Use textContent instead of innerHTML to avoid script tag parsing
+      previewPre.textContent = `<script 
   src="https://yourdomain.com/leadflow-bot.js" 
   data-leadflow-url="${EDGE}"
   data-leadflow-token="${token}"
@@ -1283,9 +1285,10 @@ function updateBotDisplay() {
     }
   } else if (displayInput) {
     displayInput.value = 'Login to see your token';
-    if (previewPre) previewPre.innerHTML = 'Please login first';
+    if (previewPre) previewPre.textContent = 'Please login first';
   }
 }
+
 
 // Add to navigation
 function addWebBotNav() {
