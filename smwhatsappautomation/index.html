@@ -2,2441 +2,378 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WA Blast — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+<title>WA Blast — AutoSend</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
-:root {
-  --bg:#080c10; --surface:#0e1318; --card:#131920; --border:#1e2a35; --border2:#243040;
-  --accent:#00e5a0; --accent2:#00b8ff; --accent3:#ff5f7e;
-  --muted:#4a6070; --text:#d0dde8; --text2:#7a95a8;
-  --mono:'Space Mono',monospace; --sans:'Syne',sans-serif;
-  --radius:10px; --transition:0.18s ease;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
-
-/* AUTH */
-.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;justify-content:center;align-items:center;z-index:9000;backdrop-filter:blur(8px);}
-.auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:36px 32px;border-radius:14px;width:380px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,0.7);animation:fadeIn .25s ease;}
-.auth-popup h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
-.auth-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:24px;}
-.auth-popup input{width:100%;padding:11px 14px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;color:#e2e2e2;font-size:14px;font-family:var(--sans);outline:none;transition:border-color .2s;}
-.auth-popup input:focus{border-color:var(--accent);}
-.auth-popup input::placeholder{color:#4a6070;}
-.primary-btn{width:100%;padding:12px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;font-family:var(--sans);cursor:pointer;margin-top:4px;transition:background .2s,transform .1s;}
-.primary-btn:hover{background:#00c88c;} .primary-btn:active{transform:scale(.98);}
-.primary-btn:disabled{background:#1e2a35;color:var(--muted);cursor:not-allowed;}
-.auth-toggle-row{display:flex;justify-content:space-between;margin-top:18px;flex-wrap:wrap;gap:6px;}
-.auth-toggle-link{font-size:13px;color:var(--accent);cursor:pointer;font-family:var(--mono);}
-.auth-toggle-link:hover{text-decoration:underline;}
-.auth-msg{font-size:13px;padding:9px 12px;border-radius:7px;margin-bottom:14px;display:none;}
-.auth-msg.error{background:#2d1a1a;color:#ff6b6b;border:1px solid #5c2020;display:block;}
-.auth-msg.success{background:#1a2d1a;color:#6bff8a;border:1px solid #205c29;display:block;}
-.auth-msg.loading{background:#0e1a2d;color:var(--accent2);border:1px solid #1a2d4a;display:block;}
-.auth-security-q{font-size:13px;color:var(--text2);padding:10px 12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;margin-bottom:12px;}
-.auth-pw-result{font-size:13px;padding:12px;background:#1a2d1a;border:1px solid #205c29;border-radius:8px;color:#6bff8a;margin-top:12px;display:none;}
-.auth-logo{margin-bottom:24px;}
-.auth-logo-mark{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;border:1px solid rgba(0,229,160,.3);padding:3px 8px;border-radius:4px;}
-
-/* DASHBOARD */
-.dashboard-wrap{display:none;width:100%;}
-
-/* SIDEBAR */
-.sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:10;}
-.sidebar-logo{padding:28px 20px 20px;border-bottom:1px solid var(--border);}
-.sidebar-logo .logo-mark{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-.sidebar-logo h1{font-size:20px;font-weight:800;color:#fff;line-height:1.1;}
-.sidebar-logo h1 span{color:var(--accent);}
-.user-pill{margin:16px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
-.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;flex-shrink:0;}
-.user-name{font-size:13px;font-weight:600;color:#fff;}
-.user-role{font-size:10px;color:var(--text2);font-family:var(--mono);}
-.nav{flex:1;padding:10px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:var(--transition);margin-bottom:2px;font-size:14px;font-weight:600;color:var(--text2);border:1px solid transparent;}
-.nav-item:hover{background:var(--card);color:var(--text);}
-.nav-item.active{background:rgba(0,229,160,.08);color:var(--accent);border-color:rgba(0,229,160,.15);}
-.nav-icon{font-size:16px;width:20px;text-align:center;}
-.nav-badge{margin-left:auto;background:var(--accent3);color:#fff;font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:20px;font-weight:700;}
-.sidebar-footer{padding:14px;border-top:1px solid var(--border);}
-.logout-btn{width:100%;padding:9px;background:rgba(255,95,126,.08);border:1px solid rgba(255,95,126,.2);border-radius:8px;color:var(--accent3);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition);}
-.logout-btn:hover{background:rgba(255,95,126,.15);}
-
-/* MAIN */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.topbar{height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;flex-shrink:0;background:var(--surface);}
-.topbar-title{font-size:16px;font-weight:700;color:#fff;flex:1;}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.status-label{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:1px;}
-.content{flex:1;overflow-y:auto;padding:28px;}
-.content::-webkit-scrollbar{width:4px;}
-.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
-
-/* TABS */
-.tab-panel{display:none;animation:fadeIn .2s ease;}
-.tab-panel.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-
-/* SECTION */
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
-.section-title{font-size:20px;font-weight:800;color:#fff;}
-.section-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:2px;}
-
-/* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
-.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;font-family:var(--mono);}
-
-/* STATS */
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.stat-card.green::before{background:var(--accent);}
-.stat-card.blue::before{background:var(--accent2);}
-.stat-card.red::before{background:var(--accent3);}
-.stat-card.yellow::before{background:#ffd166;}
-.stat-value{font-family:var(--mono);font-size:28px;font-weight:700;color:#fff;line-height:1;margin-bottom:6px;}
-.stat-label{font-size:12px;color:var(--text2);}
-.stat-icon{position:absolute;right:16px;top:16px;font-size:22px;opacity:.15;}
-
-/* FORMS */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-group.full{grid-column:1/-1;}
-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);}
-input[type=text],input[type=number],input[type=url],input[type=email],select,textarea{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color var(--transition);width:100%;}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);}
-input::placeholder,textarea::placeholder{color:var(--muted);}
-select{cursor:pointer;}
-select option{background:var(--card);}
-textarea{resize:vertical;min-height:80px;line-height:1.5;}
-
-/* TOGGLE */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
-.toggle-row:last-child{border-bottom:none;}
-.toggle-info{font-size:14px;font-weight:600;color:var(--text);}
-.toggle-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-.toggle{position:relative;width:42px;height:22px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;transition:var(--transition);}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:var(--transition);}
-.toggle input:checked+.toggle-slider{background:var(--accent);}
-.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#000;}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:var(--transition);border:1px solid transparent;}
-.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);}
-.btn-primary:hover{background:#00c88c;}
-.btn-secondary{background:transparent;color:var(--text);border-color:var(--border2);}
-.btn-secondary:hover{border-color:var(--text2);background:var(--card);}
-.btn-danger{background:rgba(255,95,126,.1);color:var(--accent3);border-color:rgba(255,95,126,.25);}
-.btn-danger:hover{background:rgba(255,95,126,.2);}
-.btn-blue{background:rgba(0,184,255,.1);color:var(--accent2);border-color:rgba(0,184,255,.25);}
-.btn-blue:hover{background:rgba(0,184,255,.2);}
-.btn-sm{padding:7px 14px;font-size:12px;}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
-
-/* UPLOAD */
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--bg);}
-.upload-zone:hover{border-color:var(--accent);background:rgba(0,229,160,.03);}
-.upload-icon{font-size:32px;margin-bottom:10px;}
-.upload-text{font-size:14px;color:var(--text2);}
-.upload-text strong{color:var(--accent);}
-.upload-hint{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono);}
-
-/* TABLE */
-.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-thead tr{background:var(--surface);border-bottom:1px solid var(--border);}
-th{padding:11px 14px;text-align:left;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);font-weight:400;}
-td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,.02);}
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-family:var(--mono);font-weight:700;}
-.badge-pending{background:rgba(255,209,102,.12);color:#ffd166;border:1px solid rgba(255,209,102,.2);}
-.badge-sent{background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);}
-.badge-failed{background:rgba(255,95,126,.1);color:var(--accent3);border:1px solid rgba(255,95,126,.2);}
-.badge-replied{background:rgba(0,184,255,.1);color:var(--accent2);border:1px solid rgba(0,184,255,.2);}
-
-/* PROGRESS */
-.progress-bar-wrap{background:var(--bg);border-radius:20px;height:8px;overflow:hidden;margin-top:8px;}
-.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px;transition:width .4s ease;}
-
-/* SEND CONTROL */
-.send-control{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:16px;}
-.control-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.big-btn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:var(--transition);flex-shrink:0;}
-.big-btn.start{background:var(--accent);color:#000;box-shadow:0 0 20px rgba(0,229,160,.3);}
-.big-btn.pause{background:#ffd166;color:#000;}
-.big-btn.stop{background:var(--accent3);color:#fff;}
-.big-btn:hover{transform:scale(1.06);}
-.send-info{flex:1;}
-.send-info .current{font-size:14px;color:var(--text);font-weight:600;}
-.send-info .queue{font-size:12px;color:var(--text2);margin-top:3px;font-family:var(--mono);}
-
-/* LOGS */
-.log-entry{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
-.log-entry:last-child{border-bottom:none;}
-.log-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-.log-dot.sent{background:var(--accent);}
-.log-dot.failed{background:var(--accent3);}
-.log-dot.reply{background:var(--accent2);}
-.log-dot.ai{background:#ffd166;}
-.log-body{flex:1;}
-.log-name{font-size:13px;font-weight:600;color:var(--text);}
-.log-msg{font-size:12px;color:var(--text2);margin-top:2px;}
-.log-time{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;}
-
-/* ATTACHMENTS */
-.attach-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
-.attach-opt{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px 8px;text-align:center;cursor:pointer;transition:var(--transition);font-size:11px;color:var(--text2);font-family:var(--mono);}
-.attach-opt .opt-icon{font-size:22px;display:block;margin-bottom:6px;}
-.attach-opt:hover{border-color:var(--accent);color:var(--accent);}
-.attach-opt.selected{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,.08);}
-
-/* RANGE */
-.range-row{display:flex;align-items:center;gap:12px;}
-.range-val{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:36px;text-align:right;}
-input[type=range]{-webkit-appearance:none;flex:1;height:4px;background:var(--border2);border-radius:4px;outline:none;border:none;padding:0;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px rgba(0,229,160,.4);}
-
-/* MISC */
-.textarea-wrap{position:relative;}
-.char-count{position:absolute;bottom:10px;right:12px;font-family:var(--mono);font-size:10px;color:var(--muted);}
-.group-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--bg);}
-.group-item{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:var(--transition);border-bottom:1px solid var(--border);font-size:13px;}
-.group-item:last-child{border-bottom:none;}
-.group-item:hover{background:rgba(255,255,255,.03);}
-.group-item input[type=radio]{accent-color:var(--accent);}
-.group-count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);}
-.divider{height:1px;background:var(--border);margin:20px 0;}
-
-/* DEVICE TAB */
-.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--radius);min-height:280px;text-align:center;}
-.qr-wrap img{width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;}
-.qr-hint{font-size:13px;color:var(--text2);font-family:var(--mono);}
-.qr-hint strong{color:var(--accent);}
-.device-status-card{display:flex;align-items:center;gap:16px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
-.device-status-icon{font-size:32px;flex-shrink:0;}
-.device-status-info{flex:1;}
-.device-status-title{font-size:15px;font-weight:700;color:#fff;}
-.device-status-id{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:4px;word-break:break-all;}
-.device-connected{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.04);}
-.device-disconnected{border-color:rgba(255,95,126,.2);}
-.poll-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite;}
-.poll-dot.scanning{background:#ffd166;}
-.poll-dot.connected{background:var(--accent);}
-.poll-dot.disconnected{background:var(--accent3);}
-.step-list{counter-reset:steps;list-style:none;padding:0;}
-.step-list li{counter-increment:steps;display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
-.step-list li:last-child{border-bottom:none;}
-.step-list li::before{content:counter(steps);width:24px;height:24px;border-radius:50%;background:rgba(0,229,160,.15);color:var(--accent);font-family:var(--mono);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.warning-banner{background:rgba(255,95,126,.1);border:1px solid rgba(255,95,126,.3);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
-.warning-banner .icon{font-size:18px;}
-.warning-banner .text{font-size:12px;color:var(--accent3);}
-.warning-banner .text strong{color:#fff;}
-
-/* Toast */
-#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;font-family:var(--sans);z-index:9999;transition:opacity .3s;pointer-events:none;opacity:0;}
-
-@media(max-width:900px){
-  .stat-row{grid-template-columns:repeat(2,1fr);}
-  .form-grid{grid-template-columns:1fr;}
-  .attach-grid{grid-template-columns:repeat(3,1fr);}
-  .sidebar{width:180px;}
-}
-@media(max-width:640px){
-  .sidebar{display:none;}
-  .content{padding:16px;}
-}
+  :root {
+    --bg:#080c10; --surface:#0e1318; --card:#131920; --border:#1e2a35; --border2:#243040;
+    --accent:#00e5a0; --accent2:#00b8ff; --accent3:#ff5f7e;
+    --muted:#4a6070; --text:#d0dde8; --text2:#7a95a8;
+    --mono:'Space Mono',monospace; --sans:'Syne',sans-serif;
+    --radius:10px; --transition:0.18s ease;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;justify-content:center;align-items:center;z-index:9000;backdrop-filter:blur(8px);}
+  .auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:36px 32px;border-radius:14px;width:380px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+  .auth-popup h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
+  .auth-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:24px;}
+  .auth-popup input{width:100%;padding:11px 14px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;color:#e2e2e2;font-size:14px;outline:none;}
+  .auth-popup input:focus{border-color:var(--accent);}
+  .primary-btn{width:100%;padding:12px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+  .primary-btn:hover{background:#00c88c;}
+  .dashboard-wrap{display:none;width:100%;}
+  .sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+  .sidebar-logo{padding:28px 20px 20px;border-bottom:1px solid var(--border);}
+  .logo-mark{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:2px;}
+  .sidebar-logo h1{font-size:20px;font-weight:800;color:#fff;}
+  .user-pill{margin:16px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;}
+  .nav{padding:10px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:2px;}
+  .nav-item.active{background:rgba(0,229,160,.08);color:var(--accent);border:1px solid rgba(0,229,160,.15);}
+  .nav-icon{width:20px;}
+  .logout-btn{width:100%;padding:9px;background:rgba(255,95,126,.08);border:1px solid rgba(255,95,126,.2);border-radius:8px;color:var(--accent3);cursor:pointer;}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .topbar{height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;background:var(--surface);}
+  .topbar-title{font-weight:700;color:#fff;flex:1;}
+  .content{flex:1;overflow-y:auto;padding:28px;}
+  .tab-panel{display:none;animation:fadeIn .2s ease;}
+  .tab-panel.active{display:block;}
+  .section-header{display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;}
+  .section-title{font-size:20px;font-weight:800;color:#fff;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+  .card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;font-family:var(--mono);}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;}
+  .stat-value{font-family:var(--mono);font-size:28px;font-weight:700;color:#fff;}
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;border:1px solid transparent;}
+  .btn-primary{background:var(--accent);color:#000;}
+  .btn-secondary{background:transparent;color:var(--text);border-color:var(--border2);}
+  .btn-danger{background:rgba(255,95,126,.1);color:var(--accent3);border-color:rgba(255,95,126,.25);}
+  .btn-sm{padding:6px 12px;font-size:12px;}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-family:var(--mono);}
+  .badge-pending{background:rgba(255,209,102,.12);color:#ffd166;}
+  .badge-sent{background:rgba(0,229,160,.1);color:var(--accent);}
+  .progress-bar-wrap{background:var(--bg);border-radius:20px;height:8px;overflow:hidden;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;}
+  .send-control{background:var(--card);padding:24px;border-radius:var(--radius);}
+  .control-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .big-btn{width:56px;height:56px;border-radius:50%;font-size:20px;cursor:pointer;}
+  .big-btn.start{background:var(--accent);color:#000;}
+  .attach-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .attach-opt{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;text-align:center;cursor:pointer;}
+  .attach-opt.selected{border-color:var(--accent);background:rgba(0,229,160,.08);}
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--radius);min-height:280px;text-align:center;}
+  .qr-wrap img{width:200px;height:200px;border-radius:8px;border:3px solid var(--accent);margin-bottom:12px;}
+  .device-status-card{display:flex;align-items:center;gap:16px;padding:20px;background:var(--card);border-radius:var(--radius);margin-bottom:16px;}
+  .poll-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .connected{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+  .disconnected{background:var(--accent3);}
+  .scanning{background:#ffd166;}
+  #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;z-index:9999;transition:opacity .3s;opacity:0;background:#0e2d1e;color:#00e5a0;}
+  .toggle{position:relative;width:42px;height:22px;}
+  .toggle input{opacity:0;}
+  .toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:22px;cursor:pointer;}
+  .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:.2s;}
+  .toggle input:checked+.toggle-slider{background:var(--accent);}
+  .toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#000;}
+  .control-row .send-info{flex:1;}
+  .step-list li{counter-increment:steps;padding:8px 0;font-size:13px;color:var(--text2);}
+  @media(max-width:768px){.stat-row{grid-template-columns:1fr 1fr;}.sidebar{width:200px;}}
 </style>
 </head>
 <body>
 
-<!-- AUTH OVERLAY -->
 <div class="auth-overlay" id="authOverlay"></div>
-
-<!-- DASHBOARD -->
 <div class="dashboard-wrap" id="dashboardWrap">
-
 <aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark">WA · Blast</div>
-    <h1>Auto<span>Send</span></h1>
-  </div>
-  <div class="user-pill">
-    <div class="user-avatar" id="avatarInitial">A</div>
-    <div>
-      <div class="user-name" id="sidebarUsername">Client</div>
-      <div class="user-role">PRO PLAN</div>
-    </div>
-  </div>
+  <div class="sidebar-logo"><div class="logo-mark">WA · BLAST</div><h1>Auto<span style="color:var(--accent)">Send</span></h1></div>
+  <div class="user-pill"><div class="user-avatar" id="avatarInitial">A</div><div><div class="user-name" id="sidebarUsername"></div><div class="user-role">PRO</div></div></div>
   <nav class="nav">
-    <div class="nav-item" onclick="switchTab('device')"><span class="nav-icon">📱</span> Device <span class="nav-badge" id="deviceBadge" style="display:none">!</span></div>
-    <div class="nav-item active" onclick="switchTab('contacts')"><span class="nav-icon">👥</span> Contacts <span class="nav-badge" id="contactCount">0</span></div>
+    <div class="nav-item" onclick="switchTab('device')"><span class="nav-icon">📱</span> Device</div>
+    <div class="nav-item" onclick="switchTab('contacts')"><span class="nav-icon">👥</span> Contacts <span id="contactCount" style="margin-left:auto;font-size:11px;">0</span></div>
     <div class="nav-item" onclick="switchTab('compose')"><span class="nav-icon">✍️</span> Compose</div>
     <div class="nav-item" onclick="switchTab('send')"><span class="nav-icon">🚀</span> Send</div>
     <div class="nav-item" onclick="switchTab('settings')"><span class="nav-icon">⚙️</span> Settings</div>
     <div class="nav-item" onclick="switchTab('logs')"><span class="nav-icon">📋</span> Logs</div>
   </nav>
-  <div class="sidebar-footer">
-    <button class="logout-btn" onclick="logout()">← Logout</button>
-  </div>
+  <div class="sidebar-footer" style="padding:14px;"><button class="logout-btn" onclick="logout()">← Logout</button></div>
 </aside>
-
 <main class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="topbarTitle">Contacts</div>
-    <div class="status-dot" id="topbarDot" style="background:var(--muted);box-shadow:none"></div>
-    <div class="status-label" id="topbarStatus" style="color:var(--text2)">NO DEVICE</div>
-  </div>
-
+  <div class="topbar"><div class="topbar-title" id="topbarTitle">Device</div><div class="status-dot" id="topbarDot" style="width:8px;height:8px;border-radius:50%;background:var(--muted);"></div><div id="topbarStatus" style="font-size:11px;">OFFLINE</div></div>
   <div class="content">
-
     <!-- DEVICE TAB -->
     <div class="tab-panel" id="tab-device">
-      <div class="section-header">
-        <div><div class="section-title">Link Your Device</div><div class="section-sub">Connect your WhatsApp number to start sending</div></div>
-        <div class="btn-row">
-          <button class="btn btn-secondary btn-sm" id="refreshQrBtn" onclick="loadQR()">🔄 Refresh QR</button>
-          <button class="btn btn-danger btn-sm" id="disconnectBtn" onclick="disconnectDevice()" style="display:none">🔌 Unlink Device</button>
-        </div>
-      </div>
-
-      <div class="warning-banner" id="deviceWarning" style="display:none">
-        <div class="icon">⚠️</div>
-        <div class="text"><strong>One device per user only.</strong> To link a new device, first unlink your current device.</div>
-      </div>
-
-      <div class="device-status-card device-disconnected" id="deviceStatusCard">
-        <div class="device-status-icon" id="deviceStatusIcon">📵</div>
-        <div class="device-status-info">
-          <div class="device-status-title" id="deviceStatusTitle">No device linked</div>
-          <div class="device-status-id" id="deviceStatusId">Scan the QR code below to link your WhatsApp</div>
-        </div>
-        <div>
-          <span class="poll-dot disconnected" id="pollDot"></span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text2)" id="pollLabel">OFFLINE</span>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
-        <div class="card">
-          <div class="card-title">QR Code</div>
-          <div class="qr-wrap" id="qrWrap">
-            <div style="font-size:40px;margin-bottom:12px">📱</div>
-            <div class="qr-hint">Enter your GoWA server URL in<br/><strong>Settings</strong> then click Load QR</div>
-          </div>
-          <div style="margin-top:14px;text-align:center">
-            <button class="btn btn-primary" id="loadQrBtn" onclick="loadQR()">Load QR Code</button>
-          </div>
-          <div style="margin-top:10px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)" id="qrTimer"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">How to Link</div>
-          <ul class="step-list">
-            <li>Make sure your GoWA server URL is saved in Settings</li>
-            <li>Click <strong style="color:var(--accent)">Load QR Code</strong> to generate a fresh QR</li>
-            <li>Open WhatsApp on your phone</li>
-            <li>Go to <strong style="color:var(--text)">Settings → Linked Devices → Link a Device</strong></li>
-            <li>Point your camera at the QR code</li>
-            <li>Wait for the green ✅ confirmation</li>
-          </ul>
-          <div style="margin-top:16px;padding:12px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:8px">
-            <div style="font-size:12px;color:#ffd166;font-family:var(--mono)">⚠ QR expires in 60 seconds — refresh if it times out</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:6px">🔒 Each user can link only ONE device. Unlink first to change devices.</div>
-          </div>
-        </div>
-      </div>
+      <div class="section-header"><div><div class="section-title">Link Your Device</div><div class="section-sub">One device per user — WhatsApp API v8.5</div></div><button class="btn btn-secondary btn-sm" onclick="loadQR()">🔄 Refresh QR</button></div>
+      <div class="device-status-card" id="deviceStatusCard"><div id="deviceStatusIcon">📵</div><div style="flex:1"><div id="deviceStatusTitle">No device linked</div><div id="deviceStatusId" style="font-size:11px;">Scan QR to connect</div></div><span class="poll-dot disconnected" id="pollDot"></span><span id="pollLabel">OFFLINE</span></div>
+      <div class="card"><div class="card-title">QR Code</div><div class="qr-wrap" id="qrWrap"><div>📱</div><div class="qr-hint">Click "Load QR Code" to start</div></div><div style="margin-top:16px;text-align:center"><button class="btn btn-primary" onclick="loadQR()">Load QR Code</button><div id="qrTimer" style="font-size:11px;margin-top:8px;"></div></div></div>
+      <div class="card"><div class="card-title">How to Link</div><ul class="step-list"><li>Make sure GoWA server is online</li><li>Click <strong>Load QR Code</strong></li><li>WhatsApp → Settings → Linked Devices → Link a Device</li><li>Scan QR → wait for green confirmation</li></ul><button class="btn btn-danger btn-sm" id="disconnectBtn" onclick="disconnectDevice()" style="display:none;margin-top:12px;">🔌 Unlink Device</button></div>
     </div>
-
     <!-- CONTACTS TAB -->
-    <div class="tab-panel active" id="tab-contacts">
-      <div class="section-header">
-        <div><div class="section-title">Contact List</div><div class="section-sub">Upload, paste or import from WhatsApp group</div></div>
-        <div class="btn-row">
-          <button class="btn btn-secondary btn-sm" onclick="deduplicateContacts()">🔄 Remove Duplicates</button>
-          <button class="btn btn-secondary btn-sm" onclick="exportContactsToCSV()">📥 Export CSV</button>
-          <button class="btn btn-blue btn-sm" onclick="openGroupImport()">📲 Import from Group</button>
-          <button class="btn btn-secondary btn-sm" onclick="clearContacts()">🗑 Clear All</button>
-          <button class="btn btn-primary btn-sm" onclick="saveContacts()">💾 Save to Sheet</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Import Contacts</div>
-        <div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap">
-          <button class="btn btn-secondary" onclick="document.getElementById('csvFile').click()">📂 Upload CSV / Excel</button>
-          <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileUpload(this)"/>
-          <button class="btn btn-secondary" onclick="togglePaste()">📋 Paste Data</button>
-        </div>
-        <div id="pasteArea" style="display:none">
-          <label>Paste from Excel — columns: Name · Phone · Message</label>
-          <textarea id="pasteInput" rows="5" placeholder="John Doe&#9;9876543210&#9;Hey John, special offer!"></textarea>
-          <div style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="parsePaste()">Parse Data</button></div>
-        </div>
-      </div>
-      <div class="card" id="groupImportCard" style="display:none">
-        <div class="card-title">Import from WhatsApp Group</div>
-        <div style="display:flex;gap:10px;margin-bottom:12px">
-          <button class="btn btn-secondary btn-sm" onclick="fetchGroups()">🔄 Fetch My Groups</button>
-        </div>
-        <div class="group-list" id="groupList"><div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Click "Fetch My Groups" to load</div></div>
-        <div style="margin-top:12px;display:flex;gap:10px">
-          <button class="btn btn-primary btn-sm" onclick="importGroupContacts()">Import Selected</button>
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('groupImportCard').style.display='none'">Cancel</button>
-        </div>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <span class="card-title" style="margin:0">Preview — <span id="contactTotal">0</span> contacts</span>
-          <input type="text" placeholder="Search..." style="width:180px;padding:7px 12px;font-size:13px" oninput="filterContacts(this.value)"/>
-        </div>
-        <div class="table-wrap" style="border:none;border-radius:0">
-          <table>
-            <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Custom Message</th><th>Status</th><th></th></tr></thead>
-            <tbody id="contactTableBody"><tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet</td></tr></tbody>
-          </table>
-        </div>
-      </div>
+    <div class="tab-panel" id="tab-contacts">
+      <div class="section-header"><div><div class="section-title">Contact List</div></div><div class="btn-row"><button class="btn btn-secondary btn-sm" onclick="clearContacts()">🗑 Clear</button><button class="btn btn-primary btn-sm" onclick="saveContacts()">💾 Save</button></div></div>
+      <div class="card"><div class="card-title">Import</div><input type="file" id="csvFile" accept=".csv,.xlsx" style="margin-bottom:10px" onchange="handleFileUpload(this)"/><textarea id="pasteInput" rows="3" placeholder="Name, Phone, Message (or paste Excel rows)"></textarea><div class="btn-row" style="margin-top:10px"><button class="btn btn-secondary btn-sm" onclick="parsePaste()">Parse Paste</button><button class="btn btn-secondary btn-sm" onclick="fetchGroups()">📲 Import from Group</button></div><div id="groupList" style="margin-top:12px;max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;display:none;"></div></div>
+      <div class="card"><div class="card-title">Contacts Preview</div><div class="table-wrap" style="overflow-x:auto"><table style="width:100%"><thead><tr><th>Name</th><th>Phone</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="contactTableBody"></tbody></table></div></div>
     </div>
-
     <!-- COMPOSE TAB -->
     <div class="tab-panel" id="tab-compose">
-      <div class="section-header">
-        <div><div class="section-title">Compose Message</div><div class="section-sub">Template + attachments for all contacts</div></div>
-        <button class="btn btn-primary" onclick="saveCompose()">💾 Save Template</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Message Template</div>
-        <div class="form-group" style="margin-bottom:14px">
-          <label>Message Body — use {name} for personalisation</label>
-          <div class="textarea-wrap">
-            <textarea id="msgTemplate" rows="5" placeholder="Hi {name}, we have an exciting offer just for you! 🎉" oninput="updateCharCount(this)"></textarea>
-            <span class="char-count" id="charCount">0</span>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <button class="btn btn-secondary btn-sm" onclick="insertVar('{name}')">+ {name}</button>
-          <button class="btn btn-secondary btn-sm" onclick="insertVar('{phone}')">+ {phone}</button>
-          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-            <button class="btn btn-secondary btn-sm" onclick="generateAIVariations()">✨ AI Generate 10 Variations</button>
-            <button class="btn btn-secondary btn-sm" onclick="resetVariations()">🔄 Reset Variations</button>
-            <span style="font-size:12px;color:var(--text2)">AI Rewrite</span>
-            <label class="toggle"><input type="checkbox" id="aiRewriteToggle" onchange="document.getElementById('aiRewriteCard').style.display=this.checked?'block':'none'"/><span class="toggle-slider"></span></label>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Attachment</div>
-        <div class="attach-grid">
-          <div class="attach-opt selected" onclick="selectAttach('none',this)"><span class="opt-icon">🚫</span>none</div>
-          <div class="attach-opt" onclick="selectAttach('image',this)"><span class="opt-icon">📷</span>image</div>
-          <div class="attach-opt" onclick="selectAttach('video',this)"><span class="opt-icon">🎥</span>video</div>
-          <div class="attach-opt" onclick="selectAttach('document',this)"><span class="opt-icon">📄</span>document</div>
-          <div class="attach-opt" onclick="selectAttach('poll',this)"><span class="opt-icon">📊</span>poll</div>
-        </div>
-        <div id="attachFileArea" style="display:none">
-          <div class="upload-zone" onclick="document.getElementById('attachFile').click()">
-            <div class="upload-icon">☁️</div>
-            <div class="upload-text">Drop file here or <strong>click to browse</strong></div>
-            <div class="upload-hint">Held temporarily on server · deleted after send</div>
-          </div>
-          <input type="file" id="attachFile" style="display:none" onchange="handleAttachUpload(this)"/>
-          <div id="attachPreview" style="margin-top:10px;display:none">
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px">
-              <span style="font-size:20px" id="attachEmoji">📎</span>
-              <div><div style="font-size:13px;font-weight:600" id="attachName">file</div><div style="font-size:11px;color:var(--text2)" id="attachSize">0 KB</div></div>
-              <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="clearAttach()">Remove</button>
-            </div>
-          </div>
-        </div>
-        <div id="pollArea" style="display:none">
-          <div class="form-group" style="margin-bottom:10px"><label>Poll Question</label><input type="text" id="pollQuestion" placeholder="What's your preference?"/></div>
-          <div id="pollOptions">
-            <div class="form-group" style="margin-bottom:8px"><label>Option 1</label><input type="text" placeholder="Option A"/></div>
-            <div class="form-group" style="margin-bottom:8px"><label>Option 2</label><input type="text" placeholder="Option B"/></div>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="addPollOption()">+ Add Option</button>
-        </div>
-      </div>
-      <div class="card" id="aiRewriteCard" style="display:none">
-        <div class="card-title">AI Rewrite Settings</div>
-        <div class="form-group"><label>Rewrite Prompt</label><textarea id="rewritePrompt" rows="3" placeholder="Rewrite the message to sound more friendly and conversational, keep it under 100 words..."></textarea></div>
-      </div>
+      <div class="section-header"><div><div class="section-title">Compose Message</div></div><button class="btn btn-primary" onclick="saveCompose()">Save Template</button></div>
+      <div class="card"><textarea id="msgTemplate" rows="4" placeholder="Hi {name}, special offer!"></textarea><div class="btn-row" style="margin-top:8px"><button class="btn btn-secondary btn-sm" onclick="insertVar('{name}')">{name}</button><button class="btn btn-secondary btn-sm" onclick="insertVar('{phone}')">{phone}</button><button class="btn btn-secondary btn-sm" onclick="generateAIVariations()">✨ AI 10 Variations</button></div></div>
+      <div class="card"><div class="card-title">Attachment</div><div class="attach-grid" id="attachGrid"><div class="attach-opt selected" data-type="none">🚫 none</div><div class="attach-opt" data-type="image">📷 image</div><div class="attach-opt" data-type="video">🎥 video</div><div class="attach-opt" data-type="document">📄 doc</div><div class="attach-opt" data-type="poll">📊 poll</div></div></div>
+      <div id="pollArea" style="display:none"><input type="text" id="pollQuestion" placeholder="Question"/><div id="pollOptions"><input placeholder="Option 1"/><input placeholder="Option 2"/></div><button class="btn btn-secondary btn-sm" onclick="addPollOption()">+ Add</button></div>
+      <div class="card" id="aiRewriteCard" style="display:none"><label>AI Rewrite Prompt</label><textarea id="rewritePrompt" rows="2" placeholder="Make it friendly and short"></textarea></div>
+      <div id="variationsPanel" style="margin-top:16px;display:none;"></div>
     </div>
-    <!-- Variations Preview Panel -->
-<div id="variationsPanel" style="display:none; margin-top: 20px; margin-bottom: 20px;">
-  <div class="card" style="padding: 16px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <div class="card-title" style="margin: 0;">📝 AI Generated Variations</div>
-      <div>
-        <span id="variationCount" style="color: var(--accent); font-family: var(--mono); font-size: 12px;">0</span>
-        <span style="color: var(--text2); font-size: 12px;"> variations ready | Cycling enabled 🔄</span>
-      </div>
-    </div>
-    <div id="variationsList" style="max-height: 300px; overflow-y: auto;">
-      <!-- Variations will appear here -->
-    </div>
-    <div style="display: flex; gap: 10px; margin-top: 12px;">
-      <button class="btn btn-secondary btn-sm" onclick="regenerateVariations()">🔄 Regenerate All</button>
-      <button class="btn btn-secondary btn-sm" onclick="clearVariations()">🗑 Clear Variations</button>
-      <button class="btn btn-secondary btn-sm" onclick="useSingleTemplate()">📝 Use Single Template Only</button>
-    </div>
-  </div>
-</div>
-
     <!-- SEND TAB -->
     <div class="tab-panel" id="tab-send">
-      <div class="section-header"><div><div class="section-title">Send Campaign</div><div class="section-sub">Control the send queue</div></div></div>
-      <div class="stat-row">
-        <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value" id="sentCount">0</div><div class="stat-label">Sent</div></div>
-        <div class="stat-card yellow"><div class="stat-icon">⏳</div><div class="stat-value" id="pendingCount">0</div><div class="stat-label">Pending</div></div>
-        <div class="stat-card red"><div class="stat-icon">❌</div><div class="stat-value" id="failedCount">0</div><div class="stat-label">Failed</div></div>
-        <div class="stat-card blue"><div class="stat-icon">💬</div><div class="stat-value" id="repliedCount">0</div><div class="stat-label">Replied</div></div>
-      </div>
-      <div class="send-control">
-        <div class="control-row">
-          <button class="big-btn start" onclick="startSend()" title="Start">▶</button>
-          <button class="big-btn pause" onclick="pauseSend()" title="Pause">⏸</button>
-          <button class="big-btn stop"  onclick="stopSend()"  title="Stop">⏹</button>
-          <div class="send-info">
-            <div class="current" id="currentContact">Ready to send</div>
-            <div class="queue" id="queueStatus">0 / 0 contacts processed</div>
-          </div>
-        </div>
-        <div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-            <span style="font-size:12px;color:var(--text2)">Progress</span>
-            <span style="font-family:var(--mono);font-size:12px;color:var(--accent)" id="progressPct">0%</span>
-          </div>
-          <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent Today</div>
-            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="todaySentDisplay">0</span> / <span id="dailyLimitDisplay">200</span></div>
-            <div class="progress-bar-wrap" style="margin-top:6px"><div class="progress-bar" id="dailyBar" style="width:0%;background:linear-gradient(90deg,#ffd166,#ff5f7e)"></div></div>
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent This Hour</div>
-            <div style="font-family:var(--mono);font-size:18px;color:#fff"><span id="hourSentDisplay">0</span> / <span id="hourLimitDisplay">30</span></div>
-            <div class="progress-bar-wrap" style="margin-top:6px"><div class="progress-bar" id="hourBar" style="width:0%;background:linear-gradient(90deg,var(--accent2),var(--accent))"></div></div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-          <span id="pauseIndicator" style="width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0"></span>
-          <span style="font-size:13px;color:var(--text2)">Auto-pause on reply: active</span>
-        </div>
-      </div>
+      <div class="stat-row"><div class="stat-card"><div class="stat-value" id="sentCount">0</div><div>Sent</div></div><div class="stat-card"><div class="stat-value" id="pendingCount">0</div><div>Pending</div></div><div class="stat-card"><div class="stat-value" id="failedCount">0</div><div>Failed</div></div><div class="stat-card"><div class="stat-value" id="repliedCount">0</div><div>Replied</div></div></div>
+      <div class="send-control"><div class="control-row"><button class="big-btn start" onclick="startSend()">▶</button><button class="big-btn" onclick="pauseSend()" style="background:#ffd166;">⏸</button><button class="big-btn" onclick="stopSend()" style="background:var(--accent3);">⏹</button><div class="send-info"><div id="currentContact">Ready</div><div id="queueStatus">0/0</div></div></div><div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div></div>
+      <div class="card"><div>Sent Today: <span id="todaySentDisplay">0</span>/<span id="dailyLimitDisplay">200</span>  |  This Hour: <span id="hourSentDisplay">0</span>/30</div><div class="progress-bar-wrap mt-1"><div class="progress-bar" id="dailyBar" style="width:0%"></div></div></div>
     </div>
-
-    <!-- SETTINGS TAB -->
+    <!-- SETTINGS -->
     <div class="tab-panel" id="tab-settings">
-      <div class="section-header">
-        <div><div class="section-title">Settings</div><div class="section-sub">Configure your campaign behaviour</div></div>
-        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Send Limits</div>
-        <div class="form-grid">
-          <div class="form-group"><label>Max per Hour</label><input type="number" id="hourLimit" value="30" min="1" max="60"/></div>
-          <div class="form-group"><label>Max per Day</label><input type="number" id="dayLimit" value="200" min="1" max="500"/></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Time Gap Between Messages</div>
-        <div class="form-group" style="margin-bottom:14px">
-          <label>Minimum Gap (seconds)</label>
-          <div class="range-row"><input type="range" id="minGap" min="0" max="300" value="30" oninput="document.getElementById('minGapVal').textContent=this.value+'s'"/><span class="range-val" id="minGapVal">30s</span></div>
-        </div>
-        <div class="form-group">
-          <label>Maximum Gap (seconds)</label>
-          <div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapVal').textContent=this.value+'s'"/><span class="range-val" id="maxGapVal">90s</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Automation</div>
-        <div class="toggle-row">
-          <div><div class="toggle-info">AI Auto Reply</div><div class="toggle-sub">Automatically reply to incoming messages using AI</div></div>
-          <label class="toggle"><input type="checkbox" id="autoReplyToggle" onchange="toggleAutoReply()"/><span class="toggle-slider"></span></label>
-        </div>
-        <div id="autoReplyPromptArea" style="display:none;padding-top:12px">
-          <div class="form-group"><label>Auto Reply Prompt</label><textarea id="autoReplyPrompt" rows="3" placeholder="You are a helpful sales assistant. Reply naturally to the customer message. Keep it short and friendly..."></textarea></div>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-info">Pause on Reply</div><div class="toggle-sub">Stop queue when a contact replies — resume manually</div></div>
-          <label class="toggle"><input type="checkbox" id="pauseOnReplyToggle" checked/><span class="toggle-slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div><div class="toggle-info">AI Message Rewrite</div><div class="toggle-sub">Rewrite each message slightly before sending</div></div>
-          <label class="toggle"><input type="checkbox" id="aiRewriteSettingToggle"/><span class="toggle-slider"></span></label>
-        </div>
-      </div>
+      <div class="section-header"><div><div class="section-title">Settings</div></div><button class="btn btn-primary" onclick="saveSettings()">Save</button></div>
+      <div class="card"><label>Hour Limit</label><input type="number" id="hourLimit" value="30"/><label>Day Limit</label><input type="number" id="dayLimit" value="200"/><label>Min Gap (sec)</label><input type="number" id="minGap" value="30"/><label>Max Gap (sec)</label><input type="number" id="maxGap" value="90"/><div class="toggle-row"><span>AI Auto Reply</span><label class="toggle"><input type="checkbox" id="autoReplyToggle"/><span class="toggle-slider"></span></label></div><textarea id="autoReplyPrompt" placeholder="Reply prompt..."></textarea></div>
     </div>
-
-    <!-- LOGS TAB -->
-    <div class="tab-panel" id="tab-logs">
-      <div class="section-header">
-        <div><div class="section-title">Activity Logs</div><div class="section-sub">All messages sent, received and AI replies</div></div>
-        <div class="btn-row">
-          <select id="logFilter" onchange="filterLogs()" style="width:140px;padding:8px 12px">
-            <option value="all">All Logs</option>
-            <option value="sent">Sent</option>
-            <option value="failed">Failed</option>
-            <option value="reply">Replies</option>
-            <option value="ai">AI Replies</option>
-          </select>
-          <button class="btn btn-secondary btn-sm" onclick="clearLogs()">🗑 Clear</button>
-        </div>
-      </div>
-      <div class="card" style="padding:0">
-        <div id="logsList" style="padding:16px 20px"><div style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No activity yet</div></div>
-      </div>
-    </div>
-
+    <!-- LOGS -->
+    <div class="tab-panel" id="tab-logs"><div class="card"><div id="logsList">No logs</div></div></div>
   </div>
 </main>
 </div>
-
 <div id="toast"></div>
 
 <script>
-// ======================================================
-// CONFIG - USE YOUR WORKING REPLIT SERVER
-// ======================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
-const GOWA_URL = "https://graphicy-wa--testhimrealty.replit.app";
-
-// ======================================================
-// SESSION MANAGER
-// ======================================================
-const SessionManager = {
-  set(u){ localStorage.setItem('auth_logged_in','true'); localStorage.setItem('auth_user',JSON.stringify(u)); localStorage.setItem('auth_started',Date.now().toString()); },
-  get(){ const r=localStorage.getItem('auth_user'); return {isLoggedIn:localStorage.getItem('auth_logged_in')==='true',userData:r?JSON.parse(r):null,sessionStart:localStorage.getItem('auth_started')}; },
-  clear(){ ['auth_logged_in','auth_user','auth_started'].forEach(k=>localStorage.removeItem(k)); },
-  isValid(){ const s=this.get(); if(!s.isLoggedIn||!s.userData) return false; if(Date.now()-parseInt(s.sessionStart||'0')>=24*60*60*1000){this.clear();return false;} return true; },
-  getUsername(){ const s=this.get(); return s.userData?.username||null; },
-  getDeviceId(){ const s=this.get(); return s.userData?.deviceId||null; }
-};
-
-// ======================================================
-// JSONP — Apps Script communication
-// ======================================================
-function jsonpRequest(params, cb){
-  const cbName = '__gs_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-  const scriptId = cbName + '_s';
-  const timeout = setTimeout(()=>{ cleanup(); cb({success:false,message:'Request timed out.'}); }, 20000);
-
-  window[cbName] = function(data){
-    clearTimeout(timeout);
-    cleanup();
-    try { cb(data); } catch(e) { console.error('JSONP callback error:', e); }
-  };
-
-  function cleanup(){
-    try { delete window[cbName]; } catch(e){}
-    const s = document.getElementById(scriptId);
-    if(s) s.remove();
-  }
-
-  const qs = Object.entries({...params, callback: cbName})
-    .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
-    .join('&');
-
-  const script = document.createElement('script');
-  script.id = scriptId;
-  script.src = API_URL + '?' + qs;
-  script.onerror = function(){
-    clearTimeout(timeout);
-    cleanup();
-    cb({success:false, message:'Network error'});
-  };
-  document.body.appendChild(script);
-}
-
-function apiGet(action, data){ return new Promise(resolve => { jsonpRequest({action, ...data}, resolve); }); }
-function apiLogin(u,p,cb){ jsonpRequest({action:'login',username:u,password:p},cb); }
-function apiRegister(u,p,q,a,cb){ jsonpRequest({action:'register',username:u,password:p,securityQuestion:q,securityAnswer:a},cb); }
-function apiGetQuestion(u,cb){ jsonpRequest({action:'getSecurityQuestion',username:u},cb); }
-function apiVerifyAnswer(u,a,cb){ jsonpRequest({action:'verifyAnswer',username:u,answer:a},cb); }
-function apiLoadLogs(u,cb){ jsonpRequest({action:'loadLogs',username:u,limit:100},cb); }
-function apiGetUserDevice(u,cb){ jsonpRequest({action:'getUserDevice',username:u},cb); }
-function apiLinkDevice(u,id,cb){ jsonpRequest({action:'linkDevice',username:u,deviceId:id},cb); }
-function apiUnlinkDevice(u,cb){ jsonpRequest({action:'unlinkDevice',username:u},cb); }
-function apiValidateDevice(u,id,cb){ jsonpRequest({action:'validateDevice',username:u,deviceId:id},cb); }
-
-// ======================================================
-// STATE
-// ======================================================
-let contacts = [], logs = [], sendState = 'idle', sendIndex = 0, sendTimer = null;
-let selectedAttach = 'none', selectedGroup = null, todaySent = 0, hourSent = 0;
+// ==================== CONFIG ====================
+const API_URL = "https://script.google.com/macros/s/AKfycbynWmbVvsGMP5Rz9HiCQApWsYVOPi2lBCE0P8hRnZR-wmamqUbOKzckl6NkvwiYxhGGfQ/exec";
+const GOWA_URL = "https://sanjaywa8-5.onrender.com";
 let deviceId = null;
-let devicePollTimer = null;
-let qrCountdown = null;
-let messageVariations = [];  // Store AI generated variations
-let currentVariationIndex = 0;  // Track which variation to use next
-let isUsingVariations = false;   // Whether to use variations or single template
-// ======================================================
-// AUTH UI
-// ======================================================
-function showAuth(){
-  const ov = document.getElementById('authOverlay');
-  ov.style.display = 'flex';
-  document.getElementById('dashboardWrap').style.display = 'none';
-  let mode = 'login', recoveryUser = '';
+let contacts = [], logs = [], sendState = 'idle', sendIndex = 0, sendTimer = null;
+let todaySent = 0, hourSent = 0;
+let messageVariations = [], currentVariationIndex = 0, isUsingVariations = false;
+let devicePollTimer = null, qrCountdown = null;
 
-  function amsg(el, type, text){ el.className = 'auth-msg ' + type; el.textContent = text; }
-  function setLoad(btn, mel, on){
-    btn.disabled = on;
-    btn.textContent = on ? 'Please wait…' : btn.dataset.label;
-    if(on){ mel.className = 'auth-msg loading'; mel.textContent = 'Talking to server…'; }
-    else { if(mel.classList.contains('loading')) mel.className = 'auth-msg'; }
-  }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function showToast(msg,err){ let t=document.getElementById('toast'); t.textContent=msg; t.style.background=err?'#2d1a1a':'#0e2d1e'; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,3000); }
 
-  function render(){
-    if(mode === 'login'){
-      ov.innerHTML = `<div class="auth-popup">
-        <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
-        <h2>Welcome back</h2><div class="auth-sub">Sign in to your account</div>
-        <div class="auth-msg" id="authMsg"></div>
-        <input type="text" id="authUser" placeholder="Username" autocomplete="off"/>
-        <input type="password" id="authPass" placeholder="Password"/>
-        <button class="primary-btn" id="authBtn" data-label="Sign In" onclick="authActions.login()">Sign In</button>
-        <div class="auth-toggle-row">
-          <span class="auth-toggle-link" onclick="authActions.go('register')">Create account</span>
-          <span class="auth-toggle-link" onclick="authActions.go('recovery')">Forgot password?</span>
-        </div></div>`;
-    } else if(mode === 'register'){
-      ov.innerHTML = `<div class="auth-popup">
-        <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
-        <h2>Create Account</h2><div class="auth-sub">Fill in your details</div>
-        <div class="auth-msg" id="authMsg"></div>
-        <input type="text" id="regUser" placeholder="Username (letters, numbers, underscore)" autocomplete="off"/>
-        <input type="password" id="regPass" placeholder="Password"/>
-        <input type="text" id="regQuestion" placeholder="Security question (e.g. Favourite colour?)"/>
-        <input type="text" id="regAnswer" placeholder="Security answer"/>
-        <button class="primary-btn" id="authBtn" data-label="Register" onclick="authActions.register()">Register</button>
-        <div class="auth-toggle-row"><span class="auth-toggle-link" onclick="authActions.go('login')">← Back to login</span></div></div>`;
-    } else {
-      ov.innerHTML = `<div class="auth-popup">
-        <div class="auth-logo"><span class="auth-logo-mark">WA · BLAST</span></div>
-        <h2>Account Recovery</h2><div class="auth-sub">Recover your password</div>
-        <div class="auth-msg" id="authMsg"></div>
-        <input type="text" id="recUser" placeholder="Username" autocomplete="off"/>
-        <button class="primary-btn" id="authBtn" data-label="Get Security Question" onclick="authActions.getQuestion()">Get Security Question</button>
-        <div id="answerSection" style="display:none;margin-top:12px">
-          <div class="auth-security-q" id="sqText"></div>
-          <input type="text" id="recAnswer" placeholder="Your answer"/>
-          <button class="primary-btn" id="verifyBtn" data-label="Verify & Recover" onclick="authActions.verify()">Verify &amp; Recover</button>
-        </div>
-        <div class="auth-pw-result" id="pwResult"></div>
-        <div class="auth-toggle-row"><span class="auth-toggle-link" onclick="authActions.go('login')">← Back to login</span></div></div>`;
-    }
-  }
+// Session
+const Session={ set(u){ localStorage.setItem('auth_user',JSON.stringify(u)); }, get(){ const u=localStorage.getItem('auth_user'); return u?JSON.parse(u):null; }, clear(){ localStorage.removeItem('auth_user'); }, getUsername(){ return this.get()?.username; } };
 
-  window.authActions = {
-    go(m){ mode = m; recoveryUser = ''; render(); },
-    login(){
-      const u = document.getElementById('authUser').value.trim();
-      const p = document.getElementById('authPass').value.trim();
-      const box = document.getElementById('authMsg');
-      const btn = document.getElementById('authBtn');
-      if(!u || !p) return amsg(box, 'error', 'Username and password required.');
-      setLoad(btn, box, true);
-      apiLogin(u, p, r => {
-        setLoad(btn, box, false);
-        if(r && r.success){
-          SessionManager.set({username: r.username||u, lastLogin: r.lastLogin||new Date().toISOString(), deviceId: r.deviceId||null});
-          showDashboard(r);
-        } else {
-          amsg(box, 'error', (r && r.message) || 'Login failed.');
-        }
-      });
-    },
-    register(){
-      const u = document.getElementById('regUser').value.trim();
-      const p = document.getElementById('regPass').value.trim();
-      const q = document.getElementById('regQuestion').value.trim();
-      const a = document.getElementById('regAnswer').value.trim();
-      const box = document.getElementById('authMsg');
-      const btn = document.getElementById('authBtn');
-      if(!u||!p||!q||!a) return amsg(box, 'error', 'All fields required.');
-      setLoad(btn, box, true);
-      apiRegister(u, p, q, a, r => {
-        setLoad(btn, box, false);
-        if(r && r.success){ amsg(box, 'success', 'Account created! Redirecting to login…'); setTimeout(()=>authActions.go('login'), 2000); }
-        else amsg(box, 'error', (r && r.message) || 'Registration failed.');
-      });
-    },
-    getQuestion(){
-      const u = document.getElementById('recUser').value.trim();
-      const box = document.getElementById('authMsg');
-      const btn = document.getElementById('authBtn');
-      if(!u) return amsg(box, 'error', 'Enter your username.');
-      setLoad(btn, box, true);
-      apiGetQuestion(u, r => {
-        setLoad(btn, box, false);
-        if(r && r.success){
-          recoveryUser = u;
-          document.getElementById('sqText').textContent = 'Q: ' + r.question;
-          document.getElementById('answerSection').style.display = 'block';
-          box.className = 'auth-msg';
-        } else {
-          amsg(box, 'error', (r && r.message) || 'User not found.');
-        }
-      });
-    },
-    verify(){
-      const a = document.getElementById('recAnswer').value.trim();
-      const box = document.getElementById('authMsg');
-      const btn = document.getElementById('verifyBtn');
-      const pw = document.getElementById('pwResult');
-      if(!a) return amsg(box, 'error', 'Enter your answer.');
-      setLoad(btn, box, true);
-      apiVerifyAnswer(recoveryUser, a, r => {
-        setLoad(btn, box, false);
-        if(r && r.success){
-          box.className = 'auth-msg';
-          pw.style.display = 'block';
-          pw.innerHTML = `<strong>Your password:</strong> ${r.password}<br><small>Please log in and change it soon.</small>`;
-        } else {
-          amsg(box, 'error', (r && r.message) || 'Incorrect answer.');
-        }
-      });
-    }
-  };
+// JSONP helpers
+function jsonp(params,cb){ const cbName='cb_'+Date.now(); window[cbName]=d=>{ delete window[cbName]; cb(d); }; const qs=new URLSearchParams({...params,callback:cbName}).toString(); const s=document.createElement('script'); s.src=API_URL+'?'+qs; document.body.appendChild(s); setTimeout(()=>{ if(window[cbName]){ window[cbName]=null; cb({success:false,message:'timeout'}); }},15000); }
+function apiGet(action,data,cb){ jsonp({action,...data},cb); }
+function apiGetUserDevice(u,cb){ apiGet('getUserDevice',{username:u},cb); }
+function apiLinkDevice(u,id,cb){ apiGet('linkDevice',{username:u,deviceId:id},cb); }
+function apiUnlinkDevice(u,cb){ apiGet('unlinkDevice',{username:u},cb); }
 
-  render();
-}
-  
-async function generateAIVariations() {
-  const msgTemplate = document.getElementById('msgTemplate');
-  const originalMsg = msgTemplate.value.trim();
-  
-  if(!originalMsg){
-    showToast('Write a message first', true);
-    return;
-  }
-  
-  showToast('🤖 AI is generating 10 variations... (may take 20-30 seconds)', false);
-  
-  const variations = [];
-  
-  for(let i = 1; i <= 10; i++) {
-    try {
-      const response = await fetch(GOWA_URL + '/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: `Generate variation #${i} of this WhatsApp message. Make it sound different from the others. Keep the same core meaning but change wording, tone, and emojis. Keep it friendly, professional, and conversational. Keep {name} variable for personalization. Original: "${originalMsg}"`
-        })
-      });
-      
-      const data = await response.json();
-      
-      if(data.code === 'SUCCESS'){
-        variations.push(data.results.response);
-        showToast(`Generated ${i}/10 variations...`, false);
-      } else {
-        throw new Error(data.message);
+// ========== LEADFLOW-STYLE DEVICE MANAGEMENT (GoWA v8.5) ==========
+async function getOrCreateDevice(){
+  const user = Session.getUsername();
+  if(!user) return null;
+  return new Promise((resolve)=>{
+    apiGetUserDevice(user, async (res)=>{
+      if(res && res.success && res.hasDevice && res.deviceId){
+        // verify still exists on GoWA
+        try{
+          const dres = await fetch(GOWA_URL+'/devices');
+          const data = await dres.json();
+          let devices = data.results?.devices || (Array.isArray(data.results)?data.results:[]);
+          if(devices.some(d=>d.id===res.deviceId)){ deviceId=res.deviceId; resolve(deviceId); return; }
+        }catch(e){}
       }
-      
-      // Small delay between requests to avoid rate limits
-      await new Promise(r => setTimeout(r, 500));
-      
-    } catch(err) {
-      console.error('Variation generation error:', err);
-      showToast(`Failed at variation ${i}: ${err.message}`, true);
-      return;
-    }
-  }
-  
-  if(variations.length === 10){
-    messageVariations = variations;
-    currentVariationIndex = 0;
-    isUsingVariations = true;
-    
-    // Show variations panel
-    renderVariationsPanel();
-    document.getElementById('variationsPanel').style.display = 'block';
-    
-    // Update template with first variation
-    msgTemplate.value = variations[0];
-    updateCharCount(msgTemplate);
-    
-    showToast(`✅ Generated ${variations.length} variations! Will cycle through during send.`);
-  }
-}
-
-function renderVariationsPanel() {
-  const container = document.getElementById('variationsList');
-  const countSpan = document.getElementById('variationCount');
-  
-  if(!container) return;
-  
-  countSpan.textContent = messageVariations.length;
-  
-  if(messageVariations.length === 0) {
-    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted);">No variations yet. Click "Generate 10 Variations" to start.</div>';
-    return;
-  }
-  
-  container.innerHTML = messageVariations.map((varMsg, idx) => `
-    <div id="var_${idx}" style="border-bottom: 1px solid var(--border); padding: 12px 0;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-        <div style="flex: 1;">
-          <div style="font-family: var(--mono); font-size: 10px; color: var(--accent); margin-bottom: 4px;">Variation ${idx + 1}</div>
-          <div style="font-size: 13px; color: var(--text); word-break: break-word;" id="var_text_${idx}">${escapeHtml(varMsg)}</div>
-        </div>
-        <div style="display: flex; gap: 5px; flex-shrink: 0;">
-          <button class="btn btn-secondary btn-sm" onclick="editVariation(${idx})" style="padding: 4px 8px; font-size: 11px;">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="removeVariation(${idx})" style="padding: 4px 8px; font-size: 11px;">🗑 Remove</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function editVariation(index) {
-  const currentText = messageVariations[index];
-  const newText = prompt('Edit variation message:', currentText);
-  
-  if(newText && newText.trim()) {
-    messageVariations[index] = newText.trim();
-    renderVariationsPanel();
-    
-    // If editing the first variation, update the template
-    if(index === 0) {
-      document.getElementById('msgTemplate').value = newText.trim();
-      updateCharCount(document.getElementById('msgTemplate'));
-    }
-    
-    showToast(`Variation ${index + 1} updated`);
-  }
-}
-
-function removeVariation(index) {
-  if(messageVariations.length <= 1) {
-    showToast('Cannot remove last variation. Clear variations or add more.', true);
-    return;
-  }
-  
-  messageVariations.splice(index, 1);
-  
-  // Adjust current index if needed
-  if(currentVariationIndex >= messageVariations.length) {
-    currentVariationIndex = 0;
-  }
-  
-  renderVariationsPanel();
-  showToast(`Removed variation ${index + 1}. ${messageVariations.length} variations remaining.`);
-  
-  // Update template with first variation
-  if(messageVariations.length > 0) {
-    document.getElementById('msgTemplate').value = messageVariations[0];
-    updateCharCount(document.getElementById('msgTemplate'));
-  }
-}
-
-function regenerateVariations() {
-  if(confirm('Regenerate all 10 variations? This will replace your current variations.')) {
-    generateAIVariations();
-  }
-}
-
-function clearVariations() {
-  if(confirm('Clear all variations? Will switch back to single template mode.')) {
-    messageVariations = [];
-    currentVariationIndex = 0;
-    isUsingVariations = false;
-    document.getElementById('variationsPanel').style.display = 'none';
-    showToast('Variations cleared. Using single template mode.');
-  }
-}
-
-function useSingleTemplate() {
-  messageVariations = [];
-  currentVariationIndex = 0;
-  isUsingVariations = false;
-  document.getElementById('variationsPanel').style.display = 'none';
-  showToast('Switched to single template mode. Variations disabled.');
-}
-  
-  // Contact Deduplication - Keep only unique phone numbers
-function deduplicateContacts(){
-  if(contacts.length === 0){
-    showToast('No contacts to deduplicate', true);
-    return;
-  }
-  
-  const originalCount = contacts.length;
-  const seenPhones = new Set();
-  const uniqueContacts = [];
-  
-  for(const contact of contacts){
-    if(!seenPhones.has(contact.phone)){
-      seenPhones.add(contact.phone);
-      uniqueContacts.push(contact);
-    }
-  }
-  
-  const removedCount = originalCount - uniqueContacts.length;
-  
-  if(removedCount === 0){
-    showToast('✅ No duplicate contacts found');
-    return;
-  }
-  
-  contacts = uniqueContacts;
-  renderContacts();
-  showToast(`✅ Removed ${removedCount} duplicate contacts. ${contacts.length} unique contacts remaining.`);
-}
-
-// Export Contacts to CSV
-function exportContactsToCSV(){
-  if(contacts.length === 0){
-    showToast('No contacts to export', true);
-    return;
-  }
-  
-  // CSV headers
-  const headers = ['Name', 'Phone', 'Message', 'Status'];
-  
-  // Create CSV rows
-  const rows = contacts.map(c => [
-    `"${c.name.replace(/"/g, '""')}"`,  // Escape quotes
-    c.phone,
-    `"${(c.message || '').replace(/"/g, '""')}"`,
-    c.status || 'pending'
-  ]);
-  
-  // Combine headers and rows
-  const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  
-  // Add BOM for Excel UTF-8 support
-  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-  
-  // Create download link
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.href = url;
-  link.setAttribute('download', `contacts_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  
-  showToast(`📥 Exported ${contacts.length} contacts to CSV`);
-}
-// ======================================================
-// SHOW DASHBOARD
-// ======================================================
-function showDashboard(serverData){
-  document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('dashboardWrap').style.display = 'flex';
-
-  const username = SessionManager.getUsername();
-  if(username){
-    document.getElementById('sidebarUsername').textContent = username;
-    document.getElementById('avatarInitial').textContent = username[0].toUpperCase();
-  }
-
-  if(serverData){
-    if(serverData.settings) applySettings(serverData.settings);
-    if(serverData.template) applyTemplate(serverData.template);
-    if(serverData.contacts && Array.isArray(serverData.contacts)){
-      contacts = serverData.contacts;
-      renderContacts();
-    }
-    if(serverData.deviceId){
-      // Server returned a device ID for this user — use it
-      deviceId = serverData.deviceId;
-      setDeviceStatus('connected', deviceId);
-    } else {
-      // No device on record for this user — show disconnected, don't probe GoWA
-      setDeviceStatus('disconnected');
-      deviceId = null;
-    }
-  } else {
-    setDeviceStatus('disconnected');
-    deviceId = null;
-  }
-
-  if(username){
-    apiLoadLogs(username, r => {
-      if(r && r.success && Array.isArray(r.logs)){
-        logs = r.logs.map(l => ({...l, time: new Date(l.timestamp || Date.now())}));
-        renderLogs();
-      }
+      // create new device
+      try{
+        const create = await fetch(GOWA_URL+'/devices',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:`wa_${user}_${Date.now()}`})});
+        const cr = await create.json();
+        let newId = cr.results?.id || cr.id;
+        if(newId){
+          deviceId = newId;
+          await new Promise(r=>apiLinkDevice(user,deviceId,r));
+          resolve(deviceId);
+        } else resolve(null);
+      }catch(e){ resolve(null); }
     });
-  }
-
-  updateSendStats();
-  // Only check live device status if user already has one stored
-  if(deviceId){
-    setTimeout(checkDeviceStatus, 800);
-  }
-}
-  
-function checkUserDevice(){
-  const username = SessionManager.getUsername();
-  if(!username) return;
-  apiGetUserDevice(username, r => {
-    if(r && r.success && r.hasDevice){
-      deviceId = r.deviceId;
-      setDeviceStatus('connected', deviceId);
-      document.getElementById('deviceWarning').style.display = 'none';
-    } else {
-      deviceId = null;
-      setDeviceStatus('disconnected');
-    }
   });
 }
 
-// ======================================================
-// INIT
-// ======================================================
-window.onload = function(){
-  if(SessionManager.isValid()){
-    reloadSessionData();
-  } else {
-    showAuth();
-  }
-};
+async function loadQR(){
+  const wrap = document.getElementById('qrWrap');
+  if(!wrap) return;
+  wrap.innerHTML = '<div>⏳</div><div>Initializing device...</div>';
+  setDeviceStatus('scanning',null);
+  const dev = await getOrCreateDevice();
+  if(!dev){ wrap.innerHTML = '<div>❌</div><div>Failed to create device</div>'; return; }
+  try{
+    const qrResp = await fetch(GOWA_URL+'/app/login?format=json',{headers:{'X-Device-Id':dev}});
+    const qrJson = await qrResp.json();
+    let qrLink = qrJson.results?.qr_link || qrJson.qr_link;
+    let duration = qrJson.results?.qr_duration || 60;
+    if(qrLink){
+      const img = document.createElement('img');
+      img.src = qrLink;
+      img.onload = ()=>{
+        wrap.innerHTML = '';
+        wrap.appendChild(img);
+        wrap.innerHTML += '<div class="qr-hint">Scan with WhatsApp → Linked Devices</div>';
+        startQrCountdown(duration);
+        startDevicePolling(dev);
+      };
+      img.onerror = ()=>{ wrap.innerHTML = '<div>❌</div><div>QR load failed</div>'; };
+    } else throw new Error('no qr');
+  }catch(e){ wrap.innerHTML = '<div>❌</div><div>Server unreachable</div>'; }
+}
 
-function reloadSessionData(){
-  const username = SessionManager.getUsername();
-  if(!username){ showAuth(); return; }
-  showToast('Restoring your session…');
-  jsonpRequest({action:'loadClientData', username}, r => {
-    try {
-      if(r && r.success){
-        showDashboard(r);
-      } else {
-        showDashboard(null);
+function startDevicePolling(devId){
+  if(devicePollTimer) clearInterval(devicePollTimer);
+  devicePollTimer = setInterval(async()=>{
+    try{
+      const res = await fetch(GOWA_URL+'/devices',{headers:{'X-Device-Id':devId}});
+      const data = await res.json();
+      let devices = data.results?.devices || (Array.isArray(data.results)?data.results:[]);
+      const myDev = devices.find(d=>d.id===devId);
+      if(myDev && myDev.is_connected===true){
+        clearInterval(devicePollTimer); devicePollTimer=null;
+        if(qrCountdown) clearInterval(qrCountdown);
+        setDeviceStatus('connected',devId);
+        const sess = Session.get();
+        if(sess) sess.deviceId=devId, Session.set(sess);
+        document.getElementById('qrWrap').innerHTML='<div>✅</div><div>Device Connected!</div>';
+        document.getElementById('disconnectBtn').style.display='inline-flex';
       }
-    } catch(e){
-      console.error('Dashboard restore error:', e);
-      showDashboard(null);
-    }
-  });
+    }catch(e){}
+  },3000);
 }
-
-function logout(){
-  SessionManager.clear();
-  contacts = []; logs = []; deviceId = null;
-  stopDevicePolling();
-  clearInterval(qrCountdown);
-  showAuth();
-}
-
-// ======================================================
-// TABS
-// ======================================================
-function switchTab(name){
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const panel = document.getElementById('tab-' + name);
-  if(panel) panel.classList.add('active');
-  const labels = ['device','contacts','compose','send','settings','logs'];
-  const idx = labels.indexOf(name);
-  if(idx >= 0){
-    const navItems = document.querySelectorAll('.nav-item');
-    if(navItems[idx]) navItems[idx].classList.add('active');
-  }
-  document.getElementById('topbarTitle').textContent = name.charAt(0).toUpperCase() + name.slice(1);
-  if(name === 'device'){ checkUserDevice(); checkDeviceStatus(); }
-}
-
-// ======================================================
-// CONTACTS
-// ======================================================
-function togglePaste(){
-  const el = document.getElementById('pasteArea');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function parsePaste(){
-  const raw = document.getElementById('pasteInput').value.trim();
-  if(!raw){
-    showToast('Paste some data first', true);
-    return;
-  }
-  
-  const lines = raw.split(/\r?\n/);
-  const newContacts = [];
-  let headerSkipped = false;
-  
-  // Take last 10 lines only (skip empty lines)
-  const nonEmptyLines = lines.filter(l => l.trim());
-  const last10Lines = nonEmptyLines;
-  
-  for(let i = 0; i < last10Lines.length; i++){
-    const line = last10Lines[i].trim();
-    if(!line) continue;
-    
-    // Try tab first, then comma, then space
-    let columns;
-    if(line.includes('\t')){
-      columns = line.split('\t');
-    } else if(line.includes(',')){
-      columns = line.split(',');
-    } else {
-      columns = line.split(/\s+/);
-    }
-    
-    // Clean each column
-    columns = columns.map(c => c.trim().replace(/^["']|["']$/g, ''));
-    
-    // Skip header row if it looks like headers
-    const firstCol = columns[0].toLowerCase();
-    if(!headerSkipped && (firstCol === 'name' || firstCol === 'nama' || firstCol === 'phone' || firstCol === 'no' || firstCol === 'nomor')){
-      headerSkipped = true;
-      continue;
-    }
-    
-    let name = columns[0] || '';
-    let phone = columns[1] || '';
-    let message = columns[2] || '';
-    
-    // If only 2 columns, assume name and phone
-    if(columns.length === 2){
-      message = '';
-    }
-    
-    // Clean phone number for INDIA (+91)
-    phone = phone.toString().replace(/\D/g, '');
-    
-    if(phone && phone.length >= 10){
-      // Remove any existing country code if present
-      if(phone.startsWith('91') && phone.length > 10){
-        phone = phone.substring(2);
-      }
-      if(phone.startsWith('0')){
-        phone = phone.substring(1);
-      }
-      // Add +91 country code
-      phone = '91' + phone;
-      
-      newContacts.push({
-        id: Date.now() + i,
-        name: name || phone,
-        phone: phone,
-        message: message || '',
-        status: 'pending'
-      });
-    }
-  }
-  
-  // Pick only last 10 contacts if more than 10 were parsed
-  const finalContacts = newContacts;
-  
-  if(finalContacts.length === 0){
-    showToast('No valid contacts found. Use format: Name[TAB]Phone[TAB]Message', true);
-    return;
-  }
-  
-  contacts = [...contacts, ...finalContacts];
-  renderContacts();
-  document.getElementById('pasteArea').style.display = 'none';
-  document.getElementById('pasteInput').value = '';
-  showToast(`✅ Imported ${finalContacts.length} contacts from paste (last ${finalContacts.length} from ${newContacts.length} parsed)`);
-}
-
-
-
-function handleFileUpload(input){
-  const file = input.files[0];
-  if(!file){
-    showToast('No file selected', true);
-    return;
-  }
-  
-  const fileName = file.name;
-  const fileExt = fileName.split('.').pop().toLowerCase();
-  
-  showToast(`Reading ${fileName}...`);
-  
-  if(fileExt === 'csv'){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const content = e.target.result;
-      parseCSVContent(content);
-    };
-    reader.onerror = function(){
-      showToast('Error reading CSV file', true);
-    };
-    reader.readAsText(file, 'UTF-8');
-  } 
-  else if(fileExt === 'xlsx' || fileExt === 'xls'){
-    // Check if SheetJS is loaded
-    if(typeof XLSX === 'undefined'){
-      showToast('Loading Excel parser...', false);
-      // Wait for SheetJS to load
-      const checkInterval = setInterval(function(){
-        if(typeof XLSX !== 'undefined'){
-          clearInterval(checkInterval);
-          parseExcelFile(file);
-        }
-      }, 500);
-      setTimeout(function(){
-        clearInterval(checkInterval);
-        if(typeof XLSX === 'undefined'){
-          showToast('Failed to load Excel parser. Please refresh and try again.', true);
-        }
-      }, 10000);
-    } else {
-      parseExcelFile(file);
-    }
-  } 
-  else {
-    showToast('Unsupported file type. Please use .csv, .xlsx, or .xls', true);
-  }
-  
-  input.value = ''; // Clear so same file can be selected again
-}
-
-function parseExcelFile(file){
-  const reader = new FileReader();
-  
-  reader.onload = function(e){
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      
-      // Get first sheet
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      
-      // Convert to JSON (header: 1 means first row is headers)
-      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-      
-      if(!rows || rows.length < 2){
-        showToast('Excel file has no data rows', true);
-        return;
-      }
-      
-      const newContacts = [];
-      let headers = [];
-      let startRow = 0;
-      
-      // Detect if first row has headers
-      const firstRow = rows[0];
-      const headerKeywords = ['name', 'nama', 'phone', 'no', 'nomor', 'contact', 'number', 'hp'];
-      let hasHeader = false;
-      
-      if(firstRow && firstRow.length > 0){
-        for(let i = 0; i < firstRow.length && i < 3; i++){
-          const cell = String(firstRow[i] || '').toLowerCase();
-          if(headerKeywords.some(keyword => cell.includes(keyword))){
-            hasHeader = true;
-            break;
-          }
-        }
-      }
-      
-      if(hasHeader){
-        headers = rows[0].map(cell => String(cell || '').toLowerCase());
-        startRow = 1;
-      }
-      
-      // Find column indices
-      let nameIdx = 0, phoneIdx = 1, msgIdx = 2;
-      
-      if(hasHeader && headers.length > 0){
-        nameIdx = -1;
-        phoneIdx = -1;
-        msgIdx = -1;
-        
-        for(let i = 0; i < headers.length; i++){
-          const h = headers[i];
-          if(h === 'name' || h === 'nama' || h === 'contact') nameIdx = i;
-          if(h === 'phone' || h === 'no' || h === 'nomor' || h === 'number' || h === 'hp') phoneIdx = i;
-          if(h === 'message' || h === 'pesan' || h === 'msg') msgIdx = i;
-        }
-        
-        // If no name/phone columns found, use first two columns
-        if(nameIdx === -1) nameIdx = 0;
-        if(phoneIdx === -1) phoneIdx = 1;
-        if(msgIdx === -1) msgIdx = 2;
-      }
-      
-      // Process rows (take only last 10)
-      const totalRows = rows.length;
-      const startParseRow = startRow;
-      
-      for(let i = startParseRow; i < totalRows; i++){
-        const row = rows[i];
-        if(!row || row.length === 0) continue;
-        
-        let name = nameIdx < row.length ? String(row[nameIdx] || '') : '';
-        let phone = phoneIdx < row.length ? String(row[phoneIdx] || '') : '';
-        let message = msgIdx < row.length ? String(row[msgIdx] || '') : '';
-        
-        // Clean phone number for INDIA (+91)
-        phone = phone.toString().replace(/\D/g, '');
-        
-        if(phone && phone.length >= 10){
-          // Remove any existing country code if present
-          if(phone.startsWith('91') && phone.length > 10){
-            phone = phone.substring(2);
-          }
-          if(phone.startsWith('0')){
-            phone = phone.substring(1);
-          }
-          // Add +91 country code
-          phone = '91' + phone;
-          
-          newContacts.push({
-            id: Date.now() + i,
-            name: name || phone,
-            phone: phone,
-            message: message || '',
-            status: 'pending'
-          });
-        }
-      }
-      
-      // Pick only last 10 contacts
-      const finalContacts = newContacts;
-      
-      if(finalContacts.length === 0){
-        showToast('No valid contacts found in Excel file', true);
-        return;
-      }
-      
-      contacts = [...contacts, ...finalContacts];
-      renderContacts();
-      showToast(`✅ Imported ${finalContacts.length} contacts from Excel (last ${finalContacts.length} from ${newContacts.length} parsed)`);
-      
-    } catch(err){
-      console.error('Excel parse error:', err);
-      showToast('Error parsing Excel file: ' + err.message, true);
-    }
-  };
-  
-  reader.onerror = function(){
-    showToast('Error reading Excel file', true);
-  };
-  
-  reader.readAsArrayBuffer(file);
-}
-
-function parseCSVContent(csvText){
-  const lines = csvText.split(/\r?\n/);
-  const newContacts = [];
-  let headerSkipped = false;
-  
-  for(let i = 0; i < lines.length; i++){
-    const line = lines[i].trim();
-    if(!line) continue;
-    
-    // Parse CSV respecting quotes
-    let columns = [];
-    let inQuotes = false;
-    let current = '';
-    
-    for(let j = 0; j < line.length; j++){
-      const char = line[j];
-      if(char === '"'){
-        inQuotes = !inQuotes;
-      } else if(char === ',' && !inQuotes){
-        columns.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    columns.push(current.trim());
-    
-    // Remove quotes from each column
-    columns = columns.map(c => c.replace(/^"|"$/g, '').trim());
-    
-    // Skip header row
-    const firstCol = columns[0].toLowerCase();
-    if(!headerSkipped && (firstCol === 'name' || firstCol === 'nama' || firstCol === 'phone' || firstCol === 'no' || firstCol === 'nomor' || firstCol === 'contact')){
-      headerSkipped = true;
-      continue;
-    }
-    
-    let name = columns[0] || '';
-    let phone = columns[1] || '';
-    let message = columns[2] || '';
-    
-    // If only 2 columns, assume name and phone
-    if(columns.length === 2){
-      message = '';
-    }
-    
-    // Clean phone number for INDIA (+91)
-    phone = phone.toString().replace(/\D/g, '');
-    
-    if(phone && phone.length >= 10){
-      // Remove any existing country code if present
-      if(phone.startsWith('91') && phone.length > 10){
-        phone = phone.substring(2);
-      }
-      if(phone.startsWith('0')){
-        phone = phone.substring(1);
-      }
-      // Add +91 country code
-      phone = '91' + phone;
-      
-      newContacts.push({
-        id: Date.now() + i,
-        name: name || phone,
-        phone: phone,
-        message: message || '',
-        status: 'pending'
-      });
-    }
-  }
-  
-  // Pick only last 10 contacts from CSV
-  const finalContacts = newContacts;
-  
-  if(finalContacts.length === 0){
-    showToast('No valid contacts found in CSV. Expected columns: Name, Phone, Message', true);
-    return;
-  }
-  
-  contacts = [...contacts, ...finalContacts];
-  renderContacts();
-  showToast(`✅ Imported ${finalContacts.length} contacts from CSV (last ${finalContacts.length} from ${newContacts.length} parsed)`);
-}
-
-  
-function renderContacts(list){
-  const data = list || contacts;
-  document.getElementById('contactCount').textContent = contacts.length;
-  document.getElementById('contactTotal').textContent = contacts.length;
-  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
-
-  const tbody = document.getElementById('contactTableBody');
-  if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No contacts yet — upload or paste above</td></tr>';
-    return;
-  }
-  tbody.innerHTML = data.map((c, i) => `<tr>
-    <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
-    <td style="font-weight:600">${esc(c.name)}</td>
-    <td style="font-family:var(--mono);font-size:12px">${esc(c.phone)}</td>
-    <td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'<em style="color:var(--muted)">uses template</em>'}</td>
-    <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeContact(${c.id})">✕</button></td>
-  </tr>`).join('');
-}
-
-function filterContacts(q){
-  renderContacts(contacts.filter(c =>
-    c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q)
-  ));
-}
-
-function removeContact(id){
-  contacts = contacts.filter(c => c.id !== id);
-  renderContacts();
-}
-
-function clearContacts(){
-  if(!contacts.length) return;
-  const username = SessionManager.getUsername();
-  contacts = [];
-  renderContacts();
-  if(username){
-    apiGet('clearContacts', {username}).then(r =>
-      showToast(r.success ? 'Contacts cleared ✅' : 'Clear failed', !r.success)
-    );
-  } else {
-    showToast('Contacts cleared');
-  }
-}
-
-function saveContacts(){
-  const username = SessionManager.getUsername();
-  if(!username){ showToast('Not logged in', true); return; }
-  if(!contacts.length){ showToast('No contacts to save', true); return; }
-  showToast('Saving contacts…');
-  const CHUNK = 20;
-  const chunks = [];
-  for(let i = 0; i < contacts.length; i += CHUNK) chunks.push(contacts.slice(i, i + CHUNK));
-  const totalChunks = chunks.length;
-  let saved = 0;
-
-  function sendChunk(i){
-    if(i >= totalChunks){ showToast(contacts.length + ' contacts saved to Sheet ✅'); return; }
-    jsonpRequest({
-      action: 'saveContactsChunk',
-      username,
-      chunkIndex: i,
-      totalChunks,
-      chunk: JSON.stringify(chunks[i])
-    }, r => {
-      if(!r || !r.success){ showToast('Save failed on chunk ' + (i+1) + ': ' + (r && r.message), true); return; }
-      saved += chunks[i].length;
-      showToast('Saving… ' + saved + '/' + contacts.length);
-      sendChunk(i + 1);
-    });
-  }
-  sendChunk(0);
-}
-
-// ======================================================
-// GROUP IMPORT
-// ======================================================
-function openGroupImport(){
-  const c = document.getElementById('groupImportCard');
-  c.style.display = c.style.display === 'none' ? 'block' : 'none';
-}
-
-function fetchGroups(){
-  const url = getGowaUrl();
-  if(!url){
-    showToast('GoWA server URL not configured', true);
-    return;
-  }
-  
-  const groupListDiv = document.getElementById('groupList');
-  groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">📡 Fetching your groups...</div>';
-  
-  fetch(url + '/user/my/groups')
-    .then(r => r.json())
-    .then(data => {
-      console.log('Groups response:', data);
-      
-      let groups = [];
-      if(data.code === 'SUCCESS' && data.results && data.results.data){
-        groups = data.results.data;
-      }
-      
-      if(!groups.length){
-        groupListDiv.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">📭 No groups found. Make sure WhatsApp is connected.</div>';
-        return;
-      }
-      
-      groupListDiv.innerHTML = groups.map(g => {
-        const groupId = g.JID || g.id || '';
-        const groupName = g.Name || g.subject || groupId;
-        const memberCount = g.Participants ? g.Participants.length : 0;
-        
-        return `<div class="group-item" onclick="selectGroup('${escapeHtml(groupId)}', '${escapeHtml(groupName)}')">
-          <input type="radio" name="groupSel" value="${escapeHtml(groupId)}" id="group_${escapeHtml(groupId)}"/>
-          <span>👥 ${escapeHtml(groupName)}</span>
-          <span class="group-count">${memberCount} members</span>
-        </div>`;
-      }).join('');
-    })
-    .catch(err => {
-      console.error('Fetch groups error:', err);
-      groupListDiv.innerHTML = `<div style="padding:16px;text-align:center;color:var(--accent3);font-size:13px">
-        ❌ Failed to fetch groups.<br/>
-        <small>Make sure GoWA server is running and device is connected.</small>
-      </div>`;
-    });
-}
-
-function escapeHtml(str){
-  if(!str) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-let selectedGroupId = null;
-let selectedGroupName = '';
-
-function selectGroup(id, name){
-  selectedGroupId = id;
-  selectedGroupName = name;
-  // Update visual selection
-  document.querySelectorAll('.group-item').forEach(el => {
-    el.style.background = 'transparent';
-  });
-  if(event && event.currentTarget){
-    event.currentTarget.style.background = 'rgba(0,229,160,.08)';
-  }
-}
-
-function importGroupContacts(){
-  if(!selectedGroupId){
-    showToast('Please select a group first', true);
-    return;
-  }
-  
-  const url = getGowaUrl();
-  if(!url){
-    showToast('GoWA server URL not configured', true);
-    return;
-  }
-  
-  showToast(`Fetching members from ${selectedGroupName}...`);
-  
-  // Fetch the specific group data to get members
-  fetch(url + '/user/my/groups')
-    .then(r => r.json())
-    .then(data => {
-      if(data.code !== 'SUCCESS' || !data.results || !data.results.data){
-        throw new Error('Failed to fetch group data');
-      }
-      
-      // Find the selected group
-      const groups = data.results.data;
-      const selectedGroup = groups.find(g => g.JID === selectedGroupId);
-      
-      if(!selectedGroup){
-        showToast('Group not found', true);
-        return;
-      }
-      
-      const participants = selectedGroup.Participants || [];
-      
-      if(!participants.length){
-        showToast('No members found in this group', true);
-        return;
-      }
-      
-      // Get existing phone numbers to avoid duplicates
-      const existingPhones = new Set(contacts.map(c => c.phone));
-      
-      const newContacts = [];
-      
-      for(let i = 0; i < participants.length; i++){
-        const p = participants[i];
-        let phone = p.PhoneNumber || '';
-        
-        // Extract phone from format: 919337373881@s.whatsapp.net
-        if(phone && phone.includes('@')){
-          phone = phone.split('@')[0];
-        }
-        
-        // Clean phone number (remove any non-digits)
-        phone = phone.toString().replace(/\D/g, '');
-        
-        if(phone && phone.length >= 10){
-          // Format for India (+91)
-          if(phone.startsWith('91') && phone.length > 10){
-            phone = phone.substring(2);
-          }
-          if(phone.startsWith('0')){
-            phone = phone.substring(1);
-          }
-          phone = '91' + phone;
-          
-          // Skip duplicates
-          if(!existingPhones.has(phone)){
-            newContacts.push({
-              id: Date.now() + i,
-              name: phone,  // Use phone number as name
-              phone: phone,
-              message: '',
-              status: 'pending'
-            });
-            existingPhones.add(phone); // Add to set to avoid duplicates within same import
-          }
-        }
-      }
-      
-      if(newContacts.length === 0){
-        showToast('No new valid contacts found in this group', true);
-        return;
-      }
-      
-      // Add all new contacts (no limit)
-      contacts = [...contacts, ...newContacts];
-      renderContacts();
-      document.getElementById('groupImportCard').style.display = 'none';
-      showToast(`✅ Imported ${newContacts.length} members from "${selectedGroupName}"`);
-      
-      // Reset selection
-      selectedGroupId = null;
-      selectedGroupName = '';
-    })
-    .catch(err => {
-      console.error('Import group error:', err);
-      showToast('Failed to fetch group members: ' + err.message, true);
-    });
-}
-// ======================================================
-// COMPOSE
-// ======================================================
-function updateCharCount(el){ document.getElementById('charCount').textContent = el.value.length; }
-
-function insertVar(v){
-  const ta = document.getElementById('msgTemplate');
-  const s = ta.selectionStart, e = ta.selectionEnd;
-  ta.value = ta.value.slice(0, s) + v + ta.value.slice(e);
-  ta.selectionStart = ta.selectionEnd = s + v.length;
-  ta.focus();
-  updateCharCount(ta);
-}
-
-function selectAttach(type, el){
-  document.querySelectorAll('.attach-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedAttach = type;
-  document.getElementById('attachFileArea').style.display = (type !== 'none' && type !== 'poll') ? 'block' : 'none';
-  document.getElementById('pollArea').style.display = (type === 'poll') ? 'block' : 'none';
-}
-
-function handleAttachUpload(input){
-  const f = input.files[0];
-  if(!f) return;
-  document.getElementById('attachName').textContent = f.name;
-  document.getElementById('attachSize').textContent = (f.size/1024).toFixed(1) + ' KB';
-  document.getElementById('attachEmoji').textContent = f.type.startsWith('image') ? '🖼' : f.type.startsWith('video') ? '🎬' : '📄';
-  document.getElementById('attachPreview').style.display = 'block';
-  showToast('File ready — will upload to server on send ✅');
-}
-
-function clearAttach(){
-  document.getElementById('attachFile').value = '';
-  document.getElementById('attachPreview').style.display = 'none';
-}
-
-function addPollOption(){
-  const w = document.getElementById('pollOptions');
-  const n = w.children.length + 1;
-  const d = document.createElement('div');
-  d.className = 'form-group';
-  d.style.marginBottom = '8px';
-  d.innerHTML = `<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`;
-  w.appendChild(d);
-}
-
-function applyTemplate(t){
-  if(!t) return;
-  if(t.body){ document.getElementById('msgTemplate').value = t.body; updateCharCount(document.getElementById('msgTemplate')); }
-  if(t.attachType){
-    const opt = document.querySelector(`.attach-opt[onclick*="'${t.attachType}'"]`);
-    if(opt) selectAttach(t.attachType, opt);
-  }
-  if(t.pollQuestion) document.getElementById('pollQuestion').value = t.pollQuestion;
-}
-
-function saveCompose(){
-  const username = SessionManager.getUsername();
-  if(!username){ showToast('Not logged in', true); return; }
-  const template = {
-    body:         document.getElementById('msgTemplate').value,
-    attachType:   selectedAttach,
-    attachUrl:    '',
-    pollQuestion: document.getElementById('pollQuestion') ? document.getElementById('pollQuestion').value : '',
-    pollOptions:  JSON.stringify([...document.querySelectorAll('#pollOptions input')].map(i => i.value).filter(Boolean))
-  };
-  showToast('Saving template…');
-  apiGet('saveTemplate', {username, ...template}).then(r => {
-    showToast(r.success ? 'Template saved ✅' : 'Save failed: ' + r.message, !r.success);
-  });
-}
-
-// ======================================================
-// SEND
-// ======================================================
-function startSend(){
-  if(!contacts.length){ showToast('No contacts to send', true); return; }
-  if(sendState === 'running') return;
-  const username = SessionManager.getUsername();
-  if(!username){ showToast('Not logged in', true); return; }
-  if(!deviceId){ showToast('No device linked. Please link your WhatsApp device first.', true); switchTab('device'); return; }
-
-  const serverUrl = GOWA_URL;
-  if(!serverUrl){ showToast('GoWA server not configured', true); return; }
-
-  apiValidateDevice(username, deviceId, valid => {
-   if(!valid || !valid.success || !valid.valid){
-      showToast('Your device is not linked to your account. Please re-link your device.', true);
-      switchTab('device');
-      return;
-    }
-    sendState = 'running';
-    if(sendIndex >= contacts.length) sendIndex = 0;
-    document.getElementById('pauseIndicator').style.background = 'var(--accent)';
-    processSend();
-  });
-}
-
-function pauseSend(){
-  sendState = 'paused';
-  clearTimeout(sendTimer);
-  document.getElementById('currentContact').textContent = '⏸ Paused';
-  document.getElementById('pauseIndicator').style.background = '#ffd166';
-}
-
-function stopSend(){
-  sendState = 'idle';
-  sendIndex = 0;
-  clearTimeout(sendTimer);
-  document.getElementById('currentContact').textContent = 'Ready to send';
-  document.getElementById('queueStatus').textContent = '0 / ' + contacts.length + ' contacts processed';
-  document.getElementById('progressBar').style.width = '0%';
-  document.getElementById('progressPct').textContent = '0%';
-  document.getElementById('pauseIndicator').style.background = 'var(--muted)';
-}
-
-function processSend(){
-  if(sendState !== 'running') return;
-  if(sendIndex >= contacts.length){
-    sendState = 'idle';
-    document.getElementById('currentContact').textContent = '✅ Campaign complete!';
-    document.getElementById('queueStatus').textContent = contacts.length + ' / ' + contacts.length + ' contacts processed';
-    document.getElementById('progressBar').style.width = '100%';
-    document.getElementById('progressPct').textContent = '100%';
-    showToast('All messages sent ✅');
-    saveContacts();
-    return;
-  }
-
-  const hl = parseInt(document.getElementById('hourLimit').value) || 30;
-  const dl = parseInt(document.getElementById('dayLimit').value) || 200;
-
-  if(hourSent >= hl){ pauseSend(); showToast('⏸ Hourly limit reached — paused', true); return; }
-  if(todaySent >= dl){ stopSend(); showToast('Daily limit reached — campaign stopped', true); return; }
-
-  const c = contacts[sendIndex];
-  const pct = Math.round((sendIndex / contacts.length) * 100);
-  const username = SessionManager.getUsername();
-  const serverUrl = GOWA_URL;
-  const template = document.getElementById('msgTemplate').value;
-  
-  // Select message: use variation if available, otherwise use template
-  let msgBody;
-  let variationInfo = '';
-  
-  if(isUsingVariations && messageVariations.length > 0){
-    // Get current variation and cycle to next
-    msgBody = messageVariations[currentVariationIndex];
-    variationInfo = ` (Var ${currentVariationIndex + 1}/${messageVariations.length})`;
-    currentVariationIndex = (currentVariationIndex + 1) % messageVariations.length;
-    // Replace variables
-    msgBody = msgBody.replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
-  } else {
-    msgBody = (c.message || template).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone);
-    variationInfo = '';
-  }
-
-  document.getElementById('currentContact').textContent = `📤 Sending to ${c.name}${variationInfo}`;
-  document.getElementById('queueStatus').textContent = sendIndex + ' / ' + contacts.length + ' contacts processed';
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-
-  // Format phone number for India (+91)
-  let formattedPhone = c.phone.toString().replace(/\D/g, '');
-  if (formattedPhone.length === 10) {
-    formattedPhone = '91' + formattedPhone;
-  } else if (formattedPhone.length === 12 && formattedPhone.startsWith('91')) {
-    formattedPhone = formattedPhone;
-  } else if (formattedPhone.length > 10 && !formattedPhone.startsWith('91')) {
-    formattedPhone = '91' + formattedPhone.substring(formattedPhone.length - 10);
-  }
-  const payload = {phone: formattedPhone, message: msgBody};
-  if(deviceId) payload.device = deviceId;
-
-  fetch(serverUrl + '/send/message', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    const success = res.code === 'SUCCESS';
-    contacts[sendIndex].status = success ? 'sent' : 'failed';
-    sendIndex++;
-    if(success){ todaySent++; hourSent++; }
-    updateSendStats();
-    const prevContact = contacts[sendIndex - 1];
-    if(username) apiGet('saveLog', {username, type: prevContact.status, name: c.name, phone: c.phone, message: msgBody, status: prevContact.status});
-    addLog({type: prevContact.status, name: c.name, msg: msgBody.substring(0, 100), time: new Date()});
-    renderContacts();
-    if(username && c.id) apiGet('updateContact', {username, rowIndex: c.id, status: prevContact.status});
-    scheduleNext();
-  })
-  .catch(() => {
-    contacts[sendIndex].status = 'failed';
-    sendIndex++;
-    updateSendStats();
-    addLog({type:'failed', name: c.name, msg:'Send failed — server unreachable', time: new Date()});
-    renderContacts();
-    scheduleNext();
-  });
-}
-  
-function scheduleNext(){
-  const minG = parseInt(document.getElementById('minGap').value) * 1000;
-  const maxG = parseInt(document.getElementById('maxGap').value) * 1000;
-  const gap = Math.floor(Math.random() * (maxG - minG + 1)) + minG;
-  sendTimer = setTimeout(processSend, gap);
-}
-function resetVariations(){
-  messageVariations = [];
-  currentVariationIndex = 0;
-  isUsingVariations = false;
-  showToast('Variations cleared. Using single template.');
-}
-  
-function updateSendStats(){
-  const dl = parseInt(document.getElementById('dayLimit').value) || 200;
-  const hl = parseInt(document.getElementById('hourLimit').value) || 30;
-  document.getElementById('sentCount').textContent = contacts.filter(c => c.status === 'sent').length;
-  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
-  document.getElementById('failedCount').textContent = contacts.filter(c => c.status === 'failed').length;
-  document.getElementById('repliedCount').textContent = contacts.filter(c => c.status === 'replied').length;
-  document.getElementById('todaySentDisplay').textContent = todaySent;
-  document.getElementById('hourSentDisplay').textContent = hourSent;
-  document.getElementById('dailyLimitDisplay').textContent = dl;
-  document.getElementById('hourLimitDisplay').textContent = hl;
-  document.getElementById('dailyBar').style.width = Math.min(100, (todaySent/dl)*100) + '%';
-  document.getElementById('hourBar').style.width = Math.min(100, (hourSent/hl)*100) + '%';
-}
-
-// ======================================================
-// SETTINGS
-// ======================================================
-function applySettings(s){
-  if(!s) return;
-  if(s.hourLimit)  document.getElementById('hourLimit').value = s.hourLimit;
-  if(s.dayLimit)   document.getElementById('dayLimit').value = s.dayLimit;
-  if(s.minGap){    document.getElementById('minGap').value = s.minGap;  document.getElementById('minGapVal').textContent = s.minGap + 's'; }
-  if(s.maxGap){    document.getElementById('maxGap').value = s.maxGap;  document.getElementById('maxGapVal').textContent = s.maxGap + 's'; }
-  if(s.autoReply !== undefined){ document.getElementById('autoReplyToggle').checked = !!s.autoReply; document.getElementById('autoReplyPromptArea').style.display = s.autoReply ? 'block' : 'none'; }
-  if(s.autoReplyPrompt) document.getElementById('autoReplyPrompt').value = s.autoReplyPrompt;
-  if(s.pauseOnReply !== undefined) document.getElementById('pauseOnReplyToggle').checked = !!s.pauseOnReply;
-  if(s.aiRewrite !== undefined) document.getElementById('aiRewriteSettingToggle').checked = !!s.aiRewrite;
-}
-
-function saveSettings(){
-  const username = SessionManager.getUsername();
-  if(!username){ showToast('Not logged in', true); return; }
-  const s = {
-    username,
-    hourLimit:       document.getElementById('hourLimit').value,
-    dayLimit:        document.getElementById('dayLimit').value,
-    minGap:          document.getElementById('minGap').value,
-    maxGap:          document.getElementById('maxGap').value,
-    autoReply:       document.getElementById('autoReplyToggle').checked,
-    autoReplyPrompt: document.getElementById('autoReplyPrompt') ? document.getElementById('autoReplyPrompt').value : '',
-    pauseOnReply:    document.getElementById('pauseOnReplyToggle').checked,
-    aiRewrite:       document.getElementById('aiRewriteSettingToggle').checked
-  };
-  showToast('Saving settings…');
-  apiGet('saveSettings', s).then(r => {
-    showToast(r.success ? 'Settings saved ✅' : 'Save failed: ' + r.message, !r.success);
-  });
-}
-
-function testServer(){
-  const url = GOWA_URL;
-  const el = document.getElementById('testResult');
-  if(el){
-    el.style.color = 'var(--text2)';
-    el.textContent = 'Testing…';
-    fetch(url)
-      .then(r => {
-        if(r.ok){ el.style.color = 'var(--accent)'; el.textContent = '● Connected'; }
-        else { el.style.color = 'var(--accent3)'; el.textContent = '● Error ' + r.status; }
-      })
-      .catch(() => { el.style.color = 'var(--accent3)'; el.textContent = '● Unreachable'; });
-  }
-}
-
-function toggleAutoReply(){
-  document.getElementById('autoReplyPromptArea').style.display =
-    document.getElementById('autoReplyToggle').checked ? 'block' : 'none';
-}
-
-// ======================================================
-// LOGS
-// ======================================================
-function addLog(entry){ logs.unshift(entry); renderLogs(); }
-
-function renderLogs(filter){
-  const f = filter || (document.getElementById('logFilter') ? document.getElementById('logFilter').value : 'all');
-  const data = f !== 'all' ? logs.filter(l => l.type === f) : logs;
-  const el = document.getElementById('logsList');
-  if(!data.length){
-    el.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px">No activity yet</div>';
-    return;
-  }
-  el.innerHTML = data.map(l => `<div class="log-entry">
-    <div class="log-dot ${l.type||'sent'}"></div>
-    <div class="log-body">
-      <div class="log-name">${esc(l.name||'')} <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">[${l.type||'sent'}]</span></div>
-      <div class="log-msg">${esc(l.msg||l.message||'')}</div>
-      <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : new Date(l.timestamp||l.time||Date.now()).toLocaleTimeString()}</div>
-    </div>
-  </div>`).join('');
-}
-
-function filterLogs(){ renderLogs(document.getElementById('logFilter').value); }
-function clearLogs(){ logs = []; renderLogs(); }
-
-// ======================================================
-// DEVICE MANAGEMENT
-// ======================================================
-function getGowaUrl(){ return GOWA_URL; }
 
 function setDeviceStatus(state, id){
-  const dot    = document.getElementById('pollDot');
-  const label  = document.getElementById('pollLabel');
-  const icon   = document.getElementById('deviceStatusIcon');
-  const title  = document.getElementById('deviceStatusTitle');
-  const idEl   = document.getElementById('deviceStatusId');
-  const card   = document.getElementById('deviceStatusCard');
-  const topDot = document.getElementById('topbarDot');
-  const topLbl = document.getElementById('topbarStatus');
-  const discBtn= document.getElementById('disconnectBtn');
-  const warning= document.getElementById('deviceWarning');
-
-  if(state === 'connected'){
-    if(dot)  { dot.className = 'poll-dot connected'; }
-    if(label){ label.textContent = 'CONNECTED'; }
-    if(icon) { icon.textContent = '📱'; }
-    if(title){ title.textContent = 'Device Connected ✅'; }
-    if(idEl) { idEl.textContent = 'Your Device ID: ' + (id || deviceId || 'Unknown'); }
-    if(card) { card.className = 'device-status-card device-connected'; }
-    if(topDot){ topDot.style.background = 'var(--accent)'; topDot.style.boxShadow = '0 0 8px var(--accent)'; }
-    if(topLbl){ topLbl.textContent = 'DEVICE CONNECTED'; topLbl.style.color = 'var(--accent)'; }
-    if(discBtn){ discBtn.style.display = 'inline-flex'; }
-    document.getElementById('deviceBadge').style.display = 'none';
-    if(warning){ warning.style.display = 'none'; }
-    deviceId = id;
-  } else if(state === 'scanning'){
-    if(dot)  { dot.className = 'poll-dot scanning'; }
-    if(label){ label.textContent = 'SCANNING…'; }
-    if(icon) { icon.textContent = '⏳'; }
-    if(title){ title.textContent = 'Waiting for QR scan…'; }
-    if(idEl) { idEl.textContent = 'Open WhatsApp → Settings → Linked Devices → Link a Device'; }
-    if(card) { card.className = 'device-status-card'; }
-    if(topDot){ topDot.style.background = '#ffd166'; topDot.style.boxShadow = '0 0 8px #ffd166'; }
-    if(topLbl){ topLbl.textContent = 'SCANNING QR'; topLbl.style.color = '#ffd166'; }
-    if(discBtn){ discBtn.style.display = 'none'; }
-  } else {
-    if(dot)  { dot.className = 'poll-dot disconnected'; }
-    if(label){ label.textContent = 'OFFLINE'; }
-    if(icon) { icon.textContent = '📵'; }
-    if(title){ title.textContent = 'No device linked'; }
-    if(idEl) { idEl.textContent = 'Scan the QR code to link your WhatsApp'; }
-    if(card) { card.className = 'device-status-card device-disconnected'; }
-    if(topDot){ topDot.style.background = 'var(--muted)'; topDot.style.boxShadow = 'none'; }
-    if(topLbl){ topLbl.textContent = 'NO DEVICE'; topLbl.style.color = 'var(--text2)'; }
-    if(discBtn){ discBtn.style.display = 'none'; }
-    document.getElementById('deviceBadge').style.display = 'inline';
+  const dot = document.getElementById('pollDot'), label = document.getElementById('pollLabel'), title = document.getElementById('deviceStatusTitle'), icon = document.getElementById('deviceStatusIcon');
+  const topDot = document.getElementById('topbarDot'), topStatus = document.getElementById('topbarStatus'), discBtn=document.getElementById('disconnectBtn');
+  if(state==='connected'){
+    dot.className='poll-dot connected'; label.textContent='CONNECTED'; title.textContent='Device Ready'; icon.textContent='📱'; topDot.style.background='var(--accent)'; topStatus.textContent='CONNECTED'; if(discBtn) discBtn.style.display='inline-flex';
+  }else if(state==='scanning'){
+    dot.className='poll-dot scanning'; label.textContent='SCANNING'; title.textContent='Waiting for QR'; icon.textContent='⏳'; topDot.style.background='#ffd166'; topStatus.textContent='SCANNING'; if(discBtn) discBtn.style.display='none';
+  }else{
+    dot.className='poll-dot disconnected'; label.textContent='OFFLINE'; title.textContent='No device'; icon.textContent='📵'; topDot.style.background='var(--muted)'; topStatus.textContent='OFFLINE'; if(discBtn) discBtn.style.display='none';
   }
+  if(id) document.getElementById('deviceStatusId').innerText = id;
 }
 
-function checkDeviceStatus(){
-  const url = getGowaUrl();
-  const username = SessionManager.getUsername();
-  if(!url || !username) return;
+function startQrCountdown(sec){ if(qrCountdown) clearInterval(qrCountdown); let s=sec; qrCountdown=setInterval(()=>{ s--; if(s<=0){ clearInterval(qrCountdown); document.getElementById('qrTimer').innerText='QR expired - refresh'; }else document.getElementById('qrTimer').innerText=`expires in ${s}s`; },1000); }
 
-  // First check what device THIS user owns in the sheet
-  apiGetUserDevice(username, userDeviceRes => {
-    const hasStoredDevice = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice;
-    const storedDeviceId = hasStoredDevice ? userDeviceRes.deviceId : null;
+async function disconnectDevice(){
+  if(!confirm('Unlink device?')) return;
+  const user=Session.getUsername();
+  if(user) await new Promise(r=>apiUnlinkDevice(user,r));
+  if(deviceId){ try{ await fetch(GOWA_URL+'/devices/'+deviceId,{method:'DELETE'}); }catch(e){} }
+  deviceId=null;
+  setDeviceStatus('disconnected',null);
+  document.getElementById('qrWrap').innerHTML='<div>📱</div><div>Click Load QR Code</div>';
+  const sess=Session.get(); if(sess) delete sess.deviceId, Session.set(sess);
+}
 
-    if(!hasStoredDevice){
-      // User has no device registered — just show disconnected, don't steal from GoWA
-      setDeviceStatus('disconnected');
-      deviceId = null;
-      return;
+// ========== AI Variations (endpoint works) ==========
+async function generateAIVariations(){
+  const msg = document.getElementById('msgTemplate').value;
+  if(!msg){ showToast('Write a message first',1); return; }
+  showToast('Generating 10 variations...',0);
+  let vars=[];
+  for(let i=0;i<10;i++){
+    try{
+      const res = await fetch(GOWA_URL+'/api/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:`Generate variation #${i+1} of: ${msg}. Keep {name}.`})});
+      const data = await res.json();
+      if(data.code==='SUCCESS') vars.push(data.results.response);
+      else vars.push(msg);
+    }catch(e){ vars.push(msg); }
+    await new Promise(r=>setTimeout(r,300));
+  }
+  messageVariations = vars; currentVariationIndex=0; isUsingVariations=true;
+  let panel=document.getElementById('variationsPanel');
+  panel.style.display='block';
+  panel.innerHTML = `<div class="card"><div>✅ ${vars.length} variations ready</div><button class="btn btn-secondary btn-sm" onclick="clearVariations()">Clear</button></div>`;
+  showToast('Variations ready!',0);
+}
+function clearVariations(){ messageVariations=[]; isUsingVariations=false; document.getElementById('variationsPanel').style.display='none'; }
+
+// ========== Contacts / Sheet ==========
+function renderContacts(){
+  let tbody=document.getElementById('contactTableBody');
+  if(!contacts.length){ tbody.innerHTML='<tr><td colspan="5">No contacts</td></tr>'; document.getElementById('contactCount').innerText='0'; return; }
+  tbody.innerHTML=contacts.map((c,i)=>`<tr><td>${esc(c.name)}</td><td>${c.phone}</td><td>${c.message||'template'}</td><td class="badge badge-${c.status||'pending'}">${c.status||'pending'}</td><td><button onclick="removeContact(${i})">✖</button></td></tr>`).join('');
+  document.getElementById('contactCount').innerText=contacts.length;
+}
+function removeContact(i){ contacts.splice(i,1); renderContacts(); }
+function parsePaste(){
+  let raw=document.getElementById('pasteInput').value;
+  let lines=raw.split(/\r?\n/);
+  let added=0;
+  for(let line of lines){
+    let parts=line.split(/[\t,]/);
+    if(parts.length>=2 && parts[1].replace(/\D/g,'').length>=10){
+      let phone=parts[1].replace(/\D/g,'');
+      if(phone.length===10) phone='91'+phone;
+      contacts.push({name:parts[0]||phone,phone,message:parts[2]||'',status:'pending'});
+      added++;
     }
-
-    // User HAS a stored device — verify it's still connected on GoWA
-    fetch(url + '/app/devices')
-      .then(r => r.json())
-      .then(data => {
-        let devices = [];
-        if(data.code === 'SUCCESS' && data.results){
-          devices = data.results.devices || (Array.isArray(data.results) ? data.results : []);
-        }
-
-        // Check if the user's stored device is among connected devices
-        const isStillConnected = devices.some(d => {
-          const did = d.device || d.id || d.jid;
-          return did === storedDeviceId;
-        });
-
-        if(isStillConnected){
-          setDeviceStatus('connected', storedDeviceId);
-          deviceId = storedDeviceId;
-        } else {
-          // Their device disconnected from GoWA (e.g. WhatsApp logged out)
-          setDeviceStatus('disconnected');
-          deviceId = null;
-        }
-      })
-      .catch(() => {
-        // Can't reach GoWA server — show disconnected
-        setDeviceStatus('disconnected');
-      });
-  });
-}
-// ======================================================
-// QR LOADING - FIXED
-// ======================================================
-function loadQR(){
-  const url = getGowaUrl();
-  const username = SessionManager.getUsername();
-
-  if(!url){
-    showToast('GoWA server URL not configured', true);
-    return;
   }
+  renderContacts(); showToast(`Added ${added} contacts`);
+}
+function handleFileUpload(inp){ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ let text=e.target.result; let rows=text.split(/\r?\n/); rows.forEach(row=>{ let cols=row.split(','); if(cols[1] && cols[1].replace(/\D/g,'').length>=10){ let phone=cols[1].replace(/\D/g,''); if(phone.length===10) phone='91'+phone; contacts.push({name:cols[0]||phone,phone,message:cols[2]||'',status:'pending'}); } }); renderContacts(); showToast('Imported'); }; r.readAsText(f); }
+function saveContacts(){ let user=Session.getUsername(); if(!user) return; apiGet('saveContactsChunk',{username:user,chunkIndex:0,totalChunks:1,chunk:JSON.stringify(contacts)},()=>showToast('Saved')); }
+function clearContacts(){ contacts=[]; renderContacts(); }
 
-  const wrap = document.getElementById('qrWrap');
-  wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Checking device status…</div>';
-
-  if(username){
-    apiGetUserDevice(username, userDeviceRes => {
-      const alreadyLinked = userDeviceRes && userDeviceRes.success && userDeviceRes.hasDevice && deviceId;
-
-      if(alreadyLinked){
-        wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">✅</div><div class="qr-hint">Device already linked.<br>Unlink first to connect a new device.</div>';
-        document.getElementById('deviceWarning').style.display = 'flex';
-        showToast('Device already linked. Unlink first to add a new one.', true);
-        return;
-      }
-
-      document.getElementById('deviceWarning').style.display = 'none';
-      _fetchAndShowQR(url, username);
-    });
-  } else {
-    _fetchAndShowQR(url, username);
+// ========== Send ==========
+function startSend(){
+  if(!deviceId){ showToast('Link device first',1); switchTab('device'); return; }
+  if(!contacts.length) return;
+  sendState='running'; processSend();
+}
+function pauseSend(){ sendState='paused'; if(sendTimer) clearTimeout(sendTimer); }
+function stopSend(){ sendState='idle'; sendIndex=0; if(sendTimer) clearTimeout(sendTimer); }
+function processSend(){
+  if(sendState!=='running') return;
+  if(sendIndex>=contacts.length){ stopSend(); showToast('Campaign complete'); return; }
+  let c=contacts[sendIndex];
+  let msg = (c.message || document.getElementById('msgTemplate').value).replace(/\{name\}/g,c.name).replace(/\{phone\}/g,c.phone);
+  if(isUsingVariations && messageVariations.length){
+    msg = messageVariations[currentVariationIndex % messageVariations.length];
+    msg = msg.replace(/\{name\}/g,c.name);
+    currentVariationIndex++;
   }
+  document.getElementById('currentContact').innerText=`Sending to ${c.name}`;
+  fetch(GOWA_URL+'/send/message',{method:'POST',headers:{'Content-Type':'application/json','X-Device-Id':deviceId},body:JSON.stringify({phone:c.phone,message:msg})})
+    .then(r=>r.json()).then(res=>{
+      let ok = res.code==='SUCCESS';
+      c.status = ok?'sent':'failed';
+      sendIndex++;
+      renderContacts();
+      let gap = (Math.random() * 60 + 30)*1000;
+      sendTimer = setTimeout(processSend, gap);
+      updateStats();
+    }).catch(()=>{ c.status='failed'; sendIndex++; sendTimer=setTimeout(processSend,30000); updateStats(); });
 }
-
-function _fetchAndShowQR(url, username){
-  const wrap = document.getElementById('qrWrap');
-  wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏳</div><div class="qr-hint">Generating QR code…</div>';
-  setDeviceStatus('scanning');
-  clearInterval(qrCountdown);
-  stopDevicePolling();
-
-  // Convert URL to HTTPS if page is HTTPS
-  let apiUrl = url;
-  if (window.location.protocol === 'https:' && apiUrl.startsWith('http://')) {
-    apiUrl = apiUrl.replace('http://', 'https://');
-  }
-
-  fetch(apiUrl + '/app/login?output=json&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      console.log('QR Response:', data);
-      
-      if (data.code === 'SUCCESS' && data.results && data.results.qr_link) {
-        let qrImageUrl = data.results.qr_link;
-        
-        // Convert HTTP to HTTPS for the image URL
-        if (window.location.protocol === 'https:' && qrImageUrl.startsWith('http://')) {
-          qrImageUrl = qrImageUrl.replace('http://', 'https://');
-        }
-        
-        const qrImg = new Image();
-        qrImg.style.cssText = 'width:220px;height:220px;border-radius:8px;border:4px solid var(--accent);margin-bottom:16px;';
-        
-        qrImg.onload = function() {
-          wrap.innerHTML = '';
-          wrap.appendChild(qrImg);
-          const hint = document.createElement('div');
-          hint.className = 'qr-hint';
-          hint.innerHTML = 'Scan with WhatsApp → <strong>Linked Devices</strong>';
-          wrap.appendChild(hint);
-          const duration = data.results.qr_duration || 60;
-          startQrCountdown(duration);
-          if (username) startDevicePollingForLinking(username);
-        };
-        
-        qrImg.onerror = function() {
-          console.error('Failed to load QR from:', qrImageUrl);
-          wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
-            <div class="qr-hint" style="color:var(--accent3)">Failed to load QR.<br/>
-            <a href="${qrImageUrl}" target="_blank" style="color:var(--accent);">Click here to open QR link</a></div>`;
-        };
-        
-        qrImg.src = qrImageUrl;
-      } else {
-        _showQrError(wrap);
-      }
-    })
-    .catch(err => {
-      console.error('Failed to fetch QR:', err);
-      _showQrError(wrap);
-    });
+function updateStats(){
+  document.getElementById('sentCount').innerText=contacts.filter(c=>c.status==='sent').length;
+  document.getElementById('pendingCount').innerText=contacts.filter(c=>c.status==='pending').length;
+  document.getElementById('failedCount').innerText=contacts.filter(c=>c.status==='failed').length;
+  document.getElementById('progressBar').style.width = (sendIndex/contacts.length*100)+'%';
 }
+function saveCompose(){ let user=Session.getUsername(); if(!user) return; let template={body:document.getElementById('msgTemplate').value}; apiGet('saveTemplate',{username:user,body:template.body},()=>showToast('Template saved')); }
+function saveSettings(){ let user=Session.getUsername(); if(!user) return; apiGet('saveSettings',{username:user,hourLimit:document.getElementById('hourLimit').value,dayLimit:document.getElementById('dayLimit').value,minGap:document.getElementById('minGap').value,maxGap:document.getElementById('maxGap').value},()=>showToast('Settings saved')); }
+function switchTab(name){ document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active')); document.getElementById(`tab-${name}`).classList.add('active'); document.getElementById('topbarTitle').innerText=name; if(name==='device') loadQR(); }
+function insertVar(v){ let ta=document.getElementById('msgTemplate'); ta.value+=v; }
+function logout(){ Session.clear(); location.reload(); }
+function fetchGroups(){ document.getElementById('groupList').style.display='block'; document.getElementById('groupList').innerHTML='<div>Demo groups would appear via GoWA API</div>'; }
+function addPollOption(){ let d=document.createElement('input'); d.placeholder='Option'; document.getElementById('pollOptions').appendChild(d); }
 
-function _showQrError(wrap){
-  wrap.innerHTML = `<div style="font-size:32px;margin-bottom:10px">❌</div>
-    <div class="qr-hint" style="color:var(--accent3)">Could not load QR.<br/>
-    Make sure your GoWA server is running.<br/>
-    <small>URL: ${GOWA_URL}</small></div>`;
-  setDeviceStatus('disconnected');
-}
-
-function startQrCountdown(seconds){
-  clearInterval(qrCountdown);
-  let s = seconds;
-  const el = document.getElementById('qrTimer');
-  qrCountdown = setInterval(() => {
-    s--;
-    if(s <= 0){
-      clearInterval(qrCountdown);
-      if(el) el.textContent = '⚠ QR expired — click Refresh QR';
-      const wrap = document.getElementById('qrWrap');
-      if(wrap) wrap.innerHTML = '<div style="font-size:32px;margin-bottom:10px">⏰</div><div class="qr-hint" style="color:#ffd166">QR expired — click <strong>Refresh QR</strong></div>';
-      stopDevicePolling();
-    } else {
-      if(el) el.textContent = 'QR expires in ' + s + 's';
-    }
-  }, 1000);
-}
-
-function startDevicePollingForLinking(username){
-  stopDevicePolling();
-  let url = getGowaUrl();
-  if(!url) return;
-
-  if (window.location.protocol === 'https:' && url.startsWith('http://')) {
-    url = url.replace('http://', 'https://');
-  }
-
-  devicePollTimer = setInterval(() => {
-    fetch(url + '/app/devices')
-      .then(r => r.json())
-      .then(data => {
-        console.log('Devices check:', data);
-        
-        let devices = [];
-        if (data.code === 'SUCCESS' && data.results) {
-          devices = data.results.devices || (Array.isArray(data.results) ? data.results : []);
-        }
-        
-        if(!devices.length) return;
-
-        apiGetUserDevice(username, existingRes => {
-          const existingId = (existingRes && existingRes.success) ? existingRes.deviceId : null;
-
-          const newDevice = devices.find(d => {
-            const did = d.device || d.id || d.jid;
-            return did && did !== existingId;
-          });
-
-          if(!newDevice) return;
-
-          const newDeviceId = newDevice.device || newDevice.id || newDevice.jid;
-
-          apiLinkDevice(username, newDeviceId, linkRes => {
-            if(linkRes && linkRes.success){
-              stopDevicePolling();
-              clearInterval(qrCountdown);
-              const timerEl = document.getElementById('qrTimer');
-              if(timerEl) timerEl.textContent = '';
-              const wrap = document.getElementById('qrWrap');
-              if(wrap) wrap.innerHTML = '<div style="font-size:48px;margin-bottom:12px">✅</div><div class="qr-hint"><strong>Device Connected!</strong><br/>' + newDeviceId + '</div>';
-              setDeviceStatus('connected', newDeviceId);
-              showToast('WhatsApp connected successfully! 🎉');
-              
-              const sess = SessionManager.get();
-              if(sess.userData){
-                sess.userData.deviceId = newDeviceId;
-                SessionManager.set(sess.userData);
-              }
-              deviceId = newDeviceId;
-            } else {
-              showToast('Failed to link device: ' + (linkRes && linkRes.message), true);
-            }
-          });
-        });
-      })
-      .catch(err => {
-        console.log('Device polling error:', err);
-      });
-  }, 3000);
-}
-
-function stopDevicePolling(){ clearInterval(devicePollTimer); }
-
-function disconnectDevice(){
-  if(!confirm('Unlink your WhatsApp device? You will need to scan a new QR code to reconnect.')) return;
-  const username = SessionManager.getUsername();
-  if(!username) return;
-
-  apiUnlinkDevice(username, unlinkRes => {
-    if(unlinkRes && unlinkRes.success){
-      const url = getGowaUrl();
-      if(url && deviceId){
-        fetch(url + '/app/logout?device=' + deviceId).catch(() => {});
-      }
-      deviceId = null;
-      setDeviceStatus('disconnected');
-      const wrap = document.getElementById('qrWrap');
-      if(wrap) wrap.innerHTML = '<div style="font-size:40px;margin-bottom:12px">📱</div><div class="qr-hint">Device unlinked.<br/>Click <strong>Load QR Code</strong> to connect a new device.</div>';
-      const timerEl = document.getElementById('qrTimer');
-      if(timerEl) timerEl.textContent = '';
-      showToast('Device unlinked successfully');
-      const sess = SessionManager.get();
-      if(sess.userData){
-        delete sess.userData.deviceId;
-        SessionManager.set(sess.userData);
-      }
-    } else {
-      showToast('Failed to unlink: ' + (unlinkRes && unlinkRes.message), true);
-    }
-  });
-}
-
-// ======================================================
-// UTILS
-// ======================================================
-function esc(s){
-  if(s === null || s === undefined) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-let toastTimer;
-function showToast(msg, isError){
-  const t = document.getElementById('toast');
-  if(!t) return;
-  t.style.background = isError ? '#2d1a1a' : '#0e2d1e';
-  t.style.color      = isError ? '#ff6b6b' : '#00e5a0';
-  t.style.border     = `1px solid ${isError ? '#5c2020' : '#00e5a040'}`;
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
-}
-
-// Expose functions to global scope
-window.renderContacts   = renderContacts;
-window.showDashboard    = showDashboard;
-window.checkUserDevice  = checkUserDevice;
-window.switchTab        = switchTab;
-window.loadQR           = loadQR;
-window.logout           = logout;
-window.saveContacts     = saveContacts;
-window.clearContacts    = clearContacts;
-window.saveCompose      = saveCompose;
-window.saveSettings     = saveSettings;
-window.testServer       = testServer;
-window.startSend        = startSend;
-window.pauseSend        = pauseSend;
-window.stopSend         = stopSend;
-window.disconnectDevice = disconnectDevice;
-window.filterLogs       = filterLogs;
-window.clearLogs        = clearLogs;
-window.removeContact    = removeContact;
-window.filterContacts   = filterContacts;
-window.togglePaste      = togglePaste;
-window.parsePaste       = parsePaste;
-window.handleFileUpload = handleFileUpload;
-window.openGroupImport  = openGroupImport;
-window.fetchGroups      = fetchGroups;
-window.importGroupContacts = importGroupContacts;
-window.updateCharCount  = updateCharCount;
-window.insertVar        = insertVar;
-window.selectAttach     = selectAttach;
-window.handleAttachUpload = handleAttachUpload;
-window.clearAttach      = clearAttach;
-window.addPollOption    = addPollOption;
-window.toggleAutoReply  = toggleAutoReply;
+// Init auth & session
+function showAuth(){ document.getElementById('authOverlay').style.display='flex'; document.getElementById('dashboardWrap').style.display='none'; let html=`<div class="auth-popup"><h2>WA Blast</h2><input id="loginUser" placeholder="Username"/><input id="loginPass" type="password" placeholder="Password"/><button class="primary-btn" onclick="doLogin()">Login</button><button class="btn btn-secondary" style="margin-top:8px" onclick="showRegister()">Create account</button></div>`; document.getElementById('authOverlay').innerHTML=html; }
+window.doLogin=()=>{ let u=document.getElementById('loginUser').value, p=document.getElementById('loginPass').value; jsonp({action:'login',username:u,password:p},r=>{ if(r.success){ Session.set({username:r.username}); document.getElementById('authOverlay').style.display='none'; document.getElementById('dashboardWrap').style.display='flex'; document.getElementById('sidebarUsername').innerText=r.username; document.getElementById('avatarInitial').innerText=r.username[0]; loadUserData(); }else showToast(r.message,1); }); };
+window.showRegister=()=>{ document.getElementById('authOverlay').innerHTML=`<div class="auth-popup"><h2>Register</h2><input id="regUser" placeholder="Username"/><input id="regPass" type="password" placeholder="Password"/><input id="regQuestion" placeholder="Security question"/><input id="regAnswer" placeholder="Answer"/><button class="primary-btn" onclick="doReg()">Register</button><button class="btn btn-secondary" onclick="showAuth()">Back</button></div>`; };
+window.doReg=()=>{ let u=document.getElementById('regUser').value, p=document.getElementById('regPass').value, q=document.getElementById('regQuestion').value, a=document.getElementById('regAnswer').value; jsonp({action:'register',username:u,password:p,securityQuestion:q,securityAnswer:a},r=>{ if(r.success) showToast('Registered, login now'), showAuth(); else showToast(r.message,1); }); };
+function loadUserData(){ let u=Session.getUsername(); if(u){ apiGet('loadClientData',{username:u},r=>{ if(r.success){ contacts=r.contacts||[]; renderContacts(); if(r.settings){ document.getElementById('hourLimit').value=r.settings.hourLimit||30; document.getElementById('dayLimit').value=r.settings.dayLimit||200; } if(r.template?.body) document.getElementById('msgTemplate').value=r.template.body; if(r.deviceId){ deviceId=r.deviceId; setDeviceStatus('connected',deviceId); } } }); } }
+if(Session.getUsername()){ document.getElementById('authOverlay').style.display='none'; document.getElementById('dashboardWrap').style.display='flex'; document.getElementById('sidebarUsername').innerText=Session.getUsername(); document.getElementById('avatarInitial').innerText=Session.getUsername()[0]; loadUserData(); } else showAuth();
+window.renderContacts=renderContacts; window.startSend=startSend; window.pauseSend=pauseSend; window.stopSend=stopSend; window.loadQR=loadQR; window.disconnectDevice=disconnectDevice;
 </script>
 </body>
 </html>
