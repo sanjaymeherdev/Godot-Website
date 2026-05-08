@@ -836,6 +836,31 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     </div>
   </div>
 </div>
+  
+<div id="sheetResultModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📊 Sheet Import Results</h3>
+      <button class="modal-close" 
+        onclick="document.getElementById('sheetResultModal').style.display='none'">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="sheetResultStats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="sheetResultBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
 
@@ -2023,8 +2048,87 @@ function renderLeads(){
   </tr>`).join('');
 }
 async function updLead(id,status){await api('updateLeadStatus',{id,status});await loadLeads();showToast(`Lead → ${status}`);}
-async function scanSheet(){showToast('Scanning sheet...');const r=await api('scanLeadSheet');if(r.success){await loadLeads();showToast(`${r.new_leads||0} new leads imported`);}else showToast('Scan failed',true);}
+async function scanSheet() {
+  const sheetId = document.getElementById('sheetId').value.trim()
+  if (!sheetId) {
+    showToast('Configure Sheet ID in Settings first', true)
+    goTab('settings')
+    return
+  }
 
+  showToast('Scanning sheet...')
+  
+  try {
+    const r = await api('scanLeadSheet')
+    
+    if (!r.success) {
+      showToast(r.message || 'Scan failed', true)
+      return
+    }
+
+    // show result modal
+    renderSheetResultModal(r)
+    await loadLeads()
+
+  } catch(e) {
+    showToast('Error: ' + e.message, true)
+  }
+}
+
+function renderSheetResultModal(r) {
+  document.getElementById('sheetResultStats').innerHTML = `
+    <div class="stat" style="flex:1;min-width:100px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent);">${r.new_leads}</div>
+      <div class="stat-lbl">✅ Imported</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:100px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent4);">${r.duplicates}</div>
+      <div class="stat-lbl">⚠️ Duplicates</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:100px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--muted);">${r.skipped}</div>
+      <div class="stat-lbl">⏭️ Skipped</div>
+    </div>
+    <div class="stat" style="flex:1;min-width:100px;padding:12px 16px;">
+      <div class="stat-val" style="font-size:22px;color:var(--accent2);">${r.total_rows}</div>
+      <div class="stat-lbl">📋 Total Rows</div>
+    </div>
+  `
+
+  const resultColors = {
+    imported:             'badge-connected',
+    duplicate:            'badge-scanning',
+    skipped_invalid_phone:'badge-created',
+    error:                'badge-disconnected'
+  }
+  const resultLabels = {
+    imported:             '✅ Imported',
+    duplicate:            '⚠️ Duplicate',
+    skipped_invalid_phone:'❌ Invalid Phone',
+    error:                '💥 Error'
+  }
+
+  const tbody = document.getElementById('sheetResultBody')
+  if (!r.preview?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">No rows processed</td></tr>'
+  } else {
+    tbody.innerHTML = r.preview.map((row, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td style="font-weight:600;">${escapeHtml(row.name || '—')}</td>
+        <td style="font-family:var(--mono);font-size:11px;">${escapeHtml(row.phone || '—')}</td>
+        <td style="font-size:11px;">${escapeHtml(row.email || '—')}</td>
+        <td>
+          <span class="badge ${resultColors[row.result] || 'badge-created'}">
+            ${resultLabels[row.result] || row.result}
+          </span>
+        </td>
+      </tr>
+    `).join('')
+  }
+
+  document.getElementById('sheetResultModal').style.display = 'flex'
+}
 // ══════════════════════ LOGS ══════════════════════
 function renderLogs(){
   const logsDiv=document.getElementById('logsList');
