@@ -358,6 +358,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <div class="sec-hdr">
           <div><div class="sec-title">Link Device</div><div class="sec-sub">// connect your whatsapp number</div></div>
           <div class="btn-row">
+            <button class="btn btn-b btn-sm" onclick="syncDevice()" id="syncBtn" style="display:none">🔄 Sync Status</button>
             <button class="btn btn-s btn-sm" onclick="loadQR()">🔄 Refresh QR</button>
             <button class="btn btn-d btn-sm" id="unlinkBtn" onclick="unlinkDevice()" style="display:none">🔌 Unlink</button>
           </div>
@@ -1182,6 +1183,17 @@ function setDevStatus(state, id) {
 // ══════════════════════════════════════════════
 
 async function checkDevice() {
+  // First try to force sync from GoWA
+  const syncRes = await api('forceSyncDevice')
+  console.log('Force sync result:', syncRes)
+  
+  if (syncRes.success && syncRes.is_connected) {
+    deviceId = syncRes.device?.id || syncRes.device?.device_id
+    setDevStatus('connected', deviceId)
+    return true
+  }
+  
+  // Fallback to normal status check
   const r = await api('checkDeviceStatus')
   console.log('Device status check:', r)
   
@@ -1190,7 +1202,6 @@ async function checkDevice() {
     setDevStatus('connected', deviceId)
     return true
   } else if (r.success && r.device_id && !r.is_connected) {
-    // Device exists but not logged in (QR needed)
     deviceId = r.device_id
     setDevStatus('scanning', deviceId)
     return false
@@ -1198,6 +1209,33 @@ async function checkDevice() {
     setDevStatus('disconnected')
     deviceId = null
     return false
+  }
+}
+
+async function syncDevice() {
+  showToast('Syncing device status...')
+  const r = await api('forceSyncDevice')
+  console.log('Sync result:', r)
+  
+  if (r.success && r.is_connected) {
+    deviceId = r.device?.id || r.device?.device_id
+    setDevStatus('connected', deviceId)
+    showToast('Device connected! ✅')
+    
+    // Update QR display
+    const wrap = document.getElementById('qrWrap')
+    if (wrap) {
+      wrap.innerHTML = `
+        <div style="font-size:48px;margin-bottom:10px">✅</div>
+        <div style="font-size:13px;color:var(--accent);font-family:var(--mono);font-weight:700">WhatsApp Connected!</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:8px">You can now send messages</div>
+      `
+    }
+  } else if (r.success && r.device) {
+    setDevStatus('scanning', r.device.id || r.device.device_id)
+    showToast('Device exists but not connected. Load QR to connect.')
+  } else {
+    showToast('No device found. Click "Load QR" to connect.', true)
   }
 }
 
