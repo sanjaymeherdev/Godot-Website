@@ -1213,15 +1213,6 @@ async function loadQR() {
     return
   }
   
-  // If device exists but not connected, get QR for existing device
-  if (statusCheck.success && statusCheck.device_id && !statusCheck.is_connected) {
-    deviceId = statusCheck.device_id
-    document.getElementById('devWarn').style.display = 'flex'
-    document.getElementById('devWarn').innerHTML = '<span>⚠️</span><span>Device exists but not logged in. Generate QR to connect.</span>'
-  } else {
-    document.getElementById('devWarn').style.display = 'none'
-  }
-  
   const wrap = document.getElementById('qrWrap')
   wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">⏳</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Generating QR…</div>'
   setDevStatus('scanning')
@@ -1231,32 +1222,90 @@ async function loadQR() {
   const r = await api('getQR')
   console.log('QR Response:', r)
   
-  if (r.success && r.qr_link) {
+  if (r.success) {
     deviceId = r.device_id
     
-    // Display QR code using iframe (most reliable for HTML pages)
-    wrap.innerHTML = `
-      <iframe 
-        src="${r.qr_link}" 
-        style="width:260px;height:280px;border:none;border-radius:12px;background:#fff;box-shadow:0 0 20px rgba(0,255,136,0.1)"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
-      ></iframe>
-      <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
-        1. Open WhatsApp on your phone<br/>
-        2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
-        3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
-        4. Scan this QR code
-      </div>
-    `
+    // Case 1: Direct QR image URL provided
+    if (r.qr_image_url) {
+      wrap.innerHTML = `
+        <img src="${r.qr_image_url}" style="width:200px;height:200px;border-radius:8px;border:3px solid var(--accent);margin-bottom:12px;" 
+             onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\\\'font-size:28px;margin-bottom:10px\\\\'>⚠️</div><div style=\\\\'font-size:11px;color:var(--accent3);font-family:var(--mono)\\\\'>QR image failed to load.<br/><a href=\\\\'${r.qr_link}\\\\' target=\\\\'_blank\\\\' style=\\\\'color:var(--accent)\\\\'>Click here to view QR</a></div>'"
+        />
+        <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+          1. Open WhatsApp on your phone<br/>
+          2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
+          3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
+          4. Scan this QR code
+        </div>
+      `
+    } 
+    // Case 2: Need to extract QR from page
+    else if (r.qr_link) {
+      // Try to fetch and extract the QR image
+      try {
+        const pageRes = await fetch(r.qr_link)
+        const html = await pageRes.text()
+        
+        // Extract QR image URL from HTML
+        const imgMatch = html.match(/src=["']([^"']*\/statics\/qrcode\/[^"']+\.png)["']/i)
+        if (imgMatch && imgMatch[1]) {
+          let imgUrl = imgMatch[1]
+          if (imgUrl.startsWith('/')) {
+            imgUrl = new URL(imgUrl, r.qr_link).href
+          }
+          
+          wrap.innerHTML = `
+            <img src="${imgUrl}" style="width:200px;height:200px;border-radius:8px;border:3px solid var(--accent);margin-bottom:12px;" />
+            <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+              1. Open WhatsApp on your phone<br/>
+              2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
+              3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
+              4. Scan this QR code
+            </div>
+          `
+        } else {
+          // Fallback to iframe
+          wrap.innerHTML = `
+            <iframe 
+              src="${r.qr_link}" 
+              style="width:260px;height:280px;border:none;border-radius:12px;background:#fff"
+            ></iframe>
+            <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+              <a href="${r.qr_link}" target="_blank" style="color:var(--accent)">Click here to open QR page</a>
+            </div>
+          `
+        }
+      } catch (err) {
+        console.error('Failed to extract QR:', err)
+        wrap.innerHTML = `
+          <iframe 
+            src="${r.qr_link}" 
+            style="width:260px;height:280px;border:none;border-radius:12px;background:#fff"
+          ></iframe>
+          <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+            <a href="${r.qr_link}" target="_blank" style="color:var(--accent)">Click here to open QR page</a>
+          </div>
+        `
+      }
+    } else {
+      wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">❌</div><div style="font-size:11px;color:var(--accent3);font-family:var(--mono)">No QR link received</div>'
+      setDevStatus('disconnected')
+      return
+    }
     
     startQrCountdown(r.qr_duration || 60)
     startDevicePoll()
   } else {
-    wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">❌</div><div style="font-size:11px;color:var(--accent3);font-family:var(--mono)">' + (r.message || 'Failed to get QR') + '</div>'
-    setDevStatus('disconnected')
+    setDevStatus('qr_error')
+    wrap.innerHTML = `
+      <div style="font-size:28px;margin-bottom:10px">❌</div>
+      <div style="font-size:12px;color:var(--accent3);font-family:var(--mono);margin-bottom:10px">
+        ${r.message || 'Failed to get QR code'}
+      </div>
+      <button class="btn btn-y btn-sm" onclick="resetDevice()">Reset Device</button>
+    `
   }
 }
-
 function startDevicePoll() {
   stopPoll()
   devicePollTimer = setInterval(async () => {
