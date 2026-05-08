@@ -448,7 +448,21 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
       <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Send Test Email</button></div>
     </div>
   </div>
-
+<!-- Apps Script Card -->
+<div class="card">
+  <div class="card-title">📜 Google Apps Script — Alternative Email (No Verification)</div>
+  <div class="fg">
+    <label>Apps Script Web App URL</label>
+    <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="fg-sub" style="font-size:10px;color:var(--text2);margin-top:4px;">
+      Deploy your own Apps Script and paste the URL here. 
+      <a href="#" onclick="showAppsScriptInstructions();return false;" style="color:var(--accent2);">How to create?</a>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-b btn-sm" onclick="testAppsScript()">🧪 Send Test Email (Apps Script)</button>
+  </div>
+</div>
   <!-- ManyChat Card -->
   <div class="card">
     <div class="card-title">🤖 ManyChat — Messenger Automation</div>
@@ -547,7 +561,63 @@ async function api(action,body={}){
   if(res.status===401){showToast('Session expired. Please login again.',true);logout();throw new Error('Unauthorized');}
   return res.json();
 }
+// Test Apps Script email
+async function testAppsScript() {
+  const appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+  
+  if (!appsScriptUrl) {
+    showToast('Please add your Apps Script URL first', true);
+    return;
+  }
+  
+  showToast('Sending test email via Apps Script...');
+  try {
+    const r = await api('testAppsScript', {});
+    if (r.success) {
+      showToast(`Test email sent to ${userEmail} via Apps Script ✅`);
+    } else {
+      showToast('Failed: ' + (r.message || 'Check your Apps Script URL'), true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
 
+// Show Apps Script instructions
+function showAppsScriptInstructions() {
+  const instructions = `
+📜 How to create your Google Apps Script:
+
+1. Go to script.google.com
+2. Click "New Project"
+3. Delete default code and paste:
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const { to, subject, html, fromName } = data;
+    const fromEmail = Session.getActiveUser().getEmail();
+    const from = \`\${fromName || 'LeadFlow'} <\${fromEmail}>\`;
+    GmailApp.sendEmail(to, subject, '', { htmlBody: html, from: from });
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Sent' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+4. Click Deploy → New deployment
+5. Type: Web app
+6. Execute as: Me (your email)
+7. Access: Anyone
+8. Click Deploy and copy the URL
+9. Paste the URL in LeadFlow Settings
+
+Note: Emails will come from YOUR Gmail address
+  `;
+  alert(instructions);
+}
 // ══════════════════════ AUTH ══════════════════════
 function renderAuth(mode = 'login') {
   const card = document.getElementById('authCard');
@@ -750,6 +820,7 @@ async function saveAllSettings() {
       col_name: document.getElementById('colName').value.trim() || 'A',
       col_phone: document.getElementById('colPhone').value.trim() || 'B',
       col_email: document.getElementById('colEmail').value.trim() || 'C',
+      apps_script_url: document.getElementById('appsScriptUrl').value.trim(),
       has_header: document.getElementById('hasHeader').checked
     });
     
@@ -760,6 +831,7 @@ async function saveAllSettings() {
     showToast('Error saving: ' + e.message, true);
   }
 }
+// Load saved config into Settings form
 // Load saved config into Settings form
 async function loadConfigToSettings() {
   try {
@@ -779,6 +851,7 @@ async function loadConfigToSettings() {
       if (cfg.col_phone) document.getElementById('colPhone').value = cfg.col_phone;
       if (cfg.col_email) document.getElementById('colEmail').value = cfg.col_email;
       if (cfg.has_header !== undefined) document.getElementById('hasHeader').checked = cfg.has_header;
+      if (cfg.apps_script_url) document.getElementById('appsScriptUrl').value = cfg.apps_script_url;
     }
     updateWebhookUrlDisplay();
   } catch(e) {
