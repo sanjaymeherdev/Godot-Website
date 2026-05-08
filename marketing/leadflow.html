@@ -1123,7 +1123,6 @@ function copyWebhookUrl() {
 async function saveAllSettings() {
   showToast('Saving settings...');
   try {
-    // Save send limits only (no GoWA fields)
     await api('saveSettings', {
       hour_limit: document.getElementById('hourLimit').value,
       day_limit: document.getElementById('dayLimit').value,
@@ -1131,7 +1130,6 @@ async function saveAllSettings() {
       max_gap: document.getElementById('maxGap').value
     });
     
-    // Save integration configs
     await api('saveConfig', {
       resend_key: document.getElementById('resendKey').value.trim(),
       from_email: document.getElementById('fromEmail').value.trim(),
@@ -1139,7 +1137,6 @@ async function saveAllSettings() {
       manychat_key: document.getElementById('manychatKey').value.trim(),
       manychat_page_id: document.getElementById('manychatPageId').value.trim(),
       calendly_link: document.getElementById('calendlyLink').value.trim(),
-      calendly_secret: document.getElementById('calendlySecret').value.trim(),
       calendly_token: document.getElementById('calendlyToken').value.trim(),
       sheet_id: document.getElementById('sheetId').value.trim(),
       sheet_tab: document.getElementById('sheetTab').value.trim(),
@@ -1150,7 +1147,6 @@ async function saveAllSettings() {
       has_header: document.getElementById('hasHeader').checked
     });
     
-    // Update webhook URL display
     updateWebhookUrlDisplay();
     showToast('All settings saved! ✅');
   } catch(e) {
@@ -1170,7 +1166,6 @@ async function loadConfigToSettings() {
       if (cfg.manychat_key) document.getElementById('manychatKey').value = cfg.manychat_key;
       if (cfg.manychat_page_id) document.getElementById('manychatPageId').value = cfg.manychat_page_id;
       if (cfg.calendly_link) document.getElementById('calendlyLink').value = cfg.calendly_link;
-      if (cfg.calendly_secret) document.getElementById('calendlySecret').value = cfg.calendly_secret;
       if (cfg.sheet_id) document.getElementById('sheetId').value = cfg.sheet_id;
       if (cfg.calendly_token) document.getElementById('calendlyToken').value = cfg.calendly_token;
       if (cfg.sheet_tab) document.getElementById('sheetTab').value = cfg.sheet_tab;
