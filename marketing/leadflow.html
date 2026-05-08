@@ -986,9 +986,17 @@ async function showDash(data) {
   if (data.contacts)  { contacts = data.contacts; renderContacts() }
   if (data.logs)      { logs = data.logs.map(l => ({...l, time: new Date(l.created_at)})); renderLogs() }
   if (data.leads)     { leads = data.leads; renderLeads() }
-  if (data.device)    { deviceId = data.device.device_id; setDevStatus('connected', deviceId) }
-  else                { setDevStatus('disconnected') }
-
+  if (data.device && data.device.device_id) {
+  deviceId = data.device.device_id
+  // Check the actual status from database
+  if (data.device.status === 'connected') {
+    setDevStatus('connected', deviceId)
+  } else {
+    setDevStatus('scanning', deviceId)
+  }
+} else {
+  setDevStatus('disconnected')
+}
   localStorage.setItem('lf_token', token)
   updateSendStats()
 }
