@@ -627,37 +627,33 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 
 <!-- Calendly Card -->
 <div class="card">
-  <div class="card-title">📅 Calendly — Booking Integration</div>
+  <div class="card-title">📅 Calendly — Booking Sync (Free Plan)</div>
   
-  <!-- Guide -->
   <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO SETUP CALENDLY</div>
+    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO GET YOUR CALENDLY TOKEN</div>
     <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
-      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://calendly.com', '_blank')">Open Calendly ↗</button> (free plan allows 1 event type)<br>
-      <strong>Step 2:</strong> Create your event type (e.g., "30 min consultation")<br>
-      <strong>Step 3:</strong> Copy your booking link from Calendly dashboard<br>
-      <strong>Step 4:</strong> Go to Calendly → Account → Webhooks<br>
-      <strong>Step 5:</strong> Add webhook URL (copy from below) and save<br>
-      <strong>Step 6:</strong> Paste your booking link in the field below
+      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://calendly.com/integrations/api_webhooks', '_blank')">Open Calendly ↗</button><br>
+      <strong>Step 2:</strong> Click <strong>"Generate New Token"</strong><br>
+      <strong>Step 3:</strong> Select <strong>"All scopes"</strong><br>
+      <strong>Step 4:</strong> Copy the token (starts with cal_live_ or cal_test_)<br>
+      <strong>Step 5:</strong> Paste token below and click <strong>Save All Settings</strong><br>
+      <strong>Step 6:</strong> Leads will auto-sync when you visit the Leads tab
     </div>
   </div>
 
-  <!-- Fields -->
   <div class="fg">
-    <label>Your Calendly Booking Link</label>
-    <input type="url" id="calendlyLink" placeholder="https://calendly.com/yourname/event">
-  </div>
-  <div class="fg">
-    <label>Webhook URL (copy this to Calendly)</label>
-    <div style="display:flex; gap:8px;">
-      <input type="text" id="calWebhookUrl" readonly style="background:var(--bg); font-family:var(--mono); font-size:11px;" placeholder="Save settings first">
-      <button class="btn btn-s btn-sm" onclick="copyWebhookUrl()">📋 Copy</button>
+    <label>Calendly Personal Access Token</label>
+    <div class="key-wrap" style="position:relative">
+      <input type="password" id="calendlyToken" placeholder="cal_live_xxxxxxxxxxxx">
+      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('calendlyToken',this)">Show</span>
     </div>
   </div>
   <div class="btn-row">
-    <button class="btn btn-b btn-sm" onclick="testCalendly()">🧪 Test Webhook (Simulate Booking)</button>
+    <button class="btn btn-b btn-sm" onclick="testCalendlyToken()">🧪 Test Token</button>
+    <button class="btn btn-g btn-sm" onclick="syncCalendlyNow()">🔄 Sync Bookings Now</button>
   </div>
 </div>
+
   <!-- Google Sheet Card -->
   <div class="card">
     <div class="card-title">📊 Google Sheet — Lead Source</div>
@@ -859,7 +855,34 @@ function showAppsScriptInstructions() {
 function closeAppsScriptModal() {
   document.getElementById('appsScriptModal').style.display = 'none';
 }
+<!-- Calendly Card -->
+<div class="card">
+  <div class="card-title">📅 Calendly — Booking Sync (Free Plan)</div>
+  
+  <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO GET YOUR CALENDLY TOKEN</div>
+    <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
+      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://calendly.com/integrations/api_webhooks', '_blank')">Open Calendly ↗</button><br>
+      <strong>Step 2:</strong> Click <strong>"Generate New Token"</strong><br>
+      <strong>Step 3:</strong> Select <strong>"All scopes"</strong><br>
+      <strong>Step 4:</strong> Copy the token (starts with cal_live_ or cal_test_)<br>
+      <strong>Step 5:</strong> Paste token below and click <strong>Save All Settings</strong><br>
+      <strong>Step 6:</strong> Leads will auto-sync when you visit the Leads tab
+    </div>
+  </div>
 
+  <div class="fg">
+    <label>Calendly Personal Access Token</label>
+    <div class="key-wrap" style="position:relative">
+      <input type="password" id="calendlyToken" placeholder="cal_live_xxxxxxxxxxxx">
+      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('calendlyToken',this)">Show</span>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-b btn-sm" onclick="testCalendlyToken()">🧪 Test Token</button>
+    <button class="btn btn-g btn-sm" onclick="syncCalendlyNow()">🔄 Sync Bookings Now</button>
+  </div>
+</div>
 // Copy script code to clipboard
 function copyScriptCode() {
   const codeElement = document.getElementById('scriptCode');
@@ -1080,6 +1103,7 @@ async function saveAllSettings() {
       manychat_page_id: document.getElementById('manychatPageId').value.trim(),
       calendly_link: document.getElementById('calendlyLink').value.trim(),
       calendly_secret: document.getElementById('calendlySecret').value.trim(),
+      calendly_token: document.getElementById('calendlyToken').value.trim(),
       sheet_id: document.getElementById('sheetId').value.trim(),
       sheet_tab: document.getElementById('sheetTab').value.trim(),
       col_name: document.getElementById('colName').value.trim() || 'A',
@@ -1111,6 +1135,7 @@ async function loadConfigToSettings() {
       if (cfg.calendly_link) document.getElementById('calendlyLink').value = cfg.calendly_link;
       if (cfg.calendly_secret) document.getElementById('calendlySecret').value = cfg.calendly_secret;
       if (cfg.sheet_id) document.getElementById('sheetId').value = cfg.sheet_id;
+      if (cfg.calendly_token) document.getElementById('calendlyToken').value = cfg.calendly_token;
       if (cfg.sheet_tab) document.getElementById('sheetTab').value = cfg.sheet_tab;
       if (cfg.col_name) document.getElementById('colName').value = cfg.col_name;
       if (cfg.col_phone) document.getElementById('colPhone').value = cfg.col_phone;
@@ -1793,6 +1818,7 @@ function goTab(name){
   document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(name==='device') refreshDeviceStatus();
   if(name==='leads') loadLeads();
+  syncCalendlyIfTokenExists();
 }
 
 // ══════════════════════ UTILITIES ══════════════════════
