@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WA Blast — AutoSend</title>
@@ -626,7 +627,176 @@ async function CreateDevice() {
     }
   } catch(e){showToast('Error: '+e.message,true);setDebug(e.message,true);}
 }
+// Import CSV/Excel file
+async function importFile() {
+  const fileInput = document.getElementById('importFile');
+  const file = fileInput.files[0];
+  if (!file) {
+    showToast('Select a file first', true);
+    return;
+  }
 
+  const progressDiv = document.getElementById('importProgress');
+  progressDiv.style.display = 'block';
+  progressDiv.innerHTML = '<span class="spinner"></span> Reading file...';
+
+  try {
+    let parsedData = [];
+    const extension = file.name.split('.').pop().toLowerCase();
+
+    if (extension === 'csv') {
+      // Parse CSV
+      const text = await file.text();
+      parsedData = parseCSV(text);
+    } else if (extension === 'xlsx' || extension === 'xls') {
+      // Need SheetJS library - add to HTML head
+      parsedData = await parseExcel(file);
+    } else {
+      throw new Error('Unsupported file type. Use .csv, .xlsx, or .xls');
+    }
+
+    if (!parsedData || parsedData.length === 0) {
+      throw new Error('No data found in file');
+    }
+
+    progressDiv.innerHTML = `Parsed ${parsedData.length} rows. Processing...`;
+
+    // Map columns (supports various headers)
+    const mappedContacts = mapContactsFromData(parsedData);
+    
+    // Add to contacts array
+    let added = 0;
+    for (const contact of mappedContacts) {
+      if (contact.phone) {
+        // Format phone number
+        let phone = contact.phone.toString().replace(/\D/g, '');
+        if (phone.length === 10) phone = '91' + phone;
+        if (phone.length >= 10 && !contacts.some(c => c.phone === phone)) {
+          contacts.push({
+            name: contact.name || phone,
+            phone: phone,
+            message: contact.message || '',
+            status: 'pending'
+          });
+          added++;
+        }
+      }
+    }
+
+    renderContacts();
+    showToast(`✅ Imported ${added} contacts from ${parsedData.length} rows`);
+    progressDiv.innerHTML = `✅ Imported ${added} contacts`;
+    setTimeout(() => { progressDiv.style.display = 'none'; }, 3000);
+    fileInput.value = '';
+
+  } catch (err) {
+    showToast('Import failed: ' + err.message, true);
+    progressDiv.innerHTML = '❌ ' + err.message;
+    console.error(err);
+  }
+}
+
+// Parse CSV text
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) return [];
+  
+  // Parse with quotes support
+  const results = [];
+  const headers = parseCSVLine(lines[0]);
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    if (values.length === 0 || (values.length === 1 && !values[0])) continue;
+    
+    const row = {};
+    headers.forEach((header, idx) => {
+      row[header.toLowerCase()] = values[idx] || '';
+    });
+    results.push(row);
+  }
+  return results;
+}
+
+// Parse a single CSV line (handles quotes)
+function parseCSVLine(line) {
+  const result = [];
+  let inQuotes = false;
+  let current = '';
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// Parse Excel file using SheetJS
+function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+        resolve(jsonData);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Map column names to name/phone/message
+function mapContactsFromData(data) {
+  const nameColumns = ['name', 'fullname', 'full name', 'contact name', 'contactname', 'person'];
+  const phoneColumns = ['phone', 'mobile', 'cell', 'whatsapp', 'number', 'phonenumber', 'contact'];
+  const messageColumns = ['message', 'msg', 'text', 'body', 'content', 'notes', 'note'];
+  
+  // Find actual column names
+  const sample = data[0] || {};
+  const headers = Object.keys(sample).map(h => h.toLowerCase());
+  
+  const nameCol = headers.find(h => nameColumns.some(col => h.includes(col))) || headers[0];
+  const phoneCol = headers.find(h => phoneColumns.some(col => h.includes(col))) || headers[1];
+  const messageCol = headers.find(h => messageColumns.some(col => h.includes(col))) || null;
+  
+  return data.map(row => ({
+    name: row[nameCol] || '',
+    phone: row[phoneCol] || '',
+    message: messageCol ? row[messageCol] : ''
+  }));
+}
+
+// Download CSV template
+function downloadTemplate() {
+  const headers = ['Name', 'Phone', 'Message'];
+  const example = ['John Doe', '919876543210', 'Hi {name}, welcome!'];
+  
+  let csv = headers.join(',') + '\n';
+  csv += example.join(',') + '\n';
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'contacts_template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Template downloaded');
+}
 // ================================================================
 // DEVICE: SELECT / QR / PAIR / UNLINK / DELETE / RECONNECT
 // ================================================================
