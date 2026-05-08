@@ -1,209 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WA Blast — AutoSend</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#080c10; --surface:#0e1318; --card:#131920; --border:#1e2a35; --border2:#243040;
-    --accent:#00e5a0; --accent2:#00b8ff; --accent3:#ff5f7e;
-    --muted:#4a6070; --text:#d0dde8; --text2:#7a95a8;
-    --mono:'Space Mono',monospace; --sans:'Syne',sans-serif;
-    --radius:10px; --transition:0.18s ease;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
-  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.94);display:none;justify-content:center;align-items:center;z-index:9000;backdrop-filter:blur(8px);}
-  .auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:36px 32px;border-radius:20px;width:380px;max-width:92vw;}
-  .auth-popup h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
-  .auth-sub{font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:24px;}
-  .auth-popup input{width:100%;padding:12px 14px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:10px;color:#fff;font-size:14px;}
-  .auth-popup input:focus{border-color:var(--accent);outline:none;}
-  .primary-btn{width:100%;padding:12px;background:var(--accent);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;}
-  .primary-btn:hover{background:#00c88c;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Syne',sans-serif;background:#080c10;color:#d0dde8;}
+  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;justify-content:center;align-items:center;z-index:1000;}
+  .auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:32px;border-radius:20px;width:360px;}
+  .auth-popup h2{font-size:24px;margin-bottom:8px;color:#fff;}
+  .auth-popup input{width:100%;padding:12px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:10px;color:#fff;}
+  .primary-btn{width:100%;padding:12px;background:#00e5a0;color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer;}
   .dashboard-wrap{display:none;width:100%;}
-  .sidebar{width:250px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
-  .sidebar-logo{padding:28px 20px 20px;border-bottom:1px solid var(--border);}
-  .logo-mark{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;}
-  .sidebar-logo h1{font-size:22px;font-weight:800;color:#fff;}
-  .user-pill{margin:16px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;}
-  .user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#000;}
-  .nav{padding:12px;}
-  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px;}
-  .nav-item.active{background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);}
-  .nav-icon{width:24px;}
-  .logout-btn{width:100%;padding:10px;background:rgba(255,95,126,.1);border:1px solid rgba(255,95,126,.3);border-radius:10px;color:var(--accent3);cursor:pointer;font-weight:600;}
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-  .topbar{height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;background:var(--surface);}
-  .topbar-title{font-weight:700;color:#fff;flex:1;}
-  .content{flex:1;overflow-y:auto;padding:28px;}
-  .tab-panel{display:none;animation:fadeIn .2s ease;}
-  .tab-panel.active{display:block;}
-  .section-header{display:flex;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;}
-  .section-title{font-size:22px;font-weight:800;color:#fff;}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
-  .card-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;font-family:var(--mono);}
-  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;}
-  .stat-value{font-family:var(--mono);font-size:28px;font-weight:700;color:#fff;}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;border:1px solid transparent;font-size:13px;}
-  .btn-primary{background:var(--accent);color:#000;}
-  .btn-secondary{background:transparent;color:var(--text);border-color:var(--border2);}
-  .btn-danger{background:rgba(255,95,126,.1);color:var(--accent3);border-color:rgba(255,95,126,.3);}
-  .btn-sm{padding:6px 14px;font-size:12px;}
-  .badge{display:inline-block;padding:4px 12px;border-radius:30px;font-size:11px;font-family:var(--mono);font-weight:700;}
-  .badge-pending{background:rgba(255,209,102,.15);color:#ffd166;}
-  .badge-sent{background:rgba(0,229,160,.15);color:var(--accent);}
-  .badge-failed{background:rgba(255,95,126,.15);color:var(--accent3);}
-  .progress-bar-wrap{background:var(--bg);border-radius:30px;height:8px;overflow:hidden;}
-  .progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;}
-  .send-control{background:var(--card);padding:24px;border-radius:16px;}
-  .control-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
-  .big-btn{width:56px;height:56px;border-radius:50%;font-size:22px;cursor:pointer;border:none;}
-  .big-btn.start{background:var(--accent);color:#000;}
-  .big-btn.pause{background:#ffd166;color:#000;}
-  .big-btn.stop{background:var(--accent3);color:#fff;}
-  .attach-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
-  .attach-opt{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;font-size:12px;}
-  .attach-opt.selected{border-color:var(--accent);background:rgba(0,229,160,.1);color:var(--accent);}
-  .qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:var(--bg);border:2px dashed var(--border2);border-radius:16px;min-height:280px;text-align:center;}
-  .qr-wrap img{width:200px;height:200px;border-radius:12px;border:4px solid var(--accent);margin-bottom:16px;}
-  .device-status-card{display:flex;align-items:center;gap:18px;padding:20px;background:var(--card);border-radius:14px;margin-bottom:20px;}
-  .poll-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;}
-  .connected{background:var(--accent);box-shadow:0 0 8px var(--accent);}
-  .disconnected{background:var(--accent3);}
+  .sidebar{width:240px;background:#0e1318;border-right:1px solid #1e2a35;min-height:100vh;position:fixed;}
+  .main{margin-left:240px;padding:20px;}
+  .card{background:#131920;border:1px solid #1e2a35;border-radius:16px;padding:20px;margin-bottom:20px;}
+  .btn{display:inline-block;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .btn-primary{background:#00e5a0;color:#000;}
+  .btn-secondary{background:transparent;border:1px solid #243040;color:#d0dde8;}
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;padding:32px;background:#080c10;border:2px dashed #1e2a35;border-radius:16px;}
+  .qr-wrap img{width:200px;border-radius:12px;border:3px solid #00e5a0;}
+  .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;}
+  .connected{background:#00e5a0;box-shadow:0 0 6px #00e5a0;}
+  .disconnected{background:#ff5f7e;}
   .scanning{background:#ffd166;}
-  #toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;border-radius:12px;z-index:9999;opacity:0;background:#0e2d1e;color:#00e5a0;font-weight:600;}
-  .toggle{position:relative;width:46px;height:24px;}
-  .toggle input{opacity:0;width:0;height:0;}
-  .toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:34px;cursor:pointer;}
-  .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:.2s;}
-  .toggle input:checked+.toggle-slider{background:var(--accent);}
-  .toggle input:checked+.toggle-slider::before{transform:translateX(22px);background:#000;}
-  .step-list{list-style:none;padding:0;}
-  .step-list li{counter-increment:steps;padding:10px 0;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);}
-  .step-list li:last-child{border-bottom:none;}
-  .step-list li::before{content:counter(steps);width:24px;height:24px;border-radius:50%;background:rgba(0,229,160,.15);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;margin-right:12px;}
-  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-  .table-wrap{overflow-x:auto;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .nav-item{padding:10px 16px;cursor:pointer;border-radius:10px;margin:4px 0;}
+  .nav-item.active{background:rgba(0,229,160,.1);color:#00e5a0;}
   table{width:100%;border-collapse:collapse;}
-  th,td{padding:12px;text-align:left;border-bottom:1px solid var(--border);}
-  th{color:var(--text2);font-size:11px;font-family:var(--mono);}
-  input,textarea,select{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:#fff;width:100%;margin-bottom:12px;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  th,td{padding:10px;text-align:left;border-bottom:1px solid #1e2a35;}
+  .badge{padding:4px 10px;border-radius:20px;font-size:11px;}
+  .badge-pending{background:rgba(255,209,102,.15);color:#ffd166;}
+  .badge-sent{background:rgba(0,229,160,.15);color:#00e5a0;}
+  .progress-bar{height:6px;background:#00e5a0;width:0%;border-radius:10px;}
+  .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;background:#0e2d1e;color:#00e5a0;z-index:2000;display:none;}
 </style>
 </head>
 <body>
 
-<div class="auth-overlay" id="authOverlay"></div>
-<div class="dashboard-wrap" id="dashboardWrap">
-<aside class="sidebar">
-  <div class="sidebar-logo"><div class="logo-mark">WA · BLAST</div><h1>Auto<span style="color:var(--accent)">Send</span></h1></div>
-  <div class="user-pill"><div class="user-avatar" id="avatarInitial">A</div><div><div class="user-name" id="sidebarUsername"></div><div class="user-role">PRO</div></div></div>
-  <nav class="nav">
-    <div class="nav-item" data-tab="device"><span class="nav-icon">📱</span> Device</div>
-    <div class="nav-item" data-tab="contacts"><span class="nav-icon">👥</span> Contacts <span id="contactCount" style="margin-left:auto;">0</span></div>
-    <div class="nav-item" data-tab="compose"><span class="nav-icon">✍️</span> Compose</div>
-    <div class="nav-item" data-tab="send"><span class="nav-icon">🚀</span> Send</div>
-    <div class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> Settings</div>
-    <div class="nav-item" data-tab="logs"><span class="nav-icon">📋</span> Logs</div>
-  </nav>
-  <div style="padding:16px;"><button class="logout-btn" onclick="logout()">← Logout</button></div>
-</aside>
-<main class="main">
-  <div class="topbar"><div class="topbar-title" id="topbarTitle">Device</div><div class="status-dot" id="topbarDot"></div><div id="topbarStatus" style="font-size:11px;">OFFLINE</div></div>
-  <div class="content">
-    <!-- DEVICE TAB -->
-    <div class="tab-panel" id="tab-device">
-      <div class="section-header"><div><div class="section-title">Link Your Device</div></div><button class="btn btn-secondary" onclick="loadQR()">🔄 Load QR Code</button></div>
-      <div class="device-status-card"><div id="deviceStatusIcon" style="font-size:36px;">📵</div><div style="flex:1"><div id="deviceStatusTitle" style="font-weight:700;">No device linked</div><div id="deviceStatusId" style="font-size:11px;color:var(--text2);">Scan QR to connect</div></div><span class="poll-dot disconnected" id="pollDot"></span><span id="pollLabel">OFFLINE</span></div>
-      <div class="card"><div class="card-title">QR Code</div><div class="qr-wrap" id="qrWrap"><div style="font-size:48px;">📱</div><div class="qr-hint">Click "Load QR Code" to start</div></div><div id="qrTimer" style="text-align:center;font-size:12px;margin-top:12px;"></div></div>
-      <div class="card"><div class="card-title">How to Link</div><ul class="step-list"><li>Click <strong style="color:var(--accent)">Load QR Code</strong></li><li>Open WhatsApp → Settings → Linked Devices → Link a Device</li><li>Scan QR → wait for green confirmation</li></ul><button class="btn btn-danger" id="disconnectBtn" onclick="disconnectDevice()" style="display:none;margin-top:16px;">🔌 Unlink Device</button></div>
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-popup">
+    <h2>WA Blast</h2>
+    <div style="margin-bottom:20px;color:#7a95a8;">WhatsApp automation</div>
+    <input type="text" id="loginEmail" placeholder="Email" autocomplete="off">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button class="primary-btn" onclick="doLogin()">Login</button>
+    <div style="margin-top:16px;text-align:center;">
+      <span style="color:#7a95a8;cursor:pointer;" onclick="showRegister()">Create account</span>
     </div>
-    <!-- CONTACTS TAB -->
-    <div class="tab-panel" id="tab-contacts">
-      <div class="section-header"><div><div class="section-title">Contact List</div></div><div class="btn-row"><button class="btn btn-secondary" onclick="clearAllContacts()">🗑 Clear All</button><button class="btn btn-primary" onclick="saveContactsToSheet()">💾 Save to Sheet</button></div></div>
-      <div class="card"><div class="card-title">Import Contacts</div><input type="file" id="csvFile" accept=".csv,.xlsx" onchange="handleFileUpload(this)"/><textarea id="pasteInput" rows="3" placeholder="Name, Phone, Message (or paste from Excel)"></textarea><div class="btn-row"><button class="btn btn-secondary" onclick="parsePaste()">Parse Paste</button><button class="btn btn-secondary" onclick="fetchGroups()">📲 Import from Group</button></div><div id="groupList" style="margin-top:12px;display:none;"></div></div>
-      <div class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="contactTableBody"></tbody></table</div></div>
-    </div>
-    <!-- COMPOSE TAB -->
-    <div class="tab-panel" id="tab-compose">
-      <div class="section-header"><div><div class="section-title">Compose Message</div></div><button class="btn btn-primary" onclick="saveTemplate()">Save Template</button></div>
-      <div class="card"><textarea id="msgTemplate" rows="4" placeholder="Hi {name}, special offer!"></textarea><div class="btn-row"><button class="btn btn-secondary" onclick="insertVar('{name}')">{name}</button><button class="btn btn-secondary" onclick="insertVar('{phone}')">{phone}</button><button class="btn btn-secondary" onclick="generateAIVariations()">✨ AI 10 Variations</button></div></div>
-      <div class="card"><div class="card-title">Attachment</div><div class="attach-grid"><div class="attach-opt selected" data-type="none">🚫 none</div><div class="attach-opt" data-type="image">📷 image</div><div class="attach-opt" data-type="video">🎥 video</div><div class="attach-opt" data-type="document">📄 doc</div><div class="attach-opt" data-type="poll">📊 poll</div></div></div>
-      <div id="variationsPanel" style="display:none;margin-top:16px;"></div>
-    </div>
-    <!-- SEND TAB -->
-    <div class="tab-panel" id="tab-send">
-      <div class="stat-row"><div class="stat-card"><div class="stat-value" id="sentCount">0</div><div>Sent</div></div><div class="stat-card"><div class="stat-value" id="pendingCount">0</div><div>Pending</div></div><div class="stat-card"><div class="stat-value" id="failedCount">0</div><div>Failed</div></div><div class="stat-card"><div class="stat-value" id="repliedCount">0</div><div>Replied</div></div></div>
-      <div class="send-control"><div class="control-row"><button class="big-btn start" onclick="startSend()">▶</button><button class="big-btn pause" onclick="pauseSend()">⏸</button><button class="big-btn stop" onclick="stopSend()">⏹</button><div class="send-info"><div id="currentContact">Ready</div><div id="queueStatus">0/0</div></div></div><div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div></div>
-      <div class="card"><div>📊 Sent Today: <span id="todaySentDisplay">0</span> / <span id="dailyLimitDisplay">200</span> | ⏱️ This Hour: <span id="hourSentDisplay">0</span> / 30</div></div>
-    </div>
-    <!-- SETTINGS -->
-    <div class="tab-panel" id="tab-settings">
-      <div class="section-header"><div><div class="section-title">Settings</div></div><button class="btn btn-primary" onclick="saveSettings()">Save</button></div>
-      <div class="card"><label>Hour Limit</label><input type="number" id="hourLimit" value="30"/><label>Day Limit</label><input type="number" id="dayLimit" value="200"/><label>Min Gap (sec)</label><input type="number" id="minGap" value="30"/><label>Max Gap (sec)</label><input type="number" id="maxGap" value="90"/><div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0;"><span>AI Auto Reply</span><label class="toggle"><input type="checkbox" id="autoReplyToggle"/><span class="toggle-slider"></span></label></div><textarea id="autoReplyPrompt" rows="2" placeholder="Auto-reply prompt..."></textarea></div>
-    </div>
-    <!-- LOGS -->
-    <div class="tab-panel" id="tab-logs"><div class="card"><div id="logsList">No logs yet</div></div></div>
   </div>
-</main>
 </div>
-<div id="toast"></div>
+
+<div class="dashboard-wrap" id="dashboardWrap">
+  <div class="sidebar">
+    <div style="padding:24px;"><h2 style="color:#fff;">Auto<span style="color:#00e5a0;">Send</span></h2></div>
+    <div style="padding:0 12px;">
+      <div class="nav-item active" data-tab="device">📱 Device</div>
+      <div class="nav-item" data-tab="contacts">👥 Contacts</div>
+      <div class="nav-item" data-tab="compose">✍️ Compose</div>
+      <div class="nav-item" data-tab="send">🚀 Send</div>
+      <div class="nav-item" data-tab="settings">⚙️ Settings</div>
+    </div>
+    <div style="position:absolute;bottom:20px;left:20px;right:20px;">
+      <button class="btn btn-secondary" style="width:100%;" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="main">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div><span class="status-dot disconnected" id="statusDot"></span><span id="statusText">OFFLINE</span></div>
+      <div><span id="userEmail" style="color:#7a95a8;"></span></div>
+    </div>
+
+    <!-- Device Tab -->
+    <div class="tab-panel active" id="tab-device">
+      <div class="card">
+        <h3>Link Your Device</h3>
+        <div class="qr-wrap" id="qrWrap">
+          <div style="font-size:48px;">📱</div>
+          <div>Click "Load QR" to start</div>
+        </div>
+        <div style="margin-top:16px;text-align:center;">
+          <button class="btn btn-primary" onclick="loadQR()">Load QR Code</button>
+          <button class="btn btn-secondary" onclick="disconnectDevice()" id="disconnectBtn" style="display:none;margin-left:10px;">Unlink Device</button>
+        </div>
+        <div id="qrTimer" style="text-align:center;margin-top:10px;font-size:12px;"></div>
+      </div>
+    </div>
+
+    <!-- Contacts Tab -->
+    <div class="tab-panel" id="tab-contacts">
+      <div class="card">
+        <h3>Contacts</h3>
+        <textarea id="pasteInput" rows="3" placeholder="Name, Phone, Message (one per row)"></textarea>
+        <button class="btn btn-secondary" onclick="parsePaste()">Parse & Add</button>
+        <button class="btn btn-secondary" onclick="saveContacts()">Save to Sheet</button>
+        <button class="btn btn-secondary" onclick="clearContacts()">Clear All</button>
+        <div style="margin-top:16px;overflow-x:auto;">
+          <table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Status</th><th></th></tr></thead>
+            <tbody id="contactsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compose Tab -->
+    <div class="tab-panel" id="tab-compose">
+      <div class="card">
+        <h3>Message Template</h3>
+        <textarea id="msgTemplate" rows="4" placeholder="Hi {name}, special offer!"></textarea>
+        <button class="btn btn-primary" onclick="saveTemplate()">Save Template</button>
+        <button class="btn btn-secondary" onclick="generateVariations()">✨ AI Generate Variations</button>
+        <div id="variationsPanel" style="margin-top:12px;display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Send Tab -->
+    <div class="tab-panel" id="tab-send">
+      <div class="card">
+        <h3>Send Campaign</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+          <div>Sent: <strong id="sentCount">0</strong></div>
+          <div>Pending: <strong id="pendingCount">0</strong></div>
+          <div>Failed: <strong id="failedCount">0</strong></div>
+        </div>
+        <div class="progress-bar" id="progressBar" style="width:0%;margin:10px 0;"></div>
+        <div id="currentStatus" style="margin:10px 0;">Ready to send</div>
+        <div>
+          <button class="btn btn-primary" onclick="startSend()">▶ Start</button>
+          <button class="btn btn-secondary" onclick="pauseSend()">⏸ Pause</button>
+          <button class="btn btn-secondary" onclick="stopSend()">⏹ Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="card">
+        <h3>Settings</h3>
+        <label>Hour Limit</label><input type="number" id="hourLimit" value="30">
+        <label>Day Limit</label><input type="number" id="dayLimit" value="200">
+        <label>Min Gap (seconds)</label><input type="number" id="minGap" value="30">
+        <label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 // ==================== CONFIG ====================
-const LEADFLOW_API = "https://cggodotassets.shop/api/leadflow";
+const EDGE_FN_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow";
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
 
+let authToken = null;
 let deviceId = null;
 let contacts = [];
 let sendState = 'idle', sendIndex = 0, sendTimer = null;
 let todaySent = 0, hourSent = 0;
-let messageVariations = [], currentVariationIndex = 0, isUsingVariations = false;
-let devicePollTimer = null, qrCountdown = null;
-let authToken = null;
+let variations = [], useVariations = false, variationIndex = 0;
+let pollTimer = null, qrTimer = null;
 
+// ==================== HELPERS ====================
 function showToast(msg, isError) {
-  let t = document.getElementById('toast');
+  const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.background = isError ? '#2d1a1a' : '#0e2d1e';
   t.style.color = isError ? '#ff6b6b' : '#00e5a0';
-  t.style.opacity = 1;
-  setTimeout(() => t.style.opacity = 0, 3000);
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
 }
 
-// Session
-const Session = {
-  set(data) { localStorage.setItem('auth_user', JSON.stringify(data)); if(data.token) localStorage.setItem('auth_token', data.token); },
-  get() { const u = localStorage.getItem('auth_user'); return u ? JSON.parse(u) : null; },
-  getToken() { return localStorage.getItem('auth_token'); },
-  clear() { localStorage.removeItem('auth_user'); localStorage.removeItem('auth_token'); },
-  getUsername() { return this.get()?.username; }
-};
-
-// ========== LEADFLOW EDGE FUNCTION CALLS ==========
-async function callLeadFlow(action, body = {}) {
-  const token = Session.getToken();
-  const response = await fetch(LEADFLOW_API, {
+// ==================== EDGE FUNCTION CALL (WITH AUTH) ====================
+async function callEdgeFunction(action, body = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+  
+  const response = await fetch(EDGE_FN_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    },
+    headers: headers,
     body: JSON.stringify({ action, ...body })
   });
-  return await response.json();
+  
+  if (response.status === 401) {
+    showToast('Session expired. Please login again.', true);
+    logout();
+    throw new Error('Unauthorized');
+  }
+  
+  const data = await response.json();
+  return data;
 }
 
-// ========== APPS SCRIPT JSONP ==========
+// ==================== APPS SCRIPT JSONP ====================
 function jsonpRequest(params, cb) {
-  const cbName = '__cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-  const timeout = setTimeout(() => { if(window[cbName]) { window[cbName] = null; cb({ success: false, message: 'Timeout' }); } }, 15000);
-  window[cbName] = function(data) { clearTimeout(timeout); delete window[cbName]; cb(data); };
+  const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  const timeout = setTimeout(() => {
+    if (window[cbName]) { window[cbName] = null; cb({ success: false, message: 'Timeout' }); }
+  }, 15000);
+  window[cbName] = function(data) {
+    clearTimeout(timeout);
+    delete window[cbName];
+    cb(data);
+  };
   const qs = new URLSearchParams({ ...params, callback: cbName }).toString();
   const script = document.createElement('script');
   script.src = APPS_SCRIPT_URL + '?' + qs;
@@ -213,293 +221,349 @@ function jsonpRequest(params, cb) {
 
 function apiGet(action, data, cb) { jsonpRequest({ action, ...data }, cb); }
 
-// ========== DEVICE MANAGEMENT (via Edge Function) ==========
-async function loadQR() {
-  const wrap = document.getElementById('qrWrap');
-  wrap.innerHTML = '<div style="font-size:32px;">⏳</div><div>Creating device...</div>';
-  setDeviceStatus('scanning');
+// ==================== AUTH ====================
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
   
-  const qrRes = await callLeadFlow('getQR');
-  if (qrRes.success && qrRes.qr_image_url) {
-    const img = document.createElement('img');
-    img.src = qrRes.qr_image_url;
-    img.onload = () => {
-      wrap.innerHTML = '';
-      wrap.appendChild(img);
-      wrap.innerHTML += '<div class="qr-hint" style="margin-top:12px;">Scan with WhatsApp → Linked Devices</div>';
-      deviceId = qrRes.device_id;
-      startQrCountdown(qrRes.qr_duration || 60);
-      startDevicePolling();
-    };
-    img.onerror = () => { wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>QR load failed</div>'; };
-  } else {
-    wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>' + (qrRes.message || 'Failed to get QR') + '</div>';
+  if (!email || !password) {
+    showToast('Email and password required', true);
+    return;
+  }
+  
+  showToast('Logging in...', false);
+  
+  try {
+    const result = await callEdgeFunction('login', { email, password });
+    
+    if (result.success && result.token) {
+      authToken = result.token;
+      localStorage.setItem('auth_token', authToken);
+      localStorage.setItem('user_email', email);
+      
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('dashboardWrap').style.display = 'block';
+      document.getElementById('userEmail').textContent = email;
+      
+      // Load user data from Apps Script
+      apiGet('loadClientData', { username: email }, (data) => {
+        if (data.success) {
+          contacts = data.contacts || [];
+          renderContacts();
+          if (data.settings) {
+            document.getElementById('hourLimit').value = data.settings.hourLimit || 30;
+            document.getElementById('dayLimit').value = data.settings.dayLimit || 200;
+          }
+          if (data.template?.body) document.getElementById('msgTemplate').value = data.template.body;
+          if (data.deviceId) {
+            deviceId = data.deviceId;
+            updateDeviceStatus('connected');
+          }
+        }
+      });
+    } else {
+      showToast(result.message || 'Login failed', true);
+    }
+  } catch (err) {
+    showToast('Login error: ' + err.message, true);
   }
 }
 
-async function startDevicePolling() {
-  if (devicePollTimer) clearInterval(devicePollTimer);
-  devicePollTimer = setInterval(async () => {
-    const statusRes = await callLeadFlow('checkDeviceStatus');
-    if (statusRes.success && statusRes.is_connected) {
-      clearInterval(devicePollTimer);
-      devicePollTimer = null;
-      if (qrCountdown) clearInterval(qrCountdown);
-      setDeviceStatus('connected');
-      document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">✅</div><div>Device Connected!</div>';
-      document.getElementById('disconnectBtn').style.display = 'inline-flex';
-      showToast('WhatsApp connected successfully!');
+function showRegister() {
+  const overlay = document.getElementById('authOverlay');
+  overlay.innerHTML = `
+    <div class="auth-popup">
+      <h2>Create Account</h2>
+      <input type="text" id="regEmail" placeholder="Email">
+      <input type="password" id="regPassword" placeholder="Password">
+      <input type="text" id="regName" placeholder="Full Name">
+      <button class="primary-btn" onclick="doRegister()">Register</button>
+      <div style="margin-top:12px;text-align:center;">
+        <span style="color:#7a95a8;cursor:pointer;" onclick="resetAuth()">Back to Login</span>
+      </div>
+    </div>
+  `;
+}
+
+function resetAuth() { location.reload(); }
+
+async function doRegister() {
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+  const full_name = document.getElementById('regName').value;
+  
+  try {
+    const result = await callEdgeFunction('register', { email, password, full_name });
+    if (result.success) {
+      showToast('Account created! Please login.', false);
+      resetAuth();
+    } else {
+      showToast(result.message, true);
+    }
+  } catch (err) {
+    showToast('Registration error', true);
+  }
+}
+
+function logout() {
+  authToken = null;
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_email');
+  location.reload();
+}
+
+// ==================== DEVICE MANAGEMENT ====================
+async function loadQR() {
+  const wrap = document.getElementById('qrWrap');
+  wrap.innerHTML = '<div style="font-size:32px;">⏳</div><div>Getting QR...</div>';
+  updateDeviceStatus('scanning');
+  
+  try {
+    const result = await callEdgeFunction('getQR');
+    
+    if (result.success && result.qr_image_url) {
+      wrap.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = result.qr_image_url;
+      img.onload = () => {
+        wrap.appendChild(img);
+        wrap.innerHTML += '<div style="margin-top:12px;">Scan with WhatsApp → Linked Devices</div>';
+        deviceId = result.device_id;
+        startQRCountdown(result.qr_duration || 60);
+        startDevicePolling();
+        document.getElementById('disconnectBtn').style.display = 'inline-block';
+      };
+      img.onerror = () => {
+        wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>QR load failed</div>';
+      };
+    } else {
+      wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>' + (result.message || 'Failed') + '</div>';
+    }
+  } catch (err) {
+    wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>Connection error</div>';
+    showToast('Failed to load QR', true);
+  }
+}
+
+function startDevicePolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const result = await callEdgeFunction('checkDeviceStatus');
+      if (result.success && result.is_connected) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        if (qrTimer) clearInterval(qrTimer);
+        updateDeviceStatus('connected');
+        document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">✅</div><div>Device Connected!</div>';
+        showToast('WhatsApp connected!');
+      }
+    } catch (err) {
+      console.log('Polling error:', err);
     }
   }, 3000);
 }
 
-function setDeviceStatus(state) {
-  const dot = document.getElementById('pollDot'), label = document.getElementById('pollLabel');
-  const title = document.getElementById('deviceStatusTitle'), icon = document.getElementById('deviceStatusIcon');
-  const topDot = document.getElementById('topbarDot'), topStatus = document.getElementById('topbarStatus');
-  const discBtn = document.getElementById('disconnectBtn');
-  
-  if (state === 'connected') {
-    dot.className = 'poll-dot connected'; label.textContent = 'CONNECTED';
-    title.textContent = 'Device Ready ✅'; icon.textContent = '📱';
-    topDot.style.background = 'var(--accent)'; topStatus.textContent = 'CONNECTED';
-    discBtn.style.display = 'inline-flex';
-  } else if (state === 'scanning') {
-    dot.className = 'poll-dot scanning'; label.textContent = 'SCANNING';
-    title.textContent = 'Waiting for QR...'; icon.textContent = '⏳';
-    topDot.style.background = '#ffd166'; topStatus.textContent = 'SCANNING';
-    discBtn.style.display = 'none';
-  } else {
-    dot.className = 'poll-dot disconnected'; label.textContent = 'OFFLINE';
-    title.textContent = 'No device linked'; icon.textContent = '📵';
-    topDot.style.background = 'var(--muted)'; topStatus.textContent = 'OFFLINE';
-    discBtn.style.display = 'none';
-  }
-}
-
-function startQrCountdown(sec) {
-  if (qrCountdown) clearInterval(qrCountdown);
-  let s = sec;
-  qrCountdown = setInterval(() => {
+function startQRCountdown(seconds) {
+  if (qrTimer) clearInterval(qrTimer);
+  let s = seconds;
+  qrTimer = setInterval(() => {
     s--;
-    if (s <= 0) { clearInterval(qrCountdown); document.getElementById('qrTimer').innerText = '⚠ QR expired'; }
-    else { document.getElementById('qrTimer').innerText = `QR expires in ${s}s`; }
+    if (s <= 0) {
+      clearInterval(qrTimer);
+      document.getElementById('qrTimer').textContent = 'QR expired - refresh';
+    } else {
+      document.getElementById('qrTimer').textContent = `QR expires in ${s}s`;
+    }
   }, 1000);
 }
 
 async function disconnectDevice() {
   if (!confirm('Unlink this device?')) return;
-  const unlinkRes = await callLeadFlow('unlinkDevice');
-  if (unlinkRes.success) {
+  const result = await callEdgeFunction('unlinkDevice');
+  if (result.success) {
     deviceId = null;
-    setDeviceStatus('disconnected');
-    document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">📱</div><div>Click Load QR Code to start</div>';
-    document.getElementById('qrTimer').innerText = '';
+    updateDeviceStatus('disconnected');
+    document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">📱</div><div>Click Load QR to start</div>';
+    document.getElementById('qrTimer').textContent = '';
+    document.getElementById('disconnectBtn').style.display = 'none';
     showToast('Device unlinked');
   } else {
     showToast('Failed to unlink', true);
   }
 }
 
-// ========== AI Variations ==========
-async function generateAIVariations() {
-  const msg = document.getElementById('msgTemplate').value;
-  if (!msg) { showToast('Write a message first', true); return; }
-  showToast('Generating 10 variations...', false);
-  
-  const aiRes = await callLeadFlow('aiGenerateVariations', { message: msg, count: 10 });
-  if (aiRes.success && aiRes.variations) {
-    messageVariations = aiRes.variations;
-    isUsingVariations = true;
-    currentVariationIndex = 0;
-    document.getElementById('variationsPanel').innerHTML = `<div class="card"><div>✅ ${messageVariations.length} variations ready</div><button class="btn btn-secondary btn-sm" onclick="clearVariations()">Clear</button></div>`;
-    document.getElementById('variationsPanel').style.display = 'block';
-    showToast('Variations ready!');
+function updateDeviceStatus(status) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  if (status === 'connected') {
+    dot.className = 'status-dot connected';
+    text.textContent = 'CONNECTED';
+  } else if (status === 'scanning') {
+    dot.className = 'status-dot scanning';
+    text.textContent = 'SCANNING';
   } else {
-    showToast('AI failed: ' + (aiRes.message || 'Unknown'), true);
+    dot.className = 'status-dot disconnected';
+    text.textContent = 'OFFLINE';
   }
 }
-function clearVariations() { messageVariations = []; isUsingVariations = false; document.getElementById('variationsPanel').style.display = 'none'; }
 
-// ========== Contacts ==========
+// ==================== CONTACTS ====================
 function renderContacts() {
-  let tbody = document.getElementById('contactTableBody');
-  if (!contacts.length) { tbody.innerHTML = '<tr><td colspan="5">No contacts</td></tr>'; document.getElementById('contactCount').innerText = '0'; return; }
-  tbody.innerHTML = contacts.map((c, i) => `<tr><td>${escapeHtml(c.name)}</td><td>${c.phone}</td><td>${c.message || 'template'}</td><td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td><td><button onclick="removeContact(${i})" style="background:none;border:none;color:var(--accent3);cursor:pointer;">✖</button></td></tr>`).join('');
-  document.getElementById('contactCount').innerText = contacts.length;
-  updateStats();
+  const tbody = document.getElementById('contactsBody');
+  if (!contacts.length) {
+    tbody.innerHTML = '<tr><td colspan="4">No contacts</td></tr>';
+    document.getElementById('pendingCount').textContent = '0';
+    return;
+  }
+  tbody.innerHTML = contacts.map((c, i) => `
+    <tr>
+      <td>${escapeHtml(c.name)}</td>
+      <td>${c.phone}</td>
+      <td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td>
+      <td><button onclick="removeContact(${i})" style="background:none;border:none;color:#ff5f7e;cursor:pointer;">✖</button></td>
+    </tr>
+  `).join('');
+  document.getElementById('sentCount').textContent = contacts.filter(c => c.status === 'sent').length;
+  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
+  document.getElementById('failedCount').textContent = contacts.filter(c => c.status === 'failed').length;
 }
+
 function removeContact(i) { contacts.splice(i, 1); renderContacts(); }
+
 function parsePaste() {
-  let raw = document.getElementById('pasteInput').value;
-  let lines = raw.split(/\r?\n/);
+  const raw = document.getElementById('pasteInput').value;
+  const lines = raw.split(/\r?\n/);
   let added = 0;
   for (let line of lines) {
-    let parts = line.split(/[\t,]/);
-    if (parts.length >= 2 && parts[1].replace(/\D/g, '').length >= 10) {
+    const parts = line.split(/[\t,]/);
+    if (parts.length >= 2) {
       let phone = parts[1].replace(/\D/g, '');
       if (phone.length === 10) phone = '91' + phone;
-      contacts.push({ name: parts[0] || phone, phone: phone, message: parts[2] || '', status: 'pending' });
-      added++;
+      if (phone.length >= 10) {
+        contacts.push({ name: parts[0] || phone, phone: phone, message: parts[2] || '', status: 'pending' });
+        added++;
+      }
     }
   }
-  renderContacts(); showToast(`Added ${added} contacts`);
+  renderContacts();
+  showToast(`Added ${added} contacts`);
+  document.getElementById('pasteInput').value = '';
 }
-function handleFileUpload(inp) {
-  const f = inp.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = e => {
-    let rows = e.target.result.split(/\r?\n/);
-    rows.forEach(row => {
-      let cols = row.split(',');
-      if (cols[1] && cols[1].replace(/\D/g, '').length >= 10) {
-        let phone = cols[1].replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone;
-        contacts.push({ name: cols[0] || phone, phone: phone, message: cols[2] || '', status: 'pending' });
-      }
-    });
-    renderContacts(); showToast('Imported');
-  };
-  r.readAsText(f);
-}
-function saveContactsToSheet() {
-  let user = Session.getUsername();
-  if (!user) return;
-  apiGet('saveContactsChunk', { username: user, chunkIndex: 0, totalChunks: 1, chunk: JSON.stringify(contacts) }, () => showToast('Saved to sheet'));
-}
-function clearAllContacts() { contacts = []; renderContacts(); }
-function fetchGroups() { showToast('Group import via Edge Function', false); }
 
-// ========== Send (via Edge Function) ==========
-function startSend() {
+function saveContacts() {
+  const email = localStorage.getItem('user_email');
+  if (!email) return;
+  apiGet('saveContactsChunk', { username: email, chunkIndex: 0, totalChunks: 1, chunk: JSON.stringify(contacts) }, () => showToast('Contacts saved'));
+}
+
+function clearContacts() { contacts = []; renderContacts(); }
+
+// ==================== SEND ====================
+async function startSend() {
   if (!deviceId) { showToast('Link device first', true); switchTab('device'); return; }
   if (!contacts.length) { showToast('No contacts', true); return; }
   sendState = 'running';
   processSend();
 }
 function pauseSend() { sendState = 'paused'; if (sendTimer) clearTimeout(sendTimer); showToast('Paused'); }
-function stopSend() { sendState = 'idle'; sendIndex = 0; if (sendTimer) clearTimeout(sendTimer); updateStats(); showToast('Stopped'); }
+function stopSend() { sendState = 'idle'; sendIndex = 0; if (sendTimer) clearTimeout(sendTimer); updateProgress(); }
 async function processSend() {
   if (sendState !== 'running') return;
   if (sendIndex >= contacts.length) { stopSend(); showToast('Campaign complete'); return; }
-  let c = contacts[sendIndex];
-  let msg = (c.message || document.getElementById('msgTemplate').value).replace(/\{name\}/g, c.name).replace(/\{phone\}/g, c.phone);
-  if (isUsingVariations && messageVariations.length) {
-    msg = messageVariations[currentVariationIndex % messageVariations.length].replace(/\{name\}/g, c.name);
-    currentVariationIndex++;
-  }
-  document.getElementById('currentContact').innerText = `Sending to ${c.name}`;
   
-  const sendRes = await callLeadFlow('sendMessage', { phone: c.phone, message: msg });
-  c.status = sendRes.success ? 'sent' : 'failed';
+  const c = contacts[sendIndex];
+  let msg = (c.message || document.getElementById('msgTemplate').value).replace(/\{name\}/g, c.name);
+  if (useVariations && variations.length) {
+    msg = variations[variationIndex % variations.length].replace(/\{name\}/g, c.name);
+    variationIndex++;
+  }
+  
+  document.getElementById('currentStatus').textContent = `Sending to ${c.name}...`;
+  
+  try {
+    const result = await callEdgeFunction('sendMessage', { phone: c.phone, message: msg });
+    c.status = result.success ? 'sent' : 'failed';
+  } catch (err) {
+    c.status = 'failed';
+  }
+  
   sendIndex++;
   renderContacts();
+  updateProgress();
   
-  let gap = (Math.random() * 60 + 30) * 1000;
+  const minGap = parseInt(document.getElementById('minGap').value) * 1000;
+  const maxGap = parseInt(document.getElementById('maxGap').value) * 1000;
+  const gap = Math.random() * (maxGap - minGap) + minGap;
   sendTimer = setTimeout(processSend, gap);
-  updateStats();
-  
-  let user = Session.getUsername();
-  if (user) apiGet('saveLog', { username: user, type: c.status, name: c.name, phone: c.phone, message: msg }, () => {});
-}
-function updateStats() {
-  document.getElementById('sentCount').innerText = contacts.filter(c => c.status === 'sent').length;
-  document.getElementById('pendingCount').innerText = contacts.filter(c => c.status === 'pending').length;
-  document.getElementById('failedCount').innerText = contacts.filter(c => c.status === 'failed').length;
-  let pct = contacts.length ? (sendIndex / contacts.length * 100) : 0;
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('queueStatus').innerText = sendIndex + '/' + contacts.length;
 }
 
-// ========== Template / Settings ==========
-function saveTemplate() {
-  let user = Session.getUsername();
-  if (!user) return;
-  apiGet('saveTemplate', { username: user, body: document.getElementById('msgTemplate').value }, () => showToast('Template saved'));
+function updateProgress() {
+  const pct = contacts.length ? (sendIndex / contacts.length * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('currentStatus').textContent = `${sendIndex}/${contacts.length} processed`;
 }
+
+// ==================== TEMPLATE & VARIATIONS ====================
+function saveTemplate() {
+  const email = localStorage.getItem('user_email');
+  if (!email) return;
+  apiGet('saveTemplate', { username: email, body: document.getElementById('msgTemplate').value }, () => showToast('Template saved'));
+}
+
+async function generateVariations() {
+  const msg = document.getElementById('msgTemplate').value;
+  if (!msg) { showToast('Write a message first', true); return; }
+  showToast('Generating variations...', false);
+  
+  const result = await callEdgeFunction('aiGenerateVariations', { message: msg, count: 5 });
+  if (result.success && result.variations) {
+    variations = result.variations;
+    useVariations = true;
+    variationIndex = 0;
+    document.getElementById('variationsPanel').innerHTML = `<div class="card">✅ ${variations.length} variations ready<br><button class="btn btn-secondary" onclick="useVariations=false;document.getElementById('variationsPanel').style.display='none';">Disable</button></div>`;
+    document.getElementById('variationsPanel').style.display = 'block';
+    showToast('Variations ready!');
+  } else {
+    showToast('AI failed: ' + (result.message || 'Unknown'), true);
+  }
+}
+
 function saveSettings() {
-  let user = Session.getUsername();
-  if (!user) return;
+  const email = localStorage.getItem('user_email');
+  if (!email) return;
   apiGet('saveSettings', {
-    username: user,
+    username: email,
     hourLimit: document.getElementById('hourLimit').value,
     dayLimit: document.getElementById('dayLimit').value,
     minGap: document.getElementById('minGap').value,
-    maxGap: document.getElementById('maxGap').value,
-    autoReply: document.getElementById('autoReplyToggle').checked,
-    autoReplyPrompt: document.getElementById('autoReplyPrompt').value
+    maxGap: document.getElementById('maxGap').value
   }, () => showToast('Settings saved'));
 }
-function insertVar(v) { let ta = document.getElementById('msgTemplate'); ta.value += v; }
 
-// ========== Tab Switching ==========
-function switchTab(name) {
+// ==================== UI ====================
+function switchTab(tabName) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`tab-${name}`).classList.add('active');
+  document.getElementById(`tab-${tabName}`).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelector(`.nav-item[data-tab="${name}"]`).classList.add('active');
-  document.getElementById('topbarTitle').innerText = name.charAt(0).toUpperCase() + name.slice(1);
-  if (name === 'device') loadQR();
+  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 }
+
 document.querySelectorAll('.nav-item').forEach(n => {
   n.addEventListener('click', () => switchTab(n.getAttribute('data-tab')));
 });
-switchTab('device');
 
-// ========== Auth & Init ==========
-function showAuth() {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('dashboardWrap').style.display = 'none';
-  document.getElementById('authOverlay').innerHTML = `<div class="auth-popup"><h2>WA Blast</h2><div class="auth-sub">Sign in to continue</div><input id="loginUser" placeholder="Username"/><input id="loginPass" type="password" placeholder="Password"/><button class="primary-btn" onclick="doLogin()">Login</button><div style="margin-top:16px;text-align:center;"><span style="color:var(--text2);cursor:pointer;" onclick="showRegister()">Create account</span></div></div>`;
-}
-window.doLogin = async () => {
-  let u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value;
-  const loginRes = await callLeadFlow('login', { email: u, password: p });
-  if (loginRes.success && loginRes.token) {
-    Session.set({ username: u, token: loginRes.token });
-    document.getElementById('authOverlay').style.display = 'none';
-    document.getElementById('dashboardWrap').style.display = 'flex';
-    document.getElementById('sidebarUsername').innerText = u;
-    document.getElementById('avatarInitial').innerText = u[0].toUpperCase();
-    
-    // Load user data from Apps Script
-    apiGet('loadClientData', { username: u }, data => {
-      if (data.success) {
-        contacts = data.contacts || [];
-        renderContacts();
-        if (data.settings) {
-          document.getElementById('hourLimit').value = data.settings.hourLimit || 30;
-          document.getElementById('dayLimit').value = data.settings.dayLimit || 200;
-        }
-        if (data.template?.body) document.getElementById('msgTemplate').value = data.template.body;
-        if (data.deviceId) { deviceId = data.deviceId; setDeviceStatus('connected'); }
-      }
-    });
-  } else {
-    showToast(loginRes.message || 'Login failed', true);
-  }
-};
-window.showRegister = () => {
-  document.getElementById('authOverlay').innerHTML = `<div class="auth-popup"><h2>Create Account</h2><div class="auth-sub">Get started for free</div><input id="regUser" placeholder="Username"/><input id="regPass" type="password" placeholder="Password"/><input id="regQuestion" placeholder="Security question"/><input id="regAnswer" placeholder="Answer"/><button class="primary-btn" onclick="doReg()">Register</button><div style="margin-top:16px;text-align:center;"><span style="color:var(--text2);cursor:pointer;" onclick="showAuth()">Back to login</span></div></div>`;
-};
-window.doReg = () => {
-  let u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, q = document.getElementById('regQuestion').value, a = document.getElementById('regAnswer').value;
-  apiGet('register', { username: u, password: p, securityQuestion: q, securityAnswer: a }, r => {
-    if (r.success) { showToast('Registered! Please login'); showAuth(); }
-    else showToast(r.message, true);
-  });
-};
-function logout() { Session.clear(); location.reload(); }
 function escapeHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 
-// Start
-if (Session.getUsername()) {
+// ==================== INIT ====================
+const savedToken = localStorage.getItem('auth_token');
+const savedEmail = localStorage.getItem('user_email');
+if (savedToken && savedEmail) {
+  authToken = savedToken;
   document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('dashboardWrap').style.display = 'flex';
-  document.getElementById('sidebarUsername').innerText = Session.getUsername();
-  document.getElementById('avatarInitial').innerText = Session.getUsername()[0].toUpperCase();
-  apiGet('loadClientData', { username: Session.getUsername() }, data => {
+  document.getElementById('dashboardWrap').style.display = 'block';
+  document.getElementById('userEmail').textContent = savedEmail;
+  apiGet('loadClientData', { username: savedEmail }, (data) => {
     if (data.success) {
       contacts = data.contacts || [];
       renderContacts();
@@ -508,10 +572,34 @@ if (Session.getUsername()) {
         document.getElementById('dayLimit').value = data.settings.dayLimit || 200;
       }
       if (data.template?.body) document.getElementById('msgTemplate').value = data.template.body;
-      if (data.deviceId) { deviceId = data.deviceId; setDeviceStatus('connected'); }
+      if (data.deviceId) {
+        deviceId = data.deviceId;
+        updateDeviceStatus('connected');
+      }
     }
   });
-} else showAuth();
+} else {
+  document.getElementById('authOverlay').style.display = 'flex';
+  document.getElementById('dashboardWrap').style.display = 'none';
+}
+
+window.doLogin = doLogin;
+window.doRegister = doRegister;
+window.logout = logout;
+window.loadQR = loadQR;
+window.disconnectDevice = disconnectDevice;
+window.parsePaste = parsePaste;
+window.saveContacts = saveContacts;
+window.clearContacts = clearContacts;
+window.removeContact = removeContact;
+window.startSend = startSend;
+window.pauseSend = pauseSend;
+window.stopSend = stopSend;
+window.saveTemplate = saveTemplate;
+window.generateVariations = generateVariations;
+window.saveSettings = saveSettings;
+window.showRegister = showRegister;
+window.resetAuth = resetAuth;
 </script>
 </body>
 </html>
