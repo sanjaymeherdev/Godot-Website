@@ -1339,77 +1339,6 @@ function startDevicePoll() {
   }, 3000)
 }
 
-function setDevStatus(state, id) {
-  const pip = document.getElementById('pipDot'), lbl = document.getElementById('pipLbl')
-  const icon = document.getElementById('devIcon'), title = document.getElementById('devTitle')
-  const idEl = document.getElementById('devId'), card = document.getElementById('devCard')
-  const topPip = document.getElementById('topPip'), topLbl = document.getElementById('topLbl')
-  const unlinkBtn = document.getElementById('unlinkBtn'), devBadge = document.getElementById('devBadge')
-
-  if (state === 'connected') {
-    pip.className = 'pip-dot on'
-    lbl.textContent = 'CONNECTED'
-    icon.textContent = '📱'
-    title.textContent = 'Device Connected ✅'
-    idEl.textContent = 'Device ID: ' + (id || deviceId || 'Unknown')
-    card.className = 'dev-card on'
-    topPip.className = 'status-pip on'
-    topPip.style.background = 'var(--accent)'
-    topLbl.textContent = 'CONNECTED'
-    topLbl.style.color = 'var(--accent)'
-    unlinkBtn.style.display = 'inline-flex'
-    devBadge.style.display = 'none'
-    deviceId = id
-  } else if (state === 'scanning') {
-    pip.className = 'pip-dot scan'
-    lbl.textContent = 'SCANNING'
-    icon.textContent = '⏳'
-    title.textContent = 'Waiting for QR scan…'
-    idEl.textContent = 'Device ID: ' + (id || deviceId || 'Pending')
-    card.className = 'dev-card'
-    topPip.className = 'status-pip'
-    topPip.style.background = 'var(--accent4)'
-    topLbl.textContent = 'SCANNING'
-    topLbl.style.color = 'var(--accent4)'
-    unlinkBtn.style.display = 'none'
-    devBadge.style.display = 'inline'
-    if (id) deviceId = id
-  } else {
-    pip.className = 'pip-dot off'
-    lbl.textContent = 'OFFLINE'
-    icon.textContent = '📵'
-    title.textContent = 'No device linked'
-    idEl.textContent = 'Scan QR code to link WhatsApp'
-    card.className = 'dev-card'
-    topPip.className = 'status-pip'
-    topPip.style.background = ''
-    topLbl.textContent = 'NO DEVICE'
-    topLbl.style.color = 'var(--muted)'
-    unlinkBtn.style.display = 'none'
-    devBadge.style.display = 'inline'
-    deviceId = null
-  }
-}
-
-async function unlinkDevice() {
-  if (!confirm('Unlink your WhatsApp device?')) return
-  
-  showToast('Unlinking device...')
-  const r = await api('unlinkDevice')
-  
-  if (r.success) {
-    deviceId = null
-    setDevStatus('disconnected')
-    document.getElementById('devWarn').style.display = 'none'
-    const wrap = document.getElementById('qrWrap')
-    if (wrap) {
-      wrap.innerHTML = '<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Click "Load QR" to connect a device</div>'
-    }
-    showToast('Device unlinked')
-  } else {
-    showToast('Failed: ' + r.message, true)
-  }
-}
 function startQrCountdown(secs) {
   clearInterval(qrCountdown)
   let s = secs
@@ -1438,7 +1367,6 @@ async function unlinkDevice() {
     showToast('Device unlinked')
   } else showToast('Failed: ' + r.message, true)
 }
-
 // ══════════════════════════════════════════════
 // CONTACTS
 // ══════════════════════════════════════════════
