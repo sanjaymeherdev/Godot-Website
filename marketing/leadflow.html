@@ -848,7 +848,12 @@ async function doLogin() {
   amsg('loading', 'Authenticating…')
   const r = await api('login', { email, password: pass })
   btn.disabled = false; btn.textContent = 'Sign In'
-  if (r.success) { token = r.token; await showDash(r) }
+  if (r.success) {
+  token = r.token
+  localStorage.setItem('lf_email', email)
+  localStorage.setItem('lf_pass', pass)
+  await showDash(r)
+}
   else if (r.requires_confirmation) {
     const el = document.getElementById('am')
     el.className = 'auth-msg error'
@@ -894,7 +899,10 @@ async function doReset() {
 }
 
 async function googleLogin() {
-  localStorage.removeItem('lf_token'); token = null
+  localStorage.removeItem('lf_email')
+  localStorage.removeItem('lf_pass')
+  localStorage.removeItem('lf_token')
+  token = null
   const redirectUrl = window.location.origin + window.location.pathname
   const authUrl = `${SUPA_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
   showToast('Redirecting to Google...')
@@ -1747,15 +1755,17 @@ async function clearLogs() { logs=[]; renderLogs(); await api('clearLogs'); show
 // SESSION
 // ══════════════════════════════════════════════════════════════════
 function logout() {
-  token=null; userId=null
+  token = null; userId = null
   localStorage.removeItem('lf_token')
+  localStorage.removeItem('lf_email')   // ← add
+  localStorage.removeItem('lf_pass')    // ← add
   supa.auth.signOut()
-  contacts=[]; logs=[]; leads=[]; deviceId=null
+  contacts = []; logs = []; leads = []; deviceId = null
   stopPolling(); clearInterval(qrCountdown)
-  document.getElementById('dash').style.display='none'
-  document.getElementById('authWrap').style.display='flex'
+  document.getElementById('dash').style.display = 'none'
+  document.getElementById('authWrap').style.display = 'flex'
   renderAuth()
-}
+}}
 
 function handleGoogleCallback() {
   const hash = window.location.hash.substring(1)
@@ -1811,30 +1821,16 @@ async function tryRefresh(refreshToken) {
   } catch { return null }
 }
 
-
-// ═══════════════════════════════════════════════════════════
-// FIX 1 — showDash: save the refresh token every time
-// Find the existing showDash function and add ONE line
-// right after:  localStorage.setItem('lf_token', token)
-// ═══════════════════════════════════════════════════════════
-
-// BEFORE (existing line in showDash):
-//   localStorage.setItem('lf_token', token)
-//
-// AFTER — add the line below immediately after it:
-//   if (data.refresh) localStorage.setItem('lf_refresh', data.refresh)
-
-
-// ═══════════════════════════════════════════════════════════
-// FIX 2 — Replace the ENTIRE window.onload block
-// ═══════════════════════════════════════════════════════════
 window.onload = async () => {
-  // Show auth form immediately — never leave a blank card
-  renderAuth()
-
+  renderAuth() // show login form immediately — never a blank card
+ 
   try {
-    // ── Google OAuth hash callback ──────────────────────────
+    // ── Google OAuth callback ───────────────────────────────
     if (handleGoogleCallback()) {
+      // Google auth — wipe any saved email/pass from a previous
+      // email session so the two methods don't cross-contaminate
+      localStorage.removeItem('lf_email')
+      localStorage.removeItem('lf_pass')
       showToast('Google sign-in successful! Loading…')
       const overlay = document.createElement('div')
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
@@ -1844,55 +1840,54 @@ window.onload = async () => {
       overlay.remove()
       if (r.success) { await showDash(r); return }
       showToast('Load failed: ' + (r.message || 'Unknown'), true)
-      return   // stay on login
+      return
     }
-
-    // ── Supabase browser session (only populated for Google OAuth) ──
-    // Email logins are server-side so this will usually be null —
-    // that's expected. We don't rely on it as the primary path.
+ 
+    // ── Email auto-login via saved credentials ──────────────
+    const savedEmail = localStorage.getItem('lf_email')
+    const savedPass  = localStorage.getItem('lf_pass')
+    if (savedEmail && savedPass) {
+      const r = await api('login', { email: savedEmail, password: savedPass })
+      if (r.success) {
+        token = r.token
+        await showDash(r)
+        return
+      }
+      // Wrong password / account deleted / etc — wipe and show login
+      localStorage.removeItem('lf_email')
+      localStorage.removeItem('lf_pass')
+      token = null
+      // fall through to show login
+      return
+    }
+ 
+    // ── Google OAuth session (Supabase browser-side session) ─
     const { data: sbData } = await supa.auth.getSession().catch(() => ({ data: {} }))
     if (sbData?.session?.access_token) {
       token = sbData.session.access_token
       localStorage.setItem('lf_token', token)
-      if (sbData.session.refresh_token) localStorage.setItem('lf_refresh', sbData.session.refresh_token)
       const r = await api('loadAll')
       if (r.success) { await showDash(r); return }
+      localStorage.removeItem('lf_token')
+      token = null
     }
-
-    // ── Saved access token (from a previous login) ──────────
+ 
+    // ── Fallback: raw saved OAuth token in localStorage ──────
     const saved = localStorage.getItem('lf_token')
     if (saved) {
       token = saved
       const r = await api('loadAll')
       if (r.success) { await showDash(r); return }
-      // Token failed — it's probably expired. Fall through to refresh.
+      localStorage.removeItem('lf_token')
       token = null
     }
-
-    // ── Saved refresh token — this is the fix for "logs out after 1 hour" ──
-    // Tries lf_refresh (new key) AND lf_refresh_token (Google OAuth key).
-    const savedRefresh = localStorage.getItem('lf_refresh') || localStorage.getItem('lf_refresh_token')
-    if (savedRefresh) {
-      const newSession = await tryRefresh(savedRefresh)
-      if (newSession?.access_token) {
-        token = newSession.access_token
-        localStorage.setItem('lf_token', newSession.access_token)
-        if (newSession.refresh_token) localStorage.setItem('lf_refresh', newSession.refresh_token)
-        const r = await api('loadAll')
-        if (r.success) { await showDash(r); return }
-      }
-    }
-
+ 
   } catch (err) {
-    console.error('[init] session restore error:', err)
+    console.error('[init] auto-login error:', err)
+    token = null
   }
-
-  // All paths failed — clear stale tokens and show login
-  // (renderAuth() was already called at the very top)
-  token = null
-  localStorage.removeItem('lf_token')
-  localStorage.removeItem('lf_refresh')
-  localStorage.removeItem('lf_refresh_token')
+ 
+  // renderAuth() was already called at the top — login form is ready
 }
 </script>
 </body>
