@@ -1793,14 +1793,47 @@ function showToast(msg, isErr=false) {
 // ══════════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════════
-// Replace the existing window.onload = async () => { ... } block with this:
+// ═══════════════════════════════════════════════════════════
+// PASTE THIS HELPER anywhere above window.onload
+// Uses the Supabase REST API to exchange a refresh_token for
+// a new access_token without needing a browser-side session.
+// ═══════════════════════════════════════════════════════════
+async function tryRefresh(refreshToken) {
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_ANON },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    })
+    const data = await res.json()
+    if (data.access_token) return data   // { access_token, refresh_token, ... }
+    return null
+  } catch { return null }
+}
 
+
+// ═══════════════════════════════════════════════════════════
+// FIX 1 — showDash: save the refresh token every time
+// Find the existing showDash function and add ONE line
+// right after:  localStorage.setItem('lf_token', token)
+// ═══════════════════════════════════════════════════════════
+
+// BEFORE (existing line in showDash):
+//   localStorage.setItem('lf_token', token)
+//
+// AFTER — add the line below immediately after it:
+//   if (data.refresh) localStorage.setItem('lf_refresh', data.refresh)
+
+
+// ═══════════════════════════════════════════════════════════
+// FIX 2 — Replace the ENTIRE window.onload block
+// ═══════════════════════════════════════════════════════════
 window.onload = async () => {
-  // Render auth card immediately so the page is never blank while async work runs
+  // Show auth form immediately — never leave a blank card
   renderAuth()
 
   try {
-    // 1. Handle Google OAuth hash callback
+    // ── Google OAuth hash callback ──────────────────────────
     if (handleGoogleCallback()) {
       showToast('Google sign-in successful! Loading…')
       const overlay = document.createElement('div')
@@ -1811,52 +1844,55 @@ window.onload = async () => {
       overlay.remove()
       if (r.success) { await showDash(r); return }
       showToast('Load failed: ' + (r.message || 'Unknown'), true)
-      return
+      return   // stay on login
     }
 
-    // 2. Try active Supabase session
-    const { data: { session } } = await supa.auth.getSession()
-    if (session?.access_token) {
-      token = session.access_token
+    // ── Supabase browser session (only populated for Google OAuth) ──
+    // Email logins are server-side so this will usually be null —
+    // that's expected. We don't rely on it as the primary path.
+    const { data: sbData } = await supa.auth.getSession().catch(() => ({ data: {} }))
+    if (sbData?.session?.access_token) {
+      token = sbData.session.access_token
       localStorage.setItem('lf_token', token)
-      let r = await api('loadAll')
+      if (sbData.session.refresh_token) localStorage.setItem('lf_refresh', sbData.session.refresh_token)
+      const r = await api('loadAll')
       if (r.success) { await showDash(r); return }
-
-      // loadAll failed — try refreshing the session token once
-      const { data: refreshed } = await supa.auth.refreshSession()
-      if (refreshed?.session?.access_token) {
-        token = refreshed.session.access_token
-        localStorage.setItem('lf_token', token)
-        r = await api('loadAll')
-        if (r.success) { await showDash(r); return }
-      }
-
-      // Session exists but backend is unreachable — clear and show login
-      token = null
-      localStorage.removeItem('lf_token')
-      showToast('Session expired — please sign in again', true)
-      return
     }
 
-    // 3. Fall back to raw saved token (e.g. set by a previous non-OAuth login)
+    // ── Saved access token (from a previous login) ──────────
     const saved = localStorage.getItem('lf_token')
     if (saved) {
       token = saved
-      showToast('Restoring session…')
       const r = await api('loadAll')
       if (r.success) { await showDash(r); return }
-      // Token is stale — discard it
+      // Token failed — it's probably expired. Fall through to refresh.
       token = null
-      localStorage.removeItem('lf_token')
+    }
+
+    // ── Saved refresh token — this is the fix for "logs out after 1 hour" ──
+    // Tries lf_refresh (new key) AND lf_refresh_token (Google OAuth key).
+    const savedRefresh = localStorage.getItem('lf_refresh') || localStorage.getItem('lf_refresh_token')
+    if (savedRefresh) {
+      const newSession = await tryRefresh(savedRefresh)
+      if (newSession?.access_token) {
+        token = newSession.access_token
+        localStorage.setItem('lf_token', newSession.access_token)
+        if (newSession.refresh_token) localStorage.setItem('lf_refresh', newSession.refresh_token)
+        const r = await api('loadAll')
+        if (r.success) { await showDash(r); return }
+      }
     }
 
   } catch (err) {
-    console.error('[onload] Session restore error:', err)
-    token = null
-    localStorage.removeItem('lf_token')
+    console.error('[init] session restore error:', err)
   }
 
-  // Auth card is already rendered at the top — nothing more to do
+  // All paths failed — clear stale tokens and show login
+  // (renderAuth() was already called at the very top)
+  token = null
+  localStorage.removeItem('lf_token')
+  localStorage.removeItem('lf_refresh')
+  localStorage.removeItem('lf_refresh_token')
 }
 </script>
 </body>
