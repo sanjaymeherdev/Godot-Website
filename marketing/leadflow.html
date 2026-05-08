@@ -1066,7 +1066,15 @@ async function doLogin(){
   const r=await api('login',{email,password:pass});
   btn.disabled=false;btn.textContent='Sign In';
   if(r.success){
-    token=r.token;userEmail=email;userId=r.user?.id||r.profile?.id;
+    token=r.token;
+    userEmail=email;
+    userId=r.user?.id||r.profile?.id;
+
+    // ✅ ADD THESE THREE LINES:
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('user_email', email);
+    localStorage.setItem('user_id', userId);
+
     document.getElementById('authWrap').style.display='none';
     document.getElementById('dash').style.display='flex';
     document.getElementById('userName').textContent=email.split('@')[0];
@@ -1076,6 +1084,7 @@ async function doLogin(){
     showToast('Login successful!');
   } else amsg('error',r.message||'Login failed');
 }
+  
 
 async function doRegister(){
   const name=document.getElementById('aName')?.value.trim(),email=document.getElementById('aEmail')?.value.trim(),pass=document.getElementById('aPass')?.value.trim();
@@ -1123,14 +1132,14 @@ function copyWebhookUrl() {
 async function saveAllSettings() {
   showToast('Saving settings...');
   try {
-    await api('saveSettings', {
+    const settingsPayload = {
       hour_limit: document.getElementById('hourLimit').value,
       day_limit: document.getElementById('dayLimit').value,
       min_gap: document.getElementById('minGap').value,
       max_gap: document.getElementById('maxGap').value
-    });
+    };
     
-    await api('saveConfig', {
+    const configPayload = {
       resend_key: document.getElementById('resendKey').value.trim(),
       from_email: document.getElementById('fromEmail').value.trim(),
       from_name: document.getElementById('fromName').value.trim(),
@@ -1139,17 +1148,39 @@ async function saveAllSettings() {
       calendly_link: document.getElementById('calendlyLink').value.trim(),
       calendly_token: document.getElementById('calendlyToken').value.trim(),
       sheet_id: document.getElementById('sheetId').value.trim(),
-      sheet_tab: document.getElementById('sheetTab').value.trim(),
+      sheet_tab: document.getElementById('sheetTab').value.trim() || 'Sheet1',
       col_name: document.getElementById('colName').value.trim() || 'A',
       col_phone: document.getElementById('colPhone').value.trim() || 'B',
       col_email: document.getElementById('colEmail').value.trim() || 'C',
       apps_script_url: document.getElementById('appsScriptUrl').value.trim(),
       has_header: document.getElementById('hasHeader').checked
-    });
+    };
+
+    console.log('Saving settings:', settingsPayload);
+    console.log('Saving config:', configPayload);
+    console.log('Token present:', !!token);
+    console.log('UserId:', userId);
+
+    const r1 = await api('saveSettings', settingsPayload);
+    console.log('saveSettings response:', r1);
     
+    if (!r1.success) {
+      showToast('Settings save failed: ' + (r1.message || 'Unknown error'), true);
+      return;
+    }
+
+    const r2 = await api('saveConfig', configPayload);
+    console.log('saveConfig response:', r2);
+    
+    if (!r2.success) {
+      showToast('Config save failed: ' + (r2.message || 'Unknown error'), true);
+      return;
+    }
+
     updateWebhookUrlDisplay();
     showToast('All settings saved! ✅');
   } catch(e) {
+    console.error('saveAllSettings error:', e);
     showToast('Error saving: ' + e.message, true);
   }
 }
@@ -1855,7 +1886,19 @@ function goTab(name){
   }
 }
 // ══════════════════════ UTILITIES ══════════════════════
-function logout(){token=null;if(pollTimer)clearInterval(pollTimer);if(qrTimer)clearInterval(qrTimer);document.getElementById('dash').style.display='none';document.getElementById('authWrap').style.display='flex';renderAuth('login');}
+function logout(){
+  token=null;
+  userId=null;
+  // ✅ ADD THESE:
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_email');
+  localStorage.removeItem('user_id');
+  if(pollTimer)clearInterval(pollTimer);
+  if(qrTimer)clearInterval(qrTimer);
+  document.getElementById('dash').style.display='none';
+  document.getElementById('authWrap').style.display='flex';
+  renderAuth('login');
+}
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function getVal(id){return document.getElementById(id)?.value||'';}
 function setVal(id,v){const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
@@ -1867,9 +1910,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAuth('login');
   const savedToken=localStorage.getItem('auth_token');
   const savedEmail=localStorage.getItem('user_email');
+  const savedUserId=localStorage.getItem('user_id'); // ✅ ADD THIS
   if(savedToken && savedEmail){
     token=savedToken;
     userEmail=savedEmail;
+    userId=savedUserId; // ✅ ADD THIS
     document.getElementById('authWrap').style.display='none';
     document.getElementById('dash').style.display='flex';
     document.getElementById('userName').textContent=savedEmail.split('@')[0];
