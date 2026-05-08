@@ -1362,67 +1362,44 @@ function showToast(msg,isErr=false){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────
 window.onload = async () => {
-  renderAuth() // always first — card never blank
+  // Render auth form immediately so UI is visible
+  renderAuth('login')
+  
+  // Check for Google OAuth callback
+  if (handleGoogleCallback()) {
+    localStorage.removeItem('lf_email')
+    localStorage.removeItem('lf_pass')
+    showToast('Google sign-in successful! Loading…')
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
+    overlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div><p>Loading dashboard…</p></div>'
+    document.body.appendChild(overlay)
+    const r = await api('loadAll')
+    overlay.remove()
+    if (r.success) { await showDash(r); return }
+    showToast('Load failed: ' + (r.message || 'Unknown'), true)
+    return
+  }
 
-  try {
-    // 1. Google OAuth hash callback
-    if (handleGoogleCallback()) {
-      localStorage.removeItem('lf_email')
-      localStorage.removeItem('lf_pass')
-      showToast('Google sign-in successful! Loading…')
-      const overlay = document.createElement('div')
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
-      overlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div><p>Loading dashboard…</p></div>'
-      document.body.appendChild(overlay)
-      const r = await api('loadAll')
-      overlay.remove()
-      if (r.success) { await showDash(r); return }
-      showToast('Load failed: ' + (r.message || 'Unknown'), true)
-      return
+  // Check for saved OAuth token ONLY (no email/password auto-login)
+  const savedToken = localStorage.getItem('lf_token')
+  if (savedToken) {
+    token = savedToken
+    const r = await api('loadAll')
+    if (r.success) { 
+      await showDash(r)
+      return 
     }
-
-    // 2. Email auto-login with saved credentials
-    const savedEmail = localStorage.getItem('lf_email')
-    const savedPass  = localStorage.getItem('lf_pass')
-    if (savedEmail && savedPass) {
-      const r = await api('login', { email: savedEmail, password: savedPass })
-      if (r.success) {
-        token = r.token
-        await showDash(r)
-        return
-      }
-      // Bad creds — clear and fall through to show login form
-      localStorage.removeItem('lf_email')
-      localStorage.removeItem('lf_pass')
-      token = null
-      return
-    }
-
-    // 3. Google OAuth — Supabase browser session
-    const { data: sbData } = await supa.auth.getSession().catch(() => ({ data: {} }))
-    if (sbData?.session?.access_token) {
-      token = sbData.session.access_token
-      localStorage.setItem('lf_token', token)
-      const r = await api('loadAll')
-      if (r.success) { await showDash(r); return }
-      localStorage.removeItem('lf_token'); token = null
-    }
-
-    // 4. Fallback: raw saved OAuth token
-    const saved = localStorage.getItem('lf_token')
-    if (saved) {
-      token = saved
-      const r = await api('loadAll')
-      if (r.success) { await showDash(r); return }
-      localStorage.removeItem('lf_token'); token = null
-    }
-
-  } catch (err) {
-    console.error('[init]', err)
+    localStorage.removeItem('lf_token')
     token = null
   }
-  // renderAuth() already ran at top — login form is visible and ready
+  
+  // If we reach here, show login form (already showing from renderAuth above)
+  // Make sure authWrap is visible and dash is hidden
+  document.getElementById('authWrap').style.display = 'flex'
+  document.getElementById('dash').style.display = 'none'
 }
 </script>
 </body>
