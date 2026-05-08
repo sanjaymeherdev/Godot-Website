@@ -245,6 +245,37 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   padding: 2px 8px;
   font-size: 10px;
 }
+  .lead-filter {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--t);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lead-filter:hover  { border-color: var(--text2); color: var(--text); }
+.lead-filter.active { background: rgba(0,255,136,.08); border-color: rgba(0,255,136,.3); color: var(--accent); }
+ 
+.ldm-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.ldm-event:last-child { border-bottom: none; }
+.ldm-event-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent2); flex-shrink: 0; margin-top: 3px;
+}
 .btn-s{background:transparent;color:var(--text);border-color:var(--border2);}
 .btn-s:hover{border-color:var(--text2);background:var(--card);}
 .btn-d{background:rgba(255,51,102,.08);color:var(--accent3);border-color:rgba(255,51,102,.2);}
@@ -501,22 +532,126 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 
       <!-- ══════════════════════ LEADS TAB ══════════════════════ -->
       <div class="tab" id="tab-leads">
-        <div class="sec-hdr">
-          <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div>
-          <div class="btn-row">
-            <button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button>
-            <button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button>
-          </div>
+  <div class="sec-hdr">
+    <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// all channels in one place</div></div>
+    <div class="btn-row">
+      <button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button>
+      <button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button>
+    </div>
+  </div>
+ 
+  <!-- Channel filter tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="lead-filter active" data-filter="all"       onclick="filterLeads('all',this)">All <span class="nav-badge blue" id="cnt-all">0</span></button>
+    <button class="lead-filter"        data-filter="whatsapp"  onclick="filterLeads('whatsapp',this)">📱 WA <span class="nav-badge blue" id="cnt-whatsapp">0</span></button>
+    <button class="lead-filter"        data-filter="instagram" onclick="filterLeads('instagram',this)">📷 IG <span class="nav-badge blue" id="cnt-instagram">0</span></button>
+    <button class="lead-filter"        data-filter="facebook"  onclick="filterLeads('facebook',this)">👥 FB <span class="nav-badge blue" id="cnt-facebook">0</span></button>
+    <button class="lead-filter"        data-filter="email"     onclick="filterLeads('email',this)">📧 Email <span class="nav-badge blue" id="cnt-email">0</span></button>
+    <button class="lead-filter"        data-filter="sheet"     onclick="filterLeads('sheet',this)">📊 Sheet <span class="nav-badge blue" id="cnt-sheet">0</span></button>
+    <button class="lead-filter"        data-filter="website"   onclick="filterLeads('website',this)">🌐 Web <span class="nav-badge blue" id="cnt-website">0</span></button>
+  </div>
+ 
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap" style="border:none;border-radius:0">
+      <table>
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>IG / FB</th>
+            <th>Status</th>
+            <th>Arrived</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leadBody">
+          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ================================================================ -->
+<!-- 3. LEAD DETAIL MODAL — add before </body>                        -->
+<!-- ================================================================ -->
+ 
+<div id="leadDetailModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="ldmTitle">Lead Detail</h3>
+      <button class="modal-close" onclick="closeLeadDetail()">&times;</button>
+    </div>
+    <div class="modal-body">
+ 
+      <!-- Identity row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div class="card" style="margin:0;padding:12px;">
+          <div class="card-title" style="margin-bottom:8px;">Contact</div>
+          <div id="ldmPhone"  style="font-family:var(--mono);font-size:12px;margin-bottom:4px;"></div>
+          <div id="ldmEmail"  style="font-size:12px;color:var(--text2);margin-bottom:4px;"></div>
+          <div id="ldmIg"     style="font-size:12px;color:var(--accent2);"></div>
+          <div id="ldmFb"     style="font-size:12px;color:var(--accent2);"></div>
         </div>
-        <div class="card" style="padding:0;overflow:hidden">
-          <div class="tbl-wrap" style="border:none;border-radius:0">
-            <table>
-              <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead>
-              <tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody>
-            </table>
-          </div>
+        <div class="card" style="margin:0;padding:12px;">
+          <div class="card-title" style="margin-bottom:8px;">Origin</div>
+          <div id="ldmSource"   style="font-size:12px;margin-bottom:4px;"></div>
+          <div id="ldmKeyword"  style="font-size:12px;color:var(--text2);margin-bottom:4px;"></div>
+          <div id="ldmArrived" style="font-size:11px;color:var(--muted);"></div>
         </div>
       </div>
+ 
+      <!-- Website activity (only shown if tracking events exist) -->
+      <div id="ldmTrackingSection" style="display:none;margin-bottom:16px;">
+        <div class="card" style="margin:0;padding:14px;">
+          <div class="card-title" style="margin-bottom:10px;">🌐 Website Activity</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+            <div><div style="font-family:var(--mono);font-size:18px;color:var(--accent);" id="ldmVisits">0</div><div style="font-size:10px;color:var(--text2);">Visits</div></div>
+            <div><div style="font-family:var(--mono);font-size:18px;color:var(--accent2);" id="ldmTimeSpent">—</div><div style="font-size:10px;color:var(--text2);">Time on site</div></div>
+            <div><div style="font-family:var(--mono);font-size:18px;color:var(--accent4);" id="ldmLastVisit">—</div><div style="font-size:10px;color:var(--text2);">Last visit</div></div>
+            <div><div style="font-family:var(--mono);font-size:18px;color:var(--accent3);" id="ldmCtaClicked">—</div><div style="font-size:10px;color:var(--text2);">CTA clicked</div></div>
+          </div>
+ 
+          <!-- Event timeline -->
+          <div class="card-title" style="margin-bottom:6px;">Timeline</div>
+          <div id="ldmEventTimeline" style="max-height:160px;overflow-y:auto;"></div>
+        </div>
+      </div>
+ 
+      <!-- Status update -->
+      <div class="card" style="margin:0 0 16px;padding:14px;">
+        <div class="card-title" style="margin-bottom:10px;">Update Status</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-s btn-sm"  onclick="ldmStatus('new')">🆕 New</button>
+          <button class="btn btn-b btn-sm"  onclick="ldmStatus('contacted')">📞 Contacted</button>
+          <button class="btn btn-y btn-sm"  onclick="ldmStatus('visited')">👁 Visited</button>
+          <button class="btn btn-g btn-sm"  onclick="ldmStatus('booked')">✅ Booked</button>
+          <button class="btn btn-s btn-sm"  onclick="ldmStatus('followed_up')">🔁 Followed Up</button>
+          <button class="btn btn-d btn-sm"  onclick="ldmStatus('cold')">❄️ Cold</button>
+        </div>
+      </div>
+ 
+      <!-- Quick actions -->
+      <div class="card-title">Quick Actions</div>
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="btn btn-g btn-sm" id="ldmWaBtn"  onclick="ldmSendWA()"  style="display:none;">📱 Send WhatsApp</button>
+        <button class="btn btn-b btn-sm" id="ldmIgBtn"  onclick="ldmOpenIG()"  style="display:none;">📷 Open IG</button>
+        <button class="btn btn-b btn-sm" id="ldmFbBtn"  onclick="ldmOpenFB()"  style="display:none;">👥 Open FB</button>
+        <button class="btn btn-d btn-sm"               onclick="ldmDelete()">🗑 Delete Lead</button>
+      </div>
+ 
+      <!-- WA logs for this lead -->
+      <div id="ldmLogsSection" style="display:none;">
+        <div class="card-title" style="margin-bottom:6px;">WhatsApp Activity</div>
+        <div id="ldmLogs" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;"></div>
+      </div>
+ 
+    </div>
+  </div>
+</div>
 
       <!-- ══════════════════════ CONFIG TAB ══════════════════════ -->
       <div class="tab" id="tab-config">
@@ -587,41 +722,81 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     <button class="btn btn-b btn-sm" onclick="testAppsScript()">🧪 Send Test Email (Apps Script)</button>
   </div>
 </div>
- <!-- ManyChat Card -->
 <div class="card">
-  <div class="card-title">🤖 ManyChat — Messenger Automation</div>
-  
-  <!-- Guide -->
-  <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO SETUP MANYCHAT</div>
-    <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
-      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://manychat.com', '_blank')">Open ManyChat ↗</button><br>
-      <strong>Step 2:</strong> Connect your Facebook page<br>
-      <strong>Step 3:</strong> Go to Settings → API → Generate API Key<br>
-      <strong>Step 4:</strong> Copy your Page ID (from Settings → General)<br>
-      <strong>Step 5:</strong> Find a Subscriber ID (from Audience tab, click a subscriber → copy ID)<br>
-      <strong>Step 6:</strong> Paste all three in the fields below and click Test
+  <div class="card-title">🤖 ManyChat — IG & FB Lead Capture</div>
+ 
+  <!-- Two routes explanation -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div style="background:rgba(0,136,255,.06);border:1px solid rgba(0,136,255,.15);border-radius:8px;padding:12px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:6px;">ROUTE 1 — WEBHOOK (FREE ✅)</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.5;">
+        ManyChat fires to LeadFlow when someone triggers your automation. Works on free plan.
+      </div>
+    </div>
+    <div style="background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.15);border-radius:8px;padding:12px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--accent4);margin-bottom:6px;">ROUTE 2 — API SYNC (PRO ONLY)</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.5;">
+        Pull subscribers directly from ManyChat. Requires paid plan.
+      </div>
     </div>
   </div>
-
-  <!-- Fields -->
+ 
+  <!-- Webhook URL -->
   <div class="fg">
-    <label>API Key</label>
+    <label>Your ManyChat Webhook URL</label>
+    <div style="position:relative;">
+      <input type="text" id="manychatWebhookUrl" readonly
+        style="padding-right:80px;font-family:var(--mono);font-size:11px;color:var(--accent2);"
+        placeholder="Save settings first to generate URL"/>
+      <button class="btn btn-s btn-sm"
+        style="position:absolute;right:6px;top:50%;transform:translateY(-50%);"
+        onclick="copyManychatWebhook()">Copy</button>
+    </div>
+    <div style="font-size:10px;color:var(--text2);margin-top:4px;">
+      Paste this URL in ManyChat → Automation → External Request block
+    </div>
+  </div>
+ 
+  <!-- Setup Instructions -->
+  <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;margin-bottom:16px;">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--accent2);margin-bottom:10px;">📖 HOW TO SET UP IN MANYCHAT (FREE)</div>
+    <div style="font-size:12px;line-height:1.8;color:var(--text2);">
+      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://manychat.com','_blank')">Open ManyChat ↗</button><br>
+      <strong>Step 2:</strong> Go to <strong>Automation → New Flow</strong><br>
+      <strong>Step 3:</strong> Add a trigger — <strong>Instagram Comment</strong> or <strong>FB Comment</strong> with keyword<br>
+      <strong>Step 4:</strong> Add action block → <strong>External Request</strong><br>
+      <strong>Step 5:</strong> Set Method: <strong>POST</strong>, URL: paste webhook URL above<br>
+      <strong>Step 6:</strong> Set Body (JSON):
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;margin:8px 0;font-family:var(--mono);font-size:10px;line-height:1.6;color:var(--text);">
+{<br>
+&nbsp;&nbsp;"first_name": "{{first name}}",<br>
+&nbsp;&nbsp;"last_name": "{{last name}}",<br>
+&nbsp;&nbsp;"ig_username": "{{ig username}}",<br>
+&nbsp;&nbsp;"fb_id": "{{messenger user id}}",<br>
+&nbsp;&nbsp;"email": "{{email}}",<br>
+&nbsp;&nbsp;"phone": "{{phone}}",<br>
+&nbsp;&nbsp;"keyword": "{{last input text}}",<br>
+&nbsp;&nbsp;"platform": "instagram"<br>
+}
+      </div>
+      <strong>Step 7:</strong> Publish the flow ✅<br>
+      <strong>Step 8:</strong> Test by commenting your keyword on a post
+    </div>
+  </div>
+ 
+  <!-- API Key (for Pro sync) -->
+  <div class="fg">
+    <label>API Key (ManyChat Pro — for subscriber sync)</label>
     <div class="key-wrap" style="position:relative">
       <input type="password" id="manychatKey" placeholder="eyJhbGci...">
-      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('manychatKey',this)">Show</span>
+      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;"
+        onclick="togglePassword('manychatKey',this)">Show</span>
     </div>
   </div>
-  <div class="fg">
-    <label>Page ID</label>
-    <input type="text" id="manychatPageId" placeholder="123456789">
-  </div>
-  <div class="fg">
-    <label>Test Subscriber ID</label>
-    <input type="text" id="manychatSubId" placeholder="For testing, paste a real subscriber ID">
-  </div>
+ 
   <div class="btn-row">
-    <button class="btn btn-b btn-sm" onclick="testManyChat()">🧪 Test ManyChat</button>
+    <button class="btn btn-b btn-sm" onclick="syncManychat()">🔄 Sync Subscribers (Pro)</button>
+    <button class="btn btn-s btn-sm" onclick="testManychatWebhook()">🧪 Test Webhook</button>
   </div>
 </div>
 
@@ -861,6 +1036,330 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     </div>
   </div>
 </div>
+  <script>
+// ── channel source icons ───────────────────────────────────────────
+const SOURCE_ICONS = {
+  whatsapp:  '📱',
+  instagram: '📷',
+  facebook:  '👥',
+  email:     '📧',
+  sheet:     '📊',
+  website:   '🌐',
+  manychat:  '🤖',
+  manual:    '✏️',
+};
+ 
+function sourceIcon(lead) {
+  const ch = lead.channel || lead.source || 'manual';
+  return SOURCE_ICONS[ch] || '👤';
+}
+ 
+// ── active lead filter ─────────────────────────────────────────────
+let activeLeadFilter = 'all';
+ 
+function filterLeads(filter, btn) {
+  activeLeadFilter = filter;
+  document.querySelectorAll('.lead-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+ 
+// ── update channel counts ──────────────────────────────────────────
+function updateLeadCounts() {
+  const channels = ['all','whatsapp','instagram','facebook','email','sheet','website'];
+  channels.forEach(ch => {
+    const el = document.getElementById('cnt-' + ch);
+    if (!el) return;
+    const count = ch === 'all'
+      ? leads.length
+      : leads.filter(l => (l.channel || l.source || 'manual') === ch).length;
+    el.textContent = count;
+    el.style.display = count > 0 ? '' : 'none';
+  });
+ 
+  // sidebar lead badge
+  const badge = document.getElementById('leadBadge');
+  if (badge) {
+    badge.textContent = leads.length;
+    badge.style.display = leads.length ? '' : 'none';
+  }
+}
+ 
+// ── renderLeads — full replacement ────────────────────────────────
+function renderLeads() {
+  updateLeadCounts();
+  const tbody = document.getElementById('leadBody');
+ 
+  const filtered = activeLeadFilter === 'all'
+    ? leads
+    : leads.filter(l => (l.channel || l.source || 'manual') === activeLeadFilter);
+ 
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">
+      ${activeLeadFilter === 'all' ? 'No leads yet' : 'No ' + activeLeadFilter + ' leads'}
+    </td></tr>`;
+    return;
+  }
+ 
+  tbody.innerHTML = filtered.map((l, i) => `
+    <tr style="cursor:pointer;" onclick="openLeadDetail('${l.id}')">
+      <td>
+        <span title="${l.channel || l.source || 'manual'}" style="font-size:16px;">
+          ${sourceIcon(l)}
+        </span>
+      </td>
+      <td style="font-weight:600;">${escapeHtml(l.name || '—')}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${l.phone ? escapeHtml(l.phone) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px;">${l.email ? escapeHtml(l.email) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px;color:var(--accent2);">
+        ${l.ig_username ? '📷 @' + escapeHtml(l.ig_username) : ''}
+        ${l.fb_id       ? '👥 ' + escapeHtml(l.fb_id.slice(0,8)) + '…' : ''}
+        ${!l.ig_username && !l.fb_id ? '<span style="color:var(--muted)">—</span>' : ''}
+      </td>
+      <td><span class="badge badge-${l.status || 'new'}">${l.status || 'new'}</span></td>
+      <td style="font-size:11px;color:var(--text2);">${l.arrived_at ? new Date(l.arrived_at).toLocaleDateString() : '—'}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="btn-row">
+          ${l.phone ? `<button class="btn btn-g btn-sm" onclick="quickSendWA('${l.phone}','${escapeHtml(l.name||'')}')">📱</button>` : ''}
+          <button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+ 
+// ── quick WA send from leads table ────────────────────────────────
+async function quickSendWA(phone, name) {
+  if (!deviceId) { showToast('No device linked', true); return; }
+  const tpl = document.getElementById('msgTpl')?.value || 'Hi {name}!';
+  const msg  = tpl.replace(/\{name\}/gi, name);
+  const r    = await api('sendMessage', { phone, message: msg });
+  showToast(r.success ? `Sent to ${name} ✅` : (r.message || 'Failed'), !r.success);
+}
+ 
+// ── lead detail modal ─────────────────────────────────────────────
+let currentLeadId = null;
+ 
+async function openLeadDetail(leadId) {
+  currentLeadId = leadId;
+  const lead = leads.find(l => l.id === leadId);
+  if (!lead) return;
+ 
+  // fill header
+  document.getElementById('ldmTitle').textContent =
+    sourceIcon(lead) + ' ' + (lead.name || 'Unknown Lead');
+ 
+  // contact info
+  document.getElementById('ldmPhone').textContent  = lead.phone  ? '📱 ' + lead.phone  : '';
+  document.getElementById('ldmEmail').textContent  = lead.email  ? '📧 ' + lead.email  : '';
+  document.getElementById('ldmIg').textContent     = lead.ig_username ? '📷 @' + lead.ig_username : '';
+  document.getElementById('ldmFb').textContent     = lead.fb_id  ? '👥 ' + lead.fb_id  : '';
+ 
+  // origin
+  document.getElementById('ldmSource').innerHTML  =
+    `<span class="badge badge-${lead.channel || 'manual'}">${sourceIcon(lead)} ${lead.channel || lead.source || 'manual'}</span>`;
+  document.getElementById('ldmKeyword').textContent =
+    lead.triggered_keyword ? '🔑 Keyword: ' + lead.triggered_keyword : '';
+  document.getElementById('ldmArrived').textContent =
+    lead.arrived_at ? 'Since ' + new Date(lead.arrived_at).toLocaleString() : '';
+ 
+  // quick action buttons — only show if data exists
+  document.getElementById('ldmWaBtn').style.display  = lead.phone       ? 'inline-flex' : 'none';
+  document.getElementById('ldmIgBtn').style.display  = lead.ig_username ? 'inline-flex' : 'none';
+  document.getElementById('ldmFbBtn').style.display  = lead.fb_id       ? 'inline-flex' : 'none';
+ 
+  // show modal early so user sees it while events load
+  document.getElementById('leadDetailModal').style.display = 'flex';
+ 
+  // fetch events
+  try {
+    const r = await api('getLeadEvents', { lead_id: leadId });
+    if (r.success && r.events?.length) {
+      renderLeadEvents(lead, r.events);
+    } else {
+      document.getElementById('ldmTrackingSection').style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('ldmTrackingSection').style.display = 'none';
+  }
+ 
+  // fetch WA logs
+  if (lead.phone) {
+    const logs = await api('getLogs', {}).catch(() => ({ logs: [] }));
+    const leadLogs = (logs.logs || []).filter(l => l.phone === lead.phone);
+    if (leadLogs.length) {
+      document.getElementById('ldmLogsSection').style.display = 'block';
+      document.getElementById('ldmLogs').innerHTML = leadLogs.slice(0,20).map(l => `
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;">
+          <span style="color:var(--text2);">${new Date(l.created_at).toLocaleString()}</span>
+          <span class="badge badge-${l.type}" style="margin:0 6px;">${l.type}</span>
+          <span>${escapeHtml(l.message || '')}</span>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('ldmLogsSection').style.display = 'none';
+    }
+  }
+}
+ 
+function renderLeadEvents(lead, events) {
+  const section = document.getElementById('ldmTrackingSection');
+ 
+  // aggregate stats from events
+  const visitEvents  = events.filter(e => e.event === 'visited');
+  const ctaEvent     = events.find(e => e.event === 'clicked_cta');
+  const totalTime    = events.reduce((sum, e) => sum + (e.time_spent || 0), 0);
+  const lastVisit    = visitEvents[0];
+ 
+  document.getElementById('ldmVisits').textContent    = lead.visit_count || visitEvents.length || 0;
+  document.getElementById('ldmTimeSpent').textContent = totalTime > 0
+    ? (totalTime >= 60 ? Math.round(totalTime/60) + 'min' : totalTime + 's')
+    : '—';
+  document.getElementById('ldmLastVisit').textContent = lastVisit
+    ? new Date(lastVisit.created_at).toLocaleDateString()
+    : '—';
+  document.getElementById('ldmCtaClicked').textContent = ctaEvent?.cta
+    ? { calendly:'📅', whatsapp:'💬', payment:'💳' }[ctaEvent.cta] || ctaEvent.cta
+    : '—';
+ 
+  // timeline
+  const eventLabels = {
+    visited:          '🌐 Visited site',
+    dropped:          '🚪 Left site',
+    clicked_cta:      '👆 Clicked',
+    bot_opened:       '💬 Opened bot',
+    bot_engaged:      '💬 Chatted with bot',
+    manychat_trigger: '🤖 ManyChat trigger',
+    time_milestone:   '⏱ Time milestone',
+    status_update:    '📝 Status updated',
+  };
+ 
+  document.getElementById('ldmEventTimeline').innerHTML = events.slice(0,15).map(e => {
+    const label = eventLabels[e.event] || e.event;
+    const extra = e.cta ? ` → ${e.cta}` : (e.time_spent ? ` (${e.time_spent}s)` : '');
+    return `<div class="ldm-event">
+      <div class="ldm-event-dot"></div>
+      <div style="flex:1;">
+        <span style="color:var(--text);">${label}${extra}</span>
+        <span style="color:var(--muted);margin-left:8px;">${new Date(e.created_at).toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:11px;">No events yet</div>';
+ 
+  section.style.display = 'block';
+}
+ 
+function closeLeadDetail() {
+  document.getElementById('leadDetailModal').style.display = 'none';
+  currentLeadId = null;
+}
+ 
+async function ldmStatus(status) {
+  if (!currentLeadId) return;
+  await updLead(currentLeadId, status);
+  // update modal title badge
+  document.getElementById('ldmTitle').textContent =
+    document.getElementById('ldmTitle').textContent.split('·')[0].trim() + ' · ' + status;
+  showToast('Status → ' + status);
+}
+ 
+function ldmSendWA() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (lead?.phone) quickSendWA(lead.phone, lead.name || '');
+}
+ 
+function ldmOpenIG() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (lead?.ig_username) window.open('https://instagram.com/' + lead.ig_username, '_blank');
+}
+ 
+function ldmOpenFB() {
+  const lead = leads.find(l => l.id === currentLeadId);
+  if (lead?.fb_id) window.open('https://facebook.com/' + lead.fb_id, '_blank');
+}
+ 
+async function ldmDelete() {
+  if (!currentLeadId) return;
+  if (!confirm('Delete this lead permanently?')) return;
+  await api('deleteLead', { id: currentLeadId });
+  leads = leads.filter(l => l.id !== currentLeadId);
+  renderLeads();
+  closeLeadDetail();
+  showToast('Lead deleted');
+}
+ 
+// ── manychat webhook URL display ──────────────────────────────────
+function updateManychatWebhookUrl() {
+  const el = document.getElementById('manychatWebhookUrl');
+  if (!el) return;
+  el.value = userId ? `${EDGE}/manychat-webhook?user=${userId}` : 'Login to generate URL';
+}
+ 
+function copyManychatWebhook() {
+  const el = document.getElementById('manychatWebhookUrl');
+  if (!el?.value || el.value === 'Login to generate URL') {
+    showToast('Login first to generate URL', true); return;
+  }
+  navigator.clipboard.writeText(el.value);
+  showToast('Webhook URL copied ✅');
+}
+ 
+async function testManychatWebhook() {
+  if (!userId) { showToast('Login first', true); return; }
+  showToast('Sending test webhook...');
+  try {
+    const res = await fetch(`${EDGE}/manychat-webhook?user=${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name:  'Test',
+        last_name:   'User',
+        ig_username: 'testuser',
+        email:       'test@example.com',
+        keyword:     'TEST',
+        platform:    'instagram'
+      })
+    });
+    const r = await res.json();
+    if (r.success) {
+      showToast(`Test webhook OK — lead ${r.action} ✅`);
+      await loadLeads();
+    } else {
+      showToast('Failed: ' + r.message, true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+ 
+async function syncManychat() {
+  showToast('Syncing ManyChat subscribers...');
+  try {
+    const r = await api('manychatSync');
+    if (r.success) {
+      showToast(`Synced ${r.imported} subscribers ✅`);
+      await loadLeads();
+    } else {
+      showToast(r.hint || r.message || 'Sync failed', true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+ 
+// ── update loadData to also set manychat webhook URL ─────────────
+// add this line inside your existing loadData() function,
+// after the updateWebhookUrlDisplay() call:
+// updateManychatWebhookUrl();
+ 
+// ── update goTab to refresh counts when switching to leads ────────
+// inside your existing goTab() function, the leads case should be:
+// if (name === 'leads') {
+//   loadLeads();
+//   syncCalendlyIfTokenExists();
+//   updateManychatWebhookUrl();
+// }
+</script>
 <script>
 const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
 
@@ -1566,6 +2065,7 @@ async function loadData(){
     if(r.template?.body) document.getElementById('msgTpl').value=r.template.body;
     if(r.device){syncDeviceToUI(r.device);} else {fetchDeviceFromServer();}
     updateWebhookUrlDisplay();
+    updateManychatWebhookUrl();
   }
 }
 
@@ -2173,10 +2673,11 @@ function goTab(name){
   if(idx>=0) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
   document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(name==='device') refreshDeviceStatus();
-  if(name==='leads') {
-    loadLeads();
-    syncCalendlyIfTokenExists();
-  }
+  if (name === 'leads') {
+   loadLeads();
+   syncCalendlyIfTokenExists();
+   updateManychatWebhookUrl();
+ }
 }
 // ══════════════════════ UTILITIES ══════════════════════
 function logout(){
