@@ -81,6 +81,126 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .tab{display:none;animation:fadeUp .2s ease;}
 .tab.active{display:block;}
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  margin: 20px;
+}
+.modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: var(--card);
+  z-index: 1;
+}
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 24px;
+  cursor: pointer;
+  font-family: var(--mono);
+}
+.modal-close:hover { color: var(--accent3); }
+.modal-body {
+  padding: 20px;
+}
+.step {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.step-num {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: rgba(0,255,136,.1);
+  color: var(--accent);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 10px;
+}
+.step-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.step-desc {
+  font-size: 12px;
+  color: var(--text2);
+  margin-left: 34px;
+  line-height: 1.5;
+}
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 12px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  position: relative;
+}
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--border2);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text);
+  cursor: pointer;
+}
+.copy-btn:hover { background: var(--accent); color: #000; }
+.setting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  border: 1px solid var(--border2);
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
@@ -537,7 +657,83 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 </div><!-- /dash -->
 
 <div id="toast"></div>
+<!-- Modal Popup -->
+<div id="appsScriptModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📜 Google Apps Script Setup</h3>
+      <button class="modal-close" onclick="closeAppsScriptModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="step">
+        <div class="step-title"><span class="step-num">1</span> Create New Script</div>
+        <div class="step-desc">
+          Go to <a href="https://script.google.com" target="_blank" style="color:var(--accent2);">script.google.com</a> and click <strong>New Project</strong>.
+        </div>
+      </div>
 
+      <div class="step">
+        <div class="step-title"><span class="step-num">2</span> Paste the Code Below</div>
+        <div class="step-desc">
+          Delete any existing code and paste this:
+        </div>
+        <div class="code-block" style="position:relative">
+          <button class="copy-btn" onclick="copyScriptCode()">📋 Copy</button>
+          <pre id="scriptCode" style="margin:0;font-family:inherit;white-space:pre-wrap;">function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const { to, subject, html, fromName } = data;
+    
+    GmailApp.sendEmail(to, subject, '', { 
+      htmlBody: html,
+      name: fromName || 'LeadFlow'
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: true, 
+      message: 'Email sent' 
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      message: error.toString() 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">3</span> Deploy as Web App</div>
+        <div class="step-desc">
+          Click <strong>Deploy</strong> → <strong>New deployment</strong>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">4</span> Configure Settings</div>
+        <div class="step-desc">
+          <div style="margin-top:8px;">
+            <div><span class="setting-badge"><span>⚙️</span> Web app</span></div>
+            <div style="margin:8px 0;"><strong>Execute as:</strong> <span class="setting-badge">Me (your email)</span></div>
+            <div><strong>Who has access:</strong> <span class="setting-badge">Anyone</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title"><span class="step-num">5</span> Deploy & Copy URL</div>
+        <div class="step-desc">
+          Click <strong>Deploy</strong>, then <strong>Authorize access</strong> when prompted.<br><br>
+          Copy the generated URL (looks like:<br>
+          <code style="font-size:10px;word-break:break-all;">https://script.google.com/macros/s/.../exec</code>)<br><br>
+          Paste it in the <strong>Apps Script URL</strong> field above and click Save.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
 
@@ -583,40 +779,38 @@ async function testAppsScript() {
   }
 }
 
-// Show Apps Script instructions
+// Show Apps Script instructions modal
 function showAppsScriptInstructions() {
-  const instructions = `
-📜 How to create your Google Apps Script:
-
-1. Go to script.google.com
-2. Click "New Project"
-3. Delete default code and paste:
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const { to, subject, html, fromName } = data;
-    const fromEmail = Session.getActiveUser().getEmail();
-    const from = \`\${fromName || 'LeadFlow'} <\${fromEmail}>\`;
-    GmailApp.sendEmail(to, subject, '', { htmlBody: html, from: from });
-    return ContentService.createTextOutput(JSON.stringify({ success: true, message: 'Sent' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(error) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  document.getElementById('appsScriptModal').style.display = 'flex';
 }
 
-4. Click Deploy → New deployment
-5. Type: Web app
-6. Execute as: Me (your email)
-7. Access: Anyone
-8. Click Deploy and copy the URL
-9. Paste the URL in LeadFlow Settings
+// Close modal
+function closeAppsScriptModal() {
+  document.getElementById('appsScriptModal').style.display = 'none';
+}
 
-Note: Emails will come from YOUR Gmail address
-  `;
-  alert(instructions);
+// Copy script code to clipboard
+function copyScriptCode() {
+  const codeElement = document.getElementById('scriptCode');
+  const code = codeElement.textContent || codeElement.innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+    }, 2000);
+  }).catch(() => {
+    showToast('Failed to copy', true);
+  });
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modal = document.getElementById('appsScriptModal');
+  if (event.target === modal) {
+    modal.style.display = 'none';
+  }
 }
 // ══════════════════════ AUTH ══════════════════════
 function renderAuth(mode = 'login') {
