@@ -295,7 +295,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div class="tab" id="tab-send"><div class="sec-hdr"><div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div></div><div class="stat-row"><div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSent">0</div><div class="stat-lbl">Sent</div></div><div class="stat y"><div class="stat-ico">⏳</div><div class="stat-val" id="sPend">0</div><div class="stat-lbl">Pending</div></div><div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div><div class="stat b"><div class="stat-ico">💬</div><div class="stat-val" id="sReply">0</div><div class="stat-lbl">Replied</div></div></div><div class="send-ctrl"><div class="ctrl-row"><button class="big-btn start" onclick="startSend()">▶</button><button class="big-btn pause" onclick="pauseSend()">⏸</button><button class="big-btn stop" onclick="stopSend()">⏹</button><div class="send-info"><div class="cur" id="curCon">Ready to send</div><div class="que" id="queStatus">0 / 0 processed</div></div></div><div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--text2)">Progress</span><span style="font-family:var(--mono);font-size:11px;color:var(--accent)" id="progPct">0%</span></div><div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div><div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent Today</div><div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="todaySent">0</span> / <span id="dayLimDisp">200</span></div><div class="prog-wrap" style="margin-top:5px"><div class="prog prog-r" id="dayBar" style="width:0%"></div></div></div><div><div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent This Hour</div><div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="hourSent">0</span> / <span id="hourLimDisp">30</span></div><div class="prog-wrap" style="margin-top:5px"><div class="prog prog-g" id="hourBar" style="width:0%"></div></div></div></div></div></div>
       <div class="tab" id="tab-leads"><div class="sec-hdr"><div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div><div class="btn-row"><button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button><button class="btn btn-s btn-sm" onclick="exportLeads()">📥 Export</button><button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button></div></div><div class="pipeline"><div class="pipe-stage new"><div class="pipe-count" id="p-new">0</div><div class="pipe-label">New</div></div><div class="pipe-stage contacted"><div class="pipe-count" id="p-contacted">0</div><div class="pipe-label">Contacted</div></div><div class="pipe-stage visited"><div class="pipe-count" id="p-visited">0</div><div class="pipe-label">Visited</div></div><div class="pipe-stage booked"><div class="pipe-count" id="p-booked">0</div><div class="pipe-label">Booked ✅</div></div><div class="pipe-stage followed_up"><div class="pipe-count" id="p-followed_up">0</div><div class="pipe-label">Follow-up</div></div><div class="pipe-stage cold"><div class="pipe-count" id="p-cold">0</div><div class="pipe-label">Cold ❄️</div></div></div><div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><input type="text" id="leadSearch" placeholder="🔍 Search..." style="flex:1;min-width:180px;max-width:260px;padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none" oninput="filterLeads()"/><select id="leadStatusF" onchange="filterLeads()" style="padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none"><option value="all">All Statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="visited">Visited</option><option value="booked">Booked</option><option value="followed_up">Follow-up</option><option value="cold">Cold</option></select></div><div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap" style="border:none;border-radius:0"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead><tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody></table></div></div></div>
       <div class="tab" id="tab-config"><div class="sec-hdr"><div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up logic</div></div><button class="btn btn-g" onclick="saveConfig()">💾 Save Config</button></div><div class="card"><div class="card-title">WhatsApp Templates</div><div class="fg"><label>Initial Message</label><textarea id="cfgWaTpl" rows="3" placeholder="Hi {name}! 👋 Book here: {link}"></textarea></div><div class="grid2"><div class="fg"><label>Follow-up 1 (30 min)</label><textarea id="cfgWaFu1" rows="3" placeholder="Hey {name} 👀 Still interested?"></textarea></div><div class="fg"><label>Follow-up 2 (24 hrs)</label><textarea id="cfgWaFu2" rows="3" placeholder="Hi {name}! 🎁 Last chance: {link}"></textarea></div></div><div class="btn-row" style="margin-top:8px"><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaTpl')">✨ AI Initial</button><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu1')">✨ AI FU1</button><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu2')">✨ AI FU2</button></div></div><div class="card"><div class="card-title">Email Templates</div><div class="fg"><label>Subject</label><input type="text" id="cfgEmailSubj" placeholder="We received your enquiry, {name}!"/></div><div class="fg"><label>Body (HTML supported)</label><textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out!"></textarea></div></div><div class="card"><div class="card-title">Follow-up Engine</div><div class="tog-row"><div><div class="tog-info">Follow-up 1</div><div class="tog-sub">Send after X minutes if not booked</div></div><label class="tog"><input type="checkbox" id="fu1En" checked/><span class="tog-sl"></span></label></div><div class="grid2" style="margin-top:10px;margin-bottom:14px"><div class="fg"><label>Delay (minutes)</label><input type="number" id="fu1Delay" value="30" min="5"/></div><div class="fg"><label>Trigger</label><select id="fu1Trig"><option value="not_booked">Not booked yet</option><option value="visited_not_booked">Visited but not booked</option></select></div></div><div class="tog-row"><div><div class="tog-info">Follow-up 2</div><div class="tog-sub">Send after X hours if still not booked</div></div><label class="tog"><input type="checkbox" id="fu2En" checked/><span class="tog-sl"></span></label></div><div class="grid2" style="margin-top:10px"><div class="fg"><label>Delay (hours)</label><input type="number" id="fu2Delay" value="24" min="1"/></div><div class="fg"><label>Trigger</label><select id="fu2Trig"><option value="not_booked">Not booked yet</option><option value="followed_up_not_booked">After FU1, still not booked</option></select></div></div></div></div>
-      <div class="tab active" id="tab-settings"><div class="sec-hdr"><div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div><button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button></div><div class="card"><div class="card-title">Integrations</div><div class="int-card"><div class="int-hdr"><div class="int-logo g">🌐</div><div><div class="int-title">GoWA Server</div><div class="int-desc">Your WhatsApp API server URL</div></div></div><div class="grid2"><div class="fg"><label>Server URL</label><input type="url" id="cfgGowaUrl" value="https://sanjaywa8-5.onrender.com"/></div><div class="fg"><label>Basic Auth</label><input type="text" id="cfgGowaAuth" placeholder="Leave empty if no auth"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo b">📅</div><div><div class="int-title">Calendly</div><div class="int-desc">Booking link + webhook auto-marks leads booked</div></div></div><div class="grid2"><div class="fg"><label>Booking Link</label><input type="url" id="cfgCalLink" placeholder="https://calendly.com/you/30min"/></div><div class="fg"><label>Webhook URL</label><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer" id="calWebhook" onclick="copyWebhook()">Save to generate URL</div></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo p">📧</div><div><div class="int-title">Resend</div><div class="int-desc">Email API for lead outreach</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgResendKey" placeholder="re_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgResendKey',this)">Show</span></div></div><div class="fg"><label>From Email</label><input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/></div><div class="fg"><label>From Name</label><input type="text" id="cfgFromName" placeholder="Your Business"/></div><div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo o">🤖</div><div><div class="int-title">ManyChat</div><div class="int-desc">Trigger flows + tag subscribers</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgMcKey" placeholder="eyJhbGci..."/><span class="key-tog" onclick="togKey('cfgMcKey',this)">Show</span></div></div><div class="fg"><label>Page ID</label><input type="text" id="cfgMcPageId" placeholder="123456789"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo t">🤖</div><div><div class="int-title">Groq AI</div><div class="int-desc">Free AI for message rewrite + auto reply</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgGroqKey" placeholder="gsk_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgGroqKey',this)">Show</span></div></div><div class="fg"><label>Model</label><select id="cfgGroqModel"><option value="llama3-8b-8192">llama3-8b-8192</option><option value="llama3-70b-8192">llama3-70b-8192</option><option value="mixtral-8x7b-32768">mixtral-8x7b</option><option value="gemma2-9b-it">gemma2-9b-it</option></select></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where leads come from</div></div></div><div class="grid2"><div class="fg"><label>Sheet ID</label><input type="text" id="cfgSheetId" placeholder="1BxiMV..."/></div><div class="fg"><label>Tab Name</label><input type="text" id="cfgSheetTab" placeholder="Sheet1"/></div></div><div class="grid3" style="margin-top:8px"><div class="fg"><label>Name Col</label><input type="text" id="cfgColName" placeholder="A" maxlength="2"/></div><div class="fg"><label>Phone Col</label><input type="text" id="cfgColPhone" placeholder="B" maxlength="2"/></div><div class="fg"><label>Email Col</label><input type="text" id="cfgColEmail" placeholder="C" maxlength="2"/></div></div><div class="tog-row"><div><div class="tog-info">Has Header Row</div><div class="tog-sub">Skip first row</div></div><label class="tog"><input type="checkbox" id="cfgHasHeader" checked/><span class="tog-sl"></span></label></div></div></div><div class="card"><div class="card-title">Send Limits</div><div class="grid2"><div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div><div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div></div><div class="fg"><label>Min Gap (seconds)</label><div class="range-row"><input type="range" id="minGap" min="0" max="300" value="30" oninput="document.getElementById('minGapV').textContent=this.value+'s'"/><span class="range-val" id="minGapV">30s</span></div></div><div class="fg"><label>Max Gap (seconds)</label><div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapV').textContent=this.value+'s'"/><span class="range-val" id="maxGapV">90s</span></div></div></div><div class="card"><div class="card-title">Automation</div><div class="tog-row"><div><div class="tog-info">AI Auto Reply</div><div class="tog-sub">Auto-reply incoming messages with Groq</div></div><label class="tog"><input type="checkbox" id="autoReply" onchange="toggleAR()"/><span class="tog-sl"></span></label></div><div id="arPromptArea" style="display:none"><div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div></div><div class="tog-row"><div><div class="tog-info">Pause on Reply</div><div class="tog-sub">Stop blast when contact replies</div></div><label class="tog"><input type="checkbox" id="pauseOnReply" checked/><span class="tog-sl"></span></label></div><div class="tog-row"><div><div class="tog-info">AI Message Rewrite</div><div class="tog-sub">Slightly rewrite each message before sending</div></div><label class="tog"><input type="checkbox" id="aiRewrite"/><span class="tog-sl"></span></label></div></div></div>
+      <div class="tab active" id="tab-settings"><!-- Add this inside the Settings tab, before other cards -->
+<div class="card">
+  <div class="card-title">Server Status</div>
+  <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+    <button class="btn btn-b" onclick="checkServerStatus()" id="serverStatusBtn">
+      🔍 Check Server Status
+    </button>
+    <div id="serverStatusDisplay" style="display: flex; align-items: center; gap: 10px;">
+      <span class="status-pip" id="serverStatusPip" style="background: var(--muted);"></span>
+      <span id="serverStatusText" style="font-family: var(--mono); font-size: 12px; color: var(--text2);">Not checked</span>
+    </div>
+  </div>
+  <div id="serverDetails" style="margin-top: 12px; font-size: 11px; color: var(--text2); display: none;"></div>
+</div><div class="sec-hdr"><div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div><button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button></div><div class="card"><div class="card-title">Integrations</div><div class="int-card"><div class="int-hdr"><div class="int-logo g">🌐</div><div><div class="int-title">GoWA Server</div><div class="int-desc">Your WhatsApp API server URL</div></div></div><div class="grid2"><div class="fg"><label>Server URL</label><input type="url" id="cfgGowaUrl" value="https://sanjaywa8-5.onrender.com"/></div><div class="fg"><label>Basic Auth</label><input type="text" id="cfgGowaAuth" placeholder="Leave empty if no auth"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo b">📅</div><div><div class="int-title">Calendly</div><div class="int-desc">Booking link + webhook auto-marks leads booked</div></div></div><div class="grid2"><div class="fg"><label>Booking Link</label><input type="url" id="cfgCalLink" placeholder="https://calendly.com/you/30min"/></div><div class="fg"><label>Webhook URL</label><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer" id="calWebhook" onclick="copyWebhook()">Save to generate URL</div></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo p">📧</div><div><div class="int-title">Resend</div><div class="int-desc">Email API for lead outreach</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgResendKey" placeholder="re_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgResendKey',this)">Show</span></div></div><div class="fg"><label>From Email</label><input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/></div><div class="fg"><label>From Name</label><input type="text" id="cfgFromName" placeholder="Your Business"/></div><div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo o">🤖</div><div><div class="int-title">ManyChat</div><div class="int-desc">Trigger flows + tag subscribers</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgMcKey" placeholder="eyJhbGci..."/><span class="key-tog" onclick="togKey('cfgMcKey',this)">Show</span></div></div><div class="fg"><label>Page ID</label><input type="text" id="cfgMcPageId" placeholder="123456789"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo t">🤖</div><div><div class="int-title">Groq AI</div><div class="int-desc">Free AI for message rewrite + auto reply</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgGroqKey" placeholder="gsk_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgGroqKey',this)">Show</span></div></div><div class="fg"><label>Model</label><select id="cfgGroqModel"><option value="llama3-8b-8192">llama3-8b-8192</option><option value="llama3-70b-8192">llama3-70b-8192</option><option value="mixtral-8x7b-32768">mixtral-8x7b</option><option value="gemma2-9b-it">gemma2-9b-it</option></select></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where leads come from</div></div></div><div class="grid2"><div class="fg"><label>Sheet ID</label><input type="text" id="cfgSheetId" placeholder="1BxiMV..."/></div><div class="fg"><label>Tab Name</label><input type="text" id="cfgSheetTab" placeholder="Sheet1"/></div></div><div class="grid3" style="margin-top:8px"><div class="fg"><label>Name Col</label><input type="text" id="cfgColName" placeholder="A" maxlength="2"/></div><div class="fg"><label>Phone Col</label><input type="text" id="cfgColPhone" placeholder="B" maxlength="2"/></div><div class="fg"><label>Email Col</label><input type="text" id="cfgColEmail" placeholder="C" maxlength="2"/></div></div><div class="tog-row"><div><div class="tog-info">Has Header Row</div><div class="tog-sub">Skip first row</div></div><label class="tog"><input type="checkbox" id="cfgHasHeader" checked/><span class="tog-sl"></span></label></div></div></div><div class="card"><div class="card-title">Send Limits</div><div class="grid2"><div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div><div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div></div><div class="fg"><label>Min Gap (seconds)</label><div class="range-row"><input type="range" id="minGap" min="0" max="300" value="30" oninput="document.getElementById('minGapV').textContent=this.value+'s'"/><span class="range-val" id="minGapV">30s</span></div></div><div class="fg"><label>Max Gap (seconds)</label><div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapV').textContent=this.value+'s'"/><span class="range-val" id="maxGapV">90s</span></div></div></div><div class="card"><div class="card-title">Automation</div><div class="tog-row"><div><div class="tog-info">AI Auto Reply</div><div class="tog-sub">Auto-reply incoming messages with Groq</div></div><label class="tog"><input type="checkbox" id="autoReply" onchange="toggleAR()"/><span class="tog-sl"></span></label></div><div id="arPromptArea" style="display:none"><div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div></div><div class="tog-row"><div><div class="tog-info">Pause on Reply</div><div class="tog-sub">Stop blast when contact replies</div></div><label class="tog"><input type="checkbox" id="pauseOnReply" checked/><span class="tog-sl"></span></label></div><div class="tog-row"><div><div class="tog-info">AI Message Rewrite</div><div class="tog-sub">Slightly rewrite each message before sending</div></div><label class="tog"><input type="checkbox" id="aiRewrite"/><span class="tog-sl"></span></label></div></div></div>
       <div class="tab" id="tab-logs"><div class="sec-hdr"><div><div class="sec-title">Activity Logs</div><div class="sec-sub">// all messages, replies and events</div></div><div class="btn-row"><select id="logFilter" onchange="filterLogs()" style="padding:7px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none"><option value="all">All</option><option value="sent">Sent</option><option value="failed">Failed</option><option value="reply">Replies</option><option value="ai">AI</option><option value="booked">Booked</option></select><button class="btn btn-d btn-sm" onclick="clearLogs()">🗑 Clear</button></div></div><div class="card" style="padding:0"><div id="logsList" style="padding:14px 18px"><div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div></div></div></div>
     </div>
   </main>
@@ -335,7 +348,110 @@ function renderAuth(mode = 'login') {
     card.innerHTML = `<h2>Reset Password</h2><p>// we'll send you a reset link</p><div class="auth-msg" id="am"></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><button class="btn-primary" id="aBtn" onclick="doReset()">Send Reset Link</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back to login</span></div>`;
   }
 }
+async function checkServerStatus() {
+  const btn = document.getElementById('serverStatusBtn');
+  const statusPip = document.getElementById('serverStatusPip');
+  const statusText = document.getElementById('serverStatusText');
+  const detailsDiv = document.getElementById('serverDetails');
+  
+  // Disable button and show loading state
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Checking Server...';
+  statusPip.style.background = 'var(--accent4)';
+  statusText.textContent = 'Checking...';
+  statusText.style.color = 'var(--accent4)';
+  detailsDiv.style.display = 'none';
+  
+  const startTime = Date.now();
+  
+  try {
+    // Try to fetch the server status with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch('https://sanjaywa8-5.onrender.com/', {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'Accept': 'text/html,application/json',
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
+    
+    if (response.ok) {
+      // Server is active
+      statusPip.style.background = 'var(--accent)';
+      statusPip.classList.add('on');
+      statusText.textContent = '🟢 ACTIVE';
+      statusText.style.color = 'var(--accent)';
+      statusText.style.fontWeight = 'bold';
+      
+      // Show detailed info
+      detailsDiv.style.display = 'block';
+      detailsDiv.innerHTML = `
+        <div style="background: rgba(0,255,136,0.05); border-radius: 8px; padding: 10px;">
+          <div>✅ Server is online and responding</div>
+          <div>📡 Status Code: ${response.status} (OK)</div>
+          <div>⏱️ Response Time: ${responseTime}ms</div>
+          <div>🌐 Server: WhatsApp API v8.5.0</div>
+          <div>🔗 URL: https://sanjaywa8-5.onrender.com</div>
+        </div>
+      `;
+      
+      showToast(`✅ Server is ACTIVE (${responseTime}ms)`, false);
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (error) {
+    // Server is not responding or error occurred
+    statusPip.style.background = 'var(--accent3)';
+    statusPip.classList.remove('on');
+    statusText.textContent = '🔴 OFFLINE / TIMEOUT';
+    statusText.style.color = 'var(--accent3)';
+    statusText.style.fontWeight = 'bold';
+    
+    detailsDiv.style.display = 'block';
+    detailsDiv.innerHTML = `
+      <div style="background: rgba(255,51,102,0.05); border-radius: 8px; padding: 10px;">
+        <div>❌ Server is not responding</div>
+        <div>⚠️ Error: ${error.message || 'Connection failed'}</div>
+        <div>💡 Tip: The server may be starting up or experiencing issues</div>
+        <div>🔄 Try again in a few moments</div>
+      </div>
+    `;
+    
+    showToast(`❌ Server OFFLINE - ${error.message}`, true);
+  } finally {
+    // Re-enable button
+    btn.disabled = false;
+    btn.innerHTML = '🔍 Check Server Status';
+    
+    // Auto-hide details after 15 seconds (optional)
+    setTimeout(() => {
+      if (detailsDiv.style.display === 'block') {
+        detailsDiv.style.opacity = '0.5';
+        setTimeout(() => {
+          if (detailsDiv.style.display === 'block') {
+            detailsDiv.style.display = 'none';
+            detailsDiv.style.opacity = '1';
+          }
+        }, 3000);
+      }
+    }, 15000);
+  }
+}
 
+// Optional: Auto-check server status when dashboard loads
+// Add this to your showDash() function or call it after login
+async function autoCheckServerOnLoad() {
+  // Wait a few seconds after dashboard loads, then check
+  setTimeout(() => {
+    checkServerStatus();
+  }, 3000);
+}
 function amsg(type, txt) { const el = document.getElementById('am'); if (el) { el.className = 'auth-msg ' + type; el.textContent = txt; } }
 
 async function doLogin() {
@@ -359,6 +475,7 @@ async function doLogin() {
     showToast('Login successful!');
   } else {
     amsg('error', r.message || 'Login failed');
+    autoCheckServerOnLoad();
   }
 }
 
