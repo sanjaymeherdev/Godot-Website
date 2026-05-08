@@ -1793,40 +1793,70 @@ function showToast(msg, isErr=false) {
 // ══════════════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════════════
+// Replace the existing window.onload = async () => { ... } block with this:
+
 window.onload = async () => {
-  const isGoogleCallback = handleGoogleCallback()
+  // Render auth card immediately so the page is never blank while async work runs
+  renderAuth()
 
-  if (isGoogleCallback) {
-    showToast('Google sign-in successful! Loading…')
-    const overlay = document.createElement('div')
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
-    overlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div><p>Loading dashboard…</p></div>'
-    document.body.appendChild(overlay)
-    const r = await api('loadAll')
-    overlay.remove()
-    if (r.success) await showDash(r) else { showToast('Load failed: '+(r.message||'Unknown'), true); renderAuth() }
-    return
-  }
+  try {
+    // 1. Handle Google OAuth hash callback
+    if (handleGoogleCallback()) {
+      showToast('Google sign-in successful! Loading…')
+      const overlay = document.createElement('div')
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
+      overlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div><p>Loading dashboard…</p></div>'
+      document.body.appendChild(overlay)
+      const r = await api('loadAll')
+      overlay.remove()
+      if (r.success) { await showDash(r); return }
+      showToast('Load failed: ' + (r.message || 'Unknown'), true)
+      return
+    }
 
-  const { data: { session } } = await supa.auth.getSession()
-  if (session) {
-    token = session.access_token
-    localStorage.setItem('lf_token', token)
-    const r = await api('loadAll')
-    if (r.success) { await showDash(r); return } else renderAuth()
-    return
-  }
+    // 2. Try active Supabase session
+    const { data: { session } } = await supa.auth.getSession()
+    if (session?.access_token) {
+      token = session.access_token
+      localStorage.setItem('lf_token', token)
+      let r = await api('loadAll')
+      if (r.success) { await showDash(r); return }
 
-  const saved = localStorage.getItem('lf_token')
-  if (saved) {
-    token = saved
-    showToast('Restoring session…')
-    const r = await api('loadAll')
-    if (r.success) { await showDash(r); return }
+      // loadAll failed — try refreshing the session token once
+      const { data: refreshed } = await supa.auth.refreshSession()
+      if (refreshed?.session?.access_token) {
+        token = refreshed.session.access_token
+        localStorage.setItem('lf_token', token)
+        r = await api('loadAll')
+        if (r.success) { await showDash(r); return }
+      }
+
+      // Session exists but backend is unreachable — clear and show login
+      token = null
+      localStorage.removeItem('lf_token')
+      showToast('Session expired — please sign in again', true)
+      return
+    }
+
+    // 3. Fall back to raw saved token (e.g. set by a previous non-OAuth login)
+    const saved = localStorage.getItem('lf_token')
+    if (saved) {
+      token = saved
+      showToast('Restoring session…')
+      const r = await api('loadAll')
+      if (r.success) { await showDash(r); return }
+      // Token is stale — discard it
+      token = null
+      localStorage.removeItem('lf_token')
+    }
+
+  } catch (err) {
+    console.error('[onload] Session restore error:', err)
+    token = null
     localStorage.removeItem('lf_token')
   }
 
-  renderAuth()
+  // Auth card is already rendered at the top — nothing more to do
 }
 </script>
 </body>
