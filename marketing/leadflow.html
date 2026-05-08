@@ -241,6 +241,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:var(--t);border:1px solid transparent;white-space:nowrap;}
 .btn-g{background:var(--accent);color:#000;border-color:var(--accent);}
 .btn-g:hover{background:#00e87a;}
+.btn-sm-inline {
+  padding: 2px 8px;
+  font-size: 10px;
+}
 .btn-s{background:transparent;color:var(--text);border-color:var(--border2);}
 .btn-s:hover{border-color:var(--text2);background:var(--card);}
 .btn-d{background:rgba(255,51,102,.08);color:var(--accent3);border-color:rgba(255,51,102,.2);}
@@ -583,34 +587,77 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     <button class="btn btn-b btn-sm" onclick="testAppsScript()">🧪 Send Test Email (Apps Script)</button>
   </div>
 </div>
-  <!-- ManyChat Card -->
-  <div class="card">
-    <div class="card-title">🤖 ManyChat — Messenger Automation</div>
-    <div class="grid2">
-      <div class="fg"><label>API Key</label><div class="key-wrap" style="position:relative"><input type="password" id="manychatKey" placeholder="eyJhbGci..."/><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('manychatKey',this)">Show</span></div></div>
-      <div class="fg"><label>Page ID (Facebook)</label><input type="text" id="manychatPageId" placeholder="123456789"/></div>
-      <div class="fg"><label>Subscriber ID (for test)</label><input type="text" id="manychatSubId" placeholder="Optional test subscriber ID"/></div>
-      <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testManyChat()" style="margin-top:auto">🧪 Test ManyChat</button></div>
+ <!-- ManyChat Card -->
+<div class="card">
+  <div class="card-title">🤖 ManyChat — Messenger Automation</div>
+  
+  <!-- Guide -->
+  <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO SETUP MANYCHAT</div>
+    <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
+      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://manychat.com', '_blank')">Open ManyChat ↗</button><br>
+      <strong>Step 2:</strong> Connect your Facebook page<br>
+      <strong>Step 3:</strong> Go to Settings → API → Generate API Key<br>
+      <strong>Step 4:</strong> Copy your Page ID (from Settings → General)<br>
+      <strong>Step 5:</strong> Find a Subscriber ID (from Audience tab, click a subscriber → copy ID)<br>
+      <strong>Step 6:</strong> Paste all three in the fields below and click Test
     </div>
   </div>
 
-  <!-- Calendly Card -->
-  <div class="card">
-    <div class="card-title">📅 Calendly — Booking Integration</div>
-    <div class="grid2">
-      <div class="fg"><label>Booking Link</label><input type="url" id="calendlyLink" placeholder="https://calendly.com/yourname/event"/></div>
-      <div class="fg"><label>Webhook Secret (optional)</label><input type="password" id="calendlySecret" placeholder="Leave empty if not using"/></div>
+  <!-- Fields -->
+  <div class="fg">
+    <label>API Key</label>
+    <div class="key-wrap" style="position:relative">
+      <input type="password" id="manychatKey" placeholder="eyJhbGci...">
+      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('manychatKey',this)">Show</span>
     </div>
-    <div class="fg">
-      <label>Webhook URL (copy to Calendly)</label>
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="calWebhookUrl" readonly style="background:var(--bg);font-family:var(--mono);font-size:11px;" placeholder="Save settings first"/>
-        <button class="btn btn-s btn-sm" onclick="copyWebhookUrl()">📋 Copy</button>
-      </div>
+  </div>
+  <div class="fg">
+    <label>Page ID</label>
+    <input type="text" id="manychatPageId" placeholder="123456789">
+  </div>
+  <div class="fg">
+    <label>Test Subscriber ID</label>
+    <input type="text" id="manychatSubId" placeholder="For testing, paste a real subscriber ID">
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-b btn-sm" onclick="testManyChat()">🧪 Test ManyChat</button>
+  </div>
+</div>
+
+<!-- Calendly Card -->
+<div class="card">
+  <div class="card-title">📅 Calendly — Booking Integration</div>
+  
+  <!-- Guide -->
+  <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO SETUP CALENDLY</div>
+    <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
+      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://calendly.com', '_blank')">Open Calendly ↗</button> (free plan allows 1 event type)<br>
+      <strong>Step 2:</strong> Create your event type (e.g., "30 min consultation")<br>
+      <strong>Step 3:</strong> Copy your booking link from Calendly dashboard<br>
+      <strong>Step 4:</strong> Go to Calendly → Account → Webhooks<br>
+      <strong>Step 5:</strong> Add webhook URL (copy from below) and save<br>
+      <strong>Step 6:</strong> Paste your booking link in the field below
     </div>
-    <div class="btn-row"><button class="btn btn-b btn-sm" onclick="testCalendly()">🧪 Test Webhook</button></div>
   </div>
 
+  <!-- Fields -->
+  <div class="fg">
+    <label>Your Calendly Booking Link</label>
+    <input type="url" id="calendlyLink" placeholder="https://calendly.com/yourname/event">
+  </div>
+  <div class="fg">
+    <label>Webhook URL (copy this to Calendly)</label>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="calWebhookUrl" readonly style="background:var(--bg); font-family:var(--mono); font-size:11px;" placeholder="Save settings first">
+      <button class="btn btn-s btn-sm" onclick="copyWebhookUrl()">📋 Copy</button>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-b btn-sm" onclick="testCalendly()">🧪 Test Webhook (Simulate Booking)</button>
+  </div>
+</div>
   <!-- Google Sheet Card -->
   <div class="card">
     <div class="card-title">📊 Google Sheet — Lead Source</div>
