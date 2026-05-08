@@ -18,11 +18,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
-
-/* NOISE TEXTURE */
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
 
-/* ═══ AUTH ═══ */
+/* AUTH */
 .auth-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:var(--bg);}
 .auth-wrap::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,255,136,.04) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
 .auth-box{width:420px;max-width:94vw;position:relative;}
@@ -45,7 +43,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .field input::placeholder{color:var(--muted);}
 .btn-primary{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:var(--t);margin-top:4px;letter-spacing:-.3px;}
 .btn-primary:hover{background:#00e87a;transform:translateY(-1px);}
-.btn-primary:active{transform:none;}
 .btn-primary:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed;transform:none;}
 .btn-google{width:100%;padding:12px;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:8px;font-size:14px;font-weight:700;font-family:var(--sans);cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;}
 .btn-google:hover{border-color:var(--text2);background:var(--border);}
@@ -55,7 +52,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .auth-link{font-size:12px;color:var(--accent2);cursor:pointer;font-family:var(--mono);}
 .auth-link:hover{text-decoration:underline;}
 
-/* ═══ DASHBOARD ═══ */
+/* DASHBOARD */
 .dash{display:none;width:100%;height:100vh;overflow:hidden;}
 
 /* SIDEBAR */
@@ -84,9 +81,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sb-footer{padding:12px;border-top:1px solid var(--border);}
 .logout-btn{width:100%;padding:9px;background:rgba(255,51,102,.06);border:1px solid rgba(255,51,102,.15);border-radius:8px;color:var(--accent3);font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:var(--t);}
 .logout-btn:hover{background:rgba(255,51,102,.12);}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .topbar{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;background:var(--surface);}
@@ -103,6 +98,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tab{display:none;animation:fadeUp .2s ease;}
 .tab.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 /* SECTION */
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
@@ -187,7 +183,7 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 .prog-g{background:linear-gradient(90deg,var(--accent),#00ccff);}
 .prog-r{background:linear-gradient(90deg,var(--accent4),var(--accent3));}
 
-/* SEND CONTROL */
+/* SEND CTRL */
 .send-ctrl{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:16px;}
 .ctrl-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .big-btn{width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:var(--t);flex-shrink:0;}
@@ -210,8 +206,13 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 .dev-id{font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:3px;word-break:break-all;}
 .pip-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
 .pip-dot.on{background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pip 1.5s infinite;}
-.pip-dot.scan{background:var(--accent4);}
+.pip-dot.scan{background:var(--accent4);animation:pip 1s infinite;}
 .pip-dot.off{background:var(--muted);}
+
+/* WS STATUS BADGE */
+.ws-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);}
+.ws-badge.ws-on{color:var(--accent);border-color:rgba(0,255,136,.2);background:rgba(0,255,136,.05);}
+.ws-badge.ws-poll{color:var(--accent4);border-color:rgba(255,170,0,.2);background:rgba(255,170,0,.05);}
 
 /* PIPELINE */
 .pipeline{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
@@ -232,7 +233,7 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 .attach-opt span{font-size:20px;display:block;margin-bottom:5px;}
 .attach-opt:hover,.attach-opt.sel{border-color:var(--accent);color:var(--accent);background:rgba(0,255,136,.05);}
 
-/* INTEGRATION CARDS */
+/* INT CARDS */
 .int-card{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:10px;}
 .int-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .int-logo{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
@@ -275,32 +276,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 /* TOAST */
 #toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:10px;font-size:12px;font-weight:700;font-family:var(--sans);z-index:9999;transition:opacity .3s;pointer-events:none;opacity:0;}
 
-/* WARN BANNER */
+/* BANNER */
 .warn-ban{background:rgba(255,51,102,.06);border:1px solid rgba(255,51,102,.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--accent3);}
 .info-ban{background:rgba(0,136,255,.05);border:1px solid rgba(0,136,255,.15);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--accent2);line-height:1.6;}
 
-/* VARIATIONS */
+/* VAR */
 .var-item{border-bottom:1px solid var(--border);padding:10px 0;}
 .var-item:last-child{border-bottom:none;}
 .var-num{font-family:var(--mono);font-size:9px;color:var(--accent);margin-bottom:3px;}
 .var-text{font-size:12px;color:var(--text);}
 
-@media(max-width:900px){
-  .stat-row{grid-template-columns:repeat(2,1fr);}
-  .grid2{grid-template-columns:1fr;}
-  .sidebar{width:190px;}
-  .pipeline{grid-template-columns:repeat(3,1fr);}
-}
-@media(max-width:640px){
-  .sidebar{display:none;}
-  .content{padding:14px;}
-  .pipeline{grid-template-columns:repeat(2,1fr);}
-}
+@media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr);}
+.grid2{grid-template-columns:1fr;}.sidebar{width:190px;}
+.pipeline{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.sidebar{display:none;}.content{padding:14px;}
+.pipeline{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
 
-<!-- ═══ AUTH ═══ -->
+<!-- AUTH -->
 <div class="auth-wrap" id="authWrap">
   <div class="auth-box">
     <div class="auth-logo">
@@ -312,13 +307,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
 </div>
 
-<!-- ═══ DASHBOARD ═══ -->
+<!-- DASHBOARD -->
 <div class="dash" id="dash">
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-tag">LEADFLOW</div>
       <h1>Lead<span>Flow</span></h1>
-      <div class="version">v2.0 · 8.5 multitenancy</div>
+      <div class="version">v2.0 · multitenancy</div>
     </div>
     <div class="user-pill">
       <div class="user-av" id="userAv">A</div>
@@ -353,13 +348,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
     <div class="content">
 
-      <!-- DEVICE -->
+      <!-- DEVICE TAB -->
       <div class="tab" id="tab-device">
         <div class="sec-hdr">
           <div><div class="sec-title">Link Device</div><div class="sec-sub">// connect your whatsapp number</div></div>
           <div class="btn-row">
-            <button class="btn btn-b btn-sm" onclick="syncDevice()" id="syncBtn" style="display:none">🔄 Sync Status</button>
-            <button class="btn btn-s btn-sm" onclick="loadQR()">🔄 Refresh QR</button>
+            <span id="wsStatusBadge" class="ws-badge" style="display:none"></span>
+            <button class="btn btn-b btn-sm" onclick="syncDevice()" id="syncBtn" style="display:none">🔄 Sync</button>
+            <button class="btn btn-s btn-sm" onclick="loadQR()">🔄 Load QR</button>
             <button class="btn btn-d btn-sm" id="unlinkBtn" onclick="unlinkDevice()" style="display:none">🔌 Unlink</button>
           </div>
         </div>
@@ -391,14 +387,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
               <li>Open WhatsApp on your phone</li>
               <li>Go to <strong>Settings → Linked Devices</strong></li>
               <li>Tap <strong>Link a Device</strong></li>
-              <li>Scan the QR code</li>
+              <li>Scan the QR code — auto-detects via WebSocket</li>
             </ul>
             <div style="margin-top:14px;padding:10px;background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.15);border-radius:8px;font-size:11px;color:var(--accent4);font-family:var(--mono)">⚠ QR expires in 60s — refresh if timed out</div>
           </div>
         </div>
       </div>
 
-      <!-- CONTACTS -->
+      <!-- CONTACTS TAB -->
       <div class="tab" id="tab-contacts">
         <div class="sec-hdr">
           <div><div class="sec-title">Contacts</div><div class="sec-sub">// upload, paste or import from group</div></div>
@@ -418,7 +414,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
             <button class="btn btn-s" onclick="togglePaste()">📋 Paste Data</button>
           </div>
           <div id="pasteArea" style="display:none">
-            <div class="fg"><label>Paste from Excel — Name · Phone · Message</label><textarea id="pasteInput" rows="4" placeholder="John&#9;9876543210&#9;Hi John!"></textarea></div>
+            <div class="fg"><label>Paste — Name · Phone · Message</label><textarea id="pasteInput" rows="4" placeholder="John&#9;9876543210&#9;Hi John!"></textarea></div>
             <button class="btn btn-g btn-sm" onclick="parsePaste()">Parse</button>
           </div>
         </div>
@@ -445,7 +441,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
       </div>
 
-      <!-- COMPOSE -->
+      <!-- COMPOSE TAB -->
       <div class="tab" id="tab-compose">
         <div class="sec-hdr">
           <div><div class="sec-title">Compose</div><div class="sec-sub">// message template + attachments</div></div>
@@ -456,7 +452,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
           <div class="fg" style="margin-bottom:10px">
             <label>Template — use {name} for personalisation</label>
             <div style="position:relative">
-              <textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special for you! 🎉" oninput="updateCC(this)"></textarea>
+              <textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special! 🎉" oninput="updateCC(this)"></textarea>
               <span style="position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;color:var(--muted)" id="cc">0</span>
             </div>
           </div>
@@ -507,7 +503,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
       </div>
 
-      <!-- SEND -->
+      <!-- SEND TAB -->
       <div class="tab" id="tab-send">
         <div class="sec-hdr"><div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div></div>
         <div class="stat-row">
@@ -548,7 +544,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
       </div>
 
-      <!-- LEADS -->
+      <!-- LEADS TAB -->
       <div class="tab" id="tab-leads">
         <div class="sec-hdr">
           <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div>
@@ -578,12 +574,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <div class="card" style="padding:0;overflow:hidden">
           <div class="tbl-wrap" style="border:none;border-radius:0">
             <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead>
-            <tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet — configure sheet in Config and scan</td></tr></tbody></table>
+            <tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody></table>
           </div>
         </div>
       </div>
 
-      <!-- CONFIG -->
+      <!-- CONFIG TAB -->
       <div class="tab" id="tab-config">
         <div class="sec-hdr">
           <div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up logic</div></div>
@@ -605,7 +601,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <div class="card">
           <div class="card-title">Email Templates</div>
           <div class="fg"><label>Subject</label><input type="text" id="cfgEmailSubj" placeholder="We received your enquiry, {name}!"/></div>
-          <div class="fg"><label>Body (HTML supported)</label><textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out! Book here: {link}"></textarea></div>
+          <div class="fg"><label>Body (HTML supported)</label><textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out!"></textarea></div>
         </div>
         <div class="card">
           <div class="card-title">Follow-up Engine</div>
@@ -628,25 +624,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
       </div>
 
-      <!-- SETTINGS -->
+      <!-- SETTINGS TAB -->
       <div class="tab active" id="tab-settings">
         <div class="sec-hdr">
           <div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div>
           <button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button>
         </div>
-
-        <!-- Integrations -->
         <div class="card">
           <div class="card-title">Integrations</div>
-
           <div class="int-card">
             <div class="int-hdr"><div class="int-logo g">🌐</div><div><div class="int-title">GoWA Server</div><div class="int-desc">Your WhatsApp API server URL</div></div></div>
             <div class="grid2">
               <div class="fg"><label>Server URL</label><input type="url" id="cfgGowaUrl" value="https://sanjaywa8-5.onrender.com"/></div>
-              <div class="fg"><label>Basic Auth (user:pass base64, leave empty if none)</label><input type="text" id="cfgGowaAuth" placeholder="Leave empty if no auth"/></div>
+              <div class="fg"><label>Basic Auth (base64 user:pass — leave empty if none)</label><input type="text" id="cfgGowaAuth" placeholder="Leave empty if no auth"/></div>
             </div>
           </div>
-
           <div class="int-card">
             <div class="int-hdr"><div class="int-logo b">📅</div><div><div class="int-title">Calendly</div><div class="int-desc">Booking link + webhook auto-marks leads booked</div></div></div>
             <div class="grid2">
@@ -654,19 +646,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
               <div class="fg"><label>Webhook URL (paste into Calendly)</label><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer" id="calWebhook" onclick="copyWebhook()">Save to generate URL</div></div>
             </div>
           </div>
-
           <div class="int-card">
             <div class="int-hdr"><div class="int-logo p">📧</div><div><div class="int-title">Resend</div><div class="int-desc">Email API for lead outreach</div></div></div>
             <div class="grid2">
               <div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgResendKey" placeholder="re_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgResendKey',this)">Show</span></div></div>
               <div class="fg"><label>From Email</label><input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/></div>
               <div class="fg"><label>From Name</label><input type="text" id="cfgFromName" placeholder="Your Business"/></div>
-              <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end">
-                <button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button>
-              </div>
+              <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button></div>
             </div>
           </div>
-
           <div class="int-card">
             <div class="int-hdr"><div class="int-logo o">🤖</div><div><div class="int-title">ManyChat</div><div class="int-desc">Trigger flows + tag subscribers</div></div></div>
             <div class="grid2">
@@ -674,7 +662,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
               <div class="fg"><label>Page ID</label><input type="text" id="cfgMcPageId" placeholder="123456789"/></div>
             </div>
           </div>
-
           <div class="int-card">
             <div class="int-hdr"><div class="int-logo t">🤖</div><div><div class="int-title">Groq AI</div><div class="int-desc">Free AI for message rewrite + auto reply</div></div></div>
             <div class="grid2">
@@ -689,9 +676,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
               </div>
             </div>
           </div>
-
           <div class="int-card">
-            <div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where your leads come from (must be public)</div></div></div>
+            <div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where leads come from (must be public)</div></div></div>
             <div class="grid2">
               <div class="fg"><label>Sheet ID</label><input type="text" id="cfgSheetId" placeholder="1BxiMV..."/></div>
               <div class="fg"><label>Tab Name</label><input type="text" id="cfgSheetTab" placeholder="Sheet1"/></div>
@@ -707,8 +693,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
             </div>
           </div>
         </div>
-
-        <!-- Send Limits -->
         <div class="card">
           <div class="card-title">Send Limits</div>
           <div class="grid2">
@@ -720,8 +704,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
             <div class="fg"><label>Max Gap (seconds)</label><div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapV').textContent=this.value+'s'"/><span class="range-val" id="maxGapV">90s</span></div></div>
           </div>
         </div>
-
-        <!-- Automation -->
         <div class="card">
           <div class="card-title">Automation</div>
           <div class="tog-row">
@@ -729,7 +711,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
             <label class="tog"><input type="checkbox" id="autoReply" onchange="toggleAR()"/><span class="tog-sl"></span></label>
           </div>
           <div id="arPromptArea" style="display:none;padding-top:10px">
-            <div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant. Reply naturally..."></textarea></div>
+            <div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div>
           </div>
           <div class="tog-row">
             <div><div class="tog-info">Pause on Reply</div><div class="tog-sub">Stop blast when contact replies</div></div>
@@ -742,7 +724,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
       </div>
 
-      <!-- LOGS -->
+      <!-- LOGS TAB -->
       <div class="tab" id="tab-logs">
         <div class="sec-hdr">
           <div><div class="sec-title">Activity Logs</div><div class="sec-sub">// all messages, replies and events</div></div>
@@ -767,30 +749,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // CONFIG
-// ══════════════════════════════════════════════
-const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow'
-const SUPA_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
+// ══════════════════════════════════════════════════════════════════
+const EDGE      = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow'
+const SUPA_URL  = 'https://lgfzoprhyjrmosvigwlb.supabase.co'
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3OTAyNzYsImV4cCI6MjA4MTM2NjI3Nn0.VjksnOtIINpR9ugYSXP2cwvoHsm8YLbs7fr5vkV4Uxg'
 
-// Init Supabase client for Google OAuth
 const supa = supabase.createClient(SUPA_URL, SUPA_ANON)
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // STATE
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 let token = null, userId = null, userEmail = null
 let contacts = [], logs = [], leads = []
-let deviceId = null, devicePollTimer = null, qrCountdown = null
+let deviceId = null, qrCountdown = null
+let ws = null, wsPollTimer = null, wsRetry = 0
 let sendState = 'idle', sendIndex = 0, sendTimer = null
 let todaySentN = 0, hourSentN = 0
 let selAttachType = 'none', variations = [], varIdx = 0, usingVars = false
 let gowaUrl = 'https://sanjaywa8-5.onrender.com'
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // API
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 async function api(action, body = {}) {
   const res = await fetch(EDGE, {
     method: 'POST',
@@ -803,9 +785,9 @@ async function api(action, body = {}) {
   return res.json()
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // AUTH
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function renderAuth(mode = 'login') {
   const card = document.getElementById('authCard')
   if (mode === 'login') {
@@ -860,176 +842,392 @@ function amsg(type, txt) {
 async function doLogin() {
   const email = document.getElementById('aEmail')?.value.trim()
   const pass  = document.getElementById('aPass')?.value.trim()
-  
   if (!email || !pass) return amsg('error', 'Email and password required')
-  
   const btn = document.getElementById('aBtn')
-  btn.disabled = true
-  btn.textContent = 'Signing in…'
+  btn.disabled = true; btn.textContent = 'Signing in…'
   amsg('loading', 'Authenticating…')
-  
   const r = await api('login', { email, password: pass })
-  
-  btn.disabled = false
-  btn.textContent = 'Sign In'
-  
-  if (r.success) { 
-    token = r.token
-    await showDash(r)
-  } else if (r.requires_confirmation) {
-    const msgDiv = document.getElementById('am')
-    msgDiv.className = 'auth-msg error'
-    msgDiv.innerHTML = `
-      <strong>⚠ Email not confirmed</strong><br/>
-      ${r.message}<br/>
-      <button onclick="resendConfirmation('${email}')" style="background:none;border:none;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:8px;">Resend verification email →</button>
-    `
-  } else {
-    amsg('error', r.message || 'Login failed')
-  }
+  btn.disabled = false; btn.textContent = 'Sign In'
+  if (r.success) { token = r.token; await showDash(r) }
+  else if (r.requires_confirmation) {
+    const el = document.getElementById('am')
+    el.className = 'auth-msg error'
+    el.innerHTML = `⚠ ${r.message}<br/><button onclick="resendConfirmation('${email}')" style="background:none;border:none;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:8px">Resend →</button>`
+  } else amsg('error', r.message || 'Login failed')
 }
 
 async function doRegister() {
   const name  = document.getElementById('aName')?.value.trim()
   const email = document.getElementById('aEmail')?.value.trim()
   const pass  = document.getElementById('aPass')?.value.trim()
-  
   if (!email || !pass) return amsg('error', 'Email and password required')
   if (pass.length < 6) return amsg('error', 'Password must be at least 6 characters')
-  
   const btn = document.getElementById('aBtn')
-  btn.disabled = true
-  btn.textContent = 'Creating…'
+  btn.disabled = true; btn.textContent = 'Creating…'
   amsg('loading', 'Creating account...')
-  
-  const redirectUrl = window.location.origin + window.location.pathname
-  const r = await api('register', { 
-    email, 
-    password: pass, 
-    full_name: name,
-    redirect_url: redirectUrl
-  })
-  
-  btn.disabled = false
-  btn.textContent = 'Create Account'
-  
+  const r = await api('register', { email, password: pass, full_name: name, redirect_url: window.location.origin + window.location.pathname })
+  btn.disabled = false; btn.textContent = 'Create Account'
   if (r.success) {
     if (r.requires_confirmation) {
-      // Show confirmation message with option to resend
-      const msgDiv = document.getElementById('am')
-      msgDiv.className = 'auth-msg success'
-      msgDiv.innerHTML = `
-        <strong>✓ Verification email sent!</strong><br/>
-        Please check your inbox (and spam folder) and click the confirmation link.<br/>
-        <button onclick="resendConfirmation('${email}')" style="background:none;border:none;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:8px;">Resend email →</button>
-      `
-    } else {
-      amsg('success', 'Account created! You can now login.')
-      setTimeout(() => renderAuth('login'), 2000)
-    }
-  } else if (r.exists) {
-    amsg('error', r.message + ' <a href="#" onclick="renderAuth(\'login\');return false;" style="color:var(--accent)">Login here</a>')
-  } else {
-    amsg('error', r.message || 'Registration failed')
-  }
+      const el = document.getElementById('am')
+      el.className = 'auth-msg success'
+      el.innerHTML = `✓ Verification email sent! Check inbox + spam.<br/><button onclick="resendConfirmation('${email}')" style="background:none;border:none;color:var(--accent);cursor:pointer;text-decoration:underline;margin-top:8px">Resend →</button>`
+    } else { amsg('success', 'Account created! You can now login.'); setTimeout(() => renderAuth('login'), 2000) }
+  } else if (r.exists) amsg('error', r.message)
+  else amsg('error', r.message || 'Registration failed')
 }
 
-// Add this function for resending confirmation
 async function resendConfirmation(email) {
   if (!email) return
   amsg('loading', 'Sending verification email...')
   const r = await api('resendConfirmation', { email })
-  if (r.success) {
-    amsg('success', 'Verification email resent! Check your inbox.')
-  } else {
-    amsg('error', r.message || 'Failed to resend. Try again later.')
-  }
+  if (r.success) amsg('success', 'Verification email resent!') else amsg('error', r.message || 'Failed')
 }
 
 async function doReset() {
   const email = document.getElementById('aEmail')?.value.trim()
   if (!email) return amsg('error', 'Email required')
-  const btn = document.getElementById('aBtn')
-  btn.disabled = true
+  const btn = document.getElementById('aBtn'); btn.disabled = true
   const r = await api('resetPassword', { email })
   btn.disabled = false
-  if (r.success) amsg('success', 'Reset link sent! Check your email.')
-  else amsg('error', r.message || 'Failed to send reset link')
+  if (r.success) amsg('success', 'Reset link sent!') else amsg('error', r.message || 'Failed')
 }
 
 async function googleLogin() {
-  const { data, error } = await supa.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: 'https://cggodotassets.shop/marketing/leadflow' }
-  })
-  if (error) amsg('error', error.message)
+  localStorage.removeItem('lf_token'); token = null
+  const redirectUrl = window.location.origin + window.location.pathname
+  const authUrl = `${SUPA_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
+  showToast('Redirecting to Google...')
+  setTimeout(() => { window.location.href = authUrl }, 500)
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // DASHBOARD
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 async function showDash(data) {
   document.getElementById('authWrap').style.display = 'none'
   document.getElementById('dash').style.display = 'flex'
-
   const user = data.user || data.profile
   userEmail  = user?.email || ''
   userId     = user?.id || ''
-
   const name = data.profile?.full_name || userEmail.split('@')[0] || 'User'
   document.getElementById('userName').textContent = name
   document.getElementById('userAv').textContent   = name[0].toUpperCase()
-
   if (data.settings)  applySettings(data.settings)
   if (data.config)    applyConfig(data.config)
   if (data.template)  applyTemplate(data.template)
   if (data.contacts)  { contacts = data.contacts; renderContacts() }
   if (data.logs)      { logs = data.logs.map(l => ({...l, time: new Date(l.created_at)})); renderLogs() }
   if (data.leads)     { leads = data.leads; renderLeads() }
-  if (data.device && data.device.device_id) {
-  deviceId = data.device.device_id
-  // Check the actual status from database
-  if (data.device.status === 'connected') {
-    setDevStatus('connected', deviceId)
-  } else {
-    setDevStatus('scanning', deviceId)
-  }
-} else {
-  setDevStatus('disconnected')
-}
+  // Restore device state
+  if (data.device?.device_id) {
+    deviceId = data.device.device_id
+    setDevStatus(data.device.status === 'connected' ? 'connected' : 'scanning', deviceId)
+  } else setDevStatus('disconnected')
   localStorage.setItem('lf_token', token)
   updateSendStats()
+  updateCalWebhook()
 }
 
-async function reloadSession() {
-  const saved = localStorage.getItem('lf_token')
-  if (!saved) return renderAuth()
-  token = saved
+// ══════════════════════════════════════════════════════════════════
+// DEVICE STATUS HELPERS
+// ══════════════════════════════════════════════════════════════════
+function setDevStatus(state, id) {
+  const pip   = document.getElementById('pipDot')
+  const lbl   = document.getElementById('pipLbl')
+  const icon  = document.getElementById('devIcon')
+  const title = document.getElementById('devTitle')
+  const idEl  = document.getElementById('devId')
+  const card  = document.getElementById('devCard')
+  const topPip = document.getElementById('topPip')
+  const topLbl = document.getElementById('topLbl')
+  const unlinkBtn = document.getElementById('unlinkBtn')
+  const syncBtn   = document.getElementById('syncBtn')
+  const devBadge  = document.getElementById('devBadge')
 
-  // Also check Supabase session (for Google auth)
-  const { data: { session } } = await supa.auth.getSession()
-  if (session) token = session.access_token
-
-  showToast('Restoring session…')
-  const r = await api('loadAll')
-  if (r.success) await showDash(r)
-  else { localStorage.removeItem('lf_token'); renderAuth() }
+  if (state === 'connected') {
+    pip.className = 'pip-dot on'; lbl.textContent = 'CONNECTED'
+    icon.textContent = '📱'; title.textContent = '✅ WhatsApp Connected'
+    idEl.textContent = 'Device: ' + (id || deviceId || 'Unknown')
+    card.className = 'dev-card on'
+    topPip.className = 'status-pip on'; topLbl.textContent = 'CONNECTED'; topLbl.style.color = 'var(--accent)'
+    unlinkBtn.style.display = 'inline-flex'; syncBtn.style.display = 'inline-flex'
+    devBadge.style.display = 'none'
+    if (id) deviceId = id
+  } else if (state === 'scanning') {
+    pip.className = 'pip-dot scan'; lbl.textContent = 'SCANNING'
+    icon.textContent = '⏳'; title.textContent = 'Waiting for QR scan…'
+    idEl.textContent = id ? `Device: ${id}` : 'Open WhatsApp and scan the QR code'
+    card.className = 'dev-card'
+    topPip.className = 'status-pip'; topPip.style.background = 'var(--accent4)'
+    topLbl.textContent = 'SCANNING'; topLbl.style.color = 'var(--accent4)'
+    unlinkBtn.style.display = 'none'; syncBtn.style.display = 'inline-flex'
+  } else {
+    pip.className = 'pip-dot off'; lbl.textContent = 'OFFLINE'
+    icon.textContent = '📵'; title.textContent = 'No device linked'
+    idEl.textContent = 'Scan QR code to link WhatsApp'
+    card.className = 'dev-card'
+    topPip.className = 'status-pip'; topPip.style.background = ''
+    topLbl.textContent = 'NO DEVICE'; topLbl.style.color = 'var(--muted)'
+    unlinkBtn.style.display = 'none'; syncBtn.style.display = 'none'
+    devBadge.style.display = 'inline'
+  }
 }
 
-function logout() {
-  token = null; userId = null
-  localStorage.removeItem('lf_token')
-  supa.auth.signOut()
-  contacts = []; logs = []; leads = []; deviceId = null
-  stopPoll(); clearInterval(qrCountdown)
-  document.getElementById('dash').style.display = 'none'
-  document.getElementById('authWrap').style.display = 'flex'
-  renderAuth()
+function onDeviceConnected(id) {
+  deviceId = id || deviceId
+  setDevStatus('connected', deviceId)
+  stopPolling()
+  clearInterval(qrCountdown)
+  document.getElementById('qrTimer').textContent = ''
+  const wrap = document.getElementById('qrWrap')
+  if (wrap) wrap.innerHTML = `
+    <div style="font-size:56px;margin-bottom:12px">✅</div>
+    <div style="font-size:14px;color:var(--accent);font-family:var(--mono);font-weight:700">WhatsApp Connected!</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:8px">Ready to send messages</div>`
+  showToast('🎉 WhatsApp connected successfully!')
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// DEVICE — WEBSOCKET POLLING (primary) + HTTP fallback
+// Server: wss://sanjaywa8-5.onrender.com/ws?device_id=xxx
+// ══════════════════════════════════════════════════════════════════
+function stopPolling() {
+  if (ws) { try { ws.close() } catch(e){} ws = null }
+  clearInterval(wsPollTimer); wsPollTimer = null
+  wsRetry = 0
+  const badge = document.getElementById('wsStatusBadge')
+  if (badge) badge.style.display = 'none'
+}
+
+function startPolling(devId) {
+  stopPolling()
+  if (!devId) return
+  updateWsBadge('connecting')
+
+  const serverBase = (gowaUrl || 'https://sanjaywa8-5.onrender.com')
+    .replace('https://', 'wss://')
+    .replace('http://', 'ws://')
+    .replace(/\/$/, '')
+
+  const wsUrl = `${serverBase}/ws?device_id=${encodeURIComponent(devId)}`
+  console.log('[WS] Connecting:', wsUrl)
+
+  try {
+    ws = new WebSocket(wsUrl)
+
+    ws.onopen = () => {
+      console.log('[WS] Connected')
+      updateWsBadge('on')
+      wsRetry = 0
+    }
+
+    ws.onmessage = (evt) => {
+      console.log('[WS] Message:', evt.data)
+      try {
+        const msg = JSON.parse(evt.data)
+        // Check for connection event
+        const isConnected = msg.code === 'SUCCESS' ||
+                            msg.event === 'connected' ||
+                            msg.is_connected === true ||
+                            msg.is_logged_in === true ||
+                            msg.status === 'connected' ||
+                            (msg.code && msg.code.toLowerCase().includes('connected'))
+        if (isConnected) onDeviceConnected(devId)
+      } catch(e) {
+        // If WS sends raw text like "connected"
+        if (typeof evt.data === 'string' && evt.data.toLowerCase().includes('connect')) {
+          onDeviceConnected(devId)
+        }
+      }
+    }
+
+    ws.onerror = (err) => {
+      console.warn('[WS] Error — falling back to HTTP polling')
+      fallbackHttpPoll(devId)
+    }
+
+    ws.onclose = (evt) => {
+      console.log('[WS] Closed, code:', evt.code)
+      updateWsBadge('poll')
+      ws = null
+      // Retry WS up to 3 times, then stay on HTTP polling
+      if (wsRetry < 3) {
+        wsRetry++
+        setTimeout(() => startPolling(devId), 3000 * wsRetry)
+      } else {
+        fallbackHttpPoll(devId)
+      }
+    }
+  } catch(e) {
+    console.warn('[WS] Could not open WebSocket:', e)
+    fallbackHttpPoll(devId)
+  }
+}
+
+function fallbackHttpPoll(devId) {
+  updateWsBadge('poll')
+  if (wsPollTimer) return // already polling
+  console.log('[Poll] Starting HTTP polling for device:', devId)
+  wsPollTimer = setInterval(async () => {
+    const r = await api('checkDeviceStatus')
+    console.log('[Poll] Status:', r.is_connected, r.status)
+    if (r.success && r.is_connected) {
+      onDeviceConnected(r.device_id || devId)
+    }
+  }, 4000)
+}
+
+function updateWsBadge(state) {
+  const badge = document.getElementById('wsStatusBadge')
+  if (!badge) return
+  if (state === 'on') {
+    badge.className = 'ws-badge ws-on'; badge.textContent = '⚡ WS LIVE'
+    badge.style.display = 'inline-flex'
+  } else if (state === 'poll') {
+    badge.className = 'ws-badge ws-poll'; badge.textContent = '🔄 POLLING'
+    badge.style.display = 'inline-flex'
+  } else if (state === 'connecting') {
+    badge.className = 'ws-badge'; badge.textContent = '… connecting'
+    badge.style.display = 'inline-flex'
+  } else {
+    badge.style.display = 'none'
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DEVICE — QR LOAD
+// Calls backend getQR → backend hits GET /app/login?device_id=xxx
+// Returns { success, qr_image_url, qr_duration, device_id }
+// ══════════════════════════════════════════════════════════════════
+async function checkDevice() {
+  const r = await api('checkDeviceStatus')
+  if (r.success && r.is_connected) {
+    onDeviceConnected(r.device_id)
+    return true
+  } else if (r.success && r.device_id) {
+    deviceId = r.device_id
+    setDevStatus('scanning', deviceId)
+    return false
+  }
+  setDevStatus('disconnected'); deviceId = null
+  return false
+}
+
+async function loadQR() {
+  // Fast path — already connected?
+  const wrap = document.getElementById('qrWrap')
+  wrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div style="width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+    <div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Checking server…</div>
+  </div>`
+  stopPolling()
+  clearInterval(qrCountdown)
+  document.getElementById('qrTimer').textContent = ''
+
+  // Check if already connected before requesting new QR
+  const statusCheck = await api('checkDeviceStatus')
+  if (statusCheck.success && statusCheck.is_connected) {
+    onDeviceConnected(statusCheck.device_id); return
+  }
+
+  setDevStatus('scanning', statusCheck.device_id)
+  showToast('Generating QR code…')
+
+  const r = await api('getQR')
+  console.log('[QR] Response:', r)
+
+  if (r.success && r.qr_image_url) {
+    deviceId = r.device_id
+
+    wrap.innerHTML = `
+      <div style="background:#fff;padding:12px;border-radius:10px;border:3px solid var(--accent);margin-bottom:12px;display:inline-block">
+        <img src="${r.qr_image_url}"
+             style="width:190px;height:190px;display:block;object-fit:contain"
+             alt="WhatsApp QR"
+             onerror="this.parentElement.parentElement.querySelector('.qr-err').style.display='block';this.parentElement.style.display='none'"
+        />
+      </div>
+      <div class="qr-err" style="display:none;color:var(--accent3);font-size:12px;font-family:var(--mono);margin-bottom:10px">
+        ⚠ Image failed to load<br/>
+        <a href="${r.qr_image_url}" target="_blank" style="color:var(--accent2)">Open QR directly →</a>
+      </div>
+      <div style="font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.8">
+        1. Open WhatsApp on your phone<br/>
+        2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
+        3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
+        4. Scan the QR code above
+      </div>`
+
+    setDevStatus('scanning', deviceId)
+    startQrCountdown(r.qr_duration || 60)
+    // Start WebSocket watch for instant detection
+    startPolling(deviceId)
+  } else {
+    wrap.innerHTML = `
+      <div style="font-size:32px;margin-bottom:10px">❌</div>
+      <div style="font-size:12px;color:var(--accent3);font-family:var(--mono);margin-bottom:14px;max-width:260px;line-height:1.6">
+        ${r.message || 'Could not get QR code'}<br/>
+        ${r.debug ? `<span style="color:var(--muted);font-size:10px">debug: ${JSON.stringify(r.debug)}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g btn-sm" onclick="loadQR()">🔄 Try Again</button>
+      </div>`
+  }
+}
+
+function startQrCountdown(secs) {
+  clearInterval(qrCountdown)
+  let s = secs
+  const el = document.getElementById('qrTimer')
+  qrCountdown = setInterval(() => {
+    s--
+    if (s <= 0) {
+      clearInterval(qrCountdown); stopPolling()
+      if (el) el.textContent = '⚠ QR expired — click Load QR again'
+      el.style.color = 'var(--accent4)'
+      const wrap = document.getElementById('qrWrap')
+      if (wrap) wrap.innerHTML = `
+        <div style="font-size:32px;margin-bottom:10px">⏰</div>
+        <div style="font-size:11px;color:var(--accent4);font-family:var(--mono);margin-bottom:12px">QR expired</div>
+        <button class="btn btn-g btn-sm" onclick="loadQR()">🔄 Refresh QR</button>`
+    } else if (el) {
+      el.textContent = `Expires in ${s}s`
+      el.style.color = s < 15 ? 'var(--accent3)' : 'var(--muted)'
+    }
+  }, 1000)
+}
+
+async function syncDevice() {
+  showToast('Syncing device status…')
+  const r = await api('forceSyncDevice')
+  console.log('[Sync]', r)
+  if (r.success && r.is_connected) {
+    onDeviceConnected(r.device?.id || r.device?.device_id || deviceId)
+  } else if (r.success) {
+    showToast('Not connected yet — waiting for scan')
+    setDevStatus('scanning', deviceId)
+  } else {
+    showToast('Sync: ' + (r.message || 'No device found'), true)
+  }
+}
+
+async function unlinkDevice() {
+  if (!confirm('Unlink your WhatsApp device? You will need to scan a new QR code.')) return
+  stopPolling()
+  const r = await api('unlinkDevice')
+  if (r.success) {
+    deviceId = null; setDevStatus('disconnected')
+    const wrap = document.getElementById('qrWrap')
+    if (wrap) wrap.innerHTML = '<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Click Load QR to reconnect</div>'
+    document.getElementById('qrTimer').textContent = ''
+    showToast('Device unlinked')
+  } else showToast('Failed: ' + r.message, true)
+}
+
+// ══════════════════════════════════════════════════════════════════
 // TABS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 const TABS = ['device','contacts','compose','send','leads','config','settings','logs']
 function goTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
@@ -1042,9 +1240,9 @@ function goTab(name) {
   if (name === 'leads')  loadLeads()
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // SETTINGS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function applySettings(s) {
   if (!s) return
   setVal('hourLimit', s.hour_limit); setVal('dayLimit', s.day_limit)
@@ -1073,7 +1271,6 @@ function applyConfig(c) {
   if (c.enable_followup1 !== undefined) document.getElementById('fu1En').checked = !!c.enable_followup1
   if (c.enable_followup2 !== undefined) document.getElementById('fu2En').checked = !!c.enable_followup2
   setVal('fu1Delay', c.followup1_delay); setVal('fu2Delay', c.followup2_delay)
-  updateCalWebhook()
 }
 
 function applyTemplate(t) {
@@ -1087,16 +1284,13 @@ async function saveSettings() {
   showToast('Saving settings…')
   const [r1, r2] = await Promise.all([
     api('saveSettings', {
-      hour_limit:        getNum('hourLimit'),
-      day_limit:         getNum('dayLimit'),
-      min_gap:           getNum('minGap'),
-      max_gap:           getNum('maxGap'),
-      auto_reply:        document.getElementById('autoReply').checked,
+      hour_limit: getNum('hourLimit'), day_limit: getNum('dayLimit'),
+      min_gap: getNum('minGap'), max_gap: getNum('maxGap'),
+      auto_reply: document.getElementById('autoReply').checked,
       auto_reply_prompt: getVal('arPrompt'),
-      pause_on_reply:    document.getElementById('pauseOnReply').checked,
-      ai_rewrite:        document.getElementById('aiRewrite').checked,
-      gowa_url:          getVal('cfgGowaUrl'),
-      gowa_auth:         getVal('cfgGowaAuth')
+      pause_on_reply: document.getElementById('pauseOnReply').checked,
+      ai_rewrite: document.getElementById('aiRewrite').checked,
+      gowa_url: getVal('cfgGowaUrl'), gowa_auth: getVal('cfgGowaAuth')
     }),
     api('saveConfig', {
       calendly_link: getVal('cfgCalLink'), resend_key: getVal('cfgResendKey'),
@@ -1104,8 +1298,7 @@ async function saveSettings() {
       manychat_key: getVal('cfgMcKey'), manychat_page_id: getVal('cfgMcPageId'),
       groq_key: getVal('cfgGroqKey'), groq_model: getVal('cfgGroqModel'),
       sheet_id: getVal('cfgSheetId'), sheet_tab: getVal('cfgSheetTab'),
-      col_name: getVal('cfgColName'), col_phone: getVal('cfgColPhone'),
-      col_email: getVal('cfgColEmail'),
+      col_name: getVal('cfgColName'), col_phone: getVal('cfgColPhone'), col_email: getVal('cfgColEmail'),
       has_header: document.getElementById('cfgHasHeader').checked
     })
   ])
@@ -1118,12 +1311,8 @@ async function saveConfig() {
   const r = await api('saveConfig', {
     wa_template: getVal('cfgWaTpl'), wa_followup1: getVal('cfgWaFu1'), wa_followup2: getVal('cfgWaFu2'),
     email_subject: getVal('cfgEmailSubj'), email_body: getVal('cfgEmailBody'),
-    enable_followup1: document.getElementById('fu1En').checked,
-    followup1_delay:  getNum('fu1Delay'),
-    followup1_trigger: getVal('fu1Trig'),
-    enable_followup2: document.getElementById('fu2En').checked,
-    followup2_delay:  getNum('fu2Delay'),
-    followup2_trigger: getVal('fu2Trig')
+    enable_followup1: document.getElementById('fu1En').checked, followup1_delay: getNum('fu1Delay'), followup1_trigger: getVal('fu1Trig'),
+    enable_followup2: document.getElementById('fu2En').checked, followup2_delay: getNum('fu2Delay'), followup2_trigger: getVal('fu2Trig')
   })
   showToast(r.success ? 'Config saved ✅' : 'Save failed: ' + r.message, !r.success)
 }
@@ -1135,9 +1324,7 @@ function updateCalWebhook() {
 }
 function copyWebhook() {
   const el = document.getElementById('calWebhook')
-  if (el && el.textContent !== 'Save to generate URL') {
-    navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied ✅'))
-  }
+  if (el && el.textContent !== 'Save to generate URL') navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied ✅'))
 }
 function togKey(id, btn) {
   const el = document.getElementById(id)
@@ -1150,231 +1337,14 @@ async function testResend() {
   showToast(r.success ? 'Test email sent ✅' : 'Failed: ' + r.message, !r.success)
 }
 
-// ══════════════════════════════════════════════
-// DEVICE
-// ══════════════════════════════════════════════
-function setDevStatus(state, id) {
-  const pip = document.getElementById('pipDot'), lbl = document.getElementById('pipLbl')
-  const icon = document.getElementById('devIcon'), title = document.getElementById('devTitle')
-  const idEl = document.getElementById('devId'), card = document.getElementById('devCard')
-  const topPip = document.getElementById('topPip'), topLbl = document.getElementById('topLbl')
-  const unlinkBtn = document.getElementById('unlinkBtn'), devBadge = document.getElementById('devBadge')
-
-  if (state === 'connected') {
-    pip.className = 'pip-dot on'; lbl.textContent = 'CONNECTED'
-    icon.textContent = '📱'; title.textContent = 'Device Connected ✅'
-    idEl.textContent = 'Device ID: ' + (id || deviceId || 'Unknown')
-    card.className = 'dev-card on'
-    topPip.className = 'status-pip on'; topLbl.textContent = 'CONNECTED'; topLbl.style.color = 'var(--accent)'
-    unlinkBtn.style.display = 'inline-flex'; devBadge.style.display = 'none'
-    deviceId = id
-  } else if (state === 'scanning') {
-    pip.className = 'pip-dot scan'; lbl.textContent = 'SCANNING'
-    icon.textContent = '⏳'; title.textContent = 'Waiting for QR scan…'
-    card.className = 'dev-card'
-    topPip.className = 'status-pip'; topPip.style.background = 'var(--accent4)'
-    topLbl.textContent = 'SCANNING'; topLbl.style.color = 'var(--accent4)'
-    unlinkBtn.style.display = 'none'
-  } else {
-    pip.className = 'pip-dot off'; lbl.textContent = 'OFFLINE'
-    icon.textContent = '📵'; title.textContent = 'No device linked'
-    idEl.textContent = 'Scan QR code to link WhatsApp'
-    card.className = 'dev-card'
-    topPip.className = 'status-pip'; topPip.style.background = ''
-    topLbl.textContent = 'NO DEVICE'; topLbl.style.color = 'var(--muted)'
-    unlinkBtn.style.display = 'none'; devBadge.style.display = 'inline'
-  }
-}
-
-// ══════════════════════════════════════════════
-// DEVICE MANAGEMENT - UPDATED
-// ══════════════════════════════════════════════
-
-async function checkDevice() {
-  // First try to force sync from GoWA
-  const syncRes = await api('forceSyncDevice')
-  console.log('Force sync result:', syncRes)
-  
-  if (syncRes.success && syncRes.is_connected) {
-    deviceId = syncRes.device?.id || syncRes.device?.device_id
-    setDevStatus('connected', deviceId)
-    return true
-  }
-  
-  // Fallback to normal status check
-  const r = await api('checkDeviceStatus')
-  console.log('Device status check:', r)
-  
-  if (r.success && r.is_connected) {
-    deviceId = r.device_id
-    setDevStatus('connected', deviceId)
-    return true
-  } else if (r.success && r.device_id && !r.is_connected) {
-    deviceId = r.device_id
-    setDevStatus('scanning', deviceId)
-    return false
-  } else {
-    setDevStatus('disconnected')
-    deviceId = null
-    return false
-  }
-}
-
-async function syncDevice() {
-  showToast('Syncing device status...')
-  const r = await api('forceSyncDevice')
-  console.log('Sync result:', r)
-  
-  if (r.success && r.is_connected) {
-    deviceId = r.device?.id || r.device?.device_id
-    setDevStatus('connected', deviceId)
-    showToast('Device connected! ✅')
-    
-    // Update QR display
-    const wrap = document.getElementById('qrWrap')
-    if (wrap) {
-      wrap.innerHTML = `
-        <div style="font-size:48px;margin-bottom:10px">✅</div>
-        <div style="font-size:13px;color:var(--accent);font-family:var(--mono);font-weight:700">WhatsApp Connected!</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:8px">You can now send messages</div>
-      `
-    }
-  } else if (r.success && r.device) {
-    setDevStatus('scanning', r.device.id || r.device.device_id)
-    showToast('Device exists but not connected. Load QR to connect.')
-  } else {
-    showToast('No device found. Click "Load QR" to connect.', true)
-  }
-}
-
-async function loadQR() {
-  // First check if device exists and is already connected
-  const statusCheck = await api('checkDeviceStatus')
-  console.log('Pre-QR status check:', statusCheck)
-  
-  if (statusCheck.success && statusCheck.is_connected) {
-    deviceId = statusCheck.device_id
-    setDevStatus('connected', deviceId)
-    showToast('Device already connected! ✅')
-    return
-  }
-  
-  const wrap = document.getElementById('qrWrap')
-  wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">⏳</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Generating QR…</div>'
-  setDevStatus('scanning')
-  stopPoll()
-  clearInterval(qrCountdown)
-
-  const r = await api('getQR')
-  console.log('QR Response:', r)
-  
-  if (r.success && r.qr_image_url) {
-    deviceId = r.device_id
-    
-    // Display the QR image directly
-    wrap.innerHTML = `
-      <img src="${r.qr_image_url}" 
-           style="width:200px;height:200px;border-radius:8px;border:3px solid var(--accent);margin-bottom:12px;object-fit:contain;background:#fff;padding:10px" 
-           onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block'"
-      />
-      <div style="display:none; margin-top:14px; font-size:11px; color:var(--text2); font-family:var(--mono)">
-        QR image failed to load.<br/>
-        <button class="btn btn-y btn-sm" onclick="loadQR()" style="margin-top:8px">Try Again</button>
-      </div>
-      <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
-        1. Open WhatsApp on your phone<br/>
-        2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
-        3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
-        4. Scan this QR code
-      </div>
-    `
-    
-    startQrCountdown(r.qr_duration || 60)
-    startDevicePoll()
-  } else {
-    setDevStatus('qr_error')
-    wrap.innerHTML = `
-      <div style="font-size:28px;margin-bottom:10px">❌</div>
-      <div style="font-size:12px;color:var(--accent3);font-family:var(--mono);margin-bottom:10px">
-        ${r.message || 'Failed to get QR code'}
-      </div>
-      <button class="btn btn-y btn-sm" onclick="resetDevice()">Reset Device</button>
-      <button class="btn btn-s btn-sm" onclick="loadQR()" style="margin-left:8px">Try Again</button>
-    `
-  }
-}
-  
-function startDevicePoll() {
-  stopPoll()
-  devicePollTimer = setInterval(async () => {
-    const status = await api('checkDeviceStatus')
-    console.log('Poll status:', status)
-    
-    if (status.success && status.is_connected) {
-      // Device is now connected!
-      deviceId = status.device_id
-      setDevStatus('connected', deviceId)
-      stopPoll()
-      clearInterval(qrCountdown)
-      
-      const wrap = document.getElementById('qrWrap')
-      if (wrap) {
-        wrap.innerHTML = `
-          <div style="font-size:48px;margin-bottom:10px">✅</div>
-          <div style="font-size:13px;color:var(--accent);font-family:var(--mono);font-weight:700">WhatsApp Connected!</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:8px">You can now send messages</div>
-        `
-      }
-      showToast('WhatsApp connected successfully! 🎉')
-    } else if (status.success && status.device_id && !status.is_connected) {
-      // Device exists but still scanning
-      if (deviceId !== status.device_id) {
-        deviceId = status.device_id
-      }
-      const wrap = document.getElementById('qrWrap')
-      if (wrap && !wrap.innerHTML.includes('iframe')) {
-        // QR might have expired, but keep polling
-      }
-    }
-  }, 3000)
-}
-
-function startQrCountdown(secs) {
-  clearInterval(qrCountdown)
-  let s = secs
-  const el = document.getElementById('qrTimer')
-  qrCountdown = setInterval(() => {
-    s--
-    if (s <= 0) {
-      clearInterval(qrCountdown); stopPoll()
-      if (el) el.textContent = '⚠ QR expired — refresh'
-      const wrap = document.getElementById('qrWrap')
-      if (wrap) wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">⏰</div><div style="font-size:11px;color:var(--accent4);font-family:var(--mono)">QR expired — click Refresh QR</div>'
-    } else if (el) el.textContent = 'Expires in ' + s + 's'
-  }, 1000)
-}
-
-function stopPoll() { clearInterval(devicePollTimer) }
-
-async function unlinkDevice() {
-  if (!confirm('Unlink your WhatsApp device?')) return
-  const r = await api('unlinkDevice')
-  if (r.success) {
-    deviceId = null; setDevStatus('disconnected')
-    document.getElementById('devWarn').style.display = 'none'
-    const wrap = document.getElementById('qrWrap')
-    if (wrap) wrap.innerHTML = '<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Click Load QR to reconnect</div>'
-    showToast('Device unlinked')
-  } else showToast('Failed: ' + r.message, true)
-}
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // CONTACTS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function togglePaste() { const el = document.getElementById('pasteArea'); el.style.display = el.style.display === 'none' ? 'block' : 'none' }
 
 function parsePaste() {
   const raw = document.getElementById('pasteInput').value.trim()
-  if (!raw) return showToast('Paste some data first', true)
+  if (!raw) return showToast('Paste data first', true)
   const lines = raw.split(/\r?\n/); const nc = []; let skip = false
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim(); if (!line) continue
@@ -1464,17 +1434,16 @@ function renderContacts(list) {
   const tbody = document.getElementById('conBody')
   if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:22px;color:var(--muted)">No contacts yet</td></tr>'; return }
   tbody.innerHTML = data.map((c, i) => `<tr>
-    <td style="color:var(--muted);font-family:var(--mono)">${i + 1}</td>
+    <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
     <td style="font-weight:600">${esc(c.name)}</td>
     <td style="font-family:var(--mono);font-size:11px">${esc(c.phone)}</td>
-    <td style="color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message) || '<em style="color:var(--muted)">uses template</em>'}</td>
-    <td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td>
-    <td><button class="btn btn-d btn-sm" onclick="removeContact('${c.id || i}')">✕</button></td>
+    <td style="color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'<em style="color:var(--muted)">uses template</em>'}</td>
+    <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+    <td><button class="btn btn-d btn-sm" onclick="removeContact('${c.id||i}')">✕</button></td>
   </tr>`).join('')
 }
-
 function filterContacts(q) { renderContacts(contacts.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q))) }
-function removeContact(id) { contacts = contacts.filter((c, i) => (c.id || i) != id); renderContacts() }
+function removeContact(id) { contacts = contacts.filter((c,i) => (c.id||i) != id); renderContacts() }
 function dedupe() {
   const seen = new Set(); const u = contacts.filter(c => { if (seen.has(c.phone)) return false; seen.add(c.phone); return true })
   const removed = contacts.length - u.length
@@ -1483,7 +1452,7 @@ function dedupe() {
 }
 function exportContacts() {
   if (!contacts.length) return showToast('No contacts', true)
-  const csv = ['Name,Phone,Message,Status', ...contacts.map(c => `"${c.name}",${c.phone},"${c.message || ''}",${c.status}`)].join('\n')
+  const csv = ['Name,Phone,Message,Status', ...contacts.map(c => `"${c.name}",${c.phone},"${c.message||''}",${c.status}`)].join('\n')
   dlFile(csv, `contacts_${Date.now()}.csv`, 'text/csv')
   showToast(`📥 Exported ${contacts.length} contacts`)
 }
@@ -1494,12 +1463,9 @@ async function saveContacts() {
   showToast(r.success ? contacts.length + ' contacts saved ✅' : 'Failed: ' + r.message, !r.success)
 }
 async function clearContacts() {
-  contacts = []; renderContacts()
-  await api('clearContacts')
-  showToast('Contacts cleared')
+  contacts = []; renderContacts(); await api('clearContacts'); showToast('Contacts cleared')
 }
 
-// Group import
 let selGroupId = null
 function openGroupImport() { const c = document.getElementById('groupCard'); c.style.display = c.style.display === 'none' ? 'block' : 'none' }
 async function fetchGroups() {
@@ -1516,7 +1482,7 @@ async function fetchGroups() {
         <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">${(g.Participants||[]).length} members</span>
       </div>`
     }).join('')
-  } catch (e) { div.innerHTML = '<div style="padding:14px;text-align:center;color:var(--accent3);font-size:12px">❌ Failed to fetch groups</div>' }
+  } catch (e) { div.innerHTML = '<div style="padding:14px;text-align:center;color:var(--accent3);font-size:12px">❌ Failed</div>' }
 }
 function selGroup(id, name, el) {
   selGroupId = id
@@ -1531,7 +1497,7 @@ async function importGroup() {
   const group = groups.find(g => g.JID === selGroupId || g.id === selGroupId)
   if (!group) return showToast('Group not found', true)
   const existing = new Set(contacts.map(c => c.phone)); const nc = []
-  ;(group.Participants || []).forEach((p, i) => {
+  ;(group.Participants || []).forEach(p => {
     let phone = (p.PhoneNumber || '').split('@')[0].replace(/\D/g, '')
     if (phone.length >= 10) {
       if (phone.startsWith('91') && phone.length > 10) phone = phone.substring(2)
@@ -1546,11 +1512,11 @@ async function importGroup() {
   showToast(`✅ Imported ${nc.length} members`)
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // COMPOSE
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function updateCC(el) { const cc = document.getElementById('cc'); if (cc) cc.textContent = el.value.length }
-function ins(v) { const ta = document.getElementById('msgTpl'); const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.slice(0, s) + v + ta.value.slice(e); ta.focus(); updateCC(ta) }
+function ins(v) { const ta = document.getElementById('msgTpl'); const s = ta.selectionStart, e = ta.selectionEnd; ta.value = ta.value.slice(0,s)+v+ta.value.slice(e); ta.focus(); updateCC(ta) }
 function selAttach(type, el) {
   document.querySelectorAll('.attach-opt').forEach(o => o.classList.remove('sel'))
   if (el) el.classList.add('sel')
@@ -1561,16 +1527,16 @@ function selAttach(type, el) {
 function handleAttach(input) {
   const f = input.files[0]; if (!f) return
   document.getElementById('attachName').textContent = f.name
-  document.getElementById('attachSize').textContent = (f.size / 1024).toFixed(1) + 'KB'
+  document.getElementById('attachSize').textContent = (f.size/1024).toFixed(1)+'KB'
   document.getElementById('attachEmoji').textContent = f.type.startsWith('image') ? '🖼' : f.type.startsWith('video') ? '🎬' : '📄'
   document.getElementById('attachPreview').style.display = 'flex'
   showToast('File ready ✅')
 }
-function clearAttach() { document.getElementById('attachFile').value = ''; document.getElementById('attachPreview').style.display = 'none' }
+function clearAttach() { document.getElementById('attachFile').value=''; document.getElementById('attachPreview').style.display='none' }
 function addPollOpt() {
-  const w = document.getElementById('pollOpts'); const n = w.children.length + 1
-  const d = document.createElement('div'); d.className = 'fg'
-  d.innerHTML = `<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64 + n)}"/>`
+  const w = document.getElementById('pollOpts'); const n = w.children.length+1
+  const d = document.createElement('div'); d.className='fg'
+  d.innerHTML=`<label>Option ${n}</label><input type="text" placeholder="Option ${String.fromCharCode(64+n)}"/>`
   w.appendChild(d)
 }
 async function saveTemplate() {
@@ -1583,11 +1549,10 @@ async function saveTemplate() {
   })
   showToast(r.success ? 'Template saved ✅' : 'Failed: ' + r.message, !r.success)
 }
-
 async function genVariations() {
   const msg = getVal('msgTpl').trim()
   if (!msg) return showToast('Write a message first', true)
-  showToast('✨ Generating 10 variations with Groq…')
+  showToast('✨ Generating 10 variations…')
   const r = await api('aiGenerateVariations', { message: msg, count: 10 })
   if (!r.success) return showToast('Failed: ' + r.message, true)
   variations = r.variations; varIdx = 0; usingVars = true
@@ -1596,12 +1561,11 @@ async function genVariations() {
   if (variations[0]) { setVal('msgTpl', variations[0]); updateCC(document.getElementById('msgTpl')) }
   showToast(`✅ Generated ${variations.length} variations`)
 }
-
 function renderVarPanel() {
   document.getElementById('varCount').textContent = `${variations.length} variations · cycling 🔄`
   document.getElementById('varList').innerHTML = variations.map((v, i) => `
     <div class="var-item">
-      <div class="var-num">Variation ${i + 1}</div>
+      <div class="var-num">Variation ${i+1}</div>
       <div class="var-text">${esc(v)}</div>
       <div style="display:flex;gap:5px;margin-top:6px">
         <button class="btn btn-s btn-sm" onclick="editVar(${i})" style="padding:3px 8px;font-size:10px">✏️</button>
@@ -1609,22 +1573,21 @@ function renderVarPanel() {
       </div>
     </div>`).join('')
 }
-function editVar(i) { const t = prompt('Edit:', variations[i]); if (t?.trim()) { variations[i] = t.trim(); renderVarPanel(); if (i === 0) { setVal('msgTpl', t.trim()); updateCC(document.getElementById('msgTpl')) } } }
-function delVar(i) { if (variations.length <= 1) return showToast('Cannot remove last', true); variations.splice(i, 1); if (varIdx >= variations.length) varIdx = 0; renderVarPanel() }
-function clearVars() { variations = []; varIdx = 0; usingVars = false; document.getElementById('varPanel').style.display = 'none' }
-
+function editVar(i) { const t = prompt('Edit:', variations[i]); if (t?.trim()) { variations[i]=t.trim(); renderVarPanel(); if (i===0){setVal('msgTpl',t.trim());updateCC(document.getElementById('msgTpl'))} } }
+function delVar(i) { if (variations.length<=1) return showToast('Cannot remove last',true); variations.splice(i,1); if (varIdx>=variations.length) varIdx=0; renderVarPanel() }
+function clearVars() { variations=[]; varIdx=0; usingVars=false; document.getElementById('varPanel').style.display='none' }
 async function aiRewriteField(fieldId) {
   const el = document.getElementById(fieldId)
   if (!el?.value.trim()) return showToast('Write a message first', true)
-  showToast('✨ Rewriting with Groq…')
+  showToast('✨ Rewriting…')
   const r = await api('aiRewrite', { message: el.value })
   if (r.success) { el.value = r.result; showToast('✅ Rewritten') }
   else showToast('Failed: ' + r.message, true)
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // SEND
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function startSend() {
   if (!contacts.length) return showToast('No contacts', true)
   if (sendState === 'running') return
@@ -1641,37 +1604,31 @@ function stopSend() {
   document.getElementById('progBar').style.width = '0%'
   document.getElementById('progPct').textContent = '0%'
 }
-
 async function processSend() {
   if (sendState !== 'running') return
   if (sendIndex >= contacts.length) {
     sendState = 'idle'
     document.getElementById('curCon').textContent = '✅ Campaign complete!'
     showToast('All messages sent ✅')
-    await api('saveContacts', { contacts })
-    return
+    await api('saveContacts', { contacts }); return
   }
   const hl = getNum('hourLimit') || 30
   const dl = getNum('dayLimit') || 200
   if (hourSentN >= hl) { pauseSend(); showToast('⏸ Hourly limit reached', true); return }
   if (todaySentN >= dl) { stopSend(); showToast('Daily limit reached', true); return }
-
-  const c   = contacts[sendIndex]
+  const c = contacts[sendIndex]
   const pct = Math.round((sendIndex / contacts.length) * 100)
   let msg
-
   if (usingVars && variations.length > 0) {
     msg = variations[varIdx].replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone)
     varIdx = (varIdx + 1) % variations.length
   } else {
     msg = (c.message || getVal('msgTpl')).replace(/\{name\}/gi, c.name).replace(/\{phone\}/gi, c.phone)
   }
-
   document.getElementById('curCon').textContent = `📤 Sending to ${c.name}`
   document.getElementById('queStatus').textContent = sendIndex + ' / ' + contacts.length + ' processed'
   document.getElementById('progBar').style.width = pct + '%'
   document.getElementById('progPct').textContent = pct + '%'
-
   const r = await api('sendMessage', { phone: c.phone + '@s.whatsapp.net', message: msg })
   const ok = r.success
   contacts[sendIndex].status = ok ? 'sent' : 'failed'
@@ -1680,52 +1637,48 @@ async function processSend() {
   updateSendStats()
   addLog({ type: ok ? 'sent' : 'failed', name: c.name, msg: msg.substring(0, 100), time: new Date() })
   renderContacts()
-
   const minG = (getNum('minGap') || 30) * 1000
   const maxG = (getNum('maxGap') || 90) * 1000
-  const gap  = Math.floor(Math.random() * (maxG - minG + 1)) + minG
-  sendTimer  = setTimeout(processSend, gap)
+  const gap = Math.floor(Math.random() * (maxG - minG + 1)) + minG
+  sendTimer = setTimeout(processSend, gap)
 }
-
 function updateSendStats() {
   document.getElementById('sSent').textContent  = contacts.filter(c => c.status === 'sent').length
   document.getElementById('sPend').textContent  = contacts.filter(c => c.status === 'pending').length
   document.getElementById('sFail').textContent  = contacts.filter(c => c.status === 'failed').length
   document.getElementById('sReply').textContent = contacts.filter(c => c.status === 'replied').length
   const dl = getNum('dayLimit') || 200; const hl = getNum('hourLimit') || 30
-  document.getElementById('todaySent').textContent  = todaySentN
-  document.getElementById('hourSent').textContent   = hourSentN
-  document.getElementById('dayLimDisp').textContent = dl
+  document.getElementById('todaySent').textContent   = todaySentN
+  document.getElementById('hourSent').textContent    = hourSentN
+  document.getElementById('dayLimDisp').textContent  = dl
   document.getElementById('hourLimDisp').textContent = hl
-  document.getElementById('dayBar').style.width  = Math.min(100, (todaySentN / dl) * 100) + '%'
-  document.getElementById('hourBar').style.width = Math.min(100, (hourSentN / hl) * 100) + '%'
+  document.getElementById('dayBar').style.width  = Math.min(100, (todaySentN/dl)*100) + '%'
+  document.getElementById('hourBar').style.width = Math.min(100, (hourSentN/hl)*100) + '%'
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // LEADS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 async function loadLeads() {
   const r = await api('getLeads')
   if (r.success) { leads = r.leads; renderLeads() }
 }
-
 function renderLeads(list) {
   const data = list || leads
   ;['new','contacted','visited','booked','followed_up','cold'].forEach(s => {
-    const el = document.getElementById('p-' + s); if (el) el.textContent = data.filter(l => l.status === s).length
+    const el = document.getElementById('p-'+s); if (el) el.textContent = data.filter(l => l.status === s).length
   })
   const nc = data.filter(l => l.status === 'new').length
   const badge = document.getElementById('leadBadge')
   badge.style.display = nc > 0 ? 'inline' : 'none'; badge.textContent = nc
-
   const tbody = document.getElementById('leadBody')
   if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr>'; return }
-  tbody.innerHTML = data.map((l, i) => `<tr>
-    <td style="color:var(--muted);font-family:var(--mono)">${i + 1}</td>
-    <td style="font-weight:600">${esc(l.name || '—')}</td>
-    <td style="font-family:var(--mono);font-size:11px">${esc(l.phone || '—')}</td>
-    <td style="font-size:11px;color:var(--text2)">${esc(l.email || '—')}</td>
-    <td><span class="badge badge-${l.status || 'new'}">${l.status || 'new'}</span></td>
+  tbody.innerHTML = data.map((l,i) => `<tr>
+    <td style="color:var(--muted);font-family:var(--mono)">${i+1}</td>
+    <td style="font-weight:600">${esc(l.name||'—')}</td>
+    <td style="font-family:var(--mono);font-size:11px">${esc(l.phone||'—')}</td>
+    <td style="font-size:11px;color:var(--text2)">${esc(l.email||'—')}</td>
+    <td><span class="badge badge-${l.status||'new'}">${l.status||'new'}</span></td>
     <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${fmtTime(l.arrived_at)}</td>
     <td><div style="display:flex;gap:4px">
       <button class="btn btn-g btn-sm" onclick="updLead('${l.id}','booked')">✅</button>
@@ -1734,202 +1687,146 @@ function renderLeads(list) {
     </div></td>
   </tr>`).join('')
 }
-
 function filterLeads() {
   const q = document.getElementById('leadSearch').value.toLowerCase()
   const sf = document.getElementById('leadStatusF').value
   let f = leads
-  if (q) f = f.filter(l => (l.name || '').toLowerCase().includes(q) || (l.phone || '').includes(q))
+  if (q) f = f.filter(l => (l.name||'').toLowerCase().includes(q)||(l.phone||'').includes(q))
   if (sf !== 'all') f = f.filter(l => l.status === sf)
   renderLeads(f)
 }
-
 async function updLead(id, status) {
   const r = await api('updateLeadStatus', { id, status })
-  if (r.success) {
-    const l = leads.find(x => x.id === id); if (l) l.status = status
-    renderLeads(); showToast(`Lead marked as ${status} ✅`)
-  } else showToast('Failed: ' + r.message, true)
+  if (r.success) { const l = leads.find(x => x.id===id); if (l) l.status=status; renderLeads(); showToast(`Lead: ${status} ✅`) }
+  else showToast('Failed: '+r.message, true)
 }
-
 async function sendToLead(id) {
-  const lead = leads.find(l => l.id === id); if (!lead) return
-  const msg = getVal('cfgWaTpl').replace(/\{name\}/gi, lead.name || '').replace(/\{link\}/gi, getVal('cfgCalLink') || '')
-  if (!msg) return showToast('Configure WA template in Config first', true)
-  const r = await api('sendMessage', { phone: lead.phone + '@s.whatsapp.net', message: msg })
-  if (r.success) { await updLead(id, 'contacted'); showToast('Sent to ' + lead.name + ' ✅') }
-  else showToast('Failed: ' + r.message, true)
+  const lead = leads.find(l => l.id===id); if (!lead) return
+  const msg = getVal('cfgWaTpl').replace(/\{name\}/gi, lead.name||'').replace(/\{link\}/gi, getVal('cfgCalLink')||'')
+  if (!msg) return showToast('Configure WA template in Config', true)
+  const r = await api('sendMessage', { phone: lead.phone+'@s.whatsapp.net', message: msg })
+  if (r.success) { await updLead(id, 'contacted'); showToast('Sent to '+lead.name+' ✅') }
+  else showToast('Failed: '+r.message, true)
 }
-
 async function scanSheet() {
-  showToast('⚡ Scanning sheet for new leads…')
+  showToast('⚡ Scanning sheet…')
   const r = await api('scanLeadSheet')
-  if (r.success) { showToast(`✅ ${r.new_leads || 0} new leads found`); loadLeads() }
-  else showToast('Scan failed: ' + r.message, true)
+  if (r.success) { showToast(`✅ ${r.new_leads||0} new leads`); loadLeads() }
+  else showToast('Scan failed: '+r.message, true)
 }
-
 function exportLeads() {
   if (!leads.length) return showToast('No leads', true)
-  const csv = ['Name,Phone,Email,Status,Arrived', ...leads.map(l => `"${l.name}",${l.phone || ''},${l.email || ''},${l.status},${l.arrived_at || ''}`)].join('\n')
+  const csv = ['Name,Phone,Email,Status,Arrived', ...leads.map(l => `"${l.name}",${l.phone||''},${l.email||''},${l.status},${l.arrived_at||''}`)].join('\n')
   dlFile(csv, `leads_${Date.now()}.csv`, 'text/csv')
   showToast(`📥 Exported ${leads.length} leads`)
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 // LOGS
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 function addLog(e) { logs.unshift(e); renderLogs() }
 function renderLogs(filter) {
   const f = filter || document.getElementById('logFilter')?.value || 'all'
-  const data = f !== 'all' ? logs.filter(l => l.type === f) : logs
+  const data = f !== 'all' ? logs.filter(l => l.type===f) : logs
   const el = document.getElementById('logsList')
-  if (!data.length) { el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div>'; return }
+  if (!data.length) { el.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div>'; return }
   el.innerHTML = data.map(l => `
     <div class="log-entry">
-      <div class="log-dot ${l.type || 'sent'}"></div>
+      <div class="log-dot ${l.type||'sent'}"></div>
       <div class="log-body">
-        <div class="log-name">${esc(l.name || '')} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">[${l.type || 'sent'}]</span></div>
-        <div class="log-msg">${esc(l.msg || l.message || '')}</div>
-        <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : fmtTime(l.created_at || l.time)}</div>
+        <div class="log-name">${esc(l.name||'')} <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">[${l.type||'sent'}]</span></div>
+        <div class="log-msg">${esc(l.msg||l.message||'')}</div>
+        <div class="log-time">${l.time instanceof Date ? l.time.toLocaleTimeString() : fmtTime(l.created_at||l.time)}</div>
       </div>
     </div>`).join('')
 }
 function filterLogs() { renderLogs(document.getElementById('logFilter').value) }
-async function clearLogs() {
-  logs = []; renderLogs()
-  await api('clearLogs')
-  showToast('Logs cleared')
+async function clearLogs() { logs=[]; renderLogs(); await api('clearLogs'); showToast('Logs cleared') }
+
+// ══════════════════════════════════════════════════════════════════
+// SESSION
+// ══════════════════════════════════════════════════════════════════
+function logout() {
+  token=null; userId=null
+  localStorage.removeItem('lf_token')
+  supa.auth.signOut()
+  contacts=[]; logs=[]; leads=[]; deviceId=null
+  stopPolling(); clearInterval(qrCountdown)
+  document.getElementById('dash').style.display='none'
+  document.getElementById('authWrap').style.display='flex'
+  renderAuth()
 }
 
-// ══════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════
-function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-function fmtTime(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleDateString() + ' ' + new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) } catch { return '—' } }
-function getVal(id) { return document.getElementById(id)?.value?.trim() || '' }
-function setVal(id, v) { const el = document.getElementById(id); if (el && v !== undefined && v !== null) el.value = v }
-function getNum(id) { return parseInt(document.getElementById(id)?.value) || 0 }
-function dlFile(content, name, type) { const blob = new Blob(['\uFEFF' + content], { type }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a) }
-let toastT
-function showToast(msg, isErr = false) {
-  const t = document.getElementById('toast'); if (!t) return
-  t.style.background = isErr ? '#2d1015' : '#0a2018'
-  t.style.color = isErr ? '#ff6680' : 'var(--accent)'
-  t.style.border = `1px solid ${isErr ? 'rgba(255,51,102,.3)' : 'rgba(0,255,136,.2)'}`
-  t.textContent = msg; t.style.opacity = '1'
-  clearTimeout(toastT); toastT = setTimeout(() => { t.style.opacity = '0' }, 3500)
-}
-
-// ══════════════════════════════════════════════
-// HANDLE GOOGLE OAUTH CALLBACK (URL FRAGMENT)
-// ══════════════════════════════════════════════
 function handleGoogleCallback() {
   const hash = window.location.hash.substring(1)
   if (!hash) return false
-  
   const params = new URLSearchParams(hash)
   const accessToken = params.get('access_token')
   const refreshToken = params.get('refresh_token')
-  const expiresAt = params.get('expires_at')
-  
   if (!accessToken) return false
-  
-  console.log('🔐 Google callback detected, processing token...')
-  
-  // Store tokens
   token = accessToken
-  
-  // Store in localStorage for persistence
   localStorage.setItem('lf_token', accessToken)
   if (refreshToken) localStorage.setItem('lf_refresh_token', refreshToken)
-  if (expiresAt) localStorage.setItem('lf_expires_at', expiresAt)
-  
-  // Clear the URL fragment without reloading
   window.history.replaceState({}, document.title, window.location.pathname + window.location.search)
-  
   return true
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════════
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function fmtTime(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleDateString()+' '+new Date(ts).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}) } catch { return '—' } }
+function getVal(id) { return document.getElementById(id)?.value?.trim()||'' }
+function setVal(id, v) { const el=document.getElementById(id); if (el && v!==undefined && v!==null) el.value=v }
+function getNum(id) { return parseInt(document.getElementById(id)?.value)||0 }
+function dlFile(content, name, type) { const blob=new Blob(['\uFEFF'+content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a) }
+let toastT
+function showToast(msg, isErr=false) {
+  const t=document.getElementById('toast'); if (!t) return
+  t.style.background=isErr?'#2d1015':'#0a2018'
+  t.style.color=isErr?'#ff6680':'var(--accent)'
+  t.style.border=`1px solid ${isErr?'rgba(255,51,102,.3)':'rgba(0,255,136,.2)'}`
+  t.textContent=msg; t.style.opacity='1'
+  clearTimeout(toastT); toastT=setTimeout(()=>{t.style.opacity='0'},3500)
+}
+
+// ══════════════════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
 window.onload = async () => {
-  // FIRST: Check for Google OAuth callback
   const isGoogleCallback = handleGoogleCallback()
-  
+
   if (isGoogleCallback) {
-    // We have a token from Google, now load user data
-    showToast('Google sign-in successful! Loading your account...')
-    
-    const loadingOverlay = document.createElement('div')
-    loadingOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
-    loadingOverlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px"></div><p>Loading your dashboard...</p></div>'
-    document.body.appendChild(loadingOverlay)
-    
+    showToast('Google sign-in successful! Loading…')
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:10000;color:var(--accent);font-family:var(--mono)'
+    overlay.innerHTML = '<div style="text-align:center"><div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div><p>Loading dashboard…</p></div>'
+    document.body.appendChild(overlay)
     const r = await api('loadAll')
-    loadingOverlay.remove()
-    
-    if (r.success) {
-      await showDash(r)
-    } else {
-      showToast('Failed to load user data: ' + (r.message || 'Unknown error'), true)
-      renderAuth()
-    }
+    overlay.remove()
+    if (r.success) await showDash(r) else { showToast('Load failed: '+(r.message||'Unknown'), true); renderAuth() }
     return
   }
-  
-  // Check for Supabase session (for Google auth via Supabase client)
+
   const { data: { session } } = await supa.auth.getSession()
   if (session) {
     token = session.access_token
     localStorage.setItem('lf_token', token)
-    showToast('Loading your data…')
     const r = await api('loadAll')
-    if (r.success) {
-      await showDash(r)
-    } else {
-      renderAuth()
-    }
+    if (r.success) { await showDash(r); return } else renderAuth()
     return
   }
-  
-  // Check saved token
+
   const saved = localStorage.getItem('lf_token')
   if (saved) {
     token = saved
     showToast('Restoring session…')
     const r = await api('loadAll')
-    if (r.success) {
-      await showDash(r)
-    } else {
-      localStorage.removeItem('lf_token')
-      renderAuth()
-    }
-    return
+    if (r.success) { await showDash(r); return }
+    localStorage.removeItem('lf_token')
   }
-  
-  // No session, show login
-  renderAuth()
-}
 
-// Also update your googleLogin function:
-async function googleLogin() {
-  // Clear any existing session first
-  localStorage.removeItem('lf_token')
-  token = null
-  
-  // Get current origin for redirect
-  const redirectUrl = window.location.origin + window.location.pathname
-  
-  // Direct Supabase OAuth URL - this will redirect back with #access_token
-  const authUrl = `${SUPA_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`
-  
-  showToast('Redirecting to Google...', false)
-  
-  // Small delay to ensure toast shows, then redirect
-  setTimeout(() => {
-    window.location.href = authUrl
-  }, 500)
+  renderAuth()
 }
 </script>
 </body>
