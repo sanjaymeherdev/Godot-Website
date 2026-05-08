@@ -6,139 +6,201 @@
 <title>WA Blast — AutoSend</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Syne',sans-serif;background:#080c10;color:#d0dde8;}
-  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;justify-content:center;align-items:center;z-index:1000;}
-  .auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:32px;border-radius:20px;width:360px;}
-  .auth-popup h2{font-size:24px;margin-bottom:8px;color:#fff;}
-  .auth-popup input{width:100%;padding:12px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:10px;color:#fff;}
-  .primary-btn{width:100%;padding:12px;background:#00e5a0;color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer;}
-  .dashboard-wrap{display:none;width:100%;}
-  .sidebar{width:240px;background:#0e1318;border-right:1px solid #1e2a35;min-height:100vh;position:fixed;}
-  .main{margin-left:240px;padding:20px;}
-  .card{background:#131920;border:1px solid #1e2a35;border-radius:16px;padding:20px;margin-bottom:20px;}
-  .btn{display:inline-block;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600;}
-  .btn-primary{background:#00e5a0;color:#000;}
-  .btn-secondary{background:transparent;border:1px solid #243040;color:#d0dde8;}
-  .qr-wrap{display:flex;flex-direction:column;align-items:center;padding:32px;background:#080c10;border:2px dashed #1e2a35;border-radius:16px;}
-  .qr-wrap img{width:200px;border-radius:12px;border:3px solid #00e5a0;}
-  .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;}
-  .connected{background:#00e5a0;box-shadow:0 0 6px #00e5a0;}
-  .disconnected{background:#ff5f7e;}
-  .scanning{background:#ffd166;}
-  .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
-  .nav-item{padding:10px 16px;cursor:pointer;border-radius:10px;margin:4px 0;}
-  .nav-item.active{background:rgba(0,229,160,.1);color:#00e5a0;}
-  table{width:100%;border-collapse:collapse;}
-  th,td{padding:10px;text-align:left;border-bottom:1px solid #1e2a35;}
-  .badge{padding:4px 10px;border-radius:20px;font-size:11px;}
-  .badge-pending{background:rgba(255,209,102,.15);color:#ffd166;}
-  .badge-sent{background:rgba(0,229,160,.15);color:#00e5a0;}
-  .progress-bar{height:6px;background:#00e5a0;width:0%;border-radius:10px;}
-  .device-name-input {
-  width: 100%;
-  padding: 12px 16px;
-  background: #080c10;
-  border: 1px solid #1e2a35;
-  border-radius: 10px;
-  color: #fff;
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  margin-bottom: 16px;
-  transition: border-color 0.2s;
-}
-
-.device-name-input:focus {
-  outline: none;
-  border-color: #00e5a0;
-}
-
-.device-name-input::placeholder {
-  color: #4a6070;
-}
-
-.device-name-label {
-  display: block;
-  font-size: 12px;
-  font-family: 'Space Mono', monospace;
-  color: #7a95a8;
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
-}
-
-.input-group {
-  margin-bottom: 20px;
-}
-  .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;background:#0e2d1e;color:#00e5a0;z-index:2000;display:none;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:#080c10;color:#d0dde8;}
+.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;justify-content:center;align-items:center;z-index:1000;}
+.auth-popup{background:#0e1318;border:1px solid #1e2a35;padding:32px;border-radius:20px;width:360px;}
+.auth-popup h2{font-size:24px;margin-bottom:8px;color:#fff;}
+.auth-popup input{width:100%;padding:12px;margin-bottom:12px;background:#080c10;border:1px solid #1e2a35;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;}
+.primary-btn{width:100%;padding:12px;background:#00e5a0;color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;}
+.dashboard-wrap{display:none;width:100%;}
+.sidebar{width:240px;background:#0e1318;border-right:1px solid #1e2a35;min-height:100vh;position:fixed;top:0;left:0;}
+.main{margin-left:240px;padding:20px;max-width:calc(100vw - 240px);}
+.card{background:#131920;border:1px solid #1e2a35;border-radius:16px;padding:20px;margin-bottom:16px;}
+.card h3{margin-bottom:14px;font-size:15px;font-weight:700;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-family:'Syne',sans-serif;border:none;font-size:13px;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn-primary{background:#00e5a0;color:#000;}
+.btn-secondary{background:transparent;border:1px solid #243040;color:#d0dde8;}
+.btn-danger{background:#ff5f7e;color:#fff;}
+.btn-warning{background:#ffd166;color:#000;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.nav-item{padding:9px 16px;cursor:pointer;border-radius:10px;margin:3px 0;font-size:13px;transition:background .12s;}
+.nav-item:hover{background:rgba(255,255,255,.04);}
+.nav-item.active{background:rgba(0,229,160,.1);color:#00e5a0;}
+.nav-section{font-size:10px;font-family:'Space Mono',monospace;color:#4a6070;letter-spacing:.8px;padding:8px 16px 4px;text-transform:uppercase;}
+.status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px;}
+.connected{background:#00e5a0;box-shadow:0 0 5px #00e5a0;}
+.disconnected{background:#ff5f7e;}
+.scanning{background:#ffd166;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+label,.field-label{display:block;font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;margin-bottom:5px;letter-spacing:.4px;}
+input[type=text],input[type=number],input[type=email],input[type=password],input[type=tel],textarea,select{width:100%;padding:10px 12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-size:13px;margin-bottom:10px;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#00e5a0;}
+input::placeholder,textarea::placeholder{color:#4a6070;}
+textarea{resize:vertical;}
+select option{background:#0e1318;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#7a95a8;padding:8px 10px;border-bottom:1px solid #1e2a35;text-align:left;}
+td{padding:9px 10px;border-bottom:1px solid #0e1318;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.badge-pending{background:rgba(255,209,102,.15);color:#ffd166;}
+.badge-sent{background:rgba(0,229,160,.15);color:#00e5a0;}
+.badge-failed{background:rgba(255,95,126,.15);color:#ff5f7e;}
+.badge-connected{background:rgba(0,229,160,.15);color:#00e5a0;}
+.badge-scanning{background:rgba(255,209,102,.15);color:#ffd166;}
+.badge-created,.badge-linked{background:rgba(122,149,168,.15);color:#7a95a8;}
+.badge-disconnected{background:rgba(255,95,126,.1);color:#ff8fa3;}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;background:#080c10;border:2px dashed #1e2a35;border-radius:14px;min-height:160px;text-align:center;gap:8px;}
+.qr-wrap img{width:200px;border-radius:10px;border:3px solid #00e5a0;}
+.qr-icon{font-size:36px;}
+.qr-hint{font-size:12px;color:#7a95a8;}
+.device-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#0a0f14;border:1px solid #1e2a35;border-radius:10px;margin-bottom:6px;gap:12px;flex-wrap:wrap;}
+.device-row.active-device{border-color:rgba(0,229,160,.4);background:rgba(0,229,160,.04);}
+.device-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+.device-name-text{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-meta{font-size:11px;color:#7a95a8;font-family:'Space Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.progress-track{height:5px;background:#1e2a35;border-radius:10px;overflow:hidden;margin:10px 0;}
+.progress-bar{height:5px;background:#00e5a0;width:0%;border-radius:10px;transition:width .3s;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-card{background:#080c10;border-radius:10px;padding:12px 14px;}
+.stat-label{font-size:10px;font-family:'Space Mono',monospace;color:#7a95a8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:800;}
+.stat-val.green{color:#00e5a0;}
+.stat-val.red{color:#ff5f7e;}
+.toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:10px;z-index:9999;display:none;font-size:13px;max-width:340px;pointer-events:none;}
+.debug-box{font-size:11px;font-family:'Space Mono',monospace;padding:9px 12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;min-height:26px;color:#7a95a8;margin-top:10px;word-break:break-all;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #1e2a35;border-top-color:#00e5a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.divider{border:none;border-top:1px solid #1e2a35;margin:14px 0;}
+.empty-state{text-align:center;padding:20px;color:#4a6070;font-size:13px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:700px){.grid-2{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
+<!-- AUTH -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-popup">
     <h2>WA Blast</h2>
-    <div style="margin-bottom:20px;color:#7a95a8;">WhatsApp automation</div>
-    <input type="text" id="loginEmail" placeholder="Email" autocomplete="off">
+    <div style="margin-bottom:18px;color:#7a95a8;font-size:13px;">WhatsApp bulk automation</div>
+    <input type="email" id="loginEmail" placeholder="Email" autocomplete="off">
     <input type="password" id="loginPassword" placeholder="Password">
     <button class="primary-btn" onclick="doLogin()">Login</button>
-    <div style="margin-top:16px;text-align:center;">
+    <div style="margin-top:14px;text-align:center;font-size:13px;">
       <span style="color:#7a95a8;cursor:pointer;" onclick="showRegister()">Create account</span>
+      &nbsp;·&nbsp;
+      <span style="color:#7a95a8;cursor:pointer;" onclick="showReset()">Forgot password</span>
     </div>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div class="dashboard-wrap" id="dashboardWrap">
   <div class="sidebar">
-    <div style="padding:24px;"><h2 style="color:#fff;">Auto<span style="color:#00e5a0;">Send</span></h2></div>
-    <div style="padding:0 12px;">
+    <div style="padding:22px 24px 14px;"><span style="font-size:18px;font-weight:800;color:#fff;">Auto</span><span style="font-size:18px;font-weight:800;color:#00e5a0;">Send</span></div>
+    <div style="padding:0 10px;">
+      <div class="nav-section">Main</div>
       <div class="nav-item active" data-tab="device">📱 Device</div>
       <div class="nav-item" data-tab="contacts">👥 Contacts</div>
       <div class="nav-item" data-tab="compose">✍️ Compose</div>
       <div class="nav-item" data-tab="send">🚀 Send</div>
+      <div class="nav-section">Tools</div>
+      <div class="nav-item" data-tab="chats">💬 Chats</div>
+      <div class="nav-item" data-tab="groups">👥 Groups</div>
+      <div class="nav-item" data-tab="user">👤 Account</div>
+      <div class="nav-section">Config</div>
       <div class="nav-item" data-tab="settings">⚙️ Settings</div>
     </div>
-    <div style="position:absolute;bottom:20px;left:20px;right:20px;">
-      <button class="btn btn-secondary" style="width:100%;" onclick="logout()">Logout</button>
+    <div style="position:absolute;bottom:18px;left:10px;right:10px;">
+      <div style="font-size:11px;color:#4a6070;font-family:'Space Mono',monospace;padding:0 6px 8px;" id="userEmail"></div>
+      <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="logout()">Logout</button>
     </div>
   </div>
+
   <div class="main">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div><span class="status-dot disconnected" id="statusDot"></span><span id="statusText">OFFLINE</span></div>
-      <div><span id="userEmail" style="color:#7a95a8;"></span></div>
-    </div>
-
-    <!-- Device Tab -->
-    <div class="tab-panel active" id="tab-device">
-      <div class="card">
-        <h3>Link Your Device</h3>
-        <div class="qr-wrap" id="qrWrap">
-          <div style="font-size:48px;">📱</div>
-          <div>Click "Load QR" to start</div>
-        </div>
-        <div class="input-group">
-  <label class="device-name-label">🔐 DEVICE NAME</label>
-  <input type="text" id="deviceNameInput" class="device-name-input" placeholder="e.g., my_whatsapp_device_1" autocomplete="off">
-</div>
-
-<div style="margin-top:16px;text-align:center;">
-  <button class="btn btn-primary" onclick="CreateDevice()">➕ Connect Device</button>
-  <button class="btn btn-primary" onclick="loadQR()">📱 Load QR Code</button>
-  <button class="btn btn-danger" onclick="disconnectDevice()" id="disconnectBtn" style="display:none;margin-left:10px;">🔌 Unlink Device</button>
-</div>
-        <div id="qrTimer" style="text-align:center;margin-top:10px;font-size:12px;"></div>
+    <!-- Top bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="status-dot disconnected" id="statusDot"></span>
+        <span id="statusText" style="font-size:12px;font-family:'Space Mono',monospace;font-weight:700;">OFFLINE</span>
+        <span id="activeDeviceName" style="font-size:11px;color:#4a6070;font-family:'Space Mono',monospace;"></span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshDeviceStatus()">↻ Check Status</button>
+        <button class="btn btn-warning btn-sm" onclick="doReconnect()" id="reconnectBtn" style="display:none;">⚡ Reconnect</button>
       </div>
     </div>
 
-    <!-- Contacts Tab -->
+    <!-- ===== DEVICE ===== -->
+    <div class="tab-panel active" id="tab-device">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 style="margin-bottom:0;">Active Device</h3>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="loadQR()">📲 Show QR</button>
+            <button class="btn btn-warning btn-sm" onclick="loginWithCode()">🔢 Pair Code</button>
+            <button class="btn btn-danger btn-sm" id="unlinkBtn" style="display:none;" onclick="unlinkActiveDevice()">🔌 Unlink</button>
+          </div>
+        </div>
+        <div class="qr-wrap" id="qrWrap">
+          <div class="qr-icon">📱</div>
+          <div class="qr-hint">Select or create a device, then click "Show QR"</div>
+        </div>
+        <div id="qrTimer" style="text-align:center;margin-top:8px;font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;"></div>
+        <div id="activeDevicePanel" style="display:none;margin-top:14px;">
+          <div class="device-row active-device">
+            <div class="device-info">
+              <span class="device-name-text" id="activeDeviceNameDisplay">—</span>
+              <span class="device-meta" id="activeDeviceIdDisplay">—</span>
+            </div>
+            <div class="device-actions">
+              <span class="badge" id="activeDeviceStatusBadge">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="debug-box" id="deviceDebug">No active device.</div>
+      </div>
+
+      <div class="card">
+        <h3>Create New Device</h3>
+        <label>Device Name (letters, numbers, _ and - only)</label>
+        <input type="text" id="deviceNameInput" placeholder="e.g. my_whatsapp_1" autocomplete="off">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="CreateDevice()">➕ Create Device</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin-bottom:0;">All Devices on Server</h3>
+          <button class="btn btn-secondary btn-sm" onclick="fetchAndRenderDevices()">↻ Sync</button>
+        </div>
+        <div id="devicesListWrap"><div class="empty-state">Click "Sync" to load devices from server.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== CONTACTS ===== -->
     <div class="tab-panel" id="tab-contacts">
       <div class="card">
-        <h3>Contacts</h3>
-        <textarea id="pasteInput" rows="3" placeholder="Name, Phone, Message (one per row)"></textarea>
-        <button class="btn btn-secondary" onclick="parsePaste()">Parse & Add</button>
-        <button class="btn btn-secondary" onclick="saveContacts()">Save to Sheet</button>
-        <button class="btn btn-secondary" onclick="clearContacts()">Clear All</button>
-        <div style="margin-top:16px;overflow-x:auto;">
+        <h3>Import Contacts</h3>
+        <label>Paste CSV (Name, Phone, Message — one per line)</label>
+        <textarea id="pasteInput" rows="4" placeholder="John Doe, 919876543210, Hi {name}!"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="parsePaste()">📥 Parse & Add</button>
+          <button class="btn btn-secondary" onclick="saveContacts()">💾 Save</button>
+          <button class="btn btn-danger" onclick="clearContacts()">🗑️ Clear All</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Contact List <span id="contactCountBadge" style="font-size:11px;color:#7a95a8;font-weight:400;"></span></h3>
+        <div style="overflow-x:auto;">
           <table>
             <thead><tr><th>Name</th><th>Phone</th><th>Status</th><th></th></tr></thead>
             <tbody id="contactsBody"></tbody>
@@ -147,570 +209,834 @@
       </div>
     </div>
 
-    <!-- Compose Tab -->
+    <!-- ===== COMPOSE ===== -->
     <div class="tab-panel" id="tab-compose">
       <div class="card">
         <h3>Message Template</h3>
-        <textarea id="msgTemplate" rows="4" placeholder="Hi {name}, special offer!"></textarea>
-        <button class="btn btn-primary" onclick="saveTemplate()">Save Template</button>
-        <button class="btn btn-secondary" onclick="generateVariations()">✨ AI Generate Variations</button>
+        <label>Use {name} for personalization</label>
+        <textarea id="msgTemplate" rows="5" placeholder="Hi {name}, we have a special offer for you! 🎉"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveTemplate()">💾 Save Template</button>
+          <button class="btn btn-secondary" onclick="generateVariations()">✨ AI Variations</button>
+        </div>
         <div id="variationsPanel" style="margin-top:12px;display:none;"></div>
+      </div>
+      <div class="card">
+        <h3>Attachment (optional)</h3>
+        <label>Type</label>
+        <select id="attachType">
+          <option value="none">None — Text only</option>
+          <option value="image">Image</option>
+          <option value="video">Video</option>
+          <option value="audio">Audio</option>
+          <option value="file">File / Document</option>
+          <option value="sticker">Sticker</option>
+        </select>
+        <label>Media URL</label>
+        <input type="text" id="attachUrl" placeholder="https://example.com/image.jpg">
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="testSendMessage()">🧪 Test Send (to yourself)</button>
+        </div>
       </div>
     </div>
 
-    <!-- Send Tab -->
+    <!-- ===== SEND ===== -->
     <div class="tab-panel" id="tab-send">
       <div class="card">
-        <h3>Send Campaign</h3>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
-          <div>Sent: <strong id="sentCount">0</strong></div>
-          <div>Pending: <strong id="pendingCount">0</strong></div>
-          <div>Failed: <strong id="failedCount">0</strong></div>
+        <h3>Campaign</h3>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Sent</div><div class="stat-val green" id="sentCount">0</div></div>
+          <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val" id="pendingCount">0</div></div>
+          <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-val red" id="failedCount">0</div></div>
         </div>
-        <div class="progress-bar" id="progressBar" style="width:0%;margin:10px 0;"></div>
-        <div id="currentStatus" style="margin:10px 0;">Ready to send</div>
-        <div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <div id="currentStatus" style="font-size:12px;color:#7a95a8;margin:8px 0;font-family:'Space Mono',monospace;">Ready</div>
+        <div class="btn-row">
           <button class="btn btn-primary" onclick="startSend()">▶ Start</button>
           <button class="btn btn-secondary" onclick="pauseSend()">⏸ Pause</button>
           <button class="btn btn-secondary" onclick="stopSend()">⏹ Stop</button>
         </div>
       </div>
-    </div>
-
-    <!-- Settings Tab -->
-    <div class="tab-panel" id="tab-settings">
       <div class="card">
-        <h3>Settings</h3>
-        <label>Hour Limit</label><input type="number" id="hourLimit" value="30">
-        <label>Day Limit</label><input type="number" id="dayLimit" value="200">
-        <label>Min Gap (seconds)</label><input type="number" id="minGap" value="30">
-        <label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90">
-        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        <h3>Send Log</h3>
+        <div style="overflow-x:auto;max-height:280px;overflow-y:auto;">
+          <table><thead><tr><th>Time</th><th>Phone</th><th>Status</th></tr></thead><tbody id="sendLogBody"></tbody></table>
+        </div>
       </div>
     </div>
+
+    <!-- ===== CHATS ===== -->
+    <div class="tab-panel" id="tab-chats">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <h3 style="margin-bottom:0;">Recent Chats</h3>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="chatSearch" placeholder="Search..." style="width:140px;margin-bottom:0;padding:6px 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="loadChats()">↻ Load</button>
+          </div>
+        </div>
+        <div id="chatsWrap"><div class="empty-state">Click Load to fetch chats.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== GROUPS ===== -->
+    <div class="tab-panel" id="tab-groups">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin-bottom:0;">My Groups</h3>
+          <button class="btn btn-secondary btn-sm" onclick="loadGroups()">↻ Load</button>
+        </div>
+        <div id="groupsWrap"><div class="empty-state">Click Load to fetch your groups.</div></div>
+      </div>
+      <div class="card">
+        <h3>Create Group</h3>
+        <label>Group Name</label>
+        <input type="text" id="newGroupName" placeholder="My Broadcast Group">
+        <label>Participants (comma-separated phone numbers, with country code)</label>
+        <input type="text" id="newGroupParticipants" placeholder="919876543210, 919123456789">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="createGroup()">➕ Create Group</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACCOUNT ===== -->
+    <div class="tab-panel" id="tab-user">
+      <div class="grid-2">
+        <div class="card">
+          <h3>WhatsApp Account</h3>
+          <div class="btn-row" style="flex-direction:column;align-items:flex-start;">
+            <button class="btn btn-secondary" style="width:100%;justify-content:flex-start;" onclick="loadUserInfo()">👤 Get My Info</button>
+            <button class="btn btn-secondary" style="width:100%;justify-content:flex-start;" onclick="loadUserAvatar()">🖼️ Get Avatar</button>
+            <button class="btn btn-secondary" style="width:100%;justify-content:flex-start;" onclick="loadMyContacts()">📞 My Contacts</button>
+            <button class="btn btn-secondary" style="width:100%;justify-content:flex-start;" onclick="loadMyPrivacy()">🔒 Privacy Settings</button>
+            <button class="btn btn-secondary" style="width:100%;justify-content:flex-start;" onclick="loadBusinessProfile()">🏢 Business Profile</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Update Account</h3>
+          <label>New Pushname</label>
+          <input type="text" id="newPushname" placeholder="My Business Name">
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="changePushname()">✏️ Update Name</button>
+          </div>
+          <hr class="divider">
+          <label>Check if number is on WhatsApp</label>
+          <input type="text" id="checkUserPhone" placeholder="919876543210">
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="checkUser()">🔍 Check Number</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Result</h3>
+        <pre id="accountResult" style="font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;">—</pre>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS ===== -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="grid-2">
+        <div class="card">
+          <h3>Sending Limits</h3>
+          <label>Hour Limit</label><input type="number" id="hourLimit" value="30">
+          <label>Day Limit</label><input type="number" id="dayLimit" value="200">
+          <label>Min Gap (seconds)</label><input type="number" id="minGap" value="30">
+          <label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90">
+          <div class="btn-row"><button class="btn btn-primary" onclick="saveSettings()">💾 Save</button></div>
+        </div>
+        <div class="card">
+          <h3>GoWA Server</h3>
+          <label>Server URL</label><input type="text" id="gowaUrl" placeholder="https://sanjaywa8-5.onrender.com">
+          <label>Basic Auth (base64 user:pass, leave blank if none)</label><input type="text" id="gowaAuth" placeholder="dXNlcjpwYXNz">
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveGowaSettings()">💾 Save</button>
+            <button class="btn btn-secondary" onclick="testGowaConnection()">🧪 Test</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>AI Auto-Reply (Groq)</h3>
+        <label>Groq API Key</label><input type="text" id="groqKey" placeholder="gsk_...">
+        <label>System Prompt (instructions for the AI when auto-replying)</label>
+        <textarea id="autoReplyPrompt" rows="3" placeholder="You are a helpful sales assistant for XYZ business. Reply concisely."></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <input type="checkbox" id="autoReplyEnabled" style="width:auto;margin-bottom:0;">
+          <label style="margin-bottom:0;cursor:pointer;" for="autoReplyEnabled">Enable Auto-Reply on incoming messages</label>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="saveAiSettings()">💾 Save AI Settings</button></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ==================== CONFIG ====================
+// ================================================================
+// CONFIG
+// ================================================================
 const EDGE_FN_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgVCGqSABYj7CNWHp-PCuwv-VP_jAvFU-biD8qVBfPRPQ7ydZejz-sEFHX9z9T2VQmzw/exec";
 
-let authToken = null;
-let deviceId = null;
-let contacts = [];
-let sendState = 'idle', sendIndex = 0, sendTimer = null;
-let todaySent = 0, hourSent = 0;
+let authToken  = null;
+let deviceId   = null;
+let deviceName = null;
+let contacts   = [];
+let sendState  = 'idle', sendIndex = 0, sendTimer = null;
+let sendLog    = [];
 let variations = [], useVariations = false, variationIndex = 0;
-let pollTimer = null, qrTimer = null;
+let pollTimer  = null, qrTimer = null;
 
-// Create device with custom name
-async function CreateDevice() {
-  const deviceName = document.getElementById('deviceNameInput').value.trim()
-  
-  if (!deviceName) {
-    showToast('Please enter a device name', true)
-    return
-  }
-
-  // Validate device name (letters, numbers, underscore, hyphen only)
-  const nameRegex = /^[a-zA-Z0-9_-]+$/
-  if (!nameRegex.test(deviceName)) {
-    showToast('Device name can only contain letters, numbers, underscore and hyphen', true)
-    return
-  }
-
-  showToast('Creating device...', false)
-  
-  try {
-    const result = await callEdgeFunction('createDevice', { device_name: deviceName })
-    
-    if (result.success) {
-      deviceId = result.device_id
-      showToast(`Device "${deviceName}" created successfully`, false)
-      
-      // Save to Apps Script as well
-      const email = localStorage.getItem('user_email')
-      if (email) {
-        apiGet('linkDevice', { username: email, deviceId: deviceId, deviceName: deviceName }, () => {})
-      }
-      
-      // Update UI
-      document.getElementById('disconnectBtn').style.display = 'inline-block'
-      document.getElementById('deviceDebug').innerHTML = `<span style="color:#00e5a0;">✅ Device created: ${deviceName} (${deviceId.substring(0, 16)}...)</span>`
-      
-      // Optionally auto-load QR after device creation
-      setTimeout(() => loadQR(), 500)
-    } else if (result.already_exists) {
-      showToast('Device already exists. Use Unlink first or refresh.', true)
-      deviceId = result.device_id
-      document.getElementById('disconnectBtn').style.display = 'inline-block'
-    } else {
-      showToast(result.message || 'Device creation failed', true)
-    }
-  } catch (err) {
-    showToast('Error creating device: ' + err.message, true)
-  }
-}
-
-// Modified loadQR to use existing deviceId
-async function loadQR() {
-  const wrap = document.getElementById('qrWrap')
-  const debugDiv = document.getElementById('deviceDebug')
-  
-  if (!deviceId) {
-    showToast('Please create a device first using "Connect Device"', true)
-    return
-  }
-  
-  wrap.innerHTML = '<div style="font-size:32px;">⏳</div><div>Loading QR code...</div>'
-  updateDeviceStatus('scanning')
-  
-  try {
-    const result = await callEdgeFunction('getQR')
-    
-    if (result.success && result.qr_image_url) {
-      wrap.innerHTML = ''
-      const img = document.createElement('img')
-      img.src = result.qr_image_url
-      img.onload = () => {
-        wrap.appendChild(img)
-        wrap.innerHTML += '<div style="margin-top:12px;">📱 Scan with WhatsApp → Linked Devices</div>'
-        startQRCountdown(result.qr_duration || 60)
-        startDevicePolling()
-      }
-      img.onerror = () => {
-        wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>QR image failed to load</div>'
-      }
-    } else {
-      wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>' + (result.message || 'Failed to get QR') + '</div>'
-    }
-  } catch (err) {
-    wrap.innerHTML = '<div style="font-size:32px;">❌</div><div>Connection error</div>'
-    showToast('Failed to load QR', true)
-  }
-}
-
-// Modified disconnectDevice to clear deviceId and allow new creation
-async function disconnectDevice() {
-  if (!confirm('Unlink this device? You will need to create a new device to reconnect.')) return
-  
-  showToast('Unlinking device...', false)
-  
-  // Try to logout from GoWA
-  if (deviceId) {
-    try {
-      await fetch(`https://sanjaywa8-5.onrender.com/devices/${deviceId}`, { method: 'DELETE' })
-    } catch(e) { console.log('Delete error:', e) }
-  }
-  
-  const result = await callEdgeFunction('unlinkDevice')
-  
-  if (result.success) {
-    deviceId = null
-    updateDeviceStatus('disconnected')
-    document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">📱</div><div>Enter device name and click "Connect Device"</div>'
-    document.getElementById('qrTimer').textContent = ''
-    document.getElementById('deviceDebug').innerHTML = ''
-    document.getElementById('disconnectBtn').style.display = 'none'
-    document.getElementById('deviceNameInput').value = ''
-    showToast('Device unlinked. You can now create a new device.')
-  } else {
-    showToast('Failed to unlink', true)
-  }
-}
-
-// ==================== HELPERS ====================
+// ================================================================
+// HELPERS
+// ================================================================
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.background = isError ? '#2d1a1a' : '#0e2d1e';
-  t.style.color = isError ? '#ff6b6b' : '#00e5a0';
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 3000);
+  t.style.cssText = `display:block;background:${isError?'#2d1a1a':'#0e2d1e'};color:${isError?'#ff6b6b':'#00e5a0'};padding:11px 18px;border-radius:10px;`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.display='none', 3500);
 }
+function setDebug(msg, isError) {
+  const d = document.getElementById('deviceDebug');
+  if (d) d.innerHTML = `<span style="color:${isError?'#ff6b6b':'#7a95a8'};">${msg}</span>`;
+}
+function setAccountResult(data) {
+  const el = document.getElementById('accountResult');
+  if (el) el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+function escapeHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString(); }
 
-// ==================== EDGE FUNCTION CALL (WITH AUTH) ====================
-async function callEdgeFunction(action, body = {}) {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
-  }
-  
-  const response = await fetch(EDGE_FN_URL, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({ action, ...body })
+// ================================================================
+// EDGE FUNCTION CALL
+// ================================================================
+async function callEdge(action, body={}) {
+  const headers = {'Content-Type':'application/json'};
+  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+  const res = await fetch(EDGE_FN_URL, {
+    method:'POST', headers,
+    body: JSON.stringify({action, ...body})
   });
-  
-  if (response.status === 401) {
-    showToast('Session expired. Please login again.', true);
-    logout();
-    throw new Error('Unauthorized');
-  }
-  
-  const data = await response.json();
-  return data;
+  if (res.status === 401) { showToast('Session expired. Please login again.', true); logout(); throw new Error('Unauthorized'); }
+  return res.json();
 }
 
-// ==================== APPS SCRIPT JSONP ====================
-function jsonpRequest(params, cb) {
-  const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-  const timeout = setTimeout(() => {
-    if (window[cbName]) { window[cbName] = null; cb({ success: false, message: 'Timeout' }); }
-  }, 15000);
-  window[cbName] = function(data) {
-    clearTimeout(timeout);
-    delete window[cbName];
-    cb(data);
-  };
-  const qs = new URLSearchParams({ ...params, callback: cbName }).toString();
-  const script = document.createElement('script');
-  script.src = APPS_SCRIPT_URL + '?' + qs;
-  document.body.appendChild(script);
-  setTimeout(() => script.remove(), 1000);
-}
-
-function apiGet(action, data, cb) { jsonpRequest({ action, ...data }, cb); }
-
-// ==================== AUTH ====================
+// ================================================================
+// AUTH
+// ================================================================
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
+  const email    = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  
-  if (!email || !password) {
-    showToast('Email and password required', true);
-    return;
-  }
-  
-  showToast('Logging in...', false);
-  
+  if (!email||!password) { showToast('Email and password required', true); return; }
+  showToast('Logging in…');
   try {
-    const result = await callEdgeFunction('login', { email, password });
-    
-    if (result.success && result.token) {
-      authToken = result.token;
+    const r = await callEdge('login', {email, password});
+    if (r.success && r.token) {
+      authToken = r.token;
       localStorage.setItem('auth_token', authToken);
       localStorage.setItem('user_email', email);
-      
-      document.getElementById('authOverlay').style.display = 'none';
-      document.getElementById('dashboardWrap').style.display = 'block';
-      document.getElementById('userEmail').textContent = email;
-      
-      // Load user data from Apps Script
-      apiGet('loadClientData', { username: email }, (data) => {
-        if (data.success) {
-          contacts = data.contacts || [];
-          renderContacts();
-          if (data.settings) {
-            document.getElementById('hourLimit').value = data.settings.hourLimit || 30;
-            document.getElementById('dayLimit').value = data.settings.dayLimit || 200;
-          }
-          if (data.template?.body) document.getElementById('msgTemplate').value = data.template.body;
-          if (data.deviceId) {
-            deviceId = data.deviceId;
-            updateDeviceStatus('connected');
-          }
-        }
-      });
-    } else {
-      showToast(result.message || 'Login failed', true);
-    }
-  } catch (err) {
-    showToast('Login error: ' + err.message, true);
-  }
+      showDashboard(email, r);
+    } else { showToast(r.message||'Login failed', true); }
+  } catch(e) { showToast('Login error: '+e.message, true); }
 }
-
 function showRegister() {
-  const overlay = document.getElementById('authOverlay');
-  overlay.innerHTML = `
+  document.getElementById('authOverlay').innerHTML = `
     <div class="auth-popup">
       <h2>Create Account</h2>
-      <input type="text" id="regEmail" placeholder="Email">
+      <input type="email" id="regEmail" placeholder="Email">
       <input type="password" id="regPassword" placeholder="Password">
       <input type="text" id="regName" placeholder="Full Name">
       <button class="primary-btn" onclick="doRegister()">Register</button>
-      <div style="margin-top:12px;text-align:center;">
-        <span style="color:#7a95a8;cursor:pointer;" onclick="resetAuth()">Back to Login</span>
-      </div>
-    </div>
-  `;
+      <div style="margin-top:12px;text-align:center;font-size:13px;"><span style="color:#7a95a8;cursor:pointer;" onclick="resetAuth()">← Back</span></div>
+    </div>`;
 }
-
-function resetAuth() { location.reload(); }
-
+function showReset() {
+  document.getElementById('authOverlay').innerHTML = `
+    <div class="auth-popup">
+      <h2>Reset Password</h2>
+      <input type="email" id="resetEmail" placeholder="Email">
+      <button class="primary-btn" onclick="doReset()">Send Reset Email</button>
+      <div style="margin-top:12px;text-align:center;font-size:13px;"><span style="color:#7a95a8;cursor:pointer;" onclick="resetAuth()">← Back</span></div>
+    </div>`;
+}
 async function doRegister() {
-  const email = document.getElementById('regEmail').value;
-  const password = document.getElementById('regPassword').value;
-  const full_name = document.getElementById('regName').value;
-  
-  try {
-    const result = await callEdgeFunction('register', { email, password, full_name });
-    if (result.success) {
-      showToast('Account created! Please login.', false);
-      resetAuth();
-    } else {
-      showToast(result.message, true);
-    }
-  } catch (err) {
-    showToast('Registration error', true);
-  }
+  const email=document.getElementById('regEmail').value, password=document.getElementById('regPassword').value, full_name=document.getElementById('regName').value;
+  try { const r=await callEdge('register',{email,password,full_name}); if(r.success){showToast('Account created! Please login.');resetAuth();}else showToast(r.message,true); } catch(e){showToast('Error',true);}
 }
-
+async function doReset() {
+  const email=document.getElementById('resetEmail').value;
+  const r=await callEdge('resetPassword',{email});
+  showToast(r.message||(r.success?'Reset sent':'Failed'), !r.success);
+}
+function resetAuth() { location.reload(); }
 function logout() {
-  authToken = null;
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_email');
-  location.reload();
+  authToken=null; if(pollTimer)clearInterval(pollTimer); if(qrTimer)clearInterval(qrTimer);
+  localStorage.removeItem('auth_token'); localStorage.removeItem('user_email'); location.reload();
 }
 
-// ==================== DEVICE MANAGEMENT ====================
-
-function startDevicePolling() {
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(async () => {
-    try {
-      const result = await callEdgeFunction('checkDeviceStatus');
-      if (result.success && result.is_connected) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-        if (qrTimer) clearInterval(qrTimer);
-        updateDeviceStatus('connected');
-        document.getElementById('qrWrap').innerHTML = '<div style="font-size:48px;">✅</div><div>Device Connected!</div>';
-        showToast('WhatsApp connected!');
-      }
-    } catch (err) {
-      console.log('Polling error:', err);
-    }
-  }, 3000);
+// ================================================================
+// DASHBOARD
+// ================================================================
+function showDashboard(email, data) {
+  document.getElementById('authOverlay').style.display='none';
+  document.getElementById('dashboardWrap').style.display='block';
+  document.getElementById('userEmail').textContent=email;
+  initDashboard(data);
 }
-
-function startQRCountdown(seconds) {
-  if (qrTimer) clearInterval(qrTimer);
-  let s = seconds;
-  qrTimer = setInterval(() => {
-    s--;
-    if (s <= 0) {
-      clearInterval(qrTimer);
-      document.getElementById('qrTimer').textContent = 'QR expired - refresh';
-    } else {
-      document.getElementById('qrTimer').textContent = `QR expires in ${s}s`;
-    }
-  }, 1000);
-}
-
-
-function updateDeviceStatus(status) {
-  const dot = document.getElementById('statusDot');
-  const text = document.getElementById('statusText');
-  if (status === 'connected') {
-    dot.className = 'status-dot connected';
-    text.textContent = 'CONNECTED';
-  } else if (status === 'scanning') {
-    dot.className = 'status-dot scanning';
-    text.textContent = 'SCANNING';
-  } else {
-    dot.className = 'status-dot disconnected';
-    text.textContent = 'OFFLINE';
+function initDashboard(data) {
+  if (data?.contacts) { contacts=data.contacts; renderContacts(); }
+  if (data?.settings) {
+    document.getElementById('hourLimit').value = data.settings.hour_limit||30;
+    document.getElementById('dayLimit').value  = data.settings.day_limit||200;
+    document.getElementById('minGap').value    = data.settings.min_gap||30;
+    document.getElementById('maxGap').value    = data.settings.max_gap||90;
+    if(data.settings.gowa_url)  document.getElementById('gowaUrl').value  = data.settings.gowa_url;
+    if(data.settings.gowa_auth) document.getElementById('gowaAuth').value = data.settings.gowa_auth;
+    if(data.settings.auto_reply_prompt) document.getElementById('autoReplyPrompt').value = data.settings.auto_reply_prompt;
+    document.getElementById('autoReplyEnabled').checked = data.settings.auto_reply||false;
   }
+  if (data?.config?.groq_key)  document.getElementById('groqKey').value   = data.config.groq_key;
+  if (data?.template?.body)    document.getElementById('msgTemplate').value = data.template.body;
+  if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
+  fetchAndRenderDevices();
 }
 
-// ==================== CONTACTS ====================
+// ================================================================
+// DEVICE: UI SYNC
+// ================================================================
+function syncDeviceToUI(device) {
+  deviceId   = device.device_id;
+  deviceName = device.device_name || device.device_id;
+  const status = device.status || 'created';
+  updateStatusBar(status);
+  document.getElementById('activeDevicePanel').style.display='block';
+  document.getElementById('activeDeviceNameDisplay').textContent = deviceName;
+  document.getElementById('activeDeviceIdDisplay').textContent   = deviceId;
+  document.getElementById('activeDeviceName').textContent = ' / '+deviceName;
+  const badge = document.getElementById('activeDeviceStatusBadge');
+  badge.textContent = status; badge.className = 'badge badge-'+status;
+  document.getElementById('unlinkBtn').style.display   = 'inline-flex';
+  document.getElementById('reconnectBtn').style.display = (status!=='connected')?'inline-flex':'none';
+  const qw = document.getElementById('qrWrap');
+  if (status==='connected') {
+    qw.innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+  } else {
+    qw.innerHTML=`<div class="qr-icon">📱</div><div class="qr-hint">${escapeHtml(deviceName)} — click "Show QR" to link</div>`;
+  }
+  setDebug(`Device: ${deviceName} [${deviceId.substring(0,24)}…] — ${status}`);
+}
+function updateStatusBar(status) {
+  const dot=document.getElementById('statusDot'), text=document.getElementById('statusText');
+  const m={connected:['status-dot connected','CONNECTED'],scanning:['status-dot scanning','SCANNING'],disconnected:['status-dot disconnected','OFFLINE'],created:['status-dot disconnected','CREATED'],linked:['status-dot disconnected','LINKED']};
+  const [c,l]=(m[status]||m.disconnected); dot.className=c; text.textContent=l;
+}
+async function fetchDeviceFromServer() {
+  try {
+    const r = await callEdge('getDevice');
+    if(r.success && r.has_device) syncDeviceToUI(r.device);
+    else { setDebug('No device linked. Create one or sync.'); updateStatusBar('disconnected'); }
+  } catch(e) { setDebug('Device fetch error: '+e.message, true); }
+}
+async function refreshDeviceStatus() {
+  if(!deviceId){showToast('No active device',true);return;}
+  try {
+    const r=await callEdge('checkDeviceStatus');
+    if(r.success){
+      const s=r.is_connected?'connected':'scanning'; updateStatusBar(s);
+      const b=document.getElementById('activeDeviceStatusBadge'); if(b){b.textContent=s;b.className='badge badge-'+s;}
+      document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';
+      showToast(r.is_connected?'Device connected ✅':'Device not connected');
+      if(r.is_connected) document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+    }
+  } catch(e){showToast('Status check failed',true);}
+}
+
+// ================================================================
+// DEVICE: FETCH ALL
+// ================================================================
+async function fetchAndRenderDevices() {
+  const wrap=document.getElementById('devicesListWrap');
+  wrap.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try {
+    const r=await callEdge('listDevices');
+    if(r.success && r.devices?.length) renderDevicesList(r.devices);
+    else wrap.innerHTML='<div class="empty-state">No devices on server. Create one above.</div>';
+  } catch(e){wrap.innerHTML=`<div class="empty-state" style="color:#ff6b6b;">Error: ${escapeHtml(e.message)}</div>`;}
+}
+function renderDevicesList(devices) {
+  const wrap=document.getElementById('devicesListWrap');
+  if(!devices?.length){wrap.innerHTML='<div class="empty-state">No devices.</div>';return;}
+  wrap.innerHTML=devices.map(d=>{
+    const id=d.id||d.device_id||'—';
+    const name=d.name||d.device_name||id;
+    const isConn=d.is_connected===true||d.is_logged_in===true||d.connected===true||d.status==='connected';
+    const sl=isConn?'connected':(d.status||'offline');
+    const isActive=deviceId&&id===deviceId;
+    return `<div class="device-row${isActive?' active-device':''}">
+      <div class="device-info">
+        <span class="device-name-text">${escapeHtml(name)}${isActive?' <span style="font-size:9px;color:#00e5a0;">[active]</span>':''}</span>
+        <span class="device-meta">${escapeHtml(id)}</span>
+      </div>
+      <div class="device-actions">
+        <span class="badge badge-${isConn?'connected':'created'}">${sl}</span>
+        <button class="btn btn-secondary btn-sm" onclick="getQRForDevice('${escapeHtml(id)}')">QR</button>
+        <button class="btn btn-primary btn-sm" onclick="selectDevice('${escapeHtml(id)}','${escapeHtml(name)}')">Use</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDevice('${escapeHtml(id)}','${escapeHtml(name)}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ================================================================
+// DEVICE: CREATE
+// ================================================================
+async function CreateDevice() {
+  const name=document.getElementById('deviceNameInput').value.trim();
+  if(!name){showToast('Enter a device name',true);return;}
+  if(!/^[a-zA-Z0-9_-]+$/.test(name)){showToast('Letters, numbers, _ and - only',true);return;}
+  setDebug('<span class="spinner"></span> Creating device…');
+  try {
+    const r=await callEdge('createDevice',{device_name:name});
+    if(r.success){
+      showToast(`Device "${name}" created!`);
+      syncDeviceToUI({device_id:r.device_id,device_name:name,status:'created'});
+      document.getElementById('deviceNameInput').value='';
+      fetchAndRenderDevices();
+      setTimeout(()=>loadQR(),600);
+    } else if(r.already_exists){
+      showToast('Device already exists. Unlink it first.',true);
+      setDebug('Already exists: '+r.device_id,true);
+    } else {
+      showToast(r.message||'Creation failed',true);
+      setDebug(r.message||'Failed',true);
+    }
+  } catch(e){showToast('Error: '+e.message,true);setDebug(e.message,true);}
+}
+
+// ================================================================
+// DEVICE: SELECT / QR / PAIR / UNLINK / DELETE / RECONNECT
+// ================================================================
+async function selectDevice(id, name) {
+  if(!confirm(`Use "${name}" as your active device?`)) return;
+  try {
+    const r=await callEdge('linkDevice',{device_id:id,device_name:name});
+    if(r.success){syncDeviceToUI({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchAndRenderDevices();}
+    else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function getQRForDevice(id) {
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='<div class="qr-icon"><span class="spinner"></span></div><div class="qr-hint">Loading QR…</div>';
+  updateStatusBar('scanning');
+  try {
+    const r=await callEdge('getQRForDevice',{device_id:id});
+    if(r.success&&r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration);
+    else wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
+  } catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+}
+
+async function loadQR() {
+  if(!deviceId){showToast('Create or select a device first',true);return;}
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='<div class="qr-icon"><span class="spinner"></span></div><div class="qr-hint">Loading QR code…</div>';
+  updateStatusBar('scanning');
+  try {
+    const r=await callEdge('getQR');
+    if(r.success&&r.qr_image_url){ renderQRImage(r.qr_image_url,r.qr_duration); startDevicePolling(); }
+    else {
+      wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed to get QR')}</div>`;
+      setDebug((r.message||'QR failed')+(r.debug?' — '+JSON.stringify(r.debug):''),true);
+    }
+  } catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">Connection error</div>`;showToast('QR load failed',true);}
+}
+
+function renderQRImage(url, duration) {
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='';
+  const img=document.createElement('img'); img.src=url;
+  img.onload=()=>{
+    wrap.appendChild(img);
+    const h=document.createElement('div'); h.className='qr-hint';
+    h.textContent='📱 Open WhatsApp → Linked Devices → Link a Device';
+    wrap.appendChild(h);
+    startQRCountdown(duration||60);
+  };
+  img.onerror=()=>{wrap.innerHTML='<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">Image failed to load</div>';};
+}
+
+async function loginWithCode() {
+  if(!deviceId){showToast('Select a device first',true);return;}
+  const phone=prompt('Enter your WhatsApp phone number (with country code, no +):\ne.g. 919876543210');
+  if(!phone) return;
+  try {
+    const r=await callEdge('loginWithCode',{device_id:deviceId,phone});
+    if(r.success){ showToast('Pairing code: '+r.code); setDebug('Pairing code: '+r.code+' — Enter this in WhatsApp → Linked Devices → Link with phone number'); }
+    else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function unlinkActiveDevice() {
+  if(!deviceId) return;
+  if(!confirm(`Unlink "${deviceName}"?`)) return;
+  showToast('Unlinking…');
+  try {
+    const r=await callEdge('unlinkDevice');
+    if(r.success){
+      deviceId=deviceName=null; updateStatusBar('disconnected');
+      document.getElementById('activeDevicePanel').style.display='none';
+      document.getElementById('unlinkBtn').style.display='none';
+      document.getElementById('reconnectBtn').style.display='none';
+      document.getElementById('activeDeviceName').textContent='';
+      document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device below to get started</div>';
+      document.getElementById('qrTimer').textContent='';
+      setDebug('Device unlinked.');
+      if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+      if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+      showToast('Device unlinked'); fetchAndRenderDevices();
+    } else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function deleteDevice(id, name) {
+  if(!confirm(`Delete "${name}" from the server? This is permanent.`)) return;
+  try {
+    const r=await callEdge('deleteDevice',{device_id:id});
+    showToast(r.success?`"${name}" deleted`:(r.message||'Delete failed'),!r.success);
+    if(r.success){
+      if(id===deviceId){
+        deviceId=deviceName=null; updateStatusBar('disconnected');
+        document.getElementById('activeDevicePanel').style.display='none';
+        document.getElementById('unlinkBtn').style.display='none';
+        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device to get started</div>';
+        setDebug('Active device deleted.');
+      }
+      fetchAndRenderDevices();
+    }
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function doReconnect() {
+  showToast('Reconnecting…');
+  try { const r=await callEdge('reconnect'); showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success); if(r.success)startDevicePolling(); }
+  catch(e){showToast('Error: '+e.message,true);}
+}
+
+// ================================================================
+// POLLING & COUNTDOWN
+// ================================================================
+function startDevicePolling() {
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try {
+      const r=await callEdge('checkDeviceStatus');
+      if(r.success&&r.is_connected){
+        clearInterval(pollTimer);pollTimer=null;
+        if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+        updateStatusBar('connected');
+        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+        document.getElementById('qrTimer').textContent='';
+        document.getElementById('reconnectBtn').style.display='none';
+        const b=document.getElementById('activeDeviceStatusBadge'); if(b){b.textContent='connected';b.className='badge badge-connected';}
+        setDebug(`✅ ${deviceName} connected!`);
+        showToast('WhatsApp connected! 🎉'); fetchAndRenderDevices();
+      }
+    } catch(e){}
+  },3000);
+}
+function startQRCountdown(secs) {
+  if(qrTimer) clearInterval(qrTimer);
+  let s=secs; const el=document.getElementById('qrTimer');
+  qrTimer=setInterval(()=>{
+    s--;
+    if(s<=0){clearInterval(qrTimer);el.textContent='QR expired — click Show QR again';el.style.color='#ff6b6b';}
+    else{el.textContent=`QR expires in ${s}s`;el.style.color=s<15?'#ffd166':'#7a95a8';}
+  },1000);
+}
+
+// ================================================================
+// CONTACTS
+// ================================================================
 function renderContacts() {
-  const tbody = document.getElementById('contactsBody');
-  if (!contacts.length) {
-    tbody.innerHTML = '<tr><td colspan="4">No contacts</td></tr>';
-    document.getElementById('pendingCount').textContent = '0';
+  const tbody=document.getElementById('contactsBody');
+  document.getElementById('contactCountBadge').textContent=`(${contacts.length})`;
+  if(!contacts.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#4a6070;padding:20px;">No contacts. Import above.</td></tr>';
+    ['sentCount','pendingCount','failedCount'].forEach(id=>document.getElementById(id).textContent='0');
     return;
   }
-  tbody.innerHTML = contacts.map((c, i) => `
+  tbody.innerHTML=contacts.map((c,i)=>`
     <tr>
       <td>${escapeHtml(c.name)}</td>
-      <td>${c.phone}</td>
-      <td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td>
-      <td><button onclick="removeContact(${i})" style="background:none;border:none;color:#ff5f7e;cursor:pointer;">✖</button></td>
-    </tr>
-  `).join('');
-  document.getElementById('sentCount').textContent = contacts.filter(c => c.status === 'sent').length;
-  document.getElementById('pendingCount').textContent = contacts.filter(c => c.status === 'pending').length;
-  document.getElementById('failedCount').textContent = contacts.filter(c => c.status === 'failed').length;
+      <td style="font-family:'Space Mono',monospace;font-size:11px;">${c.phone}</td>
+      <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+      <td><button onclick="removeContact(${i})" style="background:none;border:none;color:#ff5f7e;cursor:pointer;font-size:15px;">✕</button></td>
+    </tr>`).join('');
+  document.getElementById('sentCount').textContent    = contacts.filter(c=>c.status==='sent').length;
+  document.getElementById('pendingCount').textContent = contacts.filter(c=>!c.status||c.status==='pending').length;
+  document.getElementById('failedCount').textContent  = contacts.filter(c=>c.status==='failed').length;
 }
-
-function removeContact(i) { contacts.splice(i, 1); renderContacts(); }
-
-function parsePaste() {
-  const raw = document.getElementById('pasteInput').value;
-  const lines = raw.split(/\r?\n/);
-  let added = 0;
-  for (let line of lines) {
-    const parts = line.split(/[\t,]/);
-    if (parts.length >= 2) {
-      let phone = parts[1].replace(/\D/g, '');
-      if (phone.length === 10) phone = '91' + phone;
-      if (phone.length >= 10) {
-        contacts.push({ name: parts[0] || phone, phone: phone, message: parts[2] || '', status: 'pending' });
-        added++;
-      }
+function removeContact(i){contacts.splice(i,1);renderContacts();}
+function parsePaste(){
+  const raw=document.getElementById('pasteInput').value; let added=0;
+  for(const line of raw.split(/\r?\n/)){
+    const parts=line.split(/[\t,]/);
+    if(parts.length>=2){
+      let phone=parts[1].replace(/\D/g,'');
+      if(phone.length===10) phone='91'+phone;
+      if(phone.length>=10){contacts.push({name:(parts[0]||phone).trim(),phone,message:(parts[2]||'').trim(),status:'pending'});added++;}
     }
   }
-  renderContacts();
-  showToast(`Added ${added} contacts`);
-  document.getElementById('pasteInput').value = '';
+  renderContacts(); showToast(`Added ${added} contacts`); document.getElementById('pasteInput').value='';
 }
-
-function saveContacts() {
-  const email = localStorage.getItem('user_email');
-  if (!email) return;
-  apiGet('saveContactsChunk', { username: email, chunkIndex: 0, totalChunks: 1, chunk: JSON.stringify(contacts) }, () => showToast('Contacts saved'));
+async function saveContacts(){
+  try{const r=await callEdge('saveContacts',{contacts});showToast(r.success?'Contacts saved':(r.message||'Failed'),!r.success);}
+  catch(e){showToast('Error: '+e.message,true);}
 }
+function clearContacts(){contacts=[];renderContacts();}
 
-function clearContacts() { contacts = []; renderContacts(); }
-
-// ==================== SEND ====================
-async function startSend() {
-  if (!deviceId) { showToast('Link device first', true); switchTab('device'); return; }
-  if (!contacts.length) { showToast('No contacts', true); return; }
-  sendState = 'running';
-  processSend();
+// ================================================================
+// SEND CAMPAIGN
+// ================================================================
+async function startSend(){
+  if(!deviceId){showToast('Link a device first',true);switchTab('device');return;}
+  if(!contacts.length){showToast('No contacts',true);return;}
+  sendState='running'; sendLog=[]; renderSendLog(); processSend();
 }
-function pauseSend() { sendState = 'paused'; if (sendTimer) clearTimeout(sendTimer); showToast('Paused'); }
-function stopSend() { sendState = 'idle'; sendIndex = 0; if (sendTimer) clearTimeout(sendTimer); updateProgress(); }
-async function processSend() {
-  if (sendState !== 'running') return;
-  if (sendIndex >= contacts.length) { stopSend(); showToast('Campaign complete'); return; }
-  
-  const c = contacts[sendIndex];
-  let msg = (c.message || document.getElementById('msgTemplate').value).replace(/\{name\}/g, c.name);
-  if (useVariations && variations.length) {
-    msg = variations[variationIndex % variations.length].replace(/\{name\}/g, c.name);
-    variationIndex++;
-  }
-  
-  document.getElementById('currentStatus').textContent = `Sending to ${c.name}...`;
-  
+function pauseSend(){sendState='paused';if(sendTimer)clearTimeout(sendTimer);showToast('Paused');}
+function stopSend(){sendState='idle';sendIndex=0;if(sendTimer)clearTimeout(sendTimer);updateProgress();document.getElementById('currentStatus').textContent='Stopped';}
+
+async function processSend(){
+  if(sendState!=='running') return;
+  if(sendIndex>=contacts.length){stopSend();showToast('Campaign complete! 🎉');return;}
+  const c=contacts[sendIndex];
+  const tpl=c.message||document.getElementById('msgTemplate').value;
+  let msg=tpl.replace(/\{name\}/gi,c.name);
+  if(useVariations&&variations.length){msg=variations[variationIndex%variations.length].replace(/\{name\}/gi,c.name);variationIndex++;}
+  document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})…`;
+  const attachType=document.getElementById('attachType').value;
+  const attachUrl=document.getElementById('attachUrl').value.trim();
   try {
-    const result = await callEdgeFunction('sendMessage', { phone: c.phone, message: msg });
-    c.status = result.success ? 'sent' : 'failed';
-  } catch (err) {
-    c.status = 'failed';
-  }
-  
-  sendIndex++;
-  renderContacts();
-  updateProgress();
-  
-  const minGap = parseInt(document.getElementById('minGap').value) * 1000;
-  const maxGap = parseInt(document.getElementById('maxGap').value) * 1000;
-  const gap = Math.random() * (maxGap - minGap) + minGap;
-  sendTimer = setTimeout(processSend, gap);
+    let result;
+    if(attachType==='image'&&attachUrl)       result=await callEdge('sendImage',  {phone:c.phone,caption:msg,image_url:attachUrl});
+    else if(attachType==='video'&&attachUrl)  result=await callEdge('sendVideo',  {phone:c.phone,caption:msg,video_url:attachUrl});
+    else if(attachType==='audio'&&attachUrl)  result=await callEdge('sendAudio',  {phone:c.phone,audio_url:attachUrl});
+    else if(attachType==='file'&&attachUrl)   result=await callEdge('sendFile',   {phone:c.phone,caption:msg,file_url:attachUrl});
+    else if(attachType==='sticker'&&attachUrl)result=await callEdge('sendSticker',{phone:c.phone,sticker_url:attachUrl});
+    else                                      result=await callEdge('sendMessage',{phone:c.phone,message:msg});
+    c.status=result.success?'sent':'failed';
+  } catch(e){c.status='failed';}
+  sendLog.unshift({time:Date.now(),phone:c.phone,status:c.status});
+  sendIndex++; renderContacts(); renderSendLog(); updateProgress();
+  const minG=parseInt(document.getElementById('minGap').value)*1000;
+  const maxG=parseInt(document.getElementById('maxGap').value)*1000;
+  sendTimer=setTimeout(processSend, Math.random()*(maxG-minG)+minG);
+}
+function updateProgress(){
+  const pct=contacts.length?(sendIndex/contacts.length*100):0;
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('currentStatus').textContent=`${sendIndex}/${contacts.length} processed`;
+}
+function renderSendLog(){
+  const tbody=document.getElementById('sendLogBody');
+  if(!sendLog.length){tbody.innerHTML='<tr><td colspan="3" style="color:#4a6070;text-align:center;">No sends yet</td></tr>';return;}
+  tbody.innerHTML=sendLog.slice(0,50).map(l=>
+    `<tr><td style="font-size:11px;color:#7a95a8;">${fmtTime(l.time)}</td><td style="font-family:'Space Mono',monospace;font-size:11px;">${l.phone}</td><td><span class="badge badge-${l.status}">${l.status}</span></td></tr>`
+  ).join('');
+}
+async function testSendMessage(){
+  if(!deviceId){showToast('No device linked',true);return;}
+  const phone=prompt('Enter your own phone number to test (with country code, no +):\ne.g. 919876543210'); if(!phone) return;
+  const msg=document.getElementById('msgTemplate').value||'Test message from AutoSend 👋';
+  showToast('Sending test…');
+  try{ const r=await callEdge('sendMessage',{phone,message:msg}); showToast(r.success?'Test sent! ✅':(r.message||'Failed'),!r.success); }
+  catch(e){showToast('Error: '+e.message,true);}
 }
 
-function updateProgress() {
-  const pct = contacts.length ? (sendIndex / contacts.length * 100) : 0;
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('currentStatus').textContent = `${sendIndex}/${contacts.length} processed`;
+// ================================================================
+// TEMPLATE & AI VARIATIONS
+// ================================================================
+async function saveTemplate(){
+  try{
+    const r=await callEdge('saveTemplate',{body:document.getElementById('msgTemplate').value,attach_type:document.getElementById('attachType').value,attach_url:document.getElementById('attachUrl').value});
+    showToast(r.success?'Template saved':(r.message||'Failed'),!r.success);
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+async function generateVariations(){
+  const msg=document.getElementById('msgTemplate').value;
+  if(!msg){showToast('Write a message first',true);return;}
+  showToast('Generating with AI…');
+  try{
+    const r=await callEdge('aiGenerateVariations',{message:msg,count:5});
+    if(r.success&&r.variations?.length){
+      variations=r.variations; useVariations=true; variationIndex=0;
+      document.getElementById('variationsPanel').innerHTML=`
+        <div style="background:#0a0f14;border:1px solid #1e2a35;border-radius:10px;padding:14px;">
+          <div style="color:#00e5a0;font-weight:700;margin-bottom:10px;">✅ ${variations.length} variations ready</div>
+          ${variations.map((v,i)=>`<div style="padding:6px 0;border-bottom:1px solid #1e2a35;font-size:12px;color:#d0dde8;"><span style="color:#7a95a8;font-size:10px;">#${i+1} </span>${escapeHtml(v)}</div>`).join('')}
+          <button class="btn btn-danger btn-sm" style="margin-top:10px;" onclick="useVariations=false;document.getElementById('variationsPanel').style.display='none';">Disable</button>
+        </div>`;
+      document.getElementById('variationsPanel').style.display='block'; showToast('Variations ready!');
+    } else showToast('AI failed: '+(r.message||'Unknown'),true);
+  }catch(e){showToast('Error: '+e.message,true);}
 }
 
-// ==================== TEMPLATE & VARIATIONS ====================
-function saveTemplate() {
-  const email = localStorage.getItem('user_email');
-  if (!email) return;
-  apiGet('saveTemplate', { username: email, body: document.getElementById('msgTemplate').value }, () => showToast('Template saved'));
+// ================================================================
+// CHATS
+// ================================================================
+async function loadChats(){
+  document.getElementById('chatsWrap').innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try{
+    const search=document.getElementById('chatSearch').value.trim();
+    const r=await callEdge('getChats',search?{search}:{});
+    if(r.success&&r.data){
+      const chats=Array.isArray(r.data)?r.data:(r.data.data||[]);
+      if(!chats.length){document.getElementById('chatsWrap').innerHTML='<div class="empty-state">No chats found.</div>';return;}
+      document.getElementById('chatsWrap').innerHTML=`<table>
+        <thead><tr><th>Name</th><th>JID</th><th>Unread</th><th></th></tr></thead>
+        <tbody>${chats.slice(0,50).map(c=>`<tr>
+          <td>${escapeHtml(c.name||c.push_name||'—')}</td>
+          <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(c.jid||c.id||'—')}</td>
+          <td>${c.unread_count||0}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="archiveChat('${escapeHtml(c.jid||c.id||'')}')">Archive</button></td>
+        </tr>`).join('')}</tbody></table>`;
+    } else document.getElementById('chatsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
+  }catch(e){document.getElementById('chatsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+}
+async function archiveChat(jid){
+  if(!jid) return;
+  try{const r=await callEdge('archiveChat',{chat_jid:jid,archived:true});showToast(r.success?'Archived':(r.message||'Failed'),!r.success);}
+  catch(e){showToast('Error: '+e.message,true);}
 }
 
-async function generateVariations() {
-  const msg = document.getElementById('msgTemplate').value;
-  if (!msg) { showToast('Write a message first', true); return; }
-  showToast('Generating variations...', false);
-  
-  const result = await callEdgeFunction('aiGenerateVariations', { message: msg, count: 5 });
-  if (result.success && result.variations) {
-    variations = result.variations;
-    useVariations = true;
-    variationIndex = 0;
-    document.getElementById('variationsPanel').innerHTML = `<div class="card">✅ ${variations.length} variations ready<br><button class="btn btn-secondary" onclick="useVariations=false;document.getElementById('variationsPanel').style.display='none';">Disable</button></div>`;
-    document.getElementById('variationsPanel').style.display = 'block';
-    showToast('Variations ready!');
-  } else {
-    showToast('AI failed: ' + (result.message || 'Unknown'), true);
-  }
+// ================================================================
+// GROUPS
+// ================================================================
+async function loadGroups(){
+  document.getElementById('groupsWrap').innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try{
+    const r=await callEdge('getMyGroups');
+    if(r.success&&r.data){
+      const groups=Array.isArray(r.data)?r.data:(r.data.data||[]);
+      if(!groups.length){document.getElementById('groupsWrap').innerHTML='<div class="empty-state">No groups found.</div>';return;}
+      document.getElementById('groupsWrap').innerHTML=`<table>
+        <thead><tr><th>Name</th><th>JID</th><th>Participants</th><th></th></tr></thead>
+        <tbody>${groups.slice(0,50).map(g=>`<tr>
+          <td>${escapeHtml(g.name||'—')}</td>
+          <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(g.jid||g.id||'—')}</td>
+          <td>${g.participants?.length||g.participant_count||'—'}</td>
+          <td style="display:flex;gap:4px;">
+            <button class="btn btn-secondary btn-sm" onclick="sendToGroup('${escapeHtml(g.jid||g.id||'')}')">Send</button>
+            <button class="btn btn-danger btn-sm" onclick="leaveGroup('${escapeHtml(g.jid||g.id||'')}')">Leave</button>
+          </td>
+        </tr>`).join('')}</tbody></table>`;
+    } else document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
+  }catch(e){document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+}
+async function createGroup(){
+  const name=document.getElementById('newGroupName').value.trim();
+  const parts=document.getElementById('newGroupParticipants').value.split(',').map(p=>p.trim()).filter(Boolean);
+  if(!name){showToast('Group name required',true);return;}
+  try{
+    const r=await callEdge('createGroup',{title:name,participants:parts});
+    showToast(r.success?`Group "${name}" created!`:(r.message||'Failed'),!r.success);
+    if(r.success){document.getElementById('newGroupName').value='';document.getElementById('newGroupParticipants').value='';loadGroups();}
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+async function leaveGroup(jid){
+  if(!jid||!confirm('Leave this group?')) return;
+  try{const r=await callEdge('leaveGroup',{group_jid:jid});showToast(r.success?'Left group':(r.message||'Failed'),!r.success);if(r.success)loadGroups();}
+  catch(e){showToast('Error: '+e.message,true);}
+}
+function sendToGroup(jid){
+  const msg=document.getElementById('msgTemplate').value||prompt('Enter message:'); if(!msg) return;
+  callEdge('sendMessage',{phone:jid,message:msg}).then(r=>showToast(r.success?'Sent!':(r.message||'Failed'),!r.success)).catch(e=>showToast('Error: '+e.message,true));
 }
 
-function saveSettings() {
-  const email = localStorage.getItem('user_email');
-  if (!email) return;
-  apiGet('saveSettings', {
-    username: email,
-    hourLimit: document.getElementById('hourLimit').value,
-    dayLimit: document.getElementById('dayLimit').value,
-    minGap: document.getElementById('minGap').value,
-    maxGap: document.getElementById('maxGap').value
-  }, () => showToast('Settings saved'));
+// ================================================================
+// ACCOUNT
+// ================================================================
+async function loadUserInfo(){try{const r=await callEdge('getUserInfo');setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}}
+async function loadUserAvatar(){try{const r=await callEdge('getUserAvatar');setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}}
+async function loadMyContacts(){try{const r=await callEdge('getMyContacts');const c=Array.isArray(r.data)?r.data:(r.data?.data||[]);setAccountResult(`${c.length} contacts\n\n`+JSON.stringify(c.slice(0,20),null,2));}catch(e){setAccountResult('Error: '+e.message);}}
+async function loadMyPrivacy(){try{const r=await callEdge('getMyPrivacy');setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}}
+async function loadBusinessProfile(){
+  const phone=prompt('Enter phone number (with country code, no +):'); if(!phone) return;
+  try{const r=await callEdge('getBusinessProfile',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}
+}
+async function changePushname(){
+  const name=document.getElementById('newPushname').value.trim(); if(!name){showToast('Enter a name',true);return;}
+  try{const r=await callEdge('changePushname',{name});showToast(r.success?'Pushname updated':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
+}
+async function checkUser(){
+  const phone=document.getElementById('checkUserPhone').value.trim(); if(!phone){showToast('Enter a phone',true);return;}
+  try{const r=await callEdge('checkUser',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}
 }
 
-// ==================== UI ====================
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+// ================================================================
+// SETTINGS
+// ================================================================
+async function saveSettings(){
+  try{const r=await callEdge('saveSettings',{hour_limit:document.getElementById('hourLimit').value,day_limit:document.getElementById('dayLimit').value,min_gap:document.getElementById('minGap').value,max_gap:document.getElementById('maxGap').value});showToast(r.success?'Settings saved':(r.message||'Failed'),!r.success);}
+  catch(e){showToast('Error: '+e.message,true);}
+}
+async function saveGowaSettings(){
+  try{const r=await callEdge('saveSettings',{gowa_url:document.getElementById('gowaUrl').value.trim(),gowa_auth:document.getElementById('gowaAuth').value.trim()});showToast(r.success?'GoWA settings saved':(r.message||'Failed'),!r.success);}
+  catch(e){showToast('Error: '+e.message,true);}
+}
+async function testGowaConnection(){
+  showToast('Testing…');
+  try{const r=await callEdge('listDevices');showToast(r.success?`Connected! ${r.total||0} device(s).`:'Connection failed: '+(r.message||'Unknown'),!r.success);}
+  catch(e){showToast('Error: '+e.message,true);}
+}
+async function saveAiSettings(){
+  try{
+    const r=await callEdge('saveSettings',{auto_reply:document.getElementById('autoReplyEnabled').checked,auto_reply_prompt:document.getElementById('autoReplyPrompt').value});
+    await callEdge('saveConfig',{groq_key:document.getElementById('groqKey').value});
+    showToast(r.success?'AI settings saved':(r.message||'Failed'),!r.success);
+  }catch(e){showToast('Error: '+e.message,true);}
 }
 
-document.querySelectorAll('.nav-item').forEach(n => {
-  n.addEventListener('click', () => switchTab(n.getAttribute('data-tab')));
-});
+// ================================================================
+// UI: TAB SWITCHING
+// ================================================================
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`tab-${name}`)?.classList.add('active');
+  document.querySelector(`[data-tab="${name}"]`)?.classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>switchTab(n.dataset.tab)));
 
-function escapeHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-
-// ==================== INIT ====================
-const savedToken = localStorage.getItem('auth_token');
-const savedEmail = localStorage.getItem('user_email');
-if (savedToken && savedEmail) {
-  authToken = savedToken;
-  document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('dashboardWrap').style.display = 'block';
-  document.getElementById('userEmail').textContent = savedEmail;
-  apiGet('loadClientData', { username: savedEmail }, (data) => {
-    if (data.success) {
-      contacts = data.contacts || [];
-      renderContacts();
-      if (data.settings) {
-        document.getElementById('hourLimit').value = data.settings.hourLimit || 30;
-        document.getElementById('dayLimit').value = data.settings.dayLimit || 200;
-      }
-      if (data.template?.body) document.getElementById('msgTemplate').value = data.template.body;
-      if (data.deviceId) {
-        deviceId = data.deviceId;
-        updateDeviceStatus('connected');
-      }
-    }
-  });
+// ================================================================
+// INIT
+// ================================================================
+const savedToken=localStorage.getItem('auth_token');
+const savedEmail=localStorage.getItem('user_email');
+if(savedToken && savedEmail){
+  authToken=savedToken;
+  showDashboard(savedEmail, null);
+  callEdge('loadAll').then(r=>{if(r.success)initDashboard(r);}).catch(()=>{});
 } else {
-  document.getElementById('authOverlay').style.display = 'flex';
-  document.getElementById('dashboardWrap').style.display = 'none';
+  document.getElementById('authOverlay').style.display='flex';
+  document.getElementById('dashboardWrap').style.display='none';
 }
 
-window.doLogin = doLogin;
-window.doRegister = doRegister;
-window.logout = logout;
-window.loadQR = loadQR;
-window.disconnectDevice = disconnectDevice;
-window.parsePaste = parsePaste;
-window.saveContacts = saveContacts;
-window.clearContacts = clearContacts;
-window.removeContact = removeContact;
-window.startSend = startSend;
-window.pauseSend = pauseSend;
-window.stopSend = stopSend;
-window.saveTemplate = saveTemplate;
-window.generateVariations = generateVariations;
-window.saveSettings = saveSettings;
-window.showRegister = showRegister;
-window.resetAuth = resetAuth;
+Object.assign(window,{
+  doLogin,doRegister,doReset,showRegister,showReset,resetAuth,logout,
+  CreateDevice,loadQR,loginWithCode,unlinkActiveDevice,deleteDevice,selectDevice,getQRForDevice,refreshDeviceStatus,fetchAndRenderDevices,doReconnect,
+  parsePaste,saveContacts,clearContacts,removeContact,
+  startSend,pauseSend,stopSend,testSendMessage,
+  saveTemplate,generateVariations,
+  loadChats,archiveChat,
+  loadGroups,createGroup,leaveGroup,sendToGroup,
+  loadUserInfo,loadUserAvatar,loadMyContacts,loadMyPrivacy,loadBusinessProfile,changePushname,checkUser,
+  saveSettings,saveGowaSettings,testGowaConnection,saveAiSettings,
+});
 </script>
 </body>
 </html>
