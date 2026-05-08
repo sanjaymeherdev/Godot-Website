@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow — WhatsApp CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#060810;--surface:#0b0f1a;--card:#0f1420;--border:#1a2235;--border2:#1f2d45;--accent:#00ff88;--accent2:#0088ff;--accent3:#ff3366;--accent4:#ffaa00;--text:#c8d8e8;--text2:#6a85a0;--muted:#3a4f65;--mono:'JetBrains Mono',monospace;--sans:'Cabinet Grotesk',sans-serif;--r:10px;--t:0.15s ease;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.auth-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:var(--bg);}
+.auth-wrap::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,255,136,.04) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.auth-box{width:420px;max-width:94vw;position:relative;}
+.auth-logo{margin-bottom:32px;text-align:center;}
+.auth-logo-tag{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;border:1px solid rgba(0,255,136,.2);padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:12px;}
+.auth-logo h1{font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.auth-logo h1 span{color:var(--accent);}
+.auth-logo p{font-size:13px;color:var(--text2);margin-top:4px;font-family:var(--mono);}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;}
+.auth-card h2{font-size:20px;font-weight:800;margin-bottom:4px;color:#fff;}
+.auth-card p{font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:24px;}
+.auth-msg{font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;}
+.auth-msg.error{background:rgba(255,51,102,.08);color:#ff6680;border:1px solid rgba(255,51,102,.2);display:block;}
+.auth-msg.success{background:rgba(0,255,136,.06);color:var(--accent);border:1px solid rgba(0,255,136,.15);display:block;}
+.auth-msg.loading{background:rgba(0,136,255,.06);color:var(--accent2);border:1px solid rgba(0,136,255,.15);display:block;}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.field label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono);}
+.field input{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color var(--t);}
+.field input:focus{border-color:var(--accent);}
+.field input::placeholder{color:var(--muted);}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:var(--t);margin-top:4px;letter-spacing:-.3px;}
+.btn-primary:hover{background:#00e87a;transform:translateY(-1px);}
+.btn-primary:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed;transform:none;}
+.btn-google{width:100%;padding:12px;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:8px;font-size:14px;font-weight:700;font-family:var(--sans);cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;}
+.btn-google:hover{border-color:var(--text2);background:var(--border);}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:12px;font-family:var(--mono);}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-links{display:flex;justify-content:space-between;margin-top:20px;}
+.auth-link{font-size:12px;color:var(--accent2);cursor:pointer;font-family:var(--mono);}
+.auth-link:hover{text-decoration:underline;}
+.dash{display:none;width:100%;height:100vh;overflow:hidden;}
+.sidebar{width:228px;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;}
+.sidebar::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,var(--accent) 40%,var(--accent2) 60%,transparent);opacity:.15;}
+.sb-logo{padding:24px 18px 18px;border-bottom:1px solid var(--border);}
+.sb-tag{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;}
+.sb-logo h1{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+.sb-logo h1 span{color:var(--accent);}
+.sb-logo .version{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;}
+.user-pill{margin:14px 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2;}
+.user-plan{font-size:10px;color:var(--accent);font-family:var(--mono);letter-spacing:1px;}
+.nav{flex:1;padding:8px 10px;overflow-y:auto;}
+.nav-sec{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:10px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:var(--t);margin-bottom:1px;font-size:13px;font-weight:600;color:var(--text2);border:1px solid transparent;position:relative;}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{background:rgba(0,255,136,.06);color:var(--accent);border-color:rgba(0,255,136,.12);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:2px;background:var(--accent);border-radius:2px;}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;font-size:10px;font-family:var(--mono);padding:1px 7px;border-radius:20px;font-weight:700;}
+.nav-badge.red{background:rgba(255,51,102,.15);color:var(--accent3);border:1px solid rgba(255,51,102,.2);}
+.nav-badge.green{background:rgba(0,255,136,.1);color:var(--accent);border:1px solid rgba(0,255,136,.15);}
+.nav-badge.blue{background:rgba(0,136,255,.1);color:var(--accent2);}
+.sb-footer{padding:12px;border-top:1px solid var(--border);}
+.logout-btn{width:100%;padding:9px;background:rgba(255,51,102,.06);border:1px solid rgba(255,51,102,.15);border-radius:8px;color:var(--accent3);font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:var(--t);}
+.logout-btn:hover{background:rgba(255,51,102,.12);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;background:var(--surface);}
+.topbar-title{font-size:15px;font-weight:800;color:#fff;flex:1;letter-spacing:-.3px;}
+.status-pip{width:7px;height:7px;border-radius:50%;background:var(--muted);}
+.status-pip.on{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pip 2s infinite;}
+.status-pip.scan{background:var(--accent4);animation:pip 1.5s infinite;}
+@keyframes pip{0%,100%{opacity:1;}50%{opacity:.3;}}
+.status-lbl{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:1px;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+.content::-webkit-scrollbar{width:3px;}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.tab{display:none;animation:fadeUp .2s ease;}
+.tab.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.sec-title{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+.sec-sub{font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:3px;letter-spacing:.5px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;}
+.card-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;font-family:var(--mono);}
+.device-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;gap:12px;flex-wrap:wrap;}
+.device-row.active-device{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.04);}
+.device-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+.device-name-text{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.device-meta{font-size:11px;color:var(--text2);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.badge-connected{background:rgba(0,255,136,.15);color:var(--accent);}
+.badge-scanning{background:rgba(255,170,0,.15);color:var(--accent4);}
+.badge-created,.badge-linked,.badge-disconnected{background:rgba(122,149,168,.15);color:var(--text2);}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--r);min-height:260px;text-align:center;gap:8px;}
+.qr-wrap img{width:200px;border-radius:10px;border:3px solid var(--accent);}
+.debug-box{font-size:11px;font-family:var(--mono);padding:9px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;min-height:26px;color:var(--text2);margin-top:10px;word-break:break-all;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
+.stat.g::after{background:var(--accent);}
+.stat.b::after{background:var(--accent2);}
+.stat.r::after{background:var(--accent3);}
+.stat.y::after{background:var(--accent4);}
+.stat-val{font-family:var(--mono);font-size:30px;font-weight:700;color:#fff;line-height:1;margin-bottom:5px;}
+.stat-lbl{font-size:11px;color:var(--text2);}
+.stat-ico{position:absolute;right:14px;top:14px;font-size:20px;opacity:.12;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg.full{grid-column:1/-1;}
+.fg label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono);}
+.fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:9px 13px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color var(--t);width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted);}
+.fg textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:var(--t);border:1px solid transparent;white-space:nowrap;}
+.btn-g{background:var(--accent);color:#000;border-color:var(--accent);}
+.btn-g:hover{background:#00e87a;}
+.btn-s{background:transparent;color:var(--text);border-color:var(--border2);}
+.btn-s:hover{border-color:var(--text2);background:var(--card);}
+.btn-d{background:rgba(255,51,102,.08);color:var(--accent3);border-color:rgba(255,51,102,.2);}
+.btn-d:hover{background:rgba(255,51,102,.15);}
+.btn-b{background:rgba(0,136,255,.08);color:var(--accent2);border-color:rgba(0,136,255,.2);}
+.btn-b:hover{background:rgba(0,136,255,.15);}
+.btn-y{background:rgba(255,170,0,.08);color:var(--accent4);border-color:rgba(255,170,0,.2);}
+.btn-y:hover{background:rgba(255,170,0,.15);}
+.btn-warning{background:#ffd166;color:#000;}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:var(--surface);border-bottom:1px solid var(--border);}
+th{padding:10px 14px;text-align:left;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:400;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,.015);}
+.empty-state{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+#toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:10px;font-size:12px;font-weight:700;font-family:var(--sans);z-index:9999;transition:opacity .3s;pointer-events:none;opacity:0;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.sidebar{width:190px;}}
+@media(max-width:640px){.sidebar{display:none;}.content{padding:14px;}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-tag">WA · BLAST · CRM</div>
+      <h1>Lead<span>Flow</span></h1>
+      <p>// whatsapp automation platform v2.1</p>
+    </div>
+    <div class="auth-card" id="authCard"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash" id="dash">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-tag">LEADFLOW</div>
+      <h1>Lead<span>Flow</span></h1>
+      <div class="version">v2.1 · multitenancy</div>
+    </div>
+    <div class="user-pill">
+      <div class="user-av" id="userAv">A</div>
+      <div>
+        <div class="user-name" id="userName">User</div>
+        <div class="user-plan">PRO PLAN</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-sec">Blast</div>
+      <div class="nav-item active" onclick="goTab('device')"><span class="nav-icon">📱</span>Device<span class="nav-badge red" id="devBadge" style="display:none">!</span></div>
+      <div class="nav-item" onclick="goTab('contacts')"><span class="nav-icon">👥</span>Contacts<span class="nav-badge blue" id="conBadge">0</span></div>
+      <div class="nav-item" onclick="goTab('compose')"><span class="nav-icon">✍️</span>Compose</div>
+      <div class="nav-item" onclick="goTab('send')"><span class="nav-icon">🚀</span>Send</div>
+      <div class="nav-sec">Orchestrator</div>
+      <div class="nav-item" onclick="goTab('leads')"><span class="nav-icon">🎯</span>Leads<span class="nav-badge green" id="leadBadge" style="display:none">0</span></div>
+      <div class="nav-item" onclick="goTab('config')"><span class="nav-icon">⚙️</span>Config</div>
+      <div class="nav-sec">System</div>
+      <div class="nav-item" onclick="goTab('settings')"><span class="nav-icon">🔧</span>Settings</div>
+      <div class="nav-item" onclick="goTab('logs')"><span class="nav-icon">📋</span>Logs</div>
+    </nav>
+    <div class="sb-footer">
+      <button class="logout-btn" onclick="logout()">← Logout</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topTitle">Device</div>
+      <div class="status-pip" id="topPip"></div>
+      <div class="status-lbl" id="topLbl" style="color:var(--muted)">NO DEVICE</div>
+    </div>
+    <div class="content">
+
+      <!-- ══════════════════════ DEVICE TAB (ENHANCED FROM FIRST HTML) ══════════════════════ -->
+      <div class="tab active" id="tab-device">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Device Manager</div><div class="sec-sub">// manage WhatsApp devices</div></div>
+          <div class="btn-row">
+            <button class="btn btn-g btn-sm" onclick="loadQR()">📲 Show QR</button>
+            <button class="btn btn-y btn-sm" onclick="loginWithCode()">🔢 Pair Code</button>
+            <button class="btn btn-d btn-sm" id="unlinkBtn" style="display:none;" onclick="unlinkActiveDevice()">🔌 Unlink</button>
+            <button class="btn btn-warning btn-sm" id="reconnectBtn" style="display:none;" onclick="doReconnect()">⚡ Reconnect</button>
+          </div>
+        </div>
+
+        <!-- Active Device Panel -->
+        <div class="card">
+          <div class="card-title">Active Device</div>
+          <div class="qr-wrap" id="qrWrap">
+            <div style="font-size:36px;margin-bottom:10px">📱</div>
+            <div style="font-size:12px;color:var(--text2);font-family:var(--mono)">Select or create a device, then click "Show QR"</div>
+          </div>
+          <div id="qrTimer" style="text-align:center;margin-top:8px;font-size:11px;font-family:var(--mono);color:var(--text2);"></div>
+          <div id="activeDevicePanel" style="display:none;margin-top:14px;">
+            <div class="device-row active-device">
+              <div class="device-info">
+                <span class="device-name-text" id="activeDeviceNameDisplay">—</span>
+                <span class="device-meta" id="activeDeviceIdDisplay">—</span>
+              </div>
+              <div class="device-actions">
+                <span class="badge" id="activeDeviceStatusBadge">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="debug-box" id="deviceDebug">No active device.</div>
+        </div>
+
+        <!-- Create New Device -->
+        <div class="card">
+          <div class="card-title">Create New Device</div>
+          <div class="fg">
+            <label>Device Name (letters, numbers, _ and - only)</label>
+            <input type="text" id="deviceNameInput" placeholder="e.g. my_whatsapp_1" autocomplete="off">
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-g" onclick="CreateDevice()">➕ Create Device</button>
+          </div>
+        </div>
+
+        <!-- All Devices List -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="card-title" style="margin-bottom:0;">All Devices on Server</div>
+            <button class="btn btn-s btn-sm" onclick="fetchAndRenderDevices()">↻ Sync</button>
+          </div>
+          <div id="devicesListWrap"><div class="empty-state">Click "Sync" to load devices from server.</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ CONTACTS TAB ══════════════════════ -->
+      <div class="tab" id="tab-contacts">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Contacts</div><div class="sec-sub">// upload, paste or import from group</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="dedupe()">🔄 Dedupe</button>
+            <button class="btn btn-s btn-sm" onclick="exportContacts()">📥 Export</button>
+            <button class="btn btn-g btn-sm" onclick="saveContacts()">💾 Save</button>
+            <button class="btn btn-d btn-sm" onclick="clearContacts()">🗑 Clear</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Import</div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <button class="btn btn-s" onclick="document.getElementById('csvFile').click()">📂 Upload CSV/Excel</button>
+            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(this)"/>
+            <button class="btn btn-s" onclick="togglePaste()">📋 Paste Data</button>
+          </div>
+          <div id="pasteArea" style="display:none">
+            <div class="fg"><label>Paste — Name, Phone, Message (comma or tab separated)</label><textarea id="pasteInput" rows="4" placeholder="John Doe, 919876543210, Hi John!"></textarea></div>
+            <button class="btn btn-g btn-sm" onclick="parsePaste()">Parse & Add</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <span class="card-title" style="margin:0">Preview — <span id="conTotal">0</span> contacts</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="text" placeholder="Search..." id="contactSearch" style="width:160px;padding:6px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);outline:none" oninput="filterContacts(this.value)"/>
+            </div>
+          </div>
+          <div class="tbl-wrap" style="border:none;border-radius:0">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Message</th><th>Status</th><th></th></tr></thead>
+              <tbody id="conBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No contacts yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ COMPOSE TAB ══════════════════════ -->
+      <div class="tab" id="tab-compose">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Compose</div><div class="sec-sub">// message template + attachments</div></div>
+          <div class="btn-row">
+            <button class="btn btn-g" onclick="saveTemplate()">💾 Save Template</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Message Body</div>
+          <div class="fg">
+            <label>Template — use {name} for personalisation</label>
+            <textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special! 🎉"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="ins('{name}')">+{name}</button>
+            <button class="btn btn-s btn-sm" onclick="ins('{phone}')">+{phone}</button>
+            <button class="btn btn-y btn-sm" onclick="testSendMessage()">🧪 Test Send</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Attachment (optional)</div>
+          <div class="fg">
+            <label>Type</label>
+            <select id="attachType">
+              <option value="none">None — Text only</option>
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+              <option value="audio">Audio</option>
+              <option value="file">File / Document</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Media URL</label>
+            <input type="text" id="attachUrl" placeholder="https://example.com/image.jpg">
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ SEND TAB ══════════════════════ -->
+      <div class="tab" id="tab-send">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSent">0</div><div class="stat-lbl">Sent</div></div>
+          <div class="stat y"><div class="stat-ico">⏳</div><div class="stat-val" id="sPend">0</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div>
+          <div class="stat b"><div class="stat-ico">📤</div><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Total</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Campaign Controls</div>
+          <div class="btn-row">
+            <button class="btn btn-g" onclick="startSend()">▶ Start</button>
+            <button class="btn btn-y" onclick="pauseSend()">⏸ Pause</button>
+            <button class="btn btn-d" onclick="stopSend()">⏹ Stop</button>
+          </div>
+          <div class="progress-track" style="margin:12px 0;">
+            <div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div>
+          </div>
+          <div id="currentStatus" style="font-size:12px;color:var(--text2);font-family:var(--mono);">Ready</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Send Log</div>
+          <div class="tbl-wrap" style="max-height:280px;overflow-y:auto;">
+            <table>
+              <thead><tr><th>Time</th><th>Phone</th><th>Status</th></tr></thead>
+              <tbody id="sendLogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ LEADS TAB ══════════════════════ -->
+      <div class="tab" id="tab-leads">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button>
+            <button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="tbl-wrap" style="border:none;border-radius:0">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead>
+              <tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ CONFIG TAB ══════════════════════ -->
+      <div class="tab" id="tab-config">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up logic</div></div>
+          <button class="btn btn-g" onclick="saveConfig()">💾 Save Config</button>
+        </div>
+        <div class="card">
+          <div class="card-title">WhatsApp Templates</div>
+          <div class="fg"><label>Initial Message</label><textarea id="cfgWaTpl" rows="3" placeholder="Hi {name}! 👋 Book here: {link}"></textarea></div>
+          <div class="grid2">
+            <div class="fg"><label>Follow-up 1 (30 min)</label><textarea id="cfgWaFu1" rows="3" placeholder="Hey {name} 👀 Still interested?"></textarea></div>
+            <div class="fg"><label>Follow-up 2 (24 hrs)</label><textarea id="cfgWaFu2" rows="3" placeholder="Hi {name}! 🎁 Last chance: {link}"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ SETTINGS TAB ══════════════════════ -->
+      <div class="tab" id="tab-settings">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Settings</div><div class="sec-sub">// send limits + automation</div></div>
+          <button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Send Limits</div>
+          <div class="grid2">
+            <div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div>
+            <div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div>
+            <div class="fg"><label>Min Gap (seconds)</label><input type="number" id="minGap" value="30"/></div>
+            <div class="fg"><label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90"/></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">GoWA Server</div>
+          <div class="fg"><label>Server URL</label><input type="text" id="gowaUrl" placeholder="https://sanjaywa8-5.onrender.com"/></div>
+          <div class="fg"><label>Basic Auth (base64 user:pass)</label><input type="text" id="gowaAuth" placeholder="dXNlcjpwYXNz"/></div>
+          <div class="btn-row">
+            <button class="btn btn-b" onclick="testGowaConnection()">🧪 Test Connection</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AI Auto-Reply</div>
+          <div class="fg"><label>Groq API Key</label><input type="password" id="groqKey" placeholder="gsk_..."/></div>
+          <div class="fg"><label>System Prompt</label><textarea id="autoReplyPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <input type="checkbox" id="autoReplyEnabled" style="width:auto;margin-bottom:0;">
+            <label style="margin-bottom:0;cursor:pointer;" for="autoReplyEnabled">Enable Auto-Reply on incoming messages</label>
+          </div>
+          <div class="btn-row"><button class="btn btn-g" onclick="saveAiSettings()">💾 Save AI Settings</button></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ LOGS TAB ══════════════════════ -->
+      <div class="tab" id="tab-logs">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Activity Logs</div><div class="sec-sub">// all messages, replies and events</div></div>
+          <div class="btn-row">
+            <button class="btn btn-d btn-sm" onclick="clearLogs()">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0"><div id="logsList" style="padding:14px 18px"><div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div></div></div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /dash -->
+
+<div id="toast"></div>
+
+<script>
+const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
+
+let token=null, userId=null, userEmail=null;
+let contacts=[], logs=[], leads=[];
+let deviceId=null, deviceName=null;
+let sendState='idle', sendIndex=0, sendTimer=null;
+let sendLog=[];
+let pollTimer=null, qrTimer=null;
+
+// ══════════════════════ API ══════════════════════
+async function api(action,body={}){
+  const res=await fetch(EDGE,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      ...(token?{'Authorization':`Bearer ${token}`}:{})
+    },
+    body:JSON.stringify({action,...body})
+  });
+  if(res.status===401){showToast('Session expired. Please login again.',true);logout();throw new Error('Unauthorized');}
+  return res.json();
+}
+
+// ══════════════════════ AUTH ══════════════════════
+function renderAuth(mode='login'){
+  const card=document.getElementById('authCard');
+  if(mode==='login'){
+    card.innerHTML=`<h2>Welcome back</h2><p>// sign in to your account</p><div class="auth-msg" id="am"></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="••••••••"/></div><button class="btn-primary" id="aBtn" onclick="doLogin()">Sign In</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('register')">Create account</span><span class="auth-link" onclick="renderAuth('reset')">Forgot password?</span></div>`;
+  } else if(mode==='register'){
+    card.innerHTML=`<h2>Create Account</h2><p>// join leadflow</p><div class="auth-msg" id="am"></div><div class="field"><label>Full Name</label><input type="text" id="aName" placeholder="Your Name"/></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="Min 6 characters"/></div><button class="btn-primary" id="aBtn" onclick="doRegister()">Create Account</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back</span></div>`;
+  } else {
+    card.innerHTML=`<h2>Reset Password</h2><p>// reset link via email</p><div class="auth-msg" id="am"></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><button class="btn-primary" id="aBtn" onclick="doReset()">Send Reset Link</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back</span></div>`;
+  }
+}
+
+function amsg(t,txt){const el=document.getElementById('am');if(el){el.className='auth-msg '+t;el.textContent=txt;}}
+
+async function doLogin(){
+  const email=document.getElementById('aEmail')?.value.trim(),pass=document.getElementById('aPass')?.value.trim();
+  if(!email||!pass)return amsg('error','Email and password required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Signing in…';amsg('loading','Authenticating…');
+  const r=await api('login',{email,password:pass});
+  btn.disabled=false;btn.textContent='Sign In';
+  if(r.success){
+    token=r.token;userEmail=email;userId=r.user?.id||r.profile?.id;
+    document.getElementById('authWrap').style.display='none';
+    document.getElementById('dash').style.display='flex';
+    document.getElementById('userName').textContent=email.split('@')[0];
+    document.getElementById('userAv').textContent=email[0].toUpperCase();
+    await loadData();
+    fetchAndRenderDevices();
+    showToast('Login successful!');
+  } else amsg('error',r.message||'Login failed');
+}
+
+async function doRegister(){
+  const name=document.getElementById('aName')?.value.trim(),email=document.getElementById('aEmail')?.value.trim(),pass=document.getElementById('aPass')?.value.trim();
+  if(!email||!pass)return amsg('error','Email and password required');
+  if(pass.length<6)return amsg('error','Password min 6 chars');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Creating…';amsg('loading','Creating account...');
+  const r=await api('register',{email,password:pass,full_name:name});
+  btn.disabled=false;btn.textContent='Create Account';
+  if(r.success){amsg('success','Account created! You can now login.');setTimeout(()=>renderAuth('login'),2000);}
+  else amsg('error',r.message||'Registration failed');
+}
+
+async function doReset(){
+  const email=document.getElementById('aEmail')?.value.trim();if(!email)return amsg('error','Email required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;
+  const r=await api('resetPassword',{email});btn.disabled=false;
+  if(r.success)amsg('success','Reset link sent!');else amsg('error',r.message||'Failed');
+}
+
+// ══════════════════════ LOAD DATA ══════════════════════
+async function loadData(){
+  const r=await api('loadAll');
+  if(r.success){
+    if(r.contacts){contacts=r.contacts;renderContacts();}
+    if(r.leads){leads=r.leads;renderLeads();}
+    if(r.logs){logs=r.logs;renderLogs();}
+    if(r.settings)applySettings(r.settings);
+    if(r.template?.body) document.getElementById('msgTpl').value=r.template.body;
+    if(r.device){syncDeviceToUI(r.device);} else {fetchDeviceFromServer();}
+  }
+}
+
+function applySettings(s){
+  if(s.hour_limit)setVal('hourLimit',s.hour_limit);
+  if(s.day_limit)setVal('dayLimit',s.day_limit);
+  if(s.min_gap)setVal('minGap',s.min_gap);
+  if(s.max_gap)setVal('maxGap',s.max_gap);
+  if(s.gowa_url)setVal('gowaUrl',s.gowa_url);
+  if(s.gowa_auth)setVal('gowaAuth',s.gowa_auth);
+  if(s.auto_reply_prompt)setVal('autoReplyPrompt',s.auto_reply_prompt);
+  document.getElementById('autoReplyEnabled').checked=s.auto_reply||false;
+  if(s.groq_key)setVal('groqKey',s.groq_key);
+}
+
+// ══════════════════════ DEVICE CORE FUNCTIONS (FROM FIRST HTML) ══════════════════════
+function syncDeviceToUI(device){
+  deviceId=device.device_id;
+  deviceName=device.device_name||device.device_id;
+  const status=device.status||'created';
+  updateStatusBar(status);
+  document.getElementById('activeDevicePanel').style.display='block';
+  document.getElementById('activeDeviceNameDisplay').textContent=deviceName;
+  document.getElementById('activeDeviceIdDisplay').textContent=deviceId;
+  const badge=document.getElementById('activeDeviceStatusBadge');
+  badge.textContent=status;
+  badge.className='badge badge-'+status;
+  document.getElementById('unlinkBtn').style.display='inline-flex';
+  document.getElementById('reconnectBtn').style.display=(status!=='connected')?'inline-flex':'none';
+  const qw=document.getElementById('qrWrap');
+  if(status==='connected'){
+    qw.innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:12px;color:var(--accent);font-weight:700;">Device Connected!</div>';
+    document.getElementById('topPip').className='status-pip on';
+    document.getElementById('topLbl').textContent='CONNECTED';
+    document.getElementById('topLbl').style.color='var(--accent)';
+  } else {
+    qw.innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Click "Show QR" to link</div>';
+  }
+  document.getElementById('deviceDebug').innerHTML=`Device: ${deviceName} [${deviceId?.substring(0,24)}…] — ${status}`;
+}
+
+function updateStatusBar(status){
+  const dot=document.getElementById('topPip'), text=document.getElementById('topLbl');
+  const statusMap={
+    connected:{class:'on',label:'CONNECTED',color:'var(--accent)'},
+    scanning:{class:'scan',label:'SCANNING',color:'var(--accent4)'},
+    disconnected:{class:'',label:'OFFLINE',color:'var(--muted)'},
+    created:{class:'',label:'CREATED',color:'var(--muted)'},
+    linked:{class:'',label:'LINKED',color:'var(--muted)'}
+  };
+  const s=statusMap[status]||statusMap.disconnected;
+  dot.className='status-pip '+(s.class||'');
+  text.textContent=s.label;
+  text.style.color=s.color;
+}
+
+async function fetchDeviceFromServer(){
+  try{
+    const r=await api('getDevice');
+    if(r.success && r.has_device) syncDeviceToUI(r.device);
+    else {document.getElementById('deviceDebug').innerHTML='No device linked. Create one or sync.';updateStatusBar('disconnected');}
+  } catch(e){document.getElementById('deviceDebug').innerHTML='Device fetch error: '+e.message;}
+}
+
+async function refreshDeviceStatus(){
+  if(!deviceId){showToast('No active device',true);return;}
+  try{
+    const r=await api('checkDeviceStatus');
+    if(r.success){
+      const s=r.is_connected?'connected':'scanning';
+      updateStatusBar(s);
+      const b=document.getElementById('activeDeviceStatusBadge');
+      if(b){b.textContent=s;b.className='badge badge-'+s;}
+      document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';
+      showToast(r.is_connected?'Device connected ✅':'Device not connected');
+      if(r.is_connected) document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:12px;color:var(--accent);font-weight:700;">Device Connected!</div>';
+    }
+  } catch(e){showToast('Status check failed',true);}
+}
+
+async function fetchAndRenderDevices(){
+  const wrap=document.getElementById('devicesListWrap');
+  wrap.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try{
+    const r=await api('listDevices');
+    if(r.success && r.devices?.length) renderDevicesList(r.devices);
+    else wrap.innerHTML='<div class="empty-state">No devices on server. Create one above.</div>';
+  } catch(e){wrap.innerHTML=`<div class="empty-state" style="color:var(--accent3);">Error: ${escapeHtml(e.message)}</div>`;}
+}
+
+function renderDevicesList(devices){
+  const wrap=document.getElementById('devicesListWrap');
+  if(!devices?.length){wrap.innerHTML='<div class="empty-state">No devices.</div>';return;}
+  wrap.innerHTML=devices.map(d=>{
+    const id=d.id||d.device_id||'—';
+    const name=d.name||d.device_name||id;
+    const isConn=d.is_connected===true||d.is_logged_in===true||d.connected===true||d.status==='connected';
+    const sl=isConn?'connected':(d.status||'offline');
+    const isActive=deviceId&&id===deviceId;
+    return `<div class="device-row${isActive?' active-device':''}">
+      <div class="device-info">
+        <span class="device-name-text">${escapeHtml(name)}${isActive?' <span style="font-size:9px;color:var(--accent);">[active]</span>':''}</span>
+        <span class="device-meta">${escapeHtml(id)}</span>
+      </div>
+      <div class="device-actions">
+        <span class="badge badge-${isConn?'connected':'created'}">${sl}</span>
+        <button class="btn btn-s btn-sm" onclick="getQRForDevice('${escapeHtml(id)}')">QR</button>
+        <button class="btn btn-b btn-sm" onclick="selectDevice('${escapeHtml(id)}','${escapeHtml(name)}')">Use</button>
+        <button class="btn btn-d btn-sm" onclick="deleteDevice('${escapeHtml(id)}','${escapeHtml(name)}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function CreateDevice(){
+  const name=document.getElementById('deviceNameInput').value.trim();
+  if(!name){showToast('Enter a device name',true);return;}
+  if(!/^[a-zA-Z0-9_-]+$/.test(name)){showToast('Letters, numbers, _ and - only',true);return;}
+  document.getElementById('deviceDebug').innerHTML='<span class="spinner"></span> Creating device…';
+  try{
+    const r=await api('createDevice',{device_name:name});
+    if(r.success){
+      showToast(`Device "${name}" created!`);
+      syncDeviceToUI({device_id:r.device_id,device_name:name,status:'created'});
+      document.getElementById('deviceNameInput').value='';
+      fetchAndRenderDevices();
+      setTimeout(()=>loadQR(),600);
+    } else if(r.already_exists){
+      showToast('Device already exists. Unlink it first.',true);
+      document.getElementById('deviceDebug').innerHTML='Already exists: '+r.device_id;
+    } else {
+      showToast(r.message||'Creation failed',true);
+      document.getElementById('deviceDebug').innerHTML=r.message||'Failed';
+    }
+  } catch(e){showToast('Error: '+e.message,true);document.getElementById('deviceDebug').innerHTML=e.message;}
+}
+
+async function selectDevice(id,name){
+  if(!confirm(`Use "${name}" as your active device?`)) return;
+  try{
+    const r=await api('linkDevice',{device_id:id,device_name:name});
+    if(r.success){
+      syncDeviceToUI({device_id:id,device_name:name,status:'linked'});
+      showToast(`Now using "${name}"`);
+      fetchAndRenderDevices();
+    } else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function getQRForDevice(id){
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading QR…</div>';
+  updateStatusBar('scanning');
+  try{
+    const r=await api('getQRForDevice',{device_id:id});
+    if(r.success && r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration);
+    else wrap.innerHTML=`<div style="font-size:36px;">❌</div><div style="font-size:12px;color:var(--accent3);">${escapeHtml(r.message||'Failed')}</div>`;
+  } catch(e){wrap.innerHTML=`<div style="font-size:36px;">❌</div><div style="font-size:12px;color:var(--accent3);">${escapeHtml(e.message)}</div>`;}
+}
+
+async function loadQR(){
+  if(!deviceId){showToast('Create or select a device first',true);return;}
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading QR code…</div>';
+  updateStatusBar('scanning');
+  try{
+    const r=await api('getQR');
+    if(r.success && r.qr_image_url){
+      renderQRImage(r.qr_image_url,r.qr_duration);
+      startDevicePolling();
+    } else {
+      wrap.innerHTML=`<div style="font-size:36px;">❌</div><div style="font-size:12px;color:var(--accent3);">${escapeHtml(r.message||'Failed to get QR')}</div>`;
+      document.getElementById('deviceDebug').innerHTML=(r.message||'QR failed')+(r.debug?' — '+JSON.stringify(r.debug):'');
+    }
+  } catch(e){wrap.innerHTML='<div style="font-size:36px;">❌</div><div style="font-size:12px;color:var(--accent3);">Connection error</div>';showToast('QR load failed',true);}
+}
+
+function renderQRImage(url,duration){
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML='';
+  const img=document.createElement('img');
+  img.src=url;
+  img.onload=()=>{
+    wrap.appendChild(img);
+    const h=document.createElement('div');
+    h.style.fontSize='12px';
+    h.style.color='var(--text2)';
+    h.style.fontFamily='var(--mono)';
+    h.style.marginTop='10px';
+    h.textContent='📱 Open WhatsApp → Linked Devices → Link a Device';
+    wrap.appendChild(h);
+    startQRCountdown(duration||60);
+  };
+  img.onerror=()=>{wrap.innerHTML='<div style="font-size:36px;">❌</div><div style="font-size:12px;color:var(--accent3);">Image failed to load</div>';};
+}
+
+async function loginWithCode(){
+  if(!deviceId){showToast('Select a device first',true);return;}
+  const phone=prompt('Enter your WhatsApp phone number (with country code, no +):\ne.g. 919876543210');
+  if(!phone) return;
+  try{
+    const r=await api('loginWithCode',{device_id:deviceId,phone});
+    if(r.success){
+      showToast('Pairing code: '+r.code);
+      document.getElementById('deviceDebug').innerHTML='Pairing code: '+r.code+' — Enter this in WhatsApp → Linked Devices → Link with phone number';
+    } else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function unlinkActiveDevice(){
+  if(!deviceId) return;
+  if(!confirm(`Unlink "${deviceName}"?`)) return;
+  showToast('Unlinking…');
+  try{
+    const r=await api('unlinkDevice');
+    if(r.success){
+      deviceId=deviceName=null;
+      updateStatusBar('disconnected');
+      document.getElementById('activeDevicePanel').style.display='none';
+      document.getElementById('unlinkBtn').style.display='none';
+      document.getElementById('reconnectBtn').style.display='none';
+      document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device below to get started</div>';
+      document.getElementById('qrTimer').textContent='';
+      document.getElementById('deviceDebug').innerHTML='Device unlinked.';
+      if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+      if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+      showToast('Device unlinked');
+      fetchAndRenderDevices();
+    } else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function deleteDevice(id,name){
+  if(!confirm(`Delete "${name}" from the server? This is permanent.`)) return;
+  try{
+    const r=await api('deleteDevice',{device_id:id});
+    showToast(r.success?`"${name}" deleted`:(r.message||'Delete failed'),!r.success);
+    if(r.success){
+      if(id===deviceId){
+        deviceId=deviceName=null;
+        updateStatusBar('disconnected');
+        document.getElementById('activeDevicePanel').style.display='none';
+        document.getElementById('unlinkBtn').style.display='none';
+        document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device to get started</div>';
+        document.getElementById('deviceDebug').innerHTML='Active device deleted.';
+      }
+      fetchAndRenderDevices();
+    }
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function doReconnect(){
+  showToast('Reconnecting…');
+  try{
+    const r=await api('reconnect');
+    showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success);
+    if(r.success) startDevicePolling();
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+function startDevicePolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try{
+      const r=await api('checkDeviceStatus');
+      if(r.success && r.is_connected){
+        clearInterval(pollTimer);pollTimer=null;
+        if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+        updateStatusBar('connected');
+        document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:12px;color:var(--accent);font-weight:700;">Device Connected!</div>';
+        document.getElementById('qrTimer').textContent='';
+        document.getElementById('reconnectBtn').style.display='none';
+        const b=document.getElementById('activeDeviceStatusBadge');
+        if(b){b.textContent='connected';b.className='badge badge-connected';}
+        document.getElementById('deviceDebug').innerHTML=`✅ ${deviceName} connected!`;
+        showToast('WhatsApp connected! 🎉');
+        fetchAndRenderDevices();
+      }
+    } catch(e){}
+  },3000);
+}
+
+function startQRCountdown(secs){
+  if(qrTimer) clearInterval(qrTimer);
+  let s=secs;
+  const el=document.getElementById('qrTimer');
+  qrTimer=setInterval(()=>{
+    s--;
+    if(s<=0){
+      clearInterval(qrTimer);
+      el.textContent='QR expired — click Show QR again';
+      el.style.color='var(--accent3)';
+    } else {
+      el.textContent=`QR expires in ${s}s`;
+      el.style.color=s<15?'var(--accent4)':'var(--text2)';
+    }
+  },1000);
+}
+
+// ══════════════════════ CONTACTS (SIMPLIFIED) ══════════════════════
+function renderContacts(){
+  const tbody=document.getElementById('conBody');
+  document.getElementById('conBadge').textContent=contacts.length;
+  document.getElementById('conTotal').textContent=contacts.length;
+  document.getElementById('sPend').textContent=contacts.filter(c=>c.status==='pending'||!c.status).length;
+  if(!contacts.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No contacts</td></tr>';
+    ['sSent','sFail','sTotal'].forEach(id=>{if(document.getElementById(id))document.getElementById(id).textContent='0';});
+    return;
+  }
+  tbody.innerHTML=contacts.map((c,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHtml(c.name)}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${c.phone}</td>
+      <td style="font-size:11px;color:var(--text2);">${escapeHtml((c.message||'').substring(0,30))||'—'}</td>
+      <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+      <td><button class="btn btn-d btn-sm" onclick="removeContact(${i})">✕</button></td>
+    </tr>
+  `).join('');
+  document.getElementById('sSent').textContent=contacts.filter(c=>c.status==='sent').length;
+  document.getElementById('sFail').textContent=contacts.filter(c=>c.status==='failed').length;
+  document.getElementById('sTotal').textContent=contacts.length;
+}
+
+function removeContact(idx){contacts.splice(idx,1);renderContacts();}
+function filterContacts(q){if(!q)return renderContacts();renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
+function dedupe(){const seen=new Set();const before=contacts.length;contacts=contacts.filter(c=>{if(seen.has(c.phone))return false;seen.add(c.phone);return true;});renderContacts();showToast(`Removed ${before-contacts.length} duplicates`);}
+function exportContacts(){const csv=['Name,Phone,Message,Status',...contacts.map(c=>`"${c.name}",${c.phone},"${c.message||''}",${c.status}`)].join('\n');downloadFile(csv,`contacts_${Date.now()}.csv`);}
+async function saveContacts(){if(!contacts.length)return showToast('No contacts',true);await api('saveContacts',{contacts});showToast('Contacts saved');}
+async function clearContacts(){if(confirm('Clear all contacts?')){contacts=[];renderContacts();await api('clearContacts');showToast('Contacts cleared');}}
+function togglePaste(){document.getElementById('pasteArea').style.display=document.getElementById('pasteArea').style.display==='none'?'block':'none';}
+function parsePaste(){
+  const raw=document.getElementById('pasteInput').value;
+  if(!raw)return;
+  let added=0;
+  for(const line of raw.split(/\r?\n/)){
+    const parts=line.split(/[\t,]/);
+    if(parts.length>=2){
+      let phone=parts[1].replace(/\D/g,'');
+      if(phone.length===10) phone='91'+phone;
+      if(phone.length>=10){
+        contacts.push({name:(parts[0]||phone).trim(),phone:phone,message:(parts[2]||'').trim(),status:'pending'});
+        added++;
+      }
+    }
+  }
+  renderContacts();
+  showToast(`Added ${added} contacts`);
+  document.getElementById('pasteInput').value='';
+  document.getElementById('pasteArea').style.display='none';
+}
+function handleFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split(/\r?\n/);
+    let added=0;
+    lines.forEach(line=>{
+      const cols=line.split(',');
+      if(cols.length>=2){
+        let phone=cols[1].replace(/\D/g,'');
+        if(phone.length===10) phone='91'+phone;
+        if(phone.length>=10){
+          contacts.push({name:cols[0]||phone,phone:phone,status:'pending'});
+          added++;
+        }
+      }
+    });
+    renderContacts();
+    showToast(`Imported ${added} contacts`);
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════ COMPOSE ══════════════════════
+function ins(v){const ta=document.getElementById('msgTpl');const s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.focus();}
+async function saveTemplate(){
+  try{
+    const r=await api('saveTemplate',{
+      body:document.getElementById('msgTpl').value,
+      attach_type:document.getElementById('attachType').value,
+      attach_url:document.getElementById('attachUrl').value
+    });
+    showToast(r.success?'Template saved':(r.message||'Failed'),!r.success);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+async function testSendMessage(){
+  if(!deviceId){showToast('No device linked',true);return;}
+  const phone=prompt('Enter your own phone number to test (with country code, no +):\ne.g. 919876543210');
+  if(!phone) return;
+  const msg=document.getElementById('msgTpl').value||'Test message from LeadFlow 👋';
+  showToast('Sending test…');
+  try{
+    const r=await api('sendMessage',{phone,message:msg});
+    showToast(r.success?'Test sent! ✅':(r.message||'Failed'),!r.success);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+// ══════════════════════ SEND CAMPAIGN ══════════════════════
+async function startSend(){
+  if(!deviceId){showToast('Link a device first',true);goTab('device');return;}
+  if(!contacts.length){showToast('No contacts',true);return;}
+  sendState='running';
+  sendLog=[];
+  renderSendLog();
+  processSend();
+}
+function pauseSend(){sendState='paused';if(sendTimer)clearTimeout(sendTimer);showToast('Paused');}
+function stopSend(){sendState='idle';sendIndex=0;if(sendTimer)clearTimeout(sendTimer);updateProgress();document.getElementById('currentStatus').textContent='Stopped';}
+
+async function processSend(){
+  if(sendState!=='running') return;
+  if(sendIndex>=contacts.length){
+    stopSend();
+    showToast('Campaign complete! 🎉');
+    return;
+  }
+  const c=contacts[sendIndex];
+  const tpl=c.message||document.getElementById('msgTpl').value;
+  let msg=tpl.replace(/\{name\}/gi,c.name);
+  document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})…`;
+  const attachType=document.getElementById('attachType').value;
+  const attachUrl=document.getElementById('attachUrl').value.trim();
+  try{
+    let result;
+    if(attachType==='image'&&attachUrl) result=await api('sendImage',{phone:c.phone,caption:msg,image_url:attachUrl});
+    else if(attachType==='video'&&attachUrl) result=await api('sendVideo',{phone:c.phone,caption:msg,video_url:attachUrl});
+    else if(attachType==='audio'&&attachUrl) result=await api('sendAudio',{phone:c.phone,audio_url:attachUrl});
+    else if(attachType==='file'&&attachUrl) result=await api('sendFile',{phone:c.phone,caption:msg,file_url:attachUrl});
+    else result=await api('sendMessage',{phone:c.phone,message:msg});
+    c.status=result.success?'sent':'failed';
+  } catch(e){c.status='failed';}
+  sendLog.unshift({time:Date.now(),phone:c.phone,status:c.status});
+  sendIndex++;
+  renderContacts();
+  renderSendLog();
+  updateProgress();
+  const minG=parseInt(document.getElementById('minGap').value)*1000;
+  const maxG=parseInt(document.getElementById('maxGap').value)*1000;
+  sendTimer=setTimeout(processSend,Math.random()*(maxG-minG)+minG);
+}
+
+function updateProgress(){
+  const pct=contacts.length?(sendIndex/contacts.length*100):0;
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('currentStatus').textContent=`${sendIndex}/${contacts.length} processed`;
+}
+
+function renderSendLog(){
+  const tbody=document.getElementById('sendLogBody');
+  if(!sendLog.length){tbody.innerHTML='<tr><td colspan="3" style="color:var(--muted);text-align:center;">No sends yet</td></tr>';return;}
+  tbody.innerHTML=sendLog.slice(0,50).map(l=>`
+    <tr>
+      <td style="font-size:11px;color:var(--text2);">${new Date(l.time).toLocaleTimeString()}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${l.phone}</td>
+      <td><span class="badge badge-${l.status}">${l.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ══════════════════════ LEADS ══════════════════════
+async function loadLeads(){
+  const r=await api('getLeads');
+  if(r.success){leads=r.leads;renderLeads();}
+}
+function renderLeads(){
+  const tbody=document.getElementById('leadBody');
+  if(!leads.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr>';return;}
+  tbody.innerHTML=leads.map((l,i)=>`<tr>
+    <td>${i+1}</td>
+    <td>${escapeHtml(l.name||'—')}</td>
+    <td style="font-family:var(--mono);font-size:11px;">${escapeHtml(l.phone||'—')}</td>
+    <td>${escapeHtml(l.email||'—')}</td>
+    <td><span class="badge badge-${l.status||'new'}">${l.status||'new'}</span></td>
+    <td>${l.arrived_at?new Date(l.arrived_at).toLocaleDateString():'—'}</td>
+    <td><button class="btn btn-g btn-sm" onclick="updLead('${l.id}','booked')">✅ Book</button><button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️ Cold</button></td>
+  </tr>`).join('');
+}
+async function updLead(id,status){await api('updateLeadStatus',{id,status});await loadLeads();showToast(`Lead → ${status}`);}
+async function scanSheet(){showToast('Scanning sheet...');const r=await api('scanLeadSheet');if(r.success){await loadLeads();showToast(`${r.new_leads||0} new leads imported`);}else showToast('Scan failed',true);}
+
+// ══════════════════════ LOGS ══════════════════════
+function renderLogs(){
+  const logsDiv=document.getElementById('logsList');
+  if(!logs.length){logsDiv.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div>';return;}
+  logsDiv.innerHTML=logs.slice(0,50).map(l=>`<div class="log-entry" style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:12px;font-weight:600;">${escapeHtml(l.name||'')}</div><div style="font-size:11px;color:var(--text2);">${escapeHtml(l.msg||l.message||'')}</div><div style="font-size:10px;color:var(--muted);margin-top:3px;">${new Date(l.created_at||l.time||Date.now()).toLocaleTimeString()}</div></div></div>`).join('');
+}
+function clearLogs(){logs=[];renderLogs();api('clearLogs');}
+
+// ══════════════════════ SETTINGS ══════════════════════
+async function saveSettings(){
+  try{
+    const r=await api('saveSettings',{
+      hour_limit:document.getElementById('hourLimit').value,
+      day_limit:document.getElementById('dayLimit').value,
+      min_gap:document.getElementById('minGap').value,
+      max_gap:document.getElementById('maxGap').value,
+      gowa_url:document.getElementById('gowaUrl').value.trim(),
+      gowa_auth:document.getElementById('gowaAuth').value.trim()
+    });
+    showToast(r.success?'Settings saved':(r.message||'Failed'),!r.success);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+async function saveConfig(){await saveSettings();}
+async function testGowaConnection(){
+  showToast('Testing…');
+  try{
+    const r=await api('listDevices');
+    showToast(r.success?`Connected! ${r.total||0} device(s).`:'Connection failed: '+(r.message||'Unknown'),!r.success);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+async function saveAiSettings(){
+  try{
+    const r=await api('saveSettings',{
+      auto_reply:document.getElementById('autoReplyEnabled').checked,
+      auto_reply_prompt:document.getElementById('autoReplyPrompt').value
+    });
+    await api('saveConfig',{groq_key:document.getElementById('groqKey').value});
+    showToast(r.success?'AI settings saved':(r.message||'Failed'),!r.success);
+  } catch(e){showToast('Error: '+e.message,true);}
+}
+
+// ══════════════════════ NAVIGATION ══════════════════════
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  const items=['device','contacts','compose','send','leads','config','settings','logs'];
+  const idx=items.indexOf(name);
+  if(idx>=0) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(name==='device') refreshDeviceStatus();
+  if(name==='leads') loadLeads();
+}
+
+// ══════════════════════ UTILITIES ══════════════════════
+function logout(){token=null;if(pollTimer)clearInterval(pollTimer);if(qrTimer)clearInterval(qrTimer);document.getElementById('dash').style.display='none';document.getElementById('authWrap').style.display='flex';renderAuth('login');}
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getVal(id){return document.getElementById(id)?.value||'';}
+function setVal(id,v){const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+function downloadFile(content,name){const blob=new Blob([content],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function showToast(msg,isErr){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';t.style.background=isErr?'#2d1015':'#0a2018';t.style.color=isErr?'#ff6680':'#00ff88';t.style.padding='11px 18px';t.style.borderRadius='10px';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},3000);}
+
+// ══════════════════════ INIT ══════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAuth('login');
+  const savedToken=localStorage.getItem('auth_token');
+  const savedEmail=localStorage.getItem('user_email');
+  if(savedToken && savedEmail){
+    token=savedToken;
+    userEmail=savedEmail;
+    document.getElementById('authWrap').style.display='none';
+    document.getElementById('dash').style.display='flex';
+    document.getElementById('userName').textContent=savedEmail.split('@')[0];
+    document.getElementById('userAv').textContent=savedEmail[0].toUpperCase();
+    loadData().catch(()=>{});
+    fetchAndRenderDevices();
+  }
+});
+</script>
+</body>
+</html>
