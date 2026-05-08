@@ -1177,18 +1177,51 @@ function setDevStatus(state, id) {
   }
 }
 
+// ══════════════════════════════════════════════
+// DEVICE MANAGEMENT - UPDATED
+// ══════════════════════════════════════════════
+
 async function checkDevice() {
-  const r = await api('getDevice')
-  if (r.has_device) { deviceId = r.device.device_id; setDevStatus('connected', deviceId) }
-  else { setDevStatus('disconnected'); deviceId = null }
+  const r = await api('checkDeviceStatus')
+  console.log('Device status check:', r)
+  
+  if (r.success && r.is_connected) {
+    deviceId = r.device_id
+    setDevStatus('connected', deviceId)
+    return true
+  } else if (r.success && r.device_id && !r.is_connected) {
+    // Device exists but not logged in (QR needed)
+    deviceId = r.device_id
+    setDevStatus('scanning', deviceId)
+    return false
+  } else {
+    setDevStatus('disconnected')
+    deviceId = null
+    return false
+  }
 }
 
 async function loadQR() {
-  if (deviceId) { 
-    document.getElementById('devWarn').style.display = 'flex'; 
-    return 
+  // First check if device exists and is already connected
+  const statusCheck = await api('checkDeviceStatus')
+  console.log('Pre-QR status check:', statusCheck)
+  
+  if (statusCheck.success && statusCheck.is_connected) {
+    deviceId = statusCheck.device_id
+    setDevStatus('connected', deviceId)
+    showToast('Device already connected! ✅')
+    return
   }
-  document.getElementById('devWarn').style.display = 'none'
+  
+  // If device exists but not connected, get QR for existing device
+  if (statusCheck.success && statusCheck.device_id && !statusCheck.is_connected) {
+    deviceId = statusCheck.device_id
+    document.getElementById('devWarn').style.display = 'flex'
+    document.getElementById('devWarn').innerHTML = '<span>⚠️</span><span>Device exists but not logged in. Generate QR to connect.</span>'
+  } else {
+    document.getElementById('devWarn').style.display = 'none'
+  }
+  
   const wrap = document.getElementById('qrWrap')
   wrap.innerHTML = '<div style="font-size:28px;margin-bottom:10px">⏳</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Generating QR…</div>'
   setDevStatus('scanning')
@@ -1199,23 +1232,22 @@ async function loadQR() {
   console.log('QR Response:', r)
   
   if (r.success && r.qr_link) {
-    // The QR link returns an HTML page. We can display it in an iframe
-    // or fetch the page and extract the QR image
+    deviceId = r.device_id
     
-    // Method 1: Use iframe to display the QR page
+    // Display QR code using iframe (most reliable for HTML pages)
     wrap.innerHTML = `
       <iframe 
         src="${r.qr_link}" 
-        style="width:220px;height:260px;border:none;border-radius:8px;background:#fff"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        style="width:260px;height:280px;border:none;border-radius:12px;background:#fff;box-shadow:0 0 20px rgba(0,255,136,0.1)"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
       ></iframe>
-      <div style="margin-top:12px;font-size:11px;color:var(--text2);font-family:var(--mono)">
-        Scan with WhatsApp → <strong style="color:var(--accent)">Linked Devices</strong>
+      <div style="margin-top:14px;font-size:11px;color:var(--text2);font-family:var(--mono)">
+        1. Open WhatsApp on your phone<br/>
+        2. Go to <strong style="color:var(--accent)">Settings → Linked Devices</strong><br/>
+        3. Tap <strong style="color:var(--accent)">Link a Device</strong><br/>
+        4. Scan this QR code
       </div>
     `
-    
-    // Method 2: Alternative - fetch the HTML and extract QR image (if iframe doesn't work)
-    // fetchQrImage(r.qr_link, wrap)
     
     startQrCountdown(r.qr_duration || 60)
     startDevicePoll()
@@ -1224,7 +1256,113 @@ async function loadQR() {
     setDevStatus('disconnected')
   }
 }
+
+function startDevicePoll() {
+  stopPoll()
+  devicePollTimer = setInterval(async () => {
+    const status = await api('checkDeviceStatus')
+    console.log('Poll status:', status)
+    
+    if (status.success && status.is_connected) {
+      // Device is now connected!
+      deviceId = status.device_id
+      setDevStatus('connected', deviceId)
+      stopPoll()
+      clearInterval(qrCountdown)
+      
+      const wrap = document.getElementById('qrWrap')
+      if (wrap) {
+        wrap.innerHTML = `
+          <div style="font-size:48px;margin-bottom:10px">✅</div>
+          <div style="font-size:13px;color:var(--accent);font-family:var(--mono);font-weight:700">WhatsApp Connected!</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:8px">You can now send messages</div>
+        `
+      }
+      showToast('WhatsApp connected successfully! 🎉')
+    } else if (status.success && status.device_id && !status.is_connected) {
+      // Device exists but still scanning
+      if (deviceId !== status.device_id) {
+        deviceId = status.device_id
+      }
+      const wrap = document.getElementById('qrWrap')
+      if (wrap && !wrap.innerHTML.includes('iframe')) {
+        // QR might have expired, but keep polling
+      }
+    }
+  }, 3000)
+}
+
+function setDevStatus(state, id) {
+  const pip = document.getElementById('pipDot'), lbl = document.getElementById('pipLbl')
+  const icon = document.getElementById('devIcon'), title = document.getElementById('devTitle')
+  const idEl = document.getElementById('devId'), card = document.getElementById('devCard')
+  const topPip = document.getElementById('topPip'), topLbl = document.getElementById('topLbl')
+  const unlinkBtn = document.getElementById('unlinkBtn'), devBadge = document.getElementById('devBadge')
+
+  if (state === 'connected') {
+    pip.className = 'pip-dot on'
+    lbl.textContent = 'CONNECTED'
+    icon.textContent = '📱'
+    title.textContent = 'Device Connected ✅'
+    idEl.textContent = 'Device ID: ' + (id || deviceId || 'Unknown')
+    card.className = 'dev-card on'
+    topPip.className = 'status-pip on'
+    topPip.style.background = 'var(--accent)'
+    topLbl.textContent = 'CONNECTED'
+    topLbl.style.color = 'var(--accent)'
+    unlinkBtn.style.display = 'inline-flex'
+    devBadge.style.display = 'none'
+    deviceId = id
+  } else if (state === 'scanning') {
+    pip.className = 'pip-dot scan'
+    lbl.textContent = 'SCANNING'
+    icon.textContent = '⏳'
+    title.textContent = 'Waiting for QR scan…'
+    idEl.textContent = 'Device ID: ' + (id || deviceId || 'Pending')
+    card.className = 'dev-card'
+    topPip.className = 'status-pip'
+    topPip.style.background = 'var(--accent4)'
+    topLbl.textContent = 'SCANNING'
+    topLbl.style.color = 'var(--accent4)'
+    unlinkBtn.style.display = 'none'
+    devBadge.style.display = 'inline'
+    if (id) deviceId = id
+  } else {
+    pip.className = 'pip-dot off'
+    lbl.textContent = 'OFFLINE'
+    icon.textContent = '📵'
+    title.textContent = 'No device linked'
+    idEl.textContent = 'Scan QR code to link WhatsApp'
+    card.className = 'dev-card'
+    topPip.className = 'status-pip'
+    topPip.style.background = ''
+    topLbl.textContent = 'NO DEVICE'
+    topLbl.style.color = 'var(--muted)'
+    unlinkBtn.style.display = 'none'
+    devBadge.style.display = 'inline'
+    deviceId = null
+  }
+}
+
+async function unlinkDevice() {
+  if (!confirm('Unlink your WhatsApp device?')) return
   
+  showToast('Unlinking device...')
+  const r = await api('unlinkDevice')
+  
+  if (r.success) {
+    deviceId = null
+    setDevStatus('disconnected')
+    document.getElementById('devWarn').style.display = 'none'
+    const wrap = document.getElementById('qrWrap')
+    if (wrap) {
+      wrap.innerHTML = '<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono)">Click "Load QR" to connect a device</div>'
+    }
+    showToast('Device unlinked')
+  } else {
+    showToast('Failed: ' + r.message, true)
+  }
+}
 function startQrCountdown(secs) {
   clearInterval(qrCountdown)
   let s = secs
@@ -1240,28 +1378,6 @@ function startQrCountdown(secs) {
   }, 1000)
 }
 
-function startDevicePoll() {
-  stopPoll()
-  devicePollTimer = setInterval(async () => {
-    const r = await api('checkDevices')
-    if (!r.success || !r.devices?.length) return
-    // Find a device not already linked
-    const newDev = r.devices.find((d) => {
-      const did = d.device || d.id || d.jid
-      return did && did !== deviceId
-    })
-    if (!newDev) return
-    const newId = newDev.device || newDev.id || newDev.jid
-    const link = await api('linkDevice', { device_id: newId, device_name: newId })
-    if (link.success) {
-      stopPoll(); clearInterval(qrCountdown)
-      document.getElementById('qrTimer').textContent = ''
-      const wrap = document.getElementById('qrWrap')
-      if (wrap) wrap.innerHTML = '<div style="font-size:40px;margin-bottom:10px">✅</div><div style="font-size:12px;color:var(--accent);font-family:var(--mono)">Device Connected!</div>'
-      setDevStatus('connected', newId); showToast('WhatsApp connected! 🎉')
-    }
-  }, 3000)
-}
 function stopPoll() { clearInterval(devicePollTimer) }
 
 async function unlinkDevice() {
