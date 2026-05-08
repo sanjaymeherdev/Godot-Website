@@ -657,29 +657,24 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 </div><!-- /dash -->
 
 <div id="toast"></div>
+  
 <!-- Modal Popup -->
-<div id="appsScriptModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>📜 Google Apps Script Setup</h3>
-      <button class="modal-close" onclick="closeAppsScriptModal()">&times;</button>
+<div class="modal-body">
+  <div class="step">
+    <div class="step-title"><span class="step-num">1</span> Create New Script</div>
+    <div class="step-desc">
+      Go to <a href="https://script.google.com" target="_blank" style="color:var(--accent2); font-weight: 700;">script.google.com</a> and click <strong>New Project</strong>.
     </div>
-    <div class="modal-body">
-      <div class="step">
-        <div class="step-title"><span class="step-num">1</span> Create New Script</div>
-        <div class="step-desc">
-          Go to <a href="https://script.google.com" target="_blank" style="color:var(--accent2);">script.google.com</a> and click <strong>New Project</strong>.
-        </div>
-      </div>
+  </div>
 
-      <div class="step">
-        <div class="step-title"><span class="step-num">2</span> Paste the Code Below</div>
-        <div class="step-desc">
-          Delete any existing code and paste this:
-        </div>
-        <div class="code-block" style="position:relative">
-          <button class="copy-btn" onclick="copyScriptCode()">📋 Copy</button>
-          <pre id="scriptCode" style="margin:0;font-family:inherit;white-space:pre-wrap;">function doPost(e) {
+  <div class="step">
+    <div class="step-title"><span class="step-num">2</span> Paste the Code Below</div>
+    <div class="step-desc">
+      Delete any existing code and paste this:
+    </div>
+    <div class="code-block" style="position:relative">
+      <button class="copy-btn" onclick="copyScriptCode()">📋 Copy</button>
+      <pre id="scriptCode" style="margin:0;font-family:inherit;white-space:pre-wrap;">function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const { to, subject, html, fromName } = data;
@@ -701,36 +696,57 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }</pre>
-        </div>
-      </div>
+    </div>
+  </div>
 
-      <div class="step">
-        <div class="step-title"><span class="step-num">3</span> Deploy as Web App</div>
-        <div class="step-desc">
-          Click <strong>Deploy</strong> → <strong>New deployment</strong>
-        </div>
-      </div>
+  <div class="step">
+    <div class="step-title"><span class="step-num">3</span> Deploy as Web App</div>
+    <div class="step-desc">
+      Click <strong>Deploy</strong> → <strong>New deployment</strong>
+    </div>
+  </div>
 
-      <div class="step">
-        <div class="step-title"><span class="step-num">4</span> Configure Settings</div>
-        <div class="step-desc">
-          <div style="margin-top:8px;">
-            <div><span class="setting-badge"><span>⚙️</span> Web app</span></div>
-            <div style="margin:8px 0;"><strong>Execute as:</strong> <span class="setting-badge">Me (your email)</span></div>
-            <div><strong>Who has access:</strong> <span class="setting-badge">Anyone</span></div>
-          </div>
-        </div>
+  <div class="step">
+    <div class="step-title"><span class="step-num">4</span> Configure Settings</div>
+    <div class="step-desc">
+      <div style="margin-top:8px;">
+        <div><span class="setting-badge"><span>⚙️</span> Web app</span></div>
+        <div style="margin:8px 0;"><strong>Execute as:</strong> <span class="setting-badge">Me (your email)</span></div>
+        <div><strong>Who has access:</strong> <span class="setting-badge">Anyone</span></div>
       </div>
+    </div>
+  </div>
 
-      <div class="step">
-        <div class="step-title"><span class="step-num">5</span> Deploy & Copy URL</div>
-        <div class="step-desc">
-          Click <strong>Deploy</strong>, then <strong>Authorize access</strong> when prompted.<br><br>
-          Copy the generated URL (looks like:<br>
-          <code style="font-size:10px;word-break:break-all;">https://script.google.com/macros/s/.../exec</code>)<br><br>
-          Paste it in the <strong>Apps Script URL</strong> field above and click Save.
+  <div class="step">
+    <div class="step-title"><span class="step-num">5</span> Deploy & Authorize</div>
+    <div class="step-desc">
+      Click <strong>Deploy</strong>, then:
+      <div style="background: rgba(255,51,102,.1); border: 1px solid rgba(255,51,102,.3); border-radius: 8px; padding: 12px; margin: 12px 0;">
+        <div style="color: var(--accent3); font-weight: 700; margin-bottom: 6px;">⚠️ CRITICAL - DON'T SKIP!</div>
+        <div style="font-size: 12px;">When the authorization popup appears:</div>
+        <div style="margin-top: 8px;">
+          • Click <strong style="color: var(--accent2);">"Review Permissions"</strong><br>
+          • Click <strong style="color: var(--accent2);">"Allow"</strong>
         </div>
+        <div style="margin-top: 8px; font-size: 11px; color: var(--accent4);">❌ If you skip authorization, emails will NOT send!</div>
       </div>
+      After authorizing, copy the generated URL.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-title"><span class="step-num">6</span> Paste URL & Save</div>
+    <div class="step-desc">
+      <code style="font-size: 10px; word-break: break-all; display: inline-block; background: var(--bg); padding: 6px 8px; border-radius: 6px; margin: 8px 0;">https://script.google.com/macros/s/.../exec</code><br>
+      Paste it in the <strong>Apps Script URL</strong> field above and click <strong>Save All Settings</strong>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-title"><span class="step-num">7</span> ✅ Test It!</div>
+    <div class="step-desc">
+      Click the <strong>🧪 Send Test Email (Apps Script)</strong> button.<br>
+      Check your inbox <strong>(and spam folder)</strong> for the test email.
     </div>
   </div>
 </div>
