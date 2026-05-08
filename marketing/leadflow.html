@@ -855,35 +855,64 @@ function showAppsScriptInstructions() {
 function closeAppsScriptModal() {
   document.getElementById('appsScriptModal').style.display = 'none';
 }
-<!-- Calendly Card -->
-<div class="card">
-  <div class="card-title">📅 Calendly — Booking Sync (Free Plan)</div>
-  
-  <div style="background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-    <div style="font-family: var(--mono); font-size: 11px; color: var(--accent2); margin-bottom: 10px;">📖 HOW TO GET YOUR CALENDLY TOKEN</div>
-    <div style="font-size: 12px; line-height: 1.6; color: var(--text2);">
-      <strong>Step 1:</strong> <button class="btn btn-s btn-sm" style="padding:2px 8px;" onclick="window.open('https://calendly.com/integrations/api_webhooks', '_blank')">Open Calendly ↗</button><br>
-      <strong>Step 2:</strong> Click <strong>"Generate New Token"</strong><br>
-      <strong>Step 3:</strong> Select <strong>"All scopes"</strong><br>
-      <strong>Step 4:</strong> Copy the token (starts with cal_live_ or cal_test_)<br>
-      <strong>Step 5:</strong> Paste token below and click <strong>Save All Settings</strong><br>
-      <strong>Step 6:</strong> Leads will auto-sync when you visit the Leads tab
-    </div>
-  </div>
 
-  <div class="fg">
-    <label>Calendly Personal Access Token</label>
-    <div class="key-wrap" style="position:relative">
-      <input type="password" id="calendlyToken" placeholder="cal_live_xxxxxxxxxxxx">
-      <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('calendlyToken',this)">Show</span>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-b btn-sm" onclick="testCalendlyToken()">🧪 Test Token</button>
-    <button class="btn btn-g btn-sm" onclick="syncCalendlyNow()">🔄 Sync Bookings Now</button>
-  </div>
-</div>
-// Copy script code to clipboard
+  // Calendly Functions
+async function testCalendlyToken() {
+  const token = document.getElementById('calendlyToken').value.trim();
+  if (!token) {
+    showToast('Please enter your Calendly token first', true);
+    return;
+  }
+  
+  showToast('Testing token...');
+  try {
+    const r = await api('testCalendlyToken', { token });
+    if (r.success) {
+      showToast(`✅ Token valid! Found ${r.events_count || 0} bookings in last 7 days`);
+    } else {
+      showToast('Failed: ' + r.message, true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+async function syncCalendlyNow() {
+  const token = document.getElementById('calendlyToken').value.trim();
+  if (!token) {
+    showToast('Please enter your Calendly token first', true);
+    return;
+  }
+  
+  showToast('Syncing bookings from Calendly...');
+  try {
+    const r = await api('syncCalendlyBookings', { token });
+    if (r.success) {
+      showToast(`✅ Synced! ${r.updated || 0} leads marked as booked`);
+      loadLeads();
+    } else {
+      showToast('Failed: ' + r.message, true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+async function syncCalendlyIfTokenExists() {
+  const token = document.getElementById('calendlyToken')?.value.trim();
+  if (!token) return;
+  
+  try {
+    const r = await api('syncCalendlyBookings', { token });
+    if (r.success && r.updated > 0) {
+      showToast(`📅 ${r.updated} lead(s) marked as booked from Calendly`);
+      loadLeads();
+    }
+  } catch(e) {
+    console.log('Calendly sync failed:', e.message);
+  }
+}
+  
 function copyScriptCode() {
   const codeElement = document.getElementById('scriptCode');
   const code = codeElement.textContent || codeElement.innerText;
@@ -1817,10 +1846,11 @@ function goTab(name){
   if(idx>=0) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
   document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(name==='device') refreshDeviceStatus();
-  if(name==='leads') loadLeads();
-  syncCalendlyIfTokenExists();
+  if(name==='leads') {
+    loadLeads();
+    syncCalendlyIfTokenExists();
+  }
 }
-
 // ══════════════════════ UTILITIES ══════════════════════
 function logout(){token=null;if(pollTimer)clearInterval(pollTimer);if(qrTimer)clearInterval(qrTimer);document.getElementById('dash').style.display='none';document.getElementById('authWrap').style.display='flex';renderAuth('login');}
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
