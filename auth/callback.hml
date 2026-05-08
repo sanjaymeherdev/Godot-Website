@@ -1,18 +1,368 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Email Confirmed - LeadFlow</title>
-  <meta http-equiv="refresh" content="3;url=/">
-  <style>
-    body { background: #060810; color: #00ff88; font-family: monospace; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow — Auth</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Cabinet+Grotesk:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060810; --surface: #0b0f1a; --border: #1a2235;
+    --accent: #00ff88; --accent2: #0088ff; --accent3: #ff3366;
+    --text: #c8d8e8; --text2: #6a85a0; --muted: #3a4f65;
+    --mono: 'JetBrains Mono', monospace; --sans: 'Cabinet Grotesk', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans); background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+  .glow {
+    position: fixed; width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,255,136,.05) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none; z-index: 0;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+  .card {
+    position: relative; z-index: 1;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px 36px; width: 420px; max-width: 94vw;
+    text-align: center; animation: slideUp .4s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:none;} }
+  .logo-tag {
+    font-family: var(--mono); font-size: 9px; color: var(--accent);
+    letter-spacing: 3px; text-transform: uppercase;
+    border: 1px solid rgba(0,255,136,.2); padding: 4px 10px;
+    border-radius: 4px; display: inline-block; margin-bottom: 14px;
+  }
+  h1 { font-size: 32px; font-weight: 900; color: #fff; letter-spacing: -1px; margin-bottom: 28px; }
+  h1 span { color: var(--accent); }
+
+  /* State Icon */
+  .icon-wrap {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 20px;
+    transition: all .3s ease;
+  }
+  .icon-wrap.loading { background: rgba(0,136,255,.1); border: 2px solid rgba(0,136,255,.2); }
+  .icon-wrap.success { background: rgba(0,255,136,.1); border: 2px solid rgba(0,255,136,.25); }
+  .icon-wrap.error   { background: rgba(255,51,102,.1); border: 2px solid rgba(255,51,102,.25); }
+  .icon-wrap.reset   { background: rgba(255,170,0,.1);  border: 2px solid rgba(255,170,0,.25); }
+
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 3px solid rgba(0,136,255,.2); border-top-color: var(--accent2);
+    border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .subtitle { font-size: 12px; color: var(--text2); font-family: var(--mono); margin-bottom: 24px; line-height: 1.6; }
+
+  /* Progress bar */
+  .prog-track {
+    background: var(--border); border-radius: 4px; height: 3px;
+    margin-bottom: 24px; overflow: hidden;
+  }
+  .prog-bar {
+    height: 100%; border-radius: 4px; background: var(--accent);
+    width: 0%; transition: width .4s ease;
+  }
+  .prog-bar.blue { background: var(--accent2); }
+  .prog-bar.red  { background: var(--accent3); }
+  .prog-bar.yellow { background: #ffaa00; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 8px; font-family: var(--sans);
+    font-size: 14px; font-weight: 800; cursor: pointer;
+    transition: all .15s ease; border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .btn-g { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn-g:hover { background: #00e87a; transform: translateY(-1px); }
+  .btn-s { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn-s:hover { border-color: var(--text2); }
+  .btn-b { background: rgba(0,136,255,.1); color: var(--accent2); border-color: rgba(0,136,255,.25); }
+  .btn-b:hover { background: rgba(0,136,255,.18); }
+
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+
+  /* Password reset form */
+  .reset-form { text-align: left; margin-bottom: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--mono); }
+  .field input {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px; color: var(--text);
+    font-family: var(--sans); font-size: 14px; outline: none;
+    transition: border-color .15s ease;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--muted); }
+  .pw-strength { height: 3px; background: var(--border); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .pw-strength-bar { height: 100%; border-radius: 3px; transition: all .3s ease; width: 0%; }
+
+  .err-msg {
+    font-size: 12px; padding: 10px 14px; border-radius: 8px;
+    background: rgba(255,51,102,.08); color: #ff6680;
+    border: 1px solid rgba(255,51,102,.2); margin-bottom: 14px;
+    font-family: var(--mono); display: none;
+  }
+
+  /* Countdown */
+  .countdown { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 16px; }
+  .countdown span { color: var(--accent); }
+</style>
 </head>
 <body>
-  <div>
-    <h1>✅ Email Confirmed!</h1>
-    <p>Your email has been verified. Redirecting to login...</p>
-    <p><a href="/" style="color:#00ff88">Click here if not redirected</a></p>
-  </div>
+
+<div class="glow"></div>
+
+<div class="card" id="card">
+  <div class="logo-tag">LEADFLOW</div>
+  <h1>Lead<span>Flow</span></h1>
+  <div class="icon-wrap loading" id="icon"><div class="spinner"></div></div>
+  <div class="title" id="stateTitle">Verifying…</div>
+  <div class="subtitle" id="stateSub">Checking your credentials, please wait.</div>
+  <div class="prog-track"><div class="prog-bar blue" id="prog"></div></div>
+  <div id="actionArea"></div>
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZnpvcHJoeWpybW9zdmlnd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyNDI5MjAsImV4cCI6MjA2MDgxODkyMH0.QJAhJe5Pc8BpQPXHmR0Ol1KWm0sGV9Tt-YNp7oAVGms';
+const EDGE         = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
+const HOME         = '/';
+
+// ── Parse URL fragments and params ──────────────────────────────────────────
+const hash   = new URLSearchParams(window.location.hash.replace('#', '?').slice(1));
+const params = new URLSearchParams(window.location.search);
+
+const accessToken    = hash.get('access_token')  || params.get('access_token');
+const refreshToken   = hash.get('refresh_token') || params.get('refresh_token');
+const tokenType      = hash.get('token_type')    || params.get('token_type');
+const errorCode      = hash.get('error')          || params.get('error');
+const errorDesc      = hash.get('error_description') || params.get('error_description');
+const type           = hash.get('type')           || params.get('type'); // 'recovery', 'signup', 'magiclink'
+
+// ── UI helpers ───────────────────────────────────────────────────────────────
+function setProgress(pct, color='') {
+  const bar = document.getElementById('prog');
+  bar.style.width = pct + '%';
+  if (color) { bar.className = 'prog-bar ' + color; }
+}
+
+function setState(state, title, sub) {
+  const icon = document.getElementById('icon');
+  icon.className = 'icon-wrap ' + state;
+  const icons = { loading: '<div class="spinner"></div>', success: '✅', error: '❌', reset: '🔑' };
+  icon.innerHTML = icons[state] || icons.loading;
+  document.getElementById('stateTitle').textContent = title;
+  document.getElementById('stateSub').textContent = sub;
+}
+
+function setActions(html) {
+  document.getElementById('actionArea').innerHTML = html;
+}
+
+function countdown(secs, label, onDone) {
+  let s = secs;
+  const el = document.getElementById('cd');
+  if (!el) return;
+  const t = setInterval(() => {
+    s--;
+    if (el) el.innerHTML = `<span>${s}s</span>`;
+    if (s <= 0) { clearInterval(t); onDone(); }
+  }, 1000);
+}
+
+// ── Save session & redirect ──────────────────────────────────────────────────
+function saveAndRedirect(token, email, delay = 2500) {
+  if (token)  localStorage.setItem('auth_token', token);
+  if (email)  localStorage.setItem('user_email', email);
+  setActions(`<div class="countdown">Redirecting in <span id="cd">${Math.ceil(delay/1000)}s</span>…</div>`);
+  const s = Math.ceil(delay / 1000);
+  let c = s;
+  const el_t = setInterval(() => {
+    c--;
+    const el = document.getElementById('cd');
+    if (el) el.innerHTML = `<span>${c}s</span>`;
+    if (c <= 0) { clearInterval(el_t); window.location.href = HOME; }
+  }, 1000);
+}
+
+// ── Exchange token with Supabase to get user email ───────────────────────────
+async function getUserFromToken(accessToken) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'apikey': SUPABASE_ANON }
+    });
+    return res.ok ? await res.json() : null;
+  } catch { return null; }
+}
+
+// ── PASSWORD RESET FORM ───────────────────────────────────────────────────────
+function showResetForm(token) {
+  setState('reset', 'Set New Password', 'Choose a strong password for your account.');
+  setProgress(80, 'yellow');
+
+  document.getElementById('actionArea').innerHTML = `
+    <div class="reset-form">
+      <div class="err-msg" id="resetErr"></div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="newPass" placeholder="Min 8 characters" oninput="checkPwStrength(this.value)">
+        <div class="pw-strength"><div class="pw-strength-bar" id="pwBar"></div></div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="confPass" placeholder="Repeat password">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="doResetPassword('${token}')">🔐 Update Password</button>
+    </div>
+  `;
+}
+
+function checkPwStrength(pw) {
+  const bar = document.getElementById('pwBar');
+  if (!bar) return;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const colors = ['#ff3366','#ffaa00','#0088ff','#00ff88'];
+  const widths  = ['25%','50%','75%','100%'];
+  bar.style.background = colors[score - 1] || '#3a4f65';
+  bar.style.width = score > 0 ? widths[score - 1] : '0%';
+}
+
+async function doResetPassword(token) {
+  const pass  = document.getElementById('newPass')?.value;
+  const conf  = document.getElementById('confPass')?.value;
+  const errEl = document.getElementById('resetErr');
+
+  if (!pass || pass.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.style.display = 'block'; return; }
+  if (pass !== conf) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  setState('loading', 'Updating…', 'Saving your new password.');
+  setProgress(90, 'blue');
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPABASE_ANON
+      },
+      body: JSON.stringify({ password: pass })
+    });
+
+    if (res.ok) {
+      setProgress(100, '');
+      setState('success', 'Password Updated!', 'Your password has been changed. Redirecting to login…');
+      localStorage.removeItem('auth_token');
+      setActions(`<div class="btn-row"><a class="btn btn-g" href="${HOME}">→ Go to Login</a></div>`);
+    } else {
+      const err = await res.json();
+      setState('error', 'Update Failed', err.message || 'Could not update password. Please request a new reset link.');
+      setProgress(100, 'red');
+      setActions(`<div class="btn-row"><a class="btn btn-s" href="${HOME}">← Back to Login</a></div>`);
+    }
+  } catch (e) {
+    setState('error', 'Network Error', 'Could not connect. Please try again.');
+    setProgress(100, 'red');
+  }
+}
+
+// ── MAIN FLOW ─────────────────────────────────────────────────────────────────
+async function init() {
+  // Step 1: Handle explicit errors from Supabase redirect
+  if (errorCode) {
+    const msg = decodeURIComponent(errorDesc || errorCode).replace(/\+/g, ' ');
+    setState('error', 'Auth Failed', msg);
+    setProgress(100, 'red');
+    setActions(`<div class="btn-row"><a class="btn btn-s" href="${HOME}">← Back to Login</a></div>`);
+    return;
+  }
+
+  // Step 2: No token at all — this page was opened directly
+  if (!accessToken) {
+    setState('error', 'No Token', 'No authentication token found. Please start from the login page.');
+    setProgress(100, 'red');
+    setActions(`<div class="btn-row"><a class="btn btn-g" href="${HOME}">→ Go to Login</a></div>`);
+    return;
+  }
+
+  setProgress(40, 'blue');
+
+  // Step 3: Password Recovery
+  if (type === 'recovery') {
+    setProgress(60, 'yellow');
+    showResetForm(accessToken);
+    return;
+  }
+
+  // Step 4: Email confirmation or Google OAuth — get user info
+  setState('loading', 'Almost there…', 'Fetching your account details.');
+  setProgress(60, 'blue');
+
+  const user = await getUserFromToken(accessToken);
+
+  if (!user || user.error) {
+    setState('error', 'Token Invalid', 'This link may have expired. Please request a new one.');
+    setProgress(100, 'red');
+    setActions(`<div class="btn-row"><a class="btn btn-s" href="${HOME}">← Back to Login</a></div>`);
+    return;
+  }
+
+  setProgress(80, 'blue');
+
+  // Step 5: Ensure user profile exists in our DB (important for Google OAuth new users)
+  try {
+    await fetch(EDGE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+      body: JSON.stringify({ action: 'loadAll' })
+    });
+  } catch (e) { /* non-fatal, main app will handle */ }
+
+  setProgress(100, '');
+
+  // Step 6: Determine which flow just completed
+  const isGoogle = user.app_metadata?.provider === 'google';
+  const isEmailConfirm = type === 'signup' || type === 'email_change';
+
+  if (isGoogle) {
+    setState('success', 'Google Sign-In ✓', `Welcome, ${user.email}! Signing you in…`);
+  } else if (isEmailConfirm) {
+    setState('success', 'Email Confirmed ✓', 'Your email has been verified. Signing you in…');
+  } else {
+    // Magic link or other
+    setState('success', 'Signed In ✓', `Welcome back, ${user.email}!`);
+  }
+
+  saveAndRedirect(accessToken, user.email, 2500);
+}
+
+// ── Kick off ──────────────────────────────────────────────────────────────────
+setProgress(20, 'blue');
+init();
+</script>
 </body>
 </html>
