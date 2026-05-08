@@ -7,13 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
-:root {
-  --bg:#060810;--surface:#0b0f1a;--card:#0f1420;--border:#1a2235;--border2:#1f2d45;
-  --accent:#00ff88;--accent2:#0088ff;--accent3:#ff3366;--accent4:#ffaa00;
-  --text:#c8d8e8;--text2:#6a85a0;--muted:#3a4f65;
-  --mono:'JetBrains Mono',monospace;--sans:'Cabinet Grotesk',sans-serif;
-  --r:10px;--t:0.15s ease;
-}
+:root{--bg:#060810;--surface:#0b0f1a;--card:#0f1420;--border:#1a2235;--border2:#1f2d45;--accent:#00ff88;--accent2:#0088ff;--accent3:#ff3366;--accent4:#ffaa00;--text:#c8d8e8;--text2:#6a85a0;--muted:#3a4f65;--mono:'JetBrains Mono',monospace;--sans:'Cabinet Grotesk',sans-serif;--r:10px;--t:0.15s ease;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
@@ -74,7 +68,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sb-footer{padding:12px;border-top:1px solid var(--border);}
 .logout-btn{width:100%;padding:9px;background:rgba(255,51,102,.06);border:1px solid rgba(255,51,102,.15);border-radius:8px;color:var(--accent3);font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:var(--t);}
 .logout-btn:hover{background:rgba(255,51,102,.12);}
-.main{flex:1;display:flex;direction:column;overflow:hidden;min-width:0;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .topbar{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;background:var(--surface);}
 .topbar-title{font-size:15px;font-weight:800;color:#fff;flex:1;letter-spacing:-.3px;}
 .status-pip{width:7px;height:7px;border-radius:50%;background:var(--muted);}
@@ -151,6 +145,7 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 .badge-failed,.badge-cold{background:rgba(255,51,102,.08);color:var(--accent3);border:1px solid rgba(255,51,102,.15);}
 .badge-replied,.badge-visited{background:rgba(0,136,255,.08);color:var(--accent2);border:1px solid rgba(0,136,255,.15);}
 .badge-followed_up{background:rgba(255,170,0,.08);color:var(--accent4);}
+.badge-blacklisted{background:rgba(255,51,102,.15);color:#ff8fa3;border:1px solid rgba(255,51,102,.25);}
 .prog-wrap{background:var(--bg);border-radius:20px;height:6px;overflow:hidden;}
 .prog{height:100%;border-radius:20px;transition:width .4s ease;}
 .prog-g{background:linear-gradient(90deg,var(--accent),#00ccff);}
@@ -202,8 +197,6 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 .int-logo.p{background:rgba(147,51,234,.1);}
 .int-logo.o{background:rgba(255,150,51,.1);}
 .int-logo.t{background:rgba(20,184,166,.1);}
-.int-title{font-size:14px;font-weight:700;color:#fff;}
-.int-desc{font-size:11px;color:var(--text2);margin-top:2px;}
 .key-wrap{position:relative;}
 .key-wrap input{padding-right:70px;}
 .key-tog{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--accent);cursor:pointer;background:var(--card);padding:3px 7px;border-radius:4px;border:1px solid var(--border);}
@@ -233,29 +226,52 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .var-item:last-child{border-bottom:none;}
 .var-num{font-family:var(--mono);font-size:9px;color:var(--accent);margin-bottom:3px;}
 .var-text{font-size:12px;color:var(--text);}
+/* ── NEW: Preview Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:480px;max-width:100%;max-height:80vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:16px;}
+.preview-bubble{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.18);border-radius:14px 14px 4px 14px;padding:14px 16px;font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;max-width:340px;margin:0 auto;}
+/* ── NEW: Tag chip ── */
+.tag-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-family:var(--mono);font-weight:700;background:rgba(0,136,255,.1);color:var(--accent2);border:1px solid rgba(0,136,255,.2);cursor:pointer;}
+.tag-chip:hover{background:rgba(0,136,255,.2);}
+/* ── NEW: Scheduler box ── */
+.scheduler-box{background:rgba(255,170,0,.04);border:1px solid rgba(255,170,0,.2);border-radius:10px;padding:14px;margin-bottom:14px;}
+.sched-status{font-family:var(--mono);font-size:11px;color:var(--accent4);margin-top:8px;}
+/* ── NEW: Quick Send ── */
+.quick-send-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding:14px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;margin-bottom:14px;}
+/* ── NEW: Blacklist ── */
+.bl-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;}
+.bl-item:last-child{border-bottom:none;}
+/* ── NEW: Device health ── */
+.health-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.health-row:last-child{border-bottom:none;}
+.health-lbl{color:var(--text2);min-width:120px;font-family:var(--mono);font-size:10px;}
+.health-val{color:var(--text);font-weight:600;}
 @media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}.sidebar{width:190px;}.pipeline{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:640px){.sidebar{display:none;}.content{padding:14px;}.pipeline{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
 
+<!-- AUTH -->
 <div class="auth-wrap" id="authWrap">
   <div class="auth-box">
     <div class="auth-logo">
       <div class="auth-logo-tag">WA · BLAST · CRM</div>
       <h1>Lead<span>Flow</span></h1>
-      <p>// whatsapp automation platform v2.0</p>
+      <p>// whatsapp automation platform v2.1</p>
     </div>
     <div class="auth-card" id="authCard"></div>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div class="dash" id="dash">
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-tag">LEADFLOW</div>
       <h1>Lead<span>Flow</span></h1>
-      <div class="version">v2.0 · multitenancy</div>
+      <div class="version">v2.1 · multitenancy</div>
     </div>
     <div class="user-pill">
       <div class="user-av" id="userAv">A</div>
@@ -281,6 +297,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <button class="logout-btn" onclick="logout()">← Logout</button>
     </div>
   </aside>
+
   <main class="main">
     <div class="topbar">
       <div class="topbar-title" id="topTitle">Settings</div>
@@ -288,484 +305,864 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <div class="status-lbl" id="topLbl" style="color:var(--muted)">NO DEVICE</div>
     </div>
     <div class="content">
-      <!-- All 8 tabs with FULL content - compressed for length but all features intact -->
-      <div class="tab" id="tab-device"><div class="sec-hdr"><div><div class="sec-title">Link Device</div><div class="sec-sub">// connect your whatsapp number</div></div><div class="btn-row"><span id="wsStatusBadge" class="ws-badge" style="display:none"></span><button class="btn btn-b btn-sm" onclick="syncDevice()" id="syncBtn" style="display:none">🔄 Sync</button><button class="btn btn-s btn-sm" onclick="loadQR()">🔄 Load QR</button><button class="btn btn-d btn-sm" id="unlinkBtn" onclick="unlinkDevice()" style="display:none">🔌 Unlink</button></div></div><div class="warn-ban" id="devWarn" style="display:none"><span>⚠️</span><span>One device per account. Unlink first to connect a new one.</span></div><div class="dev-card" id="devCard"><div class="dev-icon" id="devIcon">📵</div><div class="dev-info"><div class="dev-title" id="devTitle">No device linked</div><div class="dev-id" id="devId">Scan QR code below to link WhatsApp</div></div><div><span class="pip-dot off" id="pipDot"></span><span style="font-family:var(--mono);font-size:10px;color:var(--text2)" id="pipLbl">OFFLINE</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start"><div class="card"><div class="card-title">QR Code</div><div class="qr-wrap" id="qrWrap"><div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:12px;color:var(--text2);font-family:var(--mono)">Click Load QR to begin</div></div><div style="margin-top:12px;text-align:center"><button class="btn btn-g" onclick="loadQR()">Load QR Code</button></div><div style="margin-top:8px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)" id="qrTimer"></div></div><div class="card"><div class="card-title">How to Link</div><ul class="steps"><li>Click <strong style="color:var(--accent)">Load QR Code</strong></li><li>Open WhatsApp on your phone</li><li>Go to <strong>Settings → Linked Devices</strong></li><li>Tap <strong>Link a Device</strong></li><li>Scan the QR code — auto-detects via WebSocket</li></ul><div style="margin-top:14px;padding:10px;background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.15);border-radius:8px;font-size:11px;color:var(--accent4);font-family:var(--mono)">⚠ QR expires in 60s — refresh if timed out</div></div></div></div>
-      <div class="tab" id="tab-contacts"><div class="sec-hdr"><div><div class="sec-title">Contacts</div><div class="sec-sub">// upload, paste or import from group</div></div><div class="btn-row"><button class="btn btn-s btn-sm" onclick="dedupe()">🔄 Dedupe</button><button class="btn btn-s btn-sm" onclick="exportContacts()">📥 Export</button><button class="btn btn-b btn-sm" onclick="openGroupImport()">📲 From Group</button><button class="btn btn-d btn-sm" onclick="clearContacts()">🗑 Clear</button><button class="btn btn-g btn-sm" onclick="saveContacts()">💾 Save</button></div></div><div class="card"><div class="card-title">Import</div><div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap"><button class="btn btn-s" onclick="document.getElementById('csvFile').click()">📂 Upload CSV/Excel</button><input type="file" id="csvFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(this)"/><button class="btn btn-s" onclick="togglePaste()">📋 Paste Data</button></div><div id="pasteArea" style="display:none"><div class="fg"><label>Paste — Name · Phone · Message</label><textarea id="pasteInput" rows="4" placeholder="John&#9;9876543210&#9;Hi John!"></textarea></div><button class="btn btn-g btn-sm" onclick="parsePaste()">Parse</button></div></div><div class="card" id="groupCard" style="display:none"><div class="card-title">Import from Group</div><button class="btn btn-s btn-sm" style="margin-bottom:10px" onclick="fetchGroups()">🔄 Fetch Groups</button><div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px" id="groupList"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Click Fetch Groups</div></div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="importGroup()">Import Selected</button><button class="btn btn-s btn-sm" onclick="document.getElementById('groupCard').style.display='none'">Cancel</button></div></div><div class="card" style="padding:0;overflow:hidden"><div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between"><span class="card-title" style="margin:0">Preview — <span id="conTotal">0</span> contacts</span><input type="text" placeholder="Search..." style="width:160px;padding:6px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);outline:none" oninput="filterContacts(this.value)"/></div><div class="tbl-wrap" style="border:none;border-radius:0"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Message</th><th>Status</th><th></th></tr></thead><tbody id="conBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No contacts yet</td></tr></tbody></table></div></div></div>
-      <div class="tab" id="tab-compose"><div class="sec-hdr"><div><div class="sec-title">Compose</div><div class="sec-sub">// message template + attachments</div></div><button class="btn btn-g" onclick="saveTemplate()">💾 Save Template</button></div><div class="card"><div class="card-title">Message Body</div><div class="fg" style="margin-bottom:10px"><label>Template — use {name} for personalisation</label><div style="position:relative"><textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special! 🎉" oninput="updateCC(this)"></textarea><span style="position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;color:var(--muted)" id="cc">0</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-s btn-sm" onclick="ins('{name}')">+{name}</button><button class="btn btn-s btn-sm" onclick="ins('{phone}')">+{phone}</button><div style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-y btn-sm" onclick="genVariations()">✨ AI 10 Variations</button><button class="btn btn-s btn-sm" onclick="clearVars()">🔄 Reset</button></div></div></div><div class="card"><div class="card-title">Attachment</div><div class="attach-grid"><div class="attach-opt sel" onclick="selAttach('none',this)"><span>🚫</span>none</div><div class="attach-opt" onclick="selAttach('image',this)"><span>📷</span>image</div><div class="attach-opt" onclick="selAttach('video',this)"><span>🎥</span>video</div><div class="attach-opt" onclick="selAttach('document',this)"><span>📄</span>doc</div><div class="attach-opt" onclick="selAttach('poll',this)"><span>📊</span>poll</div></div><div id="attachArea" style="display:none"><button class="btn btn-s btn-sm" onclick="document.getElementById('attachFile').click()">📂 Choose File</button><input type="file" id="attachFile" style="display:none" onchange="handleAttach(this)"/><div id="attachPreview" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px"><span id="attachEmoji" style="font-size:18px">📎</span><div><div style="font-size:12px;font-weight:600" id="attachName">file</div><div style="font-size:10px;color:var(--text2)" id="attachSize">0KB</div></div><button class="btn btn-d btn-sm" style="margin-left:auto" onclick="clearAttach()">✕</button></div></div><div id="pollArea" style="display:none"><div class="fg"><label>Poll Question</label><input type="text" id="pollQ" placeholder="What's your preference?"/></div><div id="pollOpts"><div class="fg"><label>Option 1</label><input type="text" placeholder="Option A"/></div><div class="fg"><label>Option 2</label><input type="text" placeholder="Option B"/></div></div><button class="btn btn-s btn-sm" onclick="addPollOpt()">+ Add Option</button></div></div><div id="varPanel" style="display:none"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="card-title" style="margin:0">AI Variations</div><span style="font-family:var(--mono);font-size:11px;color:var(--accent)" id="varCount">0 variations · cycling 🔄</span></div><div id="varList" style="max-height:280px;overflow-y:auto"></div></div></div></div>
-      <div class="tab" id="tab-send"><div class="sec-hdr"><div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div></div><div class="stat-row"><div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSent">0</div><div class="stat-lbl">Sent</div></div><div class="stat y"><div class="stat-ico">⏳</div><div class="stat-val" id="sPend">0</div><div class="stat-lbl">Pending</div></div><div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div><div class="stat b"><div class="stat-ico">💬</div><div class="stat-val" id="sReply">0</div><div class="stat-lbl">Replied</div></div></div><div class="send-ctrl"><div class="ctrl-row"><button class="big-btn start" onclick="startSend()">▶</button><button class="big-btn pause" onclick="pauseSend()">⏸</button><button class="big-btn stop" onclick="stopSend()">⏹</button><div class="send-info"><div class="cur" id="curCon">Ready to send</div><div class="que" id="queStatus">0 / 0 processed</div></div></div><div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--text2)">Progress</span><span style="font-family:var(--mono);font-size:11px;color:var(--accent)" id="progPct">0%</span></div><div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div><div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent Today</div><div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="todaySent">0</span> / <span id="dayLimDisp">200</span></div><div class="prog-wrap" style="margin-top:5px"><div class="prog prog-r" id="dayBar" style="width:0%"></div></div></div><div><div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent This Hour</div><div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="hourSent">0</span> / <span id="hourLimDisp">30</span></div><div class="prog-wrap" style="margin-top:5px"><div class="prog prog-g" id="hourBar" style="width:0%"></div></div></div></div></div></div>
-      <div class="tab" id="tab-leads"><div class="sec-hdr"><div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div><div class="btn-row"><button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button><button class="btn btn-s btn-sm" onclick="exportLeads()">📥 Export</button><button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button></div></div><div class="pipeline"><div class="pipe-stage new"><div class="pipe-count" id="p-new">0</div><div class="pipe-label">New</div></div><div class="pipe-stage contacted"><div class="pipe-count" id="p-contacted">0</div><div class="pipe-label">Contacted</div></div><div class="pipe-stage visited"><div class="pipe-count" id="p-visited">0</div><div class="pipe-label">Visited</div></div><div class="pipe-stage booked"><div class="pipe-count" id="p-booked">0</div><div class="pipe-label">Booked ✅</div></div><div class="pipe-stage followed_up"><div class="pipe-count" id="p-followed_up">0</div><div class="pipe-label">Follow-up</div></div><div class="pipe-stage cold"><div class="pipe-count" id="p-cold">0</div><div class="pipe-label">Cold ❄️</div></div></div><div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><input type="text" id="leadSearch" placeholder="🔍 Search..." style="flex:1;min-width:180px;max-width:260px;padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none" oninput="filterLeads()"/><select id="leadStatusF" onchange="filterLeads()" style="padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none"><option value="all">All Statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="visited">Visited</option><option value="booked">Booked</option><option value="followed_up">Follow-up</option><option value="cold">Cold</option></select></div><div class="card" style="padding:0;overflow:hidden"><div class="tbl-wrap" style="border:none;border-radius:0"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead><tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody></table></div></div></div>
-      <div class="tab" id="tab-config"><div class="sec-hdr"><div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up logic</div></div><button class="btn btn-g" onclick="saveConfig()">💾 Save Config</button></div><div class="card"><div class="card-title">WhatsApp Templates</div><div class="fg"><label>Initial Message</label><textarea id="cfgWaTpl" rows="3" placeholder="Hi {name}! 👋 Book here: {link}"></textarea></div><div class="grid2"><div class="fg"><label>Follow-up 1 (30 min)</label><textarea id="cfgWaFu1" rows="3" placeholder="Hey {name} 👀 Still interested?"></textarea></div><div class="fg"><label>Follow-up 2 (24 hrs)</label><textarea id="cfgWaFu2" rows="3" placeholder="Hi {name}! 🎁 Last chance: {link}"></textarea></div></div><div class="btn-row" style="margin-top:8px"><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaTpl')">✨ AI Initial</button><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu1')">✨ AI FU1</button><button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu2')">✨ AI FU2</button></div></div><div class="card"><div class="card-title">Email Templates</div><div class="fg"><label>Subject</label><input type="text" id="cfgEmailSubj" placeholder="We received your enquiry, {name}!"/></div><div class="fg"><label>Body (HTML supported)</label><textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out!"></textarea></div></div><div class="card"><div class="card-title">Follow-up Engine</div><div class="tog-row"><div><div class="tog-info">Follow-up 1</div><div class="tog-sub">Send after X minutes if not booked</div></div><label class="tog"><input type="checkbox" id="fu1En" checked/><span class="tog-sl"></span></label></div><div class="grid2" style="margin-top:10px;margin-bottom:14px"><div class="fg"><label>Delay (minutes)</label><input type="number" id="fu1Delay" value="30" min="5"/></div><div class="fg"><label>Trigger</label><select id="fu1Trig"><option value="not_booked">Not booked yet</option><option value="visited_not_booked">Visited but not booked</option></select></div></div><div class="tog-row"><div><div class="tog-info">Follow-up 2</div><div class="tog-sub">Send after X hours if still not booked</div></div><label class="tog"><input type="checkbox" id="fu2En" checked/><span class="tog-sl"></span></label></div><div class="grid2" style="margin-top:10px"><div class="fg"><label>Delay (hours)</label><input type="number" id="fu2Delay" value="24" min="1"/></div><div class="fg"><label>Trigger</label><select id="fu2Trig"><option value="not_booked">Not booked yet</option><option value="followed_up_not_booked">After FU1, still not booked</option></select></div></div></div></div>
-      <div class="tab active" id="tab-settings"><!-- Add this inside the Settings tab, before other cards -->
-<div class="card">
-  <div class="card-title">Server Status</div>
-  <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-    <button class="btn btn-b" onclick="checkServerStatus()" id="serverStatusBtn">
-      🔍 Check Server Status
-    </button>
-    <div id="serverStatusDisplay" style="display: flex; align-items: center; gap: 10px;">
-      <span class="status-pip" id="serverStatusPip" style="background: var(--muted);"></span>
-      <span id="serverStatusText" style="font-family: var(--mono); font-size: 12px; color: var(--text2);">Not checked</span>
-    </div>
-  </div>
-  <div id="serverDetails" style="margin-top: 12px; font-size: 11px; color: var(--text2); display: none;"></div>
-</div><div class="sec-hdr"><div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div><button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button></div><div class="card"><div class="card-title">Integrations</div><div class="int-card"><div class="int-hdr"><div class="int-logo g">🌐</div><div><div class="int-title">GoWA Server</div><div class="int-desc">Your WhatsApp API server URL</div></div></div><div class="grid2"><div class="fg"><label>Server URL</label><input type="url" id="cfgGowaUrl" value="https://sanjaywa8-5.onrender.com"/></div><div class="fg"><label>Basic Auth</label><input type="text" id="cfgGowaAuth" placeholder="Leave empty if no auth"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo b">📅</div><div><div class="int-title">Calendly</div><div class="int-desc">Booking link + webhook auto-marks leads booked</div></div></div><div class="grid2"><div class="fg"><label>Booking Link</label><input type="url" id="cfgCalLink" placeholder="https://calendly.com/you/30min"/></div><div class="fg"><label>Webhook URL</label><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer" id="calWebhook" onclick="copyWebhook()">Save to generate URL</div></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo p">📧</div><div><div class="int-title">Resend</div><div class="int-desc">Email API for lead outreach</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgResendKey" placeholder="re_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgResendKey',this)">Show</span></div></div><div class="fg"><label>From Email</label><input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/></div><div class="fg"><label>From Name</label><input type="text" id="cfgFromName" placeholder="Your Business"/></div><div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo o">🤖</div><div><div class="int-title">ManyChat</div><div class="int-desc">Trigger flows + tag subscribers</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgMcKey" placeholder="eyJhbGci..."/><span class="key-tog" onclick="togKey('cfgMcKey',this)">Show</span></div></div><div class="fg"><label>Page ID</label><input type="text" id="cfgMcPageId" placeholder="123456789"/></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo t">🤖</div><div><div class="int-title">Groq AI</div><div class="int-desc">Free AI for message rewrite + auto reply</div></div></div><div class="grid2"><div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgGroqKey" placeholder="gsk_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgGroqKey',this)">Show</span></div></div><div class="fg"><label>Model</label><select id="cfgGroqModel"><option value="llama3-8b-8192">llama3-8b-8192</option><option value="llama3-70b-8192">llama3-70b-8192</option><option value="mixtral-8x7b-32768">mixtral-8x7b</option><option value="gemma2-9b-it">gemma2-9b-it</option></select></div></div></div><div class="int-card"><div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where leads come from</div></div></div><div class="grid2"><div class="fg"><label>Sheet ID</label><input type="text" id="cfgSheetId" placeholder="1BxiMV..."/></div><div class="fg"><label>Tab Name</label><input type="text" id="cfgSheetTab" placeholder="Sheet1"/></div></div><div class="grid3" style="margin-top:8px"><div class="fg"><label>Name Col</label><input type="text" id="cfgColName" placeholder="A" maxlength="2"/></div><div class="fg"><label>Phone Col</label><input type="text" id="cfgColPhone" placeholder="B" maxlength="2"/></div><div class="fg"><label>Email Col</label><input type="text" id="cfgColEmail" placeholder="C" maxlength="2"/></div></div><div class="tog-row"><div><div class="tog-info">Has Header Row</div><div class="tog-sub">Skip first row</div></div><label class="tog"><input type="checkbox" id="cfgHasHeader" checked/><span class="tog-sl"></span></label></div></div></div><div class="card"><div class="card-title">Send Limits</div><div class="grid2"><div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div><div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div></div><div class="fg"><label>Min Gap (seconds)</label><div class="range-row"><input type="range" id="minGap" min="0" max="300" value="30" oninput="document.getElementById('minGapV').textContent=this.value+'s'"/><span class="range-val" id="minGapV">30s</span></div></div><div class="fg"><label>Max Gap (seconds)</label><div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapV').textContent=this.value+'s'"/><span class="range-val" id="maxGapV">90s</span></div></div></div><div class="card"><div class="card-title">Automation</div><div class="tog-row"><div><div class="tog-info">AI Auto Reply</div><div class="tog-sub">Auto-reply incoming messages with Groq</div></div><label class="tog"><input type="checkbox" id="autoReply" onchange="toggleAR()"/><span class="tog-sl"></span></label></div><div id="arPromptArea" style="display:none"><div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div></div><div class="tog-row"><div><div class="tog-info">Pause on Reply</div><div class="tog-sub">Stop blast when contact replies</div></div><label class="tog"><input type="checkbox" id="pauseOnReply" checked/><span class="tog-sl"></span></label></div><div class="tog-row"><div><div class="tog-info">AI Message Rewrite</div><div class="tog-sub">Slightly rewrite each message before sending</div></div><label class="tog"><input type="checkbox" id="aiRewrite"/><span class="tog-sl"></span></label></div></div></div>
-      <div class="tab" id="tab-logs"><div class="sec-hdr"><div><div class="sec-title">Activity Logs</div><div class="sec-sub">// all messages, replies and events</div></div><div class="btn-row"><select id="logFilter" onchange="filterLogs()" style="padding:7px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none"><option value="all">All</option><option value="sent">Sent</option><option value="failed">Failed</option><option value="reply">Replies</option><option value="ai">AI</option><option value="booked">Booked</option></select><button class="btn btn-d btn-sm" onclick="clearLogs()">🗑 Clear</button></div></div><div class="card" style="padding:0"><div id="logsList" style="padding:14px 18px"><div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div></div></div></div>
-    </div>
+
+      <!-- ══════════════════════ DEVICE TAB ══════════════════════ -->
+      <div class="tab" id="tab-device">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Link Device</div><div class="sec-sub">// connect your whatsapp number</div></div>
+          <div class="btn-row">
+            <span id="wsStatusBadge" class="ws-badge" style="display:none"></span>
+            <button class="btn btn-b btn-sm" onclick="syncDevice()" id="syncBtn" style="display:none">🔄 Sync</button>
+            <button class="btn btn-s btn-sm" onclick="loadQR()">🔄 Load QR</button>
+            <button class="btn btn-d btn-sm" id="unlinkBtn" onclick="unlinkDevice()" style="display:none">🔌 Unlink</button>
+          </div>
+        </div>
+        <div class="warn-ban" id="devWarn" style="display:none"><span>⚠️</span><span>One device per account. Unlink first to connect a new one.</span></div>
+        <div class="dev-card" id="devCard">
+          <div class="dev-icon" id="devIcon">📵</div>
+          <div class="dev-info">
+            <div class="dev-title" id="devTitle">No device linked</div>
+            <div class="dev-id" id="devId">Scan QR code below to link WhatsApp</div>
+          </div>
+          <div><span class="pip-dot off" id="pipDot"></span><span style="font-family:var(--mono);font-size:10px;color:var(--text2)" id="pipLbl">OFFLINE</span></div>
+        </div>
+
+        <!-- NEW: Device Health -->
+        <div class="card" id="deviceHealthCard" style="display:none">
+          <div class="card-title">📊 Device Health</div>
+          <div class="health-row"><span class="health-lbl">STATUS</span><span class="health-val" id="healthStatus">—</span></div>
+          <div class="health-row"><span class="health-lbl">DEVICE ID</span><span class="health-val" id="healthId" style="font-size:10px">—</span></div>
+          <div class="health-row"><span class="health-lbl">LAST PING</span><span class="health-val" id="healthPing">—</span></div>
+          <div class="health-row"><span class="health-lbl">UPTIME CHECK</span><span class="health-val" id="healthUptime">—</span></div>
+          <div class="health-row"><span class="health-lbl">MESSAGES TODAY</span><span class="health-val" id="healthMsgs">—</span></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+          <div class="card">
+            <div class="card-title">QR Code</div>
+            <div class="qr-wrap" id="qrWrap">
+              <div style="font-size:36px;margin-bottom:10px">📱</div>
+              <div style="font-size:12px;color:var(--text2);font-family:var(--mono)">Click Load QR to begin</div>
+            </div>
+            <div style="margin-top:12px;text-align:center"><button class="btn btn-g" onclick="loadQR()">Load QR Code</button></div>
+            <div style="margin-top:8px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted)" id="qrTimer"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">How to Link</div>
+            <ul class="steps">
+              <li>Click <strong style="color:var(--accent)">Load QR Code</strong></li>
+              <li>Open WhatsApp on your phone</li>
+              <li>Go to <strong>Settings → Linked Devices</strong></li>
+              <li>Tap <strong>Link a Device</strong></li>
+              <li>Scan the QR — auto-detects connection</li>
+            </ul>
+            <div style="margin-top:14px;padding:10px;background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.15);border-radius:8px;font-size:11px;color:var(--accent4);font-family:var(--mono)">⚠ QR expires in 60s — refresh if timed out</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ CONTACTS TAB ══════════════════════ -->
+      <div class="tab" id="tab-contacts">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Contacts</div><div class="sec-sub">// upload, paste or import from group</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="dedupe()">🔄 Dedupe</button>
+            <button class="btn btn-s btn-sm" onclick="exportContacts()">📥 Export</button>
+            <button class="btn btn-b btn-sm" onclick="openGroupImport()">📲 From Group</button>
+            <button class="btn btn-y btn-sm" onclick="resetAllPending()">♻️ Reset All</button>
+            <button class="btn btn-d btn-sm" onclick="clearContacts()">🗑 Clear</button>
+            <button class="btn btn-g btn-sm" onclick="saveContacts()">💾 Save</button>
+          </div>
+        </div>
+
+        <!-- NEW: Tag Filter Bar -->
+        <div class="card" style="padding:12px 16px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text2)">FILTER BY TAG:</span>
+            <span class="tag-chip" style="background:rgba(0,255,136,.1);color:var(--accent);border-color:rgba(0,255,136,.2);" onclick="filterByTag('all')">All</span>
+            <div id="tagFilterChips"></div>
+            <button class="btn btn-s btn-sm" onclick="showTagManager()">🏷️ Manage Tags</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Import</div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <button class="btn btn-s" onclick="document.getElementById('csvFile').click()">📂 Upload CSV/Excel</button>
+            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(this)"/>
+            <button class="btn btn-s" onclick="togglePaste()">📋 Paste Data</button>
+          </div>
+          <div id="pasteArea" style="display:none">
+            <div class="fg"><label>Paste — Name · Phone · Message</label><textarea id="pasteInput" rows="4" placeholder="John&#9;9876543210&#9;Hi John!"></textarea></div>
+            <button class="btn btn-g btn-sm" onclick="parsePaste()">Parse</button>
+          </div>
+        </div>
+
+        <div class="card" id="groupCard" style="display:none">
+          <div class="card-title">Import from Group</div>
+          <button class="btn btn-s btn-sm" style="margin-bottom:10px" onclick="fetchGroups()">🔄 Fetch Groups</button>
+          <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px" id="groupList"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Click Fetch Groups</div></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn btn-g btn-sm" onclick="importGroup()">Import Selected</button>
+            <button class="btn btn-s btn-sm" onclick="document.getElementById('groupCard').style.display='none'">Cancel</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <span class="card-title" style="margin:0">Preview — <span id="conTotal">0</span> contacts</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="text" placeholder="Search..." style="width:160px;padding:6px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);outline:none" oninput="filterContacts(this.value)"/>
+              <select id="tagFilterSel" onchange="filterByTag(this.value)" style="padding:6px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);outline:none">
+                <option value="all">All Tags</option>
+              </select>
+            </div>
+          </div>
+          <div class="tbl-wrap" style="border:none;border-radius:0">
+            <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Tag</th><th>Message</th><th>Status</th><th></th></tr></thead>
+            <tbody id="conBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No contacts yet</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ COMPOSE TAB ══════════════════════ -->
+      <div class="tab" id="tab-compose">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Compose</div><div class="sec-sub">// message template + attachments</div></div>
+          <div class="btn-row">
+            <button class="btn btn-b" onclick="previewMessage()">👁 Preview</button>
+            <button class="btn btn-g" onclick="saveTemplate()">💾 Save Template</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Message Body</div>
+          <div class="fg" style="margin-bottom:10px">
+            <label>Template — use {name} for personalisation</label>
+            <div style="position:relative"><textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special! 🎉" oninput="updateCC(this)"></textarea><span style="position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;color:var(--muted)" id="cc">0</span></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-s btn-sm" onclick="ins('{name}')">+{name}</button>
+            <button class="btn btn-s btn-sm" onclick="ins('{phone}')">+{phone}</button>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btn-y btn-sm" onclick="genVariations()">✨ AI 10 Variations</button>
+              <button class="btn btn-s btn-sm" onclick="clearVars()">🔄 Reset</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Attachment</div>
+          <div class="attach-grid">
+            <div class="attach-opt sel" onclick="selAttach('none',this)"><span>🚫</span>none</div>
+            <div class="attach-opt" onclick="selAttach('image',this)"><span>📷</span>image</div>
+            <div class="attach-opt" onclick="selAttach('video',this)"><span>🎥</span>video</div>
+            <div class="attach-opt" onclick="selAttach('document',this)"><span>📄</span>doc</div>
+            <div class="attach-opt" onclick="selAttach('poll',this)"><span>📊</span>poll</div>
+          </div>
+          <div id="attachArea" style="display:none">
+            <button class="btn btn-s btn-sm" onclick="document.getElementById('attachFile').click()">📂 Choose File</button>
+            <input type="file" id="attachFile" style="display:none" onchange="handleAttach(this)"/>
+            <div id="attachPreview" style="display:none;margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px"><span id="attachEmoji" style="font-size:18px">📎</span><div><div style="font-size:12px;font-weight:600" id="attachName">file</div><div style="font-size:10px;color:var(--text2)" id="attachSize">0KB</div></div><button class="btn btn-d btn-sm" style="margin-left:auto" onclick="clearAttach()">✕</button></div>
+          </div>
+          <div id="pollArea" style="display:none">
+            <div class="fg"><label>Poll Question</label><input type="text" id="pollQ" placeholder="What's your preference?"/></div>
+            <div id="pollOpts"><div class="fg"><label>Option 1</label><input type="text" placeholder="Option A"/></div><div class="fg"><label>Option 2</label><input type="text" placeholder="Option B"/></div></div>
+            <button class="btn btn-s btn-sm" onclick="addPollOpt()">+ Add Option</button>
+          </div>
+        </div>
+        <div id="varPanel" style="display:none">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div class="card-title" style="margin:0">AI Variations</div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--accent)" id="varCount">0 variations · cycling 🔄</span>
+            </div>
+            <div id="varList" style="max-height:280px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ SEND TAB ══════════════════════ -->
+      <div class="tab" id="tab-send">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div>
+        </div>
+
+        <!-- NEW: Quick Send -->
+        <div class="card">
+          <div class="card-title">⚡ Quick Send (Single Message)</div>
+          <div class="quick-send-bar">
+            <div class="fg" style="flex:1;min-width:140px;margin-bottom:0"><label>Phone</label><input type="tel" id="qsPhone" placeholder="919876543210"/></div>
+            <div class="fg" style="flex:2;min-width:180px;margin-bottom:0"><label>Message</label><input type="text" id="qsMsg" placeholder="Hi! Quick message here…"/></div>
+            <button class="btn btn-g" onclick="quickSend()">📤 Send Now</button>
+          </div>
+        </div>
+
+        <!-- NEW: Campaign Scheduler -->
+        <div class="card">
+          <div class="card-title">🕐 Campaign Scheduler</div>
+          <div class="scheduler-box">
+            <div class="grid2">
+              <div class="fg" style="margin-bottom:0"><label>Schedule Date & Time</label><input type="datetime-local" id="schedDateTime"/></div>
+              <div class="fg" style="margin-bottom:0;display:flex;flex-direction:column;justify-content:flex-end">
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-y" onclick="scheduleBlast()">⏰ Schedule Blast</button>
+                  <button class="btn btn-d btn-sm" onclick="cancelSchedule()" id="cancelSchedBtn" style="display:none">✕ Cancel</button>
+                </div>
+              </div>
+            </div>
+            <div class="sched-status" id="schedStatus" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSent">0</div><div class="stat-lbl">Sent</div></div>
+          <div class="stat y"><div class="stat-ico">⏳</div><div class="stat-val" id="sPend">0</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div>
+          <div class="stat b"><div class="stat-ico">💬</div><div class="stat-val" id="sReply">0</div><div class="stat-lbl">Replied</div></div>
+        </div>
+        <div class="send-ctrl">
+          <div class="ctrl-row">
+            <button class="big-btn start" onclick="startSend()">▶</button>
+            <button class="big-btn pause" onclick="pauseSend()">⏸</button>
+            <button class="big-btn stop" onclick="stopSend()">⏹</button>
+            <div class="send-info">
+              <div class="cur" id="curCon">Ready to send</div>
+              <div class="que" id="queStatus">0 / 0 processed</div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--text2)">Progress</span><span style="font-family:var(--mono);font-size:11px;color:var(--accent)" id="progPct">0%</span></div>
+            <div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent Today</div>
+              <div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="todaySent">0</span> / <span id="dayLimDisp">200</span></div>
+              <div class="prog-wrap" style="margin-top:5px"><div class="prog prog-r" id="dayBar" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text2);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:1px">Sent This Hour</div>
+              <div style="font-family:var(--mono);font-size:16px;color:#fff"><span id="hourSent">0</span> / <span id="hourLimDisp">30</span></div>
+              <div class="prog-wrap" style="margin-top:5px"><div class="prog prog-g" id="hourBar" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ LEADS TAB ══════════════════════ -->
+      <div class="tab" id="tab-leads">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// incoming leads from your sheet</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button>
+            <button class="btn btn-s btn-sm" onclick="exportLeads()">📥 Export</button>
+            <button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button>
+          </div>
+        </div>
+        <div class="pipeline">
+          <div class="pipe-stage new"><div class="pipe-count" id="p-new">0</div><div class="pipe-label">New</div></div>
+          <div class="pipe-stage contacted"><div class="pipe-count" id="p-contacted">0</div><div class="pipe-label">Contacted</div></div>
+          <div class="pipe-stage visited"><div class="pipe-count" id="p-visited">0</div><div class="pipe-label">Visited</div></div>
+          <div class="pipe-stage booked"><div class="pipe-count" id="p-booked">0</div><div class="pipe-label">Booked ✅</div></div>
+          <div class="pipe-stage followed_up"><div class="pipe-count" id="p-followed_up">0</div><div class="pipe-label">Follow-up</div></div>
+          <div class="pipe-stage cold"><div class="pipe-count" id="p-cold">0</div><div class="pipe-label">Cold ❄️</div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input type="text" id="leadSearch" placeholder="🔍 Search..." style="flex:1;min-width:180px;max-width:260px;padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none" oninput="filterLeads()"/>
+          <select id="leadStatusF" onchange="filterLeads()" style="padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none">
+            <option value="all">All Statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="visited">Visited</option><option value="booked">Booked</option><option value="followed_up">Follow-up</option><option value="cold">Cold</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="tbl-wrap" style="border:none;border-radius:0">
+            <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead>
+            <tbody id="leadBody"><tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ CONFIG TAB ══════════════════════ -->
+      <div class="tab" id="tab-config">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up logic</div></div>
+          <button class="btn btn-g" onclick="saveConfig()">💾 Save Config</button>
+        </div>
+        <div class="card">
+          <div class="card-title">WhatsApp Templates</div>
+          <div class="fg"><label>Initial Message</label><textarea id="cfgWaTpl" rows="3" placeholder="Hi {name}! 👋 Book here: {link}"></textarea></div>
+          <div class="grid2">
+            <div class="fg"><label>Follow-up 1 (30 min)</label><textarea id="cfgWaFu1" rows="3" placeholder="Hey {name} 👀 Still interested?"></textarea></div>
+            <div class="fg"><label>Follow-up 2 (24 hrs)</label><textarea id="cfgWaFu2" rows="3" placeholder="Hi {name}! 🎁 Last chance: {link}"></textarea></div>
+          </div>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaTpl')">✨ AI Initial</button>
+            <button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu1')">✨ AI FU1</button>
+            <button class="btn btn-y btn-sm" onclick="aiRewriteField('cfgWaFu2')">✨ AI FU2</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Email Templates</div>
+          <div class="fg"><label>Subject</label><input type="text" id="cfgEmailSubj" placeholder="We received your enquiry, {name}!"/></div>
+          <div class="fg"><label>Body (HTML supported)</label><textarea id="cfgEmailBody" rows="5" placeholder="Hi {name},&#10;&#10;Thanks for reaching out!"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Follow-up Engine</div>
+          <div class="tog-row"><div><div class="tog-info">Follow-up 1</div><div class="tog-sub">Send after X minutes if not booked</div></div><label class="tog"><input type="checkbox" id="fu1En" checked/><span class="tog-sl"></span></label></div>
+          <div class="grid2" style="margin-top:10px;margin-bottom:14px">
+            <div class="fg"><label>Delay (minutes)</label><input type="number" id="fu1Delay" value="30" min="5"/></div>
+            <div class="fg"><label>Trigger</label><select id="fu1Trig"><option value="not_booked">Not booked yet</option><option value="visited_not_booked">Visited but not booked</option></select></div>
+          </div>
+          <div class="tog-row"><div><div class="tog-info">Follow-up 2</div><div class="tog-sub">Send after X hours if still not booked</div></div><label class="tog"><input type="checkbox" id="fu2En" checked/><span class="tog-sl"></span></label></div>
+          <div class="grid2" style="margin-top:10px">
+            <div class="fg"><label>Delay (hours)</label><input type="number" id="fu2Delay" value="24" min="1"/></div>
+            <div class="fg"><label>Trigger</label><select id="fu2Trig"><option value="not_booked">Not booked yet</option><option value="followed_up_not_booked">After FU1, still not booked</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ SETTINGS TAB ══════════════════════ -->
+      <div class="tab active" id="tab-settings">
+        <!-- Server Status -->
+        <div class="card">
+          <div class="card-title">Server Status</div>
+          <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+            <button class="btn btn-b" onclick="checkServerStatus()" id="serverStatusBtn">🔍 Check Server</button>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="status-pip" id="serverStatusPip" style="background:var(--muted);"></span>
+              <span id="serverStatusText" style="font-family:var(--mono);font-size:12px;color:var(--text2);">Not checked</span>
+            </div>
+          </div>
+          <div id="serverDetails" style="margin-top:12px;font-size:11px;color:var(--text2);display:none;"></div>
+        </div>
+
+        <div class="sec-hdr">
+          <div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div>
+          <button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+
+        <!-- NEW: Blacklist -->
+        <div class="card">
+          <div class="card-title">🚫 Blacklist — Skip During Blast</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <input type="tel" id="blInput" placeholder="919876543210" style="flex:1;padding:9px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;outline:none"/>
+            <button class="btn btn-d" onclick="addBlacklist()">+ Add</button>
+          </div>
+          <div id="blList" style="max-height:160px;overflow-y:auto">
+            <div style="text-align:center;padding:14px;color:var(--muted);font-size:12px">No numbers blacklisted</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Integrations</div>
+          <div class="int-card">
+            <div class="int-hdr"><div class="int-logo b">📅</div><div><div class="int-title">Calendly</div><div class="int-desc">Booking link + webhook auto-marks leads booked</div></div></div>
+            <div class="grid2">
+              <div class="fg"><label>Booking Link</label><input type="url" id="cfgCalLink" placeholder="https://calendly.com/you/30min"/></div>
+              <div class="fg"><label>Webhook URL</label><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:10px;color:var(--accent);word-break:break-all;cursor:pointer" id="calWebhook" onclick="copyWebhook()">Save to generate URL</div></div>
+            </div>
+          </div>
+          <div class="int-card">
+            <div class="int-hdr"><div class="int-logo p">📧</div><div><div class="int-title">Resend</div><div class="int-desc">Email API for lead outreach</div></div></div>
+            <div class="grid2">
+              <div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgResendKey" placeholder="re_xxxxxxxx"/><span class="key-tog" onclick="togKey('cfgResendKey',this)">Show</span></div></div>
+              <div class="fg"><label>From Email</label><input type="email" id="cfgFromEmail" placeholder="hello@yourdomain.com"/></div>
+              <div class="fg"><label>From Name</label><input type="text" id="cfgFromName" placeholder="Your Business"/></div>
+              <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Test Email</button></div>
+            </div>
+          </div>
+          <div class="int-card">
+            <div class="int-hdr"><div class="int-logo o">🤖</div><div><div class="int-title">ManyChat</div><div class="int-desc">Trigger flows + tag subscribers</div></div></div>
+            <div class="grid2">
+              <div class="fg"><label>API Key</label><div class="key-wrap"><input type="password" id="cfgMcKey" placeholder="eyJhbGci..."/><span class="key-tog" onclick="togKey('cfgMcKey',this)">Show</span></div></div>
+              <div class="fg"><label>Page ID</label><input type="text" id="cfgMcPageId" placeholder="123456789"/></div>
+            </div>
+          </div>
+          <div class="int-card">
+            <div class="int-hdr"><div class="int-logo g">📊</div><div><div class="int-title">Google Sheet — Lead Source</div><div class="int-desc">Sheet where leads come from</div></div></div>
+            <div class="grid2">
+              <div class="fg"><label>Sheet ID</label><input type="text" id="cfgSheetId" placeholder="1BxiMV..."/></div>
+              <div class="fg"><label>Tab Name</label><input type="text" id="cfgSheetTab" placeholder="Sheet1"/></div>
+            </div>
+            <div class="grid3" style="margin-top:8px">
+              <div class="fg"><label>Name Col</label><input type="text" id="cfgColName" placeholder="A" maxlength="2"/></div>
+              <div class="fg"><label>Phone Col</label><input type="text" id="cfgColPhone" placeholder="B" maxlength="2"/></div>
+              <div class="fg"><label>Email Col</label><input type="text" id="cfgColEmail" placeholder="C" maxlength="2"/></div>
+            </div>
+            <div class="tog-row"><div><div class="tog-info">Has Header Row</div><div class="tog-sub">Skip first row</div></div><label class="tog"><input type="checkbox" id="cfgHasHeader" checked/><span class="tog-sl"></span></label></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Send Limits</div>
+          <div class="grid2">
+            <div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div>
+            <div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div>
+          </div>
+          <div class="fg"><label>Min Gap (seconds)</label><div class="range-row"><input type="range" id="minGap" min="0" max="300" value="30" oninput="document.getElementById('minGapV').textContent=this.value+'s'"/><span class="range-val" id="minGapV">30s</span></div></div>
+          <div class="fg"><label>Max Gap (seconds)</label><div class="range-row"><input type="range" id="maxGap" min="10" max="600" value="90" oninput="document.getElementById('maxGapV').textContent=this.value+'s'"/><span class="range-val" id="maxGapV">90s</span></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Automation</div>
+          <div class="tog-row"><div><div class="tog-info">AI Auto Reply</div><div class="tog-sub">Auto-reply incoming messages with AI</div></div><label class="tog"><input type="checkbox" id="autoReply" onchange="toggleAR()"/><span class="tog-sl"></span></label></div>
+          <div id="arPromptArea" style="display:none"><div class="fg"><label>Auto Reply Prompt</label><textarea id="arPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div></div>
+          <div class="tog-row"><div><div class="tog-info">Pause on Reply</div><div class="tog-sub">Stop blast when contact replies</div></div><label class="tog"><input type="checkbox" id="pauseOnReply" checked/><span class="tog-sl"></span></label></div>
+          <div class="tog-row"><div><div class="tog-info">AI Message Rewrite</div><div class="tog-sub">Slightly rewrite each message before sending</div></div><label class="tog"><input type="checkbox" id="aiRewrite"/><span class="tog-sl"></span></label></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════ LOGS TAB ══════════════════════ -->
+      <div class="tab" id="tab-logs">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Activity Logs</div><div class="sec-sub">// all messages, replies and events</div></div>
+          <div class="btn-row">
+            <select id="logFilter" onchange="filterLogs()" style="padding:7px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none">
+              <option value="all">All</option><option value="sent">Sent</option><option value="failed">Failed</option><option value="reply">Replies</option><option value="ai">AI</option><option value="booked">Booked</option>
+            </select>
+            <button class="btn btn-d btn-sm" onclick="clearLogs()">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0"><div id="logsList" style="padding:14px 18px"><div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div></div></div>
+      </div>
+
+    </div><!-- /content -->
   </main>
+</div><!-- /dash -->
+
+<!-- ══ Modals ══ -->
+<div class="modal-overlay" id="previewModal" style="display:none" onclick="if(event.target===this)closePreview()">
+  <div class="modal-box">
+    <div class="modal-title">👁 Message Preview</div>
+    <div style="margin-bottom:12px;font-size:11px;color:var(--text2);font-family:var(--mono)">Showing with first contact's name (or sample)</div>
+    <div class="preview-bubble" id="previewText"></div>
+    <div style="margin-top:18px;display:flex;justify-content:flex-end"><button class="btn btn-s" onclick="closePreview()">Close</button></div>
+  </div>
 </div>
+
+<div class="modal-overlay" id="tagModal" style="display:none" onclick="if(event.target===this)closeTagManager()">
+  <div class="modal-box">
+    <div class="modal-title">🏷️ Tag Manager</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input type="text" id="newTagInput" placeholder="Enter tag name..." style="flex:1;padding:9px 13px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;outline:none"/>
+      <button class="btn btn-g" onclick="addTag()">+ Add</button>
+    </div>
+    <div id="tagList" style="margin-bottom:16px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;font-family:var(--mono)">BULK ASSIGN TAG TO CONTACTS</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="bulkTagSel" style="flex:1;padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);outline:none"></select>
+        <button class="btn btn-b btn-sm" onclick="bulkAssignTag()">Assign to All</button>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end"><button class="btn btn-s" onclick="closeTagManager()">Close</button></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
 const SUPA_URL = 'https://lgfzoprhyjrmosvigwlb.supabase.co';
-let token = null, userId = null, userEmail = null;
-let contacts = [], logs = [], leads = [];
-let deviceId = null, qrCountdown = null;
-let ws = null, wsPollTimer = null;
-let sendState = 'idle', sendIndex = 0, sendTimer = null;
-let todaySentN = 0, hourSentN = 0;
-let selAttachType = 'none', variations = [], varIdx = 0, usingVars = false;
-let gowaUrl = 'https://sanjaywa8-5.onrender.com';
 
-async function api(action, body = {}) {
-  const res = await fetch(EDGE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ action, ...body })
-  });
+let token=null, userId=null, userEmail=null;
+let contacts=[], logs=[], leads=[];
+let deviceId=null;
+let sendState='idle', sendIndex=0, sendTimer=null;
+let todaySentN=0, hourSentN=0;
+let selAttachType='none', variations=[], varIdx=0, usingVars=false;
+let gowaUrl='https://sanjaywa8-5.onrender.com';
+let schedTimer=null;
+// NEW state
+let blacklist=JSON.parse(localStorage.getItem('lf_blacklist')||'[]');
+let tags=JSON.parse(localStorage.getItem('lf_tags')||'[]');
+let activeTagFilter='all';
+let deviceConnectedAt=null, lastPingTime=null;
+
+// ══════════════════════ API ══════════════════════
+async function api(action,body={}){
+  const res=await fetch(EDGE,{method:'POST',headers:{'Content-Type':'application/json',...(token?{'Authorization':`Bearer ${token}`}:{})},body:JSON.stringify({action,...body})});
   return res.json();
 }
 
-function renderAuth(mode = 'login') {
-  const card = document.getElementById('authCard');
-  if (!card) return;
-  const googleBtn = `<button class="btn-google" onclick="googleLogin()"><svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>Continue with Google</button>`;
-  if (mode === 'login') {
-    card.innerHTML = `<h2>Welcome back</h2><p>// sign in to your account</p><div class="auth-msg" id="am"></div>${googleBtn}<div class="divider">or</div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="••••••••"/></div><button class="btn-primary" id="aBtn" onclick="doLogin()">Sign In</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('register')">Create account</span><span class="auth-link" onclick="renderAuth('reset')">Forgot password?</span></div>`;
-  } else if (mode === 'register') {
-    card.innerHTML = `<h2>Create Account</h2><p>// join leadflow</p><div class="auth-msg" id="am"></div>${googleBtn}<div class="divider">or</div><div class="field"><label>Full Name</label><input type="text" id="aName" placeholder="Your Name"/></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="Min 6 characters"/></div><button class="btn-primary" id="aBtn" onclick="doRegister()">Create Account</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back to login</span></div>`;
+// ══════════════════════ AUTH ══════════════════════
+function renderAuth(mode='login'){
+  const card=document.getElementById('authCard');
+  const googleBtn=`<button class="btn-google" onclick="googleLogin()"><svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>Continue with Google</button>`;
+  if(mode==='login'){
+    card.innerHTML=`<h2>Welcome back</h2><p>// sign in to your account</p><div class="auth-msg" id="am"></div>${googleBtn}<div class="divider">or</div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="••••••••"/></div><button class="btn-primary" id="aBtn" onclick="doLogin()">Sign In</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('register')">Create account</span><span class="auth-link" onclick="renderAuth('reset')">Forgot password?</span></div>`;
+  } else if(mode==='register'){
+    card.innerHTML=`<h2>Create Account</h2><p>// join leadflow</p><div class="auth-msg" id="am"></div>${googleBtn}<div class="divider">or</div><div class="field"><label>Full Name</label><input type="text" id="aName" placeholder="Your Name"/></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><div class="field"><label>Password</label><input type="password" id="aPass" placeholder="Min 6 characters"/></div><button class="btn-primary" id="aBtn" onclick="doRegister()">Create Account</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back</span></div>`;
   } else {
-    card.innerHTML = `<h2>Reset Password</h2><p>// we'll send you a reset link</p><div class="auth-msg" id="am"></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><button class="btn-primary" id="aBtn" onclick="doReset()">Send Reset Link</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back to login</span></div>`;
+    card.innerHTML=`<h2>Reset Password</h2><p>// reset link via email</p><div class="auth-msg" id="am"></div><div class="field"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"/></div><button class="btn-primary" id="aBtn" onclick="doReset()">Send Reset Link</button><div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back</span></div>`;
   }
 }
-async function checkServerStatus() {
-  const btn = document.getElementById('serverStatusBtn');
-  const statusPip = document.getElementById('serverStatusPip');
-  const statusText = document.getElementById('serverStatusText');
-  const detailsDiv = document.getElementById('serverDetails');
-  
-  // Disable button and show loading state
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Checking Server...';
-  statusPip.style.background = 'var(--accent4)';
-  statusText.textContent = 'Checking...';
-  statusText.style.color = 'var(--accent4)';
-  detailsDiv.style.display = 'none';
-  
-  const startTime = Date.now();
-  
-  try {
-    // Try to fetch the server status with timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-    
-    const response = await fetch('https://sanjaywa8-5.onrender.com/', {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'Accept': 'text/html,application/json',
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    const endTime = Date.now();
-    const responseTime = endTime - startTime;
-    
-    if (response.ok) {
-      // Server is active
-      statusPip.style.background = 'var(--accent)';
-      statusPip.classList.add('on');
-      statusText.textContent = '🟢 ACTIVE';
-      statusText.style.color = 'var(--accent)';
-      statusText.style.fontWeight = 'bold';
-      
-      // Show detailed info
-      detailsDiv.style.display = 'block';
-      detailsDiv.innerHTML = `
-        <div style="background: rgba(0,255,136,0.05); border-radius: 8px; padding: 10px;">
-          <div>✅ Server is online and responding</div>
-          <div>📡 Status Code: ${response.status} (OK)</div>
-          <div>⏱️ Response Time: ${responseTime}ms</div>
-          <div>🌐 Server: WhatsApp API v8.5.0</div>
-          <div>🔗 URL: https://sanjaywa8-5.onrender.com</div>
-        </div>
-      `;
-      
-      showToast(`✅ Server is ACTIVE (${responseTime}ms)`, false);
-    } else {
-      throw new Error(`HTTP ${response.status}`);
-    }
-  } catch (error) {
-    // Server is not responding or error occurred
-    statusPip.style.background = 'var(--accent3)';
-    statusPip.classList.remove('on');
-    statusText.textContent = '🔴 OFFLINE / TIMEOUT';
-    statusText.style.color = 'var(--accent3)';
-    statusText.style.fontWeight = 'bold';
-    
-    detailsDiv.style.display = 'block';
-    detailsDiv.innerHTML = `
-      <div style="background: rgba(255,51,102,0.05); border-radius: 8px; padding: 10px;">
-        <div>❌ Server is not responding</div>
-        <div>⚠️ Error: ${error.message || 'Connection failed'}</div>
-        <div>💡 Tip: The server may be starting up or experiencing issues</div>
-        <div>🔄 Try again in a few moments</div>
-      </div>
-    `;
-    
-    showToast(`❌ Server OFFLINE - ${error.message}`, true);
-  } finally {
-    // Re-enable button
-    btn.disabled = false;
-    btn.innerHTML = '🔍 Check Server Status';
-    
-    // Auto-hide details after 15 seconds (optional)
-    setTimeout(() => {
-      if (detailsDiv.style.display === 'block') {
-        detailsDiv.style.opacity = '0.5';
-        setTimeout(() => {
-          if (detailsDiv.style.display === 'block') {
-            detailsDiv.style.display = 'none';
-            detailsDiv.style.opacity = '1';
-          }
-        }, 3000);
-      }
-    }, 15000);
-  }
+function amsg(t,txt){const el=document.getElementById('am');if(el){el.className='auth-msg '+t;el.textContent=txt;}}
+async function doLogin(){
+  const email=document.getElementById('aEmail')?.value.trim(),pass=document.getElementById('aPass')?.value.trim();
+  if(!email||!pass)return amsg('error','Email and password required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Signing in…';amsg('loading','Authenticating…');
+  const r=await api('login',{email,password:pass});
+  btn.disabled=false;btn.textContent='Sign In';
+  if(r.success){token=r.token;userEmail=email;userId=r.user?.id||r.profile?.id;document.getElementById('authWrap').style.display='none';document.getElementById('dash').style.display='flex';document.getElementById('userName').textContent=email.split('@')[0];document.getElementById('userAv').textContent=email[0].toUpperCase();await loadData();showToast('Login successful!');}
+  else amsg('error',r.message||'Login failed');
 }
-
-// Optional: Auto-check server status when dashboard loads
-// Add this to your showDash() function or call it after login
-async function autoCheckServerOnLoad() {
-  // Wait a few seconds after dashboard loads, then check
-  setTimeout(() => {
-    checkServerStatus();
-  }, 3000);
+async function doRegister(){
+  const name=document.getElementById('aName')?.value.trim(),email=document.getElementById('aEmail')?.value.trim(),pass=document.getElementById('aPass')?.value.trim();
+  if(!email||!pass)return amsg('error','Email and password required');
+  if(pass.length<6)return amsg('error','Password min 6 chars');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Creating…';amsg('loading','Creating account...');
+  const r=await api('register',{email,password:pass,full_name:name});
+  btn.disabled=false;btn.textContent='Create Account';
+  if(r.success){amsg('success','Account created! You can now login.');setTimeout(()=>renderAuth('login'),2000);}
+  else amsg('error',r.message||'Registration failed');
 }
-function amsg(type, txt) { const el = document.getElementById('am'); if (el) { el.className = 'auth-msg ' + type; el.textContent = txt; } }
-
-async function doLogin() {
-  const email = document.getElementById('aEmail')?.value.trim();
-  const pass = document.getElementById('aPass')?.value.trim();
-  if (!email || !pass) return amsg('error', 'Email and password required');
-  const btn = document.getElementById('aBtn');
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  amsg('loading', 'Authenticating…');
-  const r = await api('login', { email, password: pass });
-  btn.disabled = false; btn.textContent = 'Sign In';
-  if (r.success) {
-    token = r.token;
-    userEmail = email;
-    userId = r.user?.id || r.profile?.id;
-    document.getElementById('authWrap').style.display = 'none';
-    document.getElementById('dash').style.display = 'flex';
-    document.getElementById('userName').textContent = email.split('@')[0];
-    document.getElementById('userAv').textContent = email[0].toUpperCase();
-    await loadData();
-    showToast('Login successful!');
-  } else {
-    amsg('error', r.message || 'Login failed');
-    autoCheckServerOnLoad();
-  }
+async function doReset(){
+  const email=document.getElementById('aEmail')?.value.trim();if(!email)return amsg('error','Email required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;
+  const r=await api('resetPassword',{email});btn.disabled=false;
+  if(r.success)amsg('success','Reset link sent!');else amsg('error',r.message||'Failed');
 }
+async function googleLogin(){const redirectUrl=window.location.origin+window.location.pathname;window.location.href=`${SUPA_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;}
 
-async function doRegister() {
-  const name = document.getElementById('aName')?.value.trim();
-  const email = document.getElementById('aEmail')?.value.trim();
-  const pass = document.getElementById('aPass')?.value.trim();
-  if (!email || !pass) return amsg('error', 'Email and password required');
-  if (pass.length < 6) return amsg('error', 'Password must be at least 6 characters');
-  const btn = document.getElementById('aBtn');
-  btn.disabled = true; btn.textContent = 'Creating…';
-  amsg('loading', 'Creating account...');
-  const r = await api('register', { email, password: pass, full_name: name });
-  btn.disabled = false; btn.textContent = 'Create Account';
-  if (r.success) {
-    amsg('success', 'Account created! You can now login.');
-    setTimeout(() => renderAuth('login'), 2000);
-  } else {
-    amsg('error', r.message || 'Registration failed');
-  }
-}
-
-async function doReset() {
-  const email = document.getElementById('aEmail')?.value.trim();
-  if (!email) return amsg('error', 'Email required');
-  const btn = document.getElementById('aBtn');
-  btn.disabled = true;
-  const r = await api('resetPassword', { email });
-  btn.disabled = false;
-  if (r.success) amsg('success', 'Reset link sent!');
-  else amsg('error', r.message || 'Failed');
-}
-
-async function googleLogin() {
-  const redirectUrl = window.location.origin + window.location.pathname;
-  const authUrl = `${SUPA_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
-  showToast('Redirecting to Google...');
-  setTimeout(() => { window.location.href = authUrl; }, 500);
-}
-
-async function loadData() {
-  const r = await api('loadAll');
-  if (r.success) {
-    if (r.contacts) { contacts = r.contacts; renderContacts(); }
-    if (r.leads) { leads = r.leads; renderLeads(); }
-    if (r.logs) { logs = r.logs; renderLogs(); }
-    if (r.settings) applySettings(r.settings);
-    if (r.device?.device_id) setDevStatus('connected', r.device.device_id);
+// ══════════════════════ LOAD DATA ══════════════════════
+async function loadData(){
+  const r=await api('loadAll');
+  if(r.success){
+    if(r.contacts){contacts=r.contacts;renderContacts();}
+    if(r.leads){leads=r.leads;renderLeads();}
+    if(r.logs){logs=r.logs;renderLogs();}
+    if(r.settings)applySettings(r.settings);
+    if(r.device?.device_id)setDevStatus('connected',r.device.device_id);
     else setDevStatus('disconnected');
-    updateSendStats();
-    updateCalWebhook();
+    updateSendStats();updateCalWebhook();
   }
+  renderBlacklist();renderTagChips();
 }
+function applySettings(s){
+  if(!s)return;
+  if(s.hour_limit)setVal('hourLimit',s.hour_limit);
+  if(s.day_limit)setVal('dayLimit',s.day_limit);
+  if(s.gowa_url){setVal('cfgGowaUrl',s.gowa_url);gowaUrl=s.gowa_url;}
+}
+function updateCalWebhook(){const el=document.getElementById('calWebhook');if(el&&userId)el.textContent=`${EDGE}/calendly-webhook?user=${userId}`;}
+function copyWebhook(){const el=document.getElementById('calWebhook');if(el&&el.textContent!=='Save to generate URL')navigator.clipboard.writeText(el.textContent).then(()=>showToast('Copied ✅'));}
 
-function setDevStatus(state, id) {
-  const pip = document.getElementById('pipDot'), lbl = document.getElementById('pipLbl');
-  const icon = document.getElementById('devIcon'), title = document.getElementById('devTitle');
-  const idEl = document.getElementById('devId'), card = document.getElementById('devCard');
-  const topPip = document.getElementById('topPip'), topLbl = document.getElementById('topLbl');
-  const unlinkBtn = document.getElementById('unlinkBtn'), syncBtn = document.getElementById('syncBtn');
-  const devBadge = document.getElementById('devBadge');
-  if (state === 'connected') {
-    pip.className='pip-dot on'; lbl.textContent='CONNECTED';
-    icon.textContent='📱'; title.textContent='✅ WhatsApp Connected';
-    idEl.textContent='Device: '+(id||'Unknown'); card.className='dev-card on';
-    topPip.className='status-pip on'; topLbl.textContent='CONNECTED'; topLbl.style.color='var(--accent)';
-    unlinkBtn.style.display='inline-flex'; syncBtn.style.display='inline-flex'; devBadge.style.display='none';
-    if (id) deviceId = id;
-  } else if (state === 'scanning') {
-    pip.className='pip-dot scan'; lbl.textContent='SCANNING';
-    icon.textContent='⏳'; title.textContent='Waiting for QR scan…';
-    idEl.textContent=id?`Device: ${id}`:'Open WhatsApp and scan the QR code'; card.className='dev-card';
-    topPip.className='status-pip'; topPip.style.background='var(--accent4)';
-    topLbl.textContent='SCANNING'; topLbl.style.color='var(--accent4)';
-    unlinkBtn.style.display='none'; syncBtn.style.display='inline-flex';
+// ══════════════════════ DEVICE ══════════════════════
+function setDevStatus(state,id){
+  const pip=document.getElementById('pipDot'),lbl=document.getElementById('pipLbl'),icon=document.getElementById('devIcon'),title=document.getElementById('devTitle'),idEl=document.getElementById('devId'),card=document.getElementById('devCard'),topPip=document.getElementById('topPip'),topLbl=document.getElementById('topLbl'),unlinkBtn=document.getElementById('unlinkBtn'),syncBtn=document.getElementById('syncBtn'),devBadge=document.getElementById('devBadge'),healthCard=document.getElementById('deviceHealthCard');
+  if(state==='connected'){
+    pip.className='pip-dot on';lbl.textContent='CONNECTED';icon.textContent='📱';title.textContent='✅ WhatsApp Connected';idEl.textContent='Device: '+(id||'Unknown');card.className='dev-card on';
+    topPip.className='status-pip on';topLbl.textContent='CONNECTED';topLbl.style.color='var(--accent)';
+    unlinkBtn.style.display='inline-flex';syncBtn.style.display='inline-flex';devBadge.style.display='none';
+    if(id)deviceId=id;
+    healthCard.style.display='block';
+    updateDeviceHealth(id);
+  } else if(state==='scanning'){
+    pip.className='pip-dot scan';lbl.textContent='SCANNING';icon.textContent='⏳';title.textContent='Waiting for QR scan…';idEl.textContent=id?`Device: ${id}`:'Open WhatsApp and scan the QR code';card.className='dev-card';
+    topPip.className='status-pip';topPip.style.background='var(--accent4)';topLbl.textContent='SCANNING';topLbl.style.color='var(--accent4)';
+    unlinkBtn.style.display='none';syncBtn.style.display='inline-flex';healthCard.style.display='none';
   } else {
-    pip.className='pip-dot off'; lbl.textContent='OFFLINE';
-    icon.textContent='📵'; title.textContent='No device linked';
-    idEl.textContent='Scan QR code to link WhatsApp'; card.className='dev-card';
-    topPip.className='status-pip'; topPip.style.background='';
-    topLbl.textContent='NO DEVICE'; topLbl.style.color='var(--muted)';
-    unlinkBtn.style.display='none'; syncBtn.style.display='none'; devBadge.style.display='inline';
+    pip.className='pip-dot off';lbl.textContent='OFFLINE';icon.textContent='📵';title.textContent='No device linked';idEl.textContent='Scan QR code to link WhatsApp';card.className='dev-card';
+    topPip.className='status-pip';topPip.style.background='';topLbl.textContent='NO DEVICE';topLbl.style.color='var(--muted)';
+    unlinkBtn.style.display='none';syncBtn.style.display='none';devBadge.style.display='inline';healthCard.style.display='none';
   }
 }
-
-function onDeviceConnected(id) { deviceId = id; setDevStatus('connected', deviceId); }
-
-async function loadQR() {
-  const wrap = document.getElementById('qrWrap');
-  wrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--text2)">Generating QR...</div></div>`;
-  const r = await api('getQR');
-  if (r.success && r.qr_image_url) {
-    wrap.innerHTML = `<img src="${r.qr_image_url}" style="width:200px;height:200px;border-radius:10px;border:2px solid var(--accent)"/>`;
-    deviceId = r.device_id;
-    setDevStatus('scanning', deviceId);
-    pollForConnection();
+function updateDeviceHealth(id){
+  document.getElementById('healthStatus').innerHTML='<span style="color:var(--accent)">✅ Connected</span>';
+  document.getElementById('healthId').textContent=id||deviceId||'—';
+  const now=new Date();
+  lastPingTime=now;
+  document.getElementById('healthPing').textContent=now.toLocaleTimeString();
+  if(!deviceConnectedAt)deviceConnectedAt=now;
+  const uptimeMins=Math.round((now-deviceConnectedAt)/60000);
+  document.getElementById('healthUptime').textContent=uptimeMins<1?'Just connected':`${uptimeMins} min`;
+  document.getElementById('healthMsgs').textContent=todaySentN+' sent today';
+}
+function onDeviceConnected(id){deviceId=id;setDevStatus('connected',deviceId);}
+async function loadQR(){
+  const wrap=document.getElementById('qrWrap');
+  wrap.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--text2)">Generating QR...</div></div>`;
+  const r=await api('getQR');
+  if(r.success&&r.qr_image_url){
+    wrap.innerHTML=`<img src="${r.qr_image_url}" style="width:200px;height:200px;border-radius:10px;border:2px solid var(--accent)"/>`;
+    deviceId=r.device_id;setDevStatus('scanning',deviceId);pollForConnection();
   } else {
-    wrap.innerHTML = `<div style="color:var(--accent3)">Failed to get QR code</div>`;
+    wrap.innerHTML=`<div style="color:var(--accent3);font-size:13px">❌ Failed to get QR<br><span style="font-size:11px;color:var(--text2)">${r.message||'Check server connection'}</span></div>`;
   }
 }
-
-async function pollForConnection() {
-  for (let i = 0; i < 30; i++) {
-    await new Promise(r => setTimeout(r, 2000));
-    const r = await api('checkDeviceStatus');
-    if (r.success && r.is_connected) {
-      onDeviceConnected(r.device_id);
-      showToast('WhatsApp connected! 🎉');
-      break;
-    }
+async function pollForConnection(){
+  for(let i=0;i<30;i++){
+    await new Promise(r=>setTimeout(r,2000));
+    const r=await api('checkDeviceStatus');
+    if(r.success&&r.is_connected){onDeviceConnected(r.device_id||deviceId);showToast('WhatsApp connected! 🎉');break;}
   }
 }
+async function unlinkDevice(){
+  if(!confirm('Unlink your WhatsApp device?'))return;
+  const r=await api('unlinkDevice');
+  if(r.success){deviceId=null;setDevStatus('disconnected');document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:12px">Click Load QR to reconnect</div>';showToast('Device unlinked');}
+}
+async function syncDevice(){showToast('Syncing...');const r=await api('checkDeviceStatus');if(r.success&&r.is_connected)onDeviceConnected(r.device_id||deviceId);else showToast('Not connected',true);}
+async function checkDevice(){const r=await api('checkDeviceStatus');if(r.success&&r.is_connected)onDeviceConnected(r.device_id||deviceId);else setDevStatus('disconnected');}
 
-async function unlinkDevice() {
-  if (!confirm('Unlink your WhatsApp device?')) return;
-  const r = await api('unlinkDevice');
-  if (r.success) {
-    deviceId = null;
-    setDevStatus('disconnected');
-    document.getElementById('qrWrap').innerHTML = '<div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-size:12px">Click Load QR to reconnect</div>';
-    showToast('Device unlinked');
-  }
+// ══════════════════════ CONTACTS ══════════════════════
+function renderContacts(filtered){
+  const list=filtered||contacts;
+  document.getElementById('conBadge').textContent=contacts.length;
+  document.getElementById('conTotal').textContent=list.length;
+  document.getElementById('sPend').textContent=contacts.filter(c=>c.status==='pending'||!c.status).length;
+  const tbody=document.getElementById('conBody');
+  if(!list.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No contacts</td></tr>';return;}
+  tbody.innerHTML=list.map((c,i)=>`<tr>
+    <td>${contacts.indexOf(c)+1}</td>
+    <td>${escapeHtml(c.name)}</td>
+    <td style="font-family:var(--mono);font-size:11px">${escapeHtml(c.phone)}</td>
+    <td>${c.tag?`<span class="tag-chip" onclick="filterByTag('${escapeHtml(c.tag)}')">${escapeHtml(c.tag)}</span>`:'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+    <td style="font-size:11px;color:var(--text2)">${escapeHtml((c.message||'').substring(0,30))||'—'}</td>
+    <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+    <td><button class="btn btn-d btn-sm" onclick="removeContact(${contacts.indexOf(c)})">✕</button></td>
+  </tr>`).join('');
+}
+function removeContact(idx){contacts.splice(idx,1);renderContacts();}
+function filterContacts(q){if(!q)return renderContacts();renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
+function filterByTag(tag){activeTagFilter=tag;const sel=document.getElementById('tagFilterSel');if(sel)sel.value=tag;if(tag==='all')return renderContacts();renderContacts(contacts.filter(c=>(c.tag||'')===(tag)));}
+function dedupe(){const seen=new Set();const before=contacts.length;contacts=contacts.filter(c=>{if(seen.has(c.phone))return false;seen.add(c.phone);return true;});renderContacts();showToast(`Removed ${before-contacts.length} duplicates`);}
+function exportContacts(){const csv=['Name,Phone,Tag,Message,Status',...contacts.map(c=>`"${c.name}",${c.phone},"${c.tag||''}","${c.message||''}",${c.status}`)].join('\n');downloadFile(csv,`contacts_${Date.now()}.csv`);}
+async function saveContacts(){if(!contacts.length)return showToast('No contacts',true);await api('saveContacts',{contacts});showToast('Contacts saved');}
+async function clearContacts(){contacts=[];renderContacts();await api('clearContacts');showToast('Contacts cleared');}
+// NEW: Reset all to pending
+function resetAllPending(){contacts=contacts.map(c=>({...c,status:'pending'}));renderContacts();showToast(`♻️ Reset ${contacts.length} contacts to pending`);}
+function togglePaste(){document.getElementById('pasteArea').style.display=document.getElementById('pasteArea').style.display==='none'?'block':'none';}
+function parsePaste(){const raw=document.getElementById('pasteInput').value;if(!raw)return;let added=0;raw.split(/\r?\n/).forEach(line=>{const parts=line.split('\t');if(parts.length>=2){let phone=parts[1].replace(/\D/g,'');if(phone.length===10)phone='91'+phone;contacts.push({name:parts[0],phone,message:parts[2]||'',status:'pending'});added++;}});renderContacts();showToast(`Added ${added} contacts`);document.getElementById('pasteInput').value='';}
+function handleFile(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const lines=e.target.result.split(/\r?\n/);let added=0;lines.forEach(line=>{const cols=line.split(',');if(cols.length>=2){let phone=cols[1].replace(/\D/g,'');if(phone.length===10)phone='91'+phone;if(phone.length>=10){contacts.push({name:cols[0]||phone,phone,status:'pending'});added++;}}});renderContacts();showToast(`Imported ${added} contacts`);};reader.readAsText(file);}
+function fetchGroups(){showToast('Connect WhatsApp first');}
+function openGroupImport(){document.getElementById('groupCard').style.display='block';}
+function importGroup(){showToast('Select a group first');}
+
+// ══════════════════════ NEW: TAGS ══════════════════════
+function renderTagChips(){
+  const chips=document.getElementById('tagFilterChips');
+  const sel=document.getElementById('tagFilterSel');
+  const bulkSel=document.getElementById('bulkTagSel');
+  if(chips)chips.innerHTML=tags.map(t=>`<span class="tag-chip" onclick="filterByTag('${escapeHtml(t)}')">${escapeHtml(t)}</span>`).join('');
+  if(sel){sel.innerHTML='<option value="all">All Tags</option>'+tags.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');}
+  if(bulkSel)bulkSel.innerHTML=tags.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  const tl=document.getElementById('tagList');
+  if(tl)tl.innerHTML=tags.length?tags.map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span class="tag-chip">${escapeHtml(t)}</span><button class="btn btn-d btn-sm" onclick="removeTag('${escapeHtml(t)}')">✕</button></div>`).join(''):'<div style="color:var(--muted);font-size:12px;text-align:center;padding:12px">No tags yet</div>';
+}
+function showTagManager(){document.getElementById('tagModal').style.display='flex';renderTagChips();}
+function closeTagManager(){document.getElementById('tagModal').style.display='none';}
+function addTag(){const v=document.getElementById('newTagInput').value.trim();if(!v||tags.includes(v))return;tags.push(v);localStorage.setItem('lf_tags',JSON.stringify(tags));renderTagChips();document.getElementById('newTagInput').value='';}
+function removeTag(t){tags=tags.filter(x=>x!==t);contacts=contacts.map(c=>c.tag===t?{...c,tag:''}:c);localStorage.setItem('lf_tags',JSON.stringify(tags));renderTagChips();renderContacts();}
+function bulkAssignTag(){const sel=document.getElementById('bulkTagSel').value;contacts=contacts.map(c=>({...c,tag:sel}));renderContacts();showToast(`Tag "${sel}" assigned to all contacts`);}
+
+// ══════════════════════ COMPOSE ══════════════════════
+function ins(v){const ta=document.getElementById('msgTpl');const s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.focus();updateCC(ta);}
+function updateCC(el){document.getElementById('cc').textContent=el.value.length;}
+function selAttach(type,el){document.querySelectorAll('.attach-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');selAttachType=type;document.getElementById('attachArea').style.display=type!=='none'&&type!=='poll'?'block':'none';document.getElementById('pollArea').style.display=type==='poll'?'block':'none';}
+function handleAttach(input){showToast('File ready: '+input.files[0]?.name);}
+function clearAttach(){document.getElementById('attachPreview').style.display='none';}
+function addPollOpt(){const div=document.createElement('div');div.className='fg';div.innerHTML=`<label>Option ${document.getElementById('pollOpts').children.length+1}</label><input type="text"/>`;document.getElementById('pollOpts').appendChild(div);}
+async function saveTemplate(){await api('saveTemplate',{body:getVal('msgTpl'),attach_type:selAttachType});showToast('Template saved');}
+async function genVariations(){showToast('Generating variations with AI…');const r=await api('aiGenerateVariations',{message:getVal('msgTpl'),count:10});if(r.success&&r.variations?.length){variations=r.variations;usingVars=true;varIdx=0;document.getElementById('varCount').textContent=`${variations.length} variations · cycling 🔄`;document.getElementById('varList').innerHTML=variations.map((v,i)=>`<div class="var-item"><div class="var-num">#${i+1}</div><div class="var-text">${escapeHtml(v)}</div></div>`).join('');document.getElementById('varPanel').style.display='block';showToast('Variations ready!');}else showToast('AI failed: '+(r.message||'Check AI config'),true);}
+function clearVars(){variations=[];usingVars=false;document.getElementById('varPanel').style.display='none';}
+
+// NEW: Message Preview
+function previewMessage(){
+  const tpl=getVal('msgTpl');if(!tpl)return showToast('Write a message first',true);
+  const sampleName=contacts.length?contacts[0].name:'Rahul';
+  const samplePhone=contacts.length?contacts[0].phone:'919876543210';
+  const preview=tpl.replace(/{name}/gi,sampleName).replace(/{phone}/gi,samplePhone).replace(/{link}/gi,'https://calendly.com/you');
+  document.getElementById('previewText').textContent=preview;
+  document.getElementById('previewModal').style.display='flex';
+}
+function closePreview(){document.getElementById('previewModal').style.display='none';}
+
+// ══════════════════════ SEND ══════════════════════
+// NEW: Quick Send
+async function quickSend(){
+  let phone=getVal('qsPhone').replace(/\D/g,'');
+  const msg=getVal('qsMsg');
+  if(!phone||!msg)return showToast('Phone and message required',true);
+  if(!deviceId)return showToast('No device linked',true);
+  if(phone.length===10)phone='91'+phone;
+  showToast('Sending…');
+  const r=await api('sendMessage',{phone:phone+'@s.whatsapp.net',message:msg});
+  if(r.success){showToast('✅ Message sent!');document.getElementById('qsMsg').value='';document.getElementById('qsPhone').value='';}
+  else showToast('Failed: '+(r.message||'Unknown'),true);
 }
 
-async function syncDevice() {
-  showToast('Syncing device status...');
-  const r = await api('checkDeviceStatus');
-  if (r.success && r.is_connected) onDeviceConnected(r.device_id);
-  else showToast('Not connected', true);
+// NEW: Campaign Scheduler
+function scheduleBlast(){
+  const dt=document.getElementById('schedDateTime').value;
+  if(!dt)return showToast('Pick a date & time first',true);
+  const target=new Date(dt);
+  const now=new Date();
+  if(target<=now)return showToast('Time must be in the future',true);
+  const ms=target-now;
+  if(schedTimer)clearTimeout(schedTimer);
+  schedTimer=setTimeout(()=>{startSend();schedTimer=null;document.getElementById('schedStatus').textContent='🚀 Blast started!';document.getElementById('cancelSchedBtn').style.display='none';},ms);
+  const mins=Math.round(ms/60000);
+  document.getElementById('schedStatus').style.display='block';
+  document.getElementById('schedStatus').textContent=`⏰ Blast scheduled — starts in ${mins} min at ${target.toLocaleTimeString()}`;
+  document.getElementById('cancelSchedBtn').style.display='inline-flex';
+  showToast(`⏰ Blast scheduled for ${target.toLocaleTimeString()}`);
+}
+function cancelSchedule(){if(schedTimer){clearTimeout(schedTimer);schedTimer=null;}document.getElementById('schedStatus').style.display='none';document.getElementById('cancelSchedBtn').style.display='none';showToast('Schedule cancelled');}
+
+function startSend(){
+  if(!contacts.length)return showToast('No contacts',true);
+  if(!deviceId){showToast('No device linked',true);goTab('device');return;}
+  sendState='running';if(sendIndex>=contacts.length)sendIndex=0;processSend();
+}
+function pauseSend(){sendState='paused';clearTimeout(sendTimer);document.getElementById('curCon').textContent='⏸ Paused';}
+function stopSend(){sendState='idle';sendIndex=0;clearTimeout(sendTimer);document.getElementById('curCon').textContent='Ready to send';document.getElementById('queStatus').textContent='0 / '+contacts.length+' processed';document.getElementById('progBar').style.width='0%';document.getElementById('progPct').textContent='0%';}
+
+async function processSend(){
+  if(sendState!=='running')return;
+  // Skip blacklisted
+  while(sendIndex<contacts.length&&blacklist.includes(contacts[sendIndex].phone)){contacts[sendIndex].status='blacklisted';sendIndex++;}
+  if(sendIndex>=contacts.length){sendState='idle';document.getElementById('curCon').textContent='✅ Campaign complete!';showToast('All messages sent ✅');renderContacts();return;}
+  const c=contacts[sendIndex];
+  const template=document.getElementById('msgTpl').value;
+  let msg=usingVars&&variations.length?variations[varIdx%variations.length]:(c.message||template||'Hi {name}!');
+  if(usingVars)varIdx++;
+  msg=msg.replace(/{name}/gi,c.name).replace(/{phone}/gi,c.phone);
+  const pct=Math.round((sendIndex/contacts.length)*100);
+  document.getElementById('curCon').textContent=`📤 Sending to ${c.name}`;
+  document.getElementById('queStatus').textContent=sendIndex+' / '+contacts.length+' processed';
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+  const r=await api('sendMessage',{phone:c.phone+'@s.whatsapp.net',message:msg});
+  contacts[sendIndex].status=r.success?'sent':'failed';
+  sendIndex++;if(r.success){todaySentN++;hourSentN++;}
+  updateSendStats();renderContacts();
+  const minG=(parseInt(document.getElementById('minGap').value)||30)*1000;
+  const maxG=(parseInt(document.getElementById('maxGap').value)||90)*1000;
+  sendTimer=setTimeout(processSend,Math.random()*(maxG-minG)+minG);
 }
 
-function goTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('tab-' + name)?.classList.add('active');
-  const idx = ['device','contacts','compose','send','leads','config','settings','logs'].indexOf(name);
-  if (idx >= 0) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
-  document.getElementById('topTitle').textContent = name.charAt(0).toUpperCase() + name.slice(1);
-  if (name === 'device') checkDevice();
-  if (name === 'leads') loadLeads();
+function updateSendStats(){
+  document.getElementById('sSent').textContent=contacts.filter(c=>c.status==='sent').length;
+  document.getElementById('sPend').textContent=contacts.filter(c=>c.status==='pending'||!c.status).length;
+  document.getElementById('sFail').textContent=contacts.filter(c=>c.status==='failed').length;
+  document.getElementById('todaySent').textContent=todaySentN;
+  document.getElementById('hourSent').textContent=hourSentN;
+  const dl=getNum('dayLimit')||200,hl=getNum('hourLimit')||30;
+  document.getElementById('dayLimDisp').textContent=dl;document.getElementById('hourLimDisp').textContent=hl;
+  document.getElementById('dayBar').style.width=Math.min(100,(todaySentN/dl)*100)+'%';
+  document.getElementById('hourBar').style.width=Math.min(100,(hourSentN/hl)*100)+'%';
+  if(deviceId)updateDeviceHealth(deviceId);
 }
 
-async function checkDevice() {
-  const r = await api('checkDeviceStatus');
-  if (r.success && r.is_connected) onDeviceConnected(r.device_id);
-  else setDevStatus('disconnected');
+// ══════════════════════ BLACKLIST ══════════════════════
+function addBlacklist(){
+  let v=document.getElementById('blInput').value.replace(/\D/g,'');
+  if(!v)return showToast('Enter a phone number',true);
+  if(v.length===10)v='91'+v;
+  if(blacklist.includes(v))return showToast('Already blacklisted',true);
+  blacklist.push(v);localStorage.setItem('lf_blacklist',JSON.stringify(blacklist));
+  renderBlacklist();document.getElementById('blInput').value='';showToast('🚫 Number blacklisted');
+}
+function removeBlacklist(num){blacklist=blacklist.filter(n=>n!==num);localStorage.setItem('lf_blacklist',JSON.stringify(blacklist));renderBlacklist();}
+function renderBlacklist(){
+  const el=document.getElementById('blList');if(!el)return;
+  if(!blacklist.length){el.innerHTML='<div style="text-align:center;padding:14px;color:var(--muted);font-size:12px">No numbers blacklisted</div>';return;}
+  el.innerHTML=blacklist.map(n=>`<div class="bl-item"><span>${n}</span><button class="btn btn-d btn-sm" onclick="removeBlacklist('${n}')">Remove</button></div>`).join('');
 }
 
-function applySettings(s) {
-  if (!s) return;
-  if (s.hour_limit) setVal('hourLimit', s.hour_limit);
-  if (s.day_limit) setVal('dayLimit', s.day_limit);
-  if (s.gowa_url) { setVal('cfgGowaUrl', s.gowa_url); gowaUrl = s.gowa_url; }
+// ══════════════════════ LEADS ══════════════════════
+async function loadLeads(){const r=await api('getLeads');if(r.success){leads=r.leads;renderLeads();}}
+function renderLeads(){
+  const tbody=document.getElementById('leadBody');
+  if(!leads.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr>';return;}
+  const q=(document.getElementById('leadSearch')?.value||'').toLowerCase();
+  const sf=document.getElementById('leadStatusF')?.value||'all';
+  const list=leads.filter(l=>(sf==='all'||l.status===sf)&&(!q||(l.name||'').toLowerCase().includes(q)||(l.phone||'').includes(q)));
+  tbody.innerHTML=list.map((l,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(l.name||'—')}</td><td style="font-family:var(--mono);font-size:11px">${escapeHtml(l.phone||'—')}</td><td>${escapeHtml(l.email||'—')}</td><td><span class="badge badge-${l.status||'new'}">${l.status||'new'}</span></td><td>${l.arrived_at?new Date(l.arrived_at).toLocaleDateString():'—'}</td><td style="display:flex;gap:4px"><button class="btn btn-g btn-sm" onclick="updLead('${l.id}','booked')">✅</button><button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️</button></td></tr>`).join('');
+  const nc=leads.filter(l=>l.status==='new').length;
+  document.getElementById('leadBadge').style.display=nc>0?'inline':'none';document.getElementById('leadBadge').textContent=nc;
+  ['new','contacted','visited','booked','followed_up','cold'].forEach(s=>{const el=document.getElementById('p-'+s);if(el)el.textContent=leads.filter(l=>l.status===s).length;});
 }
+function filterLeads(){renderLeads();}
+async function updLead(id,status){await api('updateLeadStatus',{id,status});await loadLeads();showToast(`Lead → ${status}`);}
+async function scanSheet(){showToast('Scanning sheet...');const r=await api('scanLeadSheet');if(r.success){await loadLeads();showToast(`${r.new_leads||0} new leads imported`);}else showToast('Scan failed',true);}
+function exportLeads(){const csv=['Name,Phone,Email,Status',...leads.map(l=>`"${l.name||''}",${l.phone||''},${l.email||''},${l.status}`)].join('\n');downloadFile(csv,`leads_${Date.now()}.csv`);}
 
-function updateCalWebhook() {
-  const el = document.getElementById('calWebhook');
-  if (el && userId) el.textContent = `${EDGE}/calendly-webhook?user=${userId}`;
+// ══════════════════════ LOGS ══════════════════════
+function renderLogs(){
+  const logsDiv=document.getElementById('logsList');const f=document.getElementById('logFilter')?.value||'all';
+  const list=logs.filter(l=>f==='all'||l.type===f);
+  if(!list.length){logsDiv.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">No activity yet</div>';return;}
+  logsDiv.innerHTML=list.slice(0,50).map(l=>`<div class="log-entry"><div class="log-dot ${l.type}"></div><div class="log-body"><div class="log-name">${escapeHtml(l.name||'')} <span style="font-size:10px;color:var(--muted)">[${l.type}]</span></div><div class="log-msg">${escapeHtml(l.msg||l.message||'')}</div><div class="log-time">${new Date(l.created_at||l.time||Date.now()).toLocaleTimeString()}</div></div></div>`).join('');
 }
-function copyWebhook() {
-  const el = document.getElementById('calWebhook');
-  if (el && el.textContent !== 'Save to generate URL') navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied ✅'));
-}
-function togKey(id, btn) {
-  const el = document.getElementById(id);
-  if (el.type === 'password') { el.type = 'text'; btn.textContent = 'Hide'; }
-  else { el.type = 'password'; btn.textContent = 'Show'; }
-}
-async function testResend() { showToast('Test email feature - configure Resend API key first'); }
+function filterLogs(){renderLogs();}
+function clearLogs(){logs=[];renderLogs();api('clearLogs');}
 
-function renderContacts() {
-  document.getElementById('conBadge').textContent = contacts.length;
-  document.getElementById('conTotal').textContent = contacts.length;
-  document.getElementById('sPend').textContent = contacts.filter(c => c.status === 'pending').length;
-  const tbody = document.getElementById('conBody');
-  if (!contacts.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px">No contacts yet</td></tr>'; return; }
-  tbody.innerHTML = contacts.map((c, i) => `<tr><td>${i+1}</td><td>${escapeHtml(c.name)}</td><td>${escapeHtml(c.phone)}</td><td>${escapeHtml(c.message || '')}</td><td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td><td><button class="btn btn-d btn-sm" onclick="removeContact(${i})">✕</button></td></tr>`).join('');
-}
-function removeContact(idx) { contacts.splice(idx, 1); renderContacts(); }
-function filterContacts(q) { renderContacts(contacts.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.phone.includes(q))); }
-function dedupe() { const seen = new Set(); const u = contacts.filter(c => { if (seen.has(c.phone)) return false; seen.add(c.phone); return true; }); contacts = u; renderContacts(); showToast(`Removed ${contacts.length - u.length} duplicates`); }
-function exportContacts() { const csv = ['Name,Phone,Message,Status', ...contacts.map(c => `"${c.name}",${c.phone},"${c.message || ''}",${c.status}`)].join('\n'); downloadFile(csv, `contacts_${Date.now()}.csv`); }
-async function saveContacts() { if (!contacts.length) return showToast('No contacts', true); await api('saveContacts', { contacts }); showToast('Contacts saved'); }
-async function clearContacts() { contacts = []; renderContacts(); await api('clearContacts'); showToast('Contacts cleared'); }
-function togglePaste() { document.getElementById('pasteArea').style.display = document.getElementById('pasteArea').style.display === 'none' ? 'block' : 'none'; }
-function parsePaste() { const raw = document.getElementById('pasteInput').value; if (!raw) return; const lines = raw.split(/\r?\n/); lines.forEach(line => { const parts = line.split('\t'); if (parts.length >= 2) { let phone = parts[1].replace(/\D/g, ''); if (phone.length === 10) phone = '91' + phone; contacts.push({ name: parts[0], phone, message: parts[2] || '', status: 'pending' }); } }); renderContacts(); showToast('Contacts imported'); }
-function handleFile(input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = e => { const lines = e.target.result.split(/\r?\n/); lines.forEach(line => { const cols = line.split(','); if (cols.length >= 2) { let phone = cols[1].replace(/\D/g, ''); if (phone.length === 10) phone = '91' + phone; contacts.push({ name: cols[0], phone, status: 'pending' }); } }); renderContacts(); showToast('Contacts imported'); }; reader.readAsText(file); }
-function fetchGroups() { showToast('Group import feature - connect WhatsApp first'); }
-function importGroup() { showToast('Select a group first'); }
-
-function ins(v) { const ta = document.getElementById('msgTpl'); const s = ta.selectionStart; const e = ta.selectionEnd; ta.value = ta.value.slice(0, s) + v + ta.value.slice(e); ta.focus(); updateCC(ta); }
-function updateCC(el) { document.getElementById('cc').textContent = el.value.length; }
-function selAttach(type, el) { document.querySelectorAll('.attach-opt').forEach(o => o.classList.remove('sel')); el.classList.add('sel'); selAttachType = type; }
-function handleAttach(input) { showToast('File ready: ' + input.files[0]?.name); }
-function clearAttach() { document.getElementById('attachPreview').style.display = 'none'; }
-function addPollOpt() { const div = document.createElement('div'); div.className = 'fg'; div.innerHTML = `<label>Option ${document.getElementById('pollOpts').children.length + 1}</label><input type="text"/>`; document.getElementById('pollOpts').appendChild(div); }
-async function saveTemplate() { await api('saveTemplate', { body: getVal('msgTpl'), attach_type: selAttachType }); showToast('Template saved'); }
-async function genVariations() { showToast('AI feature - requires Groq API key'); }
-function clearVars() { variations = []; usingVars = false; document.getElementById('varPanel').style.display = 'none'; }
-
-function startSend() { if (!contacts.length) return showToast('No contacts', true); if (!deviceId) { showToast('No device linked', true); goTab('device'); return; } sendState = 'running'; if (sendIndex >= contacts.length) sendIndex = 0; processSend(); }
-function pauseSend() { sendState = 'paused'; clearTimeout(sendTimer); document.getElementById('curCon').textContent = '⏸ Paused'; }
-function stopSend() { sendState = 'idle'; sendIndex = 0; clearTimeout(sendTimer); document.getElementById('curCon').textContent = 'Ready to send'; document.getElementById('queStatus').textContent = '0 / ' + contacts.length + ' processed'; document.getElementById('progBar').style.width = '0%'; }
-async function processSend() {
-  if (sendState !== 'running') return;
-  if (sendIndex >= contacts.length) { sendState = 'idle'; document.getElementById('curCon').textContent = '✅ Campaign complete!'; showToast('All messages sent ✅'); return; }
-  const c = contacts[sendIndex];
-  const pct = Math.round((sendIndex / contacts.length) * 100);
-  const template = document.getElementById('msgTpl').value;
-  const msg = (c.message || template || 'Hi {name}!').replace(/{name}/gi, c.name).replace(/{phone}/gi, c.phone);
-  document.getElementById('curCon').textContent = `📤 Sending to ${c.name}`;
-  document.getElementById('queStatus').textContent = sendIndex + ' / ' + contacts.length + ' processed';
-  document.getElementById('progBar').style.width = pct + '%';
-  document.getElementById('progPct').textContent = pct + '%';
-  const r = await api('sendMessage', { phone: c.phone + '@s.whatsapp.net', message: msg });
-  contacts[sendIndex].status = r.success ? 'sent' : 'failed';
-  sendIndex++;
-  if (r.success) { todaySentN++; hourSentN++; }
-  updateSendStats();
-  renderContacts();
-  const gap = 30000 + Math.random() * 60000;
-  sendTimer = setTimeout(processSend, gap);
-}
-function updateSendStats() {
-  document.getElementById('sSent').textContent = contacts.filter(c => c.status === 'sent').length;
-  document.getElementById('sPend').textContent = contacts.filter(c => c.status === 'pending').length;
-  document.getElementById('sFail').textContent = contacts.filter(c => c.status === 'failed').length;
-  document.getElementById('todaySent').textContent = todaySentN;
-  document.getElementById('hourSent').textContent = hourSentN;
-  const dl = getNum('dayLimit') || 200;
-  const hl = getNum('hourLimit') || 30;
-  document.getElementById('dayBar').style.width = Math.min(100, (todaySentN / dl) * 100) + '%';
-  document.getElementById('hourBar').style.width = Math.min(100, (hourSentN / hl) * 100) + '%';
-}
-
-async function loadLeads() { const r = await api('getLeads'); if (r.success) { leads = r.leads; renderLeads(); } }
-function renderLeads() {
-  const tbody = document.getElementById('leadBody');
-  if (!leads.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px">No leads yet</td></tr>'; return; }
-  tbody.innerHTML = leads.map((l, i) => `<tr><td>${i+1}</td><td>${escapeHtml(l.name || '—')}</td><td>${escapeHtml(l.phone || '—')}</td><td>${escapeHtml(l.email || '—')}</td><td><span class="badge badge-${l.status || 'new'}">${l.status || 'new'}</span></td><td>${l.arrived_at ? new Date(l.arrived_at).toLocaleDateString() : '—'}</td><td><button class="btn btn-g btn-sm" onclick="updLead('${l.id}','booked')">✅</button> <button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️</button></td></tr>`).join('');
-  const nc = leads.filter(l => l.status === 'new').length;
-  document.getElementById('leadBadge').style.display = nc > 0 ? 'inline' : 'none';
-  document.getElementById('leadBadge').textContent = nc;
-  ['new','contacted','visited','booked','followed_up','cold'].forEach(s => { const el = document.getElementById('p-' + s); if (el) el.textContent = leads.filter(l => l.status === s).length; });
-}
-function filterLeads() { renderLeads(); }
-async function updLead(id, status) { await api('updateLeadStatus', { id, status }); await loadLeads(); showToast(`Lead updated to ${status}`); }
-async function scanSheet() { showToast('Scanning sheet...'); const r = await api('scanLeadSheet'); if (r.success) { await loadLeads(); showToast(`Imported ${r.new_leads || 0} new leads`); } else showToast('Scan failed', true); }
-function exportLeads() { const csv = ['Name,Phone,Email,Status', ...leads.map(l => `"${l.name}",${l.phone || ''},${l.email || ''},${l.status}`)].join('\n'); downloadFile(csv, `leads_${Date.now()}.csv`); }
-
-function renderLogs() { const logsDiv = document.getElementById('logsList'); if (!logs.length) { logsDiv.innerHTML = '<div style="text-align:center;padding:24px">No activity yet</div>'; return; } logsDiv.innerHTML = logs.slice(0, 50).map(l => `<div class="log-entry"><div class="log-dot ${l.type}"></div><div class="log-body"><div class="log-name">${escapeHtml(l.name || '')} <span style="font-size:10px;color:var(--muted)">[${l.type}]</span></div><div class="log-msg">${escapeHtml(l.msg || '')}</div><div class="log-time">${new Date(l.created_at || l.time).toLocaleTimeString()}</div></div></div>`).join(''); }
-function filterLogs() { renderLogs(); }
-function clearLogs() { logs = []; renderLogs(); api('clearLogs'); }
-
-async function saveSettings() {
-  const settings = { hour_limit: getNum('hourLimit'), day_limit: getNum('dayLimit'), gowa_url: getVal('cfgGowaUrl') };
-  await api('saveSettings', settings);
-  await api('saveConfig', { calendly_link: getVal('cfgCalLink'), resend_key: getVal('cfgResendKey'), from_email: getVal('cfgFromEmail'), from_name: getVal('cfgFromName'), manychat_key: getVal('cfgMcKey'), manychat_page_id: getVal('cfgMcPageId'), groq_key: getVal('cfgGroqKey'), groq_model: getVal('cfgGroqModel'), sheet_id: getVal('cfgSheetId'), sheet_tab: getVal('cfgSheetTab'), col_name: getVal('cfgColName'), col_phone: getVal('cfgColPhone'), col_email: getVal('cfgColEmail'), has_header: document.getElementById('cfgHasHeader')?.checked });
+// ══════════════════════ SETTINGS ══════════════════════
+async function saveSettings(){
+  const settings={hour_limit:getNum('hourLimit'),day_limit:getNum('dayLimit'),auto_reply:document.getElementById('autoReply')?.checked,pause_on_reply:document.getElementById('pauseOnReply')?.checked,auto_reply_prompt:getVal('arPrompt')};
+  await api('saveSettings',settings);
+  await api('saveConfig',{calendly_link:getVal('cfgCalLink'),resend_key:getVal('cfgResendKey'),from_email:getVal('cfgFromEmail'),from_name:getVal('cfgFromName'),manychat_key:getVal('cfgMcKey'),manychat_page_id:getVal('cfgMcPageId'),sheet_id:getVal('cfgSheetId'),sheet_tab:getVal('cfgSheetTab'),col_name:getVal('cfgColName'),col_phone:getVal('cfgColPhone'),col_email:getVal('cfgColEmail'),has_header:document.getElementById('cfgHasHeader')?.checked});
   showToast('Settings saved!');
 }
-async function saveConfig() { await saveSettings(); }
-function toggleAR() { document.getElementById('arPromptArea').style.display = document.getElementById('autoReply').checked ? 'block' : 'none'; }
-async function aiRewriteField(fieldId) { showToast('AI feature - requires Groq API key'); }
+async function saveConfig(){await saveSettings();}
+function toggleAR(){document.getElementById('arPromptArea').style.display=document.getElementById('autoReply').checked?'block':'none';}
+async function aiRewriteField(fId){showToast('Rewriting with AI…');const r=await api('aiRewrite',{message:getVal(fId)});if(r.success&&r.result)setVal(fId,r.result);else showToast('AI rewrite failed',true);}
+async function testResend(){showToast('Configure Resend API key first');}
+function togKey(id,btn){const el=document.getElementById(id);if(el.type==='password'){el.type='text';btn.textContent='Hide';}else{el.type='password';btn.textContent='Show';}}
 
-function logout() {
-  token = null;
-  document.getElementById('dash').style.display = 'none';
-  document.getElementById('authWrap').style.display = 'flex';
-  renderAuth('login');
+async function checkServerStatus(){
+  const btn=document.getElementById('serverStatusBtn'),pip=document.getElementById('serverStatusPip'),txt=document.getElementById('serverStatusText'),det=document.getElementById('serverDetails');
+  btn.disabled=true;btn.innerHTML='⏳ Checking…';pip.style.background='var(--accent4)';txt.textContent='Checking…';det.style.display='none';
+  const t=Date.now();
+  try{
+    const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),10000);
+    const res=await fetch(gowaUrl+'/',{method:'GET',signal:ctrl.signal});
+    const ms=Date.now()-t;
+    if(res.ok){
+      pip.style.background='var(--accent)';pip.classList.add('on');txt.textContent='🟢 ACTIVE';txt.style.color='var(--accent)';
+      det.style.display='block';det.innerHTML=`<div style="background:rgba(0,255,136,.05);border-radius:8px;padding:10px;font-size:11px"><div>✅ Server online · ${res.status} OK · ${ms}ms</div><div style="margin-top:4px;color:var(--muted)">${gowaUrl}</div></div>`;
+      showToast(`✅ Server ACTIVE (${ms}ms)`);
+    }else throw new Error(`HTTP ${res.status}`);
+  }catch(err){
+    pip.style.background='var(--accent3)';pip.classList.remove('on');txt.textContent='🔴 OFFLINE';txt.style.color='var(--accent3)';
+    det.style.display='block';det.innerHTML=`<div style="background:rgba(255,51,102,.05);border-radius:8px;padding:10px;font-size:11px"><div>❌ ${err.message||'Connection failed'}</div><div style="margin-top:4px;color:var(--muted)">Server may be starting up on Render (cold start ~30s)</div></div>`;
+    showToast(`❌ Server OFFLINE`,true);
+  }finally{btn.disabled=false;btn.innerHTML='🔍 Check Server';}
 }
-function handleGoogleCallback() {
-  const hash = window.location.hash.substring(1);
-  if (!hash) return false;
-  const params = new URLSearchParams(hash);
-  const accessToken = params.get('access_token');
-  if (!accessToken) return false;
-  token = accessToken;
-  window.history.replaceState({}, document.title, window.location.pathname);
-  return true;
-}
-function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function getVal(id) { return document.getElementById(id)?.value || ''; }
-function setVal(id, v) { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; }
-function getNum(id) { return parseInt(document.getElementById(id)?.value) || 0; }
-function downloadFile(content, name) { const blob = new Blob([content], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href); }
-function showToast(msg, isErr) { const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1'; t.style.background = isErr ? '#2d1015' : '#0a2018'; t.style.color = isErr ? '#ff6680' : '#00ff88'; setTimeout(() => { t.style.opacity = '0'; }, 3000); }
 
-document.addEventListener('DOMContentLoaded', function() {
+// ══════════════════════ NAV ══════════════════════
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  const tabs=['device','contacts','compose','send','leads','config','settings','logs'];
+  const idx=tabs.indexOf(name);if(idx>=0)document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(name==='device')checkDevice();
+  if(name==='leads')loadLeads();
+}
+
+// ══════════════════════ UTILS ══════════════════════
+function logout(){token=null;document.getElementById('dash').style.display='none';document.getElementById('authWrap').style.display='flex';renderAuth('login');}
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getVal(id){return document.getElementById(id)?.value||'';}
+function setVal(id,v){const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;}
+function getNum(id){return parseInt(document.getElementById(id)?.value)||0;}
+function downloadFile(content,name){const blob=new Blob([content],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function showToast(msg,isErr){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';t.style.background=isErr?'#2d1015':'#0a2018';t.style.color=isErr?'#ff6680':'#00ff88';clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},3000);}
+
+// ══════════════════════ INIT ══════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
   renderAuth('login');
-  autoCheckServerOnLoad();
+  renderBlacklist();
+  renderTagChips();
+  // Google OAuth callback
+  const hash=window.location.hash.substring(1);
+  if(hash){
+    const p=new URLSearchParams(hash);const at=p.get('access_token');
+    if(at){token=at;window.history.replaceState({},document.title,window.location.pathname);document.getElementById('authWrap').style.display='none';document.getElementById('dash').style.display='flex';loadData().then(()=>showToast('Logged in via Google!'));}
+  }
 });
 </script>
 </body>
