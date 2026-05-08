@@ -930,17 +930,17 @@ async function loadData(){
 }
 
 function applySettings(s){
-  if(s.hour_limit)setVal('hourLimit',s.hour_limit);
-  if(s.day_limit)setVal('dayLimit',s.day_limit);
-  if(s.min_gap)setVal('minGap',s.min_gap);
-  if(s.max_gap)setVal('maxGap',s.max_gap);
-  if(s.gowa_url)setVal('gowaUrl',s.gowa_url);
-  if(s.gowa_auth)setVal('gowaAuth',s.gowa_auth);
-  if(s.auto_reply_prompt)setVal('autoReplyPrompt',s.auto_reply_prompt);
-  document.getElementById('autoReplyEnabled').checked=s.auto_reply||false;
-  if(s.groq_key)setVal('groqKey',s.groq_key);
+  if(!s) return;
+  if(s.hour_limit) setVal('hourLimit', s.hour_limit);
+  if(s.day_limit) setVal('dayLimit', s.day_limit);
+  if(s.min_gap) setVal('minGap', s.min_gap);
+  if(s.max_gap) setVal('maxGap', s.max_gap);
+  if(s.gowa_url) setVal('gowaUrl', s.gowa_url);
+  if(s.gowa_auth) setVal('gowaAuth', s.gowa_auth);
+  // Only set autoReplyEnabled if the element exists
+  const autoReplyEl = document.getElementById('autoReplyEnabled');
+  if(autoReplyEl && s.auto_reply !== undefined) autoReplyEl.checked = s.auto_reply;
 }
-
 // ══════════════════════ DEVICE CORE FUNCTIONS (FROM FIRST HTML) ══════════════════════
 function syncDeviceToUI(device){
   deviceId=device.device_id;
