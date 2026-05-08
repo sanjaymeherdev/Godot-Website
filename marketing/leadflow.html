@@ -728,14 +728,12 @@ function copyWebhookUrl() {
 async function saveAllSettings() {
   showToast('Saving settings...');
   try {
-    // Save send limits & GoWA
+    // Save send limits only (no GoWA fields)
     await api('saveSettings', {
       hour_limit: document.getElementById('hourLimit').value,
       day_limit: document.getElementById('dayLimit').value,
       min_gap: document.getElementById('minGap').value,
-      max_gap: document.getElementById('maxGap').value,
-      gowa_url: document.getElementById('gowaUrl').value.trim(),
-      gowa_auth: document.getElementById('gowaAuth').value.trim()
+      max_gap: document.getElementById('maxGap').value
     });
     
     // Save integration configs
@@ -762,7 +760,6 @@ async function saveAllSettings() {
     showToast('Error saving: ' + e.message, true);
   }
 }
-
 // Load saved config into Settings form
 async function loadConfigToSettings() {
   try {
@@ -888,7 +885,7 @@ async function testCalendly() {
 
 // Check GoWA server status
 async function checkServerStatus() {
-  const serverUrl = document.getElementById('gowaUrl').value.trim() || 'https://sanjaywa8-5.onrender.com';
+  const serverUrl = 'https://sanjaywa8-5.onrender.com'; // Hardcoded or from config
   const statusPip = document.getElementById('serverStatusPip');
   const statusText = document.getElementById('serverStatusText');
   
