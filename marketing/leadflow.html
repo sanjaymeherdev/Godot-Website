@@ -412,42 +412,101 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
 
       <!-- ══════════════════════ SETTINGS TAB ══════════════════════ -->
       <div class="tab" id="tab-settings">
-        <div class="sec-hdr">
-          <div><div class="sec-title">Settings</div><div class="sec-sub">// send limits + automation</div></div>
-          <button class="btn btn-g" onclick="saveSettings()">💾 Save Settings</button>
-        </div>
+  <div class="sec-hdr">
+    <div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + send limits + automation</div></div>
+    <button class="btn btn-g" onclick="saveAllSettings()">💾 Save All Settings</button>
+  </div>
 
-        <div class="card">
-          <div class="card-title">Send Limits</div>
-          <div class="grid2">
-            <div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div>
-            <div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div>
-            <div class="fg"><label>Min Gap (seconds)</label><input type="number" id="minGap" value="30"/></div>
-            <div class="fg"><label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90"/></div>
-          </div>
-        </div>
+  <!-- Send Limits Card -->
+  <div class="card">
+    <div class="card-title">Send Limits</div>
+    <div class="grid2">
+      <div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"/></div>
+      <div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"/></div>
+      <div class="fg"><label>Min Gap (seconds)</label><input type="number" id="minGap" value="30"/></div>
+      <div class="fg"><label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90"/></div>
+    </div>
+  </div>
 
-        <div class="card">
-          <div class="card-title">GoWA Server</div>
-          <div class="fg"><label>Server URL</label><input type="text" id="gowaUrl" placeholder="https://sanjaywa8-5.onrender.com"/></div>
-          <div class="fg"><label>Basic Auth (base64 user:pass)</label><input type="text" id="gowaAuth" placeholder="dXNlcjpwYXNz"/></div>
-          <div class="btn-row">
-            <button class="btn btn-b" onclick="testGowaConnection()">🧪 Test Connection</button>
-          </div>
-        </div>
+  <!-- GoWA Server Card -->
+  <div class="card">
+    <div class="card-title">GoWA Server</div>
+    <div class="fg"><label>Server URL</label><input type="text" id="gowaUrl" placeholder="https://sanjaywa8-5.onrender.com"/></div>
+    <div class="fg"><label>Basic Auth (base64 user:pass)</label><input type="text" id="gowaAuth" placeholder="dXNlcjpwYXNz"/></div>
+    <div class="btn-row">
+      <button class="btn btn-b" onclick="testGowaConnection()">🧪 Test Connection</button>
+    </div>
+  </div>
 
-        <div class="card">
-          <div class="card-title">AI Auto-Reply</div>
-          <div class="fg"><label>Groq API Key</label><input type="password" id="groqKey" placeholder="gsk_..."/></div>
-          <div class="fg"><label>System Prompt</label><textarea id="autoReplyPrompt" rows="3" placeholder="You are a helpful sales assistant..."></textarea></div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-            <input type="checkbox" id="autoReplyEnabled" style="width:auto;margin-bottom:0;">
-            <label style="margin-bottom:0;cursor:pointer;" for="autoReplyEnabled">Enable Auto-Reply on incoming messages</label>
-          </div>
-          <div class="btn-row"><button class="btn btn-g" onclick="saveAiSettings()">💾 Save AI Settings</button></div>
-        </div>
+  <!-- Resend Email Card -->
+  <div class="card">
+    <div class="card-title">📧 Resend — Email API</div>
+    <div class="grid2">
+      <div class="fg"><label>API Key</label><div class="key-wrap" style="position:relative"><input type="password" id="resendKey" placeholder="re_xxxxxxx"/><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('resendKey',this)">Show</span></div></div>
+      <div class="fg"><label>From Email</label><input type="email" id="fromEmail" placeholder="hello@yourdomain.com"/></div>
+      <div class="fg"><label>From Name</label><input type="text" id="fromName" placeholder="Your Business Name"/></div>
+      <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto">🧪 Send Test Email</button></div>
+    </div>
+  </div>
+
+  <!-- ManyChat Card -->
+  <div class="card">
+    <div class="card-title">🤖 ManyChat — Messenger Automation</div>
+    <div class="grid2">
+      <div class="fg"><label>API Key</label><div class="key-wrap" style="position:relative"><input type="password" id="manychatKey" placeholder="eyJhbGci..."/><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--card);padding:2px 6px;border-radius:4px;" onclick="togglePassword('manychatKey',this)">Show</span></div></div>
+      <div class="fg"><label>Page ID (Facebook)</label><input type="text" id="manychatPageId" placeholder="123456789"/></div>
+      <div class="fg"><label>Subscriber ID (for test)</label><input type="text" id="manychatSubId" placeholder="Optional test subscriber ID"/></div>
+      <div class="fg" style="display:flex;flex-direction:column;justify-content:flex-end"><button class="btn btn-b btn-sm" onclick="testManyChat()" style="margin-top:auto">🧪 Test ManyChat</button></div>
+    </div>
+  </div>
+
+  <!-- Calendly Card -->
+  <div class="card">
+    <div class="card-title">📅 Calendly — Booking Integration</div>
+    <div class="grid2">
+      <div class="fg"><label>Booking Link</label><input type="url" id="calendlyLink" placeholder="https://calendly.com/yourname/event"/></div>
+      <div class="fg"><label>Webhook Secret (optional)</label><input type="password" id="calendlySecret" placeholder="Leave empty if not using"/></div>
+    </div>
+    <div class="fg">
+      <label>Webhook URL (copy to Calendly)</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="calWebhookUrl" readonly style="background:var(--bg);font-family:var(--mono);font-size:11px;" placeholder="Save settings first"/>
+        <button class="btn btn-s btn-sm" onclick="copyWebhookUrl()">📋 Copy</button>
       </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-b btn-sm" onclick="testCalendly()">🧪 Test Webhook</button></div>
+  </div>
 
+  <!-- Google Sheet Card -->
+  <div class="card">
+    <div class="card-title">📊 Google Sheet — Lead Source</div>
+    <div class="grid2">
+      <div class="fg"><label>Sheet ID</label><input type="text" id="sheetId" placeholder="1BxiMx0_sample..."/></div>
+      <div class="fg"><label>Tab Name</label><input type="text" id="sheetTab" placeholder="Sheet1"/></div>
+    </div>
+    <div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;">
+      <div class="fg"><label>Name Column</label><input type="text" id="colName" placeholder="A" maxlength="2"/></div>
+      <div class="fg"><label>Phone Column</label><input type="text" id="colPhone" placeholder="B" maxlength="2"/></div>
+      <div class="fg"><label>Email Column</label><input type="text" id="colEmail" placeholder="C" maxlength="2"/></div>
+    </div>
+    <div class="tog-row" style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;">
+      <div><div class="tog-info">Has Header Row</div><div class="tog-sub">Skip first row when importing</div></div>
+      <label class="tog" style="position:relative;width:40px;height:21px;"><input type="checkbox" id="hasHeader" checked/><span style="position:absolute;inset:0;background:var(--border2);border-radius:21px;cursor:pointer;"></span></label>
+    </div>
+  </div>
+
+  <!-- Server Status Card -->
+  <div class="card">
+    <div class="card-title">🌐 Server Status</div>
+    <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+      <button class="btn btn-b" onclick="checkServerStatus()">🔍 Check GoWA Server</button>
+      <div id="serverStatusDisplay" style="display:flex;align-items:center;gap:8px;">
+        <span class="status-pip" id="serverStatusPip" style="background:var(--muted);"></span>
+        <span id="serverStatusText" style="font-family:var(--mono);font-size:11px;color:var(--text2);">Not checked</span>
+      </div>
+    </div>
+  </div>
+</div>
       <!-- ══════════════════════ LOGS TAB ══════════════════════ -->
       <div class="tab" id="tab-logs">
         <div class="sec-hdr">
@@ -640,7 +699,224 @@ async function doReset(){
   const r=await api('resetPassword',{email});btn.disabled=false;
   if(r.success)amsg('success','Reset link sent!');else amsg('error',r.message||'Failed');
 }
+// ══════════════════════ MISSING FUNCTIONS FOR SETTINGS ══════════════════════
 
+// Toggle password visibility
+function togglePassword(inputId, btn) {
+  const el = document.getElementById(inputId);
+  if (el.type === 'password') {
+    el.type = 'text';
+    btn.textContent = 'Hide';
+  } else {
+    el.type = 'password';
+    btn.textContent = 'Show';
+  }
+}
+
+// Copy Calendly webhook URL
+function copyWebhookUrl() {
+  const urlInput = document.getElementById('calWebhookUrl');
+  if (urlInput.value && urlInput.value !== 'Save settings first') {
+    navigator.clipboard.writeText(urlInput.value);
+    showToast('Webhook URL copied ✅');
+  } else {
+    showToast('Save settings first to generate URL', true);
+  }
+}
+
+// Save ALL settings (limits + integrations)
+async function saveAllSettings() {
+  showToast('Saving settings...');
+  try {
+    // Save send limits & GoWA
+    await api('saveSettings', {
+      hour_limit: document.getElementById('hourLimit').value,
+      day_limit: document.getElementById('dayLimit').value,
+      min_gap: document.getElementById('minGap').value,
+      max_gap: document.getElementById('maxGap').value,
+      gowa_url: document.getElementById('gowaUrl').value.trim(),
+      gowa_auth: document.getElementById('gowaAuth').value.trim()
+    });
+    
+    // Save integration configs
+    await api('saveConfig', {
+      resend_key: document.getElementById('resendKey').value.trim(),
+      from_email: document.getElementById('fromEmail').value.trim(),
+      from_name: document.getElementById('fromName').value.trim(),
+      manychat_key: document.getElementById('manychatKey').value.trim(),
+      manychat_page_id: document.getElementById('manychatPageId').value.trim(),
+      calendly_link: document.getElementById('calendlyLink').value.trim(),
+      calendly_secret: document.getElementById('calendlySecret').value.trim(),
+      sheet_id: document.getElementById('sheetId').value.trim(),
+      sheet_tab: document.getElementById('sheetTab').value.trim(),
+      col_name: document.getElementById('colName').value.trim() || 'A',
+      col_phone: document.getElementById('colPhone').value.trim() || 'B',
+      col_email: document.getElementById('colEmail').value.trim() || 'C',
+      has_header: document.getElementById('hasHeader').checked
+    });
+    
+    // Update webhook URL display
+    updateWebhookUrlDisplay();
+    showToast('All settings saved! ✅');
+  } catch(e) {
+    showToast('Error saving: ' + e.message, true);
+  }
+}
+
+// Load saved config into Settings form
+async function loadConfigToSettings() {
+  try {
+    const r = await api('getConfig');
+    if (r.success && r.config) {
+      const cfg = r.config;
+      if (cfg.resend_key) document.getElementById('resendKey').value = cfg.resend_key;
+      if (cfg.from_email) document.getElementById('fromEmail').value = cfg.from_email;
+      if (cfg.from_name) document.getElementById('fromName').value = cfg.from_name;
+      if (cfg.manychat_key) document.getElementById('manychatKey').value = cfg.manychat_key;
+      if (cfg.manychat_page_id) document.getElementById('manychatPageId').value = cfg.manychat_page_id;
+      if (cfg.calendly_link) document.getElementById('calendlyLink').value = cfg.calendly_link;
+      if (cfg.calendly_secret) document.getElementById('calendlySecret').value = cfg.calendly_secret;
+      if (cfg.sheet_id) document.getElementById('sheetId').value = cfg.sheet_id;
+      if (cfg.sheet_tab) document.getElementById('sheetTab').value = cfg.sheet_tab;
+      if (cfg.col_name) document.getElementById('colName').value = cfg.col_name;
+      if (cfg.col_phone) document.getElementById('colPhone').value = cfg.col_phone;
+      if (cfg.col_email) document.getElementById('colEmail').value = cfg.col_email;
+      if (cfg.has_header !== undefined) document.getElementById('hasHeader').checked = cfg.has_header;
+    }
+    updateWebhookUrlDisplay();
+  } catch(e) {
+    console.error('Load config error:', e);
+  }
+}
+
+// Update Calendly webhook URL display
+function updateWebhookUrlDisplay() {
+  const urlInput = document.getElementById('calWebhookUrl');
+  if (userId) {
+    urlInput.value = `${EDGE}/calendly-webhook?user=${userId}`;
+  } else {
+    urlInput.value = 'Login to generate URL';
+  }
+}
+
+// Test Resend email
+async function testResend() {
+  const resendKey = document.getElementById('resendKey').value.trim();
+  const fromEmail = document.getElementById('fromEmail').value.trim();
+  
+  if (!resendKey || !fromEmail) {
+    showToast('Please save Resend API Key and From Email first', true);
+    return;
+  }
+  
+  showToast('Sending test email...');
+  try {
+    const r = await api('testResend', { test_email: userEmail });
+    if (r.success) {
+      showToast(`Test email sent to ${userEmail} ✅`);
+    } else {
+      showToast('Failed: ' + (r.message || 'Check API key'), true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+// Test ManyChat connection
+async function testManyChat() {
+  const mcKey = document.getElementById('manychatKey').value.trim();
+  const pageId = document.getElementById('manychatPageId').value.trim();
+  const subId = document.getElementById('manychatSubId').value.trim();
+  
+  if (!mcKey || !pageId) {
+    showToast('Please save ManyChat API Key and Page ID first', true);
+    return;
+  }
+  
+  if (!subId) {
+    showToast('Enter a Subscriber ID to test with', true);
+    return;
+  }
+  
+  showToast('Testing ManyChat...');
+  try {
+    // Try to add a test tag (tag_id 1 is usually generic)
+    const r = await api('manychatTag', { subscriber_id: subId, tag_id: '1' });
+    if (r.success) {
+      showToast('ManyChat connected! Tag test sent ✅');
+    } else {
+      showToast('Failed: ' + (r.data?.message || 'Check credentials'), true);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+// Test Calendly webhook
+async function testCalendly() {
+  const calLink = document.getElementById('calendlyLink').value.trim();
+  if (!calLink) {
+    showToast('Enter Calendly booking link first', true);
+    return;
+  }
+  
+  showToast('Simulating Calendly booking...');
+  try {
+    // Send a test webhook payload to your edge function
+    const r = await api('calendly-webhook', {
+      event: 'invitee.created',
+      payload: {
+        invitee: {
+          email: 'test@example.com',
+          name: 'Test User',
+          questions_and_answers: [
+            { question: 'WhatsApp phone number?', answer: '919876543210' }
+          ]
+        }
+      }
+    });
+    if (r.success) {
+      showToast('Test webhook sent! Check Leads tab ✅');
+      loadLeads(); // Refresh leads
+    } else {
+      showToast('Webhook test completed', !r.success);
+    }
+  } catch(e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+
+// Check GoWA server status
+async function checkServerStatus() {
+  const serverUrl = document.getElementById('gowaUrl').value.trim() || 'https://sanjaywa8-5.onrender.com';
+  const statusPip = document.getElementById('serverStatusPip');
+  const statusText = document.getElementById('serverStatusText');
+  
+  statusPip.style.background = 'var(--accent4)';
+  statusText.textContent = 'Checking...';
+  statusText.style.color = 'var(--accent4)';
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const response = await fetch(serverUrl + '/', { method: 'GET', signal: controller.signal });
+    clearTimeout(timeoutId);
+    
+    if (response.ok) {
+      statusPip.style.background = 'var(--accent)';
+      statusText.textContent = '🟢 ONLINE';
+      statusText.style.color = 'var(--accent)';
+      showToast('GoWA server is online ✅');
+    } else {
+      throw new Error('HTTP ' + response.status);
+    }
+  } catch(e) {
+    statusPip.style.background = 'var(--accent3)';
+    statusText.textContent = '🔴 OFFLINE';
+    statusText.style.color = 'var(--accent3)';
+    showToast('GoWA server is offline', true);
+  }
+}
 // ══════════════════════ LOAD DATA ══════════════════════
 async function loadData(){
   const r=await api('loadAll');
@@ -649,8 +925,10 @@ async function loadData(){
     if(r.leads){leads=r.leads;renderLeads();}
     if(r.logs){logs=r.logs;renderLogs();}
     if(r.settings)applySettings(r.settings);
+    await loadConfigToSettings();
     if(r.template?.body) document.getElementById('msgTpl').value=r.template.body;
     if(r.device){syncDeviceToUI(r.device);} else {fetchDeviceFromServer();}
+    updateWebhookUrlDisplay();
   }
 }
 
@@ -1144,20 +1422,13 @@ function renderLogs(){
 function clearLogs(){logs=[];renderLogs();api('clearLogs');}
 
 // ══════════════════════ SETTINGS ══════════════════════
-async function saveSettings(){
-  try{
-    const r=await api('saveSettings',{
-      hour_limit:document.getElementById('hourLimit').value,
-      day_limit:document.getElementById('dayLimit').value,
-      min_gap:document.getElementById('minGap').value,
-      max_gap:document.getElementById('maxGap').value,
-      gowa_url:document.getElementById('gowaUrl').value.trim(),
-      gowa_auth:document.getElementById('gowaAuth').value.trim()
-    });
-    showToast(r.success?'Settings saved':(r.message||'Failed'),!r.success);
-  } catch(e){showToast('Error: '+e.message,true);}
+async function saveSettings() {
+  await saveAllSettings();
 }
-async function saveConfig(){await saveSettings();}
+
+async function saveConfig() {
+  await saveAllSettings();
+}
 async function testGowaConnection(){
   showToast('Testing…');
   try{
