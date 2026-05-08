@@ -1896,7 +1896,7 @@ async function saveAllSettings() {
     showToast('Error saving: ' + e.message, true);
   }
 }
-// Load saved config into Settings form
+
 // Load saved config into Settings form
 async function loadConfigToSettings() {
   try {
@@ -2534,19 +2534,7 @@ async function loadLeads(){
   const r=await api('getLeads');
   if(r.success){leads=r.leads;renderLeads();}
 }
-function renderLeads(){
-  const tbody=document.getElementById('leadBody');
-  if(!leads.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">No leads yet</td></tr>';return;}
-  tbody.innerHTML=leads.map((l,i)=>`<tr>
-    <td>${i+1}</td>
-    <td>${escapeHtml(l.name||'—')}</td>
-    <td style="font-family:var(--mono);font-size:11px;">${escapeHtml(l.phone||'—')}</td>
-    <td>${escapeHtml(l.email||'—')}</td>
-    <td><span class="badge badge-${l.status||'new'}">${l.status||'new'}</span></td>
-    <td>${l.arrived_at?new Date(l.arrived_at).toLocaleDateString():'—'}</td>
-    <td><button class="btn btn-g btn-sm" onclick="updLead('${l.id}','booked')">✅ Book</button><button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️ Cold</button></td>
-  </tr>`).join('');
-}
+
 async function updLead(id,status){await api('updateLeadStatus',{id,status});await loadLeads();showToast(`Lead → ${status}`);}
 async function scanSheet() {
   const sheetId = document.getElementById('sheetId').value.trim()
@@ -2638,13 +2626,6 @@ function renderLogs(){
 function clearLogs(){logs=[];renderLogs();api('clearLogs');}
 
 // ══════════════════════ SETTINGS ══════════════════════
-async function saveSettings() {
-  await saveAllSettings();
-}
-
-async function saveConfig() {
-  await saveAllSettings();
-}
 async function testGowaConnection(){
   showToast('Testing…');
   try{
