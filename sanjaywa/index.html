@@ -147,6 +147,37 @@ tr:hover td{background:rgba(255,255,255,.02);}
 }
 .credit-low-banner.hidden{display:none;}
 
+/* ---- DEVICE NOT CONNECTED banner ---- */
+.device-nc-banner{
+  background:rgba(255,95,126,.06);
+  border:2px solid rgba(255,95,126,.45);
+  border-radius:14px;
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:16px;
+  animation: ncPulse 2.5s ease-in-out infinite;
+}
+.device-nc-banner.hidden{display:none;}
+@keyframes ncPulse{0%,100%{border-color:rgba(255,95,126,.45);}50%{border-color:rgba(255,95,126,.9);}}
+.device-nc-content{ display:flex; align-items:center; gap:14px; flex:1; min-width:0; }
+.device-nc-icon{ font-size:28px; flex-shrink:0; }
+.device-nc-text{ display:flex; flex-direction:column; gap:3px; }
+.device-nc-title{ font-size:14px; font-weight:800; color:#ff8fa3; letter-spacing:.3px; }
+.device-nc-sub{ font-size:11px; color:#7a95a8; font-family:'Space Mono',monospace; }
+.device-nc-actions{ display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+
+/* ---- START btn disabled state ---- */
+.btn-primary:disabled{
+  background:#1e2a35;
+  color:#4a6070;
+  cursor:not-allowed;
+  opacity:1;
+}
+.btn-primary:disabled:hover{opacity:1;}
+
 /* ---- BUY MODAL ERROR STATE ---- */
 .buy-error{background:rgba(255,95,126,.08);border:1px solid rgba(255,95,126,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:#ff8fa3;margin-bottom:10px;display:none;}
 </style>
@@ -174,32 +205,23 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <div class="modal-box">
     <h2>⚡ Buy Credits</h2>
     <div class="modal-subtitle">1 credit = 1 WA message sent · ₹0.50 per credit</div>
-
-    <!-- Current balance strip inside modal -->
     <div style="display:flex;align-items:center;justify-content:space-between;background:#080c10;border:1px solid #1e2a35;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
       <span style="font-size:11px;color:#7a95a8;font-family:'Space Mono',monospace;">Current Balance</span>
       <span style="font-size:15px;font-weight:800;color:#a78bfa;" id="modalCurrentCredits">0 credits</span>
     </div>
-
     <div class="pack-grid" id="packGrid"></div>
-
-    <!-- Error display -->
     <div class="buy-error" id="buyError"></div>
-
     <div id="buyBtnWrap" style="display:none;margin-bottom:12px;">
       <button class="btn btn-purple" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="proceedBuy()" id="payBtn">
         💳 Pay with Razorpay
       </button>
       <div id="buyStatus" style="font-size:12px;color:#7a95a8;text-align:center;margin-top:8px;"></div>
     </div>
-
-    <!-- Polling status (shown after payment page opened) -->
     <div id="pollStatus" style="display:none;background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px;">
       <div style="font-size:13px;color:#00e5a0;font-weight:700;margin-bottom:4px;"><span class="spinner"></span> Waiting for payment…</div>
       <div style="font-size:11px;color:#7a95a8;">Complete payment in the Razorpay tab, then come back. This will update automatically.</div>
       <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I've paid — check now</button>
     </div>
-
     <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="closeBuyModal()">Cancel</button>
     <div style="margin-top:12px;font-size:11px;color:#4a6070;text-align:center;font-family:'Space Mono',monospace;">
       Payments secured by Razorpay · Credits added instantly after payment
@@ -211,8 +233,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <div class="dashboard-wrap" id="dashboardWrap">
   <div class="sidebar">
     <div style="padding:22px 24px 14px;"><span style="font-size:18px;font-weight:800;color:#fff;">Auto</span><span style="font-size:18px;font-weight:800;color:#00e5a0;">Send</span></div>
-
-    <!-- CREDIT PILL -->
     <div class="credit-pill" onclick="openBuyModal()" title="Click to buy credits">
       <div>
         <div class="credit-pill-label">Credits</div>
@@ -221,7 +241,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
       </div>
       <div class="credit-pill-buy">+ Buy</div>
     </div>
-
     <div style="padding:0 10px;">
       <div class="nav-section">Main</div>
       <div class="nav-item active" data-tab="device">📱 Device</div>
@@ -367,6 +386,22 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
     <!-- ===== SEND ===== -->
     <div class="tab-panel" id="tab-send">
+
+      <!-- ══ DEVICE NOT CONNECTED BANNER ══ -->
+      <div class="device-nc-banner hidden" id="deviceNcBanner">
+        <div class="device-nc-content">
+          <div class="device-nc-icon">📵</div>
+          <div class="device-nc-text">
+            <div class="device-nc-title">Device Not Connected</div>
+            <div class="device-nc-sub" id="deviceNcSub">No WhatsApp device is linked and connected.</div>
+          </div>
+        </div>
+        <div class="device-nc-actions">
+          <button class="btn btn-warning btn-sm" onclick="switchTab('device')">📱 Go to Device</button>
+          <button class="btn btn-secondary btn-sm" onclick="refreshDeviceStatus();updateSendGuard();">↻ Recheck</button>
+        </div>
+      </div>
+
       <!-- Credit out banner -->
       <div class="credit-out-banner hidden" id="creditOutBanner">
         <div class="credit-out-msg">💳 Your credits have ended. Recharge to send more messages.</div>
@@ -393,9 +428,13 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
         <div id="currentStatus" style="font-size:12px;color:#7a95a8;margin:8px 0;font-family:'Space Mono',monospace;">Ready</div>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="startSend()">▶ Start</button>
+          <button class="btn btn-primary" id="startSendBtn" onclick="startSend()">▶ Start</button>
           <button class="btn btn-secondary" onclick="pauseSend()">⏸ Pause</button>
           <button class="btn btn-secondary" onclick="stopSend()">⏹ Stop</button>
+        </div>
+        <!-- Inline hint shown when Start is disabled -->
+        <div id="sendBlockedHint" style="display:none;margin-top:10px;padding:10px 13px;background:rgba(255,95,126,.06);border:1px solid rgba(255,95,126,.25);border-radius:8px;font-size:12px;color:#ff8fa3;">
+          ⚠️ <strong>Cannot start:</strong> <span id="sendBlockedReason">Connect a WhatsApp device first.</span>
         </div>
       </div>
       <div class="card">
@@ -496,14 +535,11 @@ tr:hover td{background:rgba(255,255,255,.02);}
           </div>
         </div>
       </div>
-
-      <!-- CREDITS MANAGEMENT CARD -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
           <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
           <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
         </div>
-        <!-- Balance strip -->
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div class="stat-card" style="flex:1;min-width:120px;">
             <div class="stat-label">Balance</div>
@@ -518,7 +554,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
             <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">0 msgs</div>
           </div>
         </div>
-        <!-- Transaction history -->
         <div style="font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Transaction History</div>
         <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
           <table>
@@ -564,6 +599,7 @@ const CREDIT_PACKS = [
 let authToken  = null;
 let deviceId   = null;
 let deviceName = null;
+let deviceConnected = false;   // ← tracks live connection state
 let contacts   = [];
 let userCredits = 0;
 let sendState  = 'idle', sendIndex = 0, sendTimer = null;
@@ -617,36 +653,68 @@ async function callEdge(action, body={}) {
 }
 
 // ================================================================
-// CREDIT UI  — FIX: guard against missing DOM elements, show correct numbers
+// SEND GUARD — controls banner + Start button state
+// ================================================================
+function updateSendGuard() {
+  const banner      = document.getElementById('deviceNcBanner');
+  const startBtn    = document.getElementById('startSendBtn');
+  const blockedHint = document.getElementById('sendBlockedHint');
+  const blockedMsg  = document.getElementById('sendBlockedReason');
+  const subEl       = document.getElementById('deviceNcSub');
+
+  const noDevice    = !deviceId;
+  const notConnected = deviceId && !deviceConnected;
+  const blocked      = noDevice || notConnected;
+
+  if (noDevice) {
+    if (subEl) subEl.textContent = 'No WhatsApp device selected. Create or link one first.';
+  } else if (notConnected) {
+    const name = deviceName || deviceId;
+    if (subEl) subEl.textContent = `"${name}" is not connected. Scan QR or reconnect.`;
+  }
+
+  if (banner) banner.classList.toggle('hidden', !blocked);
+
+  if (startBtn) {
+    startBtn.disabled = blocked;
+    startBtn.title    = blocked ? 'Connect a WhatsApp device first' : '';
+  }
+
+  if (blockedHint) {
+    blockedHint.style.display = blocked ? 'block' : 'none';
+    if (blockedMsg) {
+      if (noDevice)       blockedMsg.textContent = 'No device selected. Go to the Device tab to create and connect one.';
+      else if (notConnected) blockedMsg.textContent = `"${deviceName||deviceId}" is not connected. Scan QR or use Reconnect.`;
+    }
+  }
+}
+
+// ================================================================
+// CREDIT UI
 // ================================================================
 function updateCreditUI(credits) {
   const c = safeInt(credits);
   userCredits = c;
 
-  // Sidebar pill
   const sidebarCreditsEl = document.getElementById('sidebarCredits');
   const sidebarMsgsEl    = document.getElementById('sidebarMsgs');
   if (sidebarCreditsEl) sidebarCreditsEl.textContent = c.toLocaleString('en-IN');
   if (sidebarMsgsEl)    sidebarMsgsEl.textContent    = c.toLocaleString('en-IN');
 
-  // Settings card
   const settingsCreditsEl  = document.getElementById('settingsCredits');
   const settingsCanSendEl  = document.getElementById('settingsCanSend');
   if (settingsCreditsEl) settingsCreditsEl.textContent = c.toLocaleString('en-IN');
   if (settingsCanSendEl) settingsCanSendEl.textContent = c.toLocaleString('en-IN') + ' msgs';
 
-  // Modal current balance
   const modalCreditsEl = document.getElementById('modalCurrentCredits');
   if (modalCreditsEl) modalCreditsEl.textContent = c.toLocaleString('en-IN') + ' credits';
 
-  // Credit cost preview on Send tab — only count genuinely pending
   const creditCostEl = document.getElementById('creditCost');
   if (creditCostEl) {
     const pending = contacts.filter(ct => !ct.status || ct.status === 'pending').length;
     creditCostEl.textContent = pending + ' credits';
   }
 
-  // Banners
   const outBanner = document.getElementById('creditOutBanner');
   const lowBanner = document.getElementById('creditLowBanner');
   if (!outBanner || !lowBanner) return;
@@ -668,18 +736,16 @@ async function loadCredits() {
   try {
     const r = await callEdge('getCredits');
     if (r.success) {
-      // null/undefined credits on new accounts must show 0, not —
       updateCreditUI(r.credits ?? 0);
       renderTransactions(r.transactions || []);
     } else {
       console.warn('getCredits failed:', r.message);
-      // Re-render with current value (0 by default) so — never persists
       updateCreditUI(userCredits);
       renderTransactions([]);
     }
   } catch(e) {
     console.warn('loadCredits error:', e);
-    updateCreditUI(userCredits); // keep 0, never show —
+    updateCreditUI(userCredits);
   }
 }
 
@@ -704,8 +770,7 @@ function renderTransactions(txs) {
 }
 
 // ================================================================
-// BUY CREDITS MODAL — FIX: error display, payment URL validation,
-//                         manual check button, poll cleanup
+// BUY CREDITS MODAL
 // ================================================================
 function openBuyModal() {
   selectedPack = null;
@@ -714,7 +779,6 @@ function openBuyModal() {
   document.getElementById('buyStatus').textContent = '';
   document.getElementById('pollStatus').style.display = 'none';
   hideBuyError();
-  // Sync current balance into modal
   document.getElementById('modalCurrentCredits').textContent =
     userCredits.toLocaleString('en-IN') + ' credits';
   document.getElementById('buyModal').style.display = 'flex';
@@ -736,16 +800,12 @@ function showBuyError(msg) {
 }
 
 function stopPaymentPolling() {
-  if (paymentPollTimer) {
-    clearInterval(paymentPollTimer);
-    paymentPollTimer = null;
-  }
+  if (paymentPollTimer) { clearInterval(paymentPollTimer); paymentPollTimer = null; }
   currentPaymentLinkId = null;
 }
 
 function renderPacks() {
   const grid = document.getElementById('packGrid');
-  // FIX: use a clean unique id prefix that won't conflict with pack id naming
   grid.innerHTML = CREDIT_PACKS.map(p => {
     return `<div class="pack-card" id="packcard_${p.id}" onclick="selectPack('${p.id}')">
       <div class="pack-credits">${p.credits.toLocaleString('en-IN')}</div>
@@ -760,7 +820,6 @@ function renderPacks() {
 function selectPack(packId) {
   selectedPack = packId;
   hideBuyError();
-  // FIX: use correct id prefix "packcard_" matching renderPacks
   document.querySelectorAll('.pack-card').forEach(el => el.classList.remove('selected'));
   document.getElementById('packcard_' + packId)?.classList.add('selected');
   document.getElementById('buyBtnWrap').style.display = 'block';
@@ -769,7 +828,6 @@ function selectPack(packId) {
     document.getElementById('buyStatus').textContent =
       `${pack.credits.toLocaleString('en-IN')} credits for ₹${pack.amount}`;
   }
-  // Reset pay button in case it was disabled
   const payBtn = document.getElementById('payBtn');
   if (payBtn) { payBtn.textContent = '💳 Pay with Razorpay'; payBtn.disabled = false; }
   document.getElementById('pollStatus').style.display = 'none';
@@ -787,10 +845,8 @@ async function proceedBuy() {
   try {
     const r = await callEdge('buyCredits', { pack_id: selectedPack });
 
-    // FIX: explicit check for success flag AND payment_url existence
     if (!r || !r.success) {
-      const errMsg = r?.message || 'Could not create payment link. Please try again.';
-      showBuyError('❌ ' + errMsg);
+      showBuyError('❌ ' + (r?.message || 'Could not create payment link. Please try again.'));
       payBtn.textContent = '💳 Pay with Razorpay';
       payBtn.disabled = false;
       return;
@@ -803,24 +859,19 @@ async function proceedBuy() {
       return;
     }
 
-    // Open Razorpay payment page
     window.open(r.payment_url, '_blank');
     payBtn.textContent = '✅ Payment page opened';
     document.getElementById('buyStatus').textContent = '';
-
-    // Show polling status panel
     document.getElementById('pollStatus').style.display = 'block';
 
-    // Store link id for manual check
     currentPaymentLinkId = r.razorpay_payment_link_id || null;
 
-    // Start polling for payment completion
     if (currentPaymentLinkId) {
       let attempts = 0;
-      stopPaymentPolling(); // clear any existing
+      stopPaymentPolling();
       paymentPollTimer = setInterval(async () => {
         attempts++;
-        if (attempts > 72) { // ~6 min max
+        if (attempts > 72) {
           stopPaymentPolling();
           document.getElementById('pollStatus').innerHTML =
             '<div style="color:#ffd166;font-size:12px;">⏰ Polling timed out. If you paid, click the check button below or refresh credits in Settings.</div>' +
@@ -834,12 +885,11 @@ async function proceedBuy() {
             updateCreditUI(poll.credits);
             closeBuyModal();
             showToast(`✅ Credits added! New balance: ${safeInt(poll.credits).toLocaleString('en-IN')}`);
-            loadCredits(); // refresh transactions too
+            loadCredits();
           }
-        } catch(e) { /* network hiccup — keep polling */ }
+        } catch(e) {}
       }, 5000);
     } else {
-      // No link ID to poll — instruct manual check
       document.getElementById('pollStatus').innerHTML =
         '<div style="font-size:12px;color:#7a95a8;">Complete payment in the Razorpay tab, then click below.</div>' +
         '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I\'ve paid — refresh balance</button>';
@@ -852,13 +902,11 @@ async function proceedBuy() {
   }
 }
 
-// FIX: new manual payment check — just refreshes credits from server
 async function manualCheckPayment() {
   const btn = event.target;
   btn.textContent = '⏳ Checking…';
   btn.disabled = true;
   try {
-    // If we have a link ID, try polling once
     if (currentPaymentLinkId) {
       const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: currentPaymentLinkId });
       if (poll && poll.status === 'completed') {
@@ -870,7 +918,6 @@ async function manualCheckPayment() {
         return;
       }
     }
-    // Fallback: just reload credits from getCredits
     const r = await callEdge('getCredits');
     if (r.success) {
       updateCreditUI(r.credits);
@@ -884,24 +931,17 @@ async function manualCheckPayment() {
   btn.disabled = false;
 }
 
-// Check for payment=success in URL on load (Razorpay redirect)
 function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
     showToast('Payment received! Refreshing credits…');
-    // clean URL first
     window.history.replaceState({}, '', window.location.pathname);
-    // Poll a couple times to confirm credit update
     let attempts = 0;
     const t = setInterval(async () => {
       attempts++;
       try {
         const r = await callEdge('getCredits');
-        if (r.success) {
-          updateCreditUI(r.credits);
-          renderTransactions(r.transactions || []);
-          if (attempts >= 3) clearInterval(t);
-        }
+        if (r.success) { updateCreditUI(r.credits); renderTransactions(r.transactions || []); if (attempts >= 3) clearInterval(t); }
       } catch(e) {}
       if (attempts >= 5) clearInterval(t);
     }, 3000);
@@ -977,14 +1017,14 @@ function showDashboard(email, data) {
   document.getElementById('dashboardWrap').style.display='block';
   document.getElementById('userEmail').textContent=email;
   checkPaymentReturn();
-  // Show 0 immediately so dashes never appear while API loads
   updateCreditUI(0);
+  updateSendGuard(); // initial guard state
   if (data) {
     initDashboard(data);
   } else {
     callEdge('loadAll').then(r => {
       if (r.success) initDashboard(r);
-      else loadCredits(); // still refresh credits even if loadAll fails
+      else loadCredits();
     }).catch(() => { loadCredits(); });
   }
 }
@@ -1006,10 +1046,8 @@ function initDashboard(data) {
   if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
   fetchAndRenderDevices();
 
-  // FIX: always show 0 immediately (never show —) before async loadCredits resolves
   const credits = data?.profile?.credits ?? data?.credits ?? 0;
   updateCreditUI(credits);
-  // Then refresh with live data from server
   loadCredits();
 }
 
@@ -1020,6 +1058,10 @@ function syncDeviceToUI(device) {
   deviceId   = device.device_id;
   deviceName = device.device_name || device.device_id;
   const status = device.status || 'created';
+
+  // ← update connected flag before calling updateStatusBar
+  deviceConnected = (status === 'connected');
+
   updateStatusBar(status);
   document.getElementById('activeDevicePanel').style.display='block';
   document.getElementById('activeDeviceNameDisplay').textContent = deviceName;
@@ -1036,29 +1078,43 @@ function syncDeviceToUI(device) {
     qw.innerHTML=`<div class="qr-icon">📱</div><div class="qr-hint">${escapeHtml(deviceName)} — click "Show QR" to link</div>`;
   }
   setDebug(`Device: ${deviceName} [${deviceId.substring(0,24)}…] — ${status}`);
+  updateSendGuard(); // ← refresh Send tab guard after every device state change
 }
+
 function updateStatusBar(status) {
   const dot=document.getElementById('statusDot'), text=document.getElementById('statusText');
   const m={connected:['status-dot connected','CONNECTED'],scanning:['status-dot scanning','SCANNING'],disconnected:['status-dot disconnected','OFFLINE'],created:['status-dot disconnected','CREATED'],linked:['status-dot disconnected','LINKED']};
   const [c,l]=(m[status]||m.disconnected); dot.className=c; text.textContent=l;
 }
+
 async function fetchDeviceFromServer() {
   try {
     const r = await callEdge('getDevice');
     if(r.success && r.has_device) syncDeviceToUI(r.device);
-    else { setDebug('No device linked. Create one or sync.'); updateStatusBar('disconnected'); }
+    else {
+      setDebug('No device linked. Create one or sync.');
+      updateStatusBar('disconnected');
+      deviceConnected = false;
+      updateSendGuard();
+    }
   } catch(e) { setDebug('Device fetch error: '+e.message, true); }
 }
+
 async function refreshDeviceStatus() {
   if(!deviceId){showToast('No active device',true);return;}
   try {
     const r=await callEdge('checkDeviceStatus');
     if(r.success){
-      const s=r.is_connected?'connected':'scanning'; updateStatusBar(s);
-      const b=document.getElementById('activeDeviceStatusBadge'); if(b){b.textContent=s;b.className='badge badge-'+s;}
-      document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';
-      showToast(r.is_connected?'Device connected ✅':'Device not connected');
-      if(r.is_connected) document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+      const connected = r.is_connected;
+      deviceConnected = connected;
+      const s=connected?'connected':'scanning';
+      updateStatusBar(s);
+      const b=document.getElementById('activeDeviceStatusBadge');
+      if(b){b.textContent=s;b.className='badge badge-'+s;}
+      document.getElementById('reconnectBtn').style.display=connected?'none':'inline-flex';
+      showToast(connected?'Device connected ✅':'Device not connected');
+      if(connected) document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+      updateSendGuard(); // ← refresh after status check
     }
   } catch(e){showToast('Status check failed',true);}
 }
@@ -1072,6 +1128,7 @@ async function fetchAndRenderDevices() {
     else wrap.innerHTML='<div class="empty-state">No devices on server. Create one above.</div>';
   } catch(e){wrap.innerHTML=`<div class="empty-state" style="color:#ff6b6b;">Error: ${escapeHtml(e.message)}</div>`;}
 }
+
 function renderDevicesList(devices) {
   const wrap=document.getElementById('devicesListWrap');
   if(!devices?.length){wrap.innerHTML='<div class="empty-state">No devices.</div>';return;}
@@ -1185,15 +1242,21 @@ function downloadTemplate() {
 
 async function selectDevice(id,name) {
   if(!confirm(`Use "${name}" as your active device?`)) return;
-  try { const r=await callEdge('linkDevice',{device_id:id,device_name:name}); if(r.success){syncDeviceToUI({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchAndRenderDevices();}else showToast(r.message||'Failed',true); }
-  catch(e){showToast('Error: '+e.message,true);}
+  try {
+    const r=await callEdge('linkDevice',{device_id:id,device_name:name});
+    if(r.success){syncDeviceToUI({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchAndRenderDevices();}
+    else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
 }
 async function getQRForDevice(id) {
   const wrap=document.getElementById('qrWrap');
   wrap.innerHTML='<div class="qr-icon"><span class="spinner"></span></div><div class="qr-hint">Loading QR…</div>';
   updateStatusBar('scanning');
-  try { const r=await callEdge('getQRForDevice',{device_id:id}); if(r.success&&r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration); else wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`; }
-  catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+  try {
+    const r=await callEdge('getQRForDevice',{device_id:id});
+    if(r.success&&r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration);
+    else wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
+  } catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
 }
 async function loadQR() {
   if(!deviceId){showToast('Create or select a device first',true);return;}
@@ -1215,8 +1278,11 @@ function renderQRImage(url,duration) {
 async function loginWithCode() {
   if(!deviceId){showToast('Select a device first',true);return;}
   const phone=prompt('Enter your WhatsApp phone number (with country code, no +):\ne.g. 919876543210'); if(!phone) return;
-  try { const r=await callEdge('loginWithCode',{device_id:deviceId,phone}); if(r.success){ showToast('Pairing code: '+r.code); setDebug('Pairing code: '+r.code); } else showToast(r.message||'Failed',true); }
-  catch(e){showToast('Error: '+e.message,true);}
+  try {
+    const r=await callEdge('loginWithCode',{device_id:deviceId,phone});
+    if(r.success){ showToast('Pairing code: '+r.code); setDebug('Pairing code: '+r.code); }
+    else showToast(r.message||'Failed',true);
+  } catch(e){showToast('Error: '+e.message,true);}
 }
 async function unlinkActiveDevice() {
   if(!deviceId) return;
@@ -1225,7 +1291,9 @@ async function unlinkActiveDevice() {
   try {
     const r=await callEdge('unlinkDevice');
     if(r.success){
-      deviceId=deviceName=null; updateStatusBar('disconnected');
+      deviceId=deviceName=null;
+      deviceConnected=false;
+      updateStatusBar('disconnected');
       document.getElementById('activeDevicePanel').style.display='none';
       document.getElementById('unlinkBtn').style.display='none';
       document.getElementById('reconnectBtn').style.display='none';
@@ -1236,6 +1304,7 @@ async function unlinkActiveDevice() {
       if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
       if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
       showToast('Device unlinked'); fetchAndRenderDevices();
+      updateSendGuard(); // ← update after unlink
     } else showToast(r.message||'Failed',true);
   } catch(e){showToast('Error: '+e.message,true);}
 }
@@ -1244,29 +1313,54 @@ async function deleteDevice(id,name) {
   try {
     const r=await callEdge('deleteDevice',{device_id:id});
     showToast(r.success?`"${name}" deleted`:(r.message||'Delete failed'),!r.success);
-    if(r.success){if(id===deviceId){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevicePanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device to get started</div>';setDebug('Active device deleted.');}fetchAndRenderDevices();}
+    if(r.success){
+      if(id===deviceId){
+        deviceId=deviceName=null;
+        deviceConnected=false;
+        updateStatusBar('disconnected');
+        document.getElementById('activeDevicePanel').style.display='none';
+        document.getElementById('unlinkBtn').style.display='none';
+        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device to get started</div>';
+        setDebug('Active device deleted.');
+        updateSendGuard(); // ← update after delete
+      }
+      fetchAndRenderDevices();
+    }
   } catch(e){showToast('Error: '+e.message,true);}
 }
 async function doReconnect() {
   showToast('Reconnecting…');
-  try { const r=await callEdge('reconnect'); showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success); if(r.success)startDevicePolling(); }
-  catch(e){showToast('Error: '+e.message,true);}
+  try {
+    const r=await callEdge('reconnect');
+    showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success);
+    if(r.success) startDevicePolling();
+  } catch(e){showToast('Error: '+e.message,true);}
 }
 
 function startDevicePolling() {
   if(pollTimer) clearInterval(pollTimer);
   pollTimer=setInterval(async()=>{
-    try { const r=await callEdge('checkDeviceStatus');
+    try {
+      const r=await callEdge('checkDeviceStatus');
       if(r.success&&r.is_connected){
-        clearInterval(pollTimer);pollTimer=null;if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
-        updateStatusBar('connected');document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
-        document.getElementById('qrTimer').textContent='';document.getElementById('reconnectBtn').style.display='none';
-        const b=document.getElementById('activeDeviceStatusBadge');if(b){b.textContent='connected';b.className='badge badge-connected';}
-        setDebug(`✅ ${deviceName} connected!`);showToast('WhatsApp connected! 🎉');fetchAndRenderDevices();
+        clearInterval(pollTimer);pollTimer=null;
+        if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+        deviceConnected=true;
+        updateStatusBar('connected');
+        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+        document.getElementById('qrTimer').textContent='';
+        document.getElementById('reconnectBtn').style.display='none';
+        const b=document.getElementById('activeDeviceStatusBadge');
+        if(b){b.textContent='connected';b.className='badge badge-connected';}
+        setDebug(`✅ ${deviceName} connected!`);
+        showToast('WhatsApp connected! 🎉');
+        fetchAndRenderDevices();
+        updateSendGuard(); // ← unlock Send when polling confirms connected
       }
     } catch(e){}
   },3000);
 }
+
 function startQRCountdown(secs) {
   if(qrTimer) clearInterval(qrTimer);
   let s=secs; const el=document.getElementById('qrTimer');
@@ -1279,7 +1373,6 @@ function startQRCountdown(secs) {
 function renderContacts() {
   const tbody=document.getElementById('contactsBody');
   document.getElementById('contactCountBadge').textContent=`(${contacts.length})`;
-  // Update credit cost preview
   const pending = contacts.filter(c=>!c.status||c.status==='pending').length;
   const costEl = document.getElementById('creditCost');
   if (costEl) costEl.textContent = pending + ' credits';
@@ -1315,12 +1408,24 @@ async function saveContacts(){
 function clearContacts(){contacts=[];renderContacts();}
 
 // ================================================================
-// SEND CAMPAIGN — credit-aware
+// SEND CAMPAIGN — device-connection + credit-aware
 // ================================================================
 async function startSend(){
-  if(!deviceId){showToast('Link a device first',true);switchTab('device');return;}
+  // ─── Guard 1: device must exist and be connected ───
+  if(!deviceId){
+    showToast('No device selected. Go to the Device tab.', true);
+    updateSendGuard();
+    return;
+  }
+  if(!deviceConnected){
+    showToast(`"${deviceName||deviceId}" is not connected. Scan QR or reconnect first.`, true);
+    updateSendGuard();
+    return;
+  }
+  // ─── Guard 2: must have contacts ───
   if(!contacts.length){showToast('No contacts',true);return;}
   const pending = contacts.filter(c=>!c.status||c.status==='pending').length;
+  // ─── Guard 3: credits ───
   if(userCredits <= 0){
     showToast('No credits. Please buy credits to send messages.', true);
     document.getElementById('creditOutBanner').classList.remove('hidden');
@@ -1332,6 +1437,7 @@ async function startSend(){
   }
   sendState='running'; sendLog=[]; renderSendLog(); processSend();
 }
+
 function pauseSend(){sendState='paused';if(sendTimer)clearTimeout(sendTimer);showToast('Paused');}
 function stopSend(){sendState='idle';sendIndex=0;if(sendTimer)clearTimeout(sendTimer);updateProgress();document.getElementById('currentStatus').textContent='Stopped';}
 
@@ -1339,12 +1445,24 @@ async function processSend(){
   if(sendState!=='running') return;
   if(sendIndex>=contacts.length){stopSend();showToast('Campaign complete! 🎉');return;}
 
+  // Safety re-check mid-campaign
+  if(!deviceConnected){
+    sendState='idle';
+    if(sendTimer)clearTimeout(sendTimer);
+    document.getElementById('currentStatus').textContent='⚠️ Device disconnected — campaign stopped';
+    updateSendGuard();
+    showToast('Device disconnected. Campaign stopped.', true);
+    renderContacts(); renderSendLog(); updateProgress();
+    return;
+  }
+
   if(userCredits <= 0){
     sendState='idle';
     if(sendTimer)clearTimeout(sendTimer);
     document.getElementById('currentStatus').textContent='⚠️ Credits ended — campaign stopped';
     document.getElementById('creditOutBanner').classList.remove('hidden');
     showToast('Your credits have ended. Please recharge to send more.', true);
+    renderContacts(); renderSendLog(); updateProgress();
     return;
   }
 
@@ -1365,7 +1483,6 @@ async function processSend(){
     else                                      result=await callEdge('sendMessage',{phone:c.phone,message:msg});
 
     c.status = result.success ? 'sent' : 'failed';
-
     if(result.credits !== undefined) updateCreditUI(result.credits);
 
     if(!result.success && result.out_of_credits){
@@ -1374,6 +1491,17 @@ async function processSend(){
       document.getElementById('currentStatus').textContent='⚠️ Credits ended — campaign stopped';
       document.getElementById('creditOutBanner').classList.remove('hidden');
       showToast('Your credits have ended. Please recharge to send more.', true);
+      renderContacts(); renderSendLog(); updateProgress();
+      return;
+    }
+
+    if(!result.success && result.device_disconnected){
+      sendState='idle';
+      if(sendTimer)clearTimeout(sendTimer);
+      deviceConnected=false;
+      document.getElementById('currentStatus').textContent='⚠️ Device disconnected — campaign stopped';
+      updateSendGuard();
+      showToast('Device disconnected. Please reconnect and try again.', true);
       renderContacts(); renderSendLog(); updateProgress();
       return;
     }
@@ -1397,6 +1525,10 @@ function renderSendLog(){
 }
 async function testSendMessage(){
   if(!deviceId){showToast('No device linked',true);return;}
+  if(!deviceConnected){
+    showToast(`"${deviceName||deviceId}" is not connected. Please connect your device first.`, true);
+    return;
+  }
   const phone=prompt('Enter your own phone number to test (with country code, no +):\ne.g. 919876543210'); if(!phone) return;
   const msg=document.getElementById('msgTemplate').value||'Test message from AutoSend 👋';
   showToast('Sending test… (1 credit will be used)');
@@ -1517,6 +1649,7 @@ function switchTab(name){
     const p=contacts.filter(c=>!c.status||c.status==='pending').length;
     const costEl=document.getElementById('creditCost');
     if(costEl) costEl.textContent=p+' credits';
+    updateSendGuard(); // ← always re-evaluate on tab open
   }
 }
 document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>switchTab(n.dataset.tab)));
@@ -1546,6 +1679,7 @@ Object.assign(window,{
   loadUserInfo,loadUserAvatar,loadMyContacts,loadMyPrivacy,loadBusinessProfile,changePushname,checkUser,
   saveSettings,saveGowaSettings,testGowaConnection,saveAiSettings,
   openBuyModal,closeBuyModal,selectPack,proceedBuy,loadCredits,manualCheckPayment,
+  updateSendGuard,switchTab,
 });
 </script>
 </body>
