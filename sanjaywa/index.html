@@ -178,7 +178,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <!-- Current balance strip inside modal -->
     <div style="display:flex;align-items:center;justify-content:space-between;background:#080c10;border:1px solid #1e2a35;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
       <span style="font-size:11px;color:#7a95a8;font-family:'Space Mono',monospace;">Current Balance</span>
-      <span style="font-size:15px;font-weight:800;color:#a78bfa;" id="modalCurrentCredits">— credits</span>
+      <span style="font-size:15px;font-weight:800;color:#a78bfa;" id="modalCurrentCredits">0 credits</span>
     </div>
 
     <div class="pack-grid" id="packGrid"></div>
@@ -216,8 +216,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="credit-pill" onclick="openBuyModal()" title="Click to buy credits">
       <div>
         <div class="credit-pill-label">Credits</div>
-        <div class="credit-pill-val" id="sidebarCredits">—</div>
-        <div class="credit-pill-hint">≈ <span id="sidebarMsgs">—</span> messages</div>
+        <div class="credit-pill-val" id="sidebarCredits">0</div>
+        <div class="credit-pill-hint">≈ <span id="sidebarMsgs">0</span> messages</div>
       </div>
       <div class="credit-pill-buy">+ Buy</div>
     </div>
@@ -507,7 +507,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div class="stat-card" style="flex:1;min-width:120px;">
             <div class="stat-label">Balance</div>
-            <div class="stat-val purple" id="settingsCredits">—</div>
+            <div class="stat-val purple" id="settingsCredits">0</div>
           </div>
           <div class="stat-card" style="flex:1;min-width:120px;">
             <div class="stat-label">Rate</div>
@@ -515,7 +515,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
           </div>
           <div class="stat-card" style="flex:1;min-width:120px;">
             <div class="stat-label">Can Send</div>
-            <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">—</div>
+            <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">0 msgs</div>
           </div>
         </div>
         <!-- Transaction history -->
@@ -668,14 +668,18 @@ async function loadCredits() {
   try {
     const r = await callEdge('getCredits');
     if (r.success) {
-      updateCreditUI(r.credits);
+      // null/undefined credits on new accounts must show 0, not —
+      updateCreditUI(r.credits ?? 0);
       renderTransactions(r.transactions || []);
     } else {
-      // If getCredits fails, don't crash — just leave existing value
       console.warn('getCredits failed:', r.message);
+      // Re-render with current value (0 by default) so — never persists
+      updateCreditUI(userCredits);
+      renderTransactions([]);
     }
   } catch(e) {
     console.warn('loadCredits error:', e);
+    updateCreditUI(userCredits); // keep 0, never show —
   }
 }
 
@@ -973,12 +977,15 @@ function showDashboard(email, data) {
   document.getElementById('dashboardWrap').style.display='block';
   document.getElementById('userEmail').textContent=email;
   checkPaymentReturn();
+  // Show 0 immediately so dashes never appear while API loads
+  updateCreditUI(0);
   if (data) {
     initDashboard(data);
   } else {
     callEdge('loadAll').then(r => {
       if (r.success) initDashboard(r);
-    }).catch(() => {});
+      else loadCredits(); // still refresh credits even if loadAll fails
+    }).catch(() => { loadCredits(); });
   }
 }
 
@@ -999,12 +1006,10 @@ function initDashboard(data) {
   if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
   fetchAndRenderDevices();
 
-  // FIX: handle credits from multiple possible response shapes
-  const credits = data?.profile?.credits ?? data?.credits ?? null;
-  if (credits !== null && credits !== undefined) {
-    updateCreditUI(credits);
-  }
-  // Always do a fresh load to get latest balance + transactions
+  // FIX: always show 0 immediately (never show —) before async loadCredits resolves
+  const credits = data?.profile?.credits ?? data?.credits ?? 0;
+  updateCreditUI(credits);
+  // Then refresh with live data from server
   loadCredits();
 }
 
