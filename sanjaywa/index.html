@@ -609,7 +609,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 <div class="toast" id="toast"></div>
   <!-- ═══════════════════ AUTO-LOG PANEL ═══════════════════ -->
-<div id="autoLog" style="
+<div id="" style="
   position:fixed;bottom:0;right:0;width:380px;
   background:#080c10;border-top:2px solid #1e2a35;border-left:2px solid #1e2a35;
   border-radius:12px 0 0 0;z-index:8000;font-family:'Space Mono',monospace;
@@ -646,6 +646,18 @@ tr:hover td{background:rgba(255,255,255,.02);}
 // ─── Log core ───
 let logOpen = true, logCount = 0;
 
+// Hide panel by default — paste this once after the autoLog div is created
+document.getElementById('autoLog').style.display = 'none';
+
+// Ctrl+Shift+L to toggle panel visibility
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+    const log = document.getElementById('autoLog');
+    log.style.display = log.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+// Chevron open/close inside the panel
 function toggleLog() {
   logOpen = !logOpen;
   document.getElementById('autoLogBody').style.display = logOpen ? 'block' : 'none';
