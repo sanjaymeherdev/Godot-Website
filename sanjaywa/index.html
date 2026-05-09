@@ -25,6 +25,7 @@ body{font-family:'Syne',sans-serif;background:#080c10;color:#d0dde8;}
 .btn-secondary{background:transparent;border:1px solid #243040;color:#d0dde8;}
 .btn-danger{background:#ff5f7e;color:#fff;}
 .btn-warning{background:#ffd166;color:#000;}
+.btn-purple{background:#a78bfa;color:#000;}
 .btn-sm{padding:5px 10px;font-size:11px;}
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
 .nav-item{padding:9px 16px;cursor:pointer;border-radius:10px;margin:3px 0;font-size:13px;transition:background .12s;}
@@ -56,6 +57,9 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .badge-scanning{background:rgba(255,209,102,.15);color:#ffd166;}
 .badge-created,.badge-linked{background:rgba(122,149,168,.15);color:#7a95a8;}
 .badge-disconnected{background:rgba(255,95,126,.1);color:#ff8fa3;}
+.badge-purchase{background:rgba(167,139,250,.15);color:#a78bfa;}
+.badge-grant{background:rgba(0,229,160,.15);color:#00e5a0;}
+.badge-deduct{background:rgba(255,95,126,.15);color:#ff5f7e;}
 .qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;background:#080c10;border:2px dashed #1e2a35;border-radius:14px;min-height:160px;text-align:center;gap:8px;}
 .qr-wrap img{width:200px;border-radius:10px;border:3px solid #00e5a0;}
 .qr-icon{font-size:36px;}
@@ -74,6 +78,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .stat-val{font-size:22px;font-weight:800;}
 .stat-val.green{color:#00e5a0;}
 .stat-val.red{color:#ff5f7e;}
+.stat-val.purple{color:#a78bfa;}
 .toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:10px;z-index:9999;display:none;font-size:13px;max-width:340px;pointer-events:none;}
 .debug-box{font-size:11px;font-family:'Space Mono',monospace;padding:9px 12px;background:#080c10;border:1px solid #1e2a35;border-radius:8px;min-height:26px;color:#7a95a8;margin-top:10px;word-break:break-all;}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid #1e2a35;border-top-color:#00e5a0;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
@@ -82,6 +87,65 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .empty-state{text-align:center;padding:20px;color:#4a6070;font-size:13px;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:700px){.grid-2{grid-template-columns:1fr;}}
+
+/* ---- CREDIT PILL in sidebar ---- */
+.credit-pill{
+  margin:8px 10px 4px;
+  background:rgba(167,139,250,.1);
+  border:1px solid rgba(167,139,250,.3);
+  border-radius:10px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+  transition:background .15s;
+}
+.credit-pill:hover{background:rgba(167,139,250,.18);}
+.credit-pill-label{font-size:10px;font-family:'Space Mono',monospace;color:#7a95a8;letter-spacing:.5px;text-transform:uppercase;}
+.credit-pill-val{font-size:18px;font-weight:800;color:#a78bfa;}
+.credit-pill-hint{font-size:9px;color:#4a6070;margin-top:1px;}
+.credit-pill-buy{font-size:10px;color:#a78bfa;font-weight:700;}
+
+/* ---- BUY CREDITS MODAL ---- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;justify-content:center;align-items:center;z-index:2000;backdrop-filter:blur(4px);}
+.modal-box{background:#0e1318;border:1px solid #1e2a35;border-radius:20px;padding:28px;width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-box h2{margin-bottom:6px;font-size:20px;}
+.modal-subtitle{font-size:13px;color:#7a95a8;margin-bottom:20px;}
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.pack-card{background:#080c10;border:2px solid #1e2a35;border-radius:12px;padding:14px;cursor:pointer;transition:all .15s;text-align:center;}
+.pack-card:hover{border-color:#a78bfa;background:rgba(167,139,250,.06);}
+.pack-card.selected{border-color:#a78bfa;background:rgba(167,139,250,.1);}
+.pack-credits{font-size:22px;font-weight:800;color:#a78bfa;}
+.pack-price{font-size:18px;font-weight:800;color:#fff;margin-top:4px;}
+.pack-rate{font-size:10px;color:#4a6070;margin-top:3px;font-family:'Space Mono',monospace;}
+.pack-best{font-size:9px;color:#00e5a0;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-top:4px;}
+
+/* ---- CREDIT OUT banner ---- */
+.credit-out-banner{
+  background:rgba(255,95,126,.08);
+  border:1px solid rgba(255,95,126,.3);
+  border-radius:12px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.credit-out-banner.hidden{display:none;}
+.credit-out-msg{font-size:13px;color:#ff8fa3;font-weight:600;}
+.credit-low-banner{
+  background:rgba(255,209,102,.06);
+  border:1px solid rgba(255,209,102,.25);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:12px;
+  color:#ffd166;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:10px;
+}
+.credit-low-banner.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -102,10 +166,40 @@ tr:hover td{background:rgba(255,255,255,.02);}
   </div>
 </div>
 
+<!-- BUY CREDITS MODAL -->
+<div class="modal-overlay" id="buyModal" style="display:none;">
+  <div class="modal-box">
+    <h2>⚡ Buy Credits</h2>
+    <div class="modal-subtitle">1 credit = 1 WA message sent · ₹0.50 per credit</div>
+    <div class="pack-grid" id="packGrid"></div>
+    <div id="buyBtnWrap" style="display:none;margin-bottom:12px;">
+      <button class="btn btn-purple" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="proceedBuy()">
+        💳 Pay with Razorpay
+      </button>
+      <div id="buyStatus" style="font-size:12px;color:#7a95a8;text-align:center;margin-top:8px;"></div>
+    </div>
+    <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="closeBuyModal()">Cancel</button>
+    <div style="margin-top:12px;font-size:11px;color:#4a6070;text-align:center;font-family:'Space Mono',monospace;">
+      Payments secured by Razorpay · Credits added instantly after payment
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div class="dashboard-wrap" id="dashboardWrap">
   <div class="sidebar">
     <div style="padding:22px 24px 14px;"><span style="font-size:18px;font-weight:800;color:#fff;">Auto</span><span style="font-size:18px;font-weight:800;color:#00e5a0;">Send</span></div>
+
+    <!-- CREDIT PILL -->
+    <div class="credit-pill" onclick="openBuyModal()" title="Click to buy credits">
+      <div>
+        <div class="credit-pill-label">Credits</div>
+        <div class="credit-pill-val" id="sidebarCredits">—</div>
+        <div class="credit-pill-hint">≈ <span id="sidebarMsgs">—</span> messages</div>
+      </div>
+      <div class="credit-pill-buy">+ Buy</div>
+    </div>
+
     <div style="padding:0 10px;">
       <div class="nav-section">Main</div>
       <div class="nav-item active" data-tab="device">📱 Device</div>
@@ -136,6 +230,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div style="display:flex;gap:8px;">
         <button class="btn btn-secondary btn-sm" onclick="refreshDeviceStatus()">↻ Check Status</button>
         <button class="btn btn-warning btn-sm" onclick="doReconnect()" id="reconnectBtn" style="display:none;">⚡ Reconnect</button>
+        <button class="btn btn-purple btn-sm" onclick="openBuyModal()">⚡ Buy Credits</button>
       </div>
     </div>
 
@@ -168,7 +263,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
         </div>
         <div class="debug-box" id="deviceDebug">No active device.</div>
       </div>
-
       <div class="card">
         <h3>Create New Device</h3>
         <label>Device Name (letters, numbers, _ and - only)</label>
@@ -177,7 +271,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
           <button class="btn btn-primary" onclick="CreateDevice()">➕ Create Device</button>
         </div>
       </div>
-
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <h3 style="margin-bottom:0;">All Devices on Server</h3>
@@ -198,16 +291,15 @@ tr:hover td{background:rgba(255,255,255,.02);}
           <button class="btn btn-secondary" onclick="saveContacts()">💾 Save</button>
           <button class="btn btn-danger" onclick="clearContacts()">🗑️ Clear All</button>
         </div>
-        <!-- Add this inside the Contacts card, above the paste textarea -->
-<div style="margin-bottom: 16px; padding: 12px; background: #0a0f14; border-radius: 10px; border: 1px dashed #1e2a35;">
-  <label style="display: block; margin-bottom: 8px; font-weight: 700;">📁 Import from CSV/Excel</label>
-  <input type="file" id="importFile" accept=".csv,.xlsx,.xls" style="margin-bottom: 8px;">
-  <div class="btn-row">
-    <button class="btn btn-primary btn-sm" onclick="importFile()">📥 Import & Parse</button>
-    <button class="btn btn-secondary btn-sm" onclick="downloadTemplate()">📄 Download Template</button>
-  </div>
-  <div id="importProgress" style="font-size: 11px; color: #7a95a8; margin-top: 8px; display: none;"></div>
-</div>
+        <div style="margin-top:16px;padding:12px;background:#0a0f14;border-radius:10px;border:1px dashed #1e2a35;">
+          <label style="display:block;margin-bottom:8px;font-weight:700;">📁 Import from CSV/Excel</label>
+          <input type="file" id="importFile" accept=".csv,.xlsx,.xls" style="margin-bottom:8px;">
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" onclick="importFile()">📥 Import & Parse</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadTemplate()">📄 Download Template</button>
+          </div>
+          <div id="importProgress" style="font-size:11px;color:#7a95a8;margin-top:8px;display:none;"></div>
+        </div>
       </div>
       <div class="card">
         <h3>Contact List <span id="contactCountBadge" style="font-size:11px;color:#7a95a8;font-weight:400;"></span></h3>
@@ -253,12 +345,28 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
     <!-- ===== SEND ===== -->
     <div class="tab-panel" id="tab-send">
+      <!-- Credit out banner -->
+      <div class="credit-out-banner hidden" id="creditOutBanner">
+        <div class="credit-out-msg">💳 Your credits have ended. Recharge to send more messages.</div>
+        <button class="btn btn-purple btn-sm" onclick="openBuyModal()">Buy Credits</button>
+      </div>
+      <!-- Credit low banner -->
+      <div class="credit-low-banner hidden" id="creditLowBanner">
+        ⚠️ Low credits: <span id="lowCreditCount">0</span> remaining
+        <button class="btn btn-purple btn-sm" onclick="openBuyModal()">Top Up</button>
+      </div>
+
       <div class="card">
         <h3>Campaign</h3>
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-label">Sent</div><div class="stat-val green" id="sentCount">0</div></div>
           <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val" id="pendingCount">0</div></div>
           <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-val red" id="failedCount">0</div></div>
+        </div>
+        <!-- Credit cost preview -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#0a0f14;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+          <span style="font-size:12px;color:#7a95a8;font-family:'Space Mono',monospace;">Credits needed</span>
+          <span style="font-size:13px;font-weight:700;color:#a78bfa;" id="creditCost">0 credits</span>
         </div>
         <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
         <div id="currentStatus" style="font-size:12px;color:#7a95a8;margin:8px 0;font-family:'Space Mono',monospace;">Ready</div>
@@ -366,6 +474,41 @@ tr:hover td{background:rgba(255,255,255,.02);}
           </div>
         </div>
       </div>
+
+      <!-- CREDITS MANAGEMENT CARD -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
+          <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
+        </div>
+        <!-- Balance strip -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <div class="stat-card" style="flex:1;min-width:120px;">
+            <div class="stat-label">Balance</div>
+            <div class="stat-val purple" id="settingsCredits">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;">
+            <div class="stat-label">Rate</div>
+            <div style="font-size:14px;font-weight:700;color:#d0dde8;margin-top:4px;">₹0.50 / msg</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;">
+            <div class="stat-label">Can Send</div>
+            <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">—</div>
+          </div>
+        </div>
+        <!-- Transaction history -->
+        <div style="font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Transaction History</div>
+        <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr></thead>
+            <tbody id="txBody"><tr><td colspan="5" style="text-align:center;color:#4a6070;padding:16px;">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" onclick="loadCredits()">↻ Refresh</button>
+        </div>
+      </div>
+
       <div class="card">
         <h3>AI Auto-Reply (Groq)</h3>
         <label>Groq API Key</label><input type="text" id="groqKey" placeholder="gsk_...">
@@ -390,14 +533,25 @@ tr:hover td{background:rgba(255,255,255,.02);}
 // ================================================================
 const EDGE_FN_URL = "https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow";
 
+const CREDIT_PACKS = [
+  { id:'pack_100',  credits:100,  amount:49,  best:false },
+  { id:'pack_250',  credits:250,  amount:99,  best:false },
+  { id:'pack_500',  credits:500,  amount:199, best:false },
+  { id:'pack_1500', credits:1500, amount:499, best:true  },
+  { id:'pack_4000', credits:4000, amount:999, best:false },
+];
+
 let authToken  = null;
 let deviceId   = null;
 let deviceName = null;
 let contacts   = [];
+let userCredits = 0;
 let sendState  = 'idle', sendIndex = 0, sendTimer = null;
 let sendLog    = [];
 let variations = [], useVariations = false, variationIndex = 0;
 let pollTimer  = null, qrTimer = null;
+let selectedPack = null;
+let paymentPollTimer = null;
 
 // ================================================================
 // HELPERS
@@ -421,6 +575,10 @@ function escapeHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 }
 function fmtTime(ts) { return new Date(ts).toLocaleTimeString(); }
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-IN', {day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+}
 
 // ================================================================
 // EDGE FUNCTION CALL
@@ -434,6 +592,166 @@ async function callEdge(action, body={}) {
   });
   if (res.status === 401) { showToast('Session expired. Please login again.', true); logout(); throw new Error('Unauthorized'); }
   return res.json();
+}
+
+// ================================================================
+// CREDIT UI
+// ================================================================
+function updateCreditUI(credits) {
+  userCredits = credits;
+  const c = parseInt(credits) || 0;
+
+  // Sidebar pill
+  document.getElementById('sidebarCredits').textContent = c.toLocaleString('en-IN');
+  document.getElementById('sidebarMsgs').textContent = c.toLocaleString('en-IN');
+
+  // Settings card
+  document.getElementById('settingsCredits').textContent = c.toLocaleString('en-IN');
+  document.getElementById('settingsCanSend').textContent = c.toLocaleString('en-IN') + ' msgs';
+
+  // Credit cost preview on Send tab
+  const pending = contacts.filter(ct => !ct.status || ct.status === 'pending').length;
+  document.getElementById('creditCost').textContent = pending + ' credits';
+
+  // Banners
+  const outBanner  = document.getElementById('creditOutBanner');
+  const lowBanner  = document.getElementById('creditLowBanner');
+  if (c <= 0) {
+    outBanner.classList.remove('hidden');
+    lowBanner.classList.add('hidden');
+  } else if (c <= 10) {
+    outBanner.classList.add('hidden');
+    lowBanner.classList.remove('hidden');
+    document.getElementById('lowCreditCount').textContent = c;
+  } else {
+    outBanner.classList.add('hidden');
+    lowBanner.classList.add('hidden');
+  }
+}
+
+async function loadCredits() {
+  try {
+    const r = await callEdge('getCredits');
+    if (r.success) {
+      updateCreditUI(r.credits);
+      renderTransactions(r.transactions || []);
+    }
+  } catch(e) {}
+}
+
+function renderTransactions(txs) {
+  const tbody = document.getElementById('txBody');
+  if (!txs.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#4a6070;padding:16px;">No transactions yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = txs.map(tx => {
+    const amt = tx.amount > 0 ? `+${tx.amount}` : tx.amount;
+    const col = tx.amount > 0 ? '#00e5a0' : '#ff8fa3';
+    return `<tr>
+      <td style="font-size:11px;color:#7a95a8;">${fmtDate(tx.created_at)}</td>
+      <td><span class="badge badge-${tx.type}">${tx.type}</span></td>
+      <td style="font-weight:700;color:${col};">${amt}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;">${tx.balance_after}</td>
+      <td style="font-size:11px;color:#7a95a8;">${escapeHtml(tx.description||'')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ================================================================
+// BUY CREDITS MODAL
+// ================================================================
+function openBuyModal() {
+  selectedPack = null;
+  renderPacks();
+  document.getElementById('buyBtnWrap').style.display = 'none';
+  document.getElementById('buyStatus').textContent = '';
+  document.getElementById('buyModal').style.display = 'flex';
+}
+function closeBuyModal() {
+  document.getElementById('buyModal').style.display = 'none';
+  if (paymentPollTimer) { clearInterval(paymentPollTimer); paymentPollTimer = null; }
+}
+
+function renderPacks() {
+  const grid = document.getElementById('packGrid');
+  grid.innerHTML = CREDIT_PACKS.map(p => {
+    const rate = (p.amount / p.credits * 100).toFixed(0);
+    return `<div class="pack-card" id="pack_${p.id}" onclick="selectPack('${p.id}')">
+      <div class="pack-credits">${p.credits.toLocaleString('en-IN')}</div>
+      <div style="font-size:10px;color:#7a95a8;margin-top:2px;font-family:'Space Mono',monospace;">credits</div>
+      <div class="pack-price">₹${p.amount}</div>
+      <div class="pack-rate">₹${(p.amount/p.credits).toFixed(2)}/credit</div>
+      ${p.best ? '<div class="pack-best">⭐ Best Value</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function selectPack(packId) {
+  selectedPack = packId;
+  document.querySelectorAll('.pack-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('pack_'+packId)?.classList.add('selected');
+  document.getElementById('buyBtnWrap').style.display = 'block';
+  const pack = CREDIT_PACKS.find(p => p.id === packId);
+  document.getElementById('buyStatus').textContent = `${pack.credits} credits for ₹${pack.amount}`;
+}
+
+async function proceedBuy() {
+  if (!selectedPack) { showToast('Select a pack first', true); return; }
+  const btn = document.querySelector('#buyBtnWrap .btn-purple');
+  btn.textContent = '⏳ Creating payment link…';
+  btn.disabled = true;
+  document.getElementById('buyStatus').textContent = '';
+
+  try {
+    const r = await callEdge('buyCredits', { pack_id: selectedPack });
+    if (!r.success) {
+      showToast(r.message || 'Failed to create payment link', true);
+      btn.textContent = '💳 Pay with Razorpay';
+      btn.disabled = false;
+      return;
+    }
+
+    // Open Razorpay payment page
+    window.open(r.payment_url, '_blank');
+    document.getElementById('buyStatus').textContent = '⏳ Payment page opened. Complete payment and come back.';
+    btn.textContent = '✅ Payment page opened';
+
+    // Start polling for payment completion
+    const linkId = r.razorpay_payment_link_id;
+    let attempts = 0;
+    paymentPollTimer = setInterval(async () => {
+      attempts++;
+      try {
+        const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: linkId });
+        if (poll.status === 'completed') {
+          clearInterval(paymentPollTimer);
+          paymentPollTimer = null;
+          updateCreditUI(poll.credits);
+          closeBuyModal();
+          showToast(`✅ Credits added! New balance: ${poll.credits}`);
+          loadCredits();
+        }
+      } catch(e) {}
+      if (attempts > 60) { clearInterval(paymentPollTimer); paymentPollTimer = null; }
+    }, 5000);
+
+  } catch(e) {
+    showToast('Error: '+e.message, true);
+    btn.textContent = '💳 Pay with Razorpay';
+    btn.disabled = false;
+  }
+}
+
+// Check for payment=success in URL on load
+function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    showToast('Payment received! Credits will appear shortly..');
+    setTimeout(() => loadCredits(), 3000);
+    // clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
 
 // ================================================================
@@ -458,6 +776,9 @@ function showRegister() {
   document.getElementById('authOverlay').innerHTML = `
     <div class="auth-popup">
       <h2>Create Account</h2>
+      <div style="margin-bottom:12px;padding:10px 12px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;font-size:12px;color:#00e5a0;">
+        🎁 Get 50 free credits on signup
+      </div>
       <input type="email" id="regEmail" placeholder="Email">
       <input type="password" id="regPassword" placeholder="Password">
       <input type="text" id="regName" placeholder="Full Name">
@@ -476,7 +797,7 @@ function showReset() {
 }
 async function doRegister() {
   const email=document.getElementById('regEmail').value, password=document.getElementById('regPassword').value, full_name=document.getElementById('regName').value;
-  try { const r=await callEdge('register',{email,password,full_name}); if(r.success){showToast('Account created! Please login.');resetAuth();}else showToast(r.message,true); } catch(e){showToast('Error',true);}
+  try { const r=await callEdge('register',{email,password,full_name}); if(r.success){showToast('Account created! 50 free credits added 🎁');resetAuth();}else showToast(r.message,true); } catch(e){showToast('Error',true);}
 }
 async function doReset() {
   const email=document.getElementById('resetEmail').value;
@@ -486,6 +807,7 @@ async function doReset() {
 function resetAuth() { location.reload(); }
 function logout() {
   authToken=null; if(pollTimer)clearInterval(pollTimer); if(qrTimer)clearInterval(qrTimer);
+  if(paymentPollTimer)clearInterval(paymentPollTimer);
   localStorage.removeItem('auth_token'); localStorage.removeItem('user_email'); location.reload();
 }
 
@@ -496,6 +818,7 @@ function showDashboard(email, data) {
   document.getElementById('authOverlay').style.display='none';
   document.getElementById('dashboardWrap').style.display='block';
   document.getElementById('userEmail').textContent=email;
+  checkPaymentReturn();
   initDashboard(data);
 }
 function initDashboard(data) {
@@ -514,6 +837,11 @@ function initDashboard(data) {
   if (data?.template?.body)    document.getElementById('msgTemplate').value = data.template.body;
   if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
   fetchAndRenderDevices();
+  // Load credits
+  if (data?.profile?.credits !== undefined) {
+    updateCreditUI(data.profile.credits);
+  }
+  loadCredits();
 }
 
 // ================================================================
@@ -566,9 +894,6 @@ async function refreshDeviceStatus() {
   } catch(e){showToast('Status check failed',true);}
 }
 
-// ================================================================
-// DEVICE: FETCH ALL
-// ================================================================
 async function fetchAndRenderDevices() {
   const wrap=document.getElementById('devicesListWrap');
   wrap.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
@@ -602,9 +927,6 @@ function renderDevicesList(devices) {
   }).join('');
 }
 
-// ================================================================
-// DEVICE: CREATE
-// ================================================================
 async function CreateDevice() {
   const name=document.getElementById('deviceNameInput').value.trim();
   if(!name){showToast('Enter a device name',true);return;}
@@ -627,199 +949,83 @@ async function CreateDevice() {
     }
   } catch(e){showToast('Error: '+e.message,true);setDebug(e.message,true);}
 }
-// Import CSV/Excel file
+
 async function importFile() {
   const fileInput = document.getElementById('importFile');
   const file = fileInput.files[0];
-  if (!file) {
-    showToast('Select a file first', true);
-    return;
-  }
-
+  if (!file) { showToast('Select a file first', true); return; }
   const progressDiv = document.getElementById('importProgress');
   progressDiv.style.display = 'block';
   progressDiv.innerHTML = '<span class="spinner"></span> Reading file...';
-
   try {
     let parsedData = [];
     const extension = file.name.split('.').pop().toLowerCase();
-
-    if (extension === 'csv') {
-      // Parse CSV
-      const text = await file.text();
-      parsedData = parseCSV(text);
-    } else if (extension === 'xlsx' || extension === 'xls') {
-      // Need SheetJS library - add to HTML head
-      parsedData = await parseExcel(file);
-    } else {
-      throw new Error('Unsupported file type. Use .csv, .xlsx, or .xls');
-    }
-
-    if (!parsedData || parsedData.length === 0) {
-      throw new Error('No data found in file');
-    }
-
+    if (extension === 'csv') { parsedData = parseCSV(await file.text()); }
+    else if (extension === 'xlsx' || extension === 'xls') { parsedData = await parseExcel(file); }
+    else { throw new Error('Unsupported file type. Use .csv, .xlsx, or .xls'); }
+    if (!parsedData || parsedData.length === 0) throw new Error('No data found in file');
     progressDiv.innerHTML = `Parsed ${parsedData.length} rows. Processing...`;
-
-    // Map columns (supports various headers)
     const mappedContacts = mapContactsFromData(parsedData);
-    
-    // Add to contacts array
     let added = 0;
     for (const contact of mappedContacts) {
       if (contact.phone) {
-        // Format phone number
         let phone = contact.phone.toString().replace(/\D/g, '');
         if (phone.length === 10) phone = '91' + phone;
         if (phone.length >= 10 && !contacts.some(c => c.phone === phone)) {
-          contacts.push({
-            name: contact.name || phone,
-            phone: phone,
-            message: contact.message || '',
-            status: 'pending'
-          });
+          contacts.push({name:contact.name||phone,phone,message:contact.message||'',status:'pending'});
           added++;
         }
       }
     }
-
-    renderContacts();
-    showToast(`✅ Imported ${added} contacts from ${parsedData.length} rows`);
+    renderContacts(); showToast(`✅ Imported ${added} contacts`);
     progressDiv.innerHTML = `✅ Imported ${added} contacts`;
     setTimeout(() => { progressDiv.style.display = 'none'; }, 3000);
     fileInput.value = '';
-
-  } catch (err) {
-    showToast('Import failed: ' + err.message, true);
-    progressDiv.innerHTML = '❌ ' + err.message;
-    console.error(err);
-  }
+  } catch (err) { showToast('Import failed: '+err.message,true); progressDiv.innerHTML='❌ '+err.message; }
 }
-
-// Parse CSV text
 function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
-  if (lines.length === 0) return [];
-  
-  // Parse with quotes support
-  const results = [];
-  const headers = parseCSVLine(lines[0]);
-  
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-    if (values.length === 0 || (values.length === 1 && !values[0])) continue;
-    
-    const row = {};
-    headers.forEach((header, idx) => {
-      row[header.toLowerCase()] = values[idx] || '';
-    });
-    results.push(row);
-  }
+  const lines=text.split(/\r?\n/).filter(l=>l.trim()); if(!lines.length) return [];
+  const results=[], headers=parseCSVLine(lines[0]);
+  for(let i=1;i<lines.length;i++){const values=parseCSVLine(lines[i]);if(!values.length||(values.length===1&&!values[0]))continue;const row={};headers.forEach((h,idx)=>{row[h.toLowerCase()]=values[idx]||'';});results.push(row);}
   return results;
 }
-
-// Parse a single CSV line (handles quotes)
 function parseCSVLine(line) {
-  const result = [];
-  let inQuotes = false;
-  let current = '';
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-  return result;
+  const result=[];let inQuotes=false,current='';
+  for(let i=0;i<line.length;i++){const char=line[i];if(char==='"'){inQuotes=!inQuotes;}else if(char===','&&!inQuotes){result.push(current.trim());current='';}else{current+=char;}}
+  result.push(current.trim());return result;
 }
-
-// Parse Excel file using SheetJS
 function parseExcel(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-        resolve(jsonData);
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];resolve(XLSX.utils.sheet_to_json(ws));}catch(err){reject(err);}};reader.onerror=reject;reader.readAsArrayBuffer(file);});
 }
-
-// Map column names to name/phone/message
 function mapContactsFromData(data) {
-  const nameColumns = ['name', 'fullname', 'full name', 'contact name', 'contactname', 'person'];
-  const phoneColumns = ['phone', 'mobile', 'cell', 'whatsapp', 'number', 'phonenumber', 'contact'];
-  const messageColumns = ['message', 'msg', 'text', 'body', 'content', 'notes', 'note'];
-  
-  // Find actual column names
-  const sample = data[0] || {};
-  const headers = Object.keys(sample).map(h => h.toLowerCase());
-  
-  const nameCol = headers.find(h => nameColumns.some(col => h.includes(col))) || headers[0];
-  const phoneCol = headers.find(h => phoneColumns.some(col => h.includes(col))) || headers[1];
-  const messageCol = headers.find(h => messageColumns.some(col => h.includes(col))) || null;
-  
-  return data.map(row => ({
-    name: row[nameCol] || '',
-    phone: row[phoneCol] || '',
-    message: messageCol ? row[messageCol] : ''
-  }));
+  const nameColumns=['name','fullname','full name','contact name','contactname','person'];
+  const phoneColumns=['phone','mobile','cell','whatsapp','number','phonenumber','contact'];
+  const messageColumns=['message','msg','text','body','content','notes','note'];
+  const sample=data[0]||{};const headers=Object.keys(sample).map(h=>h.toLowerCase());
+  const nameCol=headers.find(h=>nameColumns.some(col=>h.includes(col)))||headers[0];
+  const phoneCol=headers.find(h=>phoneColumns.some(col=>h.includes(col)))||headers[1];
+  const messageCol=headers.find(h=>messageColumns.some(col=>h.includes(col)))||null;
+  return data.map(row=>({name:row[nameCol]||'',phone:row[phoneCol]||'',message:messageCol?row[messageCol]:''}));
 }
-
-// Download CSV template
 function downloadTemplate() {
-  const headers = ['Name', 'Phone', 'Message'];
-  const example = ['John Doe', '919876543210', 'Hi {name}, welcome!'];
-  
-  let csv = headers.join(',') + '\n';
-  csv += example.join(',') + '\n';
-  
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'contacts_template.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+  const csv='Name,Phone,Message\nJohn Doe,919876543210,Hi {name}, welcome!\n';
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='contacts_template.csv';a.click();URL.revokeObjectURL(url);
   showToast('Template downloaded');
 }
-// ================================================================
-// DEVICE: SELECT / QR / PAIR / UNLINK / DELETE / RECONNECT
-// ================================================================
-async function selectDevice(id, name) {
-  if(!confirm(`Use "${name}" as your active device?`)) return;
-  try {
-    const r=await callEdge('linkDevice',{device_id:id,device_name:name});
-    if(r.success){syncDeviceToUI({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchAndRenderDevices();}
-    else showToast(r.message||'Failed',true);
-  } catch(e){showToast('Error: '+e.message,true);}
-}
 
+async function selectDevice(id,name) {
+  if(!confirm(`Use "${name}" as your active device?`)) return;
+  try { const r=await callEdge('linkDevice',{device_id:id,device_name:name}); if(r.success){syncDeviceToUI({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchAndRenderDevices();}else showToast(r.message||'Failed',true); }
+  catch(e){showToast('Error: '+e.message,true);}
+}
 async function getQRForDevice(id) {
   const wrap=document.getElementById('qrWrap');
   wrap.innerHTML='<div class="qr-icon"><span class="spinner"></span></div><div class="qr-hint">Loading QR…</div>';
   updateStatusBar('scanning');
-  try {
-    const r=await callEdge('getQRForDevice',{device_id:id});
-    if(r.success&&r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration);
-    else wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
-  } catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+  try { const r=await callEdge('getQRForDevice',{device_id:id}); if(r.success&&r.qr_image_url) renderQRImage(r.qr_image_url,r.qr_duration); else wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`; }
+  catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
 }
-
 async function loadQR() {
   if(!deviceId){showToast('Create or select a device first',true);return;}
   const wrap=document.getElementById('qrWrap');
@@ -828,38 +1034,21 @@ async function loadQR() {
   try {
     const r=await callEdge('getQR');
     if(r.success&&r.qr_image_url){ renderQRImage(r.qr_image_url,r.qr_duration); startDevicePolling(); }
-    else {
-      wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed to get QR')}</div>`;
-      setDebug((r.message||'QR failed')+(r.debug?' — '+JSON.stringify(r.debug):''),true);
-    }
+    else { wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed to get QR')}</div>`; setDebug((r.message||'QR failed'),true); }
   } catch(e){wrap.innerHTML=`<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">Connection error</div>`;showToast('QR load failed',true);}
 }
-
-function renderQRImage(url, duration) {
-  const wrap=document.getElementById('qrWrap');
-  wrap.innerHTML='';
+function renderQRImage(url,duration) {
+  const wrap=document.getElementById('qrWrap'); wrap.innerHTML='';
   const img=document.createElement('img'); img.src=url;
-  img.onload=()=>{
-    wrap.appendChild(img);
-    const h=document.createElement('div'); h.className='qr-hint';
-    h.textContent='📱 Open WhatsApp → Linked Devices → Link a Device';
-    wrap.appendChild(h);
-    startQRCountdown(duration||60);
-  };
+  img.onload=()=>{wrap.appendChild(img);const h=document.createElement('div');h.className='qr-hint';h.textContent='📱 Open WhatsApp → Linked Devices → Link a Device';wrap.appendChild(h);startQRCountdown(duration||60);};
   img.onerror=()=>{wrap.innerHTML='<div class="qr-icon">❌</div><div class="qr-hint" style="color:#ff6b6b;">Image failed to load</div>';};
 }
-
 async function loginWithCode() {
   if(!deviceId){showToast('Select a device first',true);return;}
-  const phone=prompt('Enter your WhatsApp phone number (with country code, no +):\ne.g. 919876543210');
-  if(!phone) return;
-  try {
-    const r=await callEdge('loginWithCode',{device_id:deviceId,phone});
-    if(r.success){ showToast('Pairing code: '+r.code); setDebug('Pairing code: '+r.code+' — Enter this in WhatsApp → Linked Devices → Link with phone number'); }
-    else showToast(r.message||'Failed',true);
-  } catch(e){showToast('Error: '+e.message,true);}
+  const phone=prompt('Enter your WhatsApp phone number (with country code, no +):\ne.g. 919876543210'); if(!phone) return;
+  try { const r=await callEdge('loginWithCode',{device_id:deviceId,phone}); if(r.success){ showToast('Pairing code: '+r.code); setDebug('Pairing code: '+r.code); } else showToast(r.message||'Failed',true); }
+  catch(e){showToast('Error: '+e.message,true);}
 }
-
 async function unlinkActiveDevice() {
   if(!deviceId) return;
   if(!confirm(`Unlink "${deviceName}"?`)) return;
@@ -881,49 +1070,30 @@ async function unlinkActiveDevice() {
     } else showToast(r.message||'Failed',true);
   } catch(e){showToast('Error: '+e.message,true);}
 }
-
-async function deleteDevice(id, name) {
+async function deleteDevice(id,name) {
   if(!confirm(`Delete "${name}" from the server? This is permanent.`)) return;
   try {
     const r=await callEdge('deleteDevice',{device_id:id});
     showToast(r.success?`"${name}" deleted`:(r.message||'Delete failed'),!r.success);
-    if(r.success){
-      if(id===deviceId){
-        deviceId=deviceName=null; updateStatusBar('disconnected');
-        document.getElementById('activeDevicePanel').style.display='none';
-        document.getElementById('unlinkBtn').style.display='none';
-        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device to get started</div>';
-        setDebug('Active device deleted.');
-      }
-      fetchAndRenderDevices();
-    }
+    if(r.success){if(id===deviceId){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevicePanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div class="qr-icon">📱</div><div class="qr-hint">Create a device to get started</div>';setDebug('Active device deleted.');}fetchAndRenderDevices();}
   } catch(e){showToast('Error: '+e.message,true);}
 }
-
 async function doReconnect() {
   showToast('Reconnecting…');
   try { const r=await callEdge('reconnect'); showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success); if(r.success)startDevicePolling(); }
   catch(e){showToast('Error: '+e.message,true);}
 }
 
-// ================================================================
-// POLLING & COUNTDOWN
-// ================================================================
 function startDevicePolling() {
   if(pollTimer) clearInterval(pollTimer);
   pollTimer=setInterval(async()=>{
-    try {
-      const r=await callEdge('checkDeviceStatus');
+    try { const r=await callEdge('checkDeviceStatus');
       if(r.success&&r.is_connected){
-        clearInterval(pollTimer);pollTimer=null;
-        if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
-        updateStatusBar('connected');
-        document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
-        document.getElementById('qrTimer').textContent='';
-        document.getElementById('reconnectBtn').style.display='none';
-        const b=document.getElementById('activeDeviceStatusBadge'); if(b){b.textContent='connected';b.className='badge badge-connected';}
-        setDebug(`✅ ${deviceName} connected!`);
-        showToast('WhatsApp connected! 🎉'); fetchAndRenderDevices();
+        clearInterval(pollTimer);pollTimer=null;if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+        updateStatusBar('connected');document.getElementById('qrWrap').innerHTML='<div class="qr-icon">✅</div><div class="qr-hint" style="color:#00e5a0;font-weight:700;">Device Connected!</div>';
+        document.getElementById('qrTimer').textContent='';document.getElementById('reconnectBtn').style.display='none';
+        const b=document.getElementById('activeDeviceStatusBadge');if(b){b.textContent='connected';b.className='badge badge-connected';}
+        setDebug(`✅ ${deviceName} connected!`);showToast('WhatsApp connected! 🎉');fetchAndRenderDevices();
       }
     } catch(e){}
   },3000);
@@ -931,11 +1101,7 @@ function startDevicePolling() {
 function startQRCountdown(secs) {
   if(qrTimer) clearInterval(qrTimer);
   let s=secs; const el=document.getElementById('qrTimer');
-  qrTimer=setInterval(()=>{
-    s--;
-    if(s<=0){clearInterval(qrTimer);el.textContent='QR expired — click Show QR again';el.style.color='#ff6b6b';}
-    else{el.textContent=`QR expires in ${s}s`;el.style.color=s<15?'#ffd166':'#7a95a8';}
-  },1000);
+  qrTimer=setInterval(()=>{s--;if(s<=0){clearInterval(qrTimer);el.textContent='QR expired — click Show QR again';el.style.color='#ff6b6b';}else{el.textContent=`QR expires in ${s}s`;el.style.color=s<15?'#ffd166':'#7a95a8';}},1000);
 }
 
 // ================================================================
@@ -944,6 +1110,9 @@ function startQRCountdown(secs) {
 function renderContacts() {
   const tbody=document.getElementById('contactsBody');
   document.getElementById('contactCountBadge').textContent=`(${contacts.length})`;
+  // Update credit cost preview
+  const pending = contacts.filter(c=>!c.status||c.status==='pending').length;
+  document.getElementById('creditCost').textContent = pending + ' credits';
   if(!contacts.length){
     tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#4a6070;padding:20px;">No contacts. Import above.</td></tr>';
     ['sentCount','pendingCount','failedCount'].forEach(id=>document.getElementById(id).textContent='0');
@@ -965,13 +1134,9 @@ function parsePaste(){
   const raw=document.getElementById('pasteInput').value; let added=0;
   for(const line of raw.split(/\r?\n/)){
     const parts=line.split(/[\t,]/);
-    if(parts.length>=2){
-      let phone=parts[1].replace(/\D/g,'');
-      if(phone.length===10) phone='91'+phone;
-      if(phone.length>=10){contacts.push({name:(parts[0]||phone).trim(),phone,message:(parts[2]||'').trim(),status:'pending'});added++;}
-    }
+    if(parts.length>=2){let phone=parts[1].replace(/\D/g,'');if(phone.length===10)phone='91'+phone;if(phone.length>=10){contacts.push({name:(parts[0]||phone).trim(),phone,message:(parts[2]||'').trim(),status:'pending'});added++;}}
   }
-  renderContacts(); showToast(`Added ${added} contacts`); document.getElementById('pasteInput').value='';
+  renderContacts();showToast(`Added ${added} contacts`);document.getElementById('pasteInput').value='';
 }
 async function saveContacts(){
   try{const r=await callEdge('saveContacts',{contacts});showToast(r.success?'Contacts saved':(r.message||'Failed'),!r.success);}
@@ -980,11 +1145,21 @@ async function saveContacts(){
 function clearContacts(){contacts=[];renderContacts();}
 
 // ================================================================
-// SEND CAMPAIGN
+// SEND CAMPAIGN — credit-aware
 // ================================================================
 async function startSend(){
   if(!deviceId){showToast('Link a device first',true);switchTab('device');return;}
   if(!contacts.length){showToast('No contacts',true);return;}
+  const pending = contacts.filter(c=>!c.status||c.status==='pending').length;
+  if(userCredits <= 0){
+    showToast('No credits. Please buy credits to send messages.', true);
+    document.getElementById('creditOutBanner').classList.remove('hidden');
+    return;
+  }
+  if(userCredits < pending){
+    const go = confirm(`You have ${userCredits} credits but ${pending} contacts. Campaign will stop after ${userCredits} sends. Continue?`);
+    if(!go) return;
+  }
   sendState='running'; sendLog=[]; renderSendLog(); processSend();
 }
 function pauseSend(){sendState='paused';if(sendTimer)clearTimeout(sendTimer);showToast('Paused');}
@@ -993,11 +1168,22 @@ function stopSend(){sendState='idle';sendIndex=0;if(sendTimer)clearTimeout(sendT
 async function processSend(){
   if(sendState!=='running') return;
   if(sendIndex>=contacts.length){stopSend();showToast('Campaign complete! 🎉');return;}
+
+  // Credit check before each send
+  if(userCredits <= 0){
+    sendState='idle';
+    if(sendTimer)clearTimeout(sendTimer);
+    document.getElementById('currentStatus').textContent='⚠️ Credits ended — campaign stopped';
+    document.getElementById('creditOutBanner').classList.remove('hidden');
+    showToast('Your credits have ended. Please recharge to send more.', true);
+    return;
+  }
+
   const c=contacts[sendIndex];
   const tpl=c.message||document.getElementById('msgTemplate').value;
   let msg=tpl.replace(/\{name\}/gi,c.name);
   if(useVariations&&variations.length){msg=variations[variationIndex%variations.length].replace(/\{name\}/gi,c.name);variationIndex++;}
-  document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})…`;
+  document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})… [${userCredits} credits left]`;
   const attachType=document.getElementById('attachType').value;
   const attachUrl=document.getElementById('attachUrl').value.trim();
   try {
@@ -1008,8 +1194,24 @@ async function processSend(){
     else if(attachType==='file'&&attachUrl)   result=await callEdge('sendFile',   {phone:c.phone,caption:msg,file_url:attachUrl});
     else if(attachType==='sticker'&&attachUrl)result=await callEdge('sendSticker',{phone:c.phone,sticker_url:attachUrl});
     else                                      result=await callEdge('sendMessage',{phone:c.phone,message:msg});
-    c.status=result.success?'sent':'failed';
+
+    c.status = result.success ? 'sent' : 'failed';
+
+    // Update credit balance from response
+    if(result.credits !== undefined) updateCreditUI(result.credits);
+
+    // Handle out-of-credits response from edge
+    if(!result.success && result.out_of_credits){
+      sendState='idle';
+      if(sendTimer)clearTimeout(sendTimer);
+      document.getElementById('currentStatus').textContent='⚠️ Credits ended — campaign stopped';
+      document.getElementById('creditOutBanner').classList.remove('hidden');
+      showToast('Your credits have ended. Please recharge to send more.', true);
+      renderContacts(); renderSendLog(); updateProgress();
+      return;
+    }
   } catch(e){c.status='failed';}
+
   sendLog.unshift({time:Date.now(),phone:c.phone,status:c.status});
   sendIndex++; renderContacts(); renderSendLog(); updateProgress();
   const minG=parseInt(document.getElementById('minGap').value)*1000;
@@ -1024,27 +1226,25 @@ function updateProgress(){
 function renderSendLog(){
   const tbody=document.getElementById('sendLogBody');
   if(!sendLog.length){tbody.innerHTML='<tr><td colspan="3" style="color:#4a6070;text-align:center;">No sends yet</td></tr>';return;}
-  tbody.innerHTML=sendLog.slice(0,50).map(l=>
-    `<tr><td style="font-size:11px;color:#7a95a8;">${fmtTime(l.time)}</td><td style="font-family:'Space Mono',monospace;font-size:11px;">${l.phone}</td><td><span class="badge badge-${l.status}">${l.status}</span></td></tr>`
-  ).join('');
+  tbody.innerHTML=sendLog.slice(0,50).map(l=>`<tr><td style="font-size:11px;color:#7a95a8;">${fmtTime(l.time)}</td><td style="font-family:'Space Mono',monospace;font-size:11px;">${l.phone}</td><td><span class="badge badge-${l.status}">${l.status}</span></td></tr>`).join('');
 }
 async function testSendMessage(){
   if(!deviceId){showToast('No device linked',true);return;}
   const phone=prompt('Enter your own phone number to test (with country code, no +):\ne.g. 919876543210'); if(!phone) return;
   const msg=document.getElementById('msgTemplate').value||'Test message from AutoSend 👋';
-  showToast('Sending test…');
-  try{ const r=await callEdge('sendMessage',{phone,message:msg}); showToast(r.success?'Test sent! ✅':(r.message||'Failed'),!r.success); }
-  catch(e){showToast('Error: '+e.message,true);}
+  showToast('Sending test… (1 credit will be used)');
+  try{
+    const r=await callEdge('sendMessage',{phone,message:msg});
+    showToast(r.success?'Test sent! ✅':(r.message||'Failed'),!r.success);
+    if(r.credits !== undefined) updateCreditUI(r.credits);
+  }catch(e){showToast('Error: '+e.message,true);}
 }
 
 // ================================================================
 // TEMPLATE & AI VARIATIONS
 // ================================================================
 async function saveTemplate(){
-  try{
-    const r=await callEdge('saveTemplate',{body:document.getElementById('msgTemplate').value,attach_type:document.getElementById('attachType').value,attach_url:document.getElementById('attachUrl').value});
-    showToast(r.success?'Template saved':(r.message||'Failed'),!r.success);
-  }catch(e){showToast('Error: '+e.message,true);}
+  try{const r=await callEdge('saveTemplate',{body:document.getElementById('msgTemplate').value,attach_type:document.getElementById('attachType').value,attach_url:document.getElementById('attachUrl').value});showToast(r.success?'Template saved':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
 }
 async function generateVariations(){
   const msg=document.getElementById('msgTemplate').value;
@@ -1053,14 +1253,14 @@ async function generateVariations(){
   try{
     const r=await callEdge('aiGenerateVariations',{message:msg,count:5});
     if(r.success&&r.variations?.length){
-      variations=r.variations; useVariations=true; variationIndex=0;
+      variations=r.variations;useVariations=true;variationIndex=0;
       document.getElementById('variationsPanel').innerHTML=`
         <div style="background:#0a0f14;border:1px solid #1e2a35;border-radius:10px;padding:14px;">
-          <div style="color:#00e5a0;font-weight:700;margin-bottom:10px;">✅ ${variations.length} variations ready</div>
+          <div style="color:#00e5a0;font-weight:700;margin-bottom:10px;">✅ ${variations.length} variations ready (free)</div>
           ${variations.map((v,i)=>`<div style="padding:6px 0;border-bottom:1px solid #1e2a35;font-size:12px;color:#d0dde8;"><span style="color:#7a95a8;font-size:10px;">#${i+1} </span>${escapeHtml(v)}</div>`).join('')}
           <button class="btn btn-danger btn-sm" style="margin-top:10px;" onclick="useVariations=false;document.getElementById('variationsPanel').style.display='none';">Disable</button>
         </div>`;
-      document.getElementById('variationsPanel').style.display='block'; showToast('Variations ready!');
+      document.getElementById('variationsPanel').style.display='block';showToast('Variations ready!');
     } else showToast('AI failed: '+(r.message||'Unknown'),true);
   }catch(e){showToast('Error: '+e.message,true);}
 }
@@ -1076,22 +1276,11 @@ async function loadChats(){
     if(r.success&&r.data){
       const chats=Array.isArray(r.data)?r.data:(r.data.data||[]);
       if(!chats.length){document.getElementById('chatsWrap').innerHTML='<div class="empty-state">No chats found.</div>';return;}
-      document.getElementById('chatsWrap').innerHTML=`<table>
-        <thead><tr><th>Name</th><th>JID</th><th>Unread</th><th></th></tr></thead>
-        <tbody>${chats.slice(0,50).map(c=>`<tr>
-          <td>${escapeHtml(c.name||c.push_name||'—')}</td>
-          <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(c.jid||c.id||'—')}</td>
-          <td>${c.unread_count||0}</td>
-          <td><button class="btn btn-secondary btn-sm" onclick="archiveChat('${escapeHtml(c.jid||c.id||'')}')">Archive</button></td>
-        </tr>`).join('')}</tbody></table>`;
+      document.getElementById('chatsWrap').innerHTML=`<table><thead><tr><th>Name</th><th>JID</th><th>Unread</th><th></th></tr></thead><tbody>${chats.slice(0,50).map(c=>`<tr><td>${escapeHtml(c.name||c.push_name||'—')}</td><td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(c.jid||c.id||'—')}</td><td>${c.unread_count||0}</td><td><button class="btn btn-secondary btn-sm" onclick="archiveChat('${escapeHtml(c.jid||c.id||'')}')">Archive</button></td></tr>`).join('')}</tbody></table>`;
     } else document.getElementById('chatsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
   }catch(e){document.getElementById('chatsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
 }
-async function archiveChat(jid){
-  if(!jid) return;
-  try{const r=await callEdge('archiveChat',{chat_jid:jid,archived:true});showToast(r.success?'Archived':(r.message||'Failed'),!r.success);}
-  catch(e){showToast('Error: '+e.message,true);}
-}
+async function archiveChat(jid){ if(!jid)return; try{const r=await callEdge('archiveChat',{chat_jid:jid,archived:true});showToast(r.success?'Archived':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);} }
 
 // ================================================================
 // GROUPS
@@ -1103,17 +1292,7 @@ async function loadGroups(){
     if(r.success&&r.data){
       const groups=Array.isArray(r.data)?r.data:(r.data.data||[]);
       if(!groups.length){document.getElementById('groupsWrap').innerHTML='<div class="empty-state">No groups found.</div>';return;}
-      document.getElementById('groupsWrap').innerHTML=`<table>
-        <thead><tr><th>Name</th><th>JID</th><th>Participants</th><th></th></tr></thead>
-        <tbody>${groups.slice(0,50).map(g=>`<tr>
-          <td>${escapeHtml(g.name||'—')}</td>
-          <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(g.jid||g.id||'—')}</td>
-          <td>${g.participants?.length||g.participant_count||'—'}</td>
-          <td style="display:flex;gap:4px;">
-            <button class="btn btn-secondary btn-sm" onclick="sendToGroup('${escapeHtml(g.jid||g.id||'')}')">Send</button>
-            <button class="btn btn-danger btn-sm" onclick="leaveGroup('${escapeHtml(g.jid||g.id||'')}')">Leave</button>
-          </td>
-        </tr>`).join('')}</tbody></table>`;
+      document.getElementById('groupsWrap').innerHTML=`<table><thead><tr><th>Name</th><th>JID</th><th>Participants</th><th></th></tr></thead><tbody>${groups.slice(0,50).map(g=>`<tr><td>${escapeHtml(g.name||'—')}</td><td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(g.jid||g.id||'—')}</td><td>${g.participants?.length||g.participant_count||'—'}</td><td style="display:flex;gap:4px;"><button class="btn btn-secondary btn-sm" onclick="sendToGroup('${escapeHtml(g.jid||g.id||'')}')">Send</button><button class="btn btn-danger btn-sm" onclick="leaveGroup('${escapeHtml(g.jid||g.id||'')}')">Leave</button></td></tr>`).join('')}</tbody></table>`;
     } else document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
   }catch(e){document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
 }
@@ -1121,21 +1300,10 @@ async function createGroup(){
   const name=document.getElementById('newGroupName').value.trim();
   const parts=document.getElementById('newGroupParticipants').value.split(',').map(p=>p.trim()).filter(Boolean);
   if(!name){showToast('Group name required',true);return;}
-  try{
-    const r=await callEdge('createGroup',{title:name,participants:parts});
-    showToast(r.success?`Group "${name}" created!`:(r.message||'Failed'),!r.success);
-    if(r.success){document.getElementById('newGroupName').value='';document.getElementById('newGroupParticipants').value='';loadGroups();}
-  }catch(e){showToast('Error: '+e.message,true);}
+  try{const r=await callEdge('createGroup',{title:name,participants:parts});showToast(r.success?`Group "${name}" created!`:(r.message||'Failed'),!r.success);if(r.success){document.getElementById('newGroupName').value='';document.getElementById('newGroupParticipants').value='';loadGroups();}}catch(e){showToast('Error: '+e.message,true);}
 }
-async function leaveGroup(jid){
-  if(!jid||!confirm('Leave this group?')) return;
-  try{const r=await callEdge('leaveGroup',{group_jid:jid});showToast(r.success?'Left group':(r.message||'Failed'),!r.success);if(r.success)loadGroups();}
-  catch(e){showToast('Error: '+e.message,true);}
-}
-function sendToGroup(jid){
-  const msg=document.getElementById('msgTemplate').value||prompt('Enter message:'); if(!msg) return;
-  callEdge('sendMessage',{phone:jid,message:msg}).then(r=>showToast(r.success?'Sent!':(r.message||'Failed'),!r.success)).catch(e=>showToast('Error: '+e.message,true));
-}
+async function leaveGroup(jid){ if(!jid||!confirm('Leave this group?'))return; try{const r=await callEdge('leaveGroup',{group_jid:jid});showToast(r.success?'Left group':(r.message||'Failed'),!r.success);if(r.success)loadGroups();}catch(e){showToast('Error: '+e.message,true);} }
+function sendToGroup(jid){ const msg=document.getElementById('msgTemplate').value||prompt('Enter message:');if(!msg)return; callEdge('sendMessage',{phone:jid,message:msg}).then(r=>{showToast(r.success?'Sent!':(r.message||'Failed'),!r.success);if(r.credits!==undefined)updateCreditUI(r.credits);}).catch(e=>showToast('Error: '+e.message,true)); }
 
 // ================================================================
 // ACCOUNT
@@ -1144,34 +1312,22 @@ async function loadUserInfo(){try{const r=await callEdge('getUserInfo');setAccou
 async function loadUserAvatar(){try{const r=await callEdge('getUserAvatar');setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}}
 async function loadMyContacts(){try{const r=await callEdge('getMyContacts');const c=Array.isArray(r.data)?r.data:(r.data?.data||[]);setAccountResult(`${c.length} contacts\n\n`+JSON.stringify(c.slice(0,20),null,2));}catch(e){setAccountResult('Error: '+e.message);}}
 async function loadMyPrivacy(){try{const r=await callEdge('getMyPrivacy');setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}}
-async function loadBusinessProfile(){
-  const phone=prompt('Enter phone number (with country code, no +):'); if(!phone) return;
-  try{const r=await callEdge('getBusinessProfile',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}
-}
-async function changePushname(){
-  const name=document.getElementById('newPushname').value.trim(); if(!name){showToast('Enter a name',true);return;}
-  try{const r=await callEdge('changePushname',{name});showToast(r.success?'Pushname updated':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
-}
-async function checkUser(){
-  const phone=document.getElementById('checkUserPhone').value.trim(); if(!phone){showToast('Enter a phone',true);return;}
-  try{const r=await callEdge('checkUser',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);}
-}
+async function loadBusinessProfile(){ const phone=prompt('Enter phone number (with country code, no +):');if(!phone)return;try{const r=await callEdge('getBusinessProfile',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);} }
+async function changePushname(){ const name=document.getElementById('newPushname').value.trim();if(!name){showToast('Enter a name',true);return;}try{const r=await callEdge('changePushname',{name});showToast(r.success?'Pushname updated':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);} }
+async function checkUser(){ const phone=document.getElementById('checkUserPhone').value.trim();if(!phone){showToast('Enter a phone',true);return;}try{const r=await callEdge('checkUser',{phone});setAccountResult(r.data||r);}catch(e){setAccountResult('Error: '+e.message);} }
 
 // ================================================================
 // SETTINGS
 // ================================================================
 async function saveSettings(){
-  try{const r=await callEdge('saveSettings',{hour_limit:document.getElementById('hourLimit').value,day_limit:document.getElementById('dayLimit').value,min_gap:document.getElementById('minGap').value,max_gap:document.getElementById('maxGap').value});showToast(r.success?'Settings saved':(r.message||'Failed'),!r.success);}
-  catch(e){showToast('Error: '+e.message,true);}
+  try{const r=await callEdge('saveSettings',{hour_limit:document.getElementById('hourLimit').value,day_limit:document.getElementById('dayLimit').value,min_gap:document.getElementById('minGap').value,max_gap:document.getElementById('maxGap').value});showToast(r.success?'Settings saved':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
 }
 async function saveGowaSettings(){
-  try{const r=await callEdge('saveSettings',{gowa_url:document.getElementById('gowaUrl').value.trim(),gowa_auth:document.getElementById('gowaAuth').value.trim()});showToast(r.success?'GoWA settings saved':(r.message||'Failed'),!r.success);}
-  catch(e){showToast('Error: '+e.message,true);}
+  try{const r=await callEdge('saveSettings',{gowa_url:document.getElementById('gowaUrl').value.trim(),gowa_auth:document.getElementById('gowaAuth').value.trim()});showToast(r.success?'GoWA settings saved':(r.message||'Failed'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
 }
 async function testGowaConnection(){
   showToast('Testing…');
-  try{const r=await callEdge('listDevices');showToast(r.success?`Connected! ${r.total||0} device(s).`:'Connection failed: '+(r.message||'Unknown'),!r.success);}
-  catch(e){showToast('Error: '+e.message,true);}
+  try{const r=await callEdge('listDevices');showToast(r.success?`Connected! ${r.total||0} device(s).`:'Connection failed: '+(r.message||'Unknown'),!r.success);}catch(e){showToast('Error: '+e.message,true);}
 }
 async function saveAiSettings(){
   try{
@@ -1182,13 +1338,17 @@ async function saveAiSettings(){
 }
 
 // ================================================================
-// UI: TAB SWITCHING
+// TAB SWITCHING
 // ================================================================
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   document.querySelector(`[data-tab="${name}"]`)?.classList.add('active');
+  // Refresh credits when switching to settings
+  if(name==='settings') loadCredits();
+  // Refresh credit cost preview when switching to send
+  if(name==='send') { const p=contacts.filter(c=>!c.status||c.status==='pending').length; document.getElementById('creditCost').textContent=p+' credits'; }
 }
 document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>switchTab(n.dataset.tab)));
 
@@ -1209,13 +1369,14 @@ if(savedToken && savedEmail){
 Object.assign(window,{
   doLogin,doRegister,doReset,showRegister,showReset,resetAuth,logout,
   CreateDevice,loadQR,loginWithCode,unlinkActiveDevice,deleteDevice,selectDevice,getQRForDevice,refreshDeviceStatus,fetchAndRenderDevices,doReconnect,
-  parsePaste,saveContacts,clearContacts,removeContact,
+  parsePaste,saveContacts,clearContacts,removeContact,importFile,downloadTemplate,
   startSend,pauseSend,stopSend,testSendMessage,
   saveTemplate,generateVariations,
   loadChats,archiveChat,
   loadGroups,createGroup,leaveGroup,sendToGroup,
   loadUserInfo,loadUserAvatar,loadMyContacts,loadMyPrivacy,loadBusinessProfile,changePushname,checkUser,
   saveSettings,saveGowaSettings,testGowaConnection,saveAiSettings,
+  openBuyModal,closeBuyModal,selectPack,proceedBuy,loadCredits,
 });
 </script>
 </body>
