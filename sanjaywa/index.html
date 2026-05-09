@@ -608,6 +608,125 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </div>
 
 <div class="toast" id="toast"></div>
+  <!-- ═══════════════════ AUTO-LOG PANEL ═══════════════════ -->
+<div id="autoLog" style="
+  position:fixed;bottom:0;right:0;width:380px;
+  background:#080c10;border-top:2px solid #1e2a35;border-left:2px solid #1e2a35;
+  border-radius:12px 0 0 0;z-index:8000;font-family:'Space Mono',monospace;
+  font-size:11px;transition:height .2s;
+">
+  <div id="autoLogHeader" onclick="toggleLog()" style="
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 14px;cursor:pointer;background:#0e1318;border-radius:12px 0 0 0;
+    border-bottom:1px solid #1e2a35;user-select:none;
+  ">
+    <span style="color:#00e5a0;font-weight:700;letter-spacing:.5px;">⬛ AUTO-LOG</span>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span id="logBadge" style="background:rgba(0,229,160,.15);color:#00e5a0;padding:2px 8px;border-radius:10px;font-size:10px;">0</span>
+      <button onclick="event.stopPropagation();clearLog()" style="background:none;border:none;color:#4a6070;cursor:pointer;font-size:10px;">✕ Clear</button>
+      <span id="logChevron" style="color:#4a6070;">▲</span>
+    </div>
+  </div>
+  <div id="autoLogBody" style="height:220px;overflow-y:auto;padding:6px 0;"></div>
+</div>
+
+<style>
+.log-entry{padding:4px 12px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+.log-time{color:#4a6070;flex-shrink:0;font-size:10px;padding-top:1px;}
+.log-tag{flex-shrink:0;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.3px;}
+.log-tag-api{background:rgba(167,139,250,.2);color:#a78bfa;}
+.log-tag-ok{background:rgba(0,229,160,.15);color:#00e5a0;}
+.log-tag-err{background:rgba(255,95,126,.15);color:#ff5f7e;}
+.log-tag-send{background:rgba(255,209,102,.15);color:#ffd166;}
+.log-tag-info{background:rgba(122,149,168,.12);color:#7a95a8;}
+.log-msg{color:#d0dde8;word-break:break-all;font-size:10px;}
+</style>
+
+<script>
+// ─── Log core ───
+let logOpen = true, logCount = 0;
+
+function toggleLog() {
+  logOpen = !logOpen;
+  document.getElementById('autoLogBody').style.display = logOpen ? 'block' : 'none';
+  document.getElementById('logChevron').textContent = logOpen ? '▲' : '▼';
+}
+
+function clearLog() {
+  document.getElementById('autoLogBody').innerHTML = '';
+  logCount = 0;
+  document.getElementById('logBadge').textContent = '0';
+}
+
+function addLog(tag, tagClass, msg) {
+  logCount++;
+  document.getElementById('logBadge').textContent = logCount;
+  const body = document.getElementById('autoLogBody');
+  const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const row = document.createElement('div');
+  row.className = 'log-entry';
+  row.innerHTML = `
+    <span class="log-time">${now}</span>
+    <span class="log-tag ${tagClass}">${tag}</span>
+    <span class="log-msg">${msg}</span>`;
+  body.prepend(row); // newest on top
+  // Keep max 200 entries
+  while (body.children.length > 200) body.removeChild(body.lastChild);
+}
+
+// ─── Wrap callEdge to auto-log every API call ───
+const _origCallEdge = callEdge;
+window.callEdge = async function(action, body = {}) {
+  addLog('API', 'log-tag-api', `→ ${action}` + (Object.keys(body).length ? ' · ' + JSON.stringify(body).slice(0,80) : ''));
+  try {
+    const result = await _origCallEdge(action, body);
+    if (result?.success === false) {
+      addLog('ERR', 'log-tag-err', `✗ ${action}: ${result.message || 'failed'}`);
+    } else {
+      // Summarise key fields only
+      const summary = [];
+      if (result?.credits !== undefined)  summary.push(`credits=${result.credits}`);
+      if (result?.status !== undefined)   summary.push(`status=${result.status}`);
+      if (result?.device_id)              summary.push(`device=${result.device_id}`);
+      if (result?.message)                summary.push(result.message);
+      addLog('OK', 'log-tag-ok', `✓ ${action}` + (summary.length ? ' · ' + summary.join(', ') : ''));
+    }
+    return result;
+  } catch (err) {
+    addLog('ERR', 'log-tag-err', `✗ ${action} threw: ${err.message}`);
+    throw err;
+  }
+};
+
+// ─── Log send events ───
+const _origStartSend = window.startSend;
+window.startSend = async function() {
+  addLog('SEND', 'log-tag-send', `Campaign started · ${contacts.filter(c=>!c.status||c.status==='pending').length} pending · ${userCredits} credits`);
+  return _origStartSend();
+};
+const _origPauseSend = window.pauseSend;
+window.pauseSend = function() { addLog('SEND','log-tag-send','Campaign paused'); return _origPauseSend(); };
+const _origStopSend  = window.stopSend;
+window.stopSend  = function() { addLog('SEND','log-tag-send','Campaign stopped'); return _origStopSend(); };
+
+// ─── Log credit updates ───
+const _origUpdateCreditUI = updateCreditUI;
+window.updateCreditUI = function(credits) {
+  const prev = userCredits;
+  _origUpdateCreditUI(credits);
+  if (prev !== credits) addLog('INFO','log-tag-info',`Credits: ${prev} → ${credits}`);
+};
+
+// ─── Log device status changes ───
+const _origUpdateStatusBar = updateStatusBar;
+window.updateStatusBar = function(status) {
+  _origUpdateStatusBar(status);
+  addLog('INFO','log-tag-info',`Device status → ${status}`);
+};
+
+addLog('INFO','log-tag-info','AutoLog ready');
+Object.assign(window, { toggleLog, clearLog, addLog });
+</script>
 <script>
 // ================================================================
 // CONFIG
