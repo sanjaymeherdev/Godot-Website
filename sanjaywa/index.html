@@ -53,6 +53,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .badge-pending{background:rgba(255,209,102,.15);color:#ffd166;}
 .badge-sent{background:rgba(0,229,160,.15);color:#00e5a0;}
 .badge-failed{background:rgba(255,95,126,.15);color:#ff5f7e;}
+.badge-skipped{background:rgba(74,96,112,.15);color:#7a95a8;}
 .badge-connected{background:rgba(0,229,160,.15);color:#00e5a0;}
 .badge-scanning{background:rgba(255,209,102,.15);color:#ffd166;}
 .badge-created,.badge-linked{background:rgba(122,149,168,.15);color:#7a95a8;}
@@ -1567,9 +1568,25 @@ async function processSend(){
   }
 
   const c=contacts[sendIndex];
-  const tpl=c.message||document.getElementById('msgTemplate').value;
-  let msg=tpl.replace(/\{name\}/gi,c.name);
-  if(useVariations&&variations.length){msg=variations[variationIndex%variations.length].replace(/\{name\}/gi,c.name);variationIndex++;}
+ let rawMsg;
+if (msgSource === 'sheet') {
+  rawMsg = (c.message || '').trim();
+  if (!rawMsg) {
+    // No sheet message for this contact — skip it
+    c.status = 'skipped';
+    sendLog.unshift({time:Date.now(), phone:c.phone, status:'skipped'});
+    sendIndex++;
+    renderContacts(); renderSendLog(); updateProgress();
+    const minG=parseInt(document.getElementById('minGap').value)*1000;
+    const maxG=parseInt(document.getElementById('maxGap').value)*1000;
+    sendTimer=setTimeout(processSend, Math.random()*(maxG-minG)+minG);
+    return;
+  }
+} else {
+  rawMsg = document.getElementById('msgTemplate').value;
+}
+let msg = rawMsg.replace(/\{name\}/gi, c.name);
+if(useVariations&&variations.length){msg=variations[variationIndex%variations.length].replace(/\{name\}/gi,c.name);variationIndex++;}
   document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})… [${userCredits} credits left]`;
   const attachType=document.getElementById('attachType').value;
   const attachUrl=document.getElementById('attachUrl').value.trim();
