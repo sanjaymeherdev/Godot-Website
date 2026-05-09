@@ -475,12 +475,46 @@ tr:hover td{background:rgba(255,255,255,.02);}
         </div>
       </div>
 
-      <!-- CREDITS MANAGEMENT CARD -->
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
-          <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
-        </div>
+   <!-- CREDITS MANAGEMENT CARD -->
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
+    <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
+  </div>
+  <!-- Balance strip -->
+  <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <div class="stat-card" style="flex:1;min-width:120px;">
+      <div class="stat-label">Balance</div>
+      <div class="stat-val purple" id="settingsCredits">—</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;">
+      <div class="stat-label">Rate</div>
+      <div style="font-size:14px;font-weight:700;color:#d0dde8;margin-top:4px;">₹0.50 / msg</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:120px;">
+      <div class="stat-label">Can Send</div>
+      <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">—</div>
+    </div>
+  </div>
+  <!-- Transaction history -->
+  <div style="font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Transaction History</div>
+  <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr>
+      </thead>
+      <tbody id="txBody">
+        <tr><td colspan="5" style="text-align:center;color:#4a6070;padding:16px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- REFRESH BUTTON - ADD THIS -->
+  <div class="btn-row" style="margin-top:10px;">
+    <button class="btn btn-secondary btn-sm" onclick="loadCredits()">↻ Refresh Balance</button>
+  </div>
+  
+</div>
         <!-- Balance strip -->
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div class="stat-card" style="flex:1;min-width:120px;">
@@ -596,46 +630,70 @@ async function callEdge(action, body={}) {
 // CREDIT UI
 // ================================================================
 function updateCreditUI(credits) {
-  userCredits = credits;
-  const c = parseInt(credits) || 0;
+  // Ensure credits is a valid number
+  const c = (typeof credits === 'number' && !isNaN(credits)) ? Math.max(0, credits) : (userCredits || 0);
+  userCredits = c;
+  
+  console.log('updateCreditUI called with:', credits, 'setting to:', c); // Debug log
 
   // Sidebar pill
-  document.getElementById('sidebarCredits').textContent = c.toLocaleString('en-IN');
-  document.getElementById('sidebarMsgs').textContent = c.toLocaleString('en-IN');
+  const sidebarCredits = document.getElementById('sidebarCredits');
+  const sidebarMsgs = document.getElementById('sidebarMsgs');
+  if (sidebarCredits) sidebarCredits.textContent = c.toLocaleString('en-IN');
+  if (sidebarMsgs) sidebarMsgs.textContent = c.toLocaleString('en-IN');
 
   // Settings card
-  document.getElementById('settingsCredits').textContent = c.toLocaleString('en-IN');
-  document.getElementById('settingsCanSend').textContent = c.toLocaleString('en-IN') + ' msgs';
+  const settingsCredits = document.getElementById('settingsCredits');
+  const settingsCanSend = document.getElementById('settingsCanSend');
+  if (settingsCredits) settingsCredits.textContent = c.toLocaleString('en-IN');
+  if (settingsCanSend) settingsCanSend.textContent = c.toLocaleString('en-IN') + ' msgs';
 
   // Credit cost preview on Send tab
   const pending = contacts.filter(ct => !ct.status || ct.status === 'pending').length;
-  document.getElementById('creditCost').textContent = pending + ' credits';
+  const creditCost = document.getElementById('creditCost');
+  if (creditCost) creditCost.textContent = pending + ' credits';
 
   // Banners
-  const outBanner  = document.getElementById('creditOutBanner');
-  const lowBanner  = document.getElementById('creditLowBanner');
-  if (c <= 0) {
-    outBanner.classList.remove('hidden');
-    lowBanner.classList.add('hidden');
-  } else if (c <= 10) {
-    outBanner.classList.add('hidden');
-    lowBanner.classList.remove('hidden');
-    document.getElementById('lowCreditCount').textContent = c;
-  } else {
-    outBanner.classList.add('hidden');
-    lowBanner.classList.add('hidden');
+  const outBanner = document.getElementById('creditOutBanner');
+  const lowBanner = document.getElementById('creditLowBanner');
+  if (outBanner && lowBanner) {
+    if (c <= 0) {
+      outBanner.classList.remove('hidden');
+      lowBanner.classList.add('hidden');
+    } else if (c <= 10) {
+      outBanner.classList.add('hidden');
+      lowBanner.classList.remove('hidden');
+      const lowCreditCount = document.getElementById('lowCreditCount');
+      if (lowCreditCount) lowCreditCount.textContent = c;
+    } else {
+      outBanner.classList.add('hidden');
+      lowBanner.classList.add('hidden');
+    }
+  }
+}
+  
+async function loadCredits() {
+  try {
+    console.log('Loading credits...');
+    const r = await callEdge('getCredits');
+    console.log('getCredits response:', r);
+    
+    if (r && r.success) {
+      const creditsAmount = typeof r.credits === 'number' ? r.credits : 0;
+      updateCreditUI(creditsAmount);
+      if (r.transactions && r.transactions.length) {
+        renderTransactions(r.transactions);
+      }
+    } else {
+      console.warn('getCredits failed:', r);
+      // Don't reset to 0 on error, keep existing value
+    }
+  } catch(e) {
+    console.error('loadCredits error:', e);
+    // Don't show toast on every load error to avoid spam
   }
 }
 
-async function loadCredits() {
-  try {
-    const r = await callEdge('getCredits');
-    if (r.success) {
-      updateCreditUI(r.credits);
-      renderTransactions(r.transactions || []);
-    }
-  } catch(e) {}
-}
 
 function renderTransactions(txs) {
   const tbody = document.getElementById('txBody');
@@ -692,53 +750,6 @@ function selectPack(packId) {
   document.getElementById('buyBtnWrap').style.display = 'block';
   const pack = CREDIT_PACKS.find(p => p.id === packId);
   document.getElementById('buyStatus').textContent = `${pack.credits} credits for ₹${pack.amount}`;
-}
-
-async function proceedBuy() {
-  if (!selectedPack) { showToast('Select a pack first', true); return; }
-  const btn = document.querySelector('#buyBtnWrap .btn-purple');
-  btn.textContent = '⏳ Creating payment link…';
-  btn.disabled = true;
-  document.getElementById('buyStatus').textContent = '';
-
-  try {
-    const r = await callEdge('buyCredits', { pack_id: selectedPack });
-    if (!r.success) {
-      showToast(r.message || 'Failed to create payment link', true);
-      btn.textContent = '💳 Pay with Razorpay';
-      btn.disabled = false;
-      return;
-    }
-
-    // Open Razorpay payment page
-    window.open(r.payment_url, '_blank');
-    document.getElementById('buyStatus').textContent = '⏳ Payment page opened. Complete payment and come back.';
-    btn.textContent = '✅ Payment page opened';
-
-    // Start polling for payment completion
-    const linkId = r.razorpay_payment_link_id;
-    let attempts = 0;
-    paymentPollTimer = setInterval(async () => {
-      attempts++;
-      try {
-        const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: linkId });
-        if (poll.status === 'completed') {
-          clearInterval(paymentPollTimer);
-          paymentPollTimer = null;
-          updateCreditUI(poll.credits);
-          closeBuyModal();
-          showToast(`✅ Credits added! New balance: ${poll.credits}`);
-          loadCredits();
-        }
-      } catch(e) {}
-      if (attempts > 60) { clearInterval(paymentPollTimer); paymentPollTimer = null; }
-    }, 5000);
-
-  } catch(e) {
-    showToast('Error: '+e.message, true);
-    btn.textContent = '💳 Pay with Razorpay';
-    btn.disabled = false;
-  }
 }
 
 // Check for payment=success in URL on load
@@ -828,26 +839,118 @@ function showDashboard(email, data) {
 }
   
 function initDashboard(data) {
-  if (data?.contacts) { contacts=data.contacts; renderContacts(); }
+  console.log('initDashboard called with:', data);
+  
+  if (data?.contacts) { 
+    contacts = data.contacts; 
+    renderContacts(); 
+  }
+  
   if (data?.settings) {
-    document.getElementById('hourLimit').value = data.settings.hour_limit||30;
-    document.getElementById('dayLimit').value  = data.settings.day_limit||200;
-    document.getElementById('minGap').value    = data.settings.min_gap||30;
-    document.getElementById('maxGap').value    = data.settings.max_gap||90;
+    document.getElementById('hourLimit').value = data.settings.hour_limit || 30;
+    document.getElementById('dayLimit').value  = data.settings.day_limit || 200;
+    document.getElementById('minGap').value    = data.settings.min_gap || 30;
+    document.getElementById('maxGap').value    = data.settings.max_gap || 90;
     if(data.settings.gowa_url)  document.getElementById('gowaUrl').value  = data.settings.gowa_url;
     if(data.settings.gowa_auth) document.getElementById('gowaAuth').value = data.settings.gowa_auth;
     if(data.settings.auto_reply_prompt) document.getElementById('autoReplyPrompt').value = data.settings.auto_reply_prompt;
-    document.getElementById('autoReplyEnabled').checked = data.settings.auto_reply||false;
+    document.getElementById('autoReplyEnabled').checked = data.settings.auto_reply || false;
   }
-  if (data?.config?.groq_key)  document.getElementById('groqKey').value   = data.config.groq_key;
+  
+  if (data?.config?.groq_key)  document.getElementById('groqKey').value = data.config.groq_key;
   if (data?.template?.body)    document.getElementById('msgTemplate').value = data.template.body;
-  if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
-  fetchAndRenderDevices();
-  // Load credits
-  if (data?.profile?.credits !== undefined) {
-    updateCreditUI(data.profile.credits);
+  if (data?.device) { 
+    syncDeviceToUI(data.device); 
+  } else { 
+    fetchDeviceFromServer(); 
   }
-  loadCredits();
+  
+  fetchAndRenderDevices();
+  
+  // Load credits - this is critical
+  if (data?.profile?.credits !== undefined && data.profile.credits !== null) {
+    console.log('Setting credits from profile:', data.profile.credits);
+    updateCreditUI(data.profile.credits);
+  } else {
+    // If profile doesn't have credits, fetch them separately
+    console.log('No credits in profile, fetching separately');
+    loadCredits();
+  }
+}
+
+// Fix the proceedBuy function to handle credits update properly:
+async function proceedBuy() {
+  if (!selectedPack) { showToast('Select a pack first', true); return; }
+  const btn = document.querySelector('#buyBtnWrap .btn-purple');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Creating payment link…';
+  btn.disabled = true;
+  document.getElementById('buyStatus').textContent = '';
+
+  try {
+    const r = await callEdge('buyCredits', { pack_id: selectedPack });
+    if (!r.success) {
+      showToast(r.message || 'Failed to create payment link', true);
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    // Open Razorpay payment page
+    window.open(r.payment_url, '_blank');
+    document.getElementById('buyStatus').textContent = '⏳ Payment page opened. Complete payment and come back.';
+    btn.textContent = '✅ Payment page opened';
+
+    // Start polling for payment completion
+    const linkId = r.razorpay_payment_link_id;
+    let attempts = 0;
+    
+    if (paymentPollTimer) clearInterval(paymentPollTimer);
+    
+    paymentPollTimer = setInterval(async () => {
+      attempts++;
+      try {
+        const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: linkId });
+        console.log('Poll response:', poll);
+        
+        if (poll.status === 'completed') {
+          clearInterval(paymentPollTimer);
+          paymentPollTimer = null;
+          
+          // Get the updated credits
+          const creditsAmount = typeof poll.credits === 'number' ? poll.credits : 0;
+          updateCreditUI(creditsAmount);
+          
+          closeBuyModal();
+          showToast(`✅ Credits added! New balance: ${creditsAmount}`);
+          
+          // Also refresh transaction history
+          loadCredits();
+        } else if (poll.status === 'failed') {
+          clearInterval(paymentPollTimer);
+          paymentPollTimer = null;
+          showToast('Payment failed or cancelled', true);
+          btn.textContent = originalText;
+          btn.disabled = false;
+        }
+      } catch(e) {
+        console.error('Poll error:', e);
+      }
+      
+      if (attempts > 60) { 
+        clearInterval(paymentPollTimer); 
+        paymentPollTimer = null;
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showToast('Payment polling timeout. Check your credits manually.', true);
+      }
+    }, 5000);
+
+  } catch(e) {
+    showToast('Error: '+e.message, true);
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
 }
 
 // ================================================================
