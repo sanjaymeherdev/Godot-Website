@@ -146,6 +146,9 @@ tr:hover td{background:rgba(255,255,255,.02);}
   margin-bottom:10px;
 }
 .credit-low-banner.hidden{display:none;}
+
+/* ---- BUY MODAL ERROR STATE ---- */
+.buy-error{background:rgba(255,95,126,.08);border:1px solid rgba(255,95,126,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:#ff8fa3;margin-bottom:10px;display:none;}
 </style>
 </head>
 <body>
@@ -171,13 +174,32 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <div class="modal-box">
     <h2>⚡ Buy Credits</h2>
     <div class="modal-subtitle">1 credit = 1 WA message sent · ₹0.50 per credit</div>
+
+    <!-- Current balance strip inside modal -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#080c10;border:1px solid #1e2a35;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
+      <span style="font-size:11px;color:#7a95a8;font-family:'Space Mono',monospace;">Current Balance</span>
+      <span style="font-size:15px;font-weight:800;color:#a78bfa;" id="modalCurrentCredits">— credits</span>
+    </div>
+
     <div class="pack-grid" id="packGrid"></div>
+
+    <!-- Error display -->
+    <div class="buy-error" id="buyError"></div>
+
     <div id="buyBtnWrap" style="display:none;margin-bottom:12px;">
-      <button class="btn btn-purple" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="proceedBuy()">
+      <button class="btn btn-purple" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="proceedBuy()" id="payBtn">
         💳 Pay with Razorpay
       </button>
       <div id="buyStatus" style="font-size:12px;color:#7a95a8;text-align:center;margin-top:8px;"></div>
     </div>
+
+    <!-- Polling status (shown after payment page opened) -->
+    <div id="pollStatus" style="display:none;background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px;">
+      <div style="font-size:13px;color:#00e5a0;font-weight:700;margin-bottom:4px;"><span class="spinner"></span> Waiting for payment…</div>
+      <div style="font-size:11px;color:#7a95a8;">Complete payment in the Razorpay tab, then come back. This will update automatically.</div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I've paid — check now</button>
+    </div>
+
     <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="closeBuyModal()">Cancel</button>
     <div style="margin-top:12px;font-size:11px;color:#4a6070;text-align:center;font-family:'Space Mono',monospace;">
       Payments secured by Razorpay · Credits added instantly after payment
@@ -475,46 +497,12 @@ tr:hover td{background:rgba(255,255,255,.02);}
         </div>
       </div>
 
-   <!-- CREDITS MANAGEMENT CARD -->
-<div class="card">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
-    <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
-  </div>
-  <!-- Balance strip -->
-  <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-    <div class="stat-card" style="flex:1;min-width:120px;">
-      <div class="stat-label">Balance</div>
-      <div class="stat-val purple" id="settingsCredits">—</div>
-    </div>
-    <div class="stat-card" style="flex:1;min-width:120px;">
-      <div class="stat-label">Rate</div>
-      <div style="font-size:14px;font-weight:700;color:#d0dde8;margin-top:4px;">₹0.50 / msg</div>
-    </div>
-    <div class="stat-card" style="flex:1;min-width:120px;">
-      <div class="stat-label">Can Send</div>
-      <div style="font-size:14px;font-weight:700;color:#00e5a0;margin-top:4px;" id="settingsCanSend">—</div>
-    </div>
-  </div>
-  <!-- Transaction history -->
-  <div style="font-size:11px;font-family:'Space Mono',monospace;color:#7a95a8;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Transaction History</div>
-  <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
-    <table>
-      <thead>
-        <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr>
-      </thead>
-      <tbody id="txBody">
-        <tr><td colspan="5" style="text-align:center;color:#4a6070;padding:16px;">Loading…</td></tr>
-      </tbody>
-    </table>
-  </div>
-  
-  <!-- REFRESH BUTTON - ADD THIS -->
-  <div class="btn-row" style="margin-top:10px;">
-    <button class="btn btn-secondary btn-sm" onclick="loadCredits()">↻ Refresh Balance</button>
-  </div>
-  
-</div>
+      <!-- CREDITS MANAGEMENT CARD -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="margin-bottom:0;">⚡ Credits &amp; Billing</h3>
+          <button class="btn btn-purple btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
+        </div>
         <!-- Balance strip -->
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div class="stat-card" style="flex:1;min-width:120px;">
@@ -584,6 +572,7 @@ let variations = [], useVariations = false, variationIndex = 0;
 let pollTimer  = null, qrTimer = null;
 let selectedPack = null;
 let paymentPollTimer = null;
+let currentPaymentLinkId = null;
 
 // ================================================================
 // HELPERS
@@ -611,6 +600,7 @@ function fmtDate(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString('en-IN', {day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
 }
+function safeInt(v) { const n = parseInt(v); return isNaN(n) ? 0 : n; }
 
 // ================================================================
 // EDGE FUNCTION CALL
@@ -627,77 +617,72 @@ async function callEdge(action, body={}) {
 }
 
 // ================================================================
-// CREDIT UI
+// CREDIT UI  — FIX: guard against missing DOM elements, show correct numbers
 // ================================================================
 function updateCreditUI(credits) {
-  // Ensure credits is a valid number
-  const c = (typeof credits === 'number' && !isNaN(credits)) ? Math.max(0, credits) : (userCredits || 0);
+  const c = safeInt(credits);
   userCredits = c;
-  
-  console.log('updateCreditUI called with:', credits, 'setting to:', c); // Debug log
 
   // Sidebar pill
-  const sidebarCredits = document.getElementById('sidebarCredits');
-  const sidebarMsgs = document.getElementById('sidebarMsgs');
-  if (sidebarCredits) sidebarCredits.textContent = c.toLocaleString('en-IN');
-  if (sidebarMsgs) sidebarMsgs.textContent = c.toLocaleString('en-IN');
+  const sidebarCreditsEl = document.getElementById('sidebarCredits');
+  const sidebarMsgsEl    = document.getElementById('sidebarMsgs');
+  if (sidebarCreditsEl) sidebarCreditsEl.textContent = c.toLocaleString('en-IN');
+  if (sidebarMsgsEl)    sidebarMsgsEl.textContent    = c.toLocaleString('en-IN');
 
   // Settings card
-  const settingsCredits = document.getElementById('settingsCredits');
-  const settingsCanSend = document.getElementById('settingsCanSend');
-  if (settingsCredits) settingsCredits.textContent = c.toLocaleString('en-IN');
-  if (settingsCanSend) settingsCanSend.textContent = c.toLocaleString('en-IN') + ' msgs';
+  const settingsCreditsEl  = document.getElementById('settingsCredits');
+  const settingsCanSendEl  = document.getElementById('settingsCanSend');
+  if (settingsCreditsEl) settingsCreditsEl.textContent = c.toLocaleString('en-IN');
+  if (settingsCanSendEl) settingsCanSendEl.textContent = c.toLocaleString('en-IN') + ' msgs';
 
-  // Credit cost preview on Send tab
-  const pending = contacts.filter(ct => !ct.status || ct.status === 'pending').length;
-  const creditCost = document.getElementById('creditCost');
-  if (creditCost) creditCost.textContent = pending + ' credits';
+  // Modal current balance
+  const modalCreditsEl = document.getElementById('modalCurrentCredits');
+  if (modalCreditsEl) modalCreditsEl.textContent = c.toLocaleString('en-IN') + ' credits';
+
+  // Credit cost preview on Send tab — only count genuinely pending
+  const creditCostEl = document.getElementById('creditCost');
+  if (creditCostEl) {
+    const pending = contacts.filter(ct => !ct.status || ct.status === 'pending').length;
+    creditCostEl.textContent = pending + ' credits';
+  }
 
   // Banners
   const outBanner = document.getElementById('creditOutBanner');
   const lowBanner = document.getElementById('creditLowBanner');
-  if (outBanner && lowBanner) {
-    if (c <= 0) {
-      outBanner.classList.remove('hidden');
-      lowBanner.classList.add('hidden');
-    } else if (c <= 10) {
-      outBanner.classList.add('hidden');
-      lowBanner.classList.remove('hidden');
-      const lowCreditCount = document.getElementById('lowCreditCount');
-      if (lowCreditCount) lowCreditCount.textContent = c;
-    } else {
-      outBanner.classList.add('hidden');
-      lowBanner.classList.add('hidden');
-    }
-  }
-}
-  
-async function loadCredits() {
-  try {
-    console.log('Loading credits...');
-    const r = await callEdge('getCredits');
-    console.log('getCredits response:', r);
-    
-    if (r && r.success) {
-      const creditsAmount = typeof r.credits === 'number' ? r.credits : 0;
-      updateCreditUI(creditsAmount);
-      if (r.transactions && r.transactions.length) {
-        renderTransactions(r.transactions);
-      }
-    } else {
-      console.warn('getCredits failed:', r);
-      // Don't reset to 0 on error, keep existing value
-    }
-  } catch(e) {
-    console.error('loadCredits error:', e);
-    // Don't show toast on every load error to avoid spam
+  if (!outBanner || !lowBanner) return;
+  if (c <= 0) {
+    outBanner.classList.remove('hidden');
+    lowBanner.classList.add('hidden');
+  } else if (c <= 10) {
+    outBanner.classList.add('hidden');
+    lowBanner.classList.remove('hidden');
+    const lowCountEl = document.getElementById('lowCreditCount');
+    if (lowCountEl) lowCountEl.textContent = c;
+  } else {
+    outBanner.classList.add('hidden');
+    lowBanner.classList.add('hidden');
   }
 }
 
+async function loadCredits() {
+  try {
+    const r = await callEdge('getCredits');
+    if (r.success) {
+      updateCreditUI(r.credits);
+      renderTransactions(r.transactions || []);
+    } else {
+      // If getCredits fails, don't crash — just leave existing value
+      console.warn('getCredits failed:', r.message);
+    }
+  } catch(e) {
+    console.warn('loadCredits error:', e);
+  }
+}
 
 function renderTransactions(txs) {
   const tbody = document.getElementById('txBody');
-  if (!txs.length) {
+  if (!tbody) return;
+  if (!txs || !txs.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#4a6070;padding:16px;">No transactions yet</td></tr>';
     return;
   }
@@ -706,7 +691,7 @@ function renderTransactions(txs) {
     const col = tx.amount > 0 ? '#00e5a0' : '#ff8fa3';
     return `<tr>
       <td style="font-size:11px;color:#7a95a8;">${fmtDate(tx.created_at)}</td>
-      <td><span class="badge badge-${tx.type}">${tx.type}</span></td>
+      <td><span class="badge badge-${escapeHtml(tx.type||'')}">${escapeHtml(tx.type||'')}</span></td>
       <td style="font-weight:700;color:${col};">${amt}</td>
       <td style="font-family:'Space Mono',monospace;font-size:11px;">${tx.balance_after}</td>
       <td style="font-size:11px;color:#7a95a8;">${escapeHtml(tx.description||'')}</td>
@@ -715,25 +700,50 @@ function renderTransactions(txs) {
 }
 
 // ================================================================
-// BUY CREDITS MODAL
+// BUY CREDITS MODAL — FIX: error display, payment URL validation,
+//                         manual check button, poll cleanup
 // ================================================================
 function openBuyModal() {
   selectedPack = null;
   renderPacks();
   document.getElementById('buyBtnWrap').style.display = 'none';
   document.getElementById('buyStatus').textContent = '';
+  document.getElementById('pollStatus').style.display = 'none';
+  hideBuyError();
+  // Sync current balance into modal
+  document.getElementById('modalCurrentCredits').textContent =
+    userCredits.toLocaleString('en-IN') + ' credits';
   document.getElementById('buyModal').style.display = 'flex';
 }
+
 function closeBuyModal() {
   document.getElementById('buyModal').style.display = 'none';
-  if (paymentPollTimer) { clearInterval(paymentPollTimer); paymentPollTimer = null; }
+  stopPaymentPolling();
+}
+
+function hideBuyError() {
+  const el = document.getElementById('buyError');
+  if (el) { el.style.display = 'none'; el.textContent = ''; }
+}
+
+function showBuyError(msg) {
+  const el = document.getElementById('buyError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function stopPaymentPolling() {
+  if (paymentPollTimer) {
+    clearInterval(paymentPollTimer);
+    paymentPollTimer = null;
+  }
+  currentPaymentLinkId = null;
 }
 
 function renderPacks() {
   const grid = document.getElementById('packGrid');
+  // FIX: use a clean unique id prefix that won't conflict with pack id naming
   grid.innerHTML = CREDIT_PACKS.map(p => {
-    const rate = (p.amount / p.credits * 100).toFixed(0);
-    return `<div class="pack-card" id="pack_${p.id}" onclick="selectPack('${p.id}')">
+    return `<div class="pack-card" id="packcard_${p.id}" onclick="selectPack('${p.id}')">
       <div class="pack-credits">${p.credits.toLocaleString('en-IN')}</div>
       <div style="font-size:10px;color:#7a95a8;margin-top:2px;font-family:'Space Mono',monospace;">credits</div>
       <div class="pack-price">₹${p.amount}</div>
@@ -745,21 +755,152 @@ function renderPacks() {
 
 function selectPack(packId) {
   selectedPack = packId;
+  hideBuyError();
+  // FIX: use correct id prefix "packcard_" matching renderPacks
   document.querySelectorAll('.pack-card').forEach(el => el.classList.remove('selected'));
-  document.getElementById('pack_'+packId)?.classList.add('selected');
+  document.getElementById('packcard_' + packId)?.classList.add('selected');
   document.getElementById('buyBtnWrap').style.display = 'block';
   const pack = CREDIT_PACKS.find(p => p.id === packId);
-  document.getElementById('buyStatus').textContent = `${pack.credits} credits for ₹${pack.amount}`;
+  if (pack) {
+    document.getElementById('buyStatus').textContent =
+      `${pack.credits.toLocaleString('en-IN')} credits for ₹${pack.amount}`;
+  }
+  // Reset pay button in case it was disabled
+  const payBtn = document.getElementById('payBtn');
+  if (payBtn) { payBtn.textContent = '💳 Pay with Razorpay'; payBtn.disabled = false; }
+  document.getElementById('pollStatus').style.display = 'none';
 }
 
-// Check for payment=success in URL on load
+async function proceedBuy() {
+  if (!selectedPack) { showBuyError('Please select a credit pack first.'); return; }
+
+  const payBtn = document.getElementById('payBtn');
+  hideBuyError();
+  payBtn.textContent = '⏳ Creating payment link…';
+  payBtn.disabled = true;
+  document.getElementById('buyStatus').textContent = '';
+
+  try {
+    const r = await callEdge('buyCredits', { pack_id: selectedPack });
+
+    // FIX: explicit check for success flag AND payment_url existence
+    if (!r || !r.success) {
+      const errMsg = r?.message || 'Could not create payment link. Please try again.';
+      showBuyError('❌ ' + errMsg);
+      payBtn.textContent = '💳 Pay with Razorpay';
+      payBtn.disabled = false;
+      return;
+    }
+
+    if (!r.payment_url) {
+      showBuyError('❌ Payment URL missing in response. Contact support if this persists.');
+      payBtn.textContent = '💳 Pay with Razorpay';
+      payBtn.disabled = false;
+      return;
+    }
+
+    // Open Razorpay payment page
+    window.open(r.payment_url, '_blank');
+    payBtn.textContent = '✅ Payment page opened';
+    document.getElementById('buyStatus').textContent = '';
+
+    // Show polling status panel
+    document.getElementById('pollStatus').style.display = 'block';
+
+    // Store link id for manual check
+    currentPaymentLinkId = r.razorpay_payment_link_id || null;
+
+    // Start polling for payment completion
+    if (currentPaymentLinkId) {
+      let attempts = 0;
+      stopPaymentPolling(); // clear any existing
+      paymentPollTimer = setInterval(async () => {
+        attempts++;
+        if (attempts > 72) { // ~6 min max
+          stopPaymentPolling();
+          document.getElementById('pollStatus').innerHTML =
+            '<div style="color:#ffd166;font-size:12px;">⏰ Polling timed out. If you paid, click the check button below or refresh credits in Settings.</div>' +
+            '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ Check Payment</button>';
+          return;
+        }
+        try {
+          const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: currentPaymentLinkId });
+          if (poll && poll.status === 'completed') {
+            stopPaymentPolling();
+            updateCreditUI(poll.credits);
+            closeBuyModal();
+            showToast(`✅ Credits added! New balance: ${safeInt(poll.credits).toLocaleString('en-IN')}`);
+            loadCredits(); // refresh transactions too
+          }
+        } catch(e) { /* network hiccup — keep polling */ }
+      }, 5000);
+    } else {
+      // No link ID to poll — instruct manual check
+      document.getElementById('pollStatus').innerHTML =
+        '<div style="font-size:12px;color:#7a95a8;">Complete payment in the Razorpay tab, then click below.</div>' +
+        '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I\'ve paid — refresh balance</button>';
+    }
+
+  } catch(e) {
+    showBuyError('❌ Network error: ' + e.message);
+    payBtn.textContent = '💳 Pay with Razorpay';
+    payBtn.disabled = false;
+  }
+}
+
+// FIX: new manual payment check — just refreshes credits from server
+async function manualCheckPayment() {
+  const btn = event.target;
+  btn.textContent = '⏳ Checking…';
+  btn.disabled = true;
+  try {
+    // If we have a link ID, try polling once
+    if (currentPaymentLinkId) {
+      const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: currentPaymentLinkId });
+      if (poll && poll.status === 'completed') {
+        stopPaymentPolling();
+        updateCreditUI(poll.credits);
+        closeBuyModal();
+        showToast(`✅ Payment confirmed! New balance: ${safeInt(poll.credits).toLocaleString('en-IN')}`);
+        loadCredits();
+        return;
+      }
+    }
+    // Fallback: just reload credits from getCredits
+    const r = await callEdge('getCredits');
+    if (r.success) {
+      updateCreditUI(r.credits);
+      renderTransactions(r.transactions || []);
+      showToast('Balance refreshed: ' + safeInt(r.credits).toLocaleString('en-IN') + ' credits');
+    }
+  } catch(e) {
+    showToast('Check failed: ' + e.message, true);
+  }
+  btn.textContent = '✓ Check again';
+  btn.disabled = false;
+}
+
+// Check for payment=success in URL on load (Razorpay redirect)
 function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
-    showToast('Payment received! Credits will appear shortly..');
-    setTimeout(() => loadCredits(), 3000);
-    // clean URL
+    showToast('Payment received! Refreshing credits…');
+    // clean URL first
     window.history.replaceState({}, '', window.location.pathname);
+    // Poll a couple times to confirm credit update
+    let attempts = 0;
+    const t = setInterval(async () => {
+      attempts++;
+      try {
+        const r = await callEdge('getCredits');
+        if (r.success) {
+          updateCreditUI(r.credits);
+          renderTransactions(r.transactions || []);
+          if (attempts >= 3) clearInterval(t);
+        }
+      } catch(e) {}
+      if (attempts >= 5) clearInterval(t);
+    }, 3000);
   }
 }
 
@@ -815,9 +956,13 @@ async function doReset() {
 }
 function resetAuth() { location.reload(); }
 function logout() {
-  authToken=null; if(pollTimer)clearInterval(pollTimer); if(qrTimer)clearInterval(qrTimer);
-  if(paymentPollTimer)clearInterval(paymentPollTimer);
-  localStorage.removeItem('auth_token'); localStorage.removeItem('user_email'); location.reload();
+  authToken=null;
+  if(pollTimer)clearInterval(pollTimer);
+  if(qrTimer)clearInterval(qrTimer);
+  stopPaymentPolling();
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_email');
+  location.reload();
 }
 
 // ================================================================
@@ -831,126 +976,36 @@ function showDashboard(email, data) {
   if (data) {
     initDashboard(data);
   } else {
-    // Load fresh data
     callEdge('loadAll').then(r => {
       if (r.success) initDashboard(r);
     }).catch(() => {});
   }
 }
-  
+
 function initDashboard(data) {
-  console.log('initDashboard called with:', data);
-  
-  if (data?.contacts) { 
-    contacts = data.contacts; 
-    renderContacts(); 
-  }
-  
+  if (data?.contacts) { contacts=data.contacts; renderContacts(); }
   if (data?.settings) {
-    document.getElementById('hourLimit').value = data.settings.hour_limit || 30;
-    document.getElementById('dayLimit').value  = data.settings.day_limit || 200;
-    document.getElementById('minGap').value    = data.settings.min_gap || 30;
-    document.getElementById('maxGap').value    = data.settings.max_gap || 90;
+    document.getElementById('hourLimit').value = data.settings.hour_limit||30;
+    document.getElementById('dayLimit').value  = data.settings.day_limit||200;
+    document.getElementById('minGap').value    = data.settings.min_gap||30;
+    document.getElementById('maxGap').value    = data.settings.max_gap||90;
     if(data.settings.gowa_url)  document.getElementById('gowaUrl').value  = data.settings.gowa_url;
     if(data.settings.gowa_auth) document.getElementById('gowaAuth').value = data.settings.gowa_auth;
     if(data.settings.auto_reply_prompt) document.getElementById('autoReplyPrompt').value = data.settings.auto_reply_prompt;
-    document.getElementById('autoReplyEnabled').checked = data.settings.auto_reply || false;
+    document.getElementById('autoReplyEnabled').checked = data.settings.auto_reply||false;
   }
-  
-  if (data?.config?.groq_key)  document.getElementById('groqKey').value = data.config.groq_key;
+  if (data?.config?.groq_key)  document.getElementById('groqKey').value   = data.config.groq_key;
   if (data?.template?.body)    document.getElementById('msgTemplate').value = data.template.body;
-  if (data?.device) { 
-    syncDeviceToUI(data.device); 
-  } else { 
-    fetchDeviceFromServer(); 
-  }
-  
+  if (data?.device) { syncDeviceToUI(data.device); } else { fetchDeviceFromServer(); }
   fetchAndRenderDevices();
-  
-  // Load credits - this is critical
-  if (data?.profile?.credits !== undefined && data.profile.credits !== null) {
-    console.log('Setting credits from profile:', data.profile.credits);
-    updateCreditUI(data.profile.credits);
-  } else {
-    // If profile doesn't have credits, fetch them separately
-    console.log('No credits in profile, fetching separately');
-    loadCredits();
+
+  // FIX: handle credits from multiple possible response shapes
+  const credits = data?.profile?.credits ?? data?.credits ?? null;
+  if (credits !== null && credits !== undefined) {
+    updateCreditUI(credits);
   }
-}
-
-// Fix the proceedBuy function to handle credits update properly:
-async function proceedBuy() {
-  if (!selectedPack) { showToast('Select a pack first', true); return; }
-  const btn = document.querySelector('#buyBtnWrap .btn-purple');
-  const originalText = btn.textContent;
-  btn.textContent = '⏳ Creating payment link…';
-  btn.disabled = true;
-  document.getElementById('buyStatus').textContent = '';
-
-  try {
-    const r = await callEdge('buyCredits', { pack_id: selectedPack });
-    if (!r.success) {
-      showToast(r.message || 'Failed to create payment link', true);
-      btn.textContent = originalText;
-      btn.disabled = false;
-      return;
-    }
-
-    // Open Razorpay payment page
-    window.open(r.payment_url, '_blank');
-    document.getElementById('buyStatus').textContent = '⏳ Payment page opened. Complete payment and come back.';
-    btn.textContent = '✅ Payment page opened';
-
-    // Start polling for payment completion
-    const linkId = r.razorpay_payment_link_id;
-    let attempts = 0;
-    
-    if (paymentPollTimer) clearInterval(paymentPollTimer);
-    
-    paymentPollTimer = setInterval(async () => {
-      attempts++;
-      try {
-        const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: linkId });
-        console.log('Poll response:', poll);
-        
-        if (poll.status === 'completed') {
-          clearInterval(paymentPollTimer);
-          paymentPollTimer = null;
-          
-          // Get the updated credits
-          const creditsAmount = typeof poll.credits === 'number' ? poll.credits : 0;
-          updateCreditUI(creditsAmount);
-          
-          closeBuyModal();
-          showToast(`✅ Credits added! New balance: ${creditsAmount}`);
-          
-          // Also refresh transaction history
-          loadCredits();
-        } else if (poll.status === 'failed') {
-          clearInterval(paymentPollTimer);
-          paymentPollTimer = null;
-          showToast('Payment failed or cancelled', true);
-          btn.textContent = originalText;
-          btn.disabled = false;
-        }
-      } catch(e) {
-        console.error('Poll error:', e);
-      }
-      
-      if (attempts > 60) { 
-        clearInterval(paymentPollTimer); 
-        paymentPollTimer = null;
-        btn.textContent = originalText;
-        btn.disabled = false;
-        showToast('Payment polling timeout. Check your credits manually.', true);
-      }
-    }, 5000);
-
-  } catch(e) {
-    showToast('Error: '+e.message, true);
-    btn.textContent = originalText;
-    btn.disabled = false;
-  }
+  // Always do a fresh load to get latest balance + transactions
+  loadCredits();
 }
 
 // ================================================================
@@ -1221,7 +1276,8 @@ function renderContacts() {
   document.getElementById('contactCountBadge').textContent=`(${contacts.length})`;
   // Update credit cost preview
   const pending = contacts.filter(c=>!c.status||c.status==='pending').length;
-  document.getElementById('creditCost').textContent = pending + ' credits';
+  const costEl = document.getElementById('creditCost');
+  if (costEl) costEl.textContent = pending + ' credits';
   if(!contacts.length){
     tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:#4a6070;padding:20px;">No contacts. Import above.</td></tr>';
     ['sentCount','pendingCount','failedCount'].forEach(id=>document.getElementById(id).textContent='0');
@@ -1278,7 +1334,6 @@ async function processSend(){
   if(sendState!=='running') return;
   if(sendIndex>=contacts.length){stopSend();showToast('Campaign complete! 🎉');return;}
 
-  // Credit check before each send
   if(userCredits <= 0){
     sendState='idle';
     if(sendTimer)clearTimeout(sendTimer);
@@ -1306,10 +1361,8 @@ async function processSend(){
 
     c.status = result.success ? 'sent' : 'failed';
 
-    // Update credit balance from response
     if(result.credits !== undefined) updateCreditUI(result.credits);
 
-    // Handle out-of-credits response from edge
     if(!result.success && result.out_of_credits){
       sendState='idle';
       if(sendTimer)clearTimeout(sendTimer);
@@ -1454,10 +1507,12 @@ function switchTab(name){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   document.querySelector(`[data-tab="${name}"]`)?.classList.add('active');
-  // Refresh credits when switching to settings
   if(name==='settings') loadCredits();
-  // Refresh credit cost preview when switching to send
-  if(name==='send') { const p=contacts.filter(c=>!c.status||c.status==='pending').length; document.getElementById('creditCost').textContent=p+' credits'; }
+  if(name==='send') {
+    const p=contacts.filter(c=>!c.status||c.status==='pending').length;
+    const costEl=document.getElementById('creditCost');
+    if(costEl) costEl.textContent=p+' credits';
+  }
 }
 document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>switchTab(n.dataset.tab)));
 
@@ -1485,7 +1540,7 @@ Object.assign(window,{
   loadGroups,createGroup,leaveGroup,sendToGroup,
   loadUserInfo,loadUserAvatar,loadMyContacts,loadMyPrivacy,loadBusinessProfile,changePushname,checkUser,
   saveSettings,saveGowaSettings,testGowaConnection,saveAiSettings,
-  openBuyModal,closeBuyModal,selectPack,proceedBuy,loadCredits,
+  openBuyModal,closeBuyModal,selectPack,proceedBuy,loadCredits,manualCheckPayment,
 });
 </script>
 </body>
