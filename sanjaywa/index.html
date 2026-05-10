@@ -222,7 +222,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="buy-error" id="buyError"></div>
     <div id="buyBtnWrap" style="display:none;margin-bottom:12px;">
       <button class="btn btn-purple" style="width:100%;justify-content:center;padding:14px;font-size:15px;" onclick="proceedBuy()" id="payBtn">
-        💳 Pay with Cashfree
+        💳 Pay with Razorpay
       </button>
       <div id="buyStatus" style="font-size:12px;color:#7a95a8;text-align:center;margin-top:8px;"></div>
     </div>
@@ -233,7 +233,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     </div>
     <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="closeBuyModal()">Cancel</button>
     <div style="margin-top:12px;font-size:11px;color:#4a6070;text-align:center;font-family:'Space Mono',monospace;">
-      Payments secured by Cashfree · Credits added instantly after payment
+      Payments secured by Razorpay· Credits added instantly after payment
     </div>
   </div>
 </div>
@@ -532,12 +532,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
           <div class="btn-row">
             <button class="btn btn-secondary" onclick="checkUser()">🔍 Check Number</button>
           </div>
-          <hr class="divider">
-<label>WhatsApp Number (for payments)</label>
-<input type="tel" id="userPhoneInput" placeholder="919876543210">
-<div class="btn-row">
-  <button class="btn btn-primary" onclick="updateUserPhone()">💾 Save Phone Number</button>
-</div>
         </div>
       </div>
       <div class="card">
@@ -735,29 +729,6 @@ window.updateCreditUI = function(credits) {
   if (prev !== credits) addLog('INFO','log-tag-info',`Credits: ${prev} → ${credits}`);
 };
 
-  // Add to your frontend - in Settings tab
-async function updateUserPhone() {
-  const phone = document.getElementById('userPhoneInput').value.trim();
-  if (!phone) {
-    showToast('Please enter a phone number', true);
-    return;
-  }
-  
-  // Validate phone format (basic)
-  const cleanPhone = phone.replace(/\D/g, '');
-  if (cleanPhone.length < 10 || cleanPhone.length > 15) {
-    showToast('Invalid phone number. Use format: 919876543210', true);
-    return;
-  }
-  
-  const r = await callEdge('updateProfile', { phone: cleanPhone });
-  if (r.success) {
-    localStorage.setItem('user_phone', cleanPhone);
-    showToast('Phone number saved!');
-  } else {
-    showToast('Failed to save phone: ' + (r.message || 'Unknown error'), true);
-  }
-}
 // ─── Log device status changes ───
 const _origUpdateStatusBar = updateStatusBar;
 window.updateStatusBar = function(status) {
@@ -982,6 +953,13 @@ function renderTransactions(txs) {
 // BUY CREDITS MODAL
 // ================================================================
 function openBuyModal() {
+  // Block if no device linked
+  if (!deviceId) {
+    showToast('Please link a WhatsApp device first before buying credits.', true);
+    switchTab('device');
+    return;
+  }
+
   selectedPack = null;
   renderPacks();
   document.getElementById('buyBtnWrap').style.display = 'none';
@@ -1038,12 +1016,13 @@ function selectPack(packId) {
       `${pack.credits.toLocaleString('en-IN')} credits for ₹${pack.amount}`;
   }
   const payBtn = document.getElementById('payBtn');
-  if (payBtn) { payBtn.textContent = '💳 Pay with Cashfree'; payBtn.disabled = false; }
+  if (payBtn) { payBtn.textContent = '💳 Pay with Razorpay'; payBtn.disabled = false; }
   document.getElementById('pollStatus').style.display = 'none';
 }
   
 async function proceedBuy() {
   if (!selectedPack) { showBuyError('Please select a credit pack first.'); return; }
+  if (!deviceId) { showBuyError('No WhatsApp device linked. Please connect one first.'); return; }
 
   const payBtn = document.getElementById('payBtn');
   hideBuyError();
@@ -1052,44 +1031,18 @@ async function proceedBuy() {
   document.getElementById('buyStatus').textContent = '';
 
   try {
-    // Get user email and phone
-    const userEmail = document.getElementById('userEmail')?.textContent || '';
-    
-    // Get or prompt for phone number
-    let userPhone = localStorage.getItem('user_phone');
-    if (!userPhone) {
-      userPhone = prompt('Enter your WhatsApp number (with country code, no +):\nExample: 919876543210\n(This is required for payment)');
-      if (!userPhone) {
-        showBuyError('Phone number is required for payment');
-        payBtn.textContent = '💳 Pay with Cashfree';
-        payBtn.disabled = false;
-        return;
-      }
-      // Save to localStorage and update profile
-      localStorage.setItem('user_phone', userPhone);
-      await callEdge('updateProfile', { phone: userPhone }).catch(() => {});
-    }
-    
-    const r = await callEdge('buyCredits', { 
-      pack_id: selectedPack,
-      user_id: authToken,
-      user_email: userEmail,
-      user_phone: userPhone,
-      return_url: window.location.href + '?payment=success'
-    });
+    const r = await callEdge('buyCredits', { pack_id: selectedPack });
 
     if (!r || !r.success) {
       showBuyError('❌ ' + (r?.message || 'Could not create payment order.'));
-      payBtn.textContent = '💳 Pay with Cashfree';
+      payBtn.textContent = '💳 Pay with Razorpay';
       payBtn.disabled = false;
       return;
     }
 
-    // Open Cashfree checkout page
     window.open(r.payment_url, '_blank');
     payBtn.textContent = '✅ Payment page opened';
-    
-    // Update poll status message
+
     const pollStatusDiv = document.getElementById('pollStatus');
     pollStatusDiv.style.display = 'block';
     pollStatusDiv.innerHTML = `
@@ -1097,26 +1050,28 @@ async function proceedBuy() {
         <span class="spinner"></span> Waiting for payment…
       </div>
       <div style="font-size:11px;color:#7a95a8;">
-        Complete payment in the Cashfree tab, then come back. This will update automatically.
+        Complete payment in the Razorpay tab, then come back. This will update automatically.
       </div>
-      <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I've paid — check now</button>
+      <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">
+        ✓ I've paid — check now
+      </button>
     `;
 
-    // Poll for payment completion
     let attempts = 0;
     if (window.paymentPollTimer) clearInterval(window.paymentPollTimer);
-    
+
     window.paymentPollTimer = setInterval(async () => {
       attempts++;
       if (attempts > 60) {
         clearInterval(window.paymentPollTimer);
         pollStatusDiv.innerHTML = `
-          <div style="color:#ffd166;">⏰ Payment still pending. Click the check button below.</div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ Check Payment</button>
+          <div style="color:#ffd166;">⏰ Payment still pending. Click below to check.</div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">
+            ✓ Check Payment
+          </button>
         `;
         return;
       }
-      
       try {
         const poll = await callEdge('checkPaymentStatus', { order_id: r.order_id });
         if (poll && poll.status === 'completed') {
@@ -1130,23 +1085,19 @@ async function proceedBuy() {
         console.log('Poll error:', e);
       }
     }, 3000);
-    
+
   } catch(e) {
     showBuyError('❌ Network error: ' + e.message);
-    payBtn.textContent = '💳 Pay with Cashfree';
+    payBtn.textContent = '💳 Pay with Razorpay';
     payBtn.disabled = false;
   }
 }
   
 async function manualCheckPayment() {
   const btn = event?.target;
-  if (btn) {
-    btn.textContent = '⏳ Checking…';
-    btn.disabled = true;
-  }
-  
+  if (btn) { btn.textContent = '⏳ Checking…'; btn.disabled = true; }
+
   try {
-    // Refresh credits directly from server
     const r = await callEdge('getCredits');
     if (r.success) {
       const newCredits = r.credits || 0;
@@ -1164,13 +1115,10 @@ async function manualCheckPayment() {
   } catch(e) {
     showToast('Check failed: ' + e.message, true);
   }
-  
-  if (btn) {
-    btn.textContent = '✓ Check again';
-    btn.disabled = false;
-  }
-}
 
+  if (btn) { btn.textContent = '✓ Check again'; btn.disabled = false; }
+}
+  
 function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('payment') === 'success') {
