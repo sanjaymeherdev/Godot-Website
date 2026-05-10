@@ -729,6 +729,19 @@ window.updateCreditUI = function(credits) {
   if (prev !== credits) addLog('INFO','log-tag-info',`Credits: ${prev} → ${credits}`);
 };
 
+  // Add to your frontend - in Settings tab
+async function updateUserPhone() {
+  const phone = prompt('Enter your WhatsApp number (with country code, no +):\nExample: 919876543210');
+  if (!phone) return;
+  
+  const r = await callEdge('updateProfile', { phone });
+  if (r.success) {
+    localStorage.setItem('user_phone', phone);
+    showToast('Phone number saved!');
+  } else {
+    showToast('Failed to save phone', true);
+  }
+}
 // ─── Log device status changes ───
 const _origUpdateStatusBar = updateStatusBar;
 window.updateStatusBar = function(status) {
@@ -1018,14 +1031,18 @@ async function proceedBuy() {
 
   const payBtn = document.getElementById('payBtn');
   hideBuyError();
-  payBtn.textContent = '⏳ Creating payment order…';
+  payBtn.textContent = '⏳ Creating payment order...';
   payBtn.disabled = true;
+  document.getElementById('buyStatus').textContent = '';
 
   try {
+    // Get user email from your auth system
+    const userEmail = document.getElementById('userEmail')?.textContent || '';
+    
     const r = await callEdge('buyCredits', { 
       pack_id: selectedPack,
-      user_id: authToken, // or get from your auth
-      user_email: 'user@example.com', // get from your auth
+      user_id: authToken, // This should be the actual user ID, not token
+      user_email: userEmail,
       return_url: window.location.href + '?payment=success'
     });
 
@@ -1043,24 +1060,30 @@ async function proceedBuy() {
 
     // Poll for payment completion
     let attempts = 0;
-    const pollInterval = setInterval(async () => {
+    if (window.paymentPollTimer) clearInterval(window.paymentPollTimer);
+    
+    window.paymentPollTimer = setInterval(async () => {
       attempts++;
-      if (attempts > 60) {
-        clearInterval(pollInterval);
-        document.getElementById('pollStatus').innerHTML = '<div style="color:#ffd166;">⏰ Still waiting. Click check button below.</div>';
+      if (attempts > 60) { // 60 * 3 seconds = 3 minutes timeout
+        clearInterval(window.paymentPollTimer);
+        document.getElementById('pollStatus').innerHTML = 
+          '<div style="color:#ffd166;">⏰ Payment still pending. Click "Check Payment" button below.</div>' +
+          '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ Check Payment</button>';
         return;
       }
       
       try {
         const poll = await callEdge('checkPaymentStatus', { order_id: r.order_id });
         if (poll && poll.status === 'completed') {
-          clearInterval(pollInterval);
+          clearInterval(window.paymentPollTimer);
           updateCreditUI(poll.credits);
           closeBuyModal();
-          showToast(`✅ Credits added! New balance: ${poll.credits}`);
+          showToast(`✅ Credits added! New balance: ${poll.credits.toLocaleString('en-IN')} credits`);
           loadCredits();
         }
-      } catch(e) {}
+      } catch(e) {
+        console.log('Poll error:', e);
+      }
     }, 3000);
     
   } catch(e) {
@@ -1069,6 +1092,7 @@ async function proceedBuy() {
     payBtn.disabled = false;
   }
 }
+
   
 async function manualCheckPayment() {
   const btn = event.target;
