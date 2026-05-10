@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoSend — WhatsApp Bulk Messaging for Indian Businesses</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#00c853;
+  --green-dark:#00a040;
+  --yellow:#ffe600;
+  --orange:#ff6d00;
+  --pink:#ff3d7f;
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --text:#f0f0f0;
+  --muted:#888;
+  --border:rgba(255,255,255,0.08);
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:0.4;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  padding:18px 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:rgba(10,10,10,0.85);
+  backdrop-filter:blur(16px);
+}
+.logo{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:22px;font-weight:800;
+  letter-spacing:-0.5px;
+}
+.logo span{color:var(--green);}
+.nav-links{display:flex;gap:28px;align-items:center;}
+.nav-links a{
+  color:var(--muted);text-decoration:none;
+  font-size:14px;font-weight:500;
+  transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{
+  background:var(--green);color:#000;
+  padding:9px 20px;border-radius:100px;
+  font-size:14px;font-weight:600;
+  text-decoration:none;
+  transition:background 0.2s,transform 0.15s;
+  display:inline-block;
+}
+.nav-cta:hover{background:#00e564;transform:scale(1.03);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 5% 80px;
+  position:relative;
+  text-align:center;
+  overflow:hidden;
+}
+.hero-blob{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(80px);
+  pointer-events:none;
+}
+.blob1{width:600px;height:600px;background:rgba(0,200,83,0.12);top:-100px;left:-200px;}
+.blob2{width:500px;height:500px;background:rgba(255,109,0,0.1);bottom:-100px;right:-150px;}
+.blob3{width:400px;height:400px;background:rgba(255,61,127,0.08);top:200px;right:10%;}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,200,83,0.12);
+  border:1px solid rgba(0,200,83,0.3);
+  color:var(--green);
+  padding:6px 16px;border-radius:100px;
+  font-size:13px;font-weight:500;
+  margin-bottom:28px;
+  animation:fadeUp 0.6s ease both;
+}
+.badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);
+  animation:pulse 1.5s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+
+.hero h1{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(42px,7vw,88px);
+  font-weight:800;
+  line-height:1.0;
+  letter-spacing:-2px;
+  margin-bottom:24px;
+  animation:fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 .line2{
+  display:block;
+  background:linear-gradient(90deg,var(--green),#00e5ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero h1 .accent{
+  display:inline-block;
+  background:var(--yellow);
+  color:#000;
+  padding:0 12px;
+  border-radius:8px;
+  -webkit-text-fill-color:#000;
+}
+
+.hero-sub{
+  font-size:clamp(16px,2vw,20px);
+  color:var(--muted);
+  max-width:560px;
+  line-height:1.7;
+  margin-bottom:40px;
+  animation:fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-actions{
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;
+  margin-bottom:60px;
+  animation:fadeUp 0.6s 0.3s ease both;
+}
+.btn-primary{
+  background:var(--green);color:#000;
+  padding:15px 32px;border-radius:100px;
+  font-size:16px;font-weight:700;
+  text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all 0.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-primary:hover{background:#00e564;transform:translateY(-2px);}
+.btn-primary .tag{
+  background:rgba(0,0,0,0.2);
+  padding:3px 10px;border-radius:100px;
+  font-size:12px;
+}
+.btn-ghost{
+  color:var(--text);
+  padding:15px 28px;border-radius:100px;
+  font-size:15px;font-weight:500;
+  text-decoration:none;
+  border:1px solid var(--border);
+  display:inline-flex;align-items:center;gap:8px;
+  transition:all 0.2s;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);}
+
+.hero-trust{
+  display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center;
+  animation:fadeUp 0.6s 0.4s ease both;
+}
+.trust-item{
+  display:flex;align-items:center;gap:7px;
+  font-size:13px;color:var(--muted);
+}
+.trust-item svg{color:var(--green);}
+.trust-dot{width:4px;height:4px;border-radius:50%;background:var(--border);}
+
+/* ── PHONE MOCKUP ── */
+.hero-visual{
+  margin-top:70px;
+  position:relative;
+  animation:fadeUp 0.8s 0.5s ease both;
+  width:100%;max-width:900px;
+}
+.mockup-container{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.mockup-container::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,200,83,0.4),transparent);
+}
+.mockup-topbar{
+  display:flex;align-items:center;gap:8px;margin-bottom:20px;
+}
+.mockup-dot{width:10px;height:10px;border-radius:50%;}
+.mockup-steps{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+}
+.mockup-step{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+}
+.mockup-step::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;height:2px;
+}
+.step-green::after{background:var(--green);}
+.step-yellow::after{background:var(--yellow);}
+.step-orange::after{background:var(--orange);}
+.step-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:12px;
+}
+.step-icon-green{background:rgba(0,200,83,0.15);}
+.step-icon-yellow{background:rgba(255,230,0,0.15);}
+.step-icon-orange{background:rgba(255,109,0,0.15);}
+.mockup-step h4{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:13px;font-weight:600;
+  margin-bottom:6px;color:var(--text);
+}
+.mockup-step p{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.stat-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  border-top:1px solid var(--border);
+  margin-top:20px;
+}
+.stat-cell{
+  background:var(--surface);
+  padding:16px;text-align:center;
+}
+.stat-cell:first-child{border-radius:0 0 0 16px;}
+.stat-cell:last-child{border-radius:0 0 16px 0;}
+.stat-num{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:26px;font-weight:800;
+  color:var(--green);
+}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SECTION COMMONS ── */
+section{padding:100px 5%;position:relative;z-index:1;}
+.section-tag{
+  display:inline-block;
+  font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--green);margin-bottom:16px;
+}
+.section-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:800;line-height:1.1;letter-spacing:-1px;
+  margin-bottom:16px;
+}
+.section-sub{font-size:17px;color:var(--muted);line-height:1.7;max-width:560px;}
+
+/* ── HOW IT WORKS ── */
+.how{background:var(--surface);}
+.steps-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:2px;margin-top:60px;
+  background:var(--border);
+  border-radius:20px;overflow:hidden;
+  border:1px solid var(--border);
+}
+.step-card{
+  background:var(--surface);
+  padding:36px 28px;
+  position:relative;
+}
+.step-num{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:64px;font-weight:800;
+  color:rgba(255,255,255,0.04);
+  position:absolute;top:16px;right:20px;
+  line-height:1;
+}
+.step-emoji{font-size:32px;margin-bottom:20px;display:block;}
+.step-card h3{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:18px;font-weight:700;
+  margin-bottom:10px;
+}
+.step-card p{font-size:14px;color:var(--muted);line-height:1.7;}
+.step-bar{height:3px;width:40px;border-radius:2px;margin-top:20px;}
+
+/* ── FEATURES ── */
+.features-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:60px;
+}
+.feature-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:32px;
+  transition:border-color 0.2s;
+  position:relative;overflow:hidden;
+}
+.feature-card:hover{border-color:rgba(255,255,255,0.15);}
+.feature-card.large{grid-column:span 2;}
+.feature-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:20px;
+}
+.feature-card h3{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:20px;font-weight:700;
+  margin-bottom:10px;
+}
+.feature-card p{font-size:14px;color:var(--muted);line-height:1.7;}
+.feature-tag{
+  display:inline-block;
+  padding:4px 12px;border-radius:100px;
+  font-size:11px;font-weight:600;letter-spacing:0.5px;
+  margin-top:16px;
+}
+
+/* ── PRICING ── */
+.pricing{background:var(--surface);}
+.pricing-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:14px;
+  margin-top:60px;
+}
+.pack-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px 24px;
+  text-align:center;
+  transition:all 0.2s;
+  position:relative;
+}
+.pack-card:hover{border-color:rgba(255,255,255,0.15);transform:translateY(-4px);}
+.pack-card.popular{
+  border-color:var(--green);
+  background:rgba(0,200,83,0.04);
+}
+.popular-tag{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#000;
+  padding:4px 14px;border-radius:100px;
+  font-size:11px;font-weight:700;white-space:nowrap;
+}
+.pack-credits{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:40px;font-weight:800;
+  line-height:1;
+}
+.pack-credits span{font-size:15px;font-weight:500;color:var(--muted);}
+.pack-price{
+  font-size:28px;font-weight:700;
+  color:var(--green);margin:10px 0 4px;
+  font-family:'Bricolage Grotesque',sans-serif;
+}
+.pack-rate{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.pack-btn{
+  display:block;width:100%;
+  padding:12px;border-radius:100px;
+  font-size:14px;font-weight:600;
+  text-decoration:none;
+  border:1px solid var(--border);
+  color:var(--text);background:transparent;
+  cursor:pointer;transition:all 0.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.pack-btn:hover{background:var(--surface2);}
+.pack-card.popular .pack-btn{
+  background:var(--green);color:#000;
+  border-color:var(--green);
+}
+.pack-card.popular .pack-btn:hover{background:#00e564;}
+.pricing-note{
+  text-align:center;margin-top:28px;
+  font-size:13px;color:var(--muted);
+}
+.pricing-note strong{color:var(--green);}
+
+/* ── ANTI-BAN ── */
+.antibан-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  margin-top:60px;
+}
+.ab-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+  display:flex;gap:16px;align-items:flex-start;
+}
+.ab-icon{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.ab-card h4{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:16px;font-weight:700;margin-bottom:6px;
+}
+.ab-card p{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* ── TESTIMONIALS ── */
+.testimonials{background:var(--surface);}
+.testi-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  margin-top:60px;
+}
+.testi-card{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+}
+.testi-stars{color:var(--yellow);font-size:14px;margin-bottom:14px;}
+.testi-text{
+  font-size:14px;line-height:1.7;color:var(--text);
+  margin-bottom:20px;font-style:italic;
+}
+.testi-author{display:flex;align-items:center;gap:10px;}
+.testi-avatar{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+}
+.testi-name{font-size:13px;font-weight:600;}
+.testi-biz{font-size:12px;color:var(--muted);}
+
+/* ── FAQ ── */
+.faq-list{margin-top:60px;max-width:720px;margin-left:auto;margin-right:auto;}
+.faq-item{
+  border-bottom:1px solid var(--border);
+  padding:24px 0;cursor:pointer;
+}
+.faq-q{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:17px;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:16px;
+}
+.faq-arrow{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:14px;
+  transition:transform 0.2s;
+}
+.faq-a{
+  font-size:14px;color:var(--muted);line-height:1.7;
+  padding-top:14px;display:none;
+}
+.faq-item.open .faq-a{display:block;}
+.faq-item.open .faq-arrow{transform:rotate(45deg);}
+
+/* ── CTA SECTION ── */
+.cta-section{
+  text-align:center;padding:120px 5%;
+  position:relative;overflow:hidden;
+}
+.cta-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 600px 400px at 50% 50%,rgba(0,200,83,0.08),transparent);
+  pointer-events:none;
+}
+.cta-section h2{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(36px,5vw,64px);
+  font-weight:800;letter-spacing:-1.5px;
+  line-height:1.1;margin-bottom:20px;
+}
+.cta-section p{
+  font-size:18px;color:var(--muted);
+  margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:18px;font-weight:800;
+}
+.footer-logo span{color:var(--green);}
+footer p{font-size:13px;color:var(--muted);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .features-grid,.antibан-grid,.testi-grid{grid-template-columns:1fr;}
+  .feature-card.large{grid-column:span 1;}
+  .mockup-steps{grid-template-columns:1fr;}
+  .stat-strip{grid-template-columns:1fr;}
+  .stat-cell:first-child,.stat-cell:last-child{border-radius:0;}
+  .nav-links{display:none;}
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Auto<span>Send</span></div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="#pricing" class="nav-cta">Start Free →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+  <div class="hero-blob blob3"></div>
+
+  <div class="hero-badge">
+    <div class="badge-dot"></div>
+    50 free credits on signup — no card needed
+  </div>
+
+  <h1>
+    WhatsApp blasts<br>
+    <span class="line2">that actually land.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Send bulk WhatsApp messages to your customers in minutes. Import contacts from Excel, personalize every message, and watch your sales grow — starting at just <strong style="color:var(--text)">₹0.25 per message.</strong>
+  </p>
+
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary">
+      Start Free
+      <span class="tag">50 credits free</span>
+    </a>
+    <a href="#how" class="btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      See how it works
+    </a>
+  </div>
+
+  <div class="hero-trust">
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      No monthly subscription
+    </div>
+    <div class="trust-dot"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Pay only per message
+    </div>
+    <div class="trust-dot"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Razorpay secured payments
+    </div>
+    <div class="trust-dot"></div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Works with your own WhatsApp
+    </div>
+  </div>
+
+  <div class="hero-visual reveal">
+    <div class="mockup-container">
+      <div class="mockup-topbar">
+        <div class="mockup-dot" style="background:#ff5f57"></div>
+        <div class="mockup-dot" style="background:#febc2e"></div>
+        <div class="mockup-dot" style="background:#28c840"></div>
+        <span style="font-size:12px;color:var(--muted);margin-left:8px;">AutoSend — Campaign Dashboard</span>
+      </div>
+      <div class="mockup-steps">
+        <div class="mockup-step step-green">
+          <div class="step-num">1</div>
+          <div class="step-icon step-icon-green">📋</div>
+          <h4>Import your contacts</h4>
+          <p>Paste a list or upload your Excel sheet. AutoSend maps names and numbers automatically.</p>
+        </div>
+        <div class="mockup-step step-yellow">
+          <div class="step-num">2</div>
+          <div class="step-icon step-icon-yellow">✍️</div>
+          <h4>Write your message</h4>
+          <p>Use {name} to personalize each message. AI generates 5 variations to keep your account safe.</p>
+        </div>
+        <div class="mockup-step step-orange">
+          <div class="step-num">3</div>
+          <div class="step-icon step-icon-orange">🚀</div>
+          <h4>Hit Send & watch it go</h4>
+          <p>Smart delays between messages mimic human behavior. Live stats update as messages land.</p>
+        </div>
+      </div>
+      <div class="stat-strip">
+        <div class="stat-cell">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Open rate</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">₹0.25</div>
+          <div class="stat-label">Per message</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">50</div>
+          <div class="stat-label">Free credits</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-tag">How it works</div>
+  <h2 class="section-title">From zero to sent<br>in under 5 minutes.</h2>
+  <p class="section-sub">No technical knowledge needed. If you can use WhatsApp, you can use AutoSend.</p>
+
+  <div class="steps-grid reveal">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <span class="step-emoji">📱</span>
+      <h3>Connect your WhatsApp</h3>
+      <p>Scan a QR code with your phone. Your own WhatsApp number sends the messages — no fake accounts, no third-party numbers.</p>
+      <div class="step-bar" style="background:var(--green)"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <span class="step-emoji">📁</span>
+      <h3>Import contacts</h3>
+      <p>Upload any Excel or CSV file. Or paste a list directly. AutoSend handles Indian mobile numbers — 10 digit or with +91.</p>
+      <div class="step-bar" style="background:var(--yellow)"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <span class="step-emoji">💬</span>
+      <h3>Compose your message</h3>
+      <p>Write once, personalize for everyone using {name}. Send text, images, videos, or documents — all from one place.</p>
+      <div class="step-bar" style="background:var(--orange)"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <span class="step-emoji">⚡</span>
+      <h3>Launch & track</h3>
+      <p>Watch sent, pending, and failed counts update in real time. Pause or stop anytime. Credits deducted only on success.</p>
+      <div class="step-bar" style="background:var(--pink)"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything a small business needs.<br>Nothing you don't.</h2>
+
+  <div class="features-grid reveal">
+    <div class="feature-card large">
+      <div class="feature-icon" style="background:rgba(0,200,83,0.12);">🤖</div>
+      <h3>AI message variations</h3>
+      <p>AutoSend uses AI to automatically generate 5 variations of your message. Each contact gets a slightly different version — same meaning, different words. This dramatically reduces the chance of WhatsApp flagging your account for spam.</p>
+      <span class="feature-tag" style="background:rgba(0,200,83,0.12);color:var(--green);">Powered by Groq AI</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,230,0,0.12);">⏱️</div>
+      <h3>Smart send delays</h3>
+      <p>Random delays between every message mimic human typing behavior. Set your own min and max gap — recommended 30–90 seconds.</p>
+      <span class="feature-tag" style="background:rgba(255,230,0,0.12);color:var(--yellow);">Anti-ban protection</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,109,0,0.12);">📊</div>
+      <h3>Excel & CSV import</h3>
+      <p>AutoSend auto-detects Name, Phone, and Message columns. Per-contact custom messages from your sheet — no manual editing needed.</p>
+      <span class="feature-tag" style="background:rgba(255,109,0,0.12);color:var(--orange);">Any format works</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,61,127,0.12);">🎯</div>
+      <h3>Personalization</h3>
+      <p>Use {name} in your message and AutoSend replaces it with each contact's name. A personal message gets 3x more replies than a generic blast.</p>
+      <span class="feature-tag" style="background:rgba(255,61,127,0.12);color:var(--pink);">Higher response rate</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,229,255,0.12);">📎</div>
+      <h3>Rich media support</h3>
+      <p>Send images, videos, audio, documents, and stickers alongside your message. Add a product photo or a PDF catalogue to every blast.</p>
+      <span class="feature-tag" style="background:rgba(0,229,255,0.12);color:#00e5ff;">All media types</span>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(167,139,250,0.12);">💳</div>
+      <h3>Pay-as-you-go credits</h3>
+      <p>No monthly fees. Buy credits when you need them. Credits never expire. Start with 50 free credits — no card required to sign up.</p>
+      <span class="feature-tag" style="background:rgba(167,139,250,0.12);color:#a78bfa;">No subscription</span>
+    </div>
+  </div>
+</section>
+
+<!-- ANTI-BAN -->
+<section style="background:var(--surface);">
+  <div class="section-tag">Account safety</div>
+  <h2 class="section-title reveal">Built to keep your<br>account safe.</h2>
+  <p class="section-sub reveal">AutoSend's 4-layer protection system is designed specifically for how WhatsApp's spam detection works.</p>
+
+  <div class="antibан-grid reveal">
+    <div class="ab-card">
+      <div class="ab-icon" style="background:rgba(0,200,83,0.12);">🔀</div>
+      <div>
+        <h4>AI message variations</h4>
+        <p>5 unique rewrites of your message. WhatsApp's detection looks for identical messages sent in bulk. Variations break that pattern entirely.</p>
+      </div>
+    </div>
+    <div class="ab-card">
+      <div class="ab-icon" style="background:rgba(255,230,0,0.12);">⏳</div>
+      <div>
+        <h4>Human-like delays</h4>
+        <p>Random gaps between 30–90 seconds (customizable). No bot sends exactly one message every 30 seconds — your sending pattern looks natural.</p>
+      </div>
+    </div>
+    <div class="ab-card">
+      <div class="ab-icon" style="background:rgba(255,109,0,0.12);">📉</div>
+      <div>
+        <h4>Hour & day limits</h4>
+        <p>Set max messages per hour (default 30) and per day (default 200). Staying within these limits keeps your account below WhatsApp's radar.</p>
+      </div>
+    </div>
+    <div class="ab-card">
+      <div class="ab-icon" style="background:rgba(255,61,127,0.12);">👤</div>
+      <div>
+        <h4>Your own number sends</h4>
+        <p>Messages come from your actual WhatsApp number — not a random API number. Your contacts already know you, so spam reports stay low.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div style="text-align:center;">
+    <div class="section-tag">Pricing</div>
+    <h2 class="section-title reveal">Simple, honest pricing.</h2>
+    <p class="section-sub reveal" style="margin:0 auto;">1 credit = 1 WhatsApp message delivered. Buy only what you need. Credits never expire.</p>
+  </div>
+
+  <div class="pricing-grid reveal">
+    <div class="pack-card">
+      <div class="pack-credits">100 <span>credits</span></div>
+      <div class="pack-price">₹25</div>
+      <div class="pack-rate">₹0.25 per message</div>
+      <a href="#" class="pack-btn">Get started</a>
+    </div>
+    <div class="pack-card">
+      <div class="pack-credits">250 <span>credits</span></div>
+      <div class="pack-price">₹62.5</div>
+      <div class="pack-rate">₹0.25 per message</div>
+      <a href="#" class="pack-btn">Get started</a>
+    </div>
+    <div class="pack-card">
+      <div class="pack-credits">500 <span>credits</span></div>
+      <div class="pack-price">₹125</div>
+      <div class="pack-rate">₹0.25 per message</div>
+      <a href="#" class="pack-btn">Get started</a>
+    </div>
+    <div class="pack-card popular">
+      <div class="popular-tag">⭐ Best value</div>
+      <div class="pack-credits">1500 <span>credits</span></div>
+      <div class="pack-price">₹375</div>
+      <div class="pack-rate">₹0.25 per message</div>
+      <a href="#" class="pack-btn">Get started</a>
+    </div>
+    <div class="pack-card">
+      <div class="pack-credits">4000 <span>credits</span></div>
+      <div class="pack-price">₹1000</div>
+      <div class="pack-rate">₹0.25 per message</div>
+      <a href="#" class="pack-btn">Get started</a>
+    </div>
+  </div>
+
+  <p class="pricing-note">
+    <strong>New accounts get 50 free credits</strong> — no payment needed to try AutoSend. · Payments via Razorpay (UPI, cards, netbanking)
+  </p>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-tag">Testimonials</div>
+  <h2 class="section-title reveal">Used by businesses<br>just like yours.</h2>
+
+  <div class="testi-grid reveal">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"Maine apne coaching institute ke 400 students ko exam reminder bheja — sirf 5 minute mein. Pehle yeh manually karta tha, 2 ghante lagte the."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:rgba(0,200,83,0.15);color:var(--green);">RK</div>
+        <div>
+          <div class="testi-name">Rahul Khanna</div>
+          <div class="testi-biz">Vision Coaching, Jaipur</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"Festival sale ke liye 800 customers ko offer bheja. Same day ₹40,000 ki sales aayi. AutoSend ka ROI toh pehle hi din nikal gaya."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:rgba(255,230,0,0.15);color:var(--yellow);">PS</div>
+        <div>
+          <div class="testi-name">Priya Shah</div>
+          <div class="testi-biz">Priya Fashion, Surat</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">"My clinic's appointment reminders now go automatically. No-shows dropped by 60%. At ₹0.25 per message it's cheaper than a single missed appointment."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:rgba(255,61,127,0.15);color:var(--pink);">DM</div>
+        <div>
+          <div class="testi-name">Dr. Deepa Menon</div>
+          <div class="testi-biz">Wellness Clinic, Kochi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:var(--surface);" id="faq">
+  <div style="text-align:center;">
+    <div class="section-tag">FAQ</div>
+    <h2 class="section-title reveal">Common questions.</h2>
+  </div>
+
+  <div class="faq-list reveal">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Will my WhatsApp account get banned?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">AutoSend uses AI message variations, random human-like delays, and daily send limits to minimize ban risk. However, WhatsApp's unofficial API does carry some risk — we recommend sending to people who know you and keeping your daily sends under 200. Most users have no issues when following best practices.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Do I need a special WhatsApp number?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">No. AutoSend works with your existing WhatsApp number. Just scan a QR code once to link your phone, and messages will be sent from your own number — the same one your customers already know and trust.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        How does the credit system work?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">1 credit = 1 message successfully delivered. Credits are only deducted when a message is sent successfully — failed messages don't cost you anything. Credits never expire, so buy in bulk and use them whenever you need.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        What file formats can I import contacts from?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">AutoSend supports Excel (.xlsx, .xls) and CSV files. It automatically detects name, phone, and message columns. Indian mobile numbers work in all formats — 10 digit, with 91 prefix, or with +91.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Can I send images, PDFs, or videos?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">Yes. AutoSend supports images, videos, audio files, documents (PDF, Word, etc.), and stickers. Just paste the URL of your media file and it will be sent along with your text message.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Is payment secure?
+        <div class="faq-arrow">+</div>
+      </div>
+      <div class="faq-a">All payments are processed by Razorpay — India's most trusted payment gateway. We support UPI, all major credit and debit cards, and netbanking. We never store your payment details.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="reveal">
+    <h2>Start sending in<br><span style="color:var(--green)">5 minutes.</span></h2>
+    <p>50 free credits. No card needed. No monthly fee. Just results.</p>
+    <a href="#" class="btn-primary" style="font-size:18px;padding:18px 40px;display:inline-flex;">
+      Create free account
+      <span class="tag">50 credits free</span>
+    </a>
+    <p style="margin-top:16px;font-size:13px;color:var(--muted);">Secured by Razorpay · Made for Indian businesses</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Auto<span>Send</span></div>
+  <p>WhatsApp bulk messaging for Indian businesses · ₹0.25/message</p>
+  <p style="font-size:12px;">© 2025 AutoSend. All rights reserved.</p>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
