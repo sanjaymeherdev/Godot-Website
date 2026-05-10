@@ -490,7 +490,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <h3 style="margin-bottom:0;">My Groups</h3>
-          <button class="btn btn-secondary btn-sm" onclick="loadGroups()">↻ Load</button>
+          <button class="btn btn-secondary btn-sm" onclick="()">↻ Load</button>
         </div>
         <div id="groupsWrap"><div class="empty-state">Click Load to fetch your groups.</div></div>
       </div>
@@ -1848,39 +1848,86 @@ async function archiveChat(jid){ if(!jid)return; try{const r=await callEdge('arc
 // GROUPS
 // ================================================================
 async function loadGroups(){
-  document.getElementById('groupsWrap').innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
-  try{
-    const r=await callEdge('getMyGroups');
-    if(r.success&&r.data){
-      const groups=Array.isArray(r.data)?r.data:(r.data.data||[]);
-      if(!groups.length){document.getElementById('groupsWrap').innerHTML='<div class="empty-state">No groups found.</div>';return;}
+  document.getElementById('groupsWrap').innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try {
+    const r = await callEdge('getMyGroups');
+    console.log('Groups API response:', JSON.stringify(r, null, 2));
+    
+    if (r.success && r.data) {
+      // Handle different response structures
+      let groups = [];
+      if (Array.isArray(r.data)) {
+        groups = r.data;
+      } else if (r.data.data && Array.isArray(r.data.data)) {
+        groups = r.data.data;
+      } else if (r.data.groups && Array.isArray(r.data.groups)) {
+        groups = r.data.groups;
+      } else if (typeof r.data === 'object') {
+        // If it's a single object, wrap it
+        groups = [r.data];
+      }
       
-      // Debug: log first group to see actual field names
-      console.log('Group sample:', JSON.stringify(groups[0], null, 2));
-
-      document.getElementById('groupsWrap').innerHTML=`<table><thead><tr>
-        <th>Name</th><th>JID</th><th>Participants</th><th></th>
-      </tr></thead><tbody>${groups.slice(0,50).map(g=>{
-        // GoWA v8 uses different field names — try all variants
-        const name = g.name || g.subject || g.group_name || g.title || '—';
-        const jid  = g.jid  || g.id || g.group_id || g.chat_jid || '—';
-        const participants = g.participants || g.members || g.participant_count || [];
-        const participantCount = Array.isArray(participants) ? participants.length : (participants || '—');
-
-        return `<tr>
-          <td>${escapeHtml(name)}</td>
-          <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(jid)}</td>
-          <td>${participantCount}</td>
-          <td style="display:flex;gap:4px;flex-wrap:wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="sendToGroup('${escapeHtml(jid)}')">Send</button>
-            <button class="btn btn-primary btn-sm" onclick="exportGroupContacts('${escapeHtml(jid)}','${escapeHtml(name)}')">📥 Export</button>
-            <button class="btn btn-danger btn-sm" onclick="leaveGroup('${escapeHtml(jid)}')">Leave</button>
-          </td>
-        </tr>`;
-      }).join('')}</tbody></table>`;
-
-    } else document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message||'Failed')}</div>`;
-  }catch(e){document.getElementById('groupsWrap').innerHTML=`<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(e.message)}</div>`;}
+      if (!groups.length) {
+        document.getElementById('groupsWrap').innerHTML = '<div class="empty-state">No groups found.</div>';
+        return;
+      }
+      
+      console.log('First group structure:', JSON.stringify(groups[0], null, 2));
+      
+      document.getElementById('groupsWrap').innerHTML = `
+        <table style="width:100%;">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>JID</th>
+              <th>Participants</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${groups.slice(0, 50).map(g => {
+              // Try all possible field name variations
+              const name = g.Name || g.name || g.subject || g.group_name || g.title || '—';
+              const jid = g.JID || g.jid || g.id || g.group_id || g.chat_jid || '—';
+              
+              // Handle participants - could be array or count
+              let participantCount = '—';
+              if (g.Participants && Array.isArray(g.Participants)) {
+                participantCount = g.Participants.length;
+              } else if (g.participants && Array.isArray(g.participants)) {
+                participantCount = g.participants.length;
+              } else if (g.ParticipantCount !== undefined) {
+                participantCount = g.ParticipantCount;
+              } else if (g.participant_count !== undefined) {
+                participantCount = g.participant_count;
+              } else if (g.members && Array.isArray(g.members)) {
+                participantCount = g.members.length;
+              }
+              
+              return `
+                <tr>
+                  <td style="font-weight:600;">${escapeHtml(name)}</td>
+                  <td style="font-family:'Space Mono',monospace;font-size:10px;">${escapeHtml(jid)}</td>
+                  <td>${participantCount}</td>
+                  <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="sendToGroup('${escapeHtml(jid)}')">Send</button>
+                    <button class="btn btn-primary btn-sm" onclick="exportGroupContacts('${escapeHtml(jid)}','${escapeHtml(name)}')">📥 Export</button>
+                    <button class="btn btn-danger btn-sm" onclick="leaveGroup('${escapeHtml(jid)}')">Leave</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      
+    } else {
+      document.getElementById('groupsWrap').innerHTML = `<div class="empty-state" style="color:#ff6b6b;">${escapeHtml(r.message || 'Failed to load groups')}</div>`;
+    }
+  } catch(e) {
+    console.error('loadGroups error:', e);
+    document.getElementById('groupsWrap').innerHTML = `<div class="empty-state" style="color:#ff6b6b;">Error: ${escapeHtml(e.message)}</div>`;
+  }
 }
 
 async function exportGroupContacts(jid, groupName) {
@@ -1892,34 +1939,59 @@ async function exportGroupContacts(jid, groupName) {
 
     if (!r.success) { showToast(r.message || 'Failed to fetch participants', true); return; }
 
-    // GoWA v8 field variants
-    const rawList = r.data?.participants || r.data?.members || r.data?.data || r.data || [];
-    const list = Array.isArray(rawList) ? rawList : [];
+    // Handle different response structures
+    let list = [];
+    if (r.data && r.data.Participants && Array.isArray(r.data.Participants)) {
+      list = r.data.Participants;
+    } else if (r.data && r.data.participants && Array.isArray(r.data.participants)) {
+      list = r.data.participants;
+    } else if (r.data && Array.isArray(r.data)) {
+      list = r.data;
+    } else if (Array.isArray(r.data)) {
+      list = r.data;
+    } else if (r.participants && Array.isArray(r.participants)) {
+      list = r.participants;
+    }
 
-    if (!list.length) { showToast('No participants found in this group', true); return; }
+    if (!list.length) { 
+      showToast('No participants found in this group', true); 
+      return; 
+    }
 
-    // Build CSV — try all known phone field variants
+    // Build CSV
     const rows = list.map(p => {
-      const phone = (p.jid || p.id || p.phone || p.user || '')
-        .replace('@s.whatsapp.net', '')
-        .replace('@c.us', '')
-        .replace(/\D/g, '');
-      const name  = p.name || p.push_name || p.notify || phone || '';
-      const role  = p.role || p.admin || '';
-      return `${name},${phone},${role}`;
-    }).filter(row => row.split(',')[1]); // only rows with a phone
+      // Try all possible phone field names
+      let phone = '';
+      if (p.PhoneNumber) phone = p.PhoneNumber.replace('@s.whatsapp.net', '').replace(/\D/g, '');
+      else if (p.jid) phone = p.jid.replace('@s.whatsapp.net', '').replace(/\D/g, '');
+      else if (p.id) phone = p.id.replace('@s.whatsapp.net', '').replace(/\D/g, '');
+      else if (p.phone) phone = p.phone.replace(/\D/g, '');
+      
+      const name = p.DisplayName || p.name || p.push_name || p.notify || phone || '';
+      const role = (p.IsAdmin || p.isAdmin || p.admin) ? 'Admin' : 'Member';
+      
+      return phone ? `${name},${phone},${role}` : null;
+    }).filter(row => row);
+
+    if (!rows.length) {
+      showToast('No valid phone numbers found in participants', true);
+      return;
+    }
 
     const csv = `Name,Phone,Role\n${rows.join('\n')}`;
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `${groupName.replace(/[^a-z0-9]/gi,'_')}_contacts.csv`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${groupName.replace(/[^a-z0-9]/gi, '_')}_contacts.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(`✅ Exported ${rows.length} contacts from "${groupName}"`);
 
-  } catch(e) { showToast('Export failed: ' + e.message, true); }
+  } catch(e) { 
+    console.error('Export error:', e);
+    showToast('Export failed: ' + e.message, true); 
+  }
 }
   
 async function createGroup(){
