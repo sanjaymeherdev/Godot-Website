@@ -685,31 +685,6 @@ function addLog(tag, tagClass, msg) {
   // Keep max 200 entries
   while (body.children.length > 200) body.removeChild(body.lastChild);
 }
-
-// ─── Wrap callEdge to auto-log every API call ───
-const _origCallEdge = callEdge;
-window.callEdge = async function(action, body = {}) {
-  addLog('API', 'log-tag-api', `→ ${action}` + (Object.keys(body).length ? ' · ' + JSON.stringify(body).slice(0,80) : ''));
-  try {
-    const result = await _origCallEdge(action, body);
-    if (result?.success === false) {
-      addLog('ERR', 'log-tag-err', `✗ ${action}: ${result.message || 'failed'}`);
-    } else {
-      // Summarise key fields only
-      const summary = [];
-      if (result?.credits !== undefined)  summary.push(`credits=${result.credits}`);
-      if (result?.status !== undefined)   summary.push(`status=${result.status}`);
-      if (result?.device_id)              summary.push(`device=${result.device_id}`);
-      if (result?.message)                summary.push(result.message);
-      addLog('OK', 'log-tag-ok', `✓ ${action}` + (summary.length ? ' · ' + summary.join(', ') : ''));
-    }
-    return result;
-  } catch (err) {
-    addLog('ERR', 'log-tag-err', `✗ ${action} threw: ${err.message}`);
-    throw err;
-  }
-};
-
 // ─── Log send events ───
 const _origStartSend = window.startSend;
 window.startSend = async function() {
@@ -809,6 +784,29 @@ async function callEdge(action, body={}) {
   if (res.status === 401) { showToast('Session expired. Please login again.', true); logout(); throw new Error('Unauthorized'); }
   return res.json();
 }
+// ─── Wrap callEdge to auto-log every API call ───
+const _origCallEdge = callEdge;
+window.callEdge = async function(action, body = {}) {
+  addLog('API', 'log-tag-api', `→ ${action}` + (Object.keys(body).length ? ' · ' + JSON.stringify(body).slice(0,80) : ''));
+  try {
+    const result = await _origCallEdge(action, body);
+    if (result?.success === false) {
+      addLog('ERR', 'log-tag-err', `✗ ${action}: ${result.message || 'failed'}`);
+    } else {
+      // Summarise key fields only
+      const summary = [];
+      if (result?.credits !== undefined)  summary.push(`credits=${result.credits}`);
+      if (result?.status !== undefined)   summary.push(`status=${result.status}`);
+      if (result?.device_id)              summary.push(`device=${result.device_id}`);
+      if (result?.message)                summary.push(result.message);
+      addLog('OK', 'log-tag-ok', `✓ ${action}` + (summary.length ? ' · ' + summary.join(', ') : ''));
+    }
+    return result;
+  } catch (err) {
+    addLog('ERR', 'log-tag-err', `✗ ${action} threw: ${err.message}`);
+    throw err;
+  }
+};
 
 // ================================================================
 // SEND GUARD — controls banner + Start button state
