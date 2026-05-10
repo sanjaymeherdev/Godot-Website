@@ -1018,70 +1018,58 @@ async function proceedBuy() {
 
   const payBtn = document.getElementById('payBtn');
   hideBuyError();
-  payBtn.textContent = '⏳ Creating payment link…';
+  payBtn.textContent = '⏳ Creating payment order…';
   payBtn.disabled = true;
-  document.getElementById('buyStatus').textContent = '';
 
   try {
-    const r = await callEdge('buyCredits', { pack_id: selectedPack });
+    const r = await callEdge('buyCredits', { 
+      pack_id: selectedPack,
+      user_id: authToken, // or get from your auth
+      user_email: 'user@example.com', // get from your auth
+      return_url: window.location.href + '?payment=success'
+    });
 
     if (!r || !r.success) {
-      showBuyError('❌ ' + (r?.message || 'Could not create payment link. Please try again.'));
-      payBtn.textContent = '💳 Pay with Razorpay';
+      showBuyError('❌ ' + (r?.message || 'Could not create payment order.'));
+      payBtn.textContent = '💳 Pay with Cashfree';
       payBtn.disabled = false;
       return;
     }
 
-    if (!r.payment_url) {
-      showBuyError('❌ Payment URL missing in response. Contact support if this persists.');
-      payBtn.textContent = '💳 Pay with Razorpay';
-      payBtn.disabled = false;
-      return;
-    }
-
+    // Open Cashfree checkout page
     window.open(r.payment_url, '_blank');
     payBtn.textContent = '✅ Payment page opened';
-    document.getElementById('buyStatus').textContent = '';
     document.getElementById('pollStatus').style.display = 'block';
 
-    currentPaymentLinkId = r.razorpay_payment_link_id || null;
-
-    if (currentPaymentLinkId) {
-      let attempts = 0;
-      stopPaymentPolling();
-      paymentPollTimer = setInterval(async () => {
-        attempts++;
-        if (attempts > 72) {
-          stopPaymentPolling();
-          document.getElementById('pollStatus').innerHTML =
-            '<div style="color:#ffd166;font-size:12px;">⏰ Polling timed out. If you paid, click the check button below or refresh credits in Settings.</div>' +
-            '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ Check Payment</button>';
-          return;
+    // Poll for payment completion
+    let attempts = 0;
+    const pollInterval = setInterval(async () => {
+      attempts++;
+      if (attempts > 60) {
+        clearInterval(pollInterval);
+        document.getElementById('pollStatus').innerHTML = '<div style="color:#ffd166;">⏰ Still waiting. Click check button below.</div>';
+        return;
+      }
+      
+      try {
+        const poll = await callEdge('checkPaymentStatus', { order_id: r.order_id });
+        if (poll && poll.status === 'completed') {
+          clearInterval(pollInterval);
+          updateCreditUI(poll.credits);
+          closeBuyModal();
+          showToast(`✅ Credits added! New balance: ${poll.credits}`);
+          loadCredits();
         }
-        try {
-          const poll = await callEdge('pollCreditPayment', { razorpay_payment_link_id: currentPaymentLinkId });
-          if (poll && poll.status === 'completed') {
-            stopPaymentPolling();
-            updateCreditUI(poll.credits);
-            closeBuyModal();
-            showToast(`✅ Credits added! New balance: ${safeInt(poll.credits).toLocaleString('en-IN')}`);
-            loadCredits();
-          }
-        } catch(e) {}
-      }, 5000);
-    } else {
-      document.getElementById('pollStatus').innerHTML =
-        '<div style="font-size:12px;color:#7a95a8;">Complete payment in the Razorpay tab, then click below.</div>' +
-        '<button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="manualCheckPayment()">✓ I\'ve paid — refresh balance</button>';
-    }
-
+      } catch(e) {}
+    }, 3000);
+    
   } catch(e) {
     showBuyError('❌ Network error: ' + e.message);
-    payBtn.textContent = '💳 Pay with Razorpay';
+    payBtn.textContent = '💳 Pay with Cashfree';
     payBtn.disabled = false;
   }
 }
-
+  
 async function manualCheckPayment() {
   const btn = event.target;
   btn.textContent = '⏳ Checking…';
