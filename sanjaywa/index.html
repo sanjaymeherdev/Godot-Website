@@ -836,7 +836,8 @@ function updateSendGuard() {
   // message source validation
   const tpl = (document.getElementById('msgTemplate')?.value||'').trim();
   const pendingContacts = contacts.filter(c=>!c.status||c.status==='pending');
-  const allSheetEmpty = pendingContacts.length > 0 && pendingContacts.every(c=>!c.message||!c.message.trim());
+ const allSheetEmpty = pendingContacts.length > 0 && 
+  pendingContacts.every(c=>!c.message||!c.message.trim());
   const templateEmpty = !tpl;
 
   let msgBlocked = false;
@@ -1206,6 +1207,7 @@ function showDashboard(email, data) {
   document.getElementById('userEmail').textContent=email;
   checkPaymentReturn();
   updateCreditUI(0);
+  setMsgSource('template');
   updateSendGuard(); // initial guard state
   if (data) {
     initDashboard(data);
@@ -1243,6 +1245,7 @@ function initDashboard(data) {
   const credits = data?.profile?.credits ?? data?.credits ?? 0;
   updateCreditUI(credits);
   loadCredits();
+  setMsgSource('template'); 
 }
 
 // ================================================================
@@ -1420,11 +1423,11 @@ function parseExcel(file) {
 function mapContactsFromData(data) {
   const nameColumns=['name','fullname','full name','contact name','contactname','person'];
   const phoneColumns=['phone','mobile','cell','whatsapp','number','phonenumber','contact'];
-  const messageColumns=['message','msg','text','body','content','notes','note'];
+  const messageColumns = ['message','msg','text','body','content','notes','note'];
+  const messageCol = headers.find(h => messageColumns.some(col => h.includes(col))) || null;
   const sample=data[0]||{};const headers=Object.keys(sample).map(h=>h.toLowerCase());
   const nameCol=headers.find(h=>nameColumns.some(col=>h.includes(col)))||headers[0];
   const phoneCol=headers.find(h=>phoneColumns.some(col=>h.includes(col)))||headers[1];
-  const messageCol=headers.find(h=>messageColumns.some(col=>h.includes(col)))||null;
   return data.map(row=>({name:row[nameCol]||'',phone:row[phoneCol]||'',message:messageCol?row[messageCol]:''}));
 }
 function downloadTemplate() {
@@ -1717,16 +1720,15 @@ async function processSend(){
 if (msgSource === 'sheet') {
   rawMsg = (c.message || '').trim();
   if (!rawMsg) {
-    // No sheet message for this contact — skip it
-    c.status = 'skipped';
-    sendLog.unshift({time:Date.now(), phone:c.phone, status:'skipped'});
-    sendIndex++;
-    renderContacts(); renderSendLog(); updateProgress();
-    const minG=parseInt(document.getElementById('minGap').value)*1000;
-    const maxG=parseInt(document.getElementById('maxGap').value)*1000;
-    sendTimer=setTimeout(processSend, Math.random()*(maxG-minG)+minG);
-    return;
-  }
+  c.status = 'skipped';
+  sendLog.unshift({time:Date.now(), phone:c.phone, status:'skipped'});
+  sendIndex++;
+  renderContacts(); renderSendLog(); updateProgress();
+  const minG=parseInt(document.getElementById('minGap').value)*1000;
+  const maxG=parseInt(document.getElementById('maxGap').value)*1000;
+  sendTimer=setTimeout(processSend, Math.random()*(maxG-minG)+minG);
+  return; // ← this return IS there, so this is actually fine
+}
 } else {
   rawMsg = document.getElementById('msgTemplate').value;
 }
@@ -1911,6 +1913,7 @@ function switchTab(name){
     const p=contacts.filter(c=>!c.status||c.status==='pending').length;
     const costEl=document.getElementById('creditCost');
     if(costEl) costEl.textContent=p+' credits';
+    setMsgSource(msgSource); 
     updateSendGuard(); // ← always re-evaluate on tab open
   }
 }
