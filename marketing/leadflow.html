@@ -496,42 +496,77 @@ tbody tr:hover{background:rgba(255,255,255,.015);}
       </div>
 
       <!-- ══════════════════════ SEND TAB ══════════════════════ -->
-      <div class="tab" id="tab-send">
-        <div class="sec-hdr">
-          <div><div class="sec-title">Send Campaign</div><div class="sec-sub">// control the send queue</div></div>
-        </div>
+     <div class="tab" id="tab-send">
+  <div class="sec-hdr">
+    <div><div class="sec-title">Send Campaign</div><div class="sec-sub">// choose channel(s)</div></div>
+  </div>
 
-        <div class="stat-row">
-          <div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSent">0</div><div class="stat-lbl">Sent</div></div>
-          <div class="stat y"><div class="stat-ico">⏳</div><div class="stat-val" id="sPend">0</div><div class="stat-lbl">Pending</div></div>
-          <div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div>
-          <div class="stat b"><div class="stat-ico">📤</div><div class="stat-val" id="sTotal">0</div><div class="stat-lbl">Total</div></div>
-        </div>
+  <!-- Channel Selection Toggle -->
+  <div class="card">
+    <div class="card-title">Send via</div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="btn" id="channelWaBtn" onclick="setChannel('wa')" style="background:var(--accent); color:#000;">📱 WhatsApp Only</button>
+      <button class="btn btn-s" id="channelEmailBtn" onclick="setChannel('email')">📧 Email Only</button>
+      <button class="btn btn-s" id="channelBothBtn" onclick="setChannel('both')">📱+📧 Both</button>
+    </div>
+    <div id="channelNote" style="margin-top:8px; font-size:11px; color:var(--text2);"></div>
+  </div>
 
-        <div class="card">
-          <div class="card-title">Campaign Controls</div>
-          <div class="btn-row">
-            <button class="btn btn-g" onclick="startSend()">▶ Start</button>
-            <button class="btn btn-y" onclick="pauseSend()">⏸ Pause</button>
-            <button class="btn btn-d" onclick="stopSend()">⏹ Stop</button>
-          </div>
-          <div class="progress-track" style="margin:12px 0;">
-            <div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div>
-          </div>
-          <div id="currentStatus" style="font-size:12px;color:var(--text2);font-family:var(--mono);">Ready</div>
-        </div>
+  <!-- Email Settings (visible when email channel selected) -->
+  <div class="card" id="emailSettingsCard" style="display:none;">
+    <div class="card-title">Email Settings (Brevo)</div>
+    <div class="fg">
+      <label>Subject Line</label>
+      <input type="text" id="emailSubject" placeholder="Special offer for {name}!">
+    </div>
+    <div class="fg">
+      <label>Email HTML (optional, uses message template if empty)</label>
+      <textarea id="emailHtml" rows="3" placeholder="&lt;h2&gt;Hi {name}!&lt;/h2&gt;&lt;p&gt;Check this out...&lt;/p&gt;"></textarea>
+    </div>
+    <div class="fg-sub" style="font-size:10px; color:var(--text2);">Note: 1 credit per email sent</div>
+  </div>
 
-        <div class="card">
-          <div class="card-title">Send Log</div>
-          <div class="tbl-wrap" style="max-height:280px;overflow-y:auto;">
-            <table>
-              <thead><tr><th>Time</th><th>Phone</th><th>Status</th></tr></thead>
-              <tbody id="sendLogBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+  <!-- Contact/Lead selector -->
+  <div class="card">
+    <div class="card-title">Send to</div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button class="btn btn-s" id="useContactsBtn" onclick="setSendTarget('contacts')">👥 Use Contacts Tab</button>
+      <button class="btn btn-s" id="useLeadsBtn" onclick="setSendTarget('leads')">🎯 Use Leads (filtered)</button>
+    </div>
+    <div id="targetInfo" style="font-size:11px; color:var(--text2);">Selected: <span id="selectedCount">0</span> recipients</div>
+  </div>
 
+  <!-- Campaign Stats (split by channel) -->
+  <div class="stat-row">
+    <div class="stat g"><div class="stat-ico">✅</div><div class="stat-val" id="sSentWa">0</div><div class="stat-lbl">WhatsApp Sent</div></div>
+    <div class="stat b"><div class="stat-ico">📧</div><div class="stat-val" id="sSentEmail">0</div><div class="stat-lbl">Email Sent</div></div>
+    <div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div>
+    <div class="stat y"><div class="stat-ico">💳</div><div class="stat-val" id="sCreditsUsed">0</div><div class="stat-lbl">Credits Used</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Campaign Controls</div>
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="startSend()">▶ Start</button>
+      <button class="btn btn-y" onclick="pauseSend()">⏸ Pause</button>
+      <button class="btn btn-d" onclick="stopSend()">⏹ Stop</button>
+    </div>
+    <div class="progress-track" style="margin:12px 0;">
+      <div class="prog-wrap"><div class="prog prog-g" id="progBar" style="width:0%"></div></div>
+    </div>
+    <div id="currentStatus" style="font-size:12px;color:var(--text2);font-family:var(--mono);">Ready</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Send Log</div>
+    <div class="tbl-wrap" style="max-height:280px;overflow-y:auto;">
+      <table>
+        <thead><tr><th>Time</th><th>Channel</th><th>Recipient</th><th>Status</th><th>Details</th></tr></thead>
+        <tbody id="sendLogBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
       <!-- ══════════════════════ LEADS TAB ══════════════════════ -->
       <div class="tab" id="tab-leads">
   <div class="sec-hdr">
@@ -1172,7 +1207,260 @@ function updateLeadCounts() {
     badge.style.display = leads.length ? '' : 'none';
   }
 }
- 
+// Send channel state
+let currentChannel = 'wa'  // 'wa', 'email', 'both'
+let sendTarget = 'contacts' // 'contacts', 'leads'
+let currentRecipients = []
+
+function setChannel(channel) {
+  currentChannel = channel
+  const waBtn = document.getElementById('channelWaBtn')
+  const emailBtn = document.getElementById('channelEmailBtn')
+  const bothBtn = document.getElementById('channelBothBtn')
+  const emailCard = document.getElementById('emailSettingsCard')
+  const note = document.getElementById('channelNote')
+  
+  // Reset button styles
+  waBtn.style.background = ''
+  waBtn.style.color = ''
+  emailBtn.style.background = ''
+  emailBtn.style.color = ''
+  bothBtn.style.background = ''
+  bothBtn.style.color = ''
+  
+  if (channel === 'wa') {
+    waBtn.style.background = 'var(--accent)'
+    waBtn.style.color = '#000'
+    emailCard.style.display = 'none'
+    note.textContent = 'Sending WhatsApp only (1 credit per message)'
+  } else if (channel === 'email') {
+    emailBtn.style.background = 'var(--accent)'
+    emailBtn.style.color = '#000'
+    emailCard.style.display = 'block'
+    note.textContent = 'Sending Email only via Brevo (1 credit per email)'
+  } else {
+    bothBtn.style.background = 'var(--accent)'
+    bothBtn.style.color = '#000'
+    emailCard.style.display = 'block'
+    note.textContent = 'Sending both WhatsApp + Email (2 credits per recipient)'
+  }
+  
+  updateRecipientCount()
+}
+
+function setSendTarget(target) {
+  sendTarget = target
+  const contactsBtn = document.getElementById('useContactsBtn')
+  const leadsBtn = document.getElementById('useLeadsBtn')
+  
+  contactsBtn.style.background = target === 'contacts' ? 'var(--accent)' : ''
+  contactsBtn.style.color = target === 'contacts' ? '#000' : ''
+  leadsBtn.style.background = target === 'leads' ? 'var(--accent)' : ''
+  leadsBtn.style.color = target === 'leads' ? '#000' : ''
+  
+  updateRecipientCount()
+}
+
+function updateRecipientCount() {
+  if (sendTarget === 'contacts') {
+    currentRecipients = contacts.filter(c => !c.status || c.status === 'pending')
+  } else {
+    // Filter leads by activeLeadFilter
+    currentRecipients = leads.filter(l => {
+      if (activeLeadFilter === 'all') return true
+      return (l.channel || l.source) === activeLeadFilter
+    }).filter(l => l.status !== 'cold' && l.status !== 'converted')
+  }
+  
+  document.getElementById('selectedCount').textContent = currentRecipients.length
+  const costPer = currentChannel === 'both' ? 2 : 1
+  document.getElementById('sCreditsUsed').textContent = currentRecipients.length * costPer
+}
+
+// Enhanced send function
+async function processSend() {
+  if (sendState !== 'running') return
+  if (sendIndex >= currentRecipients.length) {
+    stopSend()
+    showToast('Campaign complete! 🎉')
+    return
+  }
+  
+  const recipient = currentRecipients[sendIndex]
+  const name = recipient.name || recipient.contact_name || 'Customer'
+  const phone = recipient.phone || ''
+  const email = recipient.email || ''
+  const templateMsg = document.getElementById('msgTpl').value
+  const message = templateMsg.replace(/\{name\}/gi, name)
+  const emailSubject = (document.getElementById('emailSubject').value || 'Message from LeadFlow').replace(/\{name\}/gi, name)
+  const emailHtml = document.getElementById('emailHtml').value || `<p>${message}</p>`
+  
+  document.getElementById('currentStatus').textContent = `Sending to ${name} (${currentChannel})...`
+  
+  let result = null
+  let creditsUsed = 0
+  
+  try {
+    if (currentChannel === 'wa') {
+      result = await api('sendMessage', { phone, message, name })
+      if (result.success) creditsUsed = 1
+    } else if (currentChannel === 'email') {
+      result = await api('sendEmail', { to: email, subject: emailSubject, html: emailHtml, to_name: name })
+      if (result.success) creditsUsed = 1
+    } else {
+      result = await api('sendBoth', {
+        phone,
+        message,
+        to_email: email,
+        email_subject: emailSubject,
+        email_html: emailHtml,
+        name
+      })
+      if (result.success) creditsUsed = result.credits_used || 0
+    }
+    
+    if (result && result.success) {
+      if (currentChannel === 'wa' || (currentChannel === 'both' && result.whatsapp_sent)) {
+        if (sendTarget === 'contacts') {
+          const contact = contacts.find(c => c.phone === phone)
+          if (contact) contact.status = 'sent'
+        }
+      }
+      
+      sendLog.unshift({
+        time: Date.now(),
+        channel: currentChannel,
+        recipient: currentChannel === 'wa' ? phone : email,
+        status: 'sent',
+        details: creditsUsed + ' credit(s)'
+      })
+      
+    } else {
+      sendLog.unshift({
+        time: Date.now(),
+        channel: currentChannel,
+        recipient: currentChannel === 'wa' ? phone : email,
+        status: 'failed',
+        details: result?.message || 'Unknown error'
+      })
+    }
+    
+    if (result?.credits !== undefined) updateCreditUI(result.credits)
+    
+  } catch (e) {
+    sendLog.unshift({
+      time: Date.now(),
+      channel: currentChannel,
+      recipient: currentChannel === 'wa' ? phone : email,
+      status: 'failed',
+      details: e.message
+    })
+  }
+  
+  sendIndex++
+  if (sendTarget === 'contacts') renderContacts()
+  renderSendLogEnhanced()
+  updateProgress()
+  
+  const minG = parseInt(document.getElementById('minGap').value) * 1000
+  const maxG = parseInt(document.getElementById('maxGap').value) * 1000
+  sendTimer = setTimeout(processSend, Math.random() * (maxG - minG) + minG)
+}
+
+function renderSendLogEnhanced() {
+  const tbody = document.getElementById('sendLogBody')
+  if (!sendLog.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;">No sends yet</td></tr>'
+    return
+  }
+  
+  tbody.innerHTML = sendLog.slice(0, 50).map(l => `
+    <tr>
+      <td style="font-size:11px;color:var(--text2);">${new Date(l.time).toLocaleTimeString()}</td>
+      <td>${l.channel === 'wa' ? '📱 WA' : l.channel === 'email' ? '📧 Email' : '📱+📧 Both'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${escapeHtml(l.recipient)}</td>
+      <td><span class="badge badge-${l.status}">${l.status}</span></td>
+      <td style="font-size:10px;color:var(--text2);">${escapeHtml(l.details || '')}</td>
+    </tr>
+  `).join('')
+  
+  // Update stats
+  const sentWa = sendLog.filter(l => l.status === 'sent' && (l.channel === 'wa' || l.channel === 'both')).length
+  const sentEmail = sendLog.filter(l => l.status === 'sent' && (l.channel === 'email' || l.channel === 'both')).length
+  const failed = sendLog.filter(l => l.status === 'failed').length
+  const creditsUsed = sendLog.filter(l => l.status === 'sent').reduce((sum, l) => {
+    const match = l.details?.match(/(\d+)/)
+    return sum + (match ? parseInt(match[1]) : (l.channel === 'both' ? 2 : 1))
+  }, 0)
+  
+  document.getElementById('sSentWa').textContent = sentWa
+  document.getElementById('sSentEmail').textContent = sentEmail
+  document.getElementById('sFail').textContent = failed
+  document.getElementById('sCreditsUsed').textContent = creditsUsed
+}
+async function loadUserFeatures() {
+  try {
+    const r = await api('getUserFeatures')
+    if (r.success) {
+      window.userFeatures = r.features
+      window.userTier = r.tier
+      window.subscriptionExpires = r.expires_at
+      
+      // Update UI based on features
+      updatePremiumFeatureUI()
+    }
+  } catch(e) {
+    console.error('Failed to load features:', e)
+  }
+}
+
+function updatePremiumFeatureUI() {
+  const features = window.userFeatures || {}
+  const isPro = window.userTier === 'pro'
+  
+  // ManyChat card
+  const manychatCard = document.querySelector('#tab-settings .card:has(.card-title:contains("ManyChat"))')
+  if (manychatCard && !features.manychat && !isPro) {
+    manychatCard.style.opacity = '0.6'
+    manychatCard.querySelectorAll('input, button').forEach(el => el.disabled = true)
+    addUpgradeOverlay(manychatCard, 'ManyChat integration requires Pro')
+  }
+  
+  // Calendly card
+  const calendlyCard = document.querySelector('#tab-settings .card:has(.card-title:contains("Calendly"))')
+  if (calendlyCard && !features.calendly && !isPro) {
+    calendlyCard.style.opacity = '0.6'
+    calendlyCard.querySelectorAll('input, button').forEach(el => el.disabled = true)
+    addUpgradeOverlay(calendlyCard, 'Calendly sync requires Pro')
+  }
+  
+  // Web Bot card
+  const webbotCard = document.querySelector('#tab-webbot')
+  if (webbotCard && !features.webbot && !isPro) {
+    webbotCard.style.opacity = '0.6'
+    webbotCard.querySelectorAll('input, button').forEach(el => el.disabled = true)
+    addUpgradeOverlay(webbotCard, 'Web Assistant Bot requires Pro')
+  }
+}
+
+function addUpgradeOverlay(card, message) {
+  const overlay = document.createElement('div')
+  overlay.className = 'upgrade-overlay'
+  overlay.style.cssText = 'position:relative; margin-top:-40px; background:rgba(0,0,0,0.8); border-radius:12px; padding:12px; text-align:center;'
+  overlay.innerHTML = `
+    <div style="color:var(--accent4); font-size:12px;">🔒 ${message}</div>
+    <button class="btn btn-g btn-sm" onclick="upgradeToPro()" style="margin-top:8px;">⬆️ Upgrade to Pro</button>
+  `
+  card.style.position = 'relative'
+  card.appendChild(overlay)
+}
+
+async function upgradeToPro() {
+  showToast('Opening payment...')
+  // Integrate with Razorpay subscription
+  // For now, redirect to contact
+  window.open('mailto:support@leadflow.com?subject=Upgrade%20to%20Pro', '_blank')
+}
 // ── renderLeads — full replacement ────────────────────────────────
 function renderLeads() {
   updateLeadCounts();
