@@ -627,8 +627,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
           <h3>Sending Limits</h3>
           <label>Hour Limit</label><input type="number" id="hourLimit" value="30">
           <label>Day Limit</label><input type="number" id="dayLimit" value="200">
-          <label>Min Gap (seconds)</label><input type="number" id="minGap" value="30">
-          <label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90">
+          <label>Min Gap (seconds)</label><input type="number" id="minGap" value="10">
+          <label>Max Gap (seconds)</label><input type="number" id="maxGap" value="180">
           <div class="btn-row"><button class="btn btn-primary" onclick="saveSettings()">💾 Save</button></div>
         </div>
         <div class="card">
@@ -1646,8 +1646,8 @@ function initDashboard(data) {
   if (data?.settings) {
     document.getElementById('hourLimit').value = data.settings.hour_limit||30;
     document.getElementById('dayLimit').value  = data.settings.day_limit||200;
-    document.getElementById('minGap').value    = data.settings.min_gap||30;
-    document.getElementById('maxGap').value    = data.settings.max_gap||90;
+    document.getElementById('minGap').value    = data.settings.min_gap||10;
+    document.getElementById('maxGap').value    = data.settings.max_gap||180;
     if(data.settings.gowa_url)  document.getElementById('gowaUrl').value  = data.settings.gowa_url;
     if(data.settings.gowa_auth) document.getElementById('gowaAuth').value = data.settings.gowa_auth;
     if(data.settings.auto_reply_prompt) document.getElementById('autoReplyPrompt').value = data.settings.auto_reply_prompt;
@@ -2156,7 +2156,10 @@ if (msgSource === 'sheet') {
   rawMsg = document.getElementById('msgTemplate').value;
 }
 let msg = rawMsg.replace(/\{name\}/gi, c.name);
-if(useVariations&&variations.length){msg=variations[variationIndex%variations.length].replace(/\{name\}/gi,c.name);variationIndex++;}
+if(useVariations&&variations.length){
+  const randomIndex = Math.floor(Math.random() * variations.length);
+  msg = variations[randomIndex].replace(/\{name\}/gi, c.name);
+}
   document.getElementById('currentStatus').textContent=`Sending to ${c.name} (${c.phone})… [${userCredits} credits left]`;
   const attachType=document.getElementById('attachType').value;
   const attachUrl=document.getElementById('attachUrl').value.trim();
@@ -2235,22 +2238,23 @@ async function saveTemplate(){
 async function generateVariations(){
   const msg=document.getElementById('msgTemplate').value;
   if(!msg){showToast('Write a message first',true);return;}
-  showToast('Generating with AI…');
+  showToast('Generating 10 variations with AI…');
   try{
-    const r=await callEdge('aiGenerateVariations',{message:msg,count:5});
+    const r=await callEdge('aiGenerateVariations',{message:msg,count:10});
     if(r.success&&r.variations?.length){
-      variations=r.variations;useVariations=true;variationIndex=0;
+      variations=r.variations;
+      useVariations=true;
       document.getElementById('variationsPanel').innerHTML=`
         <div style="background:#0a0f14;border:1px solid #1e2a35;border-radius:10px;padding:14px;">
-          <div style="color:#00e5a0;font-weight:700;margin-bottom:10px;">✅ ${variations.length} variations ready (free)</div>
+          <div style="color:#00e5a0;font-weight:700;margin-bottom:10px;">✅ ${variations.length} variations ready (randomly selected per message)</div>
           ${variations.map((v,i)=>`<div style="padding:6px 0;border-bottom:1px solid #1e2a35;font-size:12px;color:#d0dde8;"><span style="color:#7a95a8;font-size:10px;">#${i+1} </span>${escapeHtml(v)}</div>`).join('')}
           <button class="btn btn-danger btn-sm" style="margin-top:10px;" onclick="useVariations=false;document.getElementById('variationsPanel').style.display='none';">Disable</button>
         </div>`;
-      document.getElementById('variationsPanel').style.display='block';showToast('Variations ready!');
+      document.getElementById('variationsPanel').style.display='block';
+      showToast(`${variations.length} variations ready! Random selection enabled.`);
     } else showToast('AI failed: '+(r.message||'Unknown'),true);
   }catch(e){showToast('Error: '+e.message,true);}
 }
-
 // ================================================================
 // CHATS
 // ================================================================
