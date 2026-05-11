@@ -1224,19 +1224,28 @@ async function buyPro(){
 // DEVICE
 // ═══════════════════════════════════════════════════════════
 function syncDevice(d){
-  deviceId=d.device_id;deviceName=d.device_name||d.device_id;
-  const status=d.status||'created';
-  updateStatusBar(status);
-  document.getElementById('activeDevPanel').style.display='block';
-  setVal('activeDevName',deviceName);
-  document.getElementById('activeDevId').textContent=deviceId;
-  const b=document.getElementById('activeDevBadge');b.textContent=status;b.className='badge badge-'+status;
-  document.getElementById('unlinkBtn').style.display='inline-flex';
-  document.getElementById('reconnectBtn').style.display=status!=='connected'?'inline-flex':'none';
-  const qw=document.getElementById('qrWrap');
-  if(status==='connected')qw.innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';
-  else qw.innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);font-family:var(--mono);">Click "Show QR" to link</div>';
-  document.getElementById('devDebug').textContent=`${deviceName} [${deviceId?.substring(0,24)}…] — ${status}`;
+  deviceId = d.device_id;
+  // Handle both local DB (device_name) and GoWA (display_name)
+  deviceName = d.device_name || d.display_name || d.name || 'My Device';
+  
+  const status = d.status || d.state || 'created';
+  const displayStatus = (status === 'logged_in' || status === 'connected') ? 'connected' : status;
+  updateStatusBar(displayStatus);
+  document.getElementById('activeDevPanel').style.display = 'block';
+  document.getElementById('activeDevName').textContent = deviceName;
+  document.getElementById('activeDevId').textContent = deviceId;
+  const b = document.getElementById('activeDevBadge');
+  b.textContent = displayStatus;
+  b.className = 'badge badge-' + displayStatus;
+  document.getElementById('unlinkBtn').style.display = 'inline-flex';
+  document.getElementById('reconnectBtn').style.display = displayStatus !== 'connected' ? 'inline-flex' : 'none';
+  const qw = document.getElementById('qrWrap');
+  if(displayStatus === 'connected'){
+    qw.innerHTML = '<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';
+  } else {
+    qw.innerHTML = '<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);font-family:var(--mono);">Click "Show QR" to link</div>';
+  }
+  document.getElementById('devDebug').textContent = `${deviceName} [${deviceId?.substring(0,24)}…] — ${displayStatus}`;
 }
 function updateStatusBar(s){
   const pip=document.getElementById('topPip'),lbl=document.getElementById('topLbl');
@@ -1248,27 +1257,36 @@ async function fetchDevice(){
   try{const r=await api('getDevice');if(r.success&&r.has_device)syncDevice(r.device);else{document.getElementById('devDebug').textContent='No device. Create one below.';updateStatusBar('disconnected');}}catch(e){document.getElementById('devDebug').textContent='Error: '+e.message;}
 }
 async function fetchDevices(){
-  const w=document.getElementById('devicesWrap');
-  w.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  const w = document.getElementById('devicesWrap');
+  w.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading…</div>';
   try{
-    const r=await api('listDevices');
-    if(r.success&&r.devices?.length){
-      w.innerHTML=r.devices.map(d=>{
-        const id=d.id||d.device_id||'—',name=d.name||d.device_name||id;
-        const conn=d.is_connected===true||d.is_logged_in===true||d.status==='connected';
-        const isActive=deviceId&&id===deviceId;
-        return`<div class="device-row${isActive?' active-device':''}">
-          <div class="device-info"><span class="device-name-text">${esc(name)}${isActive?' <span style="font-size:9px;color:var(--g);">[active]</span>':''}</span><span class="device-meta">${esc(id)}</span></div>
+    const r = await api('listDevices');
+    if(r.success && r.devices?.length){
+      w.innerHTML = r.devices.map(d => {
+        const id = d.id || d.device_id || '—';
+        // Handle GoWA's response structure (display_name) and local DB (device_name)
+        const name = d.display_name || d.device_name || d.name || 'Unnamed Device';
+        const conn = d.state === 'logged_in' || d.is_connected === true || d.is_logged_in === true;
+        const isActive = deviceId && (id === deviceId || d.device_id === deviceId);
+        return `<div class="device-row${isActive ? ' active-device' : ''}">
+          <div class="device-info">
+            <span class="device-name-text">${esc(name)}${isActive ? ' <span style="font-size:9px;color:var(--g);">[active]</span>' : ''}</span>
+            <span class="device-meta">${esc(id)}</span>
+          </div>
           <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">
-            <span class="badge badge-${conn?'connected':'created'}">${conn?'connected':(d.status||'offline')}</span>
+            <span class="badge badge-${conn ? 'connected' : 'created'}">${conn ? 'connected' : (d.state || d.status || 'offline')}</span>
             <button class="btn btn-s btn-sm" onclick="getQRFor('${esc(id)}')">QR</button>
             <button class="btn btn-g btn-sm" onclick="selectDevice('${esc(id)}','${esc(name)}')">Use</button>
             <button class="btn btn-d btn-sm" onclick="deleteDevice('${esc(id)}','${esc(name)}')">Del</button>
           </div>
         </div>`;
       }).join('');
-    }else w.innerHTML='<div class="empty-state">No devices. Create one above.</div>';
-  }catch(e){w.innerHTML=`<div class="empty-state" style="color:#fca5a5;">Error: ${esc(e.message)}</div>`;}
+    } else {
+      w.innerHTML = '<div class="empty-state">No devices. Create one above.</div>';
+    }
+  } catch(e){
+    w.innerHTML = `<div class="empty-state" style="color:#fca5a5;">Error: ${esc(e.message)}</div>`;
+  }
 }
 async function createDevice(){
   const name=getVal('deviceNameInput').trim();
@@ -1282,11 +1300,17 @@ async function createDevice(){
     else showToast(r.message||'Failed',true);
   }catch(e){showToast('Error: '+e.message,true);}
 }
-async function selectDevice(id,name){
-  if(!confirm(`Use "${name}" as active device?`))return;
-  const r=await api('linkDevice',{device_id:id,device_name:name});
-  if(r.success){syncDevice({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchDevices();}
-  else showToast(r.message||'Failed',true);
+async function selectDevice(id, name){
+  const deviceNameToUse = name || id;
+  if(!confirm(`Use "${deviceNameToUse}" as active device?`)) return;
+  const r = await api('linkDevice', { device_id: id, device_name: deviceNameToUse });
+  if(r.success){
+    syncDevice({ device_id: id, device_name: deviceNameToUse, status: 'linked' });
+    showToast(`Now using "${deviceNameToUse}"`);
+    fetchDevices();
+  } else {
+    showToast(r.message || 'Failed', true);
+  }
 }
 async function getQRFor(id){
   const w=document.getElementById('qrWrap');
