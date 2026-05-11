@@ -2347,56 +2347,52 @@ async function saveAllSettings() {
 async function loadConfigToSettings() {
   try {
     const r = await api('getConfig');
-    if (r.success && r.config) {
-      const cfg = r.config;
-      
-      // Brevo settings
-      const resendKeyEl = document.getElementById('resendKey');
-      if (resendKeyEl && cfg.resend_key) resendKeyEl.value = cfg.resend_key;
-      
-      const fromEmailEl = document.getElementById('fromEmail');
-      if (fromEmailEl && cfg.from_email) fromEmailEl.value = cfg.from_email;
-      
-      const fromNameEl = document.getElementById('fromName');
-      if (fromNameEl && cfg.from_name) fromNameEl.value = cfg.from_name;
-      
-      // ManyChat settings
-      const manychatKeyEl = document.getElementById('manychatKey');
-      if (manychatKeyEl && cfg.manychat_key) manychatKeyEl.value = cfg.manychat_key;
-      
-      // Calendly settings
-      const calendlyLinkEl = document.getElementById('calendlyLink');
-      if (calendlyLinkEl && cfg.calendly_link) calendlyLinkEl.value = cfg.calendly_link;
-      
-      const calendlyTokenEl = document.getElementById('calendlyToken');
-      if (calendlyTokenEl && cfg.calendly_token) calendlyTokenEl.value = cfg.calendly_token;
-      
-      // Sheet settings
-      const sheetIdEl = document.getElementById('sheetId');
-      if (sheetIdEl && cfg.sheet_id) sheetIdEl.value = cfg.sheet_id;
-      
-      const sheetTabEl = document.getElementById('sheetTab');
-      if (sheetTabEl && cfg.sheet_tab) sheetTabEl.value = cfg.sheet_tab;
-      
-      const colNameEl = document.getElementById('colName');
-      if (colNameEl && cfg.col_name) colNameEl.value = cfg.col_name;
-      
-      const colPhoneEl = document.getElementById('colPhone');
-      if (colPhoneEl && cfg.col_phone) colPhoneEl.value = cfg.col_phone;
-      
-      const colEmailEl = document.getElementById('colEmail');
-      if (colEmailEl && cfg.col_email) colEmailEl.value = cfg.col_email;
-      
-      const hasHeaderEl = document.getElementById('hasHeader');
-      if (hasHeaderEl && cfg.has_header !== undefined) hasHeaderEl.checked = cfg.has_header;
-      
-      const appsScriptUrlEl = document.getElementById('appsScriptUrl');
-      if (appsScriptUrlEl && cfg.apps_script_url) appsScriptUrlEl.value = cfg.apps_script_url;
-    }
-  } catch(e) {
+    if (!r.success || !r.config) return;
+    const cfg = r.config;
+ 
+    // Helper — sets value only when both element and value exist
+    const setIfPresent = (id, val) => {
+      if (!val && val !== false) return;   // skip null / undefined / ''
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = !!val;
+      else el.value = val;
+    };
+ 
+    // Brevo
+    setIfPresent('resendKey',    cfg.resend_key);
+    setIfPresent('fromEmail',    cfg.from_email);
+    setIfPresent('fromName',     cfg.from_name);
+ 
+    // ManyChat
+    setIfPresent('manychatKey',  cfg.manychat_key);
+    // manychatPageId doesn't exist in HTML — skip it safely
+ 
+    // Calendly
+    setIfPresent('calendlyLink',  cfg.calendly_link);
+    setIfPresent('calendlyToken', cfg.calendly_token);
+ 
+    // Google Sheet
+    setIfPresent('sheetId',   cfg.sheet_id);
+    setIfPresent('sheetTab',  cfg.sheet_tab);
+    setIfPresent('colName',   cfg.col_name);
+    setIfPresent('colPhone',  cfg.col_phone);
+    setIfPresent('colEmail',  cfg.col_email);
+    setIfPresent('hasHeader', cfg.has_header);   // checkbox — uses !!val
+ 
+    // Apps Script
+    setIfPresent('appsScriptUrl', cfg.apps_script_url);
+ 
+    // GoWA (only set if the elements exist — they're commented out in the HTML)
+    setIfPresent('gowaUrl',  cfg.gowa_url);
+    setIfPresent('gowaAuth', cfg.gowa_auth);
+ 
+  } catch (e) {
     console.error('Load config error:', e);
   }
 }
+ 
+ 
 // Test Resend email
 async function testResend() {
   const resendKey = document.getElementById('resendKey').value.trim();
@@ -2533,17 +2529,37 @@ async function loadData(){
   }
 }
 
-function applySettings(s){
-  if(!s) return;
-  if(s.hour_limit) setVal('hourLimit', s.hour_limit);
-  if(s.day_limit) setVal('dayLimit', s.day_limit);
-  if(s.min_gap) setVal('minGap', s.min_gap);
-  if(s.max_gap) setVal('maxGap', s.max_gap);
-  if(s.gowa_url) setVal('gowaUrl', s.gowa_url);
-  if(s.gowa_auth) setVal('gowaAuth', s.gowa_auth);
-  // Only set autoReplyEnabled if the element exists
+function applySettings(s) {
+  if (!s) return;
+  const setNum = (id, val) => {
+    if (val === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  setNum('hourLimit', s.hour_limit);
+  setNum('dayLimit',  s.day_limit);
+  setNum('minGap',    s.min_gap);
+  setNum('maxGap',    s.max_gap);
+ 
+  // These elements are commented-out / absent — guard them
+  const gowaUrlEl = document.getElementById('gowaUrl');
+  if (gowaUrlEl && s.gowa_url) gowaUrlEl.value = s.gowa_url;
+ 
+  const gowaAuthEl = document.getElementById('gowaAuth');
+  if (gowaAuthEl && s.gowa_auth) gowaAuthEl.value = s.gowa_auth;
+ 
   const autoReplyEl = document.getElementById('autoReplyEnabled');
-  if(autoReplyEl && s.auto_reply !== undefined) autoReplyEl.checked = s.auto_reply;
+  if (autoReplyEl && s.auto_reply !== undefined) autoReplyEl.checked = s.auto_reply;
+}
+
+function updateWebhookUrlDisplay() {
+  // Stub — the real display is handled by updateManychatWebhookUrl()
+  // Called from loadData(); safe to leave empty if no separate
+  // webhook URL input exists in your HTML.
+  const el = document.getElementById('calWebhookUrl');
+  if (el && userId) {
+    el.value = `${EDGE}/calendly-webhook?user=${userId}`;
+  }
 }
 // ══════════════════════ DEVICE CORE FUNCTIONS (FROM FIRST HTML) ══════════════════════
 function syncDeviceToUI(device){
@@ -2830,31 +2846,45 @@ function startQRCountdown(secs){
 }
 
 // ══════════════════════ CONTACTS (SIMPLIFIED) ══════════════════════
-function renderContacts(){
-  const tbody=document.getElementById('conBody');
-  document.getElementById('conBadge').textContent=contacts.length;
-  document.getElementById('conTotal').textContent=contacts.length;
-  document.getElementById('sPend').textContent=contacts.filter(c=>c.status==='pending'||!c.status).length;
-  if(!contacts.length){
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No contacts</td></tr>';
-    ['sSent','sFail','sTotal'].forEach(id=>{if(document.getElementById(id))document.getElementById(id).textContent='0';});
+function renderContacts() {
+  const tbody = document.getElementById('conBody');
+  const badgeEl = document.getElementById('conBadge');
+  const totalEl = document.getElementById('conTotal');
+ 
+  if (badgeEl) badgeEl.textContent = contacts.length;
+  if (totalEl) totalEl.textContent = contacts.length;
+ 
+  // stat boxes — only write if the element actually exists
+  const setPending = document.getElementById('sPend');
+  if (setPending) setPending.textContent = contacts.filter(c => c.status === 'pending' || !c.status).length;
+ 
+  if (!contacts.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">No contacts</td></tr>';
+    ['sSent', 'sFail', 'sTotal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '0';
+    });
     return;
   }
-  tbody.innerHTML=contacts.map((c,i)=>`
+ 
+  tbody.innerHTML = contacts.map((c, i) => `
     <tr>
-      <td>${i+1}</td>
+      <td>${i + 1}</td>
       <td>${escapeHtml(c.name)}</td>
       <td style="font-family:var(--mono);font-size:11px;">${c.phone}</td>
-      <td style="font-size:11px;color:var(--text2);">${escapeHtml((c.message||'').substring(0,30))||'—'}</td>
-      <td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td>
+      <td style="font-size:11px;color:var(--text2);">${escapeHtml((c.message || '').substring(0, 30)) || '—'}</td>
+      <td><span class="badge badge-${c.status || 'pending'}">${c.status || 'pending'}</span></td>
       <td><button class="btn btn-d btn-sm" onclick="removeContact(${i})">✕</button></td>
     </tr>
   `).join('');
-  document.getElementById('sSent').textContent=contacts.filter(c=>c.status==='sent').length;
-  document.getElementById('sFail').textContent=contacts.filter(c=>c.status==='failed').length;
-  document.getElementById('sTotal').textContent=contacts.length;
+ 
+  const sentEl = document.getElementById('sSent');
+  if (sentEl) sentEl.textContent = contacts.filter(c => c.status === 'sent').length;
+  const failEl = document.getElementById('sFail');
+  if (failEl) failEl.textContent = contacts.filter(c => c.status === 'failed').length;
+  const totalStatEl = document.getElementById('sTotal');
+  if (totalStatEl) totalStatEl.textContent = contacts.length;
 }
-
 function removeContact(idx){contacts.splice(idx,1);renderContacts();}
 function filterContacts(q){if(!q)return renderContacts();renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
 function dedupe(){const seen=new Set();const before=contacts.length;contacts=contacts.filter(c=>{if(seen.has(c.phone))return false;seen.add(c.phone);return true;});renderContacts();showToast(`Removed ${before-contacts.length} duplicates`);}
