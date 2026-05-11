@@ -1251,12 +1251,12 @@ async function buyPro(){
     else showToast('Contact support to upgrade: support@leadflow.in',true);
   }catch(e){showToast('Contact support to upgrade',true);}
 }
-
 // ═══════════════════════════════════════════════════════════
 // DEVICE
 // ═══════════════════════════════════════════════════════════
 function syncDevice(d){
-  deviceId = d.device_id;
+  console.log('syncDevice called with:', d);
+  deviceId = d.device_id || d.id;
   // Handle both local DB (device_name) and GoWA (display_name)
   deviceName = d.device_name || d.display_name || d.name || 'My Device';
   
@@ -1279,18 +1279,20 @@ function syncDevice(d){
   }
   document.getElementById('devDebug').textContent = `${deviceName} [${deviceId?.substring(0,24)}…] — ${displayStatus}`;
 }
+
 function updateStatusBar(s){
   const pip=document.getElementById('topPip'),lbl=document.getElementById('topLbl');
   const m={connected:['on','CONNECTED','var(--g)'],scanning:['scan','SCANNING','var(--y)'],disconnected:['off','OFFLINE','var(--muted)'],created:['off','CREATED','var(--muted)'],linked:['off','LINKED','var(--muted)']};
   const[cls,txt,col]=m[s]||m.disconnected;
-  pip.className='status-pip '+cls;lbl.textContent=txt;lbl.style.color=col;
+  pip.className='status-pip '+cls;
+  lbl.textContent=txt;
+  lbl.style.color=col;
 }
-async function fetchDevice(){
-  try{const r=await api('getDevice');if(r.success&&r.has_device)syncDevice(r.device);else{document.getElementById('devDebug').textContent='No device. Create one below.';updateStatusBar('disconnected');}}catch(e){document.getElementById('devDebug').textContent='Error: '+e.message;}
-}
+
 async function fetchDevice(){
   try{
     const r=await api('getDevice');
+    console.log('fetchDevice response:', r);
     if(r.success && r.has_device && r.device){
       // Make sure device has proper structure
       const deviceData = {
@@ -1302,13 +1304,49 @@ async function fetchDevice(){
     } else {
       document.getElementById('devDebug').textContent='No device. Create one below.';
       updateStatusBar('disconnected');
+      document.getElementById('activeDevPanel').style.display = 'none';
     }
   } catch(e){
     console.error('fetchDevice error:', e);
     document.getElementById('devDebug').textContent='Error: '+e.message;
   }
 }
-  
+
+async function fetchDevices(){
+  const w = document.getElementById('devicesWrap');
+  w.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try{
+    const r = await api('listDevices');
+    console.log('fetchDevices response:', r);
+    if(r.success && r.devices?.length){
+      w.innerHTML = r.devices.map(d => {
+        const id = d.id || d.device_id || '—';
+        // Handle GoWA's response structure (display_name) and local DB (device_name)
+        const name = d.display_name || d.device_name || d.name || 'Unnamed Device';
+        const conn = d.state === 'logged_in' || d.is_connected === true || d.is_logged_in === true;
+        const isActive = deviceId && (id === deviceId || d.device_id === deviceId);
+        return `<div class="device-row${isActive ? ' active-device' : ''}">
+          <div class="device-info">
+            <span class="device-name-text">${esc(name)}${isActive ? ' <span style="font-size:9px;color:var(--g);">[active]</span>' : ''}</span>
+            <span class="device-meta">${esc(id)}</span>
+          </div>
+          <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">
+            <span class="badge badge-${conn ? 'connected' : 'created'}">${conn ? 'connected' : (d.state || d.status || 'offline')}</span>
+            <button class="btn btn-s btn-sm" onclick="getQRFor('${esc(id)}')">QR</button>
+            <button class="btn btn-g btn-sm" onclick="selectDevice('${esc(id)}','${esc(name)}')">Use</button>
+            <button class="btn btn-d btn-sm" onclick="deleteDevice('${esc(id)}','${esc(name)}')">Del</button>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      w.innerHTML = '<div class="empty-state">No devices. Create one above.</div>';
+    }
+  } catch(e){
+    console.error('fetchDevices error:', e);
+    w.innerHTML = `<div class="empty-state" style="color:#fca5a5;">Error: ${esc(e.message)}</div>`;
+  }
+}
+
 async function createDevice(){
   const name=getVal('deviceNameInput').trim();
   if(!name){showToast('Enter a device name',true);return;}
@@ -1316,11 +1354,22 @@ async function createDevice(){
   document.getElementById('devDebug').innerHTML='<span class="spinner"></span> Creating…';
   try{
     const r=await api('createDevice',{device_name:name});
-    if(r.success){showToast(`"${name}" created!`);syncDevice({device_id:r.device_id,device_name:name,status:'created'});setVal('deviceNameInput','');fetchDevices();setTimeout(()=>loadQR(),600);}
-    else if(r.already_exists){showToast('Device exists. Unlink first.',true);}
-    else showToast(r.message||'Failed',true);
-  }catch(e){showToast('Error: '+e.message,true);}
+    if(r.success){
+      showToast(`"${name}" created!`);
+      syncDevice({device_id:r.device_id, device_name:name, status:'created'});
+      setVal('deviceNameInput','');
+      fetchDevices();
+      setTimeout(()=>loadQR(),600);
+    } else if(r.already_exists){
+      showToast('Device exists. Unlink first.',true);
+    } else {
+      showToast(r.message||'Failed',true);
+    }
+  } catch(e){
+    showToast('Error: '+e.message,true);
+  }
 }
+
 async function selectDevice(id, name){
   const deviceNameToUse = name || id;
   if(!confirm(`Use "${deviceNameToUse}" as active device?`)) return;
@@ -1333,6 +1382,7 @@ async function selectDevice(id, name){
     showToast(r.message || 'Failed', true);
   }
 }
+
 async function getQRFor(id){
   const w=document.getElementById('qrWrap');
   w.innerHTML='<span class="spinner"></span>';
@@ -1340,59 +1390,153 @@ async function getQRFor(id){
   if(r.success&&r.qr_image_url)renderQR(r.qr_image_url,r.qr_duration);
   else w.innerHTML=`<div style="color:#fca5a5;">${esc(r.message||'Failed')}</div>`;
 }
+
 async function loadQR(){
   if(!deviceId){showToast('Create or select a device first',true);return;}
   const w=document.getElementById('qrWrap');
   w.innerHTML='<span class="spinner"></span> <div style="font-size:12px;color:var(--text2);margin-top:8px;">Loading QR…</div>';
   updateStatusBar('scanning');
   const r=await api('getQR');
-  if(r.success&&r.qr_image_url){renderQR(r.qr_image_url,r.qr_duration);startPolling();}
-  else{w.innerHTML=`<div style="color:#fca5a5;font-size:12px;">${esc(r.message||'Failed to get QR')}</div>`;document.getElementById('devDebug').textContent=r.message||'QR failed';}
+  if(r.success&&r.qr_image_url){
+    renderQR(r.qr_image_url,r.qr_duration);
+    startPolling();
+  } else {
+    w.innerHTML=`<div style="color:#fca5a5;font-size:12px;">${esc(r.message||'Failed to get QR')}</div>`;
+    document.getElementById('devDebug').textContent=r.message||'QR failed';
+  }
 }
+
 function renderQR(url,dur){
-  const w=document.getElementById('qrWrap');w.innerHTML='';
-  const img=document.createElement('img');img.src=url;
-  img.onload=()=>{w.appendChild(img);const h=document.createElement('div');h.style.cssText='font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:8px;';h.textContent='📱 WhatsApp → Linked Devices → Link a Device';w.appendChild(h);startQRCountdown(dur||60);};
-  img.onerror=()=>{w.innerHTML='<div style="color:#fca5a5;">Image failed to load</div>';};
+  const w=document.getElementById('qrWrap');
+  w.innerHTML='';
+  const img=document.createElement('img');
+  img.src=url;
+  img.onload=()=>{
+    w.appendChild(img);
+    const h=document.createElement('div');
+    h.style.cssText='font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:8px;';
+    h.textContent='📱 WhatsApp → Linked Devices → Link a Device';
+    w.appendChild(h);
+    startQRCountdown(dur||60);
+  };
+  img.onerror=()=>{
+    w.innerHTML='<div style="color:#fca5a5;">Image failed to load</div>';
+  };
 }
+
 async function loginWithCode(){
   if(!deviceId){showToast('Select a device first',true);return;}
-  const phone=prompt('Phone number with country code (no +):\ne.g. 919876543210');if(!phone)return;
+  const phone=prompt('Phone number with country code (no +):\ne.g. 919876543210');
+  if(!phone)return;
   const r=await api('loginWithCode',{device_id:deviceId,phone});
-  if(r.success)showToast('Pairing code: '+r.code);else showToast(r.message||'Failed',true);
+  if(r.success)showToast('Pairing code: '+r.code);
+  else showToast(r.message||'Failed',true);
 }
+
 async function unlinkDevice(){
   if(!deviceId||!confirm(`Unlink "${deviceName}"?`))return;
   const r=await api('unlinkDevice');
-  if(r.success){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevPanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('reconnectBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device below</div>';document.getElementById('qrTimer').textContent='';document.getElementById('devDebug').textContent='Device unlinked.';if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(qrTimer){clearInterval(qrTimer);qrTimer=null;}showToast('Device unlinked');fetchDevices();}
-  else showToast(r.message||'Failed',true);
+  if(r.success){
+    deviceId=deviceName=null;
+    updateStatusBar('disconnected');
+    document.getElementById('activeDevPanel').style.display='none';
+    document.getElementById('unlinkBtn').style.display='none';
+    document.getElementById('reconnectBtn').style.display='none';
+    document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device below</div>';
+    document.getElementById('qrTimer').textContent='';
+    document.getElementById('devDebug').textContent='Device unlinked.';
+    if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
+    if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+    showToast('Device unlinked');
+    fetchDevices();
+  } else {
+    showToast(r.message||'Failed',true);
+  }
 }
+
 async function deleteDevice(id,name){
   if(!confirm(`Delete "${name}"? This is permanent.`))return;
   const r=await api('deleteDevice',{device_id:id});
   showToast(r.success?`"${name}" deleted`:(r.message||'Failed'),!r.success);
-  if(r.success){if(id===deviceId){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevPanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device to start</div>';document.getElementById('devDebug').textContent='Active device deleted.';}fetchDevices();}
+  if(r.success){
+    if(id===deviceId){
+      deviceId=deviceName=null;
+      updateStatusBar('disconnected');
+      document.getElementById('activeDevPanel').style.display='none';
+      document.getElementById('unlinkBtn').style.display='none';
+      document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device to start</div>';
+      document.getElementById('devDebug').textContent='Active device deleted.';
+    }
+    fetchDevices();
+  }
 }
+
 async function doReconnect(){
-  const r=await api('reconnect');showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success);if(r.success)startPolling();
+  const r=await api('reconnect');
+  showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success);
+  if(r.success)startPolling();
 }
+
 async function refreshDeviceStatus(){
   if(!deviceId){showToast('No active device',true);return;}
   const r=await api('checkDeviceStatus');
-  if(r.success){const s=r.is_connected?'connected':'scanning';updateStatusBar(s);const b=document.getElementById('activeDevBadge');if(b){b.textContent=s;b.className='badge badge-'+s;}document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';showToast(r.is_connected?'Device connected ✅':'Not connected');if(r.is_connected)document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';}
+  if(r.success){
+    const s=r.is_connected?'connected':'scanning';
+    updateStatusBar(s);
+    const b=document.getElementById('activeDevBadge');
+    if(b){
+      b.textContent=s;
+      b.className='badge badge-'+s;
+    }
+    document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';
+    showToast(r.is_connected?'Device connected ✅':'Not connected');
+    if(r.is_connected){
+      document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';
+    }
+  }
 }
+
 function startPolling(){
   if(pollTimer)clearInterval(pollTimer);
   pollTimer=setInterval(async()=>{
-    try{const r=await api('checkDeviceStatus');if(r.success&&r.is_connected){clearInterval(pollTimer);pollTimer=null;if(qrTimer){clearInterval(qrTimer);qrTimer=null;}updateStatusBar('connected');document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';document.getElementById('qrTimer').textContent='';document.getElementById('reconnectBtn').style.display='none';const b=document.getElementById('activeDevBadge');if(b){b.textContent='connected';b.className='badge badge-connected';}document.getElementById('devDebug').textContent=`✅ ${deviceName} connected!`;showToast('WhatsApp connected! 🎉');fetchDevices();}}catch(e){}
+    try{
+      const r=await api('checkDeviceStatus');
+      if(r.success&&r.is_connected){
+        clearInterval(pollTimer);
+        pollTimer=null;
+        if(qrTimer){clearInterval(qrTimer);qrTimer=null;}
+        updateStatusBar('connected');
+        document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';
+        document.getElementById('qrTimer').textContent='';
+        document.getElementById('reconnectBtn').style.display='none';
+        const b=document.getElementById('activeDevBadge');
+        if(b){
+          b.textContent='connected';
+          b.className='badge badge-connected';
+        }
+        document.getElementById('devDebug').textContent=`✅ ${deviceName} connected!`;
+        showToast('WhatsApp connected! 🎉');
+        fetchDevices();
+      }
+    } catch(e){}
   },3000);
 }
+
 function startQRCountdown(s){
   if(qrTimer)clearInterval(qrTimer);
   const el=document.getElementById('qrTimer');
-  qrTimer=setInterval(()=>{s--;if(s<=0){clearInterval(qrTimer);el.textContent='QR expired — click Show QR again';el.style.color='var(--r)';}else{el.textContent=`QR expires in ${s}s`;el.style.color=s<15?'var(--y)':'var(--text2)';}},1000);
+  qrTimer=setInterval(()=>{
+    s--;
+    if(s<=0){
+      clearInterval(qrTimer);
+      el.textContent='QR expired — click Show QR again';
+      el.style.color='var(--r)';
+    } else {
+      el.textContent=`QR expires in ${s}s`;
+      el.style.color=s<15?'var(--y)':'var(--text2)';
+    }
+  },1000);
 }
-
 // ═══════════════════════════════════════════════════════════
 // CONTACTS
 // ═══════════════════════════════════════════════════════════
@@ -1813,7 +1957,6 @@ function logout(){
   document.getElementById('authWrap').style.display='flex';
   renderAuth('login');
 }
-
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
@@ -1824,16 +1967,44 @@ document.addEventListener('DOMContentLoaded',()=>{
   const savedEmail=localStorage.getItem('user_email');
   const savedUserId=localStorage.getItem('user_id');
   if(savedToken&&savedEmail){
-    token=savedToken;userEmail=savedEmail;userId=savedUserId||null;
+    token=savedToken;
+    userEmail=savedEmail;
+    userId=savedUserId||null;
     document.getElementById('authWrap').style.display='none';
     document.getElementById('app').style.display='flex';
     const initial=savedEmail[0].toUpperCase();
     document.getElementById('userAv').textContent=initial;
     document.getElementById('userName').textContent=savedEmail.split('@')[0];
     document.getElementById('userEmailSb').textContent=savedEmail;
-    setChannel('wa');setSendTarget('contacts');
-    api('loadAll').then(r=>{if(r.success)initDash(r);}).catch(()=>{});
-    loadCredits();loadUserFeatures();
+    setChannel('wa');
+    setSendTarget('contacts');
+    
+    // Load all data then initialize device
+    api('loadAll').then(r=>{
+      if(r.success){
+        if(r.contacts){contacts=r.contacts;renderContacts();}
+        if(r.leads){leads=r.leads;renderLeads();}
+        if(r.logs){logs=r.logs;renderLogs();}
+        if(r.settings)applySettings(r.settings);
+        if(r.template?.body)setVal('msgTpl',r.template.body);
+        loadConfigToSettings();
+        updateManychatUrl();
+        updateBotDisplay();
+        loadCredits();
+        loadUserFeatures();
+        
+        // Initialize device after everything else is ready
+        setTimeout(() => {
+          if(r.device){
+            syncDevice(r.device);
+            fetchDevices();
+          } else {
+            fetchDevice();
+            fetchDevices();
+          }
+        }, 500);
+      }
+    }).catch(err => console.error('loadAll error:', err));
   }
 });
 </script>
