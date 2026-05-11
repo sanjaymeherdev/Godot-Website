@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow — WhatsApp CRM</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;
+  --s1:#0c0f1a;
+  --s2:#101520;
+  --s3:#141b28;
+  --border:#1c2535;
+  --border2:#243045;
+  --g:#00e5a0;
+  --g2:#00b87a;
+  --b:#3b82f6;
+  --p:#8b5cf6;
+  --r:#ef4444;
+  --y:#f59e0b;
+  --text:#c8d8f0;
+  --text2:#6b85a0;
+  --muted:#2a3a52;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'Outfit',sans-serif;
+  --rad:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+
+/* ── AUTH ── */
+.auth-wrap{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.auth-wrap::before{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(0,229,160,.05) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.auth-box{width:400px;max-width:94vw;position:relative;}
+.auth-brand{text-align:center;margin-bottom:28px;}
+.auth-brand-tag{font-family:var(--mono);font-size:9px;color:var(--g);letter-spacing:3px;border:1px solid rgba(0,229,160,.2);padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.auth-brand h1{font-size:34px;font-weight:900;color:#fff;letter-spacing:-1.5px;}
+.auth-brand h1 span{color:var(--g);}
+.auth-brand p{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:4px;}
+.auth-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;}
+.auth-card h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px;}
+.auth-card p{font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:22px;}
+.af{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.af label{font-family:var(--mono);font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;}
+.af input{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s;}
+.af input:focus{border-color:var(--g);}
+.af input::placeholder{color:var(--muted);}
+.auth-btn{width:100%;padding:12px;background:var(--g);color:#000;border:none;border-radius:8px;font-size:15px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:.15s;margin-top:4px;letter-spacing:-.3px;}
+.auth-btn:hover{background:#00cc8c;}
+.auth-btn:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed;}
+.auth-msg{font-size:12px;padding:9px 12px;border-radius:7px;margin-bottom:14px;display:none;}
+.auth-msg.err{background:rgba(239,68,68,.08);color:#fca5a5;border:1px solid rgba(239,68,68,.2);display:block;}
+.auth-msg.ok{background:rgba(0,229,160,.06);color:var(--g);border:1px solid rgba(0,229,160,.15);display:block;}
+.auth-msg.loading{background:rgba(59,130,246,.06);color:var(--b);border:1px solid rgba(59,130,246,.15);display:block;}
+.auth-links{display:flex;justify-content:space-between;margin-top:18px;}
+.auth-link{font-family:var(--mono);font-size:11px;color:var(--b);cursor:pointer;}
+.auth-link:hover{text-decoration:underline;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);font-size:11px;font-family:var(--mono);}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── LAYOUT ── */
+.app{display:none;height:100vh;overflow:hidden;}
+.sidebar{width:220px;height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:relative;overflow:hidden;}
+.sidebar::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(0,229,160,.2) 40%,rgba(59,130,246,.15) 70%,transparent);pointer-events:none;}
+.sb-logo{padding:20px 16px 14px;}
+.sb-logo-tag{font-family:var(--mono);font-size:8px;color:var(--g);letter-spacing:2.5px;margin-bottom:5px;}
+.sb-logo h1{font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px;}
+.sb-logo h1 span{color:var(--g);}
+.sb-logo .ver{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;}
+
+/* ── CREDIT PILL ── */
+.credit-pill{margin:10px 10px 4px;background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(0,229,160,.08));border:1px solid rgba(139,92,246,.25);border-radius:10px;padding:10px 12px;cursor:pointer;transition:.15s;}
+.credit-pill:hover{border-color:rgba(139,92,246,.5);}
+.cp-row{display:flex;align-items:center;justify-content:space-between;}
+.cp-label{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
+.cp-val{font-size:20px;font-weight:800;color:var(--p);font-family:var(--mono);}
+.cp-sub{font-size:9px;color:var(--text2);margin-top:1px;}
+.cp-buy{font-family:var(--mono);font-size:9px;color:var(--g);font-weight:700;padding:2px 8px;border:1px solid rgba(0,229,160,.3);border-radius:10px;}
+
+/* ── PLAN BADGE ── */
+.plan-badge{margin:4px 10px 8px;padding:6px 12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;}
+.plan-badge.free{background:rgba(107,133,160,.08);border:1px solid rgba(107,133,160,.2);}
+.plan-badge.pro{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(59,130,246,.08));border:1px solid rgba(139,92,246,.3);}
+.pb-name{font-family:var(--mono);font-size:10px;font-weight:700;}
+.pb-name.free{color:var(--text2);}
+.pb-name.pro{color:var(--p);}
+.pb-exp{font-family:var(--mono);font-size:8px;color:var(--muted);}
+
+/* ── NAV ── */
+.nav{flex:1;padding:6px 8px;overflow-y:auto;}
+.nav::-webkit-scrollbar{width:2px;}
+.nav::-webkit-scrollbar-thumb{background:var(--border2);}
+.nav-sec{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:10px 8px 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);border:1px solid transparent;margin-bottom:1px;transition:.12s;position:relative;}
+.nav-item:hover{background:var(--s2);color:var(--text);}
+.nav-item.active{background:rgba(0,229,160,.07);color:var(--g);border-color:rgba(0,229,160,.12);}
+.nav-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:2px;background:var(--g);border-radius:2px;}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700;}
+.nb-g{background:rgba(0,229,160,.12);color:var(--g);border:1px solid rgba(0,229,160,.2);}
+.nb-r{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
+.nb-b{background:rgba(59,130,246,.1);color:var(--b);}
+.nav-lock{margin-left:auto;font-size:10px;opacity:.4;}
+
+/* ── USER ── */
+.user-pill{padding:10px 12px;margin:4px 8px;background:var(--s2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;gap:9px;}
+.u-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--b));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#000;flex-shrink:0;}
+.u-name{font-size:12px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-footer{padding:10px;border-top:1px solid var(--border);}
+.logout-btn{width:100%;padding:8px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:7px;color:#fca5a5;font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;}
+.logout-btn:hover{background:rgba(239,68,68,.12);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{height:50px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0;background:var(--s1);}
+.topbar-title{font-size:14px;font-weight:800;color:#fff;flex:1;letter-spacing:-.3px;}
+.status-pip{width:7px;height:7px;border-radius:50%;}
+.status-pip.on{background:var(--g);box-shadow:0 0 8px var(--g);animation:pip 2s infinite;}
+.status-pip.scan{background:var(--y);animation:pip 1.2s infinite;}
+.status-pip.off{background:var(--muted);}
+@keyframes pip{0%,100%{opacity:1;}50%{opacity:.3;}}
+.status-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.5px;}
+.content{flex:1;overflow-y:auto;padding:22px;}
+.content::-webkit-scrollbar{width:3px;}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── TABS ── */
+.tab{display:none;animation:fadeUp .18s ease;}
+.tab.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ── CARDS ── */
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--rad);padding:18px;margin-bottom:14px;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-family:var(--mono);font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:2px;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+.sec-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.sec-sub{font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:2px;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:.14s;border:1px solid transparent;white-space:nowrap;}
+.btn:hover{opacity:.85;}
+.btn-g{background:var(--g);color:#000;border-color:var(--g);}
+.btn-s{background:transparent;color:var(--text);border-color:var(--border2);}
+.btn-s:hover{border-color:var(--text2);background:var(--s3);}
+.btn-d{background:rgba(239,68,68,.08);color:#fca5a5;border-color:rgba(239,68,68,.2);}
+.btn-d:hover{background:rgba(239,68,68,.14);}
+.btn-b{background:rgba(59,130,246,.08);color:var(--b);border-color:rgba(59,130,246,.2);}
+.btn-b:hover{background:rgba(59,130,246,.14);}
+.btn-p{background:rgba(139,92,246,.1);color:var(--p);border-color:rgba(139,92,246,.25);}
+.btn-p:hover{background:rgba(139,92,246,.18);}
+.btn-y{background:rgba(245,158,11,.08);color:var(--y);border-color:rgba(245,158,11,.2);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg label{font-family:var(--mono);font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;}
+.fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .14s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--g);}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted);}
+.fg textarea{resize:vertical;min-height:80px;line-height:1.5;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:860px){.grid2{grid-template-columns:1fr;}}
+
+/* ── STATS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:var(--s2);border:1px solid var(--border);border-radius:var(--rad);padding:14px 16px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;}
+.stat.g::after{background:var(--g);}
+.stat.b::after{background:var(--b);}
+.stat.r::after{background:var(--r);}
+.stat.p::after{background:var(--p);}
+.stat.y::after{background:var(--y);}
+.stat-val{font-family:var(--mono);font-size:26px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:11px;color:var(--text2);}
+.stat-ico{position:absolute;right:12px;top:12px;font-size:18px;opacity:.1;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--rad);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:var(--s1);border-bottom:1px solid var(--border);}
+th{padding:9px 13px;text-align:left;font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:400;}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,.012);}
+.empty-state{text-align:center;padding:28px;color:var(--muted);font-size:12px;}
+
+/* ── BADGES ── */
+.badge{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.3px;font-family:var(--mono);}
+.badge-connected,.badge-sent,.badge-booked{background:rgba(0,229,160,.12);color:var(--g);}
+.badge-scanning,.badge-pending,.badge-new,.badge-followed_up{background:rgba(245,158,11,.12);color:var(--y);}
+.badge-created,.badge-linked,.badge-manual,.badge-cold{background:rgba(107,133,160,.12);color:var(--text2);}
+.badge-disconnected,.badge-failed{background:rgba(239,68,68,.1);color:#fca5a5;}
+.badge-contacted,.badge-sheet,.badge-whatsapp{background:rgba(59,130,246,.1);color:var(--b);}
+.badge-instagram,.badge-visited{background:rgba(236,72,153,.1);color:#f9a8d4;}
+.badge-facebook{background:rgba(59,130,246,.1);color:var(--b);}
+.badge-email{background:rgba(139,92,246,.1);color:var(--p);}
+.badge-website{background:rgba(0,229,160,.1);color:var(--g);}
+.badge-pro{background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(59,130,246,.15));color:var(--p);border:1px solid rgba(139,92,246,.3);}
+.badge-free{background:rgba(107,133,160,.1);color:var(--text2);}
+
+/* ── DEVICE ── */
+.device-row{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;background:var(--bg);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;gap:10px;flex-wrap:wrap;}
+.device-row.active-device{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.03);}
+.device-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.device-name-text{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-meta{font-size:10px;color:var(--text2);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;background:var(--bg);border:2px dashed var(--border2);border-radius:var(--rad);min-height:240px;text-align:center;gap:8px;}
+.qr-wrap img{width:190px;border-radius:10px;border:3px solid var(--g);}
+.debug-box{font-size:10px;font-family:var(--mono);padding:8px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text2);margin-top:10px;word-break:break-all;}
+
+/* ── BANNERS ── */
+.banner{border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.banner.hidden{display:none;}
+.banner-out{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);}
+.banner-out .bm{color:#fca5a5;font-size:13px;font-weight:600;}
+.banner-low{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);}
+.banner-low .bm{color:var(--y);font-size:12px;}
+
+/* ── PROGRESS ── */
+.prog-wrap{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin:10px 0;}
+.prog{height:4px;background:var(--g);width:0%;border-radius:4px;transition:width .3s;}
+
+/* ── LEADS FILTER ── */
+.lead-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.lf-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:var(--sans);font-size:11px;font-weight:600;cursor:pointer;transition:.14s;display:flex;align-items:center;gap:5px;}
+.lf-btn:hover{border-color:var(--text2);color:var(--text);}
+.lf-btn.active{background:rgba(0,229,160,.08);border-color:rgba(0,229,160,.3);color:var(--g);}
+
+/* ── LOCK OVERLAY ── */
+.feature-locked{position:relative;}
+.feature-locked .lock-overlay{position:absolute;inset:0;background:rgba(7,9,15,.85);border-radius:var(--rad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;backdrop-filter:blur(2px);}
+.lock-overlay .lock-icon{font-size:28px;}
+.lock-overlay .lock-msg{font-size:13px;font-weight:700;color:#fff;text-align:center;}
+.lock-overlay .lock-sub{font-size:11px;color:var(--text2);text-align:center;}
+
+/* ── MODAL ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:10000;align-items:center;justify-content:center;}
+.modal.open{display:flex;}
+.modal-box{background:var(--s2);border:1px solid var(--border);border-radius:16px;max-width:480px;width:92%;max-height:88vh;overflow-y:auto;position:relative;}
+.modal-box.wide{max-width:660px;}
+.modal-hdr{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--s2);z-index:1;}
+.modal-hdr h3{font-size:17px;font-weight:800;color:#fff;}
+.modal-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;font-family:var(--mono);line-height:1;}
+.modal-close:hover{color:#fca5a5;}
+.modal-body{padding:18px;}
+
+/* ── BUY CREDITS ── */
+.pack-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+.pack-card{background:var(--bg);border:2px solid var(--border);border-radius:11px;padding:14px;cursor:pointer;transition:.14s;text-align:center;position:relative;}
+.pack-card:hover{border-color:var(--p);}
+.pack-card.sel{border-color:var(--p);background:rgba(139,92,246,.06);}
+.pack-credits{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--p);}
+.pack-price{font-size:17px;font-weight:800;color:#fff;margin-top:3px;}
+.pack-rate{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;}
+.pack-best{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;font-size:8px;font-weight:800;letter-spacing:.5px;padding:2px 10px;border-radius:10px;}
+.buy-creds-btn{width:100%;padding:13px;background:var(--p);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:800;font-family:var(--sans);cursor:pointer;transition:.15s;margin-bottom:10px;}
+.buy-creds-btn:hover{background:#7c3aed;}
+.buy-creds-btn:disabled{opacity:.4;cursor:not-allowed;}
+.poll-box{background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.2);border-radius:9px;padding:12px;text-align:center;margin-bottom:10px;}
+
+/* ── UPGRADE MODAL ── */
+.upgrade-grid{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+.upgrade-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:9px;border:1px solid var(--border);}
+.upgrade-check{font-size:16px;}
+.upgrade-label{font-size:13px;color:var(--text);}
+.upgrade-sub{font-size:11px;color:var(--text2);}
+
+/* ── APPS SCRIPT — HIDDEN (backup) ── */
+.apps-script-section{display:none !important;}
+
+/* ── LEAD DETAIL MODAL ── */
+.ldm-event{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.ldm-event:last-child{border-bottom:none;}
+.ldm-dot{width:6px;height:6px;border-radius:50%;background:var(--b);flex-shrink:0;margin-top:3px;}
+
+/* ── MISC ── */
+.spinner{display:inline-block;width:11px;height:11px;border:2px solid var(--border2);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#toast{position:fixed;bottom:18px;right:18px;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;z-index:99999;transition:opacity .3s;pointer-events:none;opacity:0;}
+.tog-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+.tog{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0;}
+.tog input{opacity:0;width:0;height:0;position:absolute;}
+.tog-track{position:absolute;inset:0;background:var(--border2);border-radius:20px;transition:.2s;}
+.tog input:checked~.tog-track{background:var(--g);}
+.tog-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;}
+.tog input:checked~.tog-track~.tog-thumb,.tog input:checked+.tog-track+.tog-thumb{left:20px;}
+/* simpler toggle using label */
+.toggle-label{position:relative;display:inline-block;width:38px;height:20px;}
+.toggle-label input{display:none;}
+.toggle-label .tslider{position:absolute;inset:0;background:var(--border2);border-radius:20px;cursor:pointer;transition:.2s;}
+.toggle-label .tslider::before{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.2s;}
+.toggle-label input:checked+.tslider{background:var(--g);}
+.toggle-label input:checked+.tslider::before{left:20px;}
+
+@media(max-width:640px){.sidebar{display:none;}.content{padding:12px;}.stat-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:920px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ AUTH ═══════════════════ -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-box">
+    <div class="auth-brand">
+      <div class="auth-brand-tag">WA · CRM · BLAST</div>
+      <h1>Lead<span>Flow</span></h1>
+      <p>// whatsapp automation platform v2.2</p>
+    </div>
+    <div class="auth-card" id="authCard"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ BUY CREDITS MODAL ═══════════════════ -->
+<div class="modal" id="buyModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>⚡ Buy Credits</h3>
+      <button class="modal-close" onclick="closeBuyModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:14px;">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text2);">CURRENT BALANCE</span>
+        <span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--p);" id="modalBalance">0 credits</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:10px;letter-spacing:1px;">1 CREDIT = 1 MESSAGE · ₹0.25 PER CREDIT</div>
+      <div class="pack-grid" id="packGrid"></div>
+      <div id="buyErr" style="display:none;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:9px;font-size:12px;color:#fca5a5;margin-bottom:10px;"></div>
+      <div id="buyBtnWrap" style="display:none;">
+        <button class="buy-creds-btn" id="payBtn" onclick="proceedBuy()">💳 Pay with Razorpay</button>
+        <div id="buyStatus" style="font-size:11px;color:var(--text2);text-align:center;margin-bottom:8px;"></div>
+      </div>
+      <div class="poll-box" id="pollBox" style="display:none;">
+        <div style="font-size:13px;color:var(--g);font-weight:700;margin-bottom:4px;"><span class="spinner"></span> Waiting for payment…</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Complete payment in Razorpay tab then come back.</div>
+        <button class="btn btn-s btn-sm" onclick="manualCheckPayment()">✓ I've paid — check now</button>
+      </div>
+      <button class="btn btn-s" style="width:100%;justify-content:center;" onclick="closeBuyModal()">Cancel</button>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;margin-top:10px;">Secured by Razorpay · Credits added instantly</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ UPGRADE MODAL ═══════════════════ -->
+<div class="modal" id="upgradeModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>🚀 Upgrade to Pro</h3>
+      <button class="modal-close" onclick="closeUpgradeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;padding:10px 0 16px;">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:4px;">PRO PLAN</div>
+        <div style="font-size:32px;font-weight:900;color:#fff;">₹499<span style="font-size:14px;color:var(--text2);font-weight:400;">/month</span></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Unlock all premium features</div>
+      </div>
+      <div class="upgrade-grid">
+        <div class="upgrade-row"><span class="upgrade-check">✅</span><div><div class="upgrade-label">ManyChat Integration</div><div class="upgrade-sub">IG & FB lead capture via webhooks</div></div></div>
+        <div class="upgrade-row"><span class="upgrade-check">✅</span><div><div class="upgrade-label">Calendly Auto-Sync</div><div class="upgrade-sub">Auto-mark leads as booked</div></div></div>
+        <div class="upgrade-row"><span class="upgrade-check">✅</span><div><div class="upgrade-label">Web Assistant Bot</div><div class="upgrade-sub">AI sales widget for your website</div></div></div>
+        <div class="upgrade-row"><span class="upgrade-check">✅</span><div><div class="upgrade-label">Priority Support</div><div class="upgrade-sub">Direct WhatsApp support</div></div></div>
+        <div class="upgrade-row"><span class="upgrade-check">✅</span><div><div class="upgrade-label">WA + Email Blast</div><div class="upgrade-sub">Free tier feature — included</div></div></div>
+      </div>
+      <button class="buy-creds-btn" style="background:linear-gradient(135deg,var(--p),var(--b));" onclick="buyPro()">🚀 Upgrade Now — ₹499/month</button>
+      <button class="btn btn-s" style="width:100%;justify-content:center;" onclick="closeUpgradeModal()">Maybe later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LEAD DETAIL MODAL ═══════════════════ -->
+<div class="modal" id="ldModal">
+  <div class="modal-box wide">
+    <div class="modal-hdr">
+      <h3 id="ldmTitle">Lead Detail</h3>
+      <button class="modal-close" onclick="closeLDM()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2" style="margin-bottom:14px;">
+        <div class="card" style="margin:0;padding:12px;">
+          <div class="card-title" style="margin-bottom:8px;">Contact</div>
+          <div id="ldmPhone" style="font-family:var(--mono);font-size:12px;margin-bottom:3px;"></div>
+          <div id="ldmEmail" style="font-size:12px;color:var(--text2);margin-bottom:3px;"></div>
+          <div id="ldmIg" style="font-size:12px;color:var(--b);"></div>
+          <div id="ldmFb" style="font-size:12px;color:var(--b);"></div>
+        </div>
+        <div class="card" style="margin:0;padding:12px;">
+          <div class="card-title" style="margin-bottom:8px;">Origin</div>
+          <div id="ldmSource" style="font-size:12px;margin-bottom:3px;"></div>
+          <div id="ldmKeyword" style="font-size:12px;color:var(--text2);margin-bottom:3px;"></div>
+          <div id="ldmArrived" style="font-size:10px;color:var(--muted);"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;padding:13px;">
+        <div class="card-title" style="margin-bottom:10px;">Update Status</div>
+        <div class="btn-row">
+          <button class="btn btn-s btn-sm" onclick="ldmStatus('new')">🆕 New</button>
+          <button class="btn btn-b btn-sm" onclick="ldmStatus('contacted')">📞 Contacted</button>
+          <button class="btn btn-y btn-sm" onclick="ldmStatus('visited')">👁 Visited</button>
+          <button class="btn btn-g btn-sm" onclick="ldmStatus('booked')">✅ Booked</button>
+          <button class="btn btn-s btn-sm" onclick="ldmStatus('followed_up')">🔁 Follow Up</button>
+          <button class="btn btn-d btn-sm" onclick="ldmStatus('cold')">❄️ Cold</button>
+        </div>
+      </div>
+      <div class="card-title" style="margin-bottom:8px;">Quick Actions</div>
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn btn-g btn-sm" id="ldmWaBtn" onclick="ldmSendWA()" style="display:none;">📱 WhatsApp</button>
+        <button class="btn btn-b btn-sm" id="ldmIgBtn" onclick="ldmOpenIG()" style="display:none;">📷 Instagram</button>
+        <button class="btn btn-b btn-sm" id="ldmFbBtn" onclick="ldmOpenFB()" style="display:none;">👥 Facebook</button>
+        <button class="btn btn-d btn-sm" onclick="ldmDelete()">🗑 Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ APPS SCRIPT MODAL (hidden) ═══════════════════ -->
+<div class="modal apps-script-section" id="appsScriptModal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>📜 Google Apps Script Setup</h3>
+      <button class="modal-close" onclick="document.getElementById('appsScriptModal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" id="appsScriptBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ CALENDLY RESULT MODAL ═══════════════════ -->
+<div class="modal" id="calResultModal">
+  <div class="modal-box wide">
+    <div class="modal-hdr">
+      <h3>📅 Calendly Sync Results</h3>
+      <button class="modal-close" onclick="document.getElementById('calResultModal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="calResultStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Event</th><th>Match</th></tr></thead><tbody id="calResultBody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SHEET RESULT MODAL ═══════════════════ -->
+<div class="modal" id="sheetResultModal">
+  <div class="modal-box wide">
+    <div class="modal-hdr">
+      <h3>📊 Sheet Import Results</h3>
+      <button class="modal-close" onclick="document.getElementById('sheetResultModal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="sheetResultStats" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Result</th></tr></thead><tbody id="sheetResultBody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-tag">LEADFLOW</div>
+      <h1>Lead<span>Flow</span></h1>
+      <div class="ver">v2.2 · multitenancy</div>
+    </div>
+
+    <!-- Credit Pill -->
+    <div class="credit-pill" onclick="openBuyModal()" title="Buy credits">
+      <div class="cp-row">
+        <div>
+          <div class="cp-label">Credits</div>
+          <div class="cp-val" id="sbCredits">0</div>
+          <div class="cp-sub">≈ <span id="sbMsgs">0</span> messages</div>
+        </div>
+        <div class="cp-buy">+ Buy</div>
+      </div>
+    </div>
+
+    <!-- Plan Badge -->
+    <div class="plan-badge free" id="planBadge">
+      <span class="pb-name free" id="planName">FREE PLAN</span>
+      <span class="pb-exp" id="planExp"></span>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-sec">Blast</div>
+      <div class="nav-item active" onclick="goTab('device')"><span class="nav-icon">📱</span>Device<span class="nav-badge nb-r" id="devBadge" style="display:none">!</span></div>
+      <div class="nav-item" onclick="goTab('contacts')"><span class="nav-icon">👥</span>Contacts<span class="nav-badge nb-b" id="conBadge">0</span></div>
+      <div class="nav-item" onclick="goTab('compose')"><span class="nav-icon">✍️</span>Compose</div>
+      <div class="nav-item" onclick="goTab('send')"><span class="nav-icon">🚀</span>Send</div>
+      <div class="nav-sec">CRM</div>
+      <div class="nav-item" onclick="goTab('leads')"><span class="nav-icon">🎯</span>Leads<span class="nav-badge nb-g" id="leadBadge" style="display:none">0</span></div>
+      <div class="nav-item" onclick="goTab('config')"><span class="nav-icon">⚙️</span>Config</div>
+      <div class="nav-sec">System</div>
+      <div class="nav-item" onclick="goTab('settings')"><span class="nav-icon">🔧</span>Settings</div>
+      <div class="nav-item" onclick="goTab('logs')"><span class="nav-icon">📋</span>Logs</div>
+      <div class="nav-sec">Pro Features</div>
+      <div class="nav-item" id="navWebbot" onclick="goTab('webbot')"><span class="nav-icon">🤖</span>Web Assistant<span class="nav-lock" id="webbotLock">🔒</span></div>
+    </nav>
+
+    <div style="padding:6px 8px;">
+      <div class="user-pill">
+        <div class="u-av" id="userAv">A</div>
+        <div style="min-width:0;">
+          <div class="u-name" id="userName">User</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--muted);" id="userEmailSb"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <button class="logout-btn" onclick="logout()">← Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topTitle">Device</div>
+      <div class="status-pip off" id="topPip"></div>
+      <div class="status-lbl" id="topLbl" style="color:var(--muted)">NO DEVICE</div>
+      <button class="btn btn-p btn-sm" onclick="openBuyModal()" style="margin-left:8px;">⚡ Credits</button>
+    </div>
+    <div class="content">
+
+      <!-- ═══ DEVICE TAB ═══ -->
+      <div class="tab active" id="tab-device">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Device Manager</div><div class="sec-sub">// manage WhatsApp connections</div></div>
+          <div class="btn-row">
+            <button class="btn btn-g btn-sm" onclick="loadQR()">📲 Show QR</button>
+            <button class="btn btn-y btn-sm" onclick="loginWithCode()">🔢 Pair Code</button>
+            <button class="btn btn-d btn-sm" id="unlinkBtn" style="display:none;" onclick="unlinkDevice()">🔌 Unlink</button>
+            <button class="btn btn-y btn-sm" id="reconnectBtn" style="display:none;" onclick="doReconnect()">⚡ Reconnect</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Active Device</div></div>
+          <div class="qr-wrap" id="qrWrap">
+            <div style="font-size:36px;">📱</div>
+            <div style="font-size:12px;color:var(--text2);font-family:var(--mono);">Select or create a device, then click "Show QR"</div>
+          </div>
+          <div id="qrTimer" style="text-align:center;margin-top:8px;font-size:10px;font-family:var(--mono);color:var(--text2);"></div>
+          <div id="activeDevPanel" style="display:none;margin-top:12px;">
+            <div class="device-row active-device">
+              <div class="device-info">
+                <span class="device-name-text" id="activeDevName">—</span>
+                <span class="device-meta" id="activeDevId">—</span>
+              </div>
+              <span class="badge" id="activeDevBadge">—</span>
+            </div>
+          </div>
+          <div class="debug-box" id="devDebug">No active device.</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">Create New Device</div>
+          <div class="fg"><label>Device Name (letters, numbers, _ - only)</label><input type="text" id="deviceNameInput" placeholder="e.g. my_whatsapp_1" autocomplete="off"></div>
+          <button class="btn btn-g" onclick="createDevice()">➕ Create Device</button>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">All Devices on Server</div>
+            <button class="btn btn-s btn-sm" onclick="fetchDevices()">↻ Sync</button>
+          </div>
+          <div id="devicesWrap"><div class="empty-state">Click "Sync" to load devices.</div></div>
+        </div>
+      </div>
+
+      <!-- ═══ CONTACTS TAB ═══ -->
+      <div class="tab" id="tab-contacts">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Contacts</div><div class="sec-sub">// upload, paste or import</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="dedupe()">🔄 Dedupe</button>
+            <button class="btn btn-s btn-sm" onclick="exportContacts()">📥 Export</button>
+            <button class="btn btn-g btn-sm" onclick="saveContacts()">💾 Save</button>
+            <button class="btn btn-d btn-sm" onclick="clearContacts()">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Import</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <button class="btn btn-s" onclick="document.getElementById('csvFile').click()">📂 Upload CSV/Excel</button>
+            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(this)">
+            <button class="btn btn-s" onclick="document.getElementById('pasteArea').style.display=document.getElementById('pasteArea').style.display==='none'?'block':'none'">📋 Paste Data</button>
+          </div>
+          <div id="pasteArea" style="display:none;">
+            <div class="fg"><label>Paste — Name, Phone, Message</label><textarea id="pasteInput" rows="3" placeholder="John, 919876543210, Hi John!"></textarea></div>
+            <button class="btn btn-g btn-sm" onclick="parsePaste()">Parse & Add</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:11px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span class="card-title">Preview — <span id="conTotal">0</span> contacts</span>
+            <input type="text" placeholder="Search..." style="width:140px;padding:5px 10px;font-size:12px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);outline:none;" oninput="filterContacts(this.value)">
+          </div>
+          <div class="tbl-wrap" style="border:none;border-radius:0;">
+            <table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Message</th><th>Status</th><th></th></tr></thead>
+            <tbody id="conBody"><tr><td colspan="6" class="empty-state">No contacts yet</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ COMPOSE TAB ═══ -->
+      <div class="tab" id="tab-compose">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Compose</div><div class="sec-sub">// message template + media</div></div>
+          <button class="btn btn-g" onclick="saveTemplate()">💾 Save Template</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Message Body</div>
+          <div class="fg"><label>Use {name} for personalisation</label><textarea id="msgTpl" rows="5" placeholder="Hi {name}, we have something special! 🎉"></textarea></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="insertTpl('{name}')">+{name}</button>
+            <button class="btn btn-s btn-sm" onclick="insertTpl('{phone}')">+{phone}</button>
+            <button class="btn btn-y btn-sm" onclick="testSend()">🧪 Test Send</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Attachment (optional)</div>
+          <div class="fg"><label>Type</label>
+            <select id="attachType"><option value="none">None — Text only</option><option value="image">Image</option><option value="video">Video</option><option value="audio">Audio</option><option value="file">File / Document</option></select>
+          </div>
+          <div class="fg"><label>Media URL</label><input type="text" id="attachUrl" placeholder="https://example.com/image.jpg"></div>
+        </div>
+      </div>
+
+      <!-- ═══ SEND TAB ═══ -->
+      <div class="tab" id="tab-send">
+        <div class="sec-hdr"><div><div class="sec-title">Send Campaign</div><div class="sec-sub">// choose channel</div></div></div>
+        <div class="banner banner-out hidden" id="creditOutBanner"><div class="bm">💳 Credits ended — recharge to continue sending.</div><button class="btn btn-p btn-sm" onclick="openBuyModal()">Buy Credits</button></div>
+        <div class="banner banner-low hidden" id="creditLowBanner"><div class="bm">⚠️ Low credits: <span id="lowCreditNum">0</span> remaining</div><button class="btn btn-p btn-sm" onclick="openBuyModal()">Top Up</button></div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Send via</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+            <button class="btn btn-g" id="chWaBtn" onclick="setChannel('wa')">📱 WhatsApp Only</button>
+            <button class="btn btn-s" id="chEmailBtn" onclick="setChannel('email')">📧 Email Only</button>
+            <button class="btn btn-s" id="chBothBtn" onclick="setChannel('both')">📱+📧 Both</button>
+          </div>
+          <div id="chNote" style="font-size:11px;color:var(--text2);font-family:var(--mono);"></div>
+        </div>
+        <div class="card" id="emailSettingsCard" style="display:none;">
+          <div class="card-title" style="margin-bottom:10px;">Email Settings (Brevo)</div>
+          <div class="fg"><label>Subject Line</label><input type="text" id="emailSubject" placeholder="Special offer for {name}!"></div>
+          <div class="fg"><label>Email HTML (optional)</label><textarea id="emailHtml" rows="3" placeholder="<h2>Hi {name}!</h2><p>Check this out...</p>"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Send to</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="btn btn-s" id="useContactsBtn" onclick="setSendTarget('contacts')">👥 Contacts Tab</button>
+            <button class="btn btn-s" id="useLeadsBtn" onclick="setSendTarget('leads')">🎯 Leads (filtered)</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);">Selected: <span id="recipientCount" style="color:var(--g);font-weight:700;">0</span> recipients · <span id="creditCost" style="color:var(--p);font-family:var(--mono);">0 credits</span> needed</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat g"><div class="stat-ico">📱</div><div class="stat-val" id="sSentWa">0</div><div class="stat-lbl">WA Sent</div></div>
+          <div class="stat b"><div class="stat-ico">📧</div><div class="stat-val" id="sSentEmail">0</div><div class="stat-lbl">Email Sent</div></div>
+          <div class="stat r"><div class="stat-ico">❌</div><div class="stat-val" id="sFail">0</div><div class="stat-lbl">Failed</div></div>
+          <div class="stat p"><div class="stat-ico">💳</div><div class="stat-val" id="sCredits">0</div><div class="stat-lbl">Credits Used</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Campaign Controls</div>
+          <div class="btn-row">
+            <button class="btn btn-g" onclick="startSend()">▶ Start</button>
+            <button class="btn btn-y" onclick="pauseSend()">⏸ Pause</button>
+            <button class="btn btn-d" onclick="stopSend()">⏹ Stop</button>
+          </div>
+          <div class="prog-wrap"><div class="prog" id="progBar"></div></div>
+          <div id="sendStatus" style="font-size:11px;color:var(--text2);font-family:var(--mono);">Ready</div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">Send Log</div>
+          <div class="tbl-wrap" style="max-height:260px;overflow-y:auto;">
+            <table><thead><tr><th>Time</th><th>Channel</th><th>Recipient</th><th>Status</th></tr></thead><tbody id="sendLogBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ LEADS TAB ═══ -->
+      <div class="tab" id="tab-leads">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Lead Pipeline</div><div class="sec-sub">// all channels</div></div>
+          <div class="btn-row">
+            <button class="btn btn-s btn-sm" onclick="loadLeads()">🔄 Refresh</button>
+            <button class="btn btn-g btn-sm" onclick="scanSheet()">⚡ Scan Sheet</button>
+          </div>
+        </div>
+        <div class="lead-filters" id="leadFilters">
+          <button class="lf-btn active" data-f="all" onclick="filterLeads('all',this)">All <span class="nav-badge nb-b" id="cnt-all">0</span></button>
+          <button class="lf-btn" data-f="whatsapp" onclick="filterLeads('whatsapp',this)">📱 WA <span class="nav-badge nb-b" id="cnt-whatsapp">0</span></button>
+          <button class="lf-btn" data-f="instagram" onclick="filterLeads('instagram',this)">📷 IG <span class="nav-badge nb-b" id="cnt-instagram">0</span></button>
+          <button class="lf-btn" data-f="facebook" onclick="filterLeads('facebook',this)">👥 FB <span class="nav-badge nb-b" id="cnt-facebook">0</span></button>
+          <button class="lf-btn" data-f="email" onclick="filterLeads('email',this)">📧 Email <span class="nav-badge nb-b" id="cnt-email">0</span></button>
+          <button class="lf-btn" data-f="sheet" onclick="filterLeads('sheet',this)">📊 Sheet <span class="nav-badge nb-b" id="cnt-sheet">0</span></button>
+          <button class="lf-btn" data-f="website" onclick="filterLeads('website',this)">🌐 Web <span class="nav-badge nb-b" id="cnt-website">0</span></button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="tbl-wrap" style="border:none;border-radius:0;">
+            <table><thead><tr><th>Source</th><th>Name</th><th>Phone</th><th>Email</th><th>IG/FB</th><th>Status</th><th>Arrived</th><th>Actions</th></tr></thead>
+            <tbody id="leadBody"><tr><td colspan="8" class="empty-state">No leads yet</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ CONFIG TAB ═══ -->
+      <div class="tab" id="tab-config">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Orchestrator Config</div><div class="sec-sub">// templates + follow-up</div></div>
+          <button class="btn btn-g" onclick="saveConfig()">💾 Save Config</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">WhatsApp Templates</div>
+          <div class="fg"><label>Initial Message</label><textarea id="cfgWaTpl" rows="3" placeholder="Hi {name}! 👋 Book here: {link}"></textarea></div>
+          <div class="grid2">
+            <div class="fg"><label>Follow-up 1 (30 min)</label><textarea id="cfgWaFu1" rows="3" placeholder="Hey {name} 👀 Still interested?"></textarea></div>
+            <div class="fg"><label>Follow-up 2 (24 hrs)</label><textarea id="cfgWaFu2" rows="3" placeholder="Hi {name}! 🎁 Last chance"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SETTINGS TAB ═══ -->
+      <div class="tab" id="tab-settings">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Settings</div><div class="sec-sub">// integrations + limits</div></div>
+          <button class="btn btn-g" onclick="saveAllSettings()">💾 Save All</button>
+        </div>
+
+        <!-- Credits Card -->
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">⚡ Credits & Billing</div>
+            <button class="btn btn-p btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <div class="stat p" style="flex:1;min-width:120px;padding:12px 14px;"><div class="stat-val" id="settingsCredits">0</div><div class="stat-lbl">Balance</div></div>
+            <div class="stat g" style="flex:1;min-width:120px;padding:12px 14px;"><div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;" id="settingsCanSend">0</div><div class="stat-lbl">Can Send</div></div>
+            <div class="stat b" style="flex:1;min-width:120px;padding:12px 14px;"><div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">₹0.25</div><div class="stat-lbl">Per Message</div></div>
+          </div>
+          <div class="card-title" style="margin-bottom:8px;">Transaction History</div>
+          <div class="tbl-wrap" style="max-height:220px;overflow-y:auto;">
+            <table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr></thead>
+            <tbody id="txBody"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody></table>
+          </div>
+          <button class="btn btn-s btn-sm" style="margin-top:8px;" onclick="loadCredits()">↻ Refresh</button>
+        </div>
+
+        <!-- Sheet Auto-Send Card -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">📊 Google Sheet — Lead Source & Auto-Send</div>
+          <div class="grid2">
+            <div class="fg"><label>Sheet ID</label><input type="text" id="sheetId" placeholder="1BxiMx0_sample..."></div>
+            <div class="fg"><label>Tab Name</label><input type="text" id="sheetTab" placeholder="Sheet1"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="fg"><label>Name Column</label><input type="text" id="colName" placeholder="A" maxlength="2"></div>
+            <div class="fg"><label>Phone Column</label><input type="text" id="colPhone" placeholder="B" maxlength="2"></div>
+            <div class="fg"><label>Email Column</label><input type="text" id="colEmail" placeholder="C" maxlength="2"></div>
+          </div>
+          <div class="tog-wrap">
+            <div><div style="font-size:13px;font-weight:600;">Has Header Row</div><div style="font-size:11px;color:var(--text2);">Skip first row when importing</div></div>
+            <label class="toggle-label"><input type="checkbox" id="hasHeader" checked><span class="tslider"></span></label>
+          </div>
+          <!-- Auto-Send Toggle -->
+          <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.15);border-radius:9px;padding:12px 14px;margin-top:8px;">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--g);margin-bottom:10px;letter-spacing:1px;">AUTO-SEND ON NEW ROW</div>
+            <div class="tog-wrap" style="padding:0;margin-bottom:10px;">
+              <div><div style="font-size:13px;font-weight:600;">Enable Auto-Send</div><div style="font-size:11px;color:var(--text2);">Sends when Scan Sheet finds new rows</div></div>
+              <label class="toggle-label"><input type="checkbox" id="autoSendEnabled"><span class="tslider"></span></label>
+            </div>
+            <div id="autoSendOptions">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Send via:</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-g btn-sm" id="asSendWaBtn" onclick="setAutoSendChannel('wa')" style="font-size:11px;">📱 WhatsApp Only</button>
+                <button class="btn btn-s btn-sm" id="asSendEmailBtn" onclick="setAutoSendChannel('email')" style="font-size:11px;">📧 Email Only</button>
+                <button class="btn btn-s btn-sm" id="asSendBothBtn" onclick="setAutoSendChannel('both')" style="font-size:11px;">📱+📧 Both</button>
+              </div>
+              <div id="autoSendNote" style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:6px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Send Limits -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">Send Limits</div>
+          <div class="grid2">
+            <div class="fg"><label>Max per Hour</label><input type="number" id="hourLimit" value="30"></div>
+            <div class="fg"><label>Max per Day</label><input type="number" id="dayLimit" value="200"></div>
+            <div class="fg"><label>Min Gap (seconds)</label><input type="number" id="minGap" value="30"></div>
+            <div class="fg"><label>Max Gap (seconds)</label><input type="number" id="maxGap" value="90"></div>
+          </div>
+        </div>
+
+        <!-- Brevo Email -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px;">📧 Brevo — Email API</div>
+          <div class="grid2">
+            <div class="fg"><label>API Key</label><div style="position:relative;"><input type="password" id="resendKey" placeholder="xkeysib-..."><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--text2);" onclick="togglePwd('resendKey',this)">Show</span></div></div>
+            <div class="fg"><label>From Email</label><input type="email" id="fromEmail" placeholder="hello@domain.com"></div>
+            <div class="fg"><label>From Name</label><input type="text" id="fromName" placeholder="Your Business"></div>
+            <div class="fg" style="justify-content:flex-end;"><button class="btn btn-b btn-sm" onclick="testResend()" style="margin-top:auto;">🧪 Test Email</button></div>
+          </div>
+        </div>
+
+        <!-- Apps Script — HIDDEN (backup, display:none via CSS) -->
+        <div class="card apps-script-section">
+          <div class="card-title" style="margin-bottom:12px;">📜 Google Apps Script</div>
+          <div class="fg"><label>Apps Script Web App URL</label><input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+        </div>
+
+        <!-- ManyChat — PRO LOCKED -->
+        <div class="card feature-locked" id="manychatCard">
+          <div class="card-title" style="margin-bottom:10px;">🤖 ManyChat — IG & FB Lead Capture</div>
+          <div class="fg"><label>Webhook URL</label><div style="position:relative;"><input type="text" id="manychatWebhookUrl" readonly style="font-family:var(--mono);font-size:10px;padding-right:70px;"><button class="btn btn-s btn-sm" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);" onclick="copyMcWebhook()">Copy</button></div></div>
+          <div class="fg"><label>API Key (Pro sync)</label><div style="position:relative;"><input type="password" id="manychatKey" placeholder="eyJhbGci..."><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--text2);" onclick="togglePwd('manychatKey',this)">Show</span></div></div>
+          <div class="btn-row">
+            <button class="btn btn-b btn-sm" onclick="syncManychat()">🔄 Sync (Pro)</button>
+            <button class="btn btn-s btn-sm" onclick="testMcWebhook()">🧪 Test Webhook</button>
+          </div>
+        </div>
+
+        <!-- Calendly — PRO LOCKED -->
+        <div class="card feature-locked" id="calendlyCard">
+          <div class="card-title" style="margin-bottom:10px;">📅 Calendly — Booking Sync</div>
+          <div class="fg"><label>Booking Link</label><input type="url" id="calendlyLink" placeholder="https://calendly.com/you/event"></div>
+          <div class="fg"><label>Personal Access Token</label><div style="position:relative;"><input type="password" id="calendlyToken" placeholder="cal_live_xxx..."><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;cursor:pointer;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--text2);" onclick="togglePwd('calendlyToken',this)">Show</span></div></div>
+          <div class="btn-row">
+            <button class="btn btn-b btn-sm" onclick="testCalendly()">🧪 Test Token</button>
+            <button class="btn btn-g btn-sm" onclick="syncCalendly()">🔄 Sync Now</button>
+          </div>
+        </div>
+
+        <!-- Server Status -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:10px;">🌐 Server Status</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-b" onclick="checkServer()">🔍 Check GoWA Server</button>
+            <div style="display:flex;align-items:center;gap:7px;">
+              <span class="status-pip off" id="serverPip"></span>
+              <span id="serverTxt" style="font-family:var(--mono);font-size:11px;color:var(--text2);">Not checked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ LOGS TAB ═══ -->
+      <div class="tab" id="tab-logs">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Activity Logs</div><div class="sec-sub">// messages, replies, events</div></div>
+          <button class="btn btn-d btn-sm" onclick="clearLogs()">🗑 Clear</button>
+        </div>
+        <div class="card" style="padding:0;"><div id="logsList" style="padding:14px 16px;"><div class="empty-state">No activity yet</div></div></div>
+      </div>
+
+      <!-- ═══ WEB BOT TAB — PRO LOCKED ═══ -->
+      <div class="tab" id="tab-webbot">
+        <div class="sec-hdr">
+          <div><div class="sec-title">Web Assistant Bot</div><div class="sec-sub">// AI sales widget for your website</div></div>
+          <div class="btn-row">
+            <a href="https://github.com/sanjaymeherdev/Godot-Website/blob/main/marketing/leadflow-bot.js" class="btn btn-g" target="_blank">📥 Download bot.js</a>
+            <button class="btn btn-b" onclick="copyScriptTag()">📋 Copy Script Tag</button>
+          </div>
+        </div>
+        <div class="card feature-locked" id="webbotCard">
+          <div class="card-title" style="margin-bottom:10px;">🔑 Your Bot Token</div>
+          <div class="fg"><label>Copy for installation</label><div style="display:flex;gap:8px;"><input type="text" id="botToken" readonly style="flex:1;font-family:var(--mono);font-size:11px;"><button class="btn btn-s" onclick="copyBotToken()">Copy</button></div></div>
+          <div class="card-title" style="margin:14px 0 10px;">⚡ Script Tag</div>
+          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;position:relative;">
+            <button class="btn btn-s btn-sm" style="position:absolute;top:8px;right:8px;" onclick="copyScriptTag()">📋 Copy</button>
+            <pre id="scriptTagPre" style="font-family:var(--mono);font-size:10px;white-space:pre-wrap;word-break:break-all;margin:0;color:var(--text);"></pre>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const EDGE = 'https://lgfzoprhyjrmosvigwlb.supabase.co/functions/v1/leadflow';
+const CREDIT_PACKS = [
+  {id:'pack_100',  credits:100,  amount:25,   best:false},
+  {id:'pack_250',  credits:250,  amount:62.5, best:false},
+  {id:'pack_500',  credits:500,  amount:125,  best:false},
+  {id:'pack_1500', credits:1500, amount:375,  best:true},
+  {id:'pack_4000', credits:4000, amount:1000, best:false},
+];
+const SOURCE_ICONS = {whatsapp:'📱',instagram:'📷',facebook:'👥',email:'📧',sheet:'📊',website:'🌐',manychat:'🤖',manual:'✏️'};
+
+// ── State ──
+let token=null,userId=null,userEmail=null;
+let userCredits=0,userTier='free',userFeatures={};
+let contacts=[],logs=[],leads=[];
+let deviceId=null,deviceName=null;
+let sendState='idle',sendIndex=0,sendTimer=null,sendLog=[];
+let currentChannel='wa',sendTarget='contacts',currentRecipients=[];
+let activeLeadFilter='all',currentLeadId=null;
+let pollTimer=null,qrTimer=null;
+let selectedPack=null,payPollTimer=null,currentOrderId=null;
+let autoSendChannel='wa';
+
+// ── API ──
+async function api(action,body={}){
+  const r=await fetch(EDGE,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({action,...body})});
+  if(r.status===401){showToast('Session expired',true);logout();throw new Error('Unauthorized');}
+  return r.json();
+}
+
+// ── Utils ──
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setVal(id,v){const e=document.getElementById(id);if(e&&v!==undefined&&v!==null){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}}
+function getVal(id){return document.getElementById(id)?.value||'';}
+function showToast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.style.cssText=`opacity:1;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;background:${err?'#2d1015':'#0a2018'};color:${err?'#fca5a5':'#00e5a0'};`;clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3500);}
+function srcIcon(l){return SOURCE_ICONS[l.channel||l.source||'manual']||'👤';}
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function renderAuth(mode='login'){
+  const c=document.getElementById('authCard');
+  if(mode==='login'){
+    c.innerHTML=`<h2>Welcome back</h2><p>// sign in to your account</p>
+    <div class="auth-msg" id="am"></div>
+    <div class="af"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"></div>
+    <div class="af"><label>Password</label><input type="password" id="aPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="auth-btn" id="aBtn" onclick="doLogin()">Sign In</button>
+    <div class="auth-links"><span class="auth-link" onclick="renderAuth('register')">Create account</span><span class="auth-link" onclick="renderAuth('reset')">Forgot password?</span></div>`;
+  }else if(mode==='register'){
+    c.innerHTML=`<h2>Create Account</h2><p>// join leadflow · 50 free credits</p>
+    <div class="auth-msg" id="am"></div>
+    <div class="af"><label>Full Name</label><input type="text" id="aName" placeholder="Your Name"></div>
+    <div class="af"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"></div>
+    <div class="af"><label>Password</label><input type="password" id="aPass" placeholder="Min 6 characters"></div>
+    <button class="auth-btn" id="aBtn" onclick="doRegister()">Create Account</button>
+    <div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back to login</span></div>`;
+  }else{
+    c.innerHTML=`<h2>Reset Password</h2><p>// reset link via email</p>
+    <div class="auth-msg" id="am"></div>
+    <div class="af"><label>Email</label><input type="email" id="aEmail" placeholder="you@example.com"></div>
+    <button class="auth-btn" id="aBtn" onclick="doReset()">Send Reset Link</button>
+    <div class="auth-links"><span class="auth-link" onclick="renderAuth('login')">← Back</span></div>`;
+  }
+}
+function amsg(t,txt){const e=document.getElementById('am');if(e){e.className='auth-msg '+t;e.textContent=txt;}}
+async function doLogin(){
+  const email=getVal('aEmail'),pass=getVal('aPass');
+  if(!email||!pass)return amsg('err','Email and password required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Signing in…';amsg('loading','Authenticating…');
+  const r=await api('login',{email,password:pass});
+  btn.disabled=false;btn.textContent='Sign In';
+  if(r.success){
+    token=r.token;userEmail=email;userId=r.user?.id||r.profile?.id;
+    localStorage.setItem('auth_token',token);localStorage.setItem('user_email',email);localStorage.setItem('user_id',userId||'');
+    showDash(email,r);
+  }else amsg('err',r.message||'Login failed');
+}
+async function doRegister(){
+  const name=getVal('aName'),email=getVal('aEmail'),pass=getVal('aPass');
+  if(!email||!pass)return amsg('err','Email and password required');
+  if(pass.length<6)return amsg('err','Password min 6 chars');
+  const btn=document.getElementById('aBtn');btn.disabled=true;btn.textContent='Creating…';amsg('loading','Creating account…');
+  const r=await api('register',{email,password:pass,full_name:name});
+  btn.disabled=false;btn.textContent='Create Account';
+  if(r.success){amsg('ok','Account created! Check email to verify.');setTimeout(()=>renderAuth('login'),2500);}
+  else amsg('err',r.message||'Registration failed');
+}
+async function doReset(){
+  const email=getVal('aEmail');if(!email)return amsg('err','Email required');
+  const btn=document.getElementById('aBtn');btn.disabled=true;
+  const r=await api('resetPassword',{email});btn.disabled=false;
+  if(r.success)amsg('ok','Reset link sent!');else amsg('err',r.message||'Failed');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD INIT
+// ═══════════════════════════════════════════════════════════
+function showDash(email,data){
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const initial=email[0].toUpperCase();
+  document.getElementById('userAv').textContent=initial;
+  document.getElementById('userName').textContent=email.split('@')[0];
+  document.getElementById('userEmailSb').textContent=email;
+  setChannel('wa');setSendTarget('contacts');
+  if(data)initDash(data);
+  else api('loadAll').then(r=>{if(r.success)initDash(r);}).catch(()=>{});
+  loadCredits();
+  loadUserFeatures();
+}
+function initDash(data){
+  if(data.contacts){contacts=data.contacts;renderContacts();}
+  if(data.leads){leads=data.leads;renderLeads();}
+  if(data.logs){logs=data.logs;renderLogs();}
+  if(data.settings)applySettings(data.settings);
+  if(data.template?.body)setVal('msgTpl',data.template.body);
+  if(data.device)syncDevice(data.device);else fetchDevice();
+  loadConfigToSettings();
+  updateManychatUrl();
+  updateBotDisplay();
+}
+function applySettings(s){
+  if(!s)return;
+  ['hourLimit','dayLimit','minGap','maxGap'].forEach(id=>{const k=id.replace(/([A-Z])/g,'_$1').toLowerCase();if(s[k])setVal(id,s[k]);});
+  if(s.auto_send_enabled!==undefined)setVal('autoSendEnabled',s.auto_send_enabled);
+  if(s.auto_send_channel){autoSendChannel=s.auto_send_channel;setAutoSendChannel(s.auto_send_channel,true);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// CREDITS & SUBSCRIPTION
+// ═══════════════════════════════════════════════════════════
+function updateCreditUI(credits){
+  const c=parseInt(credits)||0;
+  userCredits=c;
+  ['sbCredits','sbMsgs','settingsCredits'].forEach(id=>setVal(id,c.toLocaleString('en-IN')));
+  const csEl=document.getElementById('settingsCanSend');
+  if(csEl)csEl.textContent=c.toLocaleString('en-IN')+' msgs';
+  const mb=document.getElementById('modalBalance');
+  if(mb)mb.textContent=c.toLocaleString('en-IN')+' credits';
+  // banners
+  const ob=document.getElementById('creditOutBanner'),lb=document.getElementById('creditLowBanner');
+  if(c<=0){ob?.classList.remove('hidden');lb?.classList.add('hidden');}
+  else if(c<=10){ob?.classList.add('hidden');lb?.classList.remove('hidden');const el=document.getElementById('lowCreditNum');if(el)el.textContent=c;}
+  else{ob?.classList.add('hidden');lb?.classList.add('hidden');}
+  // cost preview
+  updateRecipientCount();
+}
+async function loadCredits(){
+  try{
+    const r=await api('getCredits');
+    if(r.success){updateCreditUI(r.credits??0);renderTx(r.transactions||[]);}
+  }catch(e){console.warn('loadCredits:',e);}
+}
+function renderTx(txs){
+  const tbody=document.getElementById('txBody');
+  if(!tbody)return;
+  if(!txs.length){tbody.innerHTML='<tr><td colspan="5" class="empty-state">No transactions yet</td></tr>';return;}
+  tbody.innerHTML=txs.map(t=>{
+    const amt=t.amount>0?`+${t.amount}`:t.amount;
+    const col=t.amount>0?'var(--g)':'#fca5a5';
+    const d=new Date(t.created_at);
+    const ds=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    return`<tr><td style="font-size:10px;color:var(--text2);">${ds}</td><td><span class="badge badge-${esc(t.type||'')}">${esc(t.type||'')}</span></td><td style="font-weight:700;color:${col};">${amt}</td><td style="font-family:var(--mono);font-size:11px;">${t.balance_after}</td><td style="font-size:10px;color:var(--text2);">${esc(t.description||'')}</td></tr>`;
+  }).join('');
+}
+async function loadUserFeatures(){
+  try{
+    const r=await api('getUserFeatures');
+    if(r.success){
+      userFeatures=r.features||{};
+      userTier=r.tier||'free';
+      applyFeatureGating();
+      updatePlanBadge(r.tier,r.expires_at);
+    }
+  }catch(e){console.warn('loadUserFeatures:',e);}
+}
+function updatePlanBadge(tier,expiresAt){
+  const badge=document.getElementById('planBadge');
+  const name=document.getElementById('planName');
+  const exp=document.getElementById('planExp');
+  if(!badge)return;
+  const isPro=tier==='pro';
+  badge.className='plan-badge '+(isPro?'pro':'free');
+  name.className='pb-name '+(isPro?'pro':'free');
+  name.textContent=isPro?'PRO PLAN':'FREE PLAN';
+  if(isPro&&expiresAt){
+    const d=new Date(expiresAt);
+    exp.textContent='Expires '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    const daysLeft=Math.ceil((d-Date.now())/86400000);
+    if(daysLeft<=7)exp.style.color='var(--r)';
+  }else{
+    exp.textContent='';
+    if(!isPro){
+      name.innerHTML='FREE PLAN <span style="font-size:8px;cursor:pointer;color:var(--g);margin-left:4px;" onclick="openUpgradeModal()">Upgrade →</span>';
+    }
+  }
+  // Update webbot lock icon
+  const lock=document.getElementById('webbotLock');
+  if(lock)lock.style.display=isPro?'none':'';
+}
+function applyFeatureGating(){
+  const isPro=userTier==='pro';
+  // ManyChat
+  const mc=document.getElementById('manychatCard');
+  if(mc)applyLock(mc,isPro||userFeatures?.manychat,'ManyChat — Instagram & FB Lead Capture','Requires Pro plan');
+  // Calendly
+  const cal=document.getElementById('calendlyCard');
+  if(cal)applyLock(cal,isPro||userFeatures?.calendly,'Calendly — Booking Sync','Requires Pro plan');
+  // WebBot
+  const wb=document.getElementById('webbotCard');
+  if(wb)applyLock(wb,isPro||userFeatures?.webbot,'Web Assistant Bot','Requires Pro plan');
+}
+function applyLock(card,hasAccess,title,sub){
+  // remove existing overlay
+  const existing=card.querySelector('.lock-overlay');
+  if(existing)existing.remove();
+  if(!hasAccess){
+    card.classList.add('feature-locked');
+    const ov=document.createElement('div');
+    ov.className='lock-overlay';
+    ov.innerHTML=`<div class="lock-icon">🔒</div><div class="lock-msg">${esc(title)}</div><div class="lock-sub">${esc(sub)}</div><button class="btn btn-p btn-sm" style="margin-top:6px;" onclick="openUpgradeModal()">Upgrade to Pro</button>`;
+    card.appendChild(ov);
+    // disable inputs inside
+    card.querySelectorAll('input,button,select,textarea').forEach(el=>el.disabled=true);
+  }else{
+    card.classList.remove('feature-locked');
+    card.querySelectorAll('input,button,select,textarea').forEach(el=>el.disabled=false);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUY CREDITS MODAL
+// ═══════════════════════════════════════════════════════════
+function openBuyModal(){
+  selectedPack=null;
+  renderPacks();
+  document.getElementById('buyBtnWrap').style.display='none';
+  document.getElementById('pollBox').style.display='none';
+  document.getElementById('buyErr').style.display='none';
+  document.getElementById('modalBalance').textContent=userCredits.toLocaleString('en-IN')+' credits';
+  document.getElementById('buyModal').classList.add('open');
+}
+function closeBuyModal(){
+  document.getElementById('buyModal').classList.remove('open');
+  if(payPollTimer){clearInterval(payPollTimer);payPollTimer=null;}
+}
+function renderPacks(){
+  document.getElementById('packGrid').innerHTML=CREDIT_PACKS.map(p=>`
+    <div class="pack-card" id="pc_${p.id}" onclick="selectPack('${p.id}')">
+      ${p.best?'<div class="pack-best">⭐ BEST VALUE</div>':''}
+      <div class="pack-credits">${p.credits.toLocaleString('en-IN')}</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;">CREDITS</div>
+      <div class="pack-price">₹${p.amount}</div>
+      <div class="pack-rate">₹${(p.amount/p.credits).toFixed(2)}/credit</div>
+    </div>`).join('');
+}
+function selectPack(id){
+  selectedPack=id;
+  document.querySelectorAll('.pack-card').forEach(e=>e.classList.remove('sel'));
+  document.getElementById('pc_'+id)?.classList.add('sel');
+  const pack=CREDIT_PACKS.find(p=>p.id===id);
+  document.getElementById('buyBtnWrap').style.display='block';
+  document.getElementById('buyStatus').textContent=pack?`${pack.credits.toLocaleString('en-IN')} credits for ₹${pack.amount}`:'';
+  document.getElementById('payBtn').textContent='💳 Pay with Razorpay';
+  document.getElementById('payBtn').disabled=false;
+  document.getElementById('buyErr').style.display='none';
+}
+async function proceedBuy(){
+  if(!selectedPack){showBuyErr('Select a credit pack first.');return;}
+  const btn=document.getElementById('payBtn');
+  btn.textContent='⏳ Creating order…';btn.disabled=true;
+  document.getElementById('buyErr').style.display='none';
+  try{
+    const r=await api('buyCredits',{pack_id:selectedPack});
+    if(!r.success){showBuyErr(r.message||'Could not create payment order.');btn.textContent='💳 Pay with Razorpay';btn.disabled=false;return;}
+    window.open(r.payment_url,'_blank');
+    btn.textContent='✅ Payment page opened';
+    currentOrderId=r.order_id;
+    document.getElementById('pollBox').style.display='block';
+    let attempts=0;
+    if(payPollTimer)clearInterval(payPollTimer);
+    payPollTimer=setInterval(async()=>{
+      attempts++;
+      if(attempts>60){clearInterval(payPollTimer);return;}
+      try{
+        const poll=await api('checkPaymentStatus',{order_id:currentOrderId});
+        if(poll.status==='completed'){
+          clearInterval(payPollTimer);
+          updateCreditUI(poll.credits);
+          closeBuyModal();
+          showToast(`✅ Credits added! Balance: ${poll.credits.toLocaleString('en-IN')}`);
+          loadCredits();
+        }
+      }catch(e){}
+    },3000);
+  }catch(e){showBuyErr('Network error: '+e.message);btn.textContent='💳 Pay with Razorpay';btn.disabled=false;}
+}
+async function manualCheckPayment(){
+  try{
+    const r=await api('getCredits');
+    if(r.success&&r.credits>userCredits){updateCreditUI(r.credits);renderTx(r.transactions||[]);showToast(`✅ Balance updated: ${r.credits.toLocaleString('en-IN')} credits`);closeBuyModal();}
+    else showToast('No new credits yet. Payment may still be processing.',true);
+  }catch(e){showToast('Check failed: '+e.message,true);}
+}
+function showBuyErr(msg){const e=document.getElementById('buyErr');e.textContent=msg;e.style.display='block';}
+
+// Upgrade modal
+function openUpgradeModal(){document.getElementById('upgradeModal').classList.add('open');}
+function closeUpgradeModal(){document.getElementById('upgradeModal').classList.remove('open');}
+async function buyPro(){
+  showToast('Creating Pro subscription…');
+  try{
+    // Use same payment edge func with a pro plan pack
+    const r=await api('buyCredits',{pack_id:'pro_monthly'});
+    if(r.success&&r.payment_url){window.open(r.payment_url,'_blank');closeUpgradeModal();}
+    else showToast('Contact support to upgrade: support@leadflow.in',true);
+  }catch(e){showToast('Contact support to upgrade',true);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEVICE
+// ═══════════════════════════════════════════════════════════
+function syncDevice(d){
+  deviceId=d.device_id;deviceName=d.device_name||d.device_id;
+  const status=d.status||'created';
+  updateStatusBar(status);
+  document.getElementById('activeDevPanel').style.display='block';
+  setVal('activeDevName',deviceName);
+  document.getElementById('activeDevId').textContent=deviceId;
+  const b=document.getElementById('activeDevBadge');b.textContent=status;b.className='badge badge-'+status;
+  document.getElementById('unlinkBtn').style.display='inline-flex';
+  document.getElementById('reconnectBtn').style.display=status!=='connected'?'inline-flex':'none';
+  const qw=document.getElementById('qrWrap');
+  if(status==='connected')qw.innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';
+  else qw.innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);font-family:var(--mono);">Click "Show QR" to link</div>';
+  document.getElementById('devDebug').textContent=`${deviceName} [${deviceId?.substring(0,24)}…] — ${status}`;
+}
+function updateStatusBar(s){
+  const pip=document.getElementById('topPip'),lbl=document.getElementById('topLbl');
+  const m={connected:['on','CONNECTED','var(--g)'],scanning:['scan','SCANNING','var(--y)'],disconnected:['off','OFFLINE','var(--muted)'],created:['off','CREATED','var(--muted)'],linked:['off','LINKED','var(--muted)']};
+  const[cls,txt,col]=m[s]||m.disconnected;
+  pip.className='status-pip '+cls;lbl.textContent=txt;lbl.style.color=col;
+}
+async function fetchDevice(){
+  try{const r=await api('getDevice');if(r.success&&r.has_device)syncDevice(r.device);else{document.getElementById('devDebug').textContent='No device. Create one below.';updateStatusBar('disconnected');}}catch(e){document.getElementById('devDebug').textContent='Error: '+e.message;}
+}
+async function fetchDevices(){
+  const w=document.getElementById('devicesWrap');
+  w.innerHTML='<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+  try{
+    const r=await api('listDevices');
+    if(r.success&&r.devices?.length){
+      w.innerHTML=r.devices.map(d=>{
+        const id=d.id||d.device_id||'—',name=d.name||d.device_name||id;
+        const conn=d.is_connected===true||d.is_logged_in===true||d.status==='connected';
+        const isActive=deviceId&&id===deviceId;
+        return`<div class="device-row${isActive?' active-device':''}">
+          <div class="device-info"><span class="device-name-text">${esc(name)}${isActive?' <span style="font-size:9px;color:var(--g);">[active]</span>':''}</span><span class="device-meta">${esc(id)}</span></div>
+          <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">
+            <span class="badge badge-${conn?'connected':'created'}">${conn?'connected':(d.status||'offline')}</span>
+            <button class="btn btn-s btn-sm" onclick="getQRFor('${esc(id)}')">QR</button>
+            <button class="btn btn-g btn-sm" onclick="selectDevice('${esc(id)}','${esc(name)}')">Use</button>
+            <button class="btn btn-d btn-sm" onclick="deleteDevice('${esc(id)}','${esc(name)}')">Del</button>
+          </div>
+        </div>`;
+      }).join('');
+    }else w.innerHTML='<div class="empty-state">No devices. Create one above.</div>';
+  }catch(e){w.innerHTML=`<div class="empty-state" style="color:#fca5a5;">Error: ${esc(e.message)}</div>`;}
+}
+async function createDevice(){
+  const name=getVal('deviceNameInput').trim();
+  if(!name){showToast('Enter a device name',true);return;}
+  if(!/^[a-zA-Z0-9_-]+$/.test(name)){showToast('Letters, numbers, _ and - only',true);return;}
+  document.getElementById('devDebug').innerHTML='<span class="spinner"></span> Creating…';
+  try{
+    const r=await api('createDevice',{device_name:name});
+    if(r.success){showToast(`"${name}" created!`);syncDevice({device_id:r.device_id,device_name:name,status:'created'});setVal('deviceNameInput','');fetchDevices();setTimeout(()=>loadQR(),600);}
+    else if(r.already_exists){showToast('Device exists. Unlink first.',true);}
+    else showToast(r.message||'Failed',true);
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+async function selectDevice(id,name){
+  if(!confirm(`Use "${name}" as active device?`))return;
+  const r=await api('linkDevice',{device_id:id,device_name:name});
+  if(r.success){syncDevice({device_id:id,device_name:name,status:'linked'});showToast(`Now using "${name}"`);fetchDevices();}
+  else showToast(r.message||'Failed',true);
+}
+async function getQRFor(id){
+  const w=document.getElementById('qrWrap');
+  w.innerHTML='<span class="spinner"></span>';
+  const r=await api('getQRForDevice',{device_id:id});
+  if(r.success&&r.qr_image_url)renderQR(r.qr_image_url,r.qr_duration);
+  else w.innerHTML=`<div style="color:#fca5a5;">${esc(r.message||'Failed')}</div>`;
+}
+async function loadQR(){
+  if(!deviceId){showToast('Create or select a device first',true);return;}
+  const w=document.getElementById('qrWrap');
+  w.innerHTML='<span class="spinner"></span> <div style="font-size:12px;color:var(--text2);margin-top:8px;">Loading QR…</div>';
+  updateStatusBar('scanning');
+  const r=await api('getQR');
+  if(r.success&&r.qr_image_url){renderQR(r.qr_image_url,r.qr_duration);startPolling();}
+  else{w.innerHTML=`<div style="color:#fca5a5;font-size:12px;">${esc(r.message||'Failed to get QR')}</div>`;document.getElementById('devDebug').textContent=r.message||'QR failed';}
+}
+function renderQR(url,dur){
+  const w=document.getElementById('qrWrap');w.innerHTML='';
+  const img=document.createElement('img');img.src=url;
+  img.onload=()=>{w.appendChild(img);const h=document.createElement('div');h.style.cssText='font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:8px;';h.textContent='📱 WhatsApp → Linked Devices → Link a Device';w.appendChild(h);startQRCountdown(dur||60);};
+  img.onerror=()=>{w.innerHTML='<div style="color:#fca5a5;">Image failed to load</div>';};
+}
+async function loginWithCode(){
+  if(!deviceId){showToast('Select a device first',true);return;}
+  const phone=prompt('Phone number with country code (no +):\ne.g. 919876543210');if(!phone)return;
+  const r=await api('loginWithCode',{device_id:deviceId,phone});
+  if(r.success)showToast('Pairing code: '+r.code);else showToast(r.message||'Failed',true);
+}
+async function unlinkDevice(){
+  if(!deviceId||!confirm(`Unlink "${deviceName}"?`))return;
+  const r=await api('unlinkDevice');
+  if(r.success){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevPanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('reconnectBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device below</div>';document.getElementById('qrTimer').textContent='';document.getElementById('devDebug').textContent='Device unlinked.';if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(qrTimer){clearInterval(qrTimer);qrTimer=null;}showToast('Device unlinked');fetchDevices();}
+  else showToast(r.message||'Failed',true);
+}
+async function deleteDevice(id,name){
+  if(!confirm(`Delete "${name}"? This is permanent.`))return;
+  const r=await api('deleteDevice',{device_id:id});
+  showToast(r.success?`"${name}" deleted`:(r.message||'Failed'),!r.success);
+  if(r.success){if(id===deviceId){deviceId=deviceName=null;updateStatusBar('disconnected');document.getElementById('activeDevPanel').style.display='none';document.getElementById('unlinkBtn').style.display='none';document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">📱</div><div style="font-size:12px;color:var(--text2);">Create a device to start</div>';document.getElementById('devDebug').textContent='Active device deleted.';}fetchDevices();}
+}
+async function doReconnect(){
+  const r=await api('reconnect');showToast(r.success?'Reconnecting…':(r.message||'Failed'),!r.success);if(r.success)startPolling();
+}
+async function refreshDeviceStatus(){
+  if(!deviceId){showToast('No active device',true);return;}
+  const r=await api('checkDeviceStatus');
+  if(r.success){const s=r.is_connected?'connected':'scanning';updateStatusBar(s);const b=document.getElementById('activeDevBadge');if(b){b.textContent=s;b.className='badge badge-'+s;}document.getElementById('reconnectBtn').style.display=r.is_connected?'none':'inline-flex';showToast(r.is_connected?'Device connected ✅':'Not connected');if(r.is_connected)document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';}
+}
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try{const r=await api('checkDeviceStatus');if(r.success&&r.is_connected){clearInterval(pollTimer);pollTimer=null;if(qrTimer){clearInterval(qrTimer);qrTimer=null;}updateStatusBar('connected');document.getElementById('qrWrap').innerHTML='<div style="font-size:36px;">✅</div><div style="font-size:13px;color:var(--g);font-weight:700;">Device Connected!</div>';document.getElementById('qrTimer').textContent='';document.getElementById('reconnectBtn').style.display='none';const b=document.getElementById('activeDevBadge');if(b){b.textContent='connected';b.className='badge badge-connected';}document.getElementById('devDebug').textContent=`✅ ${deviceName} connected!`;showToast('WhatsApp connected! 🎉');fetchDevices();}}catch(e){}
+  },3000);
+}
+function startQRCountdown(s){
+  if(qrTimer)clearInterval(qrTimer);
+  const el=document.getElementById('qrTimer');
+  qrTimer=setInterval(()=>{s--;if(s<=0){clearInterval(qrTimer);el.textContent='QR expired — click Show QR again';el.style.color='var(--r)';}else{el.textContent=`QR expires in ${s}s`;el.style.color=s<15?'var(--y)':'var(--text2)';}},1000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTACTS
+// ═══════════════════════════════════════════════════════════
+function renderContacts(list){
+  const src=list||contacts;
+  const tbody=document.getElementById('conBody');
+  document.getElementById('conBadge').textContent=contacts.length;
+  document.getElementById('conTotal').textContent=contacts.length;
+  if(!src.length){tbody.innerHTML='<tr><td colspan="6" class="empty-state">No contacts yet</td></tr>';return;}
+  tbody.innerHTML=src.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.name)}</td><td style="font-family:var(--mono);font-size:11px;">${c.phone}</td><td style="font-size:11px;color:var(--text2);">${esc((c.message||'').substring(0,30))||'—'}</td><td><span class="badge badge-${c.status||'pending'}">${c.status||'pending'}</span></td><td><button class="btn btn-d btn-sm" onclick="contacts.splice(${contacts.indexOf(c)},1);renderContacts()">✕</button></td></tr>`).join('');
+  updateRecipientCount();
+}
+function filterContacts(q){if(!q)return renderContacts();renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.phone.includes(q)));}
+function dedupe(){const seen=new Set();const b=contacts.length;contacts=contacts.filter(c=>{if(seen.has(c.phone))return false;seen.add(c.phone);return true;});renderContacts();showToast(`Removed ${b-contacts.length} duplicates`);}
+function exportContacts(){const csv=['Name,Phone,Message,Status',...contacts.map(c=>`"${c.name}",${c.phone},"${c.message||''}",${c.status}`)].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`contacts_${Date.now()}.csv`;a.click();}
+async function saveContacts(){if(!contacts.length)return showToast('No contacts',true);const r=await api('saveContacts',{contacts});showToast(r.success?'Contacts saved':(r.message||'Failed'),!r.success);}
+async function clearContacts(){if(confirm('Clear all contacts?')){contacts=[];renderContacts();await api('clearContacts');showToast('Contacts cleared');}}
+function parsePaste(){
+  const raw=getVal('pasteInput');let added=0;
+  raw.split(/\r?\n/).forEach(line=>{const p=line.split(/[\t,]/);if(p.length>=2){let phone=p[1].replace(/\D/g,'');if(phone.length===10)phone='91'+phone;if(phone.length>=10){contacts.push({name:(p[0]||phone).trim(),phone,message:(p[2]||'').trim(),status:'pending'});added++;}}});
+  renderContacts();showToast(`Added ${added} contacts`);setVal('pasteInput','');document.getElementById('pasteArea').style.display='none';
+}
+function handleFile(inp){
+  const file=inp.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){const r=new FileReader();r.onload=e=>{let added=0;e.target.result.split(/\r?\n/).forEach(line=>{const cols=line.split(',');if(cols.length>=2){let phone=cols[1].replace(/\D/g,'');if(phone.length===10)phone='91'+phone;if(phone.length>=10){contacts.push({name:cols[0]||phone,phone,message:cols[2]||'',status:'pending'});added++;}}});renderContacts();showToast(`Imported ${added} contacts`);};r.readAsText(file);}
+  else if(ext==='xlsx'||ext==='xls'){const r=new FileReader();r.onload=e=>{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws);let added=0;rows.forEach(row=>{const keys=Object.keys(row);const phone=String(row[keys[1]]||'').replace(/\D/g,'');const finalPhone=phone.length===10?'91'+phone:phone;if(finalPhone.length>=10){contacts.push({name:String(row[keys[0]]||finalPhone),phone:finalPhone,message:String(row[keys[2]]||''),status:'pending'});added++;}});renderContacts();showToast(`Imported ${added} contacts`);};r.readAsArrayBuffer(file);}
+}
+
+// ═══════════════════════════════════════════════════════════
+// SEND CAMPAIGN
+// ═══════════════════════════════════════════════════════════
+function setChannel(ch){
+  currentChannel=ch;
+  ['wa','email','both'].forEach(c=>{const btn=document.getElementById('ch'+c.charAt(0).toUpperCase()+c.slice(1)+'Btn');if(btn){btn.className='btn '+(c===ch?'btn-g':'btn-s');}});
+  const ec=document.getElementById('emailSettingsCard');
+  if(ec)ec.style.display=(ch==='email'||ch==='both')?'block':'none';
+  const note=document.getElementById('chNote');
+  if(note)note.textContent=ch==='wa'?'1 credit per WhatsApp message':ch==='email'?'1 credit per email (Brevo)':'2 credits per recipient (WA + Email)';
+  updateRecipientCount();
+}
+function setSendTarget(t){
+  sendTarget=t;
+  document.getElementById('useContactsBtn').className='btn '+(t==='contacts'?'btn-g':'btn-s');
+  document.getElementById('useLeadsBtn').className='btn '+(t==='leads'?'btn-g':'btn-s');
+  updateRecipientCount();
+}
+function updateRecipientCount(){
+  if(sendTarget==='contacts')currentRecipients=contacts.filter(c=>!c.status||c.status==='pending');
+  else currentRecipients=leads.filter(l=>activeLeadFilter==='all'||(l.channel||l.source)===activeLeadFilter).filter(l=>l.status!=='cold'&&l.status!=='converted');
+  const cost=currentChannel==='both'?2:1;
+  const el=document.getElementById('recipientCount');const cel=document.getElementById('creditCost');
+  if(el)el.textContent=currentRecipients.length;
+  if(cel)cel.textContent=(currentRecipients.length*cost)+' credits';
+}
+async function startSend(){
+  if(!deviceId){showToast('Link a device first',true);goTab('device');return;}
+  if(!currentRecipients.length){showToast('No recipients',true);return;}
+  if(userCredits<=0){showToast('No credits. Buy credits to send.',true);openBuyModal();return;}
+  sendState='running';sendLog=[];document.getElementById('sendLogBody').innerHTML='';processSend();
+}
+function pauseSend(){sendState='paused';if(sendTimer)clearTimeout(sendTimer);showToast('Paused');}
+function stopSend(){sendState='idle';sendIndex=0;if(sendTimer)clearTimeout(sendTimer);updateSendProgress();document.getElementById('sendStatus').textContent='Stopped';}
+async function processSend(){
+  if(sendState!=='running')return;
+  if(sendIndex>=currentRecipients.length){stopSend();showToast('Campaign complete! 🎉');return;}
+  if(userCredits<=0){sendState='idle';document.getElementById('sendStatus').textContent='⚠️ Credits ended';document.getElementById('creditOutBanner').classList.remove('hidden');showToast('Credits ended. Recharge to continue.',true);return;}
+  const recip=currentRecipients[sendIndex];
+  const name=recip.name||recip.contact_name||'Customer';
+  const phone=recip.phone||'';const email=recip.email||'';
+  const tplMsg=(getVal('msgTpl')||'Hi {name}!').replace(/\{name\}/gi,name);
+  const subj=(getVal('emailSubject')||'Message from LeadFlow').replace(/\{name\}/gi,name);
+  const html=getVal('emailHtml')||`<p>${tplMsg}</p>`;
+  document.getElementById('sendStatus').textContent=`Sending to ${name}… [${userCredits} credits left]`;
+  let result=null;
+  try{
+    if(currentChannel==='wa')result=await api('sendMessage',{phone,message:tplMsg});
+    else if(currentChannel==='email')result=await api('sendEmail',{to:email,subject:subj,html,to_name:name});
+    else result=await api('sendBoth',{phone,message:tplMsg,to_email:email,email_subject:subj,email_html:html,name});
+    if(result?.credits!==undefined)updateCreditUI(result.credits);
+    if(result?.out_of_credits){sendState='idle';document.getElementById('creditOutBanner').classList.remove('hidden');showToast('Credits ended.',true);return;}
+  }catch(e){result={success:false};}
+  const status=result?.success?'sent':'failed';
+  sendLog.unshift({time:Date.now(),channel:currentChannel,recipient:currentChannel==='wa'?phone:email,status});
+  if(sendTarget==='contacts'){const c=contacts.find(x=>x.phone===phone);if(c)c.status=status;}
+  sendIndex++;renderSendLog();updateSendProgress();
+  const min=parseInt(getVal('minGap')||30)*1000,max=parseInt(getVal('maxGap')||90)*1000;
+  sendTimer=setTimeout(processSend,Math.random()*(max-min)+min);
+}
+function updateSendProgress(){
+  const pct=currentRecipients.length?(sendIndex/currentRecipients.length*100):0;
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('sendStatus').textContent=`${sendIndex}/${currentRecipients.length} processed`;
+  const waSent=sendLog.filter(l=>l.status==='sent'&&(l.channel==='wa'||l.channel==='both')).length;
+  const emailSent=sendLog.filter(l=>l.status==='sent'&&(l.channel==='email'||l.channel==='both')).length;
+  const failed=sendLog.filter(l=>l.status==='failed').length;
+  setVal('sSentWa',waSent);setVal('sSentEmail',emailSent);setVal('sFail',failed);
+  setVal('sCredits',sendLog.filter(l=>l.status==='sent').length*(currentChannel==='both'?2:1));
+}
+function renderSendLog(){
+  const tbody=document.getElementById('sendLogBody');
+  if(!sendLog.length){tbody.innerHTML='<tr><td colspan="4" class="empty-state">No sends yet</td></tr>';return;}
+  tbody.innerHTML=sendLog.slice(0,50).map(l=>`<tr><td style="font-size:10px;color:var(--text2);">${new Date(l.time).toLocaleTimeString()}</td><td>${l.channel==='wa'?'📱':'l.channel'==='email'?'📧':'📱+📧'}</td><td style="font-family:var(--mono);font-size:11px;">${esc(l.recipient)}</td><td><span class="badge badge-${l.status}">${l.status}</span></td></tr>`).join('');
+}
+
+// Compose helpers
+function insertTpl(v){const ta=document.getElementById('msgTpl');const s=ta.selectionStart;ta.value=ta.value.slice(0,s)+v+ta.value.slice(ta.selectionEnd);ta.focus();}
+async function saveTemplate(){const r=await api('saveTemplate',{body:getVal('msgTpl'),attach_type:getVal('attachType'),attach_url:getVal('attachUrl')});showToast(r.success?'Template saved':(r.message||'Failed'),!r.success);}
+async function testSend(){
+  if(!deviceId){showToast('No device linked',true);return;}
+  const phone=prompt('Test phone (with country code, no +):');if(!phone)return;
+  const r=await api('sendMessage',{phone,message:getVal('msgTpl')||'Test from LeadFlow 👋'});
+  showToast(r.success?'Test sent! ✅':(r.message||'Failed'),!r.success);
+  if(r.credits!==undefined)updateCreditUI(r.credits);
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-SEND (Sheet)
+// ═══════════════════════════════════════════════════════════
+function setAutoSendChannel(ch,silent){
+  autoSendChannel=ch;
+  if(!silent){
+    ['wa','email','both'].forEach(c=>{const btn=document.getElementById('asSend'+c.charAt(0).toUpperCase()+c.slice(1)+'Btn');if(btn)btn.className='btn btn-sm '+(c===ch?'btn-g':'btn-s');});
+    const note=document.getElementById('autoSendNote');
+    if(note)note.textContent=ch==='wa'?'Will send WhatsApp to new rows':ch==='email'?'Will send Email to new rows':'Will send both WA + Email to new rows';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEADS
+// ═══════════════════════════════════════════════════════════
+function updateLeadCounts(){
+  ['all','whatsapp','instagram','facebook','email','sheet','website'].forEach(ch=>{
+    const el=document.getElementById('cnt-'+ch);if(!el)return;
+    const count=ch==='all'?leads.length:leads.filter(l=>(l.channel||l.source||'manual')===ch).length;
+    el.textContent=count;el.style.display=count>0?'':'none';
+  });
+  const lb=document.getElementById('leadBadge');if(lb){lb.textContent=leads.length;lb.style.display=leads.length?'':'none';}
+}
+function filterLeads(f,btn){
+  activeLeadFilter=f;
+  document.querySelectorAll('.lf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();updateRecipientCount();
+}
+function renderLeads(){
+  updateLeadCounts();
+  const tbody=document.getElementById('leadBody');
+  const filtered=activeLeadFilter==='all'?leads:leads.filter(l=>(l.channel||l.source||'manual')===activeLeadFilter);
+  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="8" class="empty-state">${activeLeadFilter==='all'?'No leads yet':'No '+activeLeadFilter+' leads'}</td></tr>`;return;}
+  tbody.innerHTML=filtered.map(l=>`
+    <tr style="cursor:pointer;" onclick="openLDM('${l.id}')">
+      <td><span title="${esc(l.channel||l.source||'manual')}" style="font-size:15px;">${srcIcon(l)}</span></td>
+      <td style="font-weight:600;">${esc(l.name||'—')}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${l.phone?esc(l.phone):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px;">${l.email?esc(l.email):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px;color:var(--b);">${l.ig_username?'📷 @'+esc(l.ig_username):l.fb_id?'👥 '+esc(l.fb_id.slice(0,8))+'…':'<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="badge badge-${l.status||'new'}">${l.status||'new'}</span></td>
+      <td style="font-size:10px;color:var(--text2);">${l.arrived_at?new Date(l.arrived_at).toLocaleDateString():'—'}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="btn-row">
+          ${l.phone?`<button class="btn btn-g btn-sm" onclick="quickWA('${l.phone}','${esc(l.name||'')}')">📱</button>`:''}
+          <button class="btn btn-d btn-sm" onclick="updLead('${l.id}','cold')">❄️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+async function loadLeads(){const r=await api('getLeads');if(r.success){leads=r.leads;renderLeads();}}
+async function updLead(id,status){await api('updateLeadStatus',{id,status});await loadLeads();showToast(`Lead → ${status}`);}
+async function quickWA(phone,name){
+  if(!deviceId){showToast('No device',true);return;}
+  const r=await api('sendMessage',{phone,message:(getVal('msgTpl')||'Hi {name}!').replace(/\{name\}/gi,name)});
+  showToast(r.success?`Sent to ${name} ✅`:(r.message||'Failed'),!r.success);
+  if(r.credits!==undefined)updateCreditUI(r.credits);
+}
+
+// Scan Sheet with auto-send
+async function scanSheet(){
+  if(!getVal('sheetId')){showToast('Configure Sheet ID in Settings first',true);goTab('settings');return;}
+  showToast('Scanning sheet…');
+  try{
+    const r=await api('scanLeadSheet');
+    if(!r.success){showToast(r.message||'Scan failed',true);return;}
+    // Auto-send if enabled
+    const autoEnabled=document.getElementById('autoSendEnabled')?.checked;
+    if(autoEnabled&&r.new_leads>0){
+      showToast(`${r.new_leads} new leads found — auto-sending via ${autoSendChannel}…`);
+      await autoSendToNewLeads(r.preview?.filter(row=>row.result==='imported')||[]);
+    }
+    renderSheetResult(r);
+    await loadLeads();
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+async function autoSendToNewLeads(newRows){
+  if(!deviceId&&(autoSendChannel==='wa'||autoSendChannel==='both')){showToast('No device for WA auto-send',true);return;}
+  const tpl=getVal('msgTpl')||'Hi {name}!';
+  const subj=getVal('emailSubject')||'Message from LeadFlow';
+  const html=getVal('emailHtml')||'';
+  let sent=0;
+  for(const row of newRows){
+    const name=row.name||row.phone||'Customer';
+    const msg=tpl.replace(/\{name\}/gi,name);
+    try{
+      if(autoSendChannel==='wa'&&row.phone)await api('sendMessage',{phone:row.phone,message:msg});
+      else if(autoSendChannel==='email'&&row.email)await api('sendEmail',{to:row.email,subject:subj.replace(/\{name\}/gi,name),html:html||`<p>${msg}</p>`,to_name:name});
+      else if(autoSendChannel==='both'){if(row.phone)await api('sendMessage',{phone:row.phone,message:msg});if(row.email)await api('sendEmail',{to:row.email,subject:subj.replace(/\{name\}/gi,name),html:html||`<p>${msg}</p>`,to_name:name});}
+      sent++;
+    }catch(e){}
+    await new Promise(res=>setTimeout(res,parseInt(getVal('minGap')||30)*1000));
+  }
+  const r=await api('getCredits');if(r.success)updateCreditUI(r.credits);
+  showToast(`Auto-sent to ${sent} new leads ✅`);
+}
+function renderSheetResult(r){
+  document.getElementById('sheetResultStats').innerHTML=`
+    <div class="stat g" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${r.new_leads}</div><div class="stat-lbl">✅ Imported</div></div>
+    <div class="stat y" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${r.duplicates}</div><div class="stat-lbl">⚠️ Duplicates</div></div>
+    <div class="stat b" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${r.skipped}</div><div class="stat-lbl">⏭ Skipped</div></div>
+    <div class="stat p" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${r.total_rows}</div><div class="stat-lbl">📋 Total</div></div>`;
+  const map={imported:'badge-connected',duplicate:'badge-scanning',skipped_invalid_phone:'badge-created',error:'badge-disconnected'};
+  const lbl={imported:'✅ Imported',duplicate:'⚠️ Duplicate',skipped_invalid_phone:'❌ Invalid',error:'💥 Error'};
+  const tbody=document.getElementById('sheetResultBody');
+  tbody.innerHTML=(r.preview||[]).map((row,i)=>`<tr><td>${i+1}</td><td>${esc(row.name||'—')}</td><td style="font-family:var(--mono);font-size:11px;">${esc(row.phone||'—')}</td><td style="font-size:11px;">${esc(row.email||'—')}</td><td><span class="badge ${map[row.result]||'badge-created'}">${lbl[row.result]||row.result}</span></td></tr>`).join('');
+  document.getElementById('sheetResultModal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEAD DETAIL MODAL
+// ═══════════════════════════════════════════════════════════
+function openLDM(id){
+  currentLeadId=id;
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  document.getElementById('ldmTitle').textContent=srcIcon(l)+' '+(l.name||'Unknown Lead');
+  document.getElementById('ldmPhone').textContent=l.phone?'📱 '+l.phone:'';
+  document.getElementById('ldmEmail').textContent=l.email?'📧 '+l.email:'';
+  document.getElementById('ldmIg').textContent=l.ig_username?'📷 @'+l.ig_username:'';
+  document.getElementById('ldmFb').textContent=l.fb_id?'👥 '+l.fb_id:'';
+  document.getElementById('ldmSource').innerHTML=`<span class="badge badge-${l.channel||'manual'}">${srcIcon(l)} ${l.channel||l.source||'manual'}</span>`;
+  document.getElementById('ldmKeyword').textContent=l.triggered_keyword?'🔑 '+l.triggered_keyword:'';
+  document.getElementById('ldmArrived').textContent=l.arrived_at?'Since '+new Date(l.arrived_at).toLocaleString():'';
+  document.getElementById('ldmWaBtn').style.display=l.phone?'inline-flex':'none';
+  document.getElementById('ldmIgBtn').style.display=l.ig_username?'inline-flex':'none';
+  document.getElementById('ldmFbBtn').style.display=l.fb_id?'inline-flex':'none';
+  document.getElementById('ldModal').classList.add('open');
+}
+function closeLDM(){document.getElementById('ldModal').classList.remove('open');currentLeadId=null;}
+async function ldmStatus(s){if(!currentLeadId)return;await updLead(currentLeadId,s);showToast('Status → '+s);}
+function ldmSendWA(){const l=leads.find(x=>x.id===currentLeadId);if(l?.phone)quickWA(l.phone,l.name||'');}
+function ldmOpenIG(){const l=leads.find(x=>x.id===currentLeadId);if(l?.ig_username)window.open('https://instagram.com/'+l.ig_username,'_blank');}
+function ldmOpenFB(){const l=leads.find(x=>x.id===currentLeadId);if(l?.fb_id)window.open('https://facebook.com/'+l.fb_id,'_blank');}
+async function ldmDelete(){
+  if(!currentLeadId||!confirm('Delete this lead?'))return;
+  await api('deleteLead',{id:currentLeadId});
+  leads=leads.filter(x=>x.id!==currentLeadId);renderLeads();closeLDM();showToast('Lead deleted');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+async function saveConfig(){
+  const r=await api('saveConfig',{wa_template:getVal('cfgWaTpl'),wa_followup1:getVal('cfgWaFu1'),wa_followup2:getVal('cfgWaFu2')});
+  showToast(r.success?'Config saved':(r.message||'Failed'),!r.success);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+async function loadConfigToSettings(){
+  try{
+    const r=await api('getConfig');
+    if(r.success&&r.config){
+      const cfg=r.config;
+      const f=(id,v)=>{if(v!==null&&v!==undefined){const e=document.getElementById(id);if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}}};
+      f('resendKey',cfg.resend_key);f('fromEmail',cfg.from_email);f('fromName',cfg.from_name);
+      f('manychatKey',cfg.manychat_key);f('calendlyLink',cfg.calendly_link);f('calendlyToken',cfg.calendly_token);
+      f('sheetId',cfg.sheet_id);f('sheetTab',cfg.sheet_tab);f('colName',cfg.col_name);f('colPhone',cfg.col_phone);f('colEmail',cfg.col_email);
+      f('hasHeader',cfg.has_header);f('appsScriptUrl',cfg.apps_script_url);
+    }
+  }catch(e){console.error('loadConfigToSettings:',e);}
+}
+async function saveAllSettings(){
+  showToast('Saving…');
+  try{
+    const s1=await api('saveSettings',{
+      hour_limit:getVal('hourLimit'),day_limit:getVal('dayLimit'),min_gap:getVal('minGap'),max_gap:getVal('maxGap'),
+      auto_send_enabled:document.getElementById('autoSendEnabled')?.checked,auto_send_channel:autoSendChannel
+    });
+    const s2=await api('saveConfig',{
+      resend_key:getVal('resendKey'),from_email:getVal('fromEmail'),from_name:getVal('fromName'),
+      manychat_key:getVal('manychatKey'),calendly_link:getVal('calendlyLink'),calendly_token:getVal('calendlyToken'),
+      sheet_id:getVal('sheetId'),sheet_tab:getVal('sheetTab')||'Sheet1',col_name:getVal('colName')||'A',col_phone:getVal('colPhone')||'B',col_email:getVal('colEmail')||'C',
+      has_header:document.getElementById('hasHeader')?.checked,apps_script_url:getVal('appsScriptUrl')
+    });
+    showToast(s1.success&&s2.success?'All settings saved ✅':'Partial save — check fields',!s1.success||!s2.success);
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+function togglePwd(id,btn){const e=document.getElementById(id);if(!e)return;e.type=e.type==='password'?'text':'password';btn.textContent=e.type==='password'?'Show':'Hide';}
+async function testResend(){
+  const r=await api('testResend',{test_email:userEmail});
+  showToast(r.success?`Test email sent to ${userEmail} ✅`:'Failed: '+(r.message||'Check API key'),!r.success);
+}
+async function checkServer(){
+  const pip=document.getElementById('serverPip'),txt=document.getElementById('serverTxt');
+  pip.className='status-pip scan';txt.textContent='Checking…';
+  try{const r=await api('listDevices');if(r.success){pip.className='status-pip on';txt.textContent='🟢 ONLINE';txt.style.color='var(--g)';showToast('Server online ✅');}else{pip.className='status-pip off';txt.textContent='🔴 OFFLINE';txt.style.color='var(--r)';}}
+  catch(e){pip.className='status-pip off';txt.textContent='🔴 OFFLINE';txt.style.color='var(--r)';}
+}
+
+// ManyChat
+function updateManychatUrl(){
+  const el=document.getElementById('manychatWebhookUrl');
+  if(el)el.value=userId?`${EDGE}/manychat-webhook?user=${userId}`:'Login to generate URL';
+}
+function copyMcWebhook(){const el=document.getElementById('manychatWebhookUrl');if(el?.value&&userId){navigator.clipboard.writeText(el.value);showToast('Webhook URL copied ✅');}else showToast('Login first',true);}
+async function syncManychat(){showToast('Syncing…');const r=await api('manychatSync');showToast(r.success?`Synced ${r.imported} subscribers ✅`:(r.message||'Sync failed'),!r.success);}
+async function testMcWebhook(){
+  if(!userId){showToast('Login first',true);return;}
+  const res=await fetch(`${EDGE}/manychat-webhook?user=${userId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({first_name:'Test',ig_username:'testuser',email:'test@example.com',keyword:'TEST',platform:'instagram'})});
+  const r=await res.json();
+  showToast(r.success?`Test webhook OK — lead ${r.action} ✅`:('Failed: '+(r.message||'')),!r.success);
+  if(r.success)await loadLeads();
+}
+
+// Calendly
+async function testCalendly(){
+  const tok=getVal('calendlyToken');if(!tok){showToast('Enter token first',true);return;}
+  const r=await api('testCalendlyToken',{token:tok});
+  showToast(r.success?`✅ Token valid! ${r.events_count||0} bookings`:'Failed: '+(r.message||'Invalid'),!r.success);
+}
+async function syncCalendly(){
+  const tok=getVal('calendlyToken');if(!tok){showToast('Enter token first',true);return;}
+  showToast('Syncing…');
+  try{
+    const userRes=await fetch('https://api.calendly.com/users/me',{headers:{Authorization:`Bearer ${tok}`}});
+    const userData=await userRes.json();
+    const userUri=userData.resource?.uri;if(!userUri){showToast('Invalid token',true);return;}
+    const since=new Date();since.setDate(since.getDate()-30);
+    const eventsRes=await fetch(`https://api.calendly.com/scheduled_events?user=${encodeURIComponent(userUri)}&count=100&min_start_time=${since.toISOString()}`,{headers:{Authorization:`Bearer ${tok}`}});
+    const eventsData=await eventsRes.json();
+    const events=eventsData.collection||[];
+    const rows=[];
+    for(const event of events){
+      const invRes=await fetch(`${event.uri}/invitees?count=100`,{headers:{Authorization:`Bearer ${tok}`}});
+      const invData=await invRes.json();
+      for(const inv of (invData.collection||[])){
+        let phone='';
+        const phoneQ=inv.questions_and_answers?.find(q=>q.question?.toLowerCase().includes('phone')||q.question?.toLowerCase().includes('whatsapp'));
+        if(phoneQ){phone=phoneQ.answer.replace(/\D/g,'');if(phone.length===10)phone='91'+phone;}
+        rows.push({name:inv.name||'—',email:inv.email||'',phone,event_time:event.start_time,status:inv.status});
+      }
+    }
+    const r=await api('syncCalendlyBookings',{token:tok});
+    let matched=0,unmatched=0,canceled=0;
+    rows.forEach(row=>{if(row.status==='canceled'){canceled++;return;}const byEmail=leads.find(l=>l.email&&l.email===row.email);const byPhone=leads.find(l=>l.phone&&row.phone&&l.phone===row.phone);if(byEmail||byPhone){row.matched=true;matched++;}else{row.matched=false;unmatched++;}});
+    // render result modal
+    document.getElementById('calResultStats').innerHTML=`
+      <div class="stat g" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${matched}</div><div class="stat-lbl">✅ Matched</div></div>
+      <div class="stat r" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${unmatched}</div><div class="stat-lbl">❌ No match</div></div>
+      <div class="stat b" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${canceled}</div><div class="stat-lbl">🚫 Canceled</div></div>
+      <div class="stat p" style="flex:1;min-width:100px;padding:10px 14px;"><div class="stat-val">${rows.length}</div><div class="stat-lbl">📋 Total</div></div>`;
+    document.getElementById('calResultBody').innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.name)}</td><td style="font-size:11px;">${esc(r.email)}</td><td style="font-family:var(--mono);font-size:11px;">${r.phone||'—'}</td><td style="font-size:11px;color:var(--text2);">${r.event_time?new Date(r.event_time).toLocaleString():'—'}</td><td><span class="badge badge-${r.status==='canceled'?'failed':r.matched?'connected':'created'}">${r.status==='canceled'?'🚫 Canceled':r.matched?'✅ Matched':'❌ No match'}</span></td></tr>`).join('');
+    document.getElementById('calResultModal').classList.add('open');
+    await loadLeads();
+  }catch(e){showToast('Error: '+e.message,true);}
+}
+async function syncCalendlyIfToken(){
+  const tok=getVal('calendlyToken');if(!tok)return;
+  try{const r=await api('syncCalendlyBookings',{token:tok});if(r.success&&r.updated>0){showToast(`📅 ${r.updated} lead(s) marked as booked`);loadLeads();}}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEB BOT
+// ═══════════════════════════════════════════════════════════
+function updateBotDisplay(){
+  const tok=localStorage.getItem('auth_token');
+  const el=document.getElementById('botToken'),pre=document.getElementById('scriptTagPre');
+  if(tok&&el){el.value=tok;}
+  if(tok&&pre){pre.textContent=`<script \n  src="https://yourdomain.com/leadflow-bot.js" \n  data-leadflow-url="${EDGE}"\n  data-leadflow-token="${tok}"\n  data-whatsapp="919876543210"\n  data-calendly="https://calendly.com/you/30min"\n  data-theme="#00e5a0"\n  data-business-name="Your Business"\n><\/script>`;}
+}
+function copyBotToken(){const tok=localStorage.getItem('auth_token');if(tok){navigator.clipboard.writeText(tok);showToast('Token copied ✅');}else showToast('Login first',true);}
+function copyScriptTag(){const pre=document.getElementById('scriptTagPre');if(pre){navigator.clipboard.writeText(pre.textContent);showToast('Script tag copied ✅');}}
+
+// ═══════════════════════════════════════════════════════════
+// LOGS
+// ═══════════════════════════════════════════════════════════
+function renderLogs(){
+  const div=document.getElementById('logsList');
+  if(!logs.length){div.innerHTML='<div class="empty-state">No activity yet</div>';return;}
+  div.innerHTML=logs.slice(0,50).map(l=>`<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:12px;font-weight:600;">${esc(l.name||'')}</div><div style="font-size:11px;color:var(--text2);">${esc(l.msg||l.message||'')}</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">${new Date(l.created_at||Date.now()).toLocaleTimeString()}</div></div></div>`).join('');
+}
+function clearLogs(){logs=[];renderLogs();api('clearLogs');}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  const items=['device','contacts','compose','send','leads','config','settings','logs','webbot'];
+  const idx=items.indexOf(name);
+  if(idx>=0)document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  document.getElementById('topTitle').textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(name==='device')refreshDeviceStatus();
+  if(name==='leads'){loadLeads();syncCalendlyIfToken();updateManychatUrl();}
+  if(name==='settings')loadCredits();
+  if(name==='send')updateRecipientCount();
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════════════════════
+function logout(){
+  token=null;userId=null;
+  localStorage.removeItem('auth_token');localStorage.removeItem('user_email');localStorage.removeItem('user_id');
+  if(pollTimer)clearInterval(pollTimer);if(qrTimer)clearInterval(qrTimer);
+  document.getElementById('app').style.display='none';
+  document.getElementById('authWrap').style.display='flex';
+  renderAuth('login');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderAuth('login');
+  setAutoSendChannel('wa',false);
+  const savedToken=localStorage.getItem('auth_token');
+  const savedEmail=localStorage.getItem('user_email');
+  const savedUserId=localStorage.getItem('user_id');
+  if(savedToken&&savedEmail){
+    token=savedToken;userEmail=savedEmail;userId=savedUserId||null;
+    document.getElementById('authWrap').style.display='none';
+    document.getElementById('app').style.display='flex';
+    const initial=savedEmail[0].toUpperCase();
+    document.getElementById('userAv').textContent=initial;
+    document.getElementById('userName').textContent=savedEmail.split('@')[0];
+    document.getElementById('userEmailSb').textContent=savedEmail;
+    setChannel('wa');setSendTarget('contacts');
+    api('loadAll').then(r=>{if(r.success)initDash(r);}).catch(()=>{});
+    loadCredits();loadUserFeatures();
+  }
+});
+</script>
+</body>
+</html>
