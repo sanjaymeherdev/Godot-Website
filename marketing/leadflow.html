@@ -1012,21 +1012,20 @@ function applySettings(s){
 // CREDITS & SUBSCRIPTION
 // ═══════════════════════════════════════════════════════════
 function updateCreditUI(credits){
-  const c=parseInt(credits)||0;
-  userCredits=c;
-  ['sbCredits','sbMsgs','settingsCredits'].forEach(id=>setVal(id,c.toLocaleString('en-IN')));
-  const csEl=document.getElementById('settingsCanSend');
-  if(csEl)csEl.textContent=c.toLocaleString('en-IN')+' msgs';
-  const mb=document.getElementById('modalBalance');
-  if(mb)mb.textContent=c.toLocaleString('en-IN')+' credits';
-  // banners
-  const ob=document.getElementById('creditOutBanner'),lb=document.getElementById('creditLowBanner');
-  if(c<=0){ob?.classList.remove('hidden');lb?.classList.add('hidden');}
-  else if(c<=10){ob?.classList.add('hidden');lb?.classList.remove('hidden');const el=document.getElementById('lowCreditNum');if(el)el.textContent=c;}
-  else{ob?.classList.add('hidden');lb?.classList.add('hidden');}
-  // cost preview
+  const c = parseInt(credits) || 0;
+  userCredits = c;
+  // FIX: Show credits value, not can send
+  document.getElementById('sbCredits').textContent = c.toLocaleString('en-IN');
+  document.getElementById('sbMsgs').textContent = c.toLocaleString('en-IN');
+  document.getElementById('settingsCredits').textContent = c.toLocaleString('en-IN');
+  
+  const csEl = document.getElementById('settingsCanSend');
+  if(csEl) csEl.textContent = c.toLocaleString('en-IN') + ' msgs';
+  
+  // Also update credit cost preview
   updateRecipientCount();
 }
+  
 async function loadCredits(){
   try{
     const r=await api('getCredits');
