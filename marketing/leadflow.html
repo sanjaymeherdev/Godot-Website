@@ -976,6 +976,9 @@ async function doReset(){
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD INIT
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD INIT - FIXED SEQUENCE
+// ═══════════════════════════════════════════════════════════
 function showDash(email,data){
   document.getElementById('authWrap').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -983,23 +986,55 @@ function showDash(email,data){
   document.getElementById('userAv').textContent=initial;
   document.getElementById('userName').textContent=email.split('@')[0];
   document.getElementById('userEmailSb').textContent=email;
-  setChannel('wa');setSendTarget('contacts');
-  if(data)initDash(data);
-  else api('loadAll').then(r=>{if(r.success)initDash(r);}).catch(()=>{});
+  setChannel('wa');
+  setSendTarget('contacts');
+  
+  // FIRST: Initialize basic data
+  if(data){
+    if(data.contacts){contacts=data.contacts;renderContacts();}
+    if(data.leads){leads=data.leads;renderLeads();}
+    if(data.logs){logs=data.logs;renderLogs();}
+    if(data.settings)applySettings(data.settings);
+    if(data.template?.body)setVal('msgTpl',data.template.body);
+  }
+  
+  // SECOND: Load configs
+  loadConfigToSettings();
+  updateManychatUrl();
+  updateBotDisplay();
+  
+  // THIRD: Load credits and user features
   loadCredits();
   loadUserFeatures();
+  
+  // FOURTH: Handle device AFTER everything else is ready
+  if(data && data.device){
+    // Small delay to ensure DOM and functions are ready
+    setTimeout(() => {
+      syncDevice(data.device);
+      fetchDevices();
+    }, 100);
+  } else {
+    setTimeout(() => {
+      fetchDevice();
+      fetchDevices();
+    }, 100);
+  }
 }
+
 function initDash(data){
   if(data.contacts){contacts=data.contacts;renderContacts();}
   if(data.leads){leads=data.leads;renderLeads();}
   if(data.logs){logs=data.logs;renderLogs();}
   if(data.settings)applySettings(data.settings);
   if(data.template?.body)setVal('msgTpl',data.template.body);
-  if(data.device)syncDevice(data.device);else fetchDevice();
+  
+  // Don't call device functions here - they'll be called in showDash
   loadConfigToSettings();
   updateManychatUrl();
   updateBotDisplay();
 }
+  
 function applySettings(s){
   if(!s)return;
   ['hourLimit','dayLimit','minGap','maxGap'].forEach(id=>{const k=id.replace(/([A-Z])/g,'_$1').toLowerCase();if(s[k])setVal(id,s[k]);});
@@ -1256,38 +1291,27 @@ function updateStatusBar(s){
 async function fetchDevice(){
   try{const r=await api('getDevice');if(r.success&&r.has_device)syncDevice(r.device);else{document.getElementById('devDebug').textContent='No device. Create one below.';updateStatusBar('disconnected');}}catch(e){document.getElementById('devDebug').textContent='Error: '+e.message;}
 }
-async function fetchDevices(){
-  const w = document.getElementById('devicesWrap');
-  w.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading…</div>';
+async function fetchDevice(){
   try{
-    const r = await api('listDevices');
-    if(r.success && r.devices?.length){
-      w.innerHTML = r.devices.map(d => {
-        const id = d.id || d.device_id || '—';
-        // Handle GoWA's response structure (display_name) and local DB (device_name)
-        const name = d.display_name || d.device_name || d.name || 'Unnamed Device';
-        const conn = d.state === 'logged_in' || d.is_connected === true || d.is_logged_in === true;
-        const isActive = deviceId && (id === deviceId || d.device_id === deviceId);
-        return `<div class="device-row${isActive ? ' active-device' : ''}">
-          <div class="device-info">
-            <span class="device-name-text">${esc(name)}${isActive ? ' <span style="font-size:9px;color:var(--g);">[active]</span>' : ''}</span>
-            <span class="device-meta">${esc(id)}</span>
-          </div>
-          <div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">
-            <span class="badge badge-${conn ? 'connected' : 'created'}">${conn ? 'connected' : (d.state || d.status || 'offline')}</span>
-            <button class="btn btn-s btn-sm" onclick="getQRFor('${esc(id)}')">QR</button>
-            <button class="btn btn-g btn-sm" onclick="selectDevice('${esc(id)}','${esc(name)}')">Use</button>
-            <button class="btn btn-d btn-sm" onclick="deleteDevice('${esc(id)}','${esc(name)}')">Del</button>
-          </div>
-        </div>`;
-      }).join('');
+    const r=await api('getDevice');
+    if(r.success && r.has_device && r.device){
+      // Make sure device has proper structure
+      const deviceData = {
+        device_id: r.device.device_id || r.device.id,
+        device_name: r.device.device_name || r.device.display_name || r.device.name || 'My Device',
+        status: r.device.status || r.device.state || 'created'
+      };
+      syncDevice(deviceData);
     } else {
-      w.innerHTML = '<div class="empty-state">No devices. Create one above.</div>';
+      document.getElementById('devDebug').textContent='No device. Create one below.';
+      updateStatusBar('disconnected');
     }
   } catch(e){
-    w.innerHTML = `<div class="empty-state" style="color:#fca5a5;">Error: ${esc(e.message)}</div>`;
+    console.error('fetchDevice error:', e);
+    document.getElementById('devDebug').textContent='Error: '+e.message;
   }
 }
+  
 async function createDevice(){
   const name=getVal('deviceNameInput').trim();
   if(!name){showToast('Enter a device name',true);return;}
