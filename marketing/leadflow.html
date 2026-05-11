@@ -2293,7 +2293,7 @@ function copyWebhookUrl() {
   }
 }
 
-// Save ALL settings (limits + integrations)
+// Save ALL settings (limits + integrations) - FIXED
 async function saveAllSettings() {
   showToast('Saving settings...');
   try {
@@ -2309,7 +2309,7 @@ async function saveAllSettings() {
       from_email: document.getElementById('fromEmail').value.trim(),
       from_name: document.getElementById('fromName').value.trim(),
       manychat_key: document.getElementById('manychatKey').value.trim(),
-      manychat_page_id: document.getElementById('manychatPageId').value.trim(),
+      // manychat_page_id removed - not in HTML
       calendly_link: document.getElementById('calendlyLink').value.trim(),
       calendly_token: document.getElementById('calendlyToken').value.trim(),
       sheet_id: document.getElementById('sheetId').value.trim(),
@@ -2323,26 +2323,19 @@ async function saveAllSettings() {
 
     console.log('Saving settings:', settingsPayload);
     console.log('Saving config:', configPayload);
-    console.log('Token present:', !!token);
-    console.log('UserId:', userId);
 
     const r1 = await api('saveSettings', settingsPayload);
-    console.log('saveSettings response:', r1);
-    
     if (!r1.success) {
       showToast('Settings save failed: ' + (r1.message || 'Unknown error'), true);
       return;
     }
 
     const r2 = await api('saveConfig', configPayload);
-    console.log('saveConfig response:', r2);
-    
     if (!r2.success) {
       showToast('Config save failed: ' + (r2.message || 'Unknown error'), true);
       return;
     }
 
-    updateWebhookUrlDisplay();
     showToast('All settings saved! ✅');
   } catch(e) {
     console.error('saveAllSettings error:', e);
@@ -2350,44 +2343,60 @@ async function saveAllSettings() {
   }
 }
 
-// Load saved config into Settings form
+// Load saved config into Settings form - FIXED
 async function loadConfigToSettings() {
   try {
     const r = await api('getConfig');
     if (r.success && r.config) {
       const cfg = r.config;
-      if (cfg.resend_key) document.getElementById('resendKey').value = cfg.resend_key;
-      if (cfg.from_email) document.getElementById('fromEmail').value = cfg.from_email;
-      if (cfg.from_name) document.getElementById('fromName').value = cfg.from_name;
-      if (cfg.manychat_key) document.getElementById('manychatKey').value = cfg.manychat_key;
-      if (cfg.manychat_page_id) document.getElementById('manychatPageId').value = cfg.manychat_page_id;
-      if (cfg.calendly_link) document.getElementById('calendlyLink').value = cfg.calendly_link;
-      if (cfg.sheet_id) document.getElementById('sheetId').value = cfg.sheet_id;
-      if (cfg.calendly_token) document.getElementById('calendlyToken').value = cfg.calendly_token;
-      if (cfg.sheet_tab) document.getElementById('sheetTab').value = cfg.sheet_tab;
-      if (cfg.col_name) document.getElementById('colName').value = cfg.col_name;
-      if (cfg.col_phone) document.getElementById('colPhone').value = cfg.col_phone;
-      if (cfg.col_email) document.getElementById('colEmail').value = cfg.col_email;
-      if (cfg.has_header !== undefined) document.getElementById('hasHeader').checked = cfg.has_header;
-      if (cfg.apps_script_url) document.getElementById('appsScriptUrl').value = cfg.apps_script_url;
+      
+      // Brevo settings
+      const resendKeyEl = document.getElementById('resendKey');
+      if (resendKeyEl && cfg.resend_key) resendKeyEl.value = cfg.resend_key;
+      
+      const fromEmailEl = document.getElementById('fromEmail');
+      if (fromEmailEl && cfg.from_email) fromEmailEl.value = cfg.from_email;
+      
+      const fromNameEl = document.getElementById('fromName');
+      if (fromNameEl && cfg.from_name) fromNameEl.value = cfg.from_name;
+      
+      // ManyChat settings
+      const manychatKeyEl = document.getElementById('manychatKey');
+      if (manychatKeyEl && cfg.manychat_key) manychatKeyEl.value = cfg.manychat_key;
+      
+      // Calendly settings
+      const calendlyLinkEl = document.getElementById('calendlyLink');
+      if (calendlyLinkEl && cfg.calendly_link) calendlyLinkEl.value = cfg.calendly_link;
+      
+      const calendlyTokenEl = document.getElementById('calendlyToken');
+      if (calendlyTokenEl && cfg.calendly_token) calendlyTokenEl.value = cfg.calendly_token;
+      
+      // Sheet settings
+      const sheetIdEl = document.getElementById('sheetId');
+      if (sheetIdEl && cfg.sheet_id) sheetIdEl.value = cfg.sheet_id;
+      
+      const sheetTabEl = document.getElementById('sheetTab');
+      if (sheetTabEl && cfg.sheet_tab) sheetTabEl.value = cfg.sheet_tab;
+      
+      const colNameEl = document.getElementById('colName');
+      if (colNameEl && cfg.col_name) colNameEl.value = cfg.col_name;
+      
+      const colPhoneEl = document.getElementById('colPhone');
+      if (colPhoneEl && cfg.col_phone) colPhoneEl.value = cfg.col_phone;
+      
+      const colEmailEl = document.getElementById('colEmail');
+      if (colEmailEl && cfg.col_email) colEmailEl.value = cfg.col_email;
+      
+      const hasHeaderEl = document.getElementById('hasHeader');
+      if (hasHeaderEl && cfg.has_header !== undefined) hasHeaderEl.checked = cfg.has_header;
+      
+      const appsScriptUrlEl = document.getElementById('appsScriptUrl');
+      if (appsScriptUrlEl && cfg.apps_script_url) appsScriptUrlEl.value = cfg.apps_script_url;
     }
-    updateWebhookUrlDisplay();
   } catch(e) {
     console.error('Load config error:', e);
   }
 }
-
-// Update Calendly webhook URL display
-function updateWebhookUrlDisplay() {
-  const urlInput = document.getElementById('calWebhookUrl');
-  if (!urlInput) return; // ← element doesn't exist in HTML, just bail
-  if (userId) {
-    urlInput.value = `${EDGE}/calendly-webhook?user=${userId}`;
-  } else {
-    urlInput.value = 'Login to generate URL';
-  }
-}
-
 // Test Resend email
 async function testResend() {
   const resendKey = document.getElementById('resendKey').value.trim();
