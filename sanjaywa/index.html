@@ -7,6 +7,14 @@
 <title>WA Blast — AutoSend</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+  code {
+  font-family: 'Space Mono', monospace;
+  background: #080c10;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #a78bfa;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Syne',sans-serif;background:#080c10;color:#d0dde8;}
 .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;justify-content:center;align-items:center;z-index:1000;}
@@ -713,7 +721,351 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .log-tag-info{background:rgba(122,149,168,.12);color:#7a95a8;}
 .log-msg{color:#d0dde8;word-break:break-all;font-size:10px;}
 </style>
+<!-- ===== USER GUIDE TAB (added dynamically) ===== -->
+<script>
+// Add User Guide tab to sidebar and panel
+(function addUserGuideTab() {
+  // 1. Add nav item to sidebar
+  const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+  
+  const settingsNav = document.querySelector('[data-tab="settings"]');
+  if (!settingsNav) return;
+  
+  const userGuideNav = document.createElement('div');
+  userGuideNav.className = 'nav-item';
+  userGuideNav.setAttribute('data-tab', 'userguide');
+  userGuideNav.innerHTML = '📘 User Guide';
+  
+  // Insert after Settings
+  settingsNav.parentNode.insertBefore(userGuideNav, settingsNav.nextSibling);
+  
+  // 2. Create panel content
+  const mainContent = document.querySelector('.main');
+  if (!mainContent) return;
+  
+  const panel = document.createElement('div');
+  panel.className = 'tab-panel';
+  panel.id = 'tab-userguide';
+  
+  panel.innerHTML = `
+    <style>
+      .guide-section {
+        background: #131920;
+        border: 1px solid #1e2a35;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .guide-section h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #00e5a0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .guide-section h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 16px 0 8px 0;
+        color: #a78bfa;
+      }
+      .guide-step {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #0e1318;
+        border-radius: 12px;
+        border-left: 3px solid #00e5a0;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        background: rgba(0,229,160,0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #00e5a0;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .step-content {
+        flex: 1;
+      }
+      .step-title {
+        font-weight: 700;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+      .step-desc {
+        font-size: 12px;
+        color: #7a95a8;
+        line-height: 1.5;
+      }
+      .warning-box {
+        background: rgba(255,95,126,0.08);
+        border: 1px solid rgba(255,95,126,0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+      }
+      .warning-box.warning-orange {
+        background: rgba(255,209,102,0.06);
+        border-color: rgba(255,209,102,0.3);
+      }
+      .warning-box.warning-green {
+        background: rgba(0,229,160,0.04);
+        border-color: rgba(0,229,160,0.2);
+      }
+      .badge-guide {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 700;
+        font-family: 'Space Mono', monospace;
+        margin-right: 8px;
+      }
+      .badge-guide.red { background: rgba(255,95,126,0.15); color: #ff8fa3; }
+      .badge-guide.green { background: rgba(0,229,160,0.15); color: #00e5a0; }
+      .badge-guide.purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+      .badge-guide.yellow { background: rgba(255,209,102,0.15); color: #ffd166; }
+      .limit-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .limit-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #1e2a35;
+      }
+      .limit-table td:first-child {
+        font-weight: 700;
+        width: 40%;
+      }
+      .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+      .checklist-item .check {
+        width: 18px;
+        height: 18px;
+        background: rgba(0,229,160,0.15);
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #00e5a0;
+        font-size: 11px;
+      }
+      hr.divider-guide {
+        border: none;
+        border-top: 1px solid #1e2a35;
+        margin: 16px 0;
+      }
+    </style>
 
+    <!-- SECTION 1: What this tool is -->
+    <div class="guide-section">
+      <h3>🔧 What This Tool Is</h3>
+      <p style="margin-bottom: 12px; font-size: 13px; line-height: 1.5;">
+        WA Blast is a <strong>bulk messaging automation tool</strong> that connects to WhatsApp using the 
+        <strong>GoWA open-source API</strong> — an unofficial WhatsApp Web API wrapper.
+      </p>
+      <p style="font-size: 12px; color: #7a95a8;">
+        It allows you to send personalized messages to multiple contacts, import contacts from CSV/Excel, 
+        export group members, and automate your WhatsApp outreach.
+      </p>
+      <div style="background: rgba(0,229,160,0.04); border-radius: 8px; padding: 10px; margin-top: 12px; font-size: 11px; color: #7a95a8;">
+        <span class="badge-guide purple">i</span> This tool is NOT affiliated with WhatsApp or Meta. It's a third-party automation layer.
+      </div>
+    </div>
+
+    <!-- SECTION 2: How to Use (Step by Step) -->
+    <div class="guide-section">
+      <h3>📖 How To Use</h3>
+      
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">📱 Connect Your WhatsApp Device</div>
+          <div class="step-desc">
+            Go to <strong>Device</strong> tab → Create a device name → Click <strong>"Show QR"</strong> → 
+            Scan with WhatsApp (Settings → Linked Devices → Link a Device). Wait for status to turn <strong style="color:#00e5a0;">CONNECTED</strong>.
+          </div>
+        </div>
+      </div>
+      
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">👥 Import Contacts</div>
+          <div class="step-desc">
+            Go to <strong>Contacts</strong> tab → Paste CSV (Name, Phone) or upload Excel/CSV file.<br>
+            <strong>Pro tip:</strong> You can also <strong>export numbers from a group</strong> (Groups tab → Export button) 
+            and reuse them for your campaign.
+          </div>
+        </div>
+      </div>
+      
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">✍️ Create Your Message</div>
+          <div class="step-desc">
+            Go to <strong>Compose</strong> tab → Write your message template.<br>
+            Use <code style="background:#080c10;padding:2px 6px;border-radius:4px;">{name}</code> to personalize with each contact's name.<br>
+            <strong>AI Feature:</strong> Click <strong>"AI Variations"</strong> to generate up to 10 unique message variations automatically.
+          </div>
+        </div>
+      </div>
+      
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">🚀 Send Campaign</div>
+          <div class="step-desc">
+            Go to <strong>Send</strong> tab → Choose <strong>Message Source</strong> (Template or per-contact message from sheet) → 
+            Click <strong>Start</strong>. The tool will automatically randomize gaps between messages (30-90s) to reduce ban risk.
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider-guide">
+      
+      <div style="background: rgba(167,139,250,0.05); border-radius: 10px; padding: 12px; margin-top: 8px;">
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">💡 Smart Tips:</div>
+        <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #7a95a8; line-height: 1.6;">
+          <li>Use <strong>AI Variations</strong> – the tool will randomly pick from 10 templates, sending unique messages to each contact</li>
+          <li>Download numbers from your WhatsApp groups (Groups tab → Export) and reuse them</li>
+          <li>Add attachments (images, videos, files) in the Compose tab before sending</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Credits -->
+    <div class="guide-section">
+      <h3>⚡ Credits System</h3>
+      <div class="guide-step" style="border-left-color: #a78bfa;">
+        <div class="step-content">
+          <div class="step-desc">
+            <strong>1 credit = 1 successfully sent message</strong><br><br>
+            • Credits are <strong>only consumed when a message is successfully delivered</strong> to WhatsApp's servers<br>
+            • Failed messages (invalid number, disconnected device) do NOT deduct credits<br>
+            • Each message costs <strong>₹0.25</strong> (4 messages per ₹1)<br><br>
+            <span class="badge-guide yellow">⚠️</span> <strong>No refunds or redemptions</strong> — credits are non-refundable, non-transferable, and expire after 90 days of account inactivity.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Limitations to Be Aware Of -->
+    <div class="guide-section">
+      <h3>⚠️ Technical Limitations</h3>
+      
+      <h4>📊 Recommended Limits (Stay Under Radar)</h4>
+      <table class="limit-table">
+        <tr><td>⏱️ Gap between messages</td><td><strong class="green" style="color:#00e5a0;">30-60 seconds</strong> (randomized by tool)</td></tr>
+        <tr><td>📨 Maximum per hour</td><td><strong>100 messages/hour</strong> max safe</td></tr>
+        <tr><td>📅 Maximum per day</td><td><strong>200 messages/day</strong> absolute max</td></tr>
+        <tr><td>🔄 AI Variation pool</td><td>Up to <strong>10 unique templates</strong> – tool auto-selects randomly per message</td></tr>
+        <tr><td>👥 Group participant export</td><td>Download all members from any group you're in</td></tr>
+      </table>
+
+      <h4>🛡️ How We Reduce Ban Risk</h4>
+      <div class="checklist-item"><span class="check">✓</span> Random delays between 30-90 seconds</div>
+      <div class="checklist-item"><span class="check">✓</span> Daily & hourly limit enforcement</div>
+      <div class="checklist-item"><span class="check">✓</span> Personalization with {name} or AI variations</div>
+      <div class="checklist-item"><span class="check">✓</span> No spammy identical messages (variations bypass pattern detection)</div>
+    </div>
+
+    <!-- SECTION 5: Risks and Limitations (HIGHLIGHTED) -->
+    <div class="guide-section">
+      <h3 style="color: #ff8fa3;">🚨 RISKS & DISCLAIMER</h3>
+      
+      <div class="warning-box">
+        <div style="font-weight: 800; margin-bottom: 8px; font-size: 14px;">⚠️ WhatsApp Account Ban Risk</div>
+        <div style="font-size: 12px; line-height: 1.5;">
+          We have implemented best practices and precautions, but <strong>there is still a risk of WhatsApp banning your account</strong> 
+          if you do not follow the recommended limits or act like a spammer.
+        </div>
+      </div>
+
+      <div class="warning-box warning-orange">
+        <div style="font-weight: 800; margin-bottom: 8px; font-size: 13px;">📈 Start Safe – Gradual Warm Up</div>
+        <div style="font-size: 12px; line-height: 1.5;">
+          If you have <strong>never sent bulk messages</strong> from a WhatsApp number before:<br><br>
+          • Start with <strong>50 messages per hour, max 100 per day</strong><br>
+          • Gradually increase over 7-14 days<br>
+          • Monitor if your messages are getting delivered
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <div style="font-weight: 800; margin-bottom: 8px; font-size: 13px;">🔐 Recommendation: Use a Temporary Number</div>
+        <div style="font-size: 12px; line-height: 1.5;">
+          It is <strong>highly recommended</strong> to use a secondary/temporary WhatsApp number for bulk messaging campaigns. 
+          This way, if a ban occurs, your personal or official business number remains safe.
+        </div>
+      </div>
+
+      <div class="warning-box warning-green">
+        <div style="font-weight: 800; margin-bottom: 8px; font-size: 13px;">✅ Official API Alternative (No Ban Risk)</div>
+        <div style="font-size: 12px; line-height: 1.5;">
+          If you need <strong>zero risk</strong> and official compliance, we offer <strong>WA Blast Pro</strong> – our premium tool 
+          built on the <strong>official WhatsApp Business API</strong>. It's more expensive but completely safe, approved by Meta, 
+          and comes with dedicated support.
+          <br><br>
+          <span style="display: inline-block; background: rgba(0,229,160,0.1); padding: 4px 12px; border-radius: 20px; font-size: 11px; margin-top: 6px;">
+            💬 Contact us for pricing: [your-email@domain.com]
+          </span>
+        </div>
+      </div>
+
+      <hr class="divider-guide">
+
+      <div style="font-size: 11px; color: #4a6070; text-align: center; margin-top: 12px;">
+        By using this tool, you acknowledge that you have read, understood, and accepted all risks.<br>
+        No refunds for banned accounts. Use at your own discretion.
+      </div>
+    </div>
+  `;
+  
+  mainContent.appendChild(panel);
+  
+  // 3. Update switchTab to handle userguide
+  const originalSwitchTab = window.switchTab;
+  window.switchTab = function(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const targetPanel = document.getElementById(`tab-${name}`);
+    if (targetPanel) targetPanel.classList.add('active');
+    const targetNav = document.querySelector(`[data-tab="${name}"]`);
+    if (targetNav) targetNav.classList.add('active');
+    
+    if (name === 'settings') {
+      if (window.loadCredits) window.loadCredits();
+    }
+    if (name === 'send') {
+      const pending = (window.contacts || []).filter(c => !c.status || c.status === 'pending').length;
+      const costEl = document.getElementById('creditCost');
+      if (costEl) costEl.textContent = pending + ' credits';
+      if (window.setMsgSource) window.setMsgSource(window.msgSource || 'template');
+      if (window.updateSendGuard) window.updateSendGuard();
+    }
+  };
+  
+  console.log('User Guide tab added successfully');
+})();
+</script>
 <script>
 // ─── Log core ───
 let logOpen = true, logCount = 0;
