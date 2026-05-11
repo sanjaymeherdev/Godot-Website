@@ -849,26 +849,25 @@ tbody tr:hover td{background:rgba(255,255,255,.012);}
         </div>
         <div class="card" style="padding:0;"><div id="logsList" style="padding:14px 16px;"><div class="empty-state">No activity yet</div></div></div>
       </div>
-
-      <!-- ═══ WEB BOT TAB — PRO LOCKED ═══ -->
-      <div class="tab" id="tab-webbot">
-        <div class="sec-hdr">
-          <div><div class="sec-title">Web Assistant Bot</div><div class="sec-sub">// AI sales widget for your website</div></div>
-          <div class="btn-row">
-            <a href="https://github.com/sanjaymeherdev/Godot-Website/blob/main/marketing/leadflow-bot.js" class="btn btn-g" target="_blank">📥 Download bot.js</a>
-            <button class="btn btn-b" onclick="copyScriptTag()">📋 Copy Script Tag</button>
-          </div>
-        </div>
-        <div class="card feature-locked" id="webbotCard">
-          <div class="card-title" style="margin-bottom:10px;">🔑 Your Bot Token</div>
-          <div class="fg"><label>Copy for installation</label><div style="display:flex;gap:8px;"><input type="text" id="botToken" readonly style="flex:1;font-family:var(--mono);font-size:11px;"><button class="btn btn-s" onclick="copyBotToken()">Copy</button></div></div>
-          <div class="card-title" style="margin:14px 0 10px;">⚡ Script Tag</div>
-          <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;position:relative;">
-            <button class="btn btn-s btn-sm" style="position:absolute;top:8px;right:8px;" onclick="copyScriptTag()">📋 Copy</button>
-            <pre id="scriptTagPre" style="font-family:var(--mono);font-size:10px;white-space:pre-wrap;word-break:break-all;margin:0;color:var(--text);"></pre>
-          </div>
-        </div>
-      </div>
+<!-- ═══ WEB BOT TAB — PRO LOCKED ═══ -->
+<div class="tab" id="tab-webbot">
+  <div class="sec-hdr">
+    <div><div class="sec-title">Web Assistant Bot</div><div class="sec-sub">// AI sales widget for your website</div></div>
+    <div class="btn-row" id="webbotActions" style="display: none;">
+      <a href="https://github.com/sanjaymeherdev/Godot-Website/blob/main/marketing/leadflow-bot.js" class="btn btn-g" target="_blank">📥 Download bot.js</a>
+      <button class="btn btn-b" onclick="copyScriptTag()">📋 Copy Script Tag</button>
+    </div>
+  </div>
+  <div class="card" id="webbotCard">
+    <div class="card-title" style="margin-bottom:10px;">🔑 Your Bot Token</div>
+    <div class="fg"><label>Copy for installation</label><div style="display:flex;gap:8px;"><input type="text" id="botToken" readonly style="flex:1;font-family:var(--mono);font-size:11px;"><button class="btn btn-s" onclick="copyBotToken()">Copy</button></div></div>
+    <div class="card-title" style="margin:14px 0 10px;">⚡ Script Tag</div>
+    <div style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px;position:relative;">
+      <button class="btn btn-s btn-sm" style="position:absolute;top:8px;right:8px;" onclick="copyScriptTag()">📋 Copy</button>
+      <pre id="scriptTagPre" style="font-family:var(--mono);font-size:10px;white-space:pre-wrap;word-break:break-all;margin:0;color:var(--text);"></pre>
+    </div>
+  </div>
+</div>
 
     </div><!-- /content -->
   </main>
@@ -1046,51 +1045,74 @@ function renderTx(txs){
 }
 async function loadUserFeatures(){
   try{
-    const r=await api('getUserFeatures');
+    const r = await api('getUserFeatures');
     if(r.success){
-      userFeatures=r.features||{};
-      userTier=r.tier||'free';
+      userFeatures = r.features || {};
+      // FIX: Check both tier and subscription_tier
+      userTier = r.tier || r.subscription_tier || 'free';
+      console.log('User tier detected:', userTier);
       applyFeatureGating();
-      updatePlanBadge(r.tier,r.expires_at);
+      updatePlanBadge(userTier, r.expires_at);
+      // Force refresh of credits display
+      loadCredits();
     }
-  }catch(e){console.warn('loadUserFeatures:',e);}
+  } catch(e){ console.warn('loadUserFeatures:', e); }
 }
-function updatePlanBadge(tier,expiresAt){
-  const badge=document.getElementById('planBadge');
-  const name=document.getElementById('planName');
-  const exp=document.getElementById('planExp');
-  if(!badge)return;
-  const isPro=tier==='pro';
-  badge.className='plan-badge '+(isPro?'pro':'free');
-  name.className='pb-name '+(isPro?'pro':'free');
-  name.textContent=isPro?'PRO PLAN':'FREE PLAN';
-  if(isPro&&expiresAt){
-    const d=new Date(expiresAt);
-    exp.textContent='Expires '+d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-    const daysLeft=Math.ceil((d-Date.now())/86400000);
-    if(daysLeft<=7)exp.style.color='var(--r)';
-  }else{
-    exp.textContent='';
+  
+function updatePlanBadge(tier, expiresAt){
+  const badge = document.getElementById('planBadge');
+  const name = document.getElementById('planName');
+  const exp = document.getElementById('planExp');
+  if(!badge) return;
+  
+  // FIX: Normalize tier value
+  const isPro = tier === 'pro' || tier === 'Pro' || tier === 'PRO';
+  
+  badge.className = 'plan-badge ' + (isPro ? 'pro' : 'free');
+  name.className = 'pb-name ' + (isPro ? 'pro' : 'free');
+  name.textContent = isPro ? 'PRO PLAN' : 'FREE PLAN';
+  
+  if(isPro && expiresAt){
+    const d = new Date(expiresAt);
+    exp.textContent = 'Expires ' + d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+    const daysLeft = Math.ceil((d - Date.now()) / 86400000);
+    if(daysLeft <= 7) exp.style.color = 'var(--r)';
+  } else {
+    exp.textContent = '';
     if(!isPro){
-      name.innerHTML='FREE PLAN <span style="font-size:8px;cursor:pointer;color:var(--g);margin-left:4px;" onclick="openUpgradeModal()">Upgrade →</span>';
+      name.innerHTML = 'FREE PLAN <span style="font-size:8px;cursor:pointer;color:var(--g);margin-left:4px;" onclick="openUpgradeModal()">Upgrade →</span>';
     }
   }
+  
   // Update webbot lock icon
-  const lock=document.getElementById('webbotLock');
-  if(lock)lock.style.display=isPro?'none':'';
+  const lock = document.getElementById('webbotLock');
+  if(lock) lock.style.display = isPro ? 'none' : '';
+  
+  // Force re-apply feature gating
+  applyFeatureGating();
 }
+  
 function applyFeatureGating(){
-  const isPro=userTier==='pro';
+  const isPro = userTier === 'pro' || userTier === 'Pro' || userTier === 'PRO';
+  
   // ManyChat
-  const mc=document.getElementById('manychatCard');
-  if(mc)applyLock(mc,isPro||userFeatures?.manychat,'ManyChat — Instagram & FB Lead Capture','Requires Pro plan');
+  const mc = document.getElementById('manychatCard');
+  if(mc) applyLock(mc, isPro || userFeatures?.manychat, 'ManyChat — Instagram & FB Lead Capture', 'Requires Pro plan');
+  
   // Calendly
-  const cal=document.getElementById('calendlyCard');
-  if(cal)applyLock(cal,isPro||userFeatures?.calendly,'Calendly — Booking Sync','Requires Pro plan');
-  // WebBot
-  const wb=document.getElementById('webbotCard');
-  if(wb)applyLock(wb,isPro||userFeatures?.webbot,'Web Assistant Bot','Requires Pro plan');
+  const cal = document.getElementById('calendlyCard');
+  if(cal) applyLock(cal, isPro || userFeatures?.calendly, 'Calendly — Booking Sync', 'Requires Pro plan');
+  
+  // WebBot - FIX: Hide buttons for free users
+  const wb = document.getElementById('webbotCard');
+  const wbActions = document.getElementById('webbotActions');
+  if(wb) {
+    const hasAccess = isPro || userFeatures?.webbot;
+    applyLock(wb, hasAccess, 'Web Assistant Bot', 'Requires Pro plan');
+    if(wbActions) wbActions.style.display = hasAccess ? 'flex' : 'none';
+  }
 }
+  
 function applyLock(card,hasAccess,title,sub){
   // remove existing overlay
   const existing=card.querySelector('.lock-overlay');
