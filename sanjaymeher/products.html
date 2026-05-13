@@ -7,6 +7,68 @@
     <title>Products | Sanjay Meher - Digital Assets & Tools</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Additional styles for product images */
+        .product-image-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image-container img {
+            transform: scale(1.05);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .search-input {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            width: 250px;
+            font-size: 0.9rem;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .products-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .search-input {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Desktop Theme Toggle -->
@@ -16,7 +78,7 @@
         </button>
     </div>
 
-    <!-- Navigation - UPDATED to match CSS -->
+    <!-- Navigation -->
     <header class="main-header">
         <div class="container">
             <div class="header-content">
@@ -55,7 +117,6 @@
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
-            <!-- Mobile Theme Toggle -->
             <div class="mobile-theme-toggle">
                 <button id="themeToggleMobile" class="mobile-theme-btn">
                     <span class="theme-icon">🌙</span> Switch Theme
@@ -83,7 +144,8 @@
             </div>
             <div class="products-grid" id="productsGrid">
                 <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i> Loading products...
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading products...</p>
                 </div>
             </div>
         </div>
@@ -118,5 +180,190 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        // Override the applyProducts function to use image_url column
+        function applyProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+
+            const active = products.filter(p => p.active !== false && p.active !== 'FALSE');
+
+            if (!active.length) {
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products found.</p>';
+                return;
+            }
+
+            // Get search input value if exists
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            
+            // Filter products by search term
+            let filteredProducts = active;
+            if (searchTerm) {
+                filteredProducts = active.filter(p => {
+                    const name = (p.name || '').toLowerCase();
+                    const description = (p.description || '').toLowerCase();
+                    return name.includes(searchTerm) || description.includes(searchTerm);
+                });
+            }
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products match your search.</p>';
+                return;
+            }
+
+            grid.innerHTML = filteredProducts.map(p => {
+                // Use image_url column directly
+                const imageUrl = p.image_url || '';
+                
+                return `
+                    <div class="product-card">
+                        ${imageUrl ? `
+                        <div class="product-image-container">
+                            <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name || 'Product')}">
+                        </div>
+                        ` : ''}
+                        <div class="product-info">
+                            <h3>${escapeHtml(p.name || '')}</h3>
+                            ${p.problem ? `<p class="problem-line">"${escapeHtml(p.problem)}"</p>` : ''}
+                            <p>${escapeHtml(p.description || '')}</p>
+                            ${p.feature1 ? `<ul class="feature-list">
+                                ${p.feature1 ? `<li>${escapeHtml(p.feature1)}</li>` : ''}
+                                ${p.feature2 ? `<li>${escapeHtml(p.feature2)}</li>` : ''}
+                                ${p.feature3 ? `<li>${escapeHtml(p.feature3)}</li>` : ''}
+                            </ul>` : ''}
+                            <div class="product-price-tag" style="display: ${p.price ? 'inline-block' : 'none'}; margin-bottom: 15px;">
+                                ${escapeHtml(p.price || '')}
+                            </div>
+                            <a href="${escapeHtml(p.buy_link || '#')}" class="quote-btn" ${!p.buy_link ? 'onclick="return false;"' : ''}>
+                                ${p.buy_link ? 'Buy Now →' : 'Contact for Price →'}
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const countEl = document.getElementById('productsCount');
+            if (countEl) countEl.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} available`;
+        }
+
+        // Add search functionality
+        function initProductSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput) return;
+            
+            searchInput.addEventListener('input', (e) => {
+                if (window.productsData) {
+                    const active = window.productsData.filter(p => p.active !== false && p.active !== 'FALSE');
+                    const searchTerm = e.target.value.toLowerCase();
+                    
+                    const filtered = active.filter(p => {
+                        const name = (p.name || '').toLowerCase();
+                        const description = (p.description || '').toLowerCase();
+                        return name.includes(searchTerm) || description.includes(searchTerm);
+                    });
+                    
+                    const grid = document.getElementById('productsGrid');
+                    if (!grid) return;
+                    
+                    if (filtered.length === 0) {
+                        grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products match your search.</p>';
+                    } else {
+                        grid.innerHTML = filtered.map(p => {
+                            const imageUrl = p.image_url || '';
+                            
+                            return `
+                                <div class="product-card">
+                                    ${imageUrl ? `
+                                    <div class="product-image-container">
+                                        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name || 'Product')}">
+                                    </div>
+                                    ` : ''}
+                                    <div class="product-info">
+                                        <h3>${escapeHtml(p.name || '')}</h3>
+                                        ${p.problem ? `<p class="problem-line">"${escapeHtml(p.problem)}"</p>` : ''}
+                                        <p>${escapeHtml(p.description || '')}</p>
+                                        ${p.feature1 ? `<ul class="feature-list">
+                                            ${p.feature1 ? `<li>${escapeHtml(p.feature1)}</li>` : ''}
+                                            ${p.feature2 ? `<li>${escapeHtml(p.feature2)}</li>` : ''}
+                                            ${p.feature3 ? `<li>${escapeHtml(p.feature3)}</li>` : ''}
+                                        </ul>` : ''}
+                                        <div class="product-price-tag" style="display: ${p.price ? 'inline-block' : 'none'}; margin-bottom: 15px;">
+                                            ${escapeHtml(p.price || '')}
+                                        </div>
+                                        <a href="${escapeHtml(p.buy_link || '#')}" class="quote-btn" ${!p.buy_link ? 'onclick="return false;"' : ''}>
+                                            ${p.buy_link ? 'Buy Now →' : 'Contact for Price →'}
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                    
+                    const countEl = document.getElementById('productsCount');
+                    if (countEl) countEl.textContent = `${filtered.length} product${filtered.length !== 1 ? 's' : ''} available`;
+                }
+            });
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Store original functions and override loadAllData
+        window.originalApplyProducts = window.applyProducts;
+        window.applyProducts = applyProducts;
+        
+        const originalLoadAllData = window.loadAllData;
+        if (typeof originalLoadAllData === 'function') {
+            window.loadAllData = async function() {
+                try {
+                    const [colors, settings, products] = await Promise.all([
+                        supabaseFetch('colors'),
+                        supabaseFetch('settings'),
+                        supabaseFetch('products')
+                    ]);
+                    
+                    window.productsData = products;
+                    
+                    if (typeof applyColors === 'function') applyColors(colors);
+                    if (typeof applySettings === 'function') applySettings(settings);
+                    if (typeof applyProducts === 'function') applyProducts(products);
+                    
+                    const currentTheme = localStorage.getItem('theme');
+                    const bgDark = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
+                    const bgLight = getComputedStyle(document.documentElement).getPropertyValue('--bg-light').trim();
+                    
+                    if (currentTheme === 'light') {
+                        document.body.classList.add('light-theme');
+                        document.body.style.backgroundColor = bgLight || '#f5f5f7';
+                        if (typeof updateThemeIcons === 'function') updateThemeIcons('light');
+                    } else {
+                        document.body.classList.remove('light-theme');
+                        document.body.style.backgroundColor = bgDark || '#0a0a0f';
+                        if (typeof updateThemeIcons === 'function') updateThemeIcons('dark');
+                    }
+                    
+                    localStorage.removeItem('siteData');
+                    localStorage.removeItem('siteDataTime');
+                } catch(error) {
+                    console.error('Supabase load failed:', error);
+                    const grid = document.getElementById('productsGrid');
+                    if (grid && grid.innerHTML.includes('fa-spinner')) {
+                        grid.innerHTML = '<p style="text-align:center;color:#ef4444;">⚠️ Unable to load data. Please refresh the page.</p>';
+                    }
+                }
+            };
+        }
+        
+        // Initialize search when DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initProductSearch();
+            }, 500);
+        });
+    </script>
 </body>
 </html>
