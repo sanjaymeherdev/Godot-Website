@@ -184,6 +184,7 @@ function formatPhoneNumber(number) {
 }
 
 // ==================== APPLY PRODUCTS ====================
+// ==================== APPLY PRODUCTS ====================
 function applyProducts(products) {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
@@ -191,32 +192,60 @@ function applyProducts(products) {
   const active = products.filter(p => p.active !== false && p.active !== 'FALSE');
 
   if (!active.length) {
-    grid.innerHTML = '<p style="text-align:center;color:#9090b8;">No products found.</p>';
+    grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products found.</p>';
     return;
   }
 
-  grid.innerHTML = active.map(p => `
-    <div class="service-card">
-      <div class="service-icon">${escapeHtml(p.icon || p.Icon || '📦')}</div>
-      <h3>${escapeHtml(p.name || p.Name || '')}</h3>
-      <p class="problem-line">"${escapeHtml(p.problem || p.Problem || '')}"</p>
-      <p>${escapeHtml(p.description || p.Description || '')}</p>
-      <ul class="feature-list">
-        ${(p.feature1 || p.Feature1) ? `<li>${escapeHtml(p.feature1 || p.Feature1)}</li>` : ''}
-        ${(p.feature2 || p.Feature2) ? `<li>${escapeHtml(p.feature2 || p.Feature2)}</li>` : ''}
-        ${(p.feature3 || p.Feature3) ? `<li>${escapeHtml(p.feature3 || p.Feature3)}</li>` : ''}
-      </ul>
-      <div style="margin-top:10px;font-weight:bold;color:var(--primary-color,#8b5cf6);">
-        ${escapeHtml(p.price || p.Price || '')}
+  // Add search functionality if search input exists
+  const searchInput = document.getElementById('searchInput');
+  let filteredProducts = active;
+  
+  if (searchInput && searchInput.value) {
+    const searchTerm = searchInput.value.toLowerCase();
+    filteredProducts = active.filter(p => {
+      const name = (p.name || '').toLowerCase();
+      const description = (p.description || '').toLowerCase();
+      return name.includes(searchTerm) || description.includes(searchTerm);
+    });
+  }
+
+  if (filteredProducts.length === 0) {
+    grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products match your search.</p>';
+    return;
+  }
+
+  grid.innerHTML = filteredProducts.map(p => {
+    // Use image_url column
+    const imageUrl = p.image_url || '';
+    
+    return `
+      <div class="product-card">
+        ${imageUrl ? `
+        <div class="product-image-container">
+          <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name || 'Product')}" loading="lazy">
+        </div>
+        ` : ''}
+        <div class="product-info">
+          <h3>${escapeHtml(p.name || '')}</h3>
+          ${p.problem ? `<p class="problem-line">"${escapeHtml(p.problem)}"</p>` : ''}
+          <p>${escapeHtml(p.description || '')}</p>
+          <ul class="feature-list">
+            ${p.feature1 ? `<li>${escapeHtml(p.feature1)}</li>` : ''}
+            ${p.feature2 ? `<li>${escapeHtml(p.feature2)}</li>` : ''}
+            ${p.feature3 ? `<li>${escapeHtml(p.feature3)}</li>` : ''}
+          </ul>
+          <div style="margin-top:10px;font-weight:bold;color:var(--accent);">
+            ${escapeHtml(p.price || '')}
+          </div>
+          <a href="${escapeHtml(p.buy_link || 'contact.html')}" class="quote-btn">Get Quote →</a>
+        </div>
       </div>
-      <a href="${escapeHtml(p.buy_link || p.BuyLink || 'contact.html')}" class="quote-btn">Get Quote →</a>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   const countEl = document.getElementById('productsCount');
-  if (countEl) countEl.textContent = `${active.length} products available`;
+  if (countEl) countEl.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} available`;
 }
-
 // ==================== LOAD ALL DATA FROM SUPABASE ====================
 async function loadAllData() {
   try {
