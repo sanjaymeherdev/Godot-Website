@@ -107,16 +107,24 @@ function applyColors(colors) {
   const textDark = map.text_dark || '#ffffff';
   const textLight = map.text_light || '#1a1a2e';
 
-  document.documentElement.style.setProperty('--primary-color', primaryColor);
-  document.documentElement.style.setProperty('--secondary-color', secondaryColor);
-  document.documentElement.style.setProperty('--bg-dark', bgDark);
-  document.documentElement.style.setProperty('--bg-light', bgLight);
-  document.documentElement.style.setProperty('--text-dark', textDark);
-  document.documentElement.style.setProperty('--text-light', textLight);
+  // Set ALL CSS variables
+  document.documentElement.style.setProperty('--accent', primaryColor);
+  document.documentElement.style.setProperty('--accent-hover', secondaryColor);
+  document.documentElement.style.setProperty('--bg-primary', bgDark);
+  document.documentElement.style.setProperty('--bg-secondary', bgDark);
+  document.documentElement.style.setProperty('--bg-card', bgDark);
+  document.documentElement.style.setProperty('--text-primary', textDark);
+  document.documentElement.style.setProperty('--text-secondary', '#94A3B8');
+  document.documentElement.style.setProperty('--border', '#334155');
 
   // Apply current theme background
   if (document.body.classList.contains('light-theme')) {
     document.body.style.backgroundColor = bgLight;
+    document.documentElement.style.setProperty('--bg-primary', bgLight);
+    document.documentElement.style.setProperty('--bg-secondary', bgLight);
+    document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
+    document.documentElement.style.setProperty('--text-primary', textLight);
+    document.documentElement.style.setProperty('--border', '#E2E8F0');
   } else {
     document.body.style.backgroundColor = bgDark;
   }
