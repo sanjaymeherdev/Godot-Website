@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMB Tracker — Graphicy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #00ff88;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #f0f0f0;
+    --muted: #666;
+    --star: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── LOGIN SCREEN ─── */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: var(--bg);
+    gap: 32px;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3), var(--accent2));
+  }
+
+  .logo-mark {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .login-card h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+
+  .login-card h1 span { color: var(--accent); }
+
+  .login-card p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+    line-height: 1.6;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .config-section {
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .config-section label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .config-section input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .config-section input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary:hover { background: #00cc6a; transform: translateY(-1px); }
+
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+  .or-divider::before, .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .btn-token {
+    width: 100%;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-token:hover { background: rgba(0,255,136,0.1); }
+
+  /* Token paste modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+  }
+  .modal-box h3 { margin-bottom: 16px; font-size: 18px; }
+  .modal-box textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    height: 100px;
+    resize: none;
+    outline: none;
+    margin-bottom: 16px;
+  }
+  .modal-box textarea:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-cancel {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-confirm {
+    flex: 1;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ─── MAIN APP ─── */
+  #app { display: none; position: relative; z-index: 1; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .brand {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .brand span { color: var(--accent); }
+
+  .location-selector {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    min-width: 200px;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .refresh-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Main content */
+  .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* Stats row */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+  .stat-card:hover::after { transform: scaleX(1); }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .stat-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    opacity: 0.3;
+  }
+
+  /* Stars display */
+  .stars {
+    display: flex;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .star { color: var(--star); font-size: 16px; }
+  .star.empty { color: var(--border); }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Section card */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .section-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* Reviews list */
+  .reviews-list { padding: 0; }
+
+  .review-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-item:hover { background: var(--surface2); }
+
+  .review-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .reviewer-name {
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .review-date {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .review-stars { margin-bottom: 8px; }
+
+  .review-text {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.6;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .review-reply {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--surface2);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .reply-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  /* Reply button */
+  .btn-reply {
+    margin-top: 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-reply:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Listing info */
+  .info-list { padding: 0; }
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .info-item:last-child { border-bottom: none; }
+
+  .info-key {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    min-width: 120px;
+    padding-top: 2px;
+  }
+
+  .info-val {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    font-family: 'Space Mono', monospace;
+    word-break: break-all;
+  }
+
+  .info-val a { color: var(--accent); text-decoration: none; }
+  .info-val a:hover { text-decoration: underline; }
+
+  /* Hours grid */
+  .hours-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .hour-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .hour-row.today { background: rgba(0,255,136,0.1); color: var(--accent); }
+  .day-name { color: var(--muted); }
+
+  /* Rating breakdown */
+  .rating-breakdown { padding: 24px; }
+
+  .rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .rating-bar-label {
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    min-width: 40px;
+  }
+
+  .rating-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .rating-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .rating-bar-count {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    min-width: 30px;
+    text-align: right;
+  }
+
+  /* Full width section */
+  .full-section {
+    margin-bottom: 24px;
+  }
+
+  /* Loading state */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    gap: 12px;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Empty state */
+  .empty-state {
+    padding: 48px;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  /* Status dot */
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    z-index: 999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Reply modal */
+  .reply-modal-box textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    height: 120px;
+    resize: none;
+    outline: none;
+    margin-bottom: 16px;
+  }
+  .reply-modal-box textarea:focus { border-color: var(--accent); }
+
+  .sentiment-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+  .sentiment-positive { background: rgba(0,255,136,0.15); color: var(--accent); }
+  .sentiment-negative { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .sentiment-neutral { background: rgba(255,255,255,0.08); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo-mark">📍</div>
+    <h1>GMB <span>Tracker</span></h1>
+    <p>by Graphicy · Monitor your Google Business listings, reviews, and insights in one place.</p>
+
+    <div class="config-section">
+      <label>Client ID</label>
+      <input type="text" id="client-id" placeholder="318883110705-xxx.apps.googleusercontent.com" />
+    </div>
+    <div class="config-section">
+      <label>Client Secret</label>
+      <input type="password" id="client-secret" placeholder="GOCSPX-xxxxxxxxxxxx" />
+    </div>
+
+    <button class="btn-primary" onclick="startOAuth()">🔐 Connect with Google</button>
+
+    <div class="or-divider">or paste existing token</div>
+
+    <button class="btn-token" onclick="openTokenModal()">📋 Paste Access Token</button>
+  </div>
+</div>
+
+<!-- Token paste modal -->
+<div class="modal" id="token-modal">
+  <div class="modal-box">
+    <h3>Paste Access Token</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-family:'Space Mono',monospace;">Get from OAuth Playground → Exchange code for tokens → Copy access_token</p>
+    <textarea id="token-input" placeholder="ya29.a0AQvPy..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeTokenModal()">Cancel</button>
+      <button class="btn-confirm" onclick="useToken()">Use Token</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reply modal -->
+<div class="modal" id="reply-modal">
+  <div class="modal-box reply-modal-box">
+    <h3 style="margin-bottom:8px;">Reply to Review</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-family:'Space Mono',monospace;" id="reply-reviewer-name"></p>
+    <textarea id="reply-text" placeholder="Write your reply..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeReplyModal()">Cancel</button>
+      <button class="btn-confirm" onclick="submitReply()">Post Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="brand">GMB <span>Tracker</span></div>
+      <select class="location-selector" id="location-select" onchange="loadLocationData()">
+        <option>Loading locations...</option>
+      </select>
+    </div>
+    <div class="header-right">
+      <span style="font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);">
+        <span class="status-dot"></span>Live
+      </span>
+      <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-label">Avg Rating</div>
+        <div class="stat-value" id="stat-rating">—</div>
+        <div class="stars" id="stat-stars"></div>
+        <div class="stat-sub" id="stat-rating-sub">loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-label">Total Reviews</div>
+        <div class="stat-value" id="stat-reviews">—</div>
+        <div class="stat-sub" id="stat-reviews-sub">loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Replied</div>
+        <div class="stat-value" id="stat-replied">—</div>
+        <div class="stat-sub" id="stat-replied-sub">loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Pending Reply</div>
+        <div class="stat-value" id="stat-pending" style="color:var(--accent2)">—</div>
+        <div class="stat-sub" id="stat-pending-sub">loading...</div>
+      </div>
+    </div>
+
+    <!-- Two column -->
+    <div class="two-col">
+      <!-- Reviews -->
+      <div class="section-card full-section">
+        <div class="section-header">
+          <div class="section-title">📝 Recent Reviews</div>
+          <div class="section-badge" id="reviews-count">—</div>
+        </div>
+        <div class="reviews-list" id="reviews-list">
+          <div class="loading"><div class="spinner"></div> Loading reviews...</div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Rating breakdown -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">📊 Rating Breakdown</div>
+          </div>
+          <div class="rating-breakdown" id="rating-breakdown">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Listing info -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">📍 Listing Info</div>
+          </div>
+          <div class="info-list" id="listing-info">
+            <div class="loading"><div class="spinner"></div> Loading...</div>
+          </div>
+        </div>
+
+        <!-- Hours -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">🕐 Business Hours</div>
+          </div>
+          <div style="padding:20px 24px;" id="hours-section">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───
+let accessToken = '';
+let accountId = '';
+let locations = [];
+let currentLocationName = '';
+let currentReviewName = '';
+let allReviews = [];
+let clientId = '';
+let clientSecret = '';
+
+const DAYS = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+const TODAY = DAYS[new Date().getDay()];
+
+// ─── INIT ───
+window.onload = () => {
+  // Check for OAuth callback
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (code) {
+    const saved = JSON.parse(localStorage.getItem('gmb_oauth') || '{}');
+    clientId = saved.clientId || '';
+    clientSecret = saved.clientSecret || '';
+    exchangeCode(code);
+    return;
+  }
+
+  // Check saved token
+  const saved = localStorage.getItem('gmb_token');
+  if (saved) {
+    accessToken = saved;
+    clientId = localStorage.getItem('gmb_client_id') || '';
+    clientSecret = localStorage.getItem('gmb_client_secret') || '';
+    showApp();
+  }
+};
+
+// ─── OAUTH ───
+function startOAuth() {
+  clientId = document.getElementById('client-id').value.trim();
+  clientSecret = document.getElementById('client-secret').value.trim();
+
+  if (!clientId || !clientSecret) {
+    showToast('Enter Client ID and Secret first!');
+    return;
+  }
+
+  localStorage.setItem('gmb_oauth', JSON.stringify({ clientId, clientSecret }));
+  localStorage.setItem('gmb_client_id', clientId);
+  localStorage.setItem('gmb_client_secret', clientSecret);
+
+  const redirectUri = window.location.origin + window.location.pathname;
+  const scope = 'https://www.googleapis.com/auth/business.manage';
+  const url = `https://accounts.google.com/o/oauth2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent`;
+
+  window.location.href = url;
+}
+
+async function exchangeCode(code) {
+  const redirectUri = window.location.origin + window.location.pathname;
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code'
+      })
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      accessToken = data.access_token;
+      localStorage.setItem('gmb_token', accessToken);
+      if (data.refresh_token) localStorage.setItem('gmb_refresh', data.refresh_token);
+      window.history.replaceState({}, '', window.location.pathname);
+      showApp();
+    } else {
+      showToast('OAuth failed: ' + (data.error_description || data.error));
+    }
+  } catch(e) {
+    showToast('Token exchange failed');
+  }
+}
+
+// ─── TOKEN MODAL ───
+function openTokenModal() { document.getElementById('token-modal').classList.add('open'); }
+function closeTokenModal() { document.getElementById('token-modal').classList.remove('open'); }
+
+function useToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token.startsWith('ya29.')) { showToast('Invalid token — must start with ya29.'); return; }
+  accessToken = token;
+  localStorage.setItem('gmb_token', token);
+  closeTokenModal();
+  showApp();
+}
+
+// ─── SHOW APP ───
+async function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  await loadAccounts();
+}
+
+// ─── API CALLS ───
+async function gmb(url) {
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${accessToken}` }
+  });
+  if (res.status === 401) { logout(); throw new Error('Token expired'); }
+  return res.json();
+}
+
+async function loadAccounts() {
+  try {
+    const data = await gmb('https://mybusinessaccountmanagement.googleapis.com/v1/accounts');
+    if (data.accounts && data.accounts.length > 0) {
+      accountId = data.accounts[0].name.split('/')[1];
+      await loadLocations();
+    } else {
+      showToast('No GMB accounts found');
+    }
+  } catch(e) {
+    showToast('Failed to load accounts');
+  }
+}
+
+async function loadLocations() {
+  try {
+    const data = await gmb(`https://mybusinessbusinessinformation.googleapis.com/v1/accounts/${accountId}/locations?readMask=name,title,storefrontAddress,websiteUri,regularHours,phoneNumbers`);
+    locations = data.locations || [];
+    const sel = document.getElementById('location-select');
+    sel.innerHTML = locations.map((l,i) => `<option value="${i}">${l.title}</option>`).join('');
+    if (locations.length > 0) loadLocationData();
+  } catch(e) {
+    showToast('Failed to load locations');
+  }
+}
+
+function loadLocationData() {
+  const idx = document.getElementById('location-select').value;
+  const loc = locations[idx];
+  if (!loc) return;
+  currentLocationName = loc.name;
+  renderListingInfo(loc);
+  renderHours(loc);
+  loadReviews(loc.name);
+}
+
+async function loadReviews(locationName) {
+  document.getElementById('reviews-list').innerHTML = '<div class="loading"><div class="spinner"></div> Loading reviews...</div>';
+  document.getElementById('rating-breakdown').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  const locId = locationName.split('/')[1];
+  const accountName = `accounts/${accountId}`;
+
+  try {
+    // Try reviews API
+    const data = await gmb(`https://mybusiness.googleapis.com/v4/${accountName}/locations/${locId}/reviews?pageSize=50`);
+
+    if (data.error) {
+      // Fallback: show mock data with explanation
+      renderMockReviews();
+      return;
+    }
+
+    allReviews = data.reviews || [];
+    renderReviews(allReviews);
+    renderStats(allReviews, data.averageRating);
+    renderRatingBreakdown(allReviews);
+  } catch(e) {
+    renderMockReviews();
+  }
+}
+
+function renderStats(reviews, avgRating) {
+  const avg = avgRating || (reviews.length ? (reviews.reduce((s,r) => s + starCount(r.starRating), 0) / reviews.length).toFixed(1) : 0);
+  const replied = reviews.filter(r => r.reviewReply).length;
+  const pending = reviews.filter(r => !r.reviewReply).length;
+
+  document.getElementById('stat-rating').textContent = avg || '—';
+  document.getElementById('stat-reviews').textContent = reviews.length;
+  document.getElementById('stat-replied').textContent = replied;
+  document.getElementById('stat-pending').textContent = pending;
+
+  document.getElementById('stat-rating-sub').textContent = 'average rating';
+  document.getElementById('stat-reviews-sub').textContent = 'total reviews';
+  document.getElementById('stat-replied-sub').textContent = `${reviews.length ? Math.round(replied/reviews.length*100) : 0}% response rate`;
+  document.getElementById('stat-pending-sub').textContent = pending > 0 ? '⚠ needs attention' : '✓ all replied';
+
+  // Stars
+  const starsEl = document.getElementById('stat-stars');
+  const fullStars = Math.round(avg);
+  starsEl.innerHTML = [1,2,3,4,5].map(i => `<span class="star ${i <= fullStars ? '' : 'empty'}">★</span>`).join('');
+
+  document.getElementById('reviews-count').textContent = `${reviews.length} total`;
+}
+
+function starCount(rating) {
+  const map = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 };
+  return map[rating] || 0;
+}
+
+function starLabel(rating) {
+  return '★'.repeat(starCount(rating)) + '☆'.repeat(5 - starCount(rating));
+}
+
+function getSentiment(stars) {
+  if (stars >= 4) return { label: 'positive', cls: 'sentiment-positive' };
+  if (stars <= 2) return { label: 'negative', cls: 'sentiment-negative' };
+  return { label: 'neutral', cls: 'sentiment-neutral' };
+}
+
+function renderReviews(reviews) {
+  if (!reviews.length) {
+    document.getElementById('reviews-list').innerHTML = '<div class="empty-state">No reviews yet</div>';
+    return;
+  }
+
+  document.getElementById('reviews-list').innerHTML = reviews.map(r => {
+    const stars = starCount(r.starRating);
+    const sent = getSentiment(stars);
+    const date = r.createTime ? new Date(r.createTime).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+    const text = r.comment || '<em style="color:var(--muted)">No comment</em>';
+    const replyHtml = r.reviewReply ? `
+      <div class="review-reply">
+        <div class="reply-label">Your Reply</div>
+        ${r.reviewReply.comment}
+      </div>` : `<button class="btn-reply" onclick="openReplyModal('${r.name}', '${r.reviewer?.displayName || 'Reviewer'}')">↩ Reply</button>`;
+
+    return `
+      <div class="review-item">
+        <div class="review-top">
+          <div>
+            <span class="reviewer-name">${r.reviewer?.displayName || 'Anonymous'}</span>
+            <span class="sentiment-tag ${sent.cls}">${sent.label}</span>
+          </div>
+          <div class="review-date">${date}</div>
+        </div>
+        <div class="review-stars" style="color:var(--star);font-size:14px;">${starLabel(r.starRating)}</div>
+        <div class="review-text">${text}</div>
+        ${replyHtml}
+      </div>`;
+  }).join('');
+}
+
+function renderRatingBreakdown(reviews) {
+  const counts = {5:0, 4:0, 3:0, 2:0, 1:0};
+  reviews.forEach(r => { const s = starCount(r.starRating); if(counts[s] !== undefined) counts[s]++; });
+  const max = Math.max(...Object.values(counts), 1);
+
+  document.getElementById('rating-breakdown').innerHTML = [5,4,3,2,1].map(s => `
+    <div class="rating-bar-row">
+      <div class="rating-bar-label">${s} ★</div>
+      <div class="rating-bar-track">
+        <div class="rating-bar-fill" style="width:${(counts[s]/max*100)}%"></div>
+      </div>
+      <div class="rating-bar-count">${counts[s]}</div>
+    </div>`).join('');
+}
+
+function renderListingInfo(loc) {
+  const addr = loc.storefrontAddress;
+  const addrStr = addr ? [addr.addressLines?.join(', '), addr.locality, addr.administrativeArea, addr.postalCode].filter(Boolean).join(', ') : '—';
+  const phone = loc.phoneNumbers?.primaryPhone || '—';
+  const website = loc.websiteUri ? `<a href="${loc.websiteUri}" target="_blank">${loc.websiteUri}</a>` : '—';
+
+  document.getElementById('listing-info').innerHTML = `
+    <div class="info-item"><div class="info-key">Name</div><div class="info-val">${loc.title}</div></div>
+    <div class="info-item"><div class="info-key">Phone</div><div class="info-val">${phone}</div></div>
+    <div class="info-item"><div class="info-key">Address</div><div class="info-val">${addrStr}</div></div>
+    <div class="info-item"><div class="info-key">Website</div><div class="info-val">${website}</div></div>
+  `;
+}
+
+function renderHours(loc) {
+  const periods = loc.regularHours?.periods || [];
+  if (!periods.length) {
+    document.getElementById('hours-section').innerHTML = '<div style="color:var(--muted);font-family:Space Mono,monospace;font-size:12px;">No hours set</div>';
+    return;
+  }
+
+  const byDay = {};
+  periods.forEach(p => { byDay[p.openDay] = p; });
+
+  document.getElementById('hours-section').innerHTML = `
+    <div class="hours-grid">
+      ${DAYS.map(d => {
+        const p = byDay[d];
+        const isToday = d === TODAY;
+        const time = p ? `${p.openTime?.hours || 0}:00 – ${p.closeTime?.hours || 0}:00` : 'Closed';
+        return `<div class="hour-row ${isToday ? 'today' : ''}">
+          <span class="day-name">${d.slice(0,3)}</span>
+          <span>${time}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ─── MOCK REVIEWS (when API restricted) ───
+function renderMockReviews() {
+  showToast('Reviews API needs approval — showing demo data');
+  const mockReviews = [
+    { reviewer: { displayName: 'Ravi Kumar' }, starRating: 'FIVE', comment: 'Excellent service! Very professional and timely delivery.', createTime: new Date(Date.now() - 86400000*2).toISOString(), reviewReply: null },
+    { reviewer: { displayName: 'Priya Singh' }, starRating: 'FOUR', comment: 'Good work overall. Would recommend to others.', createTime: new Date(Date.now() - 86400000*5).toISOString(), reviewReply: { comment: 'Thank you Priya! Glad you liked our work.' } },
+    { reviewer: { displayName: 'Amit Sharma' }, starRating: 'THREE', comment: 'Average experience. Could be better.', createTime: new Date(Date.now() - 86400000*10).toISOString(), reviewReply: null },
+    { reviewer: { displayName: 'Sunita Patel' }, starRating: 'FIVE', comment: 'Amazing! Best in Sambalpur.', createTime: new Date(Date.now() - 86400000*15).toISOString(), reviewReply: null },
+  ];
+  allReviews = mockReviews;
+  renderReviews(mockReviews);
+  renderStats(mockReviews, 4.3);
+  renderRatingBreakdown(mockReviews);
+}
+
+// ─── REPLY ───
+function openReplyModal(reviewName, reviewerName) {
+  currentReviewName = reviewName;
+  document.getElementById('reply-reviewer-name').textContent = `Replying to ${reviewerName}`;
+  document.getElementById('reply-text').value = '';
+  document.getElementById('reply-modal').classList.add('open');
+}
+
+function closeReplyModal() { document.getElementById('reply-modal').classList.remove('open'); }
+
+async function submitReply() {
+  const text = document.getElementById('reply-text').value.trim();
+  if (!text) { showToast('Write something first!'); return; }
+
+  try {
+    const res = await fetch(`https://mybusiness.googleapis.com/v4/${currentReviewName}/reply`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ comment: text })
+    });
+    if (res.ok) {
+      showToast('Reply posted! ✓');
+      closeReplyModal();
+      loadLocationData();
+    } else {
+      showToast('Reply failed — API may need approval');
+      closeReplyModal();
+    }
+  } catch(e) {
+    showToast('Reply failed');
+    closeReplyModal();
+  }
+}
+
+// ─── UTILS ───
+function refreshAll() {
+  showToast('Refreshing...');
+  loadLocationData();
+}
+
+function logout() {
+  localStorage.removeItem('gmb_token');
+  localStorage.removeItem('gmb_refresh');
+  accessToken = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
