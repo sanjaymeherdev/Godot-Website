@@ -2,338 +2,689 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>9 Tools for Indian Business | Own Your Stack, Pay Once</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanjay — Custom Tech for Indian Businesses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #e55a2b;
+            --accent: #00e5ff;
+            --dark: #0A0C14;
+            --card: rgba(15,17,26,0.75);
+            --light: #F0F4FF;
+            --gray: #6b7a8d;
+            --gray-light: #9aa5b4;
+            --border: rgba(255,255,255,0.07);
+            --green: #25d366;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-            line-height: 1.5;
-            padding: 2rem 1rem;
+        body { background: var(--dark); font-family: var(--font-body); color: var(--light); overflow-x: hidden; }
+
+        .bg {
+            position: fixed; inset: 0; z-index: -2;
+            background: radial-gradient(ellipse 80% 60% at 70% 10%, rgba(0,229,255,0.04) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 50% at 10% 80%, rgba(255,107,53,0.05) 0%, transparent 60%),
+                        #0A0C14;
+        }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1;
+            background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
 
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
 
-        /* Typography */
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1rem;
-        }
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.65s cubic-bezier(0.4,0,0.2,1), transform 0.65s cubic-bezier(0.4,0,0.2,1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
 
-        .subhead {
-            font-size: 1.25rem;
-            color: #334155;
-            max-width: 720px;
-            margin-bottom: 2rem;
-        }
+        /* Header */
+        header { padding: 1.25rem 0; border-bottom: 1px solid var(--border); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 100; background: rgba(10,12,20,0.85); }
+        .header-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .logo { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; background: linear-gradient(120deg, var(--accent), var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; }
+        nav { display: flex; gap: 0.25rem; }
+        nav a { color: var(--gray); text-decoration: none; padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.875rem; font-weight: 500; transition: color 0.2s, background 0.2s; }
+        nav a:hover { color: var(--light); background: rgba(255,255,255,0.05); }
+        .nav-cta { background: var(--primary); color: #fff !important; border-radius: 30px; padding: 0.5rem 1.25rem; }
+        .nav-cta:hover { background: var(--primary-dark) !important; }
 
-        .badge {
-            display: inline-block;
-            background: #e2e8f0;
-            color: #0f172a;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            margin-bottom: 1rem;
-        }
+        /* Hero */
+        .hero { padding: 5rem 0 3.5rem; text-align: center; }
+        .trust-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; background: rgba(0,229,255,0.07); border: 1px solid rgba(0,229,255,0.18); padding: 6px 16px; border-radius: 30px; margin-bottom: 1.75rem; }
+        .trust-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.6s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .hero h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.75rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem; }
+        .hero h1 em { font-style: normal; background: linear-gradient(120deg, var(--accent), var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .hero-sub { font-size: 1.1rem; color: var(--gray-light); max-width: 600px; margin: 0 auto 2.5rem; line-height: 1.75; }
+        .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-        /* Section headers */
-        .section-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            margin-top: 3rem;
-            margin-bottom: 0.5rem;
-        }
+        /* Buttons */
+        .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary); color: #fff; padding: 0.85rem 1.75rem; border-radius: 40px; font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: all 0.25s; border: none; cursor: pointer; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,53,0.3); }
+        .btn-ghost { display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: var(--light); padding: 0.85rem 1.75rem; border-radius: 40px; font-weight: 500; font-size: 0.95rem; text-decoration: none; transition: all 0.25s; border: 1px solid var(--border); cursor: pointer; }
+        .btn-ghost:hover { border-color: rgba(0,229,255,0.3); color: var(--accent); }
 
-        .section-sub {
-            color: #475569;
-            margin-bottom: 2rem;
-            border-left: 4px solid #10b981;
-            padding-left: 1rem;
-        }
+        /* Pain strip */
+        .pain-strip { background: rgba(255,107,53,0.05); border: 1px solid rgba(255,107,53,0.14); border-radius: 20px; padding: 2rem 2.5rem; margin: 0 0 3.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+        .pain-item { display: flex; gap: 0.85rem; align-items: flex-start; }
+        .pain-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+        .pain-text strong { display: block; font-size: 0.875rem; font-weight: 700; color: var(--light); margin-bottom: 0.25rem; }
+        .pain-text span { font-size: 0.78rem; color: var(--gray-light); line-height: 1.55; }
 
-        /* 3x3 Grid */
+        /* Stats */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 3.5rem 0; }
+        .stat { background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 1rem; text-align: center; transition: border-color 0.3s, transform 0.3s; }
+        .stat:hover { border-color: rgba(0,229,255,0.25); transform: translateY(-4px); }
+        .stat-num { font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 0.75rem; color: var(--gray); font-family: var(--font-mono); margin-top: 4px; letter-spacing: 0.5px; }
+
+        /* Section */
+        .label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+        .section-title { font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--light); }
+        .section-sub { font-size: 0.875rem; color: var(--gray-light); margin-top: 0.5rem; line-height: 1.65; max-width: 560px; }
+        .section-head { margin: 4rem 0 1.75rem; }
+
+        /* ===== NEW: 3x3 Tools Grid (matches your theme) ===== */
+        .tools-section { margin: 3rem 0 2rem; }
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin: 1.5rem 0 2rem;
+        }
+        @media (max-width: 900px) {
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .tools-grid { grid-template-columns: 1fr; }
         }
 
         .tool-card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-            transition: transform 0.1s ease, box-shadow 0.2s ease;
-            border: 1px solid #e2e8f0;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.25rem;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
         }
-
         .tool-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1);
-            border-color: #cbd5e1;
+            border-color: rgba(0,229,255,0.25);
+            transform: translateY(-4px);
         }
-
-        .tool-name {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
+        .tool-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
             flex-wrap: wrap;
+            margin-bottom: 0.5rem;
         }
-
-        .pricing {
-            font-size: 0.8rem;
-            font-weight: 500;
-            background: #f1f5f9;
+        .tool-name {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--light);
+        }
+        .tool-price {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            background: rgba(0,229,255,0.12);
             padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            color: #0f172a;
+            color: var(--accent);
         }
-
         .tool-desc {
-            color: #334155;
-            font-size: 0.9rem;
-            margin: 0.75rem 0 1rem;
-            flex-grow: 1;
+            font-size: 0.75rem;
+            color: var(--gray-light);
+            line-height: 1.55;
+            margin: 0.5rem 0;
+            flex: 1;
         }
-
         .tool-link {
-            font-size: 0.8rem;
-            font-family: monospace;
-            background: #f8fafc;
-            padding: 0.5rem;
-            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.03);
+            padding: 0.4rem;
+            border-radius: 8px;
             word-break: break-all;
-            margin: 0.75rem 0;
-            color: #2563eb;
+            color: var(--gray);
             text-decoration: none;
-            border: 1px solid #e2e8f0;
-            transition: background 0.1s;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border);
+            text-align: center;
         }
-
         .tool-link:hover {
-            background: #eef2ff;
-            text-decoration: underline;
+            background: rgba(0,229,255,0.08);
+            color: var(--accent);
         }
-
-        .btn-small {
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            padding: 0.5rem;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-
-        .btn-small:hover {
-            background: #1e293b;
-        }
-
-        /* Proof section (existing solutions) */
-        .proof-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.25rem;
-            margin: 2rem 0;
-        }
-
-        .proof-card {
-            background: #f1f5f9;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            border-left: 4px solid #10b981;
-        }
-
-        .proof-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .trust-strip {
-            background: #0f172a;
-            color: white;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            text-align: center;
-            margin: 3rem 0;
-        }
-
-        .trust-strip span {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin: 0 0.75rem;
-            display: inline-block;
-        }
-
-        .wa-button {
-            background: #25D366;
-            color: #075E54;
-            font-weight: 700;
-            padding: 0.85rem 1.8rem;
-            border-radius: 60px;
-            text-decoration: none;
+        .tool-cta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.1rem;
-            margin: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            justify-content: center;
+            gap: 0.4rem;
+            background: rgba(37,211,102,0.1);
+            border: 1px solid rgba(37,211,102,0.2);
+            color: #25d366;
+            border-radius: 30px;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .tool-cta:hover {
+            background: rgba(37,211,102,0.18);
+            transform: translateX(2px);
+        }
+        .category-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--primary);
+            background: rgba(255,107,53,0.12);
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            margin-bottom: 0.75rem;
         }
 
-        footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 0.85rem;
-        }
+        /* Portfolio / Projects (unchanged, moved down as proof) */
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1rem; }
+        .project-card { background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; transition: all 0.3s; }
+        .project-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-6px); }
+        .project-thumb { height: 160px; position: relative; overflow: hidden; }
+        .project-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(10,12,20,0.7)); }
+        .project-pill { position: absolute; top: 1rem; left: 1rem; z-index: 2; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 20px; font-family: var(--font-mono); }
+        .pill-live { background: rgba(40,167,69,0.9); color: #fff; }
+        .pill-built { background: rgba(0,229,255,0.9); color: #0A0C14; }
+        .pill-client { background: rgba(150,150,200,0.85); color: #0A0C14; }
+        .project-body { padding: 1.25rem; }
+        .project-problem { font-size: 0.72rem; font-family: var(--font-mono); color: var(--primary); margin-bottom: 0.4rem; letter-spacing: 0.3px; }
+        .project-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--light); margin-bottom: 0.4rem; }
+        .project-blurb { font-size: 0.8rem; color: var(--gray-light); line-height: 1.6; margin-bottom: 0.75rem; }
+        .outcome-chip { display: inline-block; font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: rgba(255,107,53,0.12); border: 1px solid rgba(255,107,53,0.25); color: var(--primary); font-family: var(--font-mono); margin-bottom: 0.75rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: 10px; padding: 3px 9px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--gray-light); font-family: var(--font-mono); }
 
-        @media (max-width: 640px) {
-            h1 { font-size: 1.8rem; }
-            .section-title { font-size: 1.5rem; }
-            .tools-grid { gap: 1rem; }
+        /* Services */
+        .services-section { margin: 4rem 0; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .svc-card { background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem; transition: all 0.3s; display: flex; flex-direction: column; }
+        .svc-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-4px); }
+        .svc-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .svc-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.3rem; }
+        .svc-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--light); }
+        .svc-price { font-family: var(--font-mono); font-size: 0.9rem; font-weight: 600; color: var(--accent); white-space: nowrap; padding-top: 2px; }
+        .svc-for { font-size: 0.72rem; color: var(--gray); font-family: var(--font-mono); margin-bottom: 0.4rem; }
+        .svc-problem { font-size: 0.75rem; color: var(--primary); font-family: var(--font-mono); margin-bottom: 0.65rem; line-height: 1.5; }
+        .svc-desc { font-size: 0.82rem; color: var(--gray-light); line-height: 1.65; margin-bottom: 1.25rem; flex: 1; }
+        .svc-cta { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.2); color: #25d366; border-radius: 30px; padding: 0.55rem 1.1rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.2s; width: fit-content; }
+        .svc-cta:hover { background: rgba(37,211,102,0.18); transform: translateX(2px); }
+
+        /* How It Works */
+        .how-section { background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 24px; padding: 2.5rem; margin: 4rem 0; }
+        .how-header { margin-bottom: 2.5rem; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; }
+        .step-num { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: rgba(0,229,255,0.12); line-height: 1; margin-bottom: 0.75rem; }
+        .step-title { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--light); margin-bottom: 0.35rem; }
+        .step-desc { font-size: 0.8rem; color: var(--gray-light); line-height: 1.65; }
+
+        /* FAQ */
+        .faq-section { margin: 4rem 0; }
+        .faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+        .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; transition: border-color 0.3s; }
+        .faq-item:hover { border-color: rgba(0,229,255,0.15); }
+        .faq-q { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--light); margin-bottom: 0.6rem; display: flex; gap: 0.6rem; align-items: flex-start; }
+        .faq-q::before { content: 'Q'; font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--accent); background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; padding: 2px 6px; flex-shrink: 0; margin-top: 2px; }
+        .faq-a { font-size: 0.82rem; color: var(--gray-light); line-height: 1.7; padding-left: 1.75rem; }
+
+        /* CTA block */
+        .cta-block { background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(0,229,255,0.04)); border: 1px solid rgba(255,107,53,0.2); border-radius: 24px; padding: 3rem 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; margin: 4rem 0; }
+        .cta-left h2 { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin-bottom: 0.5rem; }
+        .cta-left p { color: var(--gray-light); font-size: 0.95rem; line-height: 1.65; max-width: 440px; }
+        .pay-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 600; color: #25d366; background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.2); padding: 4px 12px; border-radius: 20px; margin-top: 0.75rem; font-family: var(--font-mono); }
+        .cta-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 2rem 0; margin-top: 2rem; text-align: center; color: var(--gray); font-size: 0.78rem; font-family: var(--font-mono); }
+        .footer-links { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.75rem; flex-wrap: wrap; }
+        .footer-links a { color: var(--gray); text-decoration: none; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .container { padding: 0 1.25rem; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .cta-block { flex-direction: column; text-align: center; }
+            .cta-btns { justify-content: center; }
+            .hero { padding: 3.5rem 0 2.5rem; }
+            .svc-header { flex-direction: column; gap: 0.25rem; }
+            .pain-strip { padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Header -->
-    <div class="badge">🇮🇳 Built for Indian businesses — pay only after it works</div>
-    <h1>9 tools to sell.<br>Own your stack. Pay once.</h1>
-    <div class="subhead">
-        No monthly rental traps. Self‑host or use credits — WhatsApp blasters, automation servers, rank trackers, HR tools. <strong>Zero upfront risk.</strong>
-    </div>
 
-    <!-- 3x3 GRID: Category 1: WhatsApp Tools -->
-    <div class="section-title">📱 WhatsApp Tools</div>
-    <div class="section-sub">Unofficial + Official Meta API — credit based or self‑host one time</div>
-    <div class="tools-grid">
-        <!-- Auosend -->
-        <div class="tool-card">
-            <div class="tool-name">Auosend <span class="pricing">Credit / One‑time</span></div>
-            <div class="tool-desc">Unofficial WhatsApp Blaster — send bulk messages, sequences, broadcast lists.</div>
-            <a class="tool-link" href="https://cggodotassets.shop/sanjaywa" target="_blank">🔗 cggodotassets.shop/sanjaywa</a>
-            <a class="btn-small" href="https://cggodotassets.shop/sanjaywa" target="_blank">View tool →</a>
-        </div>
-        <!-- Leadflow -->
-        <div class="tool-card">
-            <div class="tool-name">Leadflow <span class="pricing">Credit + Subscription</span></div>
-            <div class="tool-desc">Unofficial WhatsApp Blaster + CRM — manage leads, campaigns, and chat.</div>
-            <a class="tool-link" href="https://cggodotassets.shop/marketting/leadflow" target="_blank">🔗 cggodotassets.shop/marketting/leadflow</a>
-            <a class="btn-small" href="https://cggodotassets.shop/marketting/leadflow" target="_blank">View tool →</a>
-        </div>
-        <!-- Wablast -->
-        <div class="tool-card">
-            <div class="tool-name">Wablast <span class="pricing">Credit / Self‑host (WIP)</span></div>
-            <div class="tool-desc">Official Meta API for sending messages — compliant, scalable, in progress.</div>
-            <a class="tool-link" href="https://wablast.onrender.com" target="_blank">🔗 wablast.onrender.com</a>
-            <a class="btn-small" href="https://wablast.onrender.com" target="_blank">Try demo →</a>
+<div class="bg"></div>
+<div class="grid-overlay"></div>
+
+<header>
+    <div class="container">
+        <div class="header-inner">
+            <a href="/" class="logo">SanjayMeher</a>
+            <nav>
+                <a href="https://cggodotassets.shop/services">Game Services</a>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20discuss%20a%20project" class="nav-cta">
+                    <i class="fab fa-whatsapp"></i> Chat Now
+                </a>
+            </nav>
         </div>
     </div>
+</header>
 
-    <!-- Category 2: Self-Hostable Servers -->
-    <div class="section-title">⚙️ Self‑Hostable Servers</div>
-    <div class="section-sub">Rent or self‑host — you keep full control of data & infra</div>
-    <div class="tools-grid">
-        <div class="tool-card">
-            <div class="tool-name">Gowa <span class="pricing">Self‑host / Rent</span></div>
-            <div class="tool-desc">Unofficial Wasender backend — run your own WhatsApp gateway.</div>
-            <a class="tool-link" href="https://sanjaywa8-5.onrender.com" target="_blank">🔗 sanjaywa8-5.onrender.com</a>
-            <a class="btn-small" href="https://sanjaywa8-5.onrender.com" target="_blank">Deploy →</a>
-        </div>
-        <div class="tool-card">
-            <div class="tool-name">n8n <span class="pricing">Self‑host / Rent</span></div>
-            <div class="tool-desc">Self‑hosted n8n — automation workflows, connect anything.</div>
-            <a class="tool-link" href="https://sanjayn8n.onrender.com" target="_blank">🔗 sanjayn8n.onrender.com</a>
-            <a class="btn-small" href="https://sanjayn8n.onrender.com" target="_blank">Launch instance →</a>
-        </div>
-        <div class="tool-card">
-            <div class="tool-name">Ecom <span class="pricing">Self‑host / Rent</span></div>
-            <div class="tool-desc">Ecommerce site on Vercel or Netlify — fully owned storefront.</div>
-            <div class="tool-link">(Contact for custom deploy)</div>
-            <a class="btn-small" href="#" onclick="alert('Message on WhatsApp to get your ecom site'); return false;">Request →</a>
-        </div>
-    </div>
+<main class="container">
 
-    <!-- Category 3: Business Tools -->
-    <div class="section-title">💼 Business Tools</div>
-    <div class="section-sub">One‑time payment • BYOK (bring your own key) • own forever</div>
-    <div class="tools-grid">
-        <div class="tool-card">
-            <div class="tool-name">Site Sheet <span class="pricing">One Time</span></div>
-            <div class="tool-desc">A customizable website — editable via spreadsheet-like UI.</div>
-            <a class="tool-link" href="https://cggodotassets.shop/marketing/sitesheet" target="_blank">🔗 cggodotassets.shop/marketing/sitesheet</a>
-            <a class="btn-small" href="https://cggodotassets.shop/marketing/sitesheet" target="_blank">Preview →</a>
+    <!-- Hero -->
+    <section class="hero reveal">
+        <div class="trust-badge">For Indian businesses &amp; startups</div>
+        <h1>Fast, affordable tech<br>for <em>Indian businesses.</em></h1>
+        <p class="hero-sub">AI integrations, WhatsApp automation, web &amp; mobile apps, business automations — built and delivered in days, not months. Fixed price. Pay only after it works.</p>
+        <div class="hero-ctas">
+            <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20something%20built%20for%20my%20business" class="btn-primary">
+                <i class="fab fa-whatsapp"></i> Free Consultation
+            </a>
+            <a href="#services" class="btn-ghost">See Pricing ↓</a>
         </div>
-        <div class="tool-card">
-            <div class="tool-name">Gmb Rank <span class="pricing">One Time BYOK</span></div>
-            <div class="tool-desc">Google Maps Local Business rank tracker — daily updates, competitor comparison.</div>
-            <div class="tool-link">(BYOK: own Google API key)</div>
-            <a class="btn-small" href="#" onclick="alert('GMB Rank — one-time setup. Message for demo'); return false;">Get access →</a>
+    </section>
+
+    <!-- Pain strip -->
+    <div class="pain-strip reveal">
+        <div class="pain-item">
+            <div class="pain-icon">😤</div>
+            <div class="pain-text">
+                <strong>Paying ₹3,000–6,000/month for WhatsApp tools?</strong>
+                <span>WATI, Interakt, AiSensy — you're renting what you could own once for ₹2,500.</span>
+            </div>
         </div>
-        <div class="tool-card">
-            <div class="tool-name">YourMate <span class="pricing">One Time</span></div>
-            <div class="tool-desc">Modular HR tool: Attendance, task mgmt, salary slips — own your employee data.</div>
-            <a class="btn-small" href="#" onclick="alert('YourMate — self-hosted HR suite. Contact for live demo'); return false;">See modules →</a>
+        <div class="pain-item">
+            <div class="pain-icon">🐌</div>
+            <div class="pain-text">
+                <strong>Agency quoted ₹80,000 and 3 months?</strong>
+                <span>Most small business needs are 1–3 day builds. Agencies charge for overhead you don't need.</span>
+            </div>
+        </div>
+        <div class="pain-item">
+            <div class="pain-icon">🔒</div>
+            <div class="pain-text">
+                <strong>Your data lives on someone else's server?</strong>
+                <span>Self-hosted means you own your data, your infra, and your costs — forever.</span>
+            </div>
+        </div>
+        <div class="pain-item">
+            <div class="pain-icon">🤷</div>
+            <div class="pain-text">
+                <strong>Freelancer disappeared mid-project?</strong>
+                <span>I don't get paid until you confirm everything works. Zero upfront. Zero risk.</span>
+            </div>
         </div>
     </div>
 
-    <!-- MOVED EXISTING SOLUTIONS TO BOTTOM AS PROOF -->
-    <div class="section-title" style="margin-top: 3rem;">✅ Live proof: tools already solving real problems</div>
-    <div class="section-sub">Not mockups — these run live today</div>
-    <div class="proof-grid">
-        <div class="proof-card"><span class="proof-title">📊 Indian Income Tax Calculator</span><br>Groq AI Q&A, both regimes — accurate, free.</div>
-        <div class="proof-card"><span class="proof-title">💬 GOwa (WhatsApp API Server)</span><br>Saves ₹48,000+/year vs WATI/Interakt. Self‑hosted.</div>
-        <div class="proof-card"><span class="proof-title">📍 Local Business Rank Tracker</span><br>Windows + Mac + Android + iOS — daily rank updates.</div>
-        <div class="proof-card"><span class="proof-title">⏱️ Activity Tracker Extension</span><br>Chrome extension, offline, data stays in browser. Built in 24h.</div>
+    <!-- Stats -->
+    <div class="stats reveal">
+        <div class="stat">
+            <div class="stat-num">5+</div>
+            <div class="stat-lbl">Live Products</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">12+</div>
+            <div class="stat-lbl">AI Integrations</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">24h</div>
+            <div class="stat-lbl">Avg Delivery</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">₹0</div>
+            <div class="stat-lbl">Upfront Risk</div>
+        </div>
     </div>
 
-    <!-- Trust + Payment guarantee -->
-    <div class="trust-strip">
-        🛡️ <span>Pay only after it works</span> 🛡️<br>
-        Zero upfront • Zero risk • You own the code • 3 free revisions
+    <!-- ===== NEW SECTION: 9 TOOLS (3x3 GRID BY CATEGORY) ===== -->
+    <div class="tools-section reveal">
+        <div class="section-head">
+            <div class="label">Products</div>
+            <div class="section-title">9 Tools You Can Own</div>
+            <p class="section-sub">Self‑host, pay once, or use credits. No monthly rentals. No lock‑in.</p>
+        </div>
+
+        <!-- Category: WhatsApp Tools -->
+        <div style="margin-top: 1rem;">
+            <div class="category-badge">📱 WhatsApp Tools</div>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Auosend</span>
+                    <span class="tool-price">Credit / One‑time</span>
+                </div>
+                <div class="tool-desc">Unofficial WhatsApp Blaster — bulk messages, sequences, broadcast lists.</div>
+                <a class="tool-link" href="https://cggodotassets.shop/sanjaywa" target="_blank">cggodotassets.shop/sanjaywa</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20to%20buy%20Auosend"><i class="fab fa-whatsapp"></i> Buy / Demo →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Leadflow</span>
+                    <span class="tool-price">Credit + Subscription</span>
+                </div>
+                <div class="tool-desc">WhatsApp Blaster + CRM — manage leads, campaigns, and chat.</div>
+                <a class="tool-link" href="https://cggodotassets.shop/marketting/leadflow" target="_blank">cggodotassets.shop/marketting/leadflow</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20to%20buy%20Leadflow"><i class="fab fa-whatsapp"></i> Buy / Demo →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Wablast</span>
+                    <span class="tool-price">Credit / Self‑host (WIP)</span>
+                </div>
+                <div class="tool-desc">Official Meta API for sending messages — compliant, scalable.</div>
+                <a class="tool-link" href="https://wablast.onrender.com" target="_blank">wablast.onrender.com</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20to%20try%20Wablast"><i class="fab fa-whatsapp"></i> Try Demo →</a>
+            </div>
+        </div>
+
+        <!-- Category: Self-Hostable Servers -->
+        <div style="margin-top: 1.5rem;">
+            <div class="category-badge">⚙️ Self‑Hostable Servers</div>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Gowa</span>
+                    <span class="tool-price">Self‑host / Rent</span>
+                </div>
+                <div class="tool-desc">Unofficial Wasender backend — run your own WhatsApp gateway.</div>
+                <a class="tool-link" href="https://sanjaywa8-5.onrender.com" target="_blank">sanjaywa8-5.onrender.com</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20to%20self-host%20Gowa"><i class="fab fa-whatsapp"></i> Deploy →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">n8n</span>
+                    <span class="tool-price">Self‑host / Rent</span>
+                </div>
+                <div class="tool-desc">Self‑hosted n8n — automation workflows, connect anything.</div>
+                <a class="tool-link" href="https://sanjayn8n.onrender.com" target="_blank">sanjayn8n.onrender.com</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20to%20self-host%20n8n"><i class="fab fa-whatsapp"></i> Launch →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Ecom</span>
+                    <span class="tool-price">Self‑host / Rent</span>
+                </div>
+                <div class="tool-desc">Ecommerce site on Vercel or Netlify — fully owned storefront.</div>
+                <div class="tool-link" style="background:transparent;">📧 Contact for custom deploy</div>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20an%20ecom%20site"><i class="fab fa-whatsapp"></i> Request →</a>
+            </div>
+        </div>
+
+        <!-- Category: Business Tools -->
+        <div style="margin-top: 1.5rem;">
+            <div class="category-badge">💼 Business Tools</div>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Site Sheet</span>
+                    <span class="tool-price">One Time</span>
+                </div>
+                <div class="tool-desc">Customizable website — editable via spreadsheet-like UI.</div>
+                <a class="tool-link" href="https://cggodotassets.shop/marketing/sitesheet" target="_blank">cggodotassets.shop/marketing/sitesheet</a>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20Site%20Sheet"><i class="fab fa-whatsapp"></i> Buy →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">Gmb Rank</span>
+                    <span class="tool-price">One Time BYOK</span>
+                </div>
+                <div class="tool-desc">Google Maps Local Business rank tracker — daily updates, competitor comparison.</div>
+                <div class="tool-link" style="background:transparent;">🔑 BYOK (your Google API key)</div>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20GMB%20Rank%20Tracker"><i class="fab fa-whatsapp"></i> Get Access →</a>
+            </div>
+            <div class="tool-card">
+                <div class="tool-header">
+                    <span class="tool-name">YourMate</span>
+                    <span class="tool-price">One Time</span>
+                </div>
+                <div class="tool-desc">Modular HR tool: Attendance, task mgmt, salary slips — own your employee data.</div>
+                <div class="tool-link" style="background:transparent;">🏢 Self-hosted HR suite</div>
+                <a class="tool-cta" href="https://wa.me/917504704502?text=I%20want%20YourMate%20HR%20tool"><i class="fab fa-whatsapp"></i> See Modules →</a>
+            </div>
+        </div>
     </div>
 
-    <!-- CTA -->
-    <div style="text-align: center; margin: 2rem 0;">
-        <a class="wa-button" href="https://wa.me/91XXXXXXXXXX?text=I%20want%20to%20buy%20or%20test%20one%20of%20your%209%20tools" target="_blank">
-            💬 Tell me which tool you need → WhatsApp
-        </a>
-        <p style="margin-top: 1rem; font-size: 0.85rem; color: #475569;">Free consultation. I’ll show you a working demo before you pay.</p>
+    <!-- Portfolio (moved down as proof, after tools) -->
+    <div class="section-head reveal">
+        <div class="label">Portfolio</div>
+        <div class="section-title">Problems I've Already Solved</div>
+        <p class="section-sub">These aren't mockups. Every project below runs live — built to solve a real problem, not to look good in a case study.</p>
     </div>
 
-    <footer>
-        © 2025 • Self-hosted, no lock-in • Replace your ₹3k–6k/month subscriptions with one-time tools
-    </footer>
-</div>
+    <div class="projects-grid">
+        <div class="project-card reveal">
+            <div class="project-thumb" style="background: linear-gradient(135deg, #0f6e56, #1D9E75);">
+                <span class="project-pill pill-live">● LIVE</span>
+            </div>
+            <div class="project-body">
+                <div class="project-problem">PROBLEM → Tax calculators are confusing and often wrong</div>
+                <div class="project-name">Indian Income Tax Calculator</div>
+                <p class="project-blurb">People were relying on outdated Excel sheets or paying CAs just to estimate their liability. Built a full FY 2024-25 calculator with Groq AI Q&amp;A — accurate answers, instantly, free.</p>
+                <div class="outcome-chip">✓ All income heads · Old + new regime · AI Q&amp;A</div>
+                <div class="tags"><span class="tag">Groq AI</span><span class="tag">React</span><span class="tag">Fintech</span></div>
+            </div>
+        </div>
+
+        <div class="project-card reveal">
+            <div class="project-thumb" style="background: linear-gradient(135deg, #1a237e, #1b6ca8);">
+                <span class="project-pill pill-live">● LIVE</span>
+            </div>
+            <div class="project-body">
+                <div class="project-problem">PROBLEM → ₹4,000/month just to send WhatsApp messages</div>
+                <div class="project-name">GOwa — WhatsApp API Server</div>
+                <p class="project-blurb">Small businesses were trapped paying WATI or Interakt monthly forever. GOwa is a self-hosted server that does the same thing. Pay once, own it forever, no subscriptions.</p>
+                <div class="outcome-chip">💰 Saves ₹48,000+/year vs WATI/Interakt</div>
+                <div class="tags"><span class="tag">WhatsApp API</span><span class="tag">Go</span><span class="tag">Self-hosted</span></div>
+            </div>
+        </div>
+
+        <div class="project-card reveal">
+            <div class="project-thumb" style="background: linear-gradient(135deg, #e65100, #bf360c);">
+                <span class="project-pill pill-built">BUILT</span>
+            </div>
+            <div class="project-body">
+                <div class="project-problem">PROBLEM → No affordable way to track local Google rankings</div>
+                <div class="project-name">Local Business Rank Tracker</div>
+                <p class="project-blurb">Business owners had no simple way to monitor Google Maps visibility without expensive SEO tools. Built a desktop + mobile app with daily reports and competitor tracking — one codebase, all platforms.</p>
+                <div class="outcome-chip">📊 Windows + Mac + Android + iOS</div>
+                <div class="tags"><span class="tag">Flutter</span><span class="tag">Local SEO</span><span class="tag">Cross-platform</span></div>
+            </div>
+        </div>
+
+        <div class="project-card reveal">
+            <div class="project-thumb" style="background: linear-gradient(135deg, #4a148c, #6a1b9a);">
+                <span class="project-pill pill-client">CLIENT</span>
+            </div>
+            <div class="project-body">
+                <div class="project-problem">PROBLEM → Team had no visibility into where browser time was going</div>
+                <div class="project-name">Activity Tracker Chrome Extension</div>
+                <p class="project-blurb">A client needed to understand how their remote team spent browser time — without intrusive software. Built a lightweight Chrome extension: works offline, zero dependencies, data never leaves the browser.</p>
+                <div class="outcome-chip">🔌 Delivered in 24h · Zero dependencies</div>
+                <div class="tags"><span class="tag">Chrome Extension</span><span class="tag">Vanilla JS</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services (unchanged) -->
+    <div class="services-section" id="services">
+        <div class="section-head reveal">
+            <div class="label">Services &amp; Pricing</div>
+            <div class="section-title">What Problem Do You Have?</div>
+            <p class="section-sub">Every card below starts with the real problem — not the tech. Find the one that sounds like yours.</p>
+        </div>
+
+        <div class="services-grid">
+            <div class="svc-card reveal">
+                <div class="svc-icon">💬</div>
+                <div class="svc-header">
+                    <div class="svc-name">WhatsApp Automation</div>
+                    <div class="svc-price">from ₹2,500</div>
+                </div>
+                <div class="svc-for">For: coaches, clinics, D2C brands, small businesses</div>
+                <div class="svc-problem">→ "I'm paying ₹3,000+/month for WATI / AiSensy."</div>
+                <p class="svc-desc">I set up GOwa — a self-hosted WhatsApp server on your own machine or cloud. Send bulk messages, automate replies, handle webhooks, connect to your CRM. One-time cost. You own it. No subscriptions, ever.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20WhatsApp%20Automation%20for%20my%20business" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🧠</div>
+                <div class="svc-header">
+                    <div class="svc-name">AI Integration</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <div class="svc-for">For: SaaS products, service businesses, e-commerce</div>
+                <div class="svc-problem">→ "My competitors use AI. I don't know where to start."</div>
+                <p class="svc-desc">I wire Groq, Gemini, OpenAI, or ElevenLabs into your product. Chatbots that actually answer real questions, document Q&amp;A, voice synthesis, content generation — real AI doing something useful, not a demo.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20an%20AI%20integration%20for%20my%20business" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">📱</div>
+                <div class="svc-header">
+                    <div class="svc-name">Web &amp; Mobile App</div>
+                    <div class="svc-price">from ₹5,000</div>
+                </div>
+                <div class="svc-for">For: startups, local businesses, service providers</div>
+                <div class="svc-problem">→ "An agency quoted ₹80,000 and said 3 months."</div>
+                <p class="svc-desc">Most small business apps are 3–7 day builds, not 3-month projects. React, Flutter, Node.js, Supabase — one codebase that runs on web, Android, and iOS. A production app, not a prototype that falls apart.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20web%20or%20mobile%20app%20built" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">⚙️</div>
+                <div class="svc-header">
+                    <div class="svc-name">Business Automation</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <div class="svc-for">For: operations teams, agencies, e-commerce sellers</div>
+                <div class="svc-problem">→ "My team does the same manual task every single day."</div>
+                <p class="svc-desc">If someone on your team is copy-pasting data, sending manual follow-ups, or running the same report every week — that's automatable. Scripts, API integrations, scheduled jobs that replace the repetition entirely.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20business%20automation%20built" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🗄️</div>
+                <div class="svc-header">
+                    <div class="svc-name">Backend &amp; APIs</div>
+                    <div class="svc-price">from ₹2,000</div>
+                </div>
+                <div class="svc-for">For: app founders, dev teams needing infra</div>
+                <div class="svc-problem">→ "My app has no real backend. It breaks under load."</div>
+                <p class="svc-desc">Supabase auth, database, realtime, storage — plus custom servers, Razorpay and PayPal gateways, and API integrations. Scalable from day one, not bolted on later when things fall apart at 100 users.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20backend%20or%20API%20built" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+
+            <div class="svc-card reveal">
+                <div class="svc-icon">🌐</div>
+                <div class="svc-header">
+                    <div class="svc-name">Chrome Extension</div>
+                    <div class="svc-price">from ₹1,500</div>
+                </div>
+                <div class="svc-for">For: SaaS teams, recruiters, power browser users</div>
+                <div class="svc-problem">→ "My team uses a web tool every day, but it's missing one key thing."</div>
+                <p class="svc-desc">Chrome extensions sit right in the browser — no installs, no app store approval, no friction. I build custom overlays, data tools, background workers, and productivity features on top of any site your team already uses.</p>
+                <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20a%20Chrome%20Extension%20built" class="svc-cta"><i class="fab fa-whatsapp"></i> Get this →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="how-section reveal">
+        <div class="how-header">
+            <div class="label">Process</div>
+            <div class="section-title">Why You Won't Get Burned</div>
+            <p class="section-sub" style="margin-top:0.5rem;">Most freelancer horror stories share one thing in common: money changed hands before anything was proven to work. That's not how this works.</p>
+        </div>
+        <div class="steps">
+            <div class="step"><div class="step-num">01</div><div class="step-title">You message me</div><p class="step-desc">Tell me what's broken or what you need. Your business, the problem, what you've tried. 2 minutes on WhatsApp — no forms, no calls.</p></div>
+            <div class="step"><div class="step-num">02</div><div class="step-title">I scope it, you get one number</div><p class="step-desc">No "depends on requirements." I review it, confirm the scope, and give you a fixed price. No hourly billing. No invoice surprises at the end.</p></div>
+            <div class="step"><div class="step-num">03</div><div class="step-title">I build it fast</div><p class="step-desc">Standard builds delivered same day. Larger projects within 48 hours. Updates on WhatsApp throughout — not radio silence until it's "done."</p></div>
+            <div class="step"><div class="step-num">04</div><div class="step-title">We test together</div><p class="step-desc">We go through it together on WhatsApp until everything works the way you need it to. 3 free revisions after delivery, no questions asked.</p></div>
+            <div class="step"><div class="step-num">05</div><div class="step-title">You pay only then</div><p class="step-desc">Not before. Not halfway through. Only after you've confirmed with your own eyes that it works in your environment. Zero upfront. Zero risk on your side.</p></div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+        <div class="section-head reveal">
+            <div class="label">FAQ</div>
+            <div class="section-title">Questions Before You Message</div>
+            <p class="section-sub">The things most people wonder but don't ask.</p>
+        </div>
+        <div class="faq-grid">
+            <div class="faq-item reveal"><div class="faq-q">Do I need to be technical to work with you?</div><div class="faq-a">Not at all. You describe the problem in plain language — "I want customers to get an automatic WhatsApp reply when they fill this form." I handle everything from there and explain what I built in plain terms.</div></div>
+            <div class="faq-item reveal"><div class="faq-q">How does "pay after it works" actually work?</div><div class="faq-a">I build first, you test in your own environment. Only once you confirm it does what you need, you pay via Razorpay or UPI. If it doesn't work as scoped, we keep fixing until it does — no payment until then.</div></div>
+            <div class="faq-item reveal"><div class="faq-q">What if I need changes after delivery?</div><div class="faq-a">3 free revisions are included after every delivery. Changes within the original scope are free. If you want something new added that wasn't in the original scope, we discuss and agree on a price first.</div></div>
+            <div class="faq-item reveal"><div class="faq-q">How fast is delivery, really?</div><div class="faq-a">Most standard services — WhatsApp automation, AI integrations, Chrome extensions, automations — are same-day or next-day. Larger builds like full apps are typically 3–7 days. I'll give you an exact timeline before starting.</div></div>
+            <div class="faq-item reveal"><div class="faq-q">Will I own the code?</div><div class="faq-a">Yes. Everything I build for you is yours — the code, the server, the setup. You're not renting anything from me. You can hand it to any developer to maintain or extend after I deliver it.</div></div>
+            <div class="faq-item reveal"><div class="faq-q">I'm not sure what I need — can I still message you?</div><div class="faq-a">That's the best time to message. Describe the problem, not the solution — "I need to send 500 customers a WhatsApp message every Monday" — and I'll tell you exactly what makes sense and what it costs.</div></div>
+        </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="cta-block reveal">
+        <div class="cta-left">
+            <h2>What's the thing<br>that's been bothering you?</h2>
+            <p>Tell me on WhatsApp. Free consultation, no commitment. If I can solve it, I'll tell you exactly how and what it costs. If I can't, I'll tell you that too — and point you to someone who can.</p>
+            <div class="pay-badge">✓ Pay after it works — always</div>
+        </div>
+        <div class="cta-btns">
+            <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20have%20a%20business%20problem%20I%20want%20to%20talk%20through" class="btn-primary"><i class="fab fa-whatsapp"></i> Tell me your problem</a>
+            <a href="https://cggodotassets.shop/services" class="btn-ghost">Game Dev Services →</a>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <div class="container">
+        <p>© 2026 Sanjay Meher · Solo dev · Fixed price · Pay after it works</p>
+        <div class="footer-links">
+            <a href="https://cggodotassets.shop/">Home</a>
+            <a href="https://cggodotassets.shop/services">Game Services</a>
+            <a href="https://cggodotassets.shop/godot-4-mobile-game">CGOW Demo</a>
+            <a href="https://champ-gaming.itch.io">Itch.io</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('active'), i * 60);
+                observer.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
