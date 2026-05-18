@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation</title>
+  <style>
+    :root {
+      --accent: #8b5cf6;
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: #ddd;
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon { font-size: 4rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 1.6rem; color: #fff; margin-bottom: 0.75rem; }
+    .sub { color: #888; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+    .order-number {
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .order-items {
+      text-align: left;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .order-items h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 0.75rem; }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: #bbb;
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      color: #fff;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-msg { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: #888;
+      margin-left: 0.75rem;
+    }
+    .error-card .icon::after { content: '❌'; }
+    .attempts { font-size: 0.75rem; color: #444; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+  <!-- Checking state -->
+  <div id="stateChecking">
+    <div class="spinner"></div>
+    <h1>Verifying payment…</h1>
+    <p class="status-msg" id="statusMsg">Checking with Razorpay…</p>
+    <p class="attempts" id="attemptsMsg"></p>
+  </div>
+
+  <!-- Success state -->
+  <div id="stateSuccess" style="display:none">
+    <div class="icon">✅</div>
+    <h1>Order Confirmed!</h1>
+    <p class="sub">Thank you for your purchase. You'll receive a confirmation shortly.</p>
+    <div class="order-number" id="orderNumber"></div>
+    <div class="order-items" id="orderItems"></div>
+    <a href="products.html" class="btn">Continue Shopping</a>
+  </div>
+
+  <!-- Failed state -->
+  <div id="stateFailed" style="display:none">
+    <div class="icon">⚠️</div>
+    <h1>Payment Incomplete</h1>
+    <p class="sub" id="failedMsg">Your payment was not completed. No charges were made.</p>
+    <a href="products.html" class="btn">Back to Shop</a>
+    <button class="btn btn-outline" onclick="retryPoll()">Retry Check</button>
+  </div>
+</div>
+
+<script>
+  // ================================================================
+  // CONFIG — must match cart.js
+  // ================================================================
+  const EDGE_URL = 'https://bvavtdyxuzzabzgodbjw.supabase.co/functions/v1/razorpay-payment'
+
+  // ================================================================
+  // POLL PAYMENT STATUS
+  // ================================================================
+  const MAX_ATTEMPTS = 12   // 12 × 5s = 60 seconds max
+  let attempts = 0
+  let pollTimer = null
+
+  const paymentLinkId = sessionStorage.getItem('pending_payment_link_id')
+    || new URLSearchParams(window.location.search).get('razorpay_payment_link_id')
+
+  const savedCart = (() => {
+    try { return JSON.parse(sessionStorage.getItem('pending_cart') || '[]') } catch { return [] }
+  })()
+
+  async function checkStatus() {
+    if (!paymentLinkId) {
+      showFailed('No payment reference found. If you completed payment, please contact support.')
+      return
+    }
+
+    attempts++
+    document.getElementById('attemptsMsg').textContent = `Attempt ${attempts} of ${MAX_ATTEMPTS}…`
+
+    try {
+      const res = await fetch(EDGE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'checkPaymentStatus',
+          razorpay_payment_link_id: paymentLinkId,
+        }),
+      })
+      const data = await res.json()
+
+      if (data.success && data.status === 'completed') {
+        clearTimeout(pollTimer)
+        showSuccess(data)
+        return
+      }
+
+      if (data.status === 'expired' || data.status === 'cancelled') {
+        clearTimeout(pollTimer)
+        showFailed(`Payment was ${data.status}. No charges were made.`)
+        return
+      }
+
+      // Still pending
+      document.getElementById('statusMsg').textContent = 'Payment pending, checking again…'
+
+      if (attempts >= MAX_ATTEMPTS) {
+        clearTimeout(pollTimer)
+        showFailed('Could not confirm payment automatically. If you were charged, please contact support with your payment ID.')
+        return
+      }
+
+      pollTimer = setTimeout(checkStatus, 5000)
+
+    } catch (err) {
+      console.error('Poll error:', err)
+      if (attempts < MAX_ATTEMPTS) {
+        pollTimer = setTimeout(checkStatus, 5000)
+      } else {
+        showFailed('Connection error while verifying. Please contact support.')
+      }
+    }
+  }
+
+  function showSuccess(data) {
+    document.getElementById('stateChecking').style.display = 'none'
+    document.getElementById('stateSuccess').style.display = 'block'
+
+    // Order number
+    const orderNum = data.fulfillment?.order_number
+    if (orderNum) {
+      const el = document.getElementById('orderNumber')
+      el.textContent = `Order #${orderNum}`
+      el.style.display = 'block'
+    }
+
+    // Items from saved cart
+    if (savedCart.length > 0) {
+      const itemsEl = document.getElementById('orderItems')
+      const total = savedCart.reduce((s, i) => s + i.price * i.quantity, 0)
+      itemsEl.style.display = 'block'
+      itemsEl.innerHTML = `
+        <h3>Order Summary</h3>
+        ${savedCart.map(i => `
+          <div class="order-item">
+            <span>${i.name} ×${i.quantity}</span>
+            <span>₹${(i.price * i.quantity).toLocaleString('en-IN')}</span>
+          </div>
+        `).join('')}
+        <div class="order-total">
+          <span>Total</span>
+          <span>₹${total.toLocaleString('en-IN')}</span>
+        </div>
+      `
+    }
+
+    // Clear cart
+    localStorage.removeItem('shop_cart')
+    sessionStorage.removeItem('pending_payment_link_id')
+    sessionStorage.removeItem('pending_cart')
+  }
+
+  function showFailed(msg) {
+    document.getElementById('stateChecking').style.display = 'none'
+    document.getElementById('stateFailed').style.display = 'block'
+    if (msg) document.getElementById('failedMsg').textContent = msg
+  }
+
+  function retryPoll() {
+    attempts = 0
+    document.getElementById('stateFailed').style.display = 'none'
+    document.getElementById('stateChecking').style.display = 'block'
+    checkStatus()
+  }
+
+  // Start polling
+  checkStatus()
+</script>
+</body>
+</html>
