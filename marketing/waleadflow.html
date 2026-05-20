@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow — WhatsApp CRM & Blast for Indian Businesses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--s1:#0c0f1a;--s2:#101520;--s3:#141b28;
+  --border:#1c2535;--border2:#243045;
+  --g:#00e5a0;--g2:#00b87a;--b:#3b82f6;--p:#8b5cf6;--y:#f59e0b;--r:#ef4444;
+  --text:#c8d8f0;--text2:#6b85a0;--muted:#2a3a52;
+  --mono:'IBM Plex Mono',monospace;--sans:'Outfit',sans-serif;--rad:12px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--g2);border-radius:99px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(7,9,15,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-left{display:flex;align-items:center;gap:12px}
+.nav-tag{font-family:var(--mono);font-size:8px;color:var(--g);letter-spacing:3px;border:1px solid rgba(0,229,160,.2);padding:3px 9px;border-radius:20px}
+.nav-logo{font-size:18px;font-weight:900;color:#fff;text-decoration:none;letter-spacing:-.5px}
+.nav-logo span{color:var(--g)}
+.nav-right{display:flex;align-items:center;gap:22px}
+.nav-link{font-family:var(--mono);font-size:10px;color:var(--text2);text-decoration:none;letter-spacing:.5px;transition:.15s}
+.nav-link:hover{color:var(--g)}
+.nav-cta{font-family:var(--sans);font-size:12px;font-weight:800;color:#000;background:var(--g);padding:8px 18px;border-radius:8px;text-decoration:none;transition:.15s;white-space:nowrap}
+.nav-cta:hover{background:#00cc8c}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 80px;text-align:center;position:relative;overflow:hidden}
+.hero-glow{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(0,229,160,.06) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,160,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,.018) 1px,transparent 1px);background-size:64px 64px;pointer-events:none}
+.hero-eyebrow{font-family:var(--mono);font-size:9px;color:var(--g);letter-spacing:4px;margin-bottom:22px;border:1px solid rgba(0,229,160,.2);display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:20px;background:rgba(0,229,160,.04);animation:fadeUp .6s ease both}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-size:clamp(40px,7vw,88px);font-weight:900;line-height:1;letter-spacing:-3px;color:#fff;margin-bottom:16px;animation:fadeUp .6s .1s ease both}
+.hero h1 em{font-style:normal;color:var(--g)}
+.hero-sub{font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.9;max-width:560px;margin:0 auto 36px;animation:fadeUp .6s .2s ease both}
+.hero-sub strong{color:var(--text)}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:60px;animation:fadeUp .6s .3s ease both}
+.btn-g{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:var(--g);color:#000;font-family:var(--sans);font-weight:800;font-size:14px;border-radius:9px;text-decoration:none;transition:.15s;letter-spacing:-.2px}
+.btn-g:hover{background:#00cc8c;transform:translateY(-2px)}
+.btn-s{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:transparent;color:var(--text);font-family:var(--sans);font-weight:700;font-size:14px;border-radius:9px;text-decoration:none;border:1px solid var(--border2);transition:.15s}
+.btn-s:hover{border-color:var(--text2);background:var(--s2)}
+
+/* stats strip */
+.stats-strip{display:flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:620px;margin:0 auto;background:var(--s1);animation:fadeUp .6s .4s ease both}
+.stat-box{flex:1;padding:20px 16px;text-align:center;border-right:1px solid var(--border)}
+.stat-box:last-child{border-right:none}
+.stat-num{font-family:var(--mono);font-size:26px;font-weight:700;color:#fff;line-height:1}
+.stat-num span{color:var(--g)}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:4px}
+
+/* ── MARQUEE ── */
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:.85rem 0;background:var(--s1)}
+.marquee-track{display:flex;gap:3rem;animation:marquee 22s linear infinite;width:max-content}
+.marquee-item{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text2);white-space:nowrap;display:flex;align-items:center;gap:.5rem;letter-spacing:1px;text-transform:uppercase}
+.marquee-item i{color:var(--g)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── SECTIONS ── */
+section{padding:96px 24px}
+.container{max-width:1080px;margin:0 auto}
+.sec-label{font-family:var(--mono);font-size:9px;color:var(--g);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::before{content:'//';color:var(--muted)}
+.sec-title{font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;letter-spacing:-1.5px;line-height:1.1;margin-bottom:14px}
+.sec-title em{font-style:normal;color:var(--g)}
+.sec-sub{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.85;max-width:520px}
+
+/* ── PAIN ── */
+.pain-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.pain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:48px}
+.pain-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rad);padding:22px 24px;display:flex;gap:14px;transition:.2s}
+.pain-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.pain-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.pain-head{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px}
+.pain-desc{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.75}
+.pain-desc strong{color:var(--g)}
+
+/* ── FEATURE CARDS ── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--border);border-radius:var(--rad);overflow:hidden;margin-top:52px}
+.feature-item{background:var(--s1);padding:26px;transition:.2s;border:1px solid transparent}
+.feature-item:hover{background:var(--s2);border-color:rgba(0,229,160,.1)}
+.fi-icon{width:40px;height:40px;background:rgba(0,229,160,.07);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--g);font-size:16px;margin-bottom:14px}
+.fi-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.2px}
+.fi-desc{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.75}
+
+/* ── DEMO VISUAL ── */
+.demo-wrap{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:52px}
+.demo-panel{background:var(--s1);border:1px solid var(--border);border-radius:var(--rad);overflow:hidden}
+.demo-bar{background:var(--s2);padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--text2)}
+.demo-bar i{color:var(--g);font-size:12px}
+.demo-table{width:100%;border-collapse:collapse}
+.demo-table th{background:rgba(0,229,160,.04);padding:8px 12px;text-align:left;font-family:var(--mono);font-size:8px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.demo-table td{padding:9px 12px;font-size:11px;color:var(--text2);border-bottom:1px solid rgba(0,229,160,.04)}
+.demo-table tr:last-child td{border-bottom:none}
+.tag-sent{background:rgba(0,229,160,.1);color:var(--g);padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700}
+.tag-pending{background:rgba(245,158,11,.1);color:var(--y);padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700}
+.demo-crm{padding:14px}
+.crm-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px}
+.crm-row:last-child{margin-bottom:0}
+.crm-name{font-size:12px;font-weight:700;color:#fff}
+.crm-phone{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.crm-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px}
+.cb-new{background:rgba(59,130,246,.12);color:var(--b)}
+.cb-contacted{background:rgba(0,229,160,.1);color:var(--g)}
+.cb-booked{background:rgba(139,92,246,.12);color:var(--p)}
+.arrow-mid{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--g)}
+.arrow-mid i{font-size:20px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.3;transform:translateX(0)}50%{opacity:1;transform:translateX(5px)}}
+.arrow-mid span{font-family:var(--mono);font-size:9px;color:var(--text2)}
+
+/* ── HOW IT WORKS ── */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--border);border-radius:var(--rad);overflow:hidden;margin-top:52px;counter-reset:step}
+.step-item{background:var(--s1);padding:28px 22px;border:1px solid transparent;transition:.2s;counter-increment:step;position:relative}
+.step-item:hover{background:var(--s2)}
+.step-item::before{content:counter(step,decimal-leading-zero);font-family:var(--mono);font-size:32px;font-weight:700;color:rgba(0,229,160,.07);line-height:1;display:block;margin-bottom:14px}
+.step-icon{font-size:22px;margin-bottom:12px;color:var(--g)}
+.step-name{font-size:13px;font-weight:800;color:#fff;margin-bottom:7px}
+.step-desc{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.75}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:52px;align-items:start}
+.price-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rad);padding:28px;transition:.2s;position:relative}
+.price-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.price-card.featured{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.03)}
+.featured-tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;font-size:9px;font-weight:800;padding:3px 12px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+.price-name{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.price-amount{font-size:clamp(36px,5vw,54px);font-weight:900;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.price-amount span{font-size:16px;color:var(--text2);font-weight:400;letter-spacing:0}
+.price-note{font-family:var(--mono);font-size:10px;color:var(--text2);margin-bottom:22px}
+.price-divider{height:1px;background:var(--border);margin-bottom:22px}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
+.price-features li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text2);line-height:1.5}
+.price-features li i{color:var(--g);font-size:11px;margin-top:3px;flex-shrink:0}
+.price-features li.dim{color:var(--muted)}
+.price-features li.dim i{color:var(--muted)}
+
+/* ── MODULES ── */
+.modules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:52px}
+.module-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rad);padding:22px;transition:.2s;position:relative;overflow:hidden}
+.module-card:hover{border-color:rgba(0,229,160,.2);transform:translateY(-3px)}
+.module-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:0;transition:.2s}
+.module-card:hover::after{opacity:1}
+.module-icon{font-size:24px;margin-bottom:12px}
+.module-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-.2px}
+.module-tag{font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:8px}
+.mt-free{background:rgba(0,229,160,.1);color:var(--g)}
+.mt-pro{background:rgba(139,92,246,.12);color:var(--p)}
+.module-desc{font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.75}
+
+/* ── CREDITS ── */
+.credits-wrap{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:52px}
+.credits-left{}
+.credits-packs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:28px}
+.pack{background:var(--s1);border:1px solid var(--border);border-radius:var(--rad);padding:16px;text-align:center;transition:.2s}
+.pack:hover{border-color:rgba(0,229,160,.25)}
+.pack.best{border-color:rgba(0,229,160,.35);background:rgba(0,229,160,.03);position:relative}
+.pack-best-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;font-size:8px;font-weight:800;padding:2px 10px;border-radius:20px}
+.pack-credits{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--p)}
+.pack-price{font-size:18px;font-weight:800;color:#fff;margin:4px 0 2px}
+.pack-rate{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.credits-info{background:var(--s1);border:1px solid var(--border);border-radius:var(--rad);padding:24px}
+.credits-info h3{font-size:16px;font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-.3px}
+.credit-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.credit-row:last-child{border-bottom:none}
+.credit-row span:first-child{color:var(--text2);flex:1}
+.credit-row span:last-child{color:var(--g);font-weight:700}
+
+/* ── FAQ ── */
+.faq-list{display:flex;flex-direction:column;gap:1px;margin-top:52px;border:1px solid var(--border);border-radius:var(--rad);overflow:hidden}
+.faq-item{background:var(--s1);transition:.2s}
+.faq-item:hover{background:var(--s2)}
+.faq-q{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:16px}
+.faq-q span{font-size:14px;font-weight:700;color:#fff}
+.faq-q i{color:var(--text2);font-size:12px;transition:.2s;flex-shrink:0}
+.faq-a{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.85;padding:0 22px;max-height:0;overflow:hidden;transition:all .3s}
+.faq-a.open{max-height:200px;padding:0 22px 18px}
+.faq-a strong{color:var(--g)}
+.faq-item.active .faq-q i{transform:rotate(180deg);color:var(--g)}
+
+/* ── CTA ── */
+.cta-section{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.cta-inner{text-align:center;max-width:640px;margin:0 auto}
+.cta-inner h2{font-size:clamp(28px,4vw,52px);font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.05;margin-bottom:16px}
+.cta-inner h2 em{font-style:normal;color:var(--g)}
+.cta-inner p{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.85;margin-bottom:32px}
+.cta-checks{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:32px}
+.cta-check{font-family:var(--mono);font-size:10px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.cta-check i{color:var(--g)}
+
+/* ── FOOTER ── */
+footer{padding:28px 32px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px}
+.footer-brand{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.footer-brand span{color:var(--g)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-family:var(--mono);font-size:9px;color:var(--text2);text-decoration:none;letter-spacing:.5px;transition:.15s}
+.footer-links a:hover{color:var(--g)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  nav{padding:12px 16px}
+  .nav-right .nav-link{display:none}
+  section{padding:64px 16px}
+  .pain-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .demo-wrap{grid-template-columns:1fr}
+  .arrow-mid{transform:rotate(90deg)}
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .modules-grid{grid-template-columns:1fr}
+  .credits-wrap{grid-template-columns:1fr}
+  .credits-packs{grid-template-columns:repeat(3,1fr)}
+  .stats-strip{max-width:100%}
+  footer{flex-direction:column;text-align:center}
+}
+@media(max-width:480px){
+  .steps-grid{grid-template-columns:1fr}
+  .credits-packs{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-tag">WA · CRM · BLAST</div>
+    <a href="#" class="nav-logo">Lead<span>Flow</span></a>
+  </div>
+  <div class="nav-right">
+    <a href="#features" class="nav-link">FEATURES</a>
+    <a href="#modules" class="nav-link">MODULES</a>
+    <a href="#pricing" class="nav-link">PRICING</a>
+    <a href="https://wa.me/917504704502?text=I%20want%20to%20buy%20Leadflow" class="nav-cta">Buy / Demo →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">WHATSAPP AUTOMATION PLATFORM v2.2</div>
+  <h1>Stop renting.<br><em>Own your CRM.</em></h1>
+  <p class="hero-sub" style="animation:fadeUp .6s .2s ease both">
+    WATI costs <strong>₹3,000–6,000/month</strong>. LeadFlow is a one-time purchase.<br>
+    WhatsApp blast + lead pipeline + email + social — everything in one dashboard you actually own.
+  </p>
+  <div class="hero-btns">
+    <a href="https://wa.me/917504704502?text=I%20want%20to%20buy%20Leadflow" class="btn-g"><i class="fas fa-rocket"></i> Buy / Demo</a>
+    <a href="https://cggodotassets.shop/marketting/leadflow" class="btn-s" target="_blank"><i class="fas fa-external-link-alt"></i> Open App</a>
+  </div>
+  <div class="stats-strip">
+    <div class="stat-box"><div class="stat-num"><span>₹0</span></div><div class="stat-lbl">Monthly fee</div></div>
+    <div class="stat-box"><div class="stat-num">1<span>k+</span></div><div class="stat-lbl">Messages sent</div></div>
+    <div class="stat-box"><div class="stat-num"><span>₹</span>0.25</div><div class="stat-lbl">Per message</div></div>
+    <div class="stat-box"><div class="stat-num"><span>5</span>min</div><div class="stat-lbl">Setup time</div></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> WhatsApp Blast</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Lead CRM Pipeline</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Email Campaigns</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Instagram Lead Capture</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Facebook Lead Capture</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Google Sheet Import</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Calendly Auto-Sync</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> AI Web Assistant Bot</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> No Monthly Fee</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Pay After It Works</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> WhatsApp Blast</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Lead CRM Pipeline</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Email Campaigns</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Instagram Lead Capture</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Facebook Lead Capture</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Google Sheet Import</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Calendly Auto-Sync</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> AI Web Assistant Bot</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> No Monthly Fee</span>
+    <span class="marquee-item"><i class="fas fa-check-circle"></i> Pay After It Works</span>
+  </div>
+</div>
+
+<!-- PAIN POINTS -->
+<section class="pain-section">
+  <div class="container">
+    <div class="sec-label reveal">The problem</div>
+    <h2 class="sec-title reveal">Sound familiar?</h2>
+    <p class="sec-sub reveal">Every Indian business owner using WhatsApp for sales has hit at least one of these.</p>
+    <div class="pain-grid">
+      <div class="pain-card reveal">
+        <div class="pain-icon">😤</div>
+        <div>
+          <div class="pain-head">Paying ₹3,000–6,000/month for WhatsApp tools</div>
+          <div class="pain-desc">WATI, Interakt, AiSensy — you're <strong>renting what you could own once for ₹2,500</strong>. Every month, forever. LeadFlow is a one-time purchase.</div>
+        </div>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">🐌</div>
+        <div>
+          <div class="pain-head">No real lead tracking — just chat chaos</div>
+          <div class="pain-desc">WhatsApp Business has zero CRM. Leads fall through chats daily. <strong>LeadFlow gives every lead a status, a source, and a follow-up</strong> — all in one place.</div>
+        </div>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">📋</div>
+        <div>
+          <div class="pain-head">Manually copy-pasting numbers into Excel</div>
+          <div class="pain-desc">You shouldn't be doing that. <strong>Paste a sheet, LeadFlow imports it, blasts everyone, logs every result</strong>. Same result in 30 seconds.</div>
+        </div>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">🔒</div>
+        <div>
+          <div class="pain-head">Your lead data lives on someone else's server</div>
+          <div class="pain-desc">WATI, ManyChat, AiSensy all own your data. <strong>LeadFlow runs on your Supabase account</strong>. Your data, your infrastructure, your cost — forever.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="sec-label reveal">What you get</div>
+    <h2 class="sec-title reveal">One dashboard.<br><em>Every channel.</em></h2>
+    <p class="sec-sub reveal">WhatsApp blast, email, Instagram, Facebook, Calendly, Google Sheets — all synced. All in one tab.</p>
+    <div class="features-grid reveal">
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fab fa-whatsapp"></i></div>
+        <div class="fi-name">WhatsApp Blast</div>
+        <div class="fi-desc">Upload a CSV or paste numbers. Write your message with {name} personalisation. Hit send. LeadFlow throttles intelligently — no bans.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fas fa-filter"></i></div>
+        <div class="fi-name">Lead Pipeline CRM</div>
+        <div class="fi-desc">Every lead from every channel — WhatsApp, Instagram, Facebook, Sheet, Website — lands in one pipeline. Status tracking: New → Contacted → Booked → Cold.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fas fa-envelope"></i></div>
+        <div class="fi-name">Email Campaigns</div>
+        <div class="fi-desc">Send via Google Apps Script (free), Brevo (300/day free), or Resend. Same blast interface, same {name} personalisation. WA + Email in one campaign.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fas fa-table"></i></div>
+        <div class="fi-name">Google Sheet Import</div>
+        <div class="fi-desc">Map columns once. Every time Scan Sheet runs, new rows become leads automatically. Enable Auto-Send and it messages them the moment they appear.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="fi-name">Calendly Auto-Sync</div>
+        <div class="fi-desc">Connect your Calendly token. LeadFlow syncs bookings and marks matching leads as Booked automatically. No more manual status updates.</div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon"><i class="fas fa-robot"></i></div>
+        <div class="fi-name">AI Web Assistant Bot</div>
+        <div class="fi-desc">A one-script embed that puts an AI chatbot on your website. Trained on your URLs, books leads straight into your pipeline. Pro module.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO VISUAL -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="sec-label reveal">Live demo</div>
+    <h2 class="sec-title reveal">Blast + track in one screen.</h2>
+    <p class="sec-sub reveal">Import from sheet, send on WhatsApp, watch the pipeline update — all without switching tabs.</p>
+    <div class="demo-wrap reveal">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:8px;letter-spacing:1px;">CONTACTS FROM SHEET</div>
+        <div class="demo-panel">
+          <div class="demo-bar"><i class="fas fa-table"></i> leads — Google Sheet import</div>
+          <table class="demo-table">
+            <thead><tr><th>Name</th><th>Phone</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Rohit Sharma</td><td>9198765...</td><td><span class="tag-sent">sent</span></td></tr>
+              <tr><td>Priya Patel</td><td>9187654...</td><td><span class="tag-sent">sent</span></td></tr>
+              <tr><td>Amit Gupta</td><td>9176543...</td><td><span class="tag-pending">pending</span></td></tr>
+              <tr><td>Neha Singh</td><td>9165432...</td><td><span class="tag-pending">pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="arrow-mid">
+        <i class="fas fa-arrow-right"></i>
+        <span>Auto-syncs to CRM</span>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:8px;letter-spacing:1px;">LEAD PIPELINE</div>
+        <div class="demo-panel">
+          <div class="demo-bar"><i class="fas fa-filter"></i> leads — all channels</div>
+          <div class="demo-crm">
+            <div class="crm-row">
+              <div><div class="crm-name">Rohit Sharma</div><div class="crm-phone">📱 WA · Sheet</div></div>
+              <span class="crm-badge cb-contacted">Contacted</span>
+            </div>
+            <div class="crm-row">
+              <div><div class="crm-name">@priya_designs</div><div class="crm-phone">📷 Instagram</div></div>
+              <span class="crm-badge cb-new">New</span>
+            </div>
+            <div class="crm-row">
+              <div><div class="crm-name">Amit Gupta</div><div class="crm-phone">📅 Calendly</div></div>
+              <span class="crm-badge cb-booked">Booked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section id="modules" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="sec-label reveal">Modules</div>
+    <h2 class="sec-title reveal">Free core. <em>Pro unlocks everything.</em></h2>
+    <p class="sec-sub reveal">The blast + CRM is free-tier ready. Pro at ₹499/month unlocks the advanced capture and automation modules.</p>
+    <div class="modules-grid">
+      <div class="module-card reveal">
+        <div class="module-icon">📱</div>
+        <div class="module-name">WhatsApp Blast</div>
+        <span class="module-tag mt-free">FREE</span>
+        <div class="module-desc">Bulk send to contacts or leads. CSV upload, personalisation, media attachments, send log, throttle controls.</div>
+      </div>
+      <div class="module-card reveal">
+        <div class="module-icon">🎯</div>
+        <div class="module-name">Lead Pipeline</div>
+        <span class="module-tag mt-free">FREE</span>
+        <div class="module-desc">Multi-channel lead inbox. Filter by source. Update statuses. Quick WhatsApp, Instagram, Facebook actions per lead.</div>
+      </div>
+      <div class="module-card reveal">
+        <div class="module-icon">📊</div>
+        <div class="module-name">Google Sheet Sync</div>
+        <span class="module-tag mt-free">FREE</span>
+        <div class="module-desc">Map your sheet columns once. Scan for new rows anytime. Auto-Send blasts new leads the moment they're imported.</div>
+      </div>
+      <div class="module-card reveal">
+        <div class="module-icon">📧</div>
+        <div class="module-name">Email Module</div>
+        <span class="module-tag mt-pro">PRO</span>
+        <div class="module-desc">Send via Apps Script, Brevo, or Resend. Campaign history, open tracking, conversation threads. Blast WA + Email together.</div>
+      </div>
+      <div class="module-card reveal">
+        <div class="module-icon">📱</div>
+        <div class="module-name">Social Media Module</div>
+        <span class="module-tag mt-pro">PRO</span>
+        <div class="module-desc">Instagram DMs, comments and story replies. Facebook page messages and ad leads. Auto-reply templates. ManyChat webhook compatible.</div>
+      </div>
+      <div class="module-card reveal">
+        <div class="module-icon">🤖</div>
+        <div class="module-name">Web Assistant Bot</div>
+        <span class="module-tag mt-pro">PRO</span>
+        <div class="module-desc">Embed one script tag. AI chatbot trained on your URLs. Captures leads directly into your pipeline. Calendly booking built-in.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container">
+    <div class="sec-label reveal">How it works</div>
+    <h2 class="sec-title reveal">From sign-up to first blast<br><em>in under 5 minutes.</em></h2>
+    <p class="sec-sub reveal">No server to manage. No Zapier flows. No developer. Just your WhatsApp number and a browser.</p>
+    <div class="steps-grid reveal">
+      <div class="step-item">
+        <div class="step-icon"><i class="fas fa-user-plus"></i></div>
+        <div class="step-name">Create Account</div>
+        <div class="step-desc">Sign up with email. You get 50 free credits to test. No card needed to start.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon"><i class="fas fa-qrcode"></i></div>
+        <div class="step-name">Link WhatsApp</div>
+        <div class="step-desc">Scan a QR code with WhatsApp — just like linking WhatsApp Web. Takes 20 seconds.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon"><i class="fas fa-upload"></i></div>
+        <div class="step-name">Import Contacts</div>
+        <div class="step-desc">Upload a CSV, paste numbers, or connect a Google Sheet. Contacts load instantly.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-icon"><i class="fas fa-paper-plane"></i></div>
+        <div class="step-name">Blast & Track</div>
+        <div class="step-desc">Write your message, hit Start. Watch the send log. Every lead lands in the CRM pipeline.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREDITS -->
+<section style="padding-top:0">
+  <div class="container">
+    <div class="sec-label reveal">Credits</div>
+    <h2 class="sec-title reveal"><em>₹0.25</em> per message.<br>Buy once, use anytime.</h2>
+    <p class="sec-sub reveal">No subscription. Top up when you need. Credits never expire. 1 credit = 1 WhatsApp or 1 email.</p>
+    <div class="credits-wrap reveal">
+      <div>
+        <div class="credits-packs">
+          <div class="pack">
+            <div class="pack-credits">100</div>
+            <div class="pack-price">₹25</div>
+            <div class="pack-rate">₹0.25/credit</div>
+          </div>
+          <div class="pack">
+            <div class="pack-credits">500</div>
+            <div class="pack-price">₹125</div>
+            <div class="pack-rate">₹0.25/credit</div>
+          </div>
+          <div class="pack best">
+            <div class="pack-best-tag">⭐ BEST</div>
+            <div class="pack-credits">1500</div>
+            <div class="pack-price">₹375</div>
+            <div class="pack-rate">₹0.25/credit</div>
+          </div>
+          <div class="pack">
+            <div class="pack-credits">4000</div>
+            <div class="pack-price">₹1000</div>
+            <div class="pack-rate">₹0.25/credit</div>
+          </div>
+          <div class="pack" style="grid-column:span 2">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-bottom:4px">COMPARE</div>
+            <div class="pack-price" style="font-size:14px">WATI: <span style="color:var(--r)">₹3,000/mo</span> for same volume</div>
+            <div class="pack-rate" style="font-size:10px;color:var(--g)">LeadFlow: ₹375 for 1,500 msgs — no subscription</div>
+          </div>
+        </div>
+        <a href="https://wa.me/917504704502?text=I%20want%20to%20buy%20Leadflow" class="btn-g" style="margin-top:20px;width:100%;justify-content:center">Buy Credits via WhatsApp →</a>
+      </div>
+      <div class="credits-info">
+        <h3>What does 1 credit do?</h3>
+        <div class="credit-row"><span>WhatsApp message</span><span>1 credit</span></div>
+        <div class="credit-row"><span>Email (Brevo / Resend)</span><span>1 credit</span></div>
+        <div class="credit-row"><span>WA + Email together</span><span>2 credits</span></div>
+        <div class="credit-row"><span>Failed message</span><span>0 credits</span></div>
+        <div class="credit-row"><span>Credits expire</span><span style="color:var(--text2)">Never</span></div>
+        <div class="credit-row"><span>Minimum top-up</span><span>₹25 (100 credits)</span></div>
+        <div style="margin-top:16px;padding:12px;background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.15);border-radius:8px;font-family:var(--mono);font-size:10px;color:var(--text2);line-height:1.75">
+          Payments via <strong style="color:var(--g)">Razorpay</strong>. Credits added instantly after payment confirmation.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="sec-label reveal">Pricing</div>
+    <h2 class="sec-title reveal">Simple. <em>No surprises.</em></h2>
+    <p class="sec-sub reveal">Pay for credits as you use them. Upgrade to Pro to unlock all modules. That's it.</p>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="price-name">FREE TIER</div>
+        <div class="price-amount">₹0<span>/month</span></div>
+        <div class="price-note">50 free credits on signup · Pay-as-you-go credits after</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> WhatsApp Blast (unlimited contacts)</li>
+          <li><i class="fas fa-check"></i> Lead Pipeline CRM</li>
+          <li><i class="fas fa-check"></i> Google Sheet import + Auto-Send</li>
+          <li><i class="fas fa-check"></i> Send log + campaign history</li>
+          <li><i class="fas fa-check"></i> 50 free credits to start</li>
+          <li class="dim"><i class="fas fa-times"></i> Email module</li>
+          <li class="dim"><i class="fas fa-times"></i> Instagram / Facebook capture</li>
+          <li class="dim"><i class="fas fa-times"></i> Web Assistant Bot</li>
+          <li class="dim"><i class="fas fa-times"></i> Calendly Auto-Sync</li>
+        </ul>
+        <a href="https://cggodotassets.shop/marketting/leadflow" class="btn-s" style="width:100%;justify-content:center" target="_blank">Open App Free →</a>
+      </div>
+      <div class="price-card featured reveal">
+        <div class="featured-tag">✦ Everything Unlocked</div>
+        <div class="price-name">PRO PLAN</div>
+        <div class="price-amount">₹499<span>/month</span></div>
+        <div class="price-note">Credits billed separately at ₹0.25 each</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Everything in Free</li>
+          <li><i class="fas fa-check"></i> Email Module — Brevo / Resend / Apps Script</li>
+          <li><i class="fas fa-check"></i> Instagram & Facebook lead capture</li>
+          <li><i class="fas fa-check"></i> ManyChat webhook integration</li>
+          <li><i class="fas fa-check"></i> Calendly Auto-Sync & booking management</li>
+          <li><i class="fas fa-check"></i> Web Assistant AI Bot (1-script embed)</li>
+          <li><i class="fas fa-check"></i> Priority WhatsApp support</li>
+          <li><i class="fas fa-check"></i> All future modules included</li>
+        </ul>
+        <a href="https://wa.me/917504704502?text=I%20want%20to%20upgrade%20LeadFlow%20to%20Pro" class="btn-g" style="width:100%;justify-content:center"><i class="fas fa-rocket"></i> Upgrade to Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <div class="sec-label reveal">FAQ</div>
+    <h2 class="sec-title reveal">Questions before you buy.</h2>
+    <p class="sec-sub reveal">The things most people ask before messaging.</p>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Is this the official WhatsApp API?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">LeadFlow uses an unofficial WhatsApp connection — the same method as WhatsApp Web. It is <strong>not the official Meta Business API</strong>. This means lower cost and no template approvals, but also means Meta could detect and temporarily block mass-sending if you push too hard too fast. The throttle controls are there for a reason — use them. For high-volume official API usage, ask about the Wablast product instead.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Do I need to keep my phone connected?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">Yes — just like WhatsApp Web, your phone needs to stay connected to the internet while sending. You don't need to have WhatsApp open on your phone, but the phone must be online. Most users leave it on Wi-Fi and charging during campaigns.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Where is my data stored?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">Your lead and contact data is stored in a <strong>Supabase database</strong>. It's shared infrastructure managed by Sanjay — but each account's data is isolated. If you want fully private infrastructure, ask about deploying your own instance.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>How is this different from WATI or AiSensy?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">WATI and AiSensy use the <strong>official Meta API</strong> — more compliant, but costs ₹3,000–6,000/month minimum regardless of how many messages you send. LeadFlow is <strong>pay-per-message at ₹0.25</strong> with no monthly platform fee. For most small businesses sending under 10,000 messages/month, LeadFlow is significantly cheaper.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>Can I use my existing WhatsApp number?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">Yes. You link whatever WhatsApp number you want — personal or business. Just scan the QR code and you're connected. You can unlink anytime. Using the number on LeadFlow doesn't affect your regular WhatsApp usage.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span>What happens if I run out of credits mid-campaign?</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-a">The campaign pauses automatically and shows a warning. No messages are attempted with zero credits — <strong>you're never charged for failed sends</strong>. Top up on WhatsApp and resume from where it stopped.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="reveal">What's the thing<br><em>you need to send?</em></h2>
+      <p class="reveal">Tell me on WhatsApp. Free demo, no commitment.<br>If LeadFlow fits, I'll show you exactly how — and what it costs.</p>
+      <div class="cta-checks reveal">
+        <div class="cta-check"><i class="fas fa-check"></i> 50 free credits on signup</div>
+        <div class="cta-check"><i class="fas fa-check"></i> No setup fee</div>
+        <div class="cta-check"><i class="fas fa-check"></i> Pay after it works — always</div>
+      </div>
+      <div class="hero-btns reveal">
+        <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20try%20LeadFlow" class="btn-g"><i class="fab fa-whatsapp"></i> Message on WhatsApp</a>
+        <a href="https://cggodotassets.shop/marketting/leadflow" class="btn-s" target="_blank">Open App →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">© 2026 <span>Sanjay Meher</span> · Solo dev · Fixed price · Pay after it works</div>
+  <div class="footer-links">
+    <a href="https://cggodotassets.shop/">Home</a>
+    <a href="https://cggodotassets.shop/marketing/business-services">Business Services</a>
+    <a href="https://cggodotassets.shop/sanjaywa">Auosend</a>
+    <a href="https://champ-gaming.itch.io">Itch.io</a>
+  </div>
+</footer>
+
+<script>
+// FAQ
+function toggleFaq(el){
+  const item=el.parentElement;
+  const ans=item.querySelector('.faq-a');
+  const wasOpen=item.classList.contains('active');
+  document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('active');i.querySelector('.faq-a').classList.remove('open')});
+  if(!wasOpen){item.classList.add('active');ans.classList.add('open')}
+}
+
+// Scroll reveal
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*70);obs.unobserve(e.target)}
+  })
+},{threshold:.07});
+reveals.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
