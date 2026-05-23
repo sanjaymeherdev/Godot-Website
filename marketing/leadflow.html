@@ -1186,59 +1186,140 @@ function doPost(e) {
           <button class="btn btn-g" onclick="saveAllSettings()">💾 Save All</button>
         </div>
 
-        <!-- Credits Card -->
-        <div class="card">
-          <div class="card-hdr">
-            <div class="card-title">⚡ Credits & Billing</div>
-            <button class="btn btn-p btn-sm" onclick="openBuyModal()">+ Buy Credits</button>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-            <div class="stat p" style="flex:1;min-width:120px;padding:12px 14px;"><div class="stat-val" id="settingsCredits">0</div><div class="stat-lbl">Balance</div></div>
-            <div class="stat g" style="flex:1;min-width:120px;padding:12px 14px;"><div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;" id="settingsCanSend">0</div><div class="stat-lbl">Can Send</div></div>
-            <div class="stat b" style="flex:1;min-width:120px;padding:12px 14px;"><div style="font-size:14px;font-weight:700;color:#fff;margin-top:2px;">₹0.25</div><div class="stat-lbl">Per Message</div></div>
-          </div>
-          <div class="card-title" style="margin-bottom:8px;">Transaction History</div>
-          <div class="tbl-wrap" style="max-height:220px;overflow-y:auto;">
-            <table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr></thead>
-            <tbody id="txBody"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody></table>
-          </div>
-          <button class="btn btn-s btn-sm" style="margin-top:8px;" onclick="loadCredits()">↻ Refresh</button>
+   <div class="card">
+  <div class="card-title" style="margin-bottom:12px;">📊 Google Sheet — Lead Source & Auto-Send</div>
+ 
+  <!-- Sheet connection method tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px;">
+    <button class="subnav-btn active" id="sheetTabManual" onclick="switchSheetTab('manual',this)">✏️ Manual</button>
+    <button class="subnav-btn" id="sheetTabOauth" onclick="switchSheetTab('oauth',this)">🔗 Connect via Google</button>
+  </div>
+ 
+  <!-- ── MANUAL TAB (unchanged) ── -->
+  <div id="sheetPanel-manual">
+    <div class="grid2">
+      <div class="fg"><label>Sheet ID</label><input type="text" id="sheetId" placeholder="1BxiMx0_sample..."></div>
+      <div class="fg"><label>Tab Name</label><input type="text" id="sheetTab" placeholder="Sheet1"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="fg"><label>Name Column</label><input type="text" id="colName" placeholder="A" maxlength="2"></div>
+      <div class="fg"><label>Phone Column</label><input type="text" id="colPhone" placeholder="B" maxlength="2"></div>
+      <div class="fg"><label>Email Column</label><input type="text" id="colEmail" placeholder="C" maxlength="2"></div>
+    </div>
+    <div class="tog-wrap">
+      <div><div style="font-size:13px;font-weight:600;">Has Header Row</div><div style="font-size:11px;color:var(--text2);">Skip first row when importing</div></div>
+      <label class="toggle-label"><input type="checkbox" id="hasHeader" checked><span class="tslider"></span></label>
+    </div>
+  </div>
+ 
+  <!-- ── OAUTH TAB (new) ── -->
+  <div id="sheetPanel-oauth" style="display:none;">
+ 
+    <!-- Step 1: Connect -->
+    <div id="oauthStep1">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6;">
+        Connect your Google account to pick a sheet directly from Drive. An <span style="color:var(--g);font-weight:700;">onChange trigger</span> will be auto-installed — new rows will arrive instantly instead of waiting for the 15-min scan.
+      </div>
+      <button class="btn btn-b" onclick="startGoogleOAuth()">
+        <span style="font-size:14px;">G</span> Connect Google Account
+      </button>
+      <div id="oauthStatus" style="font-size:11px;color:var(--text2);margin-top:8px;font-family:var(--mono);"></div>
+    </div>
+ 
+    <!-- Step 2: Pick sheet (shown after OAuth) -->
+    <div id="oauthStep2" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.2);border-radius:9px;margin-bottom:14px;">
+        <span style="font-size:18px;">✅</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--g);" id="oauthEmail">Connected</div>
+          <div style="font-size:10px;color:var(--text2);">Google account linked</div>
         </div>
-
-        <!-- Sheet Auto-Send Card -->
-        <div class="card">
-          <div class="card-title" style="margin-bottom:12px;">📊 Google Sheet — Lead Source & Auto-Send</div>
-          <div class="grid2">
-            <div class="fg"><label>Sheet ID</label><input type="text" id="sheetId" placeholder="1BxiMx0_sample..."></div>
-            <div class="fg"><label>Tab Name</label><input type="text" id="sheetTab" placeholder="Sheet1"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-            <div class="fg"><label>Name Column</label><input type="text" id="colName" placeholder="A" maxlength="2"></div>
-            <div class="fg"><label>Phone Column</label><input type="text" id="colPhone" placeholder="B" maxlength="2"></div>
-            <div class="fg"><label>Email Column</label><input type="text" id="colEmail" placeholder="C" maxlength="2"></div>
-          </div>
-          <div class="tog-wrap">
-            <div><div style="font-size:13px;font-weight:600;">Has Header Row</div><div style="font-size:11px;color:var(--text2);">Skip first row when importing</div></div>
-            <label class="toggle-label"><input type="checkbox" id="hasHeader" checked><span class="tslider"></span></label>
-          </div>
-          <!-- Auto-Send Toggle -->
-          <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.15);border-radius:9px;padding:12px 14px;margin-top:8px;">
-            <div style="font-family:var(--mono);font-size:9px;color:var(--g);margin-bottom:10px;letter-spacing:1px;">AUTO-SEND ON NEW ROW</div>
-            <div class="tog-wrap" style="padding:0;margin-bottom:10px;">
-              <div><div style="font-size:13px;font-weight:600;">Enable Auto-Send</div><div style="font-size:11px;color:var(--text2);">Sends when Scan Sheet finds new rows</div></div>
-              <label class="toggle-label"><input type="checkbox" id="autoSendEnabled"><span class="tslider"></span></label>
-            </div>
-            <div id="autoSendOptions">
-              <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Send via:</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn btn-g btn-sm" id="asSendWaBtn" onclick="setAutoSendChannel('wa')" style="font-size:11px;">📱 WhatsApp Only</button>
-                <button class="btn btn-s btn-sm" id="asSendEmailBtn" onclick="setAutoSendChannel('email')" style="font-size:11px;">📧 Email Only</button>
-                <button class="btn btn-s btn-sm" id="asSendBothBtn" onclick="setAutoSendChannel('both')" style="font-size:11px;">📱+📧 Both</button>
+        <button class="btn btn-d btn-sm" style="margin-left:auto;" onclick="disconnectGoogle()">Disconnect</button>
+      </div>
+ 
+      <div class="fg">
+        <label>Select Sheet</label>
+        <div style="display:flex;gap:8px;">
+          <select id="sheetPickerDropdown" style="flex:1;" onchange="onSheetSelected(this.value)">
+            <option value="">— Choose a spreadsheet —</option>
+          </select>
+          <button class="btn btn-s btn-sm" onclick="loadUserSheets()">↻</button>
+        </div>
+      </div>
+ 
+      <div id="oauthStep3" style="display:none;">
+        <!-- Tab picker -->
+        <div class="fg">
+          <label>Sheet Tab</label>
+          <select id="oauthSheetTab" onchange="loadSheetHeaders()">
+            <option value="">— Choose tab —</option>
+          </select>
+        </div>
+ 
+        <!-- Column mapper (shown after tab selected) -->
+        <div id="columnMapperWrap" style="display:none;">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:10px;">MAP YOUR COLUMNS</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:8px;">First row detected:</div>
+            <div id="headerPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+            <div class="grid2" style="gap:10px;">
+              <div class="fg">
+                <label>Name Column</label>
+                <select id="mapName"><option value="">— skip —</option></select>
               </div>
-              <div id="autoSendNote" style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:6px;"></div>
+              <div class="fg">
+                <label>Phone Column</label>
+                <select id="mapPhone"><option value="">— skip —</option></select>
+              </div>
+              <div class="fg">
+                <label>Email Column</label>
+                <select id="mapEmail"><option value="">— skip —</option></select>
+              </div>
+              <div class="fg">
+                <label>Has Header Row</label>
+                <select id="mapHeader">
+                  <option value="true">Yes — first row is header</option>
+                  <option value="false">No — data starts at row 1</option>
+                </select>
+              </div>
             </div>
           </div>
+ 
+          <!-- Trigger install -->
+          <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:9px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:4px;">⚡ Instant Trigger</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Auto-installs an Apps Script on your sheet. New rows will be detected instantly — no 15-min wait.</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn btn-b btn-sm" id="installTriggerBtn" onclick="installSheetTrigger()">🔧 Install Trigger</button>
+              <span id="triggerStatus" style="font-size:11px;font-family:var(--mono);color:var(--text2);"></span>
+            </div>
+          </div>
+ 
+          <button class="btn btn-g" onclick="saveOAuthSheetConfig()">💾 Save Sheet Config</button>
         </div>
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- ── AUTO-SEND (shared, shown for both tabs) ── -->
+  <div style="background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.15);border-radius:9px;padding:12px 14px;margin-top:14px;">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--g);margin-bottom:10px;letter-spacing:1px;">AUTO-SEND ON NEW ROW</div>
+    <div class="tog-wrap" style="padding:0;margin-bottom:10px;">
+      <div><div style="font-size:13px;font-weight:600;">Enable Auto-Send</div><div style="font-size:11px;color:var(--text2);">Sends when Scan Sheet finds new rows</div></div>
+      <label class="toggle-label"><input type="checkbox" id="autoSendEnabled"><span class="tslider"></span></label>
+    </div>
+    <div id="autoSendOptions">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Send via:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-g btn-sm" id="asSendWaBtn" onclick="setAutoSendChannel('wa')" style="font-size:11px;">📱 WhatsApp Only</button>
+        <button class="btn btn-s btn-sm" id="asSendEmailBtn" onclick="setAutoSendChannel('email')" style="font-size:11px;">📧 Email Only</button>
+        <button class="btn btn-s btn-sm" id="asSendBothBtn" onclick="setAutoSendChannel('both')" style="font-size:11px;">📱+📧 Both</button>
+      </div>
+      <div id="autoSendNote" style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:6px;"></div>
+    </div>
+  </div>
+</div>
 
         <!-- Send Limits -->
         <div class="card">
@@ -2878,6 +2959,307 @@ document.addEventListener('DOMContentLoaded',()=>{
     }).catch(err => console.error('loadAll error:', err));
   }
 });
+</script>
+  <script>
+// ── Google OAuth config ────────────────────────────────────
+const GOOGLE_CLIENT_ID = '318883110705-38kuiivsftv2roa2i0g7u6i2f4967kub.apps.googleusercontent.com';
+const GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/spreadsheets.readonly',
+  'https://www.googleapis.com/auth/drive.readonly',
+  'https://www.googleapis.com/auth/script.projects'
+].join(' ');
+ 
+// State
+let googleAccessToken = null;
+let googleRefreshToken = null;
+let selectedSheetId = null;
+let selectedSheetName = null;
+let sheetHeaders = [];
+ 
+// ── Sheet tab switcher ─────────────────────────────────────
+function switchSheetTab(tab, btn) {
+  document.querySelectorAll('#sheetTabManual, #sheetTabOauth').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sheetPanel-manual').style.display = tab === 'manual' ? 'block' : 'none';
+  document.getElementById('sheetPanel-oauth').style.display = tab === 'oauth' ? 'block' : 'none';
+  if (tab === 'oauth') checkExistingGoogleAuth();
+}
+ 
+// ── Check if already connected ─────────────────────────────
+function checkExistingGoogleAuth() {
+  const saved = localStorage.getItem('google_access_token');
+  const email = localStorage.getItem('google_email');
+  if (saved && email) {
+    googleAccessToken = saved;
+    showOAuthConnected(email);
+    loadUserSheets();
+  }
+}
+ 
+// ── Start OAuth flow ───────────────────────────────────────
+function startGoogleOAuth() {
+  const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+  const state = Math.random().toString(36).slice(2);
+  localStorage.setItem('oauth_state', state);
+ 
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: window.location.origin + window.location.pathname,
+    response_type: 'code',
+    scope: GOOGLE_SCOPES,
+    access_type: 'offline',
+    prompt: 'consent',
+    state
+  });
+ 
+  const popup = window.open(
+    'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString(),
+    'google_oauth',
+    'width=500,height=600,scrollbars=yes'
+  );
+ 
+  // Listen for redirect back
+  const interval = setInterval(() => {
+    try {
+      if (popup.closed) { clearInterval(interval); return; }
+      const url = popup.location.href;
+      if (url.includes('code=')) {
+        clearInterval(interval);
+        popup.close();
+        const urlParams = new URLSearchParams(popup.location.search || url.split('?')[1]);
+        const code = urlParams.get('code');
+        if (code) exchangeOAuthCode(code);
+      }
+    } catch (e) {}
+  }, 500);
+ 
+  document.getElementById('oauthStatus').textContent = 'Waiting for Google authorization...';
+}
+ 
+// ── Exchange code for tokens via edge function ─────────────
+async function exchangeOAuthCode(code) {
+  document.getElementById('oauthStatus').textContent = 'Exchanging authorization code...';
+  try {
+    const r = await api('googleOAuthExchange', {
+      code,
+      redirect_uri: window.location.origin + window.location.pathname
+    });
+    if (r.success) {
+      googleAccessToken = r.access_token;
+      localStorage.setItem('google_access_token', r.access_token);
+      localStorage.setItem('google_email', r.email);
+      if (r.refresh_token) localStorage.setItem('google_refresh_token', r.refresh_token);
+      showOAuthConnected(r.email);
+      loadUserSheets();
+      showToast('✅ Google account connected');
+    } else {
+      document.getElementById('oauthStatus').textContent = 'Error: ' + (r.message || 'Auth failed');
+      showToast(r.message || 'OAuth failed', true);
+    }
+  } catch (e) {
+    document.getElementById('oauthStatus').textContent = 'Error: ' + e.message;
+    showToast('OAuth error: ' + e.message, true);
+  }
+}
+ 
+// ── Show connected state ───────────────────────────────────
+function showOAuthConnected(email) {
+  document.getElementById('oauthStep1').style.display = 'none';
+  document.getElementById('oauthStep2').style.display = 'block';
+  document.getElementById('oauthEmail').textContent = email;
+}
+ 
+// ── Disconnect Google ──────────────────────────────────────
+function disconnectGoogle() {
+  googleAccessToken = null;
+  localStorage.removeItem('google_access_token');
+  localStorage.removeItem('google_email');
+  localStorage.removeItem('google_refresh_token');
+  document.getElementById('oauthStep1').style.display = 'block';
+  document.getElementById('oauthStep2').style.display = 'none';
+  document.getElementById('oauthStep3').style.display = 'none';
+  document.getElementById('columnMapperWrap').style.display = 'none';
+  showToast('Google account disconnected');
+}
+ 
+// ── Load user's sheets from Drive ─────────────────────────
+async function loadUserSheets() {
+  if (!googleAccessToken) return;
+  try {
+    const r = await api('listGoogleSheets', { access_token: googleAccessToken });
+    if (r.success) {
+      const dropdown = document.getElementById('sheetPickerDropdown');
+      dropdown.innerHTML = '<option value="">— Choose a spreadsheet —</option>';
+      (r.sheets || []).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        dropdown.appendChild(opt);
+      });
+ 
+      // Pre-select if already configured
+      const currentSheetId = document.getElementById('sheetId')?.value;
+      if (currentSheetId) dropdown.value = currentSheetId;
+    } else {
+      showToast('Could not load sheets: ' + (r.message || ''), true);
+    }
+  } catch (e) {
+    showToast('Error loading sheets: ' + e.message, true);
+  }
+}
+ 
+// ── Sheet selected — load tabs ─────────────────────────────
+async function onSheetSelected(sheetId) {
+  if (!sheetId) {
+    document.getElementById('oauthStep3').style.display = 'none';
+    return;
+  }
+  selectedSheetId = sheetId;
+  selectedSheetName = document.getElementById('sheetPickerDropdown').selectedOptions[0]?.text || '';
+  document.getElementById('oauthStep3').style.display = 'block';
+  document.getElementById('columnMapperWrap').style.display = 'none';
+ 
+  try {
+    const r = await api('getSheetTabs', { access_token: googleAccessToken, sheet_id: sheetId });
+    if (r.success) {
+      const tabSelect = document.getElementById('oauthSheetTab');
+      tabSelect.innerHTML = '<option value="">— Choose tab —</option>';
+      (r.tabs || []).forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        tabSelect.appendChild(opt);
+      });
+      if (r.tabs?.length === 1) {
+        tabSelect.value = r.tabs[0];
+        loadSheetHeaders();
+      }
+    }
+  } catch (e) {
+    showToast('Error loading tabs: ' + e.message, true);
+  }
+}
+ 
+// ── Tab selected — load headers for column mapping ─────────
+async function loadSheetHeaders() {
+  const tab = document.getElementById('oauthSheetTab').value;
+  if (!tab || !selectedSheetId) return;
+ 
+  try {
+    const r = await api('getSheetHeaders', {
+      access_token: googleAccessToken,
+      sheet_id: selectedSheetId,
+      tab_name: tab
+    });
+ 
+    if (r.success && r.headers?.length) {
+      sheetHeaders = r.headers;
+      renderColumnMapper(r.headers);
+      document.getElementById('columnMapperWrap').style.display = 'block';
+    } else {
+      showToast('Could not read sheet headers', true);
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, true);
+  }
+}
+ 
+// ── Render column mapper dropdowns ─────────────────────────
+function renderColumnMapper(headers) {
+  // Header preview pills
+  document.getElementById('headerPreview').innerHTML = headers.map((h, i) =>
+    `<span style="padding:3px 10px;background:var(--s3);border:1px solid var(--border2);border-radius:20px;font-size:10px;font-family:var(--mono);">${String.fromCharCode(65 + i)}: ${h}</span>`
+  ).join('');
+ 
+  // Populate each mapping dropdown
+  ['mapName', 'mapPhone', 'mapEmail'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— skip —</option>';
+    headers.forEach((h, i) => {
+      const opt = document.createElement('option');
+      opt.value = String.fromCharCode(65 + i); // A, B, C...
+      opt.textContent = `${String.fromCharCode(65 + i)} — ${h}`;
+      sel.appendChild(opt);
+    });
+  });
+ 
+  // Auto-detect common column names
+  headers.forEach((h, i) => {
+    const col = String.fromCharCode(65 + i);
+    const lower = h.toLowerCase();
+    if (/name|full.?name|contact/i.test(lower)) document.getElementById('mapName').value = col;
+    if (/phone|mobile|whatsapp|wa|number/i.test(lower)) document.getElementById('mapPhone').value = col;
+    if (/email|mail/i.test(lower)) document.getElementById('mapEmail').value = col;
+  });
+}
+ 
+// ── Install Apps Script trigger ────────────────────────────
+async function installSheetTrigger() {
+  if (!selectedSheetId) { showToast('Select a sheet first', true); return; }
+  const btn = document.getElementById('installTriggerBtn');
+  const status = document.getElementById('triggerStatus');
+  btn.disabled = true;
+  status.textContent = '⏳ Installing...';
+ 
+  try {
+    const r = await api('installSheetTrigger', {
+      access_token: googleAccessToken,
+      refresh_token: localStorage.getItem('google_refresh_token'),
+      sheet_id: selectedSheetId,
+      sheet_name: selectedSheetName,
+      user_jwt: localStorage.getItem('auth_token'),
+      edge_url: EDGE
+    });
+ 
+    if (r.success) {
+      status.innerHTML = '<span style="color:var(--g);">✅ Trigger installed</span>';
+      showToast('✅ Apps Script trigger installed — new rows will arrive instantly');
+    } else {
+      status.innerHTML = `<span style="color:#fca5a5;">❌ ${r.message || 'Failed'}</span>`;
+      showToast(r.message || 'Trigger install failed', true);
+    }
+  } catch (e) {
+    status.innerHTML = `<span style="color:#fca5a5;">❌ ${e.message}</span>`;
+    showToast('Error: ' + e.message, true);
+  }
+ 
+  btn.disabled = false;
+}
+ 
+// ── Save OAuth sheet config ────────────────────────────────
+async function saveOAuthSheetConfig() {
+  const tab = document.getElementById('oauthSheetTab').value;
+  const colName = document.getElementById('mapName').value;
+  const colPhone = document.getElementById('mapPhone').value;
+  const colEmail = document.getElementById('mapEmail').value;
+  const hasHeader = document.getElementById('mapHeader').value === 'true';
+ 
+  if (!selectedSheetId) { showToast('Select a sheet first', true); return; }
+  if (!colPhone) { showToast('Phone column is required', true); return; }
+ 
+  // Write to same lf_configs fields as manual tab
+  // Also sync the manual inputs so saveAllSettings picks them up
+  setVal('sheetId', selectedSheetId);
+  setVal('sheetTab', tab);
+  setVal('colName', colName || 'A');
+  setVal('colPhone', colPhone || 'B');
+  setVal('colEmail', colEmail || 'C');
+  setVal('hasHeader', hasHeader);
+ 
+  // Save immediately
+  const r = await api('saveConfig', {
+    sheet_id: selectedSheetId,
+    sheet_tab: tab,
+    col_name: colName || 'A',
+    col_phone: colPhone || 'B',
+    col_email: colEmail || 'C',
+    has_header: hasHeader,
+    google_access_token: googleAccessToken,
+    google_refresh_token: localStorage.getItem('google_refresh_token') || ''
+  });
+ 
+  showToast(r.success ? '✅ Sheet config saved' : (r.message || 'Failed'), !r.success);
+}
 </script>
 </body>
 </html>
