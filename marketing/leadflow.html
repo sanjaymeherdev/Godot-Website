@@ -1527,7 +1527,17 @@ function showDash(email,data){
   // Initialize module toggles
   applyModuleLocks();
 }
-
+// Complete pending OAuth exchange if returning from Google
+const pendingCode = localStorage.getItem('pending_oauth_code');
+if (pendingCode) {
+  localStorage.removeItem('pending_oauth_code');
+  setTimeout(() => {
+    goTab('settings');
+    switchSheetTab('oauth', document.getElementById('sheetTabOauth'));
+    exchangeOAuthCode(pendingCode);
+  }, 800);
+}
+  
 function initDash(data){
   if(data.contacts){contacts=data.contacts;renderContacts();}
   if(data.leads){leads=data.leads;renderLeads();}
@@ -2998,10 +3008,10 @@ function checkExistingGoogleAuth() {
  
 // ── Start OAuth flow ───────────────────────────────────────
 function startGoogleOAuth() {
-  const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
   const state = Math.random().toString(36).slice(2);
   localStorage.setItem('oauth_state', state);
- 
+  localStorage.setItem('oauth_return_tab', 'settings'); // remember where to go back
+
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: window.location.origin + window.location.pathname,
@@ -3011,31 +3021,9 @@ function startGoogleOAuth() {
     prompt: 'consent',
     state
   });
- 
-  const popup = window.open(
-    'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString(),
-    'google_oauth',
-    'width=500,height=600,scrollbars=yes'
-  );
- 
-  // Listen for redirect back
-  const interval = setInterval(() => {
-    try {
-      if (popup.closed) { clearInterval(interval); return; }
-      const url = popup.location.href;
-      if (url.includes('code=')) {
-        clearInterval(interval);
-        popup.close();
-        const urlParams = new URLSearchParams(popup.location.search || url.split('?')[1]);
-        const code = urlParams.get('code');
-        if (code) exchangeOAuthCode(code);
-      }
-    } catch (e) {}
-  }, 500);
- 
-  document.getElementById('oauthStatus').textContent = 'Waiting for Google authorization...';
+
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
 }
- 
 // ── Exchange code for tokens via edge function ─────────────
 async function exchangeOAuthCode(code) {
   document.getElementById('oauthStatus').textContent = 'Exchanging authorization code...';
@@ -3163,7 +3151,26 @@ async function loadSheetHeaders() {
     showToast('Error: ' + e.message, true);
   }
 }
- 
+// Handle OAuth redirect return
+const urlParams = new URLSearchParams(window.location.search);
+const oauthCode = urlParams.get('code');
+const oauthState = urlParams.get('state');
+
+if (oauthCode && oauthState && oauthState === localStorage.getItem('oauth_state')) {
+  // Clean URL
+  window.history.replaceState({}, '', window.location.pathname);
+  localStorage.removeItem('oauth_state');
+  
+  // Need token first — restore session then exchange
+  const savedToken = localStorage.getItem('auth_token');
+  if (savedToken) {
+    token = savedToken;
+    userEmail = localStorage.getItem('user_email');
+    userId = localStorage.getItem('user_id');
+    // Will exchange after dash loads
+    localStorage.setItem('pending_oauth_code', oauthCode);
+  }
+}
 // ── Render column mapper dropdowns ─────────────────────────
 function renderColumnMapper(headers) {
   // Header preview pills
