@@ -503,40 +503,60 @@ body {
 }
 
 .countdown-grid {
-  display: flex; justify-content: center; gap: 6px;
-  flex-wrap: wrap; margin-top: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 2vw, 14px);
+  flex-wrap: nowrap; /* 🔒 Forces single line */
+  margin-top: 8px;
+  white-space: nowrap;
 }
 
 .count-block {
-  display: flex; flex-direction: column; align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(160deg, rgba(29,90,68,0.25), rgba(10,26,20,0.6));
   border: 1px solid rgba(201,168,76,0.3);
-  border-radius: 10px;
-  padding: 10px 12px;
-  min-width: 50px;
-  position: relative; overflow: hidden;
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
 .count-block::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
+
 .count-number {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-size: clamp(1.1rem, 4vw, 1.8rem); /* 🔽 Reduced from 3.2rem for single-line fit */
   color: var(--gold);
   line-height: 1;
   text-shadow: var(--glow);
-}
-.count-label {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-top: 6px;
+  white-space: nowrap;
 }
 
+.count-label {
+  font-family: var(--font-sans);
+  font-size: clamp(0.45rem, 1.2vw, 0.6rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* 🔹 Mobile safety: guarantees single line on screens ≤360px */
+@media (max-width: 400px) {
+  .countdown-grid { gap: 6px; }
+  .count-block { padding: 6px 8px; }
+  .count-number { font-size: clamp(0.95rem, 5vw, 1.3rem); }
+  .count-label { font-size: 0.4rem; margin-top: 2px; }
+}
 /* ── EVENTS ─────────────────────────────────────────────── */
 #events-section { background: var(--dark); }
 
