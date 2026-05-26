@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Invitation</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- config.js must load FIRST so WEDDING is available -->
+  <script src="config.js"></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  PARTICLES                                             -->
+<!-- ══════════════════════════════════════════════════════ -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  OPENING CARD OVERLAY                                  -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="door-overlay">
+
+  <p class="door-tagline">You are cordially invited</p>
+
+  <!-- ornate mini invitation card -->
+  <div class="invite-card" id="invite-card" onclick="openDoor()">
+    <div class="card-face">
+      <!-- shimmer -->
+      <div class="card-shimmer"></div>
+
+      <!-- ornate SVG corners -->
+      <div class="card-corner tl">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2 L22 2" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L2 22" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L14 14" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="22" cy="2" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="22" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="2" r="2.5" fill="#c9a84c"/>
+          <path d="M14 2 Q8 8 2 14" stroke="#c9a84c" stroke-width="0.5" fill="none" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="card-corner tr">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2 L22 2" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L2 22" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L14 14" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="22" cy="2" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="22" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="2" r="2.5" fill="#c9a84c"/>
+          <path d="M14 2 Q8 8 2 14" stroke="#c9a84c" stroke-width="0.5" fill="none" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="card-corner bl">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2 L22 2" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L2 22" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L14 14" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="22" cy="2" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="22" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="2" r="2.5" fill="#c9a84c"/>
+          <path d="M14 2 Q8 8 2 14" stroke="#c9a84c" stroke-width="0.5" fill="none" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="card-corner br">
+        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2 L22 2" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L2 22" stroke="#c9a84c" stroke-width="1.2"/>
+          <path d="M2 2 L14 14" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+          <circle cx="22" cy="2" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="22" r="1.5" fill="#c9a84c"/>
+          <circle cx="2" cy="2" r="2.5" fill="#c9a84c"/>
+          <path d="M14 2 Q8 8 2 14" stroke="#c9a84c" stroke-width="0.5" fill="none" opacity="0.4"/>
+        </svg>
+      </div>
+
+      <!-- card body -->
+      <div class="card-body">
+        <span class="card-flourish">✦ ✦ ✦</span>
+        <div class="card-monogram" id="door-initials"></div>
+        <div class="card-rule"></div>
+        <span class="card-label">Wedding Invitation</span>
+        <div class="card-rule"></div>
+        <span class="card-date" id="door-date"></span>
+        <span class="card-flourish" style="font-size:1rem; margin-top:4px">✦</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- click to open label -->
+  <button class="open-btn" onclick="openDoor()">
+    <span class="btn-line"></span>
+    Click to Open
+    <span class="btn-line r"></span>
+  </button>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  MAIN INVITATION                                       -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main id="invitation">
+
+  <!-- ── HERO ─────────────────────────────────────────── -->
+  <section id="hero">
+    <p class="hero-families fade-in" id="hero-families"></p>
+
+    <div class="hero-names fade-in" id="hero-names">
+      <span id="bride-name"></span>
+      <span class="and-sign">&amp;</span>
+      <span id="groom-name"></span>
+    </div>
+
+    <div class="divider fade-in"><div class="divider-diamond"></div></div>
+
+    <p class="hero-date fade-in" id="hero-date"></p>
+    <p class="hero-venue-mini fade-in" id="hero-venue-mini"></p>
+    <span class="hero-hashtag fade-in" id="hero-hashtag"></span>
+
+    <div class="scroll-hint fade-in">Scroll to explore</div>
+  </section>
+
+  <!-- ── INVITE MESSAGE ───────────────────────────────── -->
+  <section id="message-section" class="section">
+    <div class="section-inner">
+      <p class="invite-message fade-in" id="invite-message"></p>
+    </div>
+  </section>
+
+  <!-- ── SCRATCH CARD ─────────────────────────────────── -->
+  <section id="scratch-section" class="section">
+    <div class="section-inner center">
+      <h2 class="section-title fade-in">Scratch to Reveal</h2>
+      <p class="section-subtitle fade-in">Our special date is hidden below</p>
+
+      <div class="scratch-wrapper fade-in">
+        <p class="scratch-hint">Scratch with your finger or mouse ✦</p>
+        <div class="scratch-container" id="scratch-container">
+          <div class="scratch-reveal">
+            <span class="reveal-label">We are getting married on</span>
+            <span class="reveal-date" id="scratch-date-text"></span>
+          </div>
+          <canvas class="scratch-canvas" id="scratch-canvas"></canvas>
+        </div>
+        <p class="scratch-cleared-msg" id="scratch-cleared">
+          ✦ Mark the date! See you there ✦
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COUNTDOWN ────────────────────────────────────── -->
+  <section id="countdown-section" class="section">
+    <div class="section-inner center">
+      <h2 class="section-title fade-in">Counting Down</h2>
+      <p class="section-subtitle fade-in">Until we say "I do"</p>
+
+      <div class="countdown-grid stagger" id="countdown-grid">
+        <div class="count-block">
+          <span class="count-number" id="cd-days">00</span>
+          <span class="count-label">Days</span>
+        </div>
+        <div class="count-block">
+          <span class="count-number" id="cd-hours">00</span>
+          <span class="count-label">Hours</span>
+        </div>
+        <div class="count-block">
+          <span class="count-number" id="cd-mins">00</span>
+          <span class="count-label">Minutes</span>
+        </div>
+        <div class="count-block">
+          <span class="count-number" id="cd-secs">00</span>
+          <span class="count-label">Seconds</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EVENTS ───────────────────────────────────────── -->
+  <section id="events-section" class="section">
+    <div class="section-inner">
+      <h2 class="section-title fade-in">Celebrations</h2>
+      <p class="section-subtitle fade-in">Join us across all the festivities</p>
+      <div class="events-grid stagger" id="events-grid"></div>
+    </div>
+  </section>
+
+  <!-- ── DRESS CODE ───────────────────────────────────── -->
+  <section id="dresscode-section" class="section">
+    <div class="section-inner">
+      <h2 class="section-title fade-in">Dress Code</h2>
+      <p class="section-subtitle fade-in">Come dressed to celebrate</p>
+      <div class="dresscode-card fade-in">
+        <p class="dress-label">Attire</p>
+        <p class="dress-type" id="dress-type"></p>
+        <p class="dress-colors" id="dress-colors"></p>
+        <div class="color-swatches">
+          <div class="swatch" style="background:#1a4a3a" title="Emerald"></div>
+          <div class="swatch" style="background:#c9a84c" title="Gold"></div>
+          <div class="swatch" style="background:#f5f0e8" title="Ivory"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GALLERY ──────────────────────────────────────── -->
+  <section id="gallery-section" class="section">
+    <div class="section-inner">
+      <h2 class="section-title fade-in">Our Story</h2>
+      <p class="section-subtitle fade-in">A glimpse of us</p>
+
+      <div class="slideshow-wrap fade-in">
+        <div class="slideshow-track" id="slideshow-track"></div>
+        <button class="slide-btn prev" id="slide-prev">&#8249;</button>
+        <button class="slide-btn next" id="slide-next">&#8250;</button>
+        <div class="slide-dots" id="slide-dots"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VENUE & MAP ──────────────────────────────────── -->
+  <section id="venue-section" class="section">
+    <div class="section-inner">
+      <h2 class="section-title fade-in">The Venue</h2>
+      <p class="section-subtitle fade-in">Where the magic happens</p>
+
+      <div class="venue-content fade-in">
+        <div class="venue-details">
+          <h3 class="venue-name" id="venue-name"></h3>
+          <p class="venue-address" id="venue-address"></p>
+          <a class="btn-directions" id="venue-link" href="#" target="_blank" rel="noopener">
+            📍 Get Directions
+          </a>
+        </div>
+        <div class="map-wrap">
+          <iframe id="venue-map" src="" allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade" title="Venue Map"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RSVP ─────────────────────────────────────────── -->
+  <section id="rsvp-section" class="section" id="rsvp">
+    <div class="section-inner">
+      <h2 class="section-title fade-in">RSVP</h2>
+      <p class="section-subtitle fade-in">Kindly respond by <span id="rsvp-deadline-display" class="gold"></span></p>
+
+      <div class="rsvp-card fade-in" id="rsvp-card">
+        <div id="rsvp-form-wrap">
+          <div class="form-group">
+            <label for="rsvp-name">Full Name</label>
+            <input type="text" id="rsvp-name" placeholder="Your full name" />
+          </div>
+          <div class="form-group">
+            <label for="rsvp-phone">WhatsApp / Phone</label>
+            <input type="tel" id="rsvp-phone" placeholder="+91 98765 43210" />
+          </div>
+          <div class="form-group">
+            <label for="rsvp-attending">Attending</label>
+            <select id="rsvp-attending">
+              <option value="">— Please select —</option>
+              <option value="yes">Joyfully Accept</option>
+              <option value="no">Regretfully Decline</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rsvp-guests">Number of Guests (including you)</label>
+            <input type="number" id="rsvp-guests" min="1" max="10" placeholder="1" />
+          </div>
+          <div class="form-group">
+            <label for="rsvp-msg">Message for the Couple (optional)</label>
+            <textarea id="rsvp-msg" placeholder="Share your wishes…"></textarea>
+          </div>
+          <button class="btn-rsvp" onclick="submitRSVP()">Send RSVP ✦</button>
+        </div>
+
+        <div class="rsvp-success" id="rsvp-success">
+          <span class="checkmark">💚</span>
+          <p>Thank you! We can't wait to celebrate with you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ───────────────────────────────────────── -->
+  <footer id="footer">
+    <div class="divider"><div class="divider-diamond"></div></div>
+    <p class="footer-note" id="footer-note"></p>
+    <p class="footer-divider">✦ ✦ ✦</p>
+  </footer>
+
+</main><!-- /invitation -->
+
+<!-- ── MUSIC BUTTON ──────────────────────────────────────── -->
+<button id="music-btn" title="Toggle music" onclick="toggleMusic()">♪</button>
+<span class="music-label-tooltip" id="music-tooltip"></span>
+<audio id="bg-music" loop></audio>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                             -->
+<!-- ════════════════════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────────────────────
+// 0. Populate everything from WEDDING config
+// ─────────────────────────────────────────────────────────
+(function populate() {
+  // Door initials
+  const bi = WEDDING.bride.trim().split(' ')[0][0];
+  const gi = WEDDING.groom.trim().split(' ')[0][0];
+  document.getElementById('door-initials').innerHTML =
+    `${bi} <span class="amp">&</span> ${gi}`;
+  document.getElementById('door-date').textContent = WEDDING.weddingDateDisplay;
+
+  // Hero
+  document.getElementById('hero-families').textContent =
+    `${WEDDING.brideFamily}  ·  ${WEDDING.groomFamily}`;
+  document.getElementById('bride-name').textContent = WEDDING.bride;
+  document.getElementById('groom-name').textContent = WEDDING.groom;
+  document.getElementById('hero-date').textContent = WEDDING.weddingDateDisplay;
+  document.getElementById('hero-venue-mini').textContent =
+    `${WEDDING.venueName} · ${WEDDING.weddingTimeDisplay}`;
+  document.getElementById('hero-hashtag').textContent = WEDDING.coupleHashtag;
+
+  // Message
+  document.getElementById('invite-message').textContent = WEDDING.inviteMessage;
+
+  // Scratch date
+  document.getElementById('scratch-date-text').textContent = WEDDING.weddingDateDisplay;
+
+  // Events
+  const grid = document.getElementById('events-grid');
+  WEDDING.events.forEach(ev => {
+    grid.innerHTML += `
+      <div class="event-card">
+        <div class="event-icon">${ev.icon}</div>
+        <div class="event-name">${ev.name}</div>
+        <div class="event-date">${ev.date}</div>
+        <div class="event-time">${ev.time}</div>
+        <div class="event-venue">${ev.venue}</div>
+      </div>`;
+  });
+
+  // Dress code
+  document.getElementById('dress-type').textContent = WEDDING.dressCode;
+  document.getElementById('dress-colors').textContent = WEDDING.dressCodeColors;
+
+  // Venue
+  document.getElementById('venue-name').textContent = WEDDING.venueName;
+  document.getElementById('venue-address').textContent = WEDDING.venueAddress;
+  document.getElementById('venue-link').href = WEDDING.venueMapLink;
+  document.getElementById('venue-map').src = WEDDING.venueMapEmbedUrl;
+
+  // RSVP
+  document.getElementById('rsvp-deadline-display').textContent = WEDDING.rsvpDeadline;
+
+  // Music
+  const audio = document.getElementById('bg-music');
+  audio.src = WEDDING.musicUrl || '';
+  document.getElementById('music-tooltip').textContent = WEDDING.musicLabel;
+  if (!WEDDING.musicUrl) document.getElementById('music-btn').style.display = 'none';
+
+  // Footer
+  document.getElementById('footer-note').textContent = WEDDING.footerNote;
+
+  // Photo slideshow
+  buildSlideshow();
+})();
+
+// ─────────────────────────────────────────────────────────
+// 1. Particles
+// ─────────────────────────────────────────────────────────
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x  = Math.random() * canvas.width;
+      this.y  = Math.random() * canvas.height;
+      this.r  = Math.random() * 1.5 + 0.3;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = -(Math.random() * 0.4 + 0.1);
+      this.a  = Math.random() * 0.6 + 0.1;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.y < -5) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(201,168,76,${this.a})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ─────────────────────────────────────────────────────────
+// 2. Card Open Animation
+// ─────────────────────────────────────────────────────────
+let doorOpened = false;
+function openDoor() {
+  if (doorOpened) return;
+  doorOpened = true;
+
+  const overlay = document.getElementById('door-overlay');
+  const card    = document.getElementById('invite-card');
+
+  // sparkle burst from card center
+  const rect = card.getBoundingClientRect();
+  const cx = rect.left + rect.width  / 2;
+  const cy = rect.top  + rect.height / 2;
+
+  for (let i = 0; i < 32; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    const angle = (i / 32) * Math.PI * 2;
+    const dist  = 60 + Math.random() * 140;
+    const size  = 3 + Math.random() * 7;
+    s.style.cssText = `
+      left: ${cx}px; top: ${cy}px;
+      width: ${size}px; height: ${size}px;
+      --dx: ${Math.cos(angle) * dist}px;
+      --dy: ${Math.sin(angle) * dist}px;
+      animation-delay: ${Math.random() * 0.25}s;
+      background: hsl(${40 + Math.random()*20}, 85%, ${58+Math.random()*28}%);
+    `;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
+
+  // trigger card zoom-out animation
+  overlay.classList.add('opening');
+
+  // fade out overlay, reveal invitation
+  setTimeout(() => {
+    overlay.classList.add('gone');
+    setTimeout(() => overlay.classList.add('hidden'), 700);
+    document.getElementById('invitation').classList.add('visible');
+    animateOnScroll();
+    startCountdown();
+  }, 680);
+}
+
+// ─────────────────────────────────────────────────────────
+// 3. Scroll-based fade-ins
+// ─────────────────────────────────────────────────────────
+function animateOnScroll() {
+  const els = document.querySelectorAll('.fade-in, .stagger');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(el => io.observe(el));
+}
+
+// ─────────────────────────────────────────────────────────
+// 4. Countdown Timer
+// ─────────────────────────────────────────────────────────
+function startCountdown() {
+  const target = new Date(WEDDING.weddingDateTime).getTime();
+
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      ['days','hours','mins','secs'].forEach(id =>
+        document.getElementById(`cd-${id}`).textContent = '00');
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd-days').textContent  = String(d).padStart(2,'0');
+    document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
+    document.getElementById('cd-secs').textContent  = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ─────────────────────────────────────────────────────────
+// 5. Scratch Card
+// ─────────────────────────────────────────────────────────
+(function initScratch() {
+  const container = document.getElementById('scratch-container');
+  const canvas    = document.getElementById('scratch-canvas');
+  const ctx       = canvas.getContext('2d');
+  let scratching  = false;
+  let cleared     = false;
+
+  function setup() {
+    canvas.width  = container.offsetWidth;
+    canvas.height = container.offsetHeight;
+
+    // gold foil overlay
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0,   '#1a4a3a');
+    grad.addColorStop(0.4, '#2d7a60');
+    grad.addColorStop(1,   '#1a4a3a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // overlay text
+    ctx.fillStyle = 'rgba(201,168,76,0.55)';
+    ctx.font = `bold ${canvas.width * 0.055}px Cinzel, serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('✦  Scratch Here  ✦', canvas.width / 2, canvas.height / 2);
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const src  = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+  }
+
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function checkCleared() {
+    if (cleared) return;
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let transparent = 0;
+    for (let i = 3; i < data.length; i += 4) { if (data[i] === 0) transparent++; }
+    const pct = transparent / (canvas.width * canvas.height);
+    if (pct > 0.55) {
+      cleared = true;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('scratch-cleared').classList.add('show');
+    }
+  }
+
+  canvas.addEventListener('mousedown',  e => { scratching = true; const p = getPos(e); scratch(p.x,p.y); });
+  canvas.addEventListener('mousemove',  e => { if (!scratching) return; const p = getPos(e); scratch(p.x,p.y); checkCleared(); });
+  canvas.addEventListener('mouseup',   () => { scratching = false; });
+  canvas.addEventListener('mouseleave',() => { scratching = false; });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); scratching = true; const p = getPos(e); scratch(p.x,p.y); }, {passive:false});
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (!scratching) return; const p = getPos(e); scratch(p.x,p.y); checkCleared(); }, {passive:false});
+  canvas.addEventListener('touchend',  () => { scratching = false; });
+
+  // wait for fonts to load
+  if (document.fonts) { document.fonts.ready.then(setup); } else { window.addEventListener('load', setup); }
+})();
+
+// ─────────────────────────────────────────────────────────
+// 6. Slideshow
+// ─────────────────────────────────────────────────────────
+function buildSlideshow() {
+  const track = document.getElementById('slideshow-track');
+  const dots  = document.getElementById('slide-dots');
+  const photos = WEDDING.photos;
+  if (!photos || !photos.length) return;
+
+  let current = 0;
+
+  photos.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src; img.alt = `Photo ${i+1}`;
+    img.className = 'slide-img';
+    img.onerror = () => { img.src = `https://placehold.co/800x460/1a4a3a/c9a84c?text=Photo+${i+1}`; };
+    track.appendChild(img);
+
+    const dot = document.createElement('div');
+    dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dots.appendChild(dot);
+  });
+
+  function goTo(n) {
+    current = (n + photos.length) % photos.length;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    document.querySelectorAll('.slide-dot').forEach((d,i) =>
+      d.classList.toggle('active', i === current));
+  }
+
+  document.getElementById('slide-prev').onclick = () => goTo(current - 1);
+  document.getElementById('slide-next').onclick = () => goTo(current + 1);
+
+  // auto-advance every 4s
+  setInterval(() => goTo(current + 1), 4000);
+}
+
+// ─────────────────────────────────────────────────────────
+// 7. Background Music
+// ─────────────────────────────────────────────────────────
+let musicPlaying = false;
+const audio = document.getElementById('bg-music');
+
+function toggleMusic() {
+  const btn = document.getElementById('music-btn');
+  if (musicPlaying) {
+    audio.pause();
+    btn.textContent = '♪';
+    btn.classList.remove('playing');
+  } else {
+    audio.volume = 0.35;
+    audio.play().catch(() => {});
+    btn.textContent = '♫';
+    btn.classList.add('playing');
+  }
+  musicPlaying = !musicPlaying;
+}
+
+// ─────────────────────────────────────────────────────────
+// 8. RSVP
+// ─────────────────────────────────────────────────────────
+function submitRSVP() {
+  const name      = document.getElementById('rsvp-name').value.trim();
+  const phone     = document.getElementById('rsvp-phone').value.trim();
+  const attending = document.getElementById('rsvp-attending').value;
+  const guests    = document.getElementById('rsvp-guests').value;
+  const msg       = document.getElementById('rsvp-msg').value.trim();
+
+  if (!name || !attending) {
+    alert('Please fill in your name and attendance.');
+    return;
+  }
+
+  // If a formAction is set, POST to it
+  if (WEDDING.rsvpFormAction) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = WEDDING.rsvpFormAction;
+    form.style.display = 'none';
+    const fields = { name, phone, attending, guests, message: msg };
+    Object.entries(fields).forEach(([k,v]) => {
+      const i = document.createElement('input');
+      i.name = k; i.value = v;
+      form.appendChild(i);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  } else if (WEDDING.rsvpWhatsApp) {
+    // WhatsApp fallback
+    const text = encodeURIComponent(
+      `*Wedding RSVP*\nName: ${name}\nPhone: ${phone}\nAttending: ${attending === 'yes' ? 'Yes ✅' : 'No ❌'}\nGuests: ${guests || 1}\nMessage: ${msg || '—'}`
+    );
+    window.open(`https://wa.me/${WEDDING.rsvpWhatsApp.replace(/\D/g,'')}?text=${text}`, '_blank');
+  }
+
+  // Show success
+  document.getElementById('rsvp-form-wrap').style.display = 'none';
+  const success = document.getElementById('rsvp-success');
+  success.style.display = 'flex';
+}
+</script>
+</body>
+</html>
