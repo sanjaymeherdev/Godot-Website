@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PocketAI — AI on Every App, Every Screen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080c14;
+    --surface:  #0e1420;
+    --card:     #131a28;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #2ecc71;
+    --accent2:  #a78bfa;
+    --text:     #f0f4ff;
+    --muted:    #7b8fb5;
+    --dim:      #3a4868;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,20,0.85);
+    backdrop-filter: blur(12px);
+  }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px;
+    padding: 8px 18px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: opacity .15s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 0 60px;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.25);
+    border-radius: 40px; padding: 5px 14px;
+    font-size: 11px; font-weight: 500; color: var(--accent);
+    letter-spacing: .6px; text-transform: uppercase;
+    margin-bottom: 24px;
+    animation: fadeUp .5s ease both;
+  }
+  .hero-eyebrow::before { content: '●'; font-size: 7px; }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 7vw, 68px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+    animation: fadeUp .5s .1s ease both;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero h1 .purple { color: var(--accent2); }
+
+  .hero-sub {
+    font-size: 17px; color: var(--muted); max-width: 520px;
+    margin: 0 auto 36px; line-height: 1.65;
+    animation: fadeUp .5s .2s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp .5s .3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 15px;
+    padding: 14px 30px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: transform .15s, opacity .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); opacity: .9; }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 15px;
+    padding: 14px 28px; border-radius: 40px;
+    border: 1px solid var(--border); cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: border-color .15s;
+  }
+  .btn-secondary:hover { border-color: var(--dim); }
+
+  /* ── PHONE MOCKUP ── */
+  .mockup-wrap {
+    margin: 52px auto 0;
+    position: relative; width: 220px;
+    animation: fadeUp .6s .4s ease both;
+  }
+  .phone-frame {
+    width: 220px; height: 380px;
+    background: var(--card);
+    border-radius: 32px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .phone-notch {
+    width: 70px; height: 18px;
+    background: var(--bg);
+    border-radius: 0 0 14px 14px;
+    margin: 0 auto;
+    position: relative; z-index: 2;
+  }
+  .phone-screen {
+    padding: 8px 10px;
+    height: calc(100% - 18px);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .phone-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 2px;
+  }
+  .phone-app-label { font-size: 8px; color: var(--muted); }
+  .phone-status { font-size: 7px; color: var(--muted); }
+  .chat-bubble-phone {
+    border-radius: 10px; padding: 7px 9px; font-size: 9px; line-height: 1.4; max-width: 85%;
+  }
+  .cb-user { background: #1f2a44; color: #f1f5ff; align-self: flex-end; border-bottom-right-radius: 3px; margin-left: auto; }
+  .cb-ai { background: #192132; color: #eef2ff; align-self: flex-start; border-bottom-left-radius: 3px; }
+  .phone-input-row {
+    margin-top: auto;
+    display: flex; gap: 5px; align-items: center;
+    background: #0b0f18; border-top: 1px solid rgba(255,255,255,.06);
+    padding: 6px 4px 4px;
+    border-radius: 0 0 0 0;
+  }
+  .phone-input-field {
+    flex: 1; background: #141c2c; border-radius: 20px;
+    height: 22px; border: none;
+  }
+  .phone-send-btn {
+    width: 22px; height: 22px; background: var(--accent);
+    border-radius: 50%; flex-shrink: 0;
+  }
+  /* floating bubble on top right of phone */
+  .bubble-float {
+    position: absolute; bottom: 48px; right: -16px;
+    width: 44px; height: 44px;
+    background: #11161f; border-radius: 50%;
+    border: 1.5px solid #3a4868;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5);
+    z-index: 10;
+    animation: float 3s ease-in-out infinite;
+  }
+  .bubble-dot-f {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 9px; height: 9px; background: var(--accent);
+    border-radius: 50%; border: 1.5px solid #0f121c;
+  }
+  @keyframes float {
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-6px); }
+  }
+
+  /* ── GLOW LINES ── */
+  .glow-line {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    width: 1px; background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+    opacity: .25; pointer-events: none;
+  }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 700; letter-spacing: -1px;
+    line-height: 1.1; margin-bottom: 14px;
+  }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 500px; }
+
+  /* ── PAIN SECTION ── */
+  .pain { padding: 80px 0; border-top: 1px solid var(--border); }
+  .pain-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-top: 40px;
+  }
+  .pain-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px;
+    transition: border-color .2s;
+  }
+  .pain-card:hover { border-color: var(--dim); }
+  .pain-icon { font-size: 22px; margin-bottom: 10px; }
+  .pain-card h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .pain-card p { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  /* ── HOW IT WORKS ── */
+  .how { padding: 80px 0; border-top: 1px solid var(--border); }
+  .steps { margin-top: 48px; display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: grid; grid-template-columns: 48px 1fr;
+    gap: 20px; padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 40px; height: 40px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0; margin-top: 2px;
+  }
+  .step-body h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .step-body p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .step-tag {
+    display: inline-block; margin-top: 8px;
+    background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);
+    color: var(--accent2); font-size: 10px; font-weight: 500;
+    padding: 3px 10px; border-radius: 40px; letter-spacing: .3px;
+  }
+
+  /* ── FEATURES ── */
+  .features { padding: 80px 0; border-top: 1px solid var(--border); }
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px; margin-top: 44px;
+  }
+  .feat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 24px;
+    transition: transform .2s, border-color .2s;
+  }
+  .feat-card:hover { transform: translateY(-3px); border-color: var(--dim); }
+  .feat-icon {
+    width: 38px; height: 38px;
+    background: rgba(46,204,113,0.1); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .feat-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 7px; }
+  .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── PROVIDERS ── */
+  .providers { padding: 60px 0; border-top: 1px solid var(--border); text-align: center; }
+  .provider-list {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; margin-top: 28px;
+  }
+  .provider-pill {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 40px; padding: 8px 18px;
+    font-size: 13px; color: var(--muted);
+    transition: border-color .2s, color .2s;
+  }
+  .provider-pill:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ── PRICING ── */
+  .pricing { padding: 80px 0; border-top: 1px solid var(--border); }
+  .price-card {
+    max-width: 440px; margin: 44px auto 0;
+    background: var(--card);
+    border: 1px solid rgba(46,204,113,0.3);
+    border-radius: 24px; padding: 36px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .price-card::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(to right, transparent, var(--accent), transparent);
+  }
+  .price-badge {
+    display: inline-block;
+    background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.25);
+    color: var(--accent); font-size: 10px; font-weight: 500;
+    padding: 4px 12px; border-radius: 40px; letter-spacing: .5px;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 56px; font-weight: 800; letter-spacing: -2px;
+    line-height: 1;
+  }
+  .price-amount sup { font-size: 24px; vertical-align: super; letter-spacing: 0; }
+  .price-note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .price-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  .price-features { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+  .price-features li {
+    font-size: 14px; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .price-features li::before { content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .price-cta {
+    display: block; width: 100%;
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 16px;
+    padding: 15px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; margin-top: 28px;
+    transition: opacity .15s, transform .15s;
+  }
+  .price-cta:hover { opacity: .88; transform: translateY(-1px); }
+  .price-sub { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+  /* ── FAQ ── */
+  .faq { padding: 80px 0; border-top: 1px solid var(--border); }
+  .faq-list { margin-top: 40px; display: flex; flex-direction: column; gap: 0; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; text-align: left;
+    background: none; border: none; cursor: pointer;
+    padding: 18px 0;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    color: var(--text); display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-q::after { content: '+'; font-size: 20px; color: var(--muted); transition: transform .2s; }
+  .faq-q.open::after { transform: rotate(45deg); }
+  .faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height .25s ease, padding .2s; }
+  .faq-a.open { max-height: 300px; padding-bottom: 16px; }
+
+  /* ── CTA FOOTER ── */
+  .cta-footer {
+    padding: 80px 0 60px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .cta-footer h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800; letter-spacing: -1.5px;
+    line-height: 1.1; margin-bottom: 16px;
+  }
+  .cta-footer p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+
+  footer {
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px; color: var(--dim);
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .hero { padding: 52px 0 40px; }
+    .mockup-wrap { width: 180px; }
+    .phone-frame { width: 180px; height: 310px; }
+    .bubble-float { right: -12px; bottom: 38px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">Pocket<span>AI</span></div>
+    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="nav-cta">Get it — ₹1,999</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">One-time setup · You own it forever</div>
+    <h1>AI on <em>every app,</em><br/>every <span class="purple">screen.</span></h1>
+    <p class="hero-sub">A floating bubble that lives on top of every app on your Android phone. Tap it, type, get an answer — from DeepSeek, Claude, ChatGPT, or Groq. No switching apps. No subscriptions. No API costs.</p>
+    <div class="hero-actions">
+      <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="btn-primary">Get PocketAI — ₹1,999</a>
+      <a href="#how" class="btn-secondary">See how it works ↓</a>
+    </div>
+
+    <div class="mockup-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-topbar">
+            <span class="phone-app-label">Instagram</span>
+            <span class="phone-status">9:41</span>
+          </div>
+          <!-- fake instagram post placeholder -->
+          <div style="height:140px;background:#0d1120;border-radius:8px;opacity:.5;"></div>
+          <div style="height:60px;background:#0d1120;border-radius:8px;opacity:.3;margin-top:4px;"></div>
+
+          <!-- mini chat bubbles appearing over it -->
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;">
+            <div class="chat-bubble-phone cb-user">Write a reply to this post in Hindi</div>
+            <div class="chat-bubble-phone cb-ai">यह पोस्ट वाकई बहुत शानदार है! 🔥 बहुत अच्छा काम किया है आपने।</div>
+          </div>
+
+          <div class="phone-input-row">
+            <div class="phone-input-field"></div>
+            <div class="phone-send-btn"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bubble-float">🤖<div class="bubble-dot-f"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section class="pain">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">The problem</div>
+      <h2 class="section-title">AI tools on mobile are broken.</h2>
+      <p class="section-sub">Every AI app wants you to leave what you're doing, switch apps, copy-paste, come back. That's not a tool — that's friction.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card reveal">
+        <div class="pain-icon">📋</div>
+        <h3>Constant app switching</h3>
+        <p>Copy text → switch to ChatGPT → paste → wait → copy answer → switch back. Every. Single. Time.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">💸</div>
+        <h3>Paying per message</h3>
+        <p>API keys drain money. Subscription apps charge monthly. You're renting access to something you should own.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">🔒</div>
+        <h3>Locked to one AI</h3>
+        <p>Each app forces you to one provider. Want DeepSeek today, Claude tomorrow? That's two apps, two subscriptions.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-icon">📵</div>
+        <h3>Doesn't work everywhere</h3>
+        <p>Need AI while reading an article? Watching a video? Gaming? Regular AI apps can't overlay — PocketAI can.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">How it works</div>
+      <h2 class="section-title">Simple. Fast. Always there.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>A bubble lives on every screen</h3>
+          <p>After setup, a small 🤖 bubble floats on the edge of your screen — on top of every app. Drag it wherever you want. It never gets in the way.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Tap to open, type to ask</h3>
+          <p>One tap opens a chat panel. Type your question — write this email, explain this, translate that, summarise this article. No app switch. No copy-paste.</p>
+          <span class="step-tag">Works in any language</span>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Your PC does the thinking</h3>
+          <p>Your question goes to your own PC over a private relay. A Chrome extension quietly types it into DeepSeek, Claude, or ChatGPT — whichever you pick — and sends the answer back to your phone in seconds.</p>
+          <span class="step-tag">Uses your existing AI accounts — no extra cost</span>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>PC off? Groq kicks in instantly</h3>
+          <p>If your PC is off or you're out, PocketAI switches to Groq automatically — one of the fastest AI APIs available, free tier included. You never hit a dead end.</p>
+          <span class="step-tag">Llama 3.3 70B · Sub-second responses</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">What you get</div>
+      <h2 class="section-title">Everything in the box.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">🫧</div>
+        <h3>Draggable overlay bubble</h3>
+        <p>Floats over every app. Drag it to any corner. Tap to chat, tap again to hide. Never in your way.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚡</div>
+        <h3>5 AI providers</h3>
+        <p>DeepSeek, Claude, ChatGPT, Gemini, Qwen — switch between them with one tap. Use your own logged-in sessions.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔁</div>
+        <h3>Auto Groq fallback</h3>
+        <p>PC off? No problem. Groq API takes over instantly with Llama 3.3 70B. Fast, free, and always available.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔒</div>
+        <h3>100% private relay</h3>
+        <p>Your messages go through your own relay on your own PC. Nothing is stored on any third-party server.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📋</div>
+        <h3>Copy any response</h3>
+        <p>One tap copies the AI's reply to clipboard — ready to paste anywhere on your phone.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🛠️</div>
+        <h3>Full setup included</h3>
+        <p>Sanjay sets everything up for you over WhatsApp. Android app, Chrome extension, relay — done in one session.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVIDERS -->
+<section class="providers">
+  <div class="wrap reveal">
+    <div class="section-label">Supported AI providers</div>
+    <div class="provider-list">
+      <div class="provider-pill">🤖 DeepSeek</div>
+      <div class="provider-pill">🟣 Claude</div>
+      <div class="provider-pill">🟢 ChatGPT</div>
+      <div class="provider-pill">💎 Gemini</div>
+      <div class="provider-pill">🌊 Qwen</div>
+      <div class="provider-pill">⚡ Groq (fallback)</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Pay once. Own it forever.</h2>
+      <p class="section-sub" style="margin:0 auto;">No subscriptions. No monthly fee. No API cost if you use your own accounts.</p>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-badge">One-time · Lifetime</div>
+      <div class="price-amount"><sup>₹</sup>1,999</div>
+      <div class="price-note">Pay after it works — not before.</div>
+      <hr class="price-divider"/>
+      <ul class="price-features">
+        <li>Android overlay app — installed on your phone</li>
+        <li>Chrome extension — set up on your PC</li>
+        <li>Private relay — configured and running</li>
+        <li>5 AI providers — DeepSeek, Claude, ChatGPT, Gemini, Qwen</li>
+        <li>Groq fallback — for when PC is off</li>
+        <li>Full setup over WhatsApp by Sanjay</li>
+        <li>You own everything — code, setup, forever</li>
+      </ul>
+      <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="price-cta">Get PocketAI on WhatsApp →</a>
+      <p class="price-sub">✓ Pay only after it's working on your device</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Questions.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q">Do I need to pay for the AI separately?</button>
+        <div class="faq-a">No. PocketAI uses your existing logged-in sessions on DeepSeek, Claude, ChatGPT etc. — the same accounts you already use in a browser. If you use Groq fallback and hit the free tier limit, you'd need a Groq API key, but the free tier is very generous for personal use.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Does my PC need to be on?</button>
+        <div class="faq-a">For the full multi-provider experience, yes — your PC runs the Chrome extension that controls the AI browser tabs. But if your PC is off, PocketAI automatically falls back to Groq, so you always have AI available on your phone.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is my data private?</button>
+        <div class="faq-a">Yes. The relay runs on your own PC — your messages travel directly from your phone to your PC. Nothing is stored on or routed through any third-party server. It's as private as using the AI website directly on your own computer.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What Android version do I need?</button>
+        <div class="faq-a">Android 8.0 (Oreo) or above — which covers almost every Android phone made in the last 6+ years. The overlay permission (Draw over other apps) is required, and Sanjay will walk you through enabling it during setup.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How does the setup work?</button>
+        <div class="faq-a">You message Sanjay on WhatsApp. He installs the Android app on your phone, sets up the Chrome extension on your PC, configures the relay, and tests everything with you live. The whole thing typically takes under 30 minutes. You pay only after it's working.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Can I use it on iOS?</button>
+        <div class="faq-a">Not currently — iOS doesn't allow floating overlay apps the way Android does. PocketAI is Android only for now.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FOOTER -->
+<section class="cta-footer">
+  <div class="wrap reveal">
+    <h2>AI in your pocket.<br/>Actually in your pocket.</h2>
+    <p>One-time ₹1,999. Full setup included. Pay after it works.</p>
+    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="btn-primary" style="font-size:16px;padding:16px 36px;">Message Sanjay on WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 Sanjay Meher · <a href="https://cggodotassets.shop/marketing/business-services">More tools →</a></p>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ans = btn.nextElementSibling;
+      const isOpen = ans.classList.contains('open');
+      document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+      document.querySelectorAll('.faq-q').forEach(b => b.classList.remove('open'));
+      if (!isOpen) { ans.classList.add('open'); btn.classList.add('open'); }
+    });
+  });
+</script>
+</body>
+</html>
