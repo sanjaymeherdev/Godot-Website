@@ -91,10 +91,58 @@
   .hero h1 em { font-style: normal; color: var(--accent); }
   .hero h1 .purple { color: var(--accent2); }
 
-  .hero-sub {
-    font-size: 17px; color: var(--muted); max-width: 520px;
-    margin: 0 auto 36px; line-height: 1.65;
+  /* ✨ NEW HIGHLIGHTED TABS — core promise pills ✨ */
+  .highlight-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin: 0 auto 36px;
     animation: fadeUp .5s .2s ease both;
+  }
+  .promise-tab {
+    background: rgba(18, 26, 40, 0.75);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+    border-radius: 80px;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #eef5ff;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.2px;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  .promise-tab:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: rgba(46, 204, 113, 0.08);
+    box-shadow: 0 12px 24px rgba(46, 204, 113, 0.12);
+  }
+  .promise-icon {
+    font-size: 18px;
+    filter: drop-shadow(0 0 4px rgba(46,204,113,0.4));
+  }
+  .promise-tab span:last-child {
+    font-weight: 500;
+    background: linear-gradient(135deg, #fff, #b9f5d4);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  /* responsive */
+  @media (max-width: 550px) {
+    .promise-tab { padding: 6px 16px; font-size: 13px; gap: 6px; }
+    .promise-icon { font-size: 15px; }
+    .highlight-tabs { gap: 10px; }
+  }
+
+  .hero-sub {
+    font-size: 17px; color: var(--muted); max-width: 560px;
+    margin: 0 auto 16px; line-height: 1.65;
   }
 
   .hero-actions {
@@ -172,7 +220,6 @@
     width: 22px; height: 22px; background: var(--accent);
     border-radius: 50%; flex-shrink: 0;
   }
-  /* floating bubble on top right of phone */
   .bubble-float {
     position: absolute; bottom: 48px; right: -16px;
     width: 44px; height: 44px;
@@ -192,13 +239,6 @@
   @keyframes float {
     0%,100%{ transform: translateY(0); }
     50%{ transform: translateY(-6px); }
-  }
-
-  /* ── GLOW LINES ── */
-  .glow-line {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    width: 1px; background: linear-gradient(to bottom, transparent, var(--accent), transparent);
-    opacity: .25; pointer-events: none;
   }
 
   /* ── SECTION LABELS ── */
@@ -391,7 +431,6 @@
   }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     .hero { padding: 52px 0 40px; }
     .mockup-wrap { width: 180px; }
@@ -414,7 +453,24 @@
   <div class="wrap">
     <div class="hero-eyebrow">One-time setup · You own it forever</div>
     <h1>AI on <em>every app,</em><br/>every <span class="purple">screen.</span></h1>
-    <p class="hero-sub">A floating bubble that lives on top of every app on your Android phone. Tap it, type, get an answer — from DeepSeek, Claude, ChatGPT, or Groq. No switching apps. No subscriptions. No API costs.</p>
+    
+    <!-- ✨ HIGHLIGHTED TABS ✨ -->
+    <div class="highlight-tabs">
+      <div class="promise-tab">
+        <span class="promise-icon">🚫🔄</span>
+        <span>No switching apps</span>
+      </div>
+      <div class="promise-tab">
+        <span class="promise-icon">💎</span>
+        <span>No subscriptions</span>
+      </div>
+      <div class="promise-tab">
+        <span class="promise-icon">⚡</span>
+        <span>No API costs</span>
+      </div>
+    </div>
+
+    <p class="hero-sub">A floating bubble that lives on top of every app on your Android phone. Tap it, type, get an answer — from DeepSeek, Claude, ChatGPT, or Groq. No switching, no monthly fees, no surprise bills.</p>
     <div class="hero-actions">
       <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="btn-primary">Get PocketAI — ₹1,999</a>
       <a href="#how" class="btn-secondary">See how it works ↓</a>
@@ -428,16 +484,12 @@
             <span class="phone-app-label">Instagram</span>
             <span class="phone-status">9:41</span>
           </div>
-          <!-- fake instagram post placeholder -->
           <div style="height:140px;background:#0d1120;border-radius:8px;opacity:.5;"></div>
           <div style="height:60px;background:#0d1120;border-radius:8px;opacity:.3;margin-top:4px;"></div>
-
-          <!-- mini chat bubbles appearing over it -->
           <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;">
             <div class="chat-bubble-phone cb-user">Write a reply to this post in Hindi</div>
             <div class="chat-bubble-phone cb-ai">यह पोस्ट वाकई बहुत शानदार है! 🔥 बहुत अच्छा काम किया है आपने।</div>
           </div>
-
           <div class="phone-input-row">
             <div class="phone-input-field"></div>
             <div class="phone-send-btn"></div>
@@ -449,7 +501,7 @@
   </div>
 </section>
 
-<!-- PAIN -->
+<!-- PAIN (unchanged) -->
 <section class="pain">
   <div class="wrap">
     <div class="reveal">
@@ -458,218 +510,87 @@
       <p class="section-sub">Every AI app wants you to leave what you're doing, switch apps, copy-paste, come back. That's not a tool — that's friction.</p>
     </div>
     <div class="pain-grid">
-      <div class="pain-card reveal">
-        <div class="pain-icon">📋</div>
-        <h3>Constant app switching</h3>
-        <p>Copy text → switch to ChatGPT → paste → wait → copy answer → switch back. Every. Single. Time.</p>
-      </div>
-      <div class="pain-card reveal">
-        <div class="pain-icon">💸</div>
-        <h3>Paying per message</h3>
-        <p>API keys drain money. Subscription apps charge monthly. You're renting access to something you should own.</p>
-      </div>
-      <div class="pain-card reveal">
-        <div class="pain-icon">🔒</div>
-        <h3>Locked to one AI</h3>
-        <p>Each app forces you to one provider. Want DeepSeek today, Claude tomorrow? That's two apps, two subscriptions.</p>
-      </div>
-      <div class="pain-card reveal">
-        <div class="pain-icon">📵</div>
-        <h3>Doesn't work everywhere</h3>
-        <p>Need AI while reading an article? Watching a video? Gaming? Regular AI apps can't overlay — PocketAI can.</p>
-      </div>
+      <div class="pain-card reveal"><div class="pain-icon">📋</div><h3>Constant app switching</h3><p>Copy text → switch to ChatGPT → paste → wait → copy answer → switch back. Every. Single. Time.</p></div>
+      <div class="pain-card reveal"><div class="pain-icon">💸</div><h3>Paying per message</h3><p>API keys drain money. Subscription apps charge monthly. You're renting access to something you should own.</p></div>
+      <div class="pain-card reveal"><div class="pain-icon">🔒</div><h3>Locked to one AI</h3><p>Each app forces you to one provider. Want DeepSeek today, Claude tomorrow? That's two apps, two subscriptions.</p></div>
+      <div class="pain-card reveal"><div class="pain-icon">📵</div><h3>Doesn't work everywhere</h3><p>Need AI while reading an article? Watching a video? Gaming? Regular AI apps can't overlay — PocketAI can.</p></div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
+<!-- HOW IT WORKS (unchanged) -->
 <section class="how" id="how">
   <div class="wrap">
-    <div class="reveal">
-      <div class="section-label">How it works</div>
-      <h2 class="section-title">Simple. Fast. Always there.</h2>
-    </div>
+    <div class="reveal"><div class="section-label">How it works</div><h2 class="section-title">Simple. Fast. Always there.</h2></div>
     <div class="steps">
-      <div class="step reveal">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <h3>A bubble lives on every screen</h3>
-          <p>After setup, a small 🤖 bubble floats on the edge of your screen — on top of every app. Drag it wherever you want. It never gets in the way.</p>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <h3>Tap to open, type to ask</h3>
-          <p>One tap opens a chat panel. Type your question — write this email, explain this, translate that, summarise this article. No app switch. No copy-paste.</p>
-          <span class="step-tag">Works in any language</span>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <h3>Your PC does the thinking</h3>
-          <p>Your question goes to your own PC over a private relay. A Chrome extension quietly types it into DeepSeek, Claude, or ChatGPT — whichever you pick — and sends the answer back to your phone in seconds.</p>
-          <span class="step-tag">Uses your existing AI accounts — no extra cost</span>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <h3>PC off? Groq kicks in instantly</h3>
-          <p>If your PC is off or you're out, PocketAI switches to Groq automatically — one of the fastest AI APIs available, free tier included. You never hit a dead end.</p>
-          <span class="step-tag">Llama 3.3 70B · Sub-second responses</span>
-        </div>
-      </div>
+      <div class="step reveal"><div class="step-num">1</div><div class="step-body"><h3>A bubble lives on every screen</h3><p>After setup, a small 🤖 bubble floats on the edge of your screen — on top of every app. Drag it wherever you want. It never gets in the way.</p></div></div>
+      <div class="step reveal"><div class="step-num">2</div><div class="step-body"><h3>Tap to open, type to ask</h3><p>One tap opens a chat panel. Type your question — write this email, explain this, translate that, summarise this article. No app switch. No copy-paste.</p><span class="step-tag">Works in any language</span></div></div>
+      <div class="step reveal"><div class="step-num">3</div><div class="step-body"><h3>Your PC does the thinking</h3><p>Your question goes to your own PC over a private relay. A Chrome extension quietly types it into DeepSeek, Claude, or ChatGPT — whichever you pick — and sends the answer back to your phone in seconds.</p><span class="step-tag">Uses your existing AI accounts — no extra cost</span></div></div>
+      <div class="step reveal"><div class="step-num">4</div><div class="step-body"><h3>PC off? Groq kicks in instantly</h3><p>If your PC is off or you're out, PocketAI switches to Groq automatically — one of the fastest AI APIs available, free tier included. You never hit a dead end.</p><span class="step-tag">Llama 3.3 70B · Sub-second responses</span></div></div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
+<!-- FEATURES (unchanged) -->
 <section class="features">
   <div class="wrap">
-    <div class="reveal">
-      <div class="section-label">What you get</div>
-      <h2 class="section-title">Everything in the box.</h2>
-    </div>
+    <div class="reveal"><div class="section-label">What you get</div><h2 class="section-title">Everything in the box.</h2></div>
     <div class="feat-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon">🫧</div>
-        <h3>Draggable overlay bubble</h3>
-        <p>Floats over every app. Drag it to any corner. Tap to chat, tap again to hide. Never in your way.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">⚡</div>
-        <h3>5 AI providers</h3>
-        <p>DeepSeek, Claude, ChatGPT, Gemini, Qwen — switch between them with one tap. Use your own logged-in sessions.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🔁</div>
-        <h3>Auto Groq fallback</h3>
-        <p>PC off? No problem. Groq API takes over instantly with Llama 3.3 70B. Fast, free, and always available.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🔒</div>
-        <h3>100% private relay</h3>
-        <p>Your messages go through your own relay on your own PC. Nothing is stored on any third-party server.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">📋</div>
-        <h3>Copy any response</h3>
-        <p>One tap copies the AI's reply to clipboard — ready to paste anywhere on your phone.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🛠️</div>
-        <h3>Full setup included</h3>
-        <p>Sanjay sets everything up for you over WhatsApp. Android app, Chrome extension, relay — done in one session.</p>
-      </div>
+      <div class="feat-card reveal"><div class="feat-icon">🫧</div><h3>Draggable overlay bubble</h3><p>Floats over every app. Drag to any corner. Tap to chat, tap again to hide. Never in your way.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">⚡</div><h3>5 AI providers</h3><p>DeepSeek, Claude, ChatGPT, Gemini, Qwen — switch between them with one tap. Use your own logged-in sessions.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🔁</div><h3>Auto Groq fallback</h3><p>PC off? No problem. Groq API takes over instantly with Llama 3.3 70B. Fast, free, and always available.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🔒</div><h3>100% private relay</h3><p>Your messages go through your own relay on your own PC. Nothing is stored on any third-party server.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">📋</div><h3>Copy any response</h3><p>One tap copies the AI's reply to clipboard — ready to paste anywhere on your phone.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🛠️</div><h3>Full setup included</h3><p>Sanjay sets everything up for you over WhatsApp. Android app, Chrome extension, relay — done in one session.</p></div>
     </div>
   </div>
 </section>
 
 <!-- PROVIDERS -->
 <section class="providers">
-  <div class="wrap reveal">
-    <div class="section-label">Supported AI providers</div>
-    <div class="provider-list">
-      <div class="provider-pill">🤖 DeepSeek</div>
-      <div class="provider-pill">🟣 Claude</div>
-      <div class="provider-pill">🟢 ChatGPT</div>
-      <div class="provider-pill">💎 Gemini</div>
-      <div class="provider-pill">🌊 Qwen</div>
-      <div class="provider-pill">⚡ Groq (fallback)</div>
-    </div>
-  </div>
+  <div class="wrap reveal"><div class="section-label">Supported AI providers</div><div class="provider-list"><div class="provider-pill">🤖 DeepSeek</div><div class="provider-pill">🟣 Claude</div><div class="provider-pill">🟢 ChatGPT</div><div class="provider-pill">💎 Gemini</div><div class="provider-pill">🌊 Qwen</div><div class="provider-pill">⚡ Groq (fallback)</div></div></div>
 </section>
 
-<!-- PRICING -->
+<!-- PRICING (unchanged) -->
 <section class="pricing">
   <div class="wrap">
-    <div class="reveal" style="text-align:center;">
-      <div class="section-label">Pricing</div>
-      <h2 class="section-title">Pay once. Own it forever.</h2>
-      <p class="section-sub" style="margin:0 auto;">No subscriptions. No monthly fee. No API cost if you use your own accounts.</p>
-    </div>
+    <div class="reveal" style="text-align:center;"><div class="section-label">Pricing</div><h2 class="section-title">Pay once. Own it forever.</h2><p class="section-sub" style="margin:0 auto;">No subscriptions. No monthly fee. No API cost if you use your own accounts.</p></div>
     <div class="price-card reveal">
-      <div class="price-badge">One-time · Lifetime</div>
-      <div class="price-amount"><sup>₹</sup>1,999</div>
-      <div class="price-note">Pay after it works — not before.</div>
-      <hr class="price-divider"/>
-      <ul class="price-features">
-        <li>Android overlay app — installed on your phone</li>
-        <li>Chrome extension — set up on your PC</li>
-        <li>Private relay — configured and running</li>
-        <li>5 AI providers — DeepSeek, Claude, ChatGPT, Gemini, Qwen</li>
-        <li>Groq fallback — for when PC is off</li>
-        <li>Full setup over WhatsApp by Sanjay</li>
-        <li>You own everything — code, setup, forever</li>
-      </ul>
-      <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="price-cta">Get PocketAI on WhatsApp →</a>
-      <p class="price-sub">✓ Pay only after it's working on your device</p>
+      <div class="price-badge">One-time · Lifetime</div><div class="price-amount"><sup>₹</sup>1,999</div><div class="price-note">Pay after it works — not before.</div><hr class="price-divider"/>
+      <ul class="price-features"><li>Android overlay app — installed on your phone</li><li>Chrome extension — set up on your PC</li><li>Private relay — configured and running</li><li>5 AI providers — DeepSeek, Claude, ChatGPT, Gemini, Qwen</li><li>Groq fallback — for when PC is off</li><li>Full setup over WhatsApp by Sanjay</li><li>You own everything — code, setup, forever</li></ul>
+      <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="price-cta">Get PocketAI on WhatsApp →</a><p class="price-sub">✓ Pay only after it's working on your device</p>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
+<!-- FAQ (unchanged) -->
 <section class="faq">
-  <div class="wrap">
-    <div class="reveal">
-      <div class="section-label">FAQ</div>
-      <h2 class="section-title">Questions.</h2>
-    </div>
+  <div class="wrap"><div class="reveal"><div class="section-label">FAQ</div><h2 class="section-title">Questions.</h2></div>
     <div class="faq-list reveal">
-      <div class="faq-item">
-        <button class="faq-q">Do I need to pay for the AI separately?</button>
-        <div class="faq-a">No. PocketAI uses your existing logged-in sessions on DeepSeek, Claude, ChatGPT etc. — the same accounts you already use in a browser. If you use Groq fallback and hit the free tier limit, you'd need a Groq API key, but the free tier is very generous for personal use.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">Does my PC need to be on?</button>
-        <div class="faq-a">For the full multi-provider experience, yes — your PC runs the Chrome extension that controls the AI browser tabs. But if your PC is off, PocketAI automatically falls back to Groq, so you always have AI available on your phone.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">Is my data private?</button>
-        <div class="faq-a">Yes. The relay runs on your own PC — your messages travel directly from your phone to your PC. Nothing is stored on or routed through any third-party server. It's as private as using the AI website directly on your own computer.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">What Android version do I need?</button>
-        <div class="faq-a">Android 8.0 (Oreo) or above — which covers almost every Android phone made in the last 6+ years. The overlay permission (Draw over other apps) is required, and Sanjay will walk you through enabling it during setup.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">How does the setup work?</button>
-        <div class="faq-a">You message Sanjay on WhatsApp. He installs the Android app on your phone, sets up the Chrome extension on your PC, configures the relay, and tests everything with you live. The whole thing typically takes under 30 minutes. You pay only after it's working.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q">Can I use it on iOS?</button>
-        <div class="faq-a">Not currently — iOS doesn't allow floating overlay apps the way Android does. PocketAI is Android only for now.</div>
-      </div>
+      <div class="faq-item"><button class="faq-q">Do I need to pay for the AI separately?</button><div class="faq-a">No. PocketAI uses your existing logged-in sessions on DeepSeek, Claude, ChatGPT etc. — the same accounts you already use in a browser. If you use Groq fallback and hit the free tier limit, you'd need a Groq API key, but the free tier is very generous for personal use.</div></div>
+      <div class="faq-item"><button class="faq-q">Does my PC need to be on?</button><div class="faq-a">For the full multi-provider experience, yes — your PC runs the Chrome extension that controls the AI browser tabs. But if your PC is off, PocketAI automatically falls back to Groq, so you always have AI available on your phone.</div></div>
+      <div class="faq-item"><button class="faq-q">Is my data private?</button><div class="faq-a">Yes. The relay runs on your own PC — your messages travel directly from your phone to your PC. Nothing is stored on or routed through any third-party server. It's as private as using the AI website directly on your own computer.</div></div>
+      <div class="faq-item"><button class="faq-q">What Android version do I need?</button><div class="faq-a">Android 8.0 (Oreo) or above — which covers almost every Android phone made in the last 6+ years. The overlay permission (Draw over other apps) is required, and Sanjay will walk you through enabling it during setup.</div></div>
+      <div class="faq-item"><button class="faq-q">How does the setup work?</button><div class="faq-a">You message Sanjay on WhatsApp. He installs the Android app on your phone, sets up the Chrome extension on your PC, configures the relay, and tests everything with you live. The whole thing typically takes under 30 minutes. You pay only after it's working.</div></div>
+      <div class="faq-item"><button class="faq-q">Can I use it on iOS?</button><div class="faq-a">Not currently — iOS doesn't allow floating overlay apps the way Android does. PocketAI is Android only for now.</div></div>
     </div>
   </div>
 </section>
 
 <!-- CTA FOOTER -->
 <section class="cta-footer">
-  <div class="wrap reveal">
-    <h2>AI in your pocket.<br/>Actually in your pocket.</h2>
-    <p>One-time ₹1,999. Full setup included. Pay after it works.</p>
-    <a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="btn-primary" style="font-size:16px;padding:16px 36px;">Message Sanjay on WhatsApp →</a>
-  </div>
+  <div class="wrap reveal"><h2>AI in your pocket.<br/>Actually in your pocket.</h2><p>One-time ₹1,999. Full setup included. Pay after it works.</p><a href="https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20PocketAI" class="btn-primary" style="font-size:16px;padding:16px 36px;">Message Sanjay on WhatsApp →</a></div>
 </section>
 
-<footer>
-  <div class="wrap">
-    <p>© 2026 Sanjay Meher · <a href="https://cggodotassets.shop/marketing/business-services">More tools →</a></p>
-  </div>
-</footer>
+<footer><div class="wrap"><p>© 2026 Sanjay Meher · <a href="https://cggodotassets.shop/marketing/business-services">More tools →</a></p></div></footer>
 
 <script>
-  // Scroll reveal
   const revealEls = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
   }, { threshold: 0.1 });
   revealEls.forEach(el => observer.observe(el));
 
-  // FAQ accordion
   document.querySelectorAll('.faq-q').forEach(btn => {
     btn.addEventListener('click', () => {
       const ans = btn.nextElementSibling;
