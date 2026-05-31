@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AICommander — Command All Your AI From One Place</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080c14;
+    --surface:  #0e1420;
+    --card:     #131a28;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #00e5a0;
+    --accent2:  #a78bfa;
+    --text:     #f0f4ff;
+    --muted:    #7b8fb5;
+    --dim:      #3a4868;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,20,0.85);
+    backdrop-filter: blur(12px);
+  }
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px;
+    padding: 8px 18px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: opacity .15s;
+  }
+  .nav-cta:hover { opacity: .85; }
+
+  /* HERO */
+  .hero { padding: 80px 0 60px; text-align: center; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.25);
+    border-radius: 40px; padding: 5px 14px;
+    font-size: 11px; font-weight: 500; color: var(--accent);
+    letter-spacing: .6px; text-transform: uppercase;
+    margin-bottom: 24px;
+    animation: fadeUp .5s ease both;
+  }
+  .hero-eyebrow::before { content: '●'; font-size: 7px; }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 7vw, 68px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+    animation: fadeUp .5s .1s ease both;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero h1 .purple { color: var(--accent2); }
+
+  .highlight-tabs {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 14px; margin: 0 auto 36px;
+    animation: fadeUp .5s .2s ease both;
+  }
+  .promise-tab {
+    background: rgba(18,26,40,0.75);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0,229,160,0.35);
+    border-radius: 80px; padding: 10px 24px;
+    font-size: 15px; font-weight: 500; color: #eef5ff;
+    display: inline-flex; align-items: center; gap: 10px;
+    letter-spacing: -0.2px;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+  .promise-tab:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    background: rgba(0,229,160,0.08);
+    box-shadow: 0 12px 24px rgba(0,229,160,0.12);
+  }
+  .promise-icon { font-size: 18px; }
+  .promise-tab span:last-child {
+    font-weight: 500;
+    background: linear-gradient(135deg, #fff, #b9f5d4);
+    background-clip: text; -webkit-background-clip: text; color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 17px; color: var(--muted); max-width: 580px;
+    margin: 0 auto 32px; line-height: 1.65;
+    animation: fadeUp .5s .25s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp .5s .3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 15px;
+    padding: 14px 30px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: transform .15s, opacity .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); opacity: .9; }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 15px;
+    padding: 14px 28px; border-radius: 40px;
+    border: 1px solid var(--border); cursor: pointer;
+    text-decoration: none; display: inline-block;
+    transition: border-color .15s;
+  }
+  .btn-secondary:hover { border-color: var(--dim); }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-wrap {
+    margin: 60px auto 0;
+    max-width: 700px;
+    animation: fadeUp .6s .4s ease both;
+  }
+  .arch-diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+  }
+  .arch-row {
+    display: flex; justify-content: center; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 130px;
+  }
+  .arch-box.highlight {
+    border-color: rgba(0,229,160,0.4);
+    background: rgba(0,229,160,0.06);
+  }
+  .arch-box.purple-hl {
+    border-color: rgba(167,139,250,0.4);
+    background: rgba(167,139,250,0.06);
+  }
+  .arch-box-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 3px;
+  }
+  .arch-box-sub { font-size: 11px; color: var(--muted); }
+  .arch-arrow {
+    color: var(--dim); font-size: 18px; flex-shrink: 0;
+  }
+  .arch-label {
+    font-size: 10px; color: var(--muted);
+    text-align: center; margin: 4px 0 8px;
+    letter-spacing: .5px;
+  }
+  .arch-clients {
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  }
+  .arch-client {
+    background: var(--surface);
+    border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 10px; padding: 10px 16px;
+    text-align: center; min-width: 110px;
+  }
+  .arch-client-title { font-size: 12px; font-weight: 500; color: var(--accent2); }
+  .arch-client-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .ai-pills {
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .ai-pill {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 40px; padding: 5px 13px;
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* SECTION */
+  .section-label {
+    font-size: 10px; font-weight: 500; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 700; letter-spacing: -1px;
+    line-height: 1.1; margin-bottom: 14px;
+  }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 500px; }
+
+  /* PIECES */
+  .pieces { padding: 80px 0; border-top: 1px solid var(--border); }
+  .piece-list { margin-top: 48px; display: flex; flex-direction: column; gap: 0; }
+  .piece {
+    display: grid; grid-template-columns: 56px 1fr;
+    gap: 24px; padding: 32px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .piece:last-child { border-bottom: none; }
+  .piece-num {
+    width: 44px; height: 44px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0; margin-top: 2px;
+  }
+  .piece-body h3 {
+    font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700;
+    margin-bottom: 6px; letter-spacing: -0.5px;
+  }
+  .piece-body p { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
+  .piece-tag {
+    display: inline-block;
+    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.2);
+    color: var(--accent); font-size: 10px; font-weight: 500;
+    padding: 3px 10px; border-radius: 40px; letter-spacing: .3px;
+    margin-right: 6px; margin-bottom: 6px;
+  }
+  .piece-tag.purple {
+    background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2);
+    color: var(--accent2);
+  }
+  .capability-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+  }
+  .cap-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; color: var(--muted);
+  }
+
+  /* QUICK PROMPT FEATURE */
+  .qp-demo {
+    margin-top: 16px;
+    background: #0a0c14;
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 460px;
+  }
+  .qp-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .qp-title { font-size: 12px; font-weight: 500; color: var(--accent); }
+  .qp-close { font-size: 11px; color: var(--dim); }
+  .qp-select {
+    width: 100%; padding: 7px 10px; margin-bottom: 8px;
+    background: #0f172a; border: 1px solid #334155;
+    color: var(--muted); border-radius: 6px; font-size: 12px;
+  }
+  .qp-textarea {
+    width: 100%; height: 60px; padding: 7px 10px; margin-bottom: 8px;
+    background: #0f172a; border: 1px solid #334155;
+    color: var(--text); border-radius: 6px; font-size: 12px;
+    resize: none;
+  }
+  .qp-row { display: flex; gap: 6px; }
+  .qp-send {
+    flex: 1; background: var(--accent); color: #000;
+    border: none; border-radius: 6px; padding: 7px;
+    font-size: 12px; cursor: pointer;
+  }
+  .qp-cancel {
+    flex: 1; background: #1f2937; color: var(--muted);
+    border: none; border-radius: 6px; padding: 7px;
+    font-size: 12px; cursor: pointer;
+  }
+
+  /* FEATURES GRID */
+  .features { padding: 80px 0; border-top: 1px solid var(--border); }
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px; margin-top: 44px;
+  }
+  .feat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 24px;
+    transition: transform .2s, border-color .2s;
+  }
+  .feat-card:hover { transform: translateY(-3px); border-color: var(--dim); }
+  .feat-icon {
+    width: 38px; height: 38px;
+    background: rgba(0,229,160,0.1); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 14px;
+  }
+  .feat-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 7px; }
+  .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* PROVIDERS */
+  .providers { padding: 60px 0; border-top: 1px solid var(--border); text-align: center; }
+  .provider-list {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; margin-top: 28px;
+  }
+  .provider-pill {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 40px; padding: 8px 18px;
+    font-size: 13px; color: var(--muted);
+    transition: border-color .2s, color .2s;
+  }
+  .provider-pill:hover { border-color: var(--accent); color: var(--text); }
+
+  /* USE CASES */
+  .usecases { padding: 80px 0; border-top: 1px solid var(--border); }
+  .usecase-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 16px; margin-top: 40px;
+  }
+  .usecase-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px;
+    transition: border-color .2s;
+  }
+  .usecase-card:hover { border-color: var(--dim); }
+  .usecase-icon { font-size: 22px; margin-bottom: 10px; }
+  .usecase-card h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .usecase-card p { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  /* PRICING */
+  .pricing { padding: 80px 0; border-top: 1px solid var(--border); }
+  .price-card {
+    max-width: 460px; margin: 44px auto 0;
+    background: var(--card);
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 24px; padding: 36px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .price-card::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(to right, transparent, var(--accent), transparent);
+  }
+  .price-badge {
+    display: inline-block;
+    background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.25);
+    color: var(--accent); font-size: 10px; font-weight: 500;
+    padding: 4px 12px; border-radius: 40px; letter-spacing: .5px;
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+  }
+  .price-amount sup { font-size: 24px; vertical-align: super; letter-spacing: 0; }
+  .price-note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .price-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  .price-features { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+  .price-features li { font-size: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .price-features li::before { content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .price-cta {
+    display: block; width: 100%;
+    background: var(--accent); color: #080c14;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 16px;
+    padding: 15px; border-radius: 40px; border: none; cursor: pointer;
+    text-decoration: none; margin-top: 28px;
+    transition: opacity .15s, transform .15s;
+  }
+  .price-cta:hover { opacity: .88; transform: translateY(-1px); }
+  .price-sub { font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+  /* FAQ */
+  .faq { padding: 80px 0; border-top: 1px solid var(--border); }
+  .faq-list { margin-top: 40px; display: flex; flex-direction: column; gap: 0; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; text-align: left;
+    background: none; border: none; cursor: pointer;
+    padding: 18px 0;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    color: var(--text); display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-q::after { content: '+'; font-size: 20px; color: var(--muted); transition: transform .2s; }
+  .faq-q.open::after { transform: rotate(45deg); }
+  .faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height .25s ease, padding .2s; }
+  .faq-a.open { max-height: 300px; padding-bottom: 16px; }
+
+  /* CTA FOOTER */
+  .cta-footer {
+    padding: 80px 0 60px; text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .cta-footer h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800; letter-spacing: -1.5px;
+    line-height: 1.1; margin-bottom: 16px;
+  }
+  .cta-footer p { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+
+  footer {
+    padding: 20px 0; border-top: 1px solid var(--border);
+    text-align: center; font-size: 12px; color: var(--dim);
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 52px 0 40px; }
+    .arch-clients { flex-direction: column; align-items: center; }
+    .promise-tab { padding: 6px 16px; font-size: 13px; gap: 6px; }
+    .promise-icon { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">AI<span>Commander</span></div>
+    <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20AICommander" class="nav-cta">Get it — ₹2,999</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">One-time setup · You own it forever</div>
+    <h1>One command centre.<br/><em>All your AI.</em><br/><span class="purple">Any device.</span></h1>
+
+    <div class="highlight-tabs">
+      <div class="promise-tab"><span class="promise-icon">🧠</span><span>5 AI providers</span></div>
+      <div class="promise-tab"><span class="promise-icon">🚫💸</span><span>Zero API cost</span></div>
+      <div class="promise-tab"><span class="promise-icon">📡</span><span>Use from anywhere</span></div>
+    </div>
+
+    <p class="hero-sub">AICommander turns your PC's logged-in AI sessions into a private relay you can reach from any device — phone, another PC, or any browser tab. One setup. Everything connected. No subscriptions ever.</p>
+
+    <div class="hero-actions">
+      <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20AICommander" class="btn-primary">Get AICommander — ₹2,999</a>
+      <a href="#pieces" class="btn-secondary">See how it works ↓</a>
+    </div>
+
+    <!-- ARCHITECTURE DIAGRAM -->
+    <div class="arch-wrap">
+      <div class="arch-diagram">
+        <div class="arch-row">
+          <div class="arch-box highlight">
+            <div class="arch-box-title">🎼 Orchestrator</div>
+            <div class="arch-box-sub">Chrome ext · Your main PC</div>
+          </div>
+        </div>
+        <div class="arch-label">controls silently in background tabs ↕</div>
+        <div class="ai-pills">
+          <div class="ai-pill">Claude</div>
+          <div class="ai-pill">ChatGPT</div>
+          <div class="ai-pill">Gemini</div>
+          <div class="ai-pill">DeepSeek</div>
+          <div class="ai-pill">Qwen</div>
+        </div>
+        <div style="text-align:center; margin: 20px 0 8px;">
+          <div style="display:inline-block; width:1px; height:24px; background: var(--dim);"></div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-box highlight">
+            <div class="arch-box-title">🔁 Relay Server</div>
+            <div class="arch-box-sub">Runs on your PC · API key protected</div>
+          </div>
+        </div>
+        <div class="arch-label">sends commands to any connected client ↕</div>
+        <div class="arch-clients">
+          <div class="arch-client">
+            <div class="arch-client-title">📱 PocketAI</div>
+            <div class="arch-client-sub">Android floating app</div>
+          </div>
+          <div class="arch-client">
+            <div class="arch-client-title">💻 Remote Extension</div>
+            <div class="arch-client-sub">Chrome ext · Any PC</div>
+          </div>
+          <div class="arch-client">
+            <div class="arch-client-title">⚡ Groq Fallback</div>
+            <div class="arch-client-sub">Auto · PC unreachable</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 PIECES -->
+<section class="pieces" id="pieces">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">The system</div>
+      <h2 class="section-title">4 pieces. One system.</h2>
+      <p class="section-sub">Each part does one job. Together they give you every AI tool, on every device, for free.</p>
+    </div>
+    <div class="piece-list">
+
+      <div class="piece reveal">
+        <div class="piece-num">1</div>
+        <div class="piece-body">
+          <h3>🎼 The Orchestrator</h3>
+          <p>A Chrome extension that lives on your main PC. It opens DeepSeek, Claude, ChatGPT, Gemini, and Qwen in silent background tabs and controls them like a robot — sending your prompts, creating new chats, navigating chat history, and waiting for the full response before returning it. Uses your own logged-in accounts. No API keys needed.</p>
+          <div class="capability-list">
+            <div class="cap-item">Send prompts</div>
+            <div class="cap-item">New chat</div>
+            <div class="cap-item">Get chat list</div>
+            <div class="cap-item">Navigate to chat</div>
+            <div class="cap-item">Image generation</div>
+            <div class="cap-item">Video generation (Qwen)</div>
+            <div class="cap-item">Auto video upload to cloud</div>
+          </div>
+          <div style="margin-top:12px;">
+            <span class="piece-tag">Runs silently in background</span>
+            <span class="piece-tag">Claude has special UI handling</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="piece reveal">
+        <div class="piece-num">2</div>
+        <div class="piece-body">
+          <h3>🔁 The Relay Server</h3>
+          <p>A private server that runs on your PC and bridges every remote client to the Orchestrator. It exposes a clean REST API — <code style="font-size:12px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">/prompt/:provider</code>, <code style="font-size:12px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">/run</code>, <code style="font-size:12px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">/status</code> — protected by your own API key. Nothing passes through any third-party server. Your data never leaves your machines.</p>
+          <div style="margin-top:12px;">
+            <span class="piece-tag">API key protected</span>
+            <span class="piece-tag">100% private</span>
+            <span class="piece-tag purple">WebSocket + REST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="piece reveal">
+        <div class="piece-num">3</div>
+        <div class="piece-body">
+          <h3>💻 The Remote Extension</h3>
+          <p>Install this Chrome extension on any second PC, connect it to your relay with the URL and API key, and you instantly have access to all 5 AI tools from that machine too. It has a full side panel for regular use — and a killer feature most people miss:</p>
+          <div class="qp-demo">
+            <div class="qp-header">
+              <span class="qp-title">🤖 AI Quick Prompt</span>
+              <span class="qp-close">✕</span>
+            </div>
+            <select class="qp-select"><option>Claude</option></select>
+            <textarea class="qp-textarea" readonly>Summarise this article for me in 3 bullet points</textarea>
+            <div class="qp-row">
+              <button class="qp-send">Send</button>
+              <button class="qp-cancel">Cancel</button>
+            </div>
+          </div>
+          <p style="margin-top:14px;">Select any text on any webpage, hit a keyboard shortcut, and a quick prompt overlay pops up right there — pre-filled with your selected text. Ask AI about it without leaving the page. Ctrl+Enter to send.</p>
+          <div style="margin-top:12px;">
+            <span class="piece-tag">Works on any webpage</span>
+            <span class="piece-tag">Keyboard shortcut trigger</span>
+            <span class="piece-tag purple">Select text → instant AI</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="piece reveal">
+        <div class="piece-num">4</div>
+        <div class="piece-body">
+          <h3>📱 PocketAI — The Mobile App</h3>
+          <p>A floating bubble that lives on top of every Android app. Connects to your relay and uses your PC's AI sessions. When your PC is off or unreachable, it automatically switches to Groq (Llama 3.3 70B) — so you always get a response. Think of PocketAI as the remote control for AICommander in your pocket.</p>
+          <div style="margin-top:12px;">
+            <span class="piece-tag">Overlay on every app</span>
+            <span class="piece-tag">Groq auto-fallback</span>
+            <span class="piece-tag purple">Android · One-tap AI</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">What you get</div>
+      <h2 class="section-title">Everything in the box.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">🤖</div>
+        <h3>5 AI providers, zero cost</h3>
+        <p>Uses your existing logged-in browser sessions for Claude, ChatGPT, Gemini, DeepSeek, and Qwen. No API billing. Ever.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📡</div>
+        <h3>Use from any device</h3>
+        <p>Phone, second PC, or any Chrome browser. As long as your relay is running, every device has access to all 5 AIs.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚡</div>
+        <h3>Instant quick prompts</h3>
+        <p>Select text on any webpage, hit a shortcut, get an AI overlay. No tab switching. No copy-paste. Just ask.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🎬</div>
+        <h3>Image & video generation</h3>
+        <p>Qwen's image and video generation fully supported. Videos auto-upload to cloud storage and return a shareable link.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔒</div>
+        <h3>Fully private relay</h3>
+        <p>Your relay runs on your own PC. API key protected. No third-party servers. Your prompts go from your device to your PC only.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🛠️</div>
+        <h3>Full setup by Sanjay</h3>
+        <p>All 4 pieces installed and configured over WhatsApp. Orchestrator, relay, remote extension, PocketAI — done in one session.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROVIDERS -->
+<section class="providers">
+  <div class="wrap reveal">
+    <div class="section-label">Supported AI providers</div>
+    <div class="provider-list">
+      <div class="provider-pill">🟣 Claude</div>
+      <div class="provider-pill">🟢 ChatGPT</div>
+      <div class="provider-pill">💎 Gemini</div>
+      <div class="provider-pill">🤖 DeepSeek</div>
+      <div class="provider-pill">🌊 Qwen</div>
+      <div class="provider-pill">⚡ Groq (fallback)</div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="usecases">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">Who it's for</div>
+      <h2 class="section-title">Real situations, solved.</h2>
+    </div>
+    <div class="usecase-grid">
+      <div class="usecase-card reveal">
+        <div class="usecase-icon">✍️</div>
+        <h3>Content creators</h3>
+        <p>Select a caption idea on Instagram, hit the shortcut, ask Claude to rewrite it — without leaving the browser.</p>
+      </div>
+      <div class="usecase-card reveal">
+        <div class="usecase-icon">💼</div>
+        <h3>Business owners</h3>
+        <p>Use all 5 AIs from your phone while you're out, without paying for any of them. Your PC does the work.</p>
+      </div>
+      <div class="usecase-card reveal">
+        <div class="usecase-icon">👨‍💻</div>
+        <h3>Developers</h3>
+        <p>Quick prompt overlay on any docs page. Select an error, ask DeepSeek to fix it. Stay in your flow.</p>
+      </div>
+      <div class="usecase-card reveal">
+        <div class="usecase-icon">🎓</div>
+        <h3>Students & researchers</h3>
+        <p>Reading a paper? Select a paragraph and ask Gemini to explain it in simple terms. Instantly, in place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Pay once. Own it forever.</h2>
+      <p class="section-sub" style="margin:0 auto;">No subscriptions. No API cost. All 4 pieces included.</p>
+    </div>
+    <div class="price-card reveal">
+      <div class="price-badge">One-time · Lifetime · 4 pieces</div>
+      <div class="price-amount"><sup>₹</sup>2,999</div>
+      <div class="price-note">Pay after everything works — not before.</div>
+      <hr class="price-divider"/>
+      <ul class="price-features">
+        <li>Orchestrator Chrome extension — installed on your main PC</li>
+        <li>Relay server — configured and running on your PC</li>
+        <li>Remote Chrome extension — set up on a second PC</li>
+        <li>PocketAI Android app — installed on your phone</li>
+        <li>All 5 providers — Claude, ChatGPT, Gemini, DeepSeek, Qwen</li>
+        <li>Groq fallback — auto-activates when PC is off</li>
+        <li>Quick prompt overlay — keyboard shortcut on any webpage</li>
+        <li>Full setup over WhatsApp by Sanjay</li>
+        <li>You own everything — code, setup, forever</li>
+      </ul>
+      <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20AICommander" class="price-cta">Get AICommander on WhatsApp →</a>
+      <p class="price-sub">✓ Pay only after all 4 pieces are working on your devices</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Questions.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q">Do I need to pay for Claude, ChatGPT, or Gemini separately?</button>
+        <div class="faq-a">No. AICommander uses your existing logged-in browser sessions — the same accounts you already use. Free tiers work fine. If you have a paid plan, those benefits carry over automatically. The only exception is the Groq fallback, which uses a Groq API key — but Groq's free tier is very generous for personal use.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Does my main PC need to be on all the time?</button>
+        <div class="faq-a">For the full 5-provider experience, yes — your PC runs the Orchestrator and relay. But if your PC is off, PocketAI and the remote extension automatically fall back to Groq, so you always have AI available on every device.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is my data private?</button>
+        <div class="faq-a">Yes. The relay server runs on your own PC. Your prompts travel from your phone or second PC directly to your relay — not through any third-party server. It's as private as using the AI websites directly on your own computer. The relay is also protected by your own API key.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How does the quick prompt overlay work?</button>
+        <div class="faq-a">The remote Chrome extension injects a content script into every webpage. When you press the keyboard shortcut, a floating prompt box appears on top of whatever you're reading. If you had text selected, it pre-fills the box. You pick your AI provider, type your question, hit Ctrl+Enter, and get the answer right there — without leaving the page or opening a new tab.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Can I use AICommander without PocketAI on mobile?</button>
+        <div class="faq-a">Yes. You can buy AICommander for desktop use only — Orchestrator, relay, and remote extension — without the Android app. Or you can add PocketAI later. Sanjay will work out the right setup for your situation during the WhatsApp consultation.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How does the setup work?</button>
+        <div class="faq-a">You message Sanjay on WhatsApp. He installs and configures all 4 pieces with you live — Orchestrator on your main PC, relay server, remote extension on a second device, and PocketAI on your phone. The whole setup typically takes under an hour. You pay only after everything is working.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FOOTER -->
+<section class="cta-footer">
+  <div class="wrap reveal">
+    <h2>Command all your AI.<br/>From anywhere.</h2>
+    <p>One-time ₹2,999. All 4 pieces. Full setup included. Pay after it works.</p>
+    <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20buy%20AICommander" class="btn-primary" style="font-size:16px;padding:16px 36px;">Message Sanjay on WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 Sanjay Meher · <a href="https://sanjaymeherdev.netlify.app/sanjaymeher/products">More tools →</a></p>
+  </div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  revealEls.forEach(el => observer.observe(el));
+
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ans = btn.nextElementSibling;
+      const isOpen = ans.classList.contains('open');
+      document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+      document.querySelectorAll('.faq-q').forEach(b => b.classList.remove('open'));
+      if (!isOpen) { ans.classList.add('open'); btn.classList.add('open'); }
+    });
+  });
+</script>
+</body>
+</html>
