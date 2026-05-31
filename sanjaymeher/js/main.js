@@ -1,8 +1,12 @@
-// ==================== CONFIGURATION ====================
+// ============================================================
+// SANJAY MEHER — main.js
+// Supabase: colors, settings, products, leads
+// ============================================================
+
 const SUPABASE_URL = 'https://bvavtdyxuzzabzgodbjw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2YXZ0ZHl4dXp6YWJ6Z29kYmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxOTc2OTksImV4cCI6MjA4OTc3MzY5OX0.gqfiaeDtWBtuyj_CQCaiySVA2-VmuM9CVvd5N-gRlV8';
 
-// ==================== SUPABASE FETCH HELPER ====================
+// ── Supabase fetch helper ──────────────────────────────────
 async function supabaseFetch(table) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
     headers: {
@@ -14,311 +18,231 @@ async function supabaseFetch(table) {
   return res.json();
 }
 
-// ==================== THEME MANAGEMENT ====================
+// ── Theme ──────────────────────────────────────────────────
 function initTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  const bgDark = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
-  const bgLight = getComputedStyle(document.documentElement).getPropertyValue('--bg-light').trim();
-  
-  if (savedTheme === 'light') {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
     document.body.classList.add('light-theme');
-    document.body.style.backgroundColor = bgLight || '#f5f5f7';
-    updateThemeIcons('light');
   } else {
     document.body.classList.remove('light-theme');
-    document.body.style.backgroundColor = bgDark || '#0a0a0f';
-    updateThemeIcons('dark');
   }
+  updateThemeIcons(saved === 'light' ? 'light' : 'dark');
 }
 
 function updateThemeIcons(theme) {
-  const isLight = theme === 'light';
-  const desktopIcon = document.querySelector('#themeToggleDesktop .theme-icon');
-  const mobileIcon = document.querySelector('#themeToggleMobile');
-  
-  if (desktopIcon) {
-    desktopIcon.textContent = isLight ? '☀️' : '🌙';
-  }
-  
-  if (mobileIcon) {
-    if (isLight) {
-      mobileIcon.innerHTML = '<span class="theme-icon">☀️</span> Switch Theme';
-    } else {
-      mobileIcon.innerHTML = '<span class="theme-icon">🌙</span> Switch Theme';
-    }
-  }
+  const icon = theme === 'light' ? '☀️' : '🌙';
+  const desktopBtn = document.querySelector('#themeToggleDesktop .theme-icon');
+  const mobileBtn = document.getElementById('themeToggleMobile');
+  if (desktopBtn) desktopBtn.textContent = icon;
+  if (mobileBtn) mobileBtn.innerHTML = `<span class="theme-icon">${icon}</span> Switch Theme`;
 }
 
 function toggleTheme() {
-  const isCurrentlyLight = document.body.classList.contains('light-theme');
-  const bgDark = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
-  const bgLight = getComputedStyle(document.documentElement).getPropertyValue('--bg-light').trim();
-  
-  if (isCurrentlyLight) {
-    // Switch to dark mode
-    document.body.classList.remove('light-theme');
-    document.body.style.backgroundColor = bgDark || '#0a0a0f';
-    localStorage.setItem('theme', 'dark');
-    updateThemeIcons('dark');
-  } else {
-    // Switch to light mode
-    document.body.classList.add('light-theme');
-    document.body.style.backgroundColor = bgLight || '#f5f5f7';
-    localStorage.setItem('theme', 'light');
-    updateThemeIcons('light');
-  }
-  
-  // Force update of any elements that might have cached styles
-  document.dispatchEvent(new Event('themeChanged'));
+  const isLight = document.body.classList.toggle('light-theme');
+  const theme = isLight ? 'light' : 'dark';
+  localStorage.setItem('theme', theme);
+  updateThemeIcons(theme);
 }
 
-// ==================== MOBILE MENU ====================
+// ── Mobile menu ───────────────────────────────────────────
 function initMobileMenu() {
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const mobileMenu = document.getElementById('mobileMenu');
-  
-  if (hamburgerBtn && mobileMenu) {
-    hamburgerBtn.addEventListener('click', () => {
-      hamburgerBtn.classList.toggle('active');
-      mobileMenu.classList.toggle('active');
-      document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+  const hamburger = document.getElementById('hamburgerBtn');
+  const menu = document.getElementById('mobileMenu');
+  if (!hamburger || !menu) return;
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    menu.classList.toggle('active');
+    document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+  });
+
+  menu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      menu.classList.remove('active');
+      document.body.style.overflow = '';
     });
-    
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburgerBtn.classList.remove('active');
-        mobileMenu.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    });
-  }
+  });
 }
 
-// ==================== APPLY COLORS ====================
+// ── Apply Colors from Supabase ────────────────────────────
 function applyColors(colors) {
   const map = Array.isArray(colors)
     ? Object.fromEntries(colors.map(c => [c.key, c.value]))
     : colors;
 
-  const primaryColor = map.primary_color || '#8b5cf6';
-  const secondaryColor = map.secondary_color || '#6d28d9';
-  const bgDark = map.background_dark || '#0a0a0f';
-  const bgLight = map.background_light || '#f5f5f7';
-  const textDark = map.text_dark || '#ffffff';
-  const textLight = map.text_light || '#1a1a2e';
+  const vars = {
+    '--accent':       map.primary_color   || '#8B5CF6',
+    '--accent-hover': map.secondary_color || '#7C3AED',
+    '--bg-dark':      map.background_dark || '#0a0a0f',
+    '--bg-light':     map.background_light|| '#f5f5f7',
+  };
 
-  // Set ALL CSS variables
-  document.documentElement.style.setProperty('--accent', primaryColor);
-  document.documentElement.style.setProperty('--accent-hover', secondaryColor);
-  document.documentElement.style.setProperty('--bg-primary', bgDark);
-  document.documentElement.style.setProperty('--bg-secondary', bgDark);
-  document.documentElement.style.setProperty('--bg-card', bgDark);
-  document.documentElement.style.setProperty('--text-primary', textDark);
-  document.documentElement.style.setProperty('--text-secondary', '#94A3B8');
-  document.documentElement.style.setProperty('--border', '#334155');
+  Object.entries(vars).forEach(([k,v]) =>
+    document.documentElement.style.setProperty(k, v)
+  );
 
-  // Apply current theme background
-  if (document.body.classList.contains('light-theme')) {
-    document.body.style.backgroundColor = bgLight;
-    document.documentElement.style.setProperty('--bg-primary', bgLight);
-    document.documentElement.style.setProperty('--bg-secondary', bgLight);
-    document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
-    document.documentElement.style.setProperty('--text-primary', textLight);
-    document.documentElement.style.setProperty('--border', '#E2E8F0');
-  } else {
-    document.body.style.backgroundColor = bgDark;
-  }
+  // Reapply bg based on current theme
+  const isDark = !document.body.classList.contains('light-theme');
+  document.documentElement.style.setProperty(
+    '--bg-primary', isDark ? vars['--bg-dark'] : vars['--bg-light']
+  );
 }
 
-// ==================== APPLY SETTINGS ====================
+// ── Apply Settings from Supabase ─────────────────────────
 function applySettings(settings) {
   const map = Array.isArray(settings)
     ? Object.fromEntries(settings.map(s => [s.key, s.value]))
     : settings;
 
-  // Update WhatsApp number
+  // WhatsApp number
   if (map.whatsapp_number) {
-    const whatsappNumber = map.whatsapp_number.replace(/\D/g, '');
-    const formattedNumber = formatPhoneNumber(whatsappNumber);
-    
-    const whatsappBtn = document.querySelector('.btn-whatsapp');
-    if (whatsappBtn) {
-      const icon = whatsappBtn.querySelector('i');
-      if (icon) {
-        whatsappBtn.innerHTML = '<i class="fab fa-whatsapp"></i> ' + formattedNumber;
-      } else {
-        whatsappBtn.innerHTML = '<i class="fab fa-whatsapp"></i> ' + formattedNumber;
-      }
-    }
-    
-    const callBtn = document.querySelector('.btn-call');
-    if (callBtn) {
-      callBtn.textContent = formattedNumber;
-    }
-  }
-
-  // Update email
-  if (map.email) {
-    const emailBtn = document.querySelector('.btn-email');
-    if (emailBtn) {
-      emailBtn.textContent = map.email;
-    }
-  }
-
-  // Update site title
-  if (map.site_title) {
-    document.title = map.site_title;
-  }
-}
-
-// Helper function to format phone number
-function formatPhoneNumber(number) {
-  const str = number.toString();
-  if (str.length === 12 && str.startsWith('91')) {
-    return `+91 ${str.slice(2, 7)} ${str.slice(7)}`;
-  }
-  if (str.length === 10) {
-    return `+91 ${str.slice(0, 5)} ${str.slice(5)}`;
-  }
-  return `+${str}`;
-}
-
-// ==================== APPLY PRODUCTS ====================
-// ==================== APPLY PRODUCTS ====================
-function applyProducts(products) {
-  const grid = document.getElementById('productsGrid');
-  if (!grid) return;
-
-  const active = products.filter(p => p.active !== false && p.active !== 'FALSE');
-
-  if (!active.length) {
-    grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products found.</p>';
-    return;
-  }
-
-  // Add search functionality if search input exists
-  const searchInput = document.getElementById('searchInput');
-  let filteredProducts = active;
-  
-  if (searchInput && searchInput.value) {
-    const searchTerm = searchInput.value.toLowerCase();
-    filteredProducts = active.filter(p => {
-      const name = (p.name || '').toLowerCase();
-      const description = (p.description || '').toLowerCase();
-      return name.includes(searchTerm) || description.includes(searchTerm);
+    const num = map.whatsapp_number.replace(/\D/g,'');
+    const fmt = formatPhone(num);
+    document.querySelectorAll('.wa-number').forEach(el => el.textContent = fmt);
+    document.querySelectorAll('[data-wa-link]').forEach(el => {
+      const msg = el.getAttribute('data-wa-msg') || '';
+      el.href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+    });
+    document.querySelectorAll('.whatsapp-float').forEach(el => {
+      el.href = `https://wa.me/${num}?text=Hi%20Sanjay%2C%20I%20need%20a%20quote%20for%20my%20business.`;
     });
   }
 
-  if (filteredProducts.length === 0) {
-    grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">No products match your search.</p>';
+  // Email
+  if (map.email) {
+    document.querySelectorAll('.contact-email').forEach(el => {
+      el.textContent = map.email;
+      if (el.tagName === 'A') el.href = `mailto:${map.email}`;
+    });
+  }
+
+  // Site title
+  if (map.site_title) document.title = map.site_title;
+}
+
+function formatPhone(num) {
+  const s = String(num);
+  if (s.length === 12 && s.startsWith('91'))
+    return `+91 ${s.slice(2,7)} ${s.slice(7)}`;
+  if (s.length === 10)
+    return `+91 ${s.slice(0,5)} ${s.slice(5)}`;
+  return `+${s}`;
+}
+
+// ── Apply Products from Supabase ─────────────────────────
+function applyProducts(products, query = '') {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+
+  let active = products.filter(p => p.active !== false && p.active !== 'FALSE');
+
+  if (query.trim()) {
+    const q = query.toLowerCase();
+    active = active.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.description||'').toLowerCase().includes(q)
+    );
+  }
+
+  const countEl = document.getElementById('productsCount');
+  if (countEl) countEl.textContent = `${active.length} product${active.length !== 1 ? 's' : ''} available`;
+
+  if (!active.length) {
+    grid.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:2rem 0;">No products found.</p>';
     return;
   }
 
-  grid.innerHTML = filteredProducts.map(p => {
-    // Use image_url column
-    const imageUrl = p.image_url || '';
-    
-    return `
-      <div class="product-card">
-        ${imageUrl ? `
+  grid.innerHTML = active.map(p => `
+    <div class="product-card animate-on-scroll">
+      ${p.image_url ? `
         <div class="product-image-container">
-          <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name || 'Product')}" loading="lazy">
-        </div>
-        ` : ''}
-        <div class="product-info">
-          <h3>${escapeHtml(p.name || '')}</h3>
-          ${p.problem ? `<p class="problem-line">"${escapeHtml(p.problem)}"</p>` : ''}
-          <p>${escapeHtml(p.description || '')}</p>
-          <ul class="feature-list">
-            ${p.feature1 ? `<li>${escapeHtml(p.feature1)}</li>` : ''}
-            ${p.feature2 ? `<li>${escapeHtml(p.feature2)}</li>` : ''}
-            ${p.feature3 ? `<li>${escapeHtml(p.feature3)}</li>` : ''}
-          </ul>
-          <div style="margin-top:10px;font-weight:bold;color:var(--accent);">
-            ${escapeHtml(p.price || '')}
-          </div>
-          <a href="${escapeHtml(p.buy_link || 'contact.html')}" class="quote-btn">Get Quote →</a>
-        </div>
+          <img src="${esc(p.image_url)}" alt="${esc(p.name||'')}" loading="lazy">
+        </div>` : ''}
+      <div class="product-info">
+        <h3>${esc(p.name||'')}</h3>
+        ${p.problem ? `<p class="problem-line">"${esc(p.problem)}"</p>` : ''}
+        <p>${esc(p.description||'')}</p>
+        <ul class="feature-list">
+          ${p.feature1 ? `<li>${esc(p.feature1)}</li>` : ''}
+          ${p.feature2 ? `<li>${esc(p.feature2)}</li>` : ''}
+          ${p.feature3 ? `<li>${esc(p.feature3)}</li>` : ''}
+        </ul>
+        ${p.price ? `<div class="product-price-tag">${esc(p.price)}</div>` : ''}
+        <a href="${esc(p.buy_link||'contact.html')}" class="quote-btn" style="margin-top:0.5rem;display:inline-block">
+          Get Quote →
+        </a>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 
-  const countEl = document.getElementById('productsCount');
-  if (countEl) countEl.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} available`;
+  initScrollAnimations();
 }
-// ==================== LOAD ALL DATA FROM SUPABASE ====================
+
+function esc(text) {
+  if (!text) return '';
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+// ── Load all Supabase data ────────────────────────────────
+let allProducts = [];
+
 async function loadAllData() {
   try {
-    // Fetch all 3 in parallel
     const [colors, settings, products] = await Promise.all([
       supabaseFetch('colors'),
       supabaseFetch('settings'),
-      supabaseFetch('products')
+      supabaseFetch('products').catch(() => [])
     ]);
 
     applyColors(colors);
     applySettings(settings);
+
+    allProducts = products;
     applyProducts(products);
-    
-    // Re-apply theme after colors are loaded
-    const currentTheme = localStorage.getItem('theme');
-    const bgDark = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
-    const bgLight = getComputedStyle(document.documentElement).getPropertyValue('--bg-light').trim();
-    
-    if (currentTheme === 'light') {
-      document.body.classList.add('light-theme');
-      document.body.style.backgroundColor = bgLight || '#f5f5f7';
-      updateThemeIcons('light');
-    } else {
-      document.body.classList.remove('light-theme');
-      document.body.style.backgroundColor = bgDark || '#0a0a0f';
-      updateThemeIcons('dark');
-    }
 
-    // Clear any old cached data
-    localStorage.removeItem('siteData');
-    localStorage.removeItem('siteDataTime');
+    // Re-init theme after colors load
+    initTheme();
 
-  } catch(error) {
-    console.error('Supabase load failed, page will use defaults:', error);
-    
+  } catch (err) {
+    console.error('Supabase load error:', err);
     const grid = document.getElementById('productsGrid');
-    if (grid && grid.innerHTML.includes('fa-spinner')) {
-      grid.innerHTML = '<p style="text-align:center;color:#ef4444;">⚠️ Unable to load data. Please refresh the page.</p>';
-    }
-    
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-      const note = document.querySelector('.form-note');
-      if (note) {
-        note.innerHTML = '⚠️ Connection issue. Please WhatsApp directly or refresh.';
-        note.style.color = '#ef4444';
-      }
+    if (grid && grid.innerHTML.includes('Loading')) {
+      grid.innerHTML = '<p style="text-align:center;color:var(--danger);padding:2rem 0;">⚠️ Could not load products. Please refresh.</p>';
     }
   }
 }
 
-// ==================== CONTACT FORM HANDLER ====================
+// ── Product search ────────────────────────────────────────
+function initProductSearch() {
+  const input = document.getElementById('searchInput');
+  if (!input) return;
+  input.addEventListener('input', () => applyProducts(allProducts, input.value));
+}
+
+// ── Contact form ──────────────────────────────────────────
 function initContactForm() {
-  const contactForm = document.getElementById('contactForm');
-  if (!contactForm) return;
+  const form = document.getElementById('contactForm');
+  if (!form) return;
 
-  contactForm.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const formData = new FormData(contactForm);
+    const fd = new FormData(form);
     const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      service: formData.get('service') || 'General',
-      message: formData.get('message')
+      name:    fd.get('name'),
+      email:   fd.get('email'),
+      phone:   fd.get('phone'),
+      service: fd.get('service') || 'General',
+      message: fd.get('message'),
+      status:  'New'
     };
 
-    const submitBtn = contactForm.querySelector('button[type="submit"]');
-    const originalHTML = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<span>⏳ Sending...</span>';
-    submitBtn.disabled = true;
+    const btn = form.querySelector('button[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Sending…';
+    btn.disabled = true;
 
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
@@ -329,127 +253,80 @@ function initContactForm() {
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
-        body: JSON.stringify({ ...data, status: 'New' })
+        body: JSON.stringify(data)
       });
-
-      if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
-
-      showNotification('✅ Thank you! I will contact you on WhatsApp within 24 hours.', 'success');
-      contactForm.reset();
-
-    } catch(error) {
-      console.error('Lead save failed:', error);
-      showNotification('❌ Something went wrong. Please WhatsApp directly.', 'error');
+      if (!res.ok) throw new Error(res.status);
+      showNotification('✅ Message sent! I'll reply on WhatsApp within 24 hours.', 'success');
+      form.reset();
+    } catch {
+      showNotification('❌ Something went wrong. Please WhatsApp me directly.', 'error');
     } finally {
-      submitBtn.innerHTML = originalHTML;
-      submitBtn.disabled = false;
+      btn.innerHTML = orig;
+      btn.disabled = false;
     }
   });
 }
 
-// ==================== NOTIFICATION ====================
-function showNotification(message, type = 'success') {
-  let notification = document.querySelector('.site-notification');
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.className = 'site-notification';
-    document.body.appendChild(notification);
-    const style = document.createElement('style');
-    style.textContent = `
-      .site-notification {
-        position: fixed; bottom: 90px; right: 20px;
-        background: #10b981; color: white;
-        padding: 12px 20px; border-radius: 8px;
-        font-size: 14px; z-index: 10000;
-        opacity: 0; transition: opacity 0.3s;
-        pointer-events: none; max-width: 300px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      }
-      .site-notification.error { background: #ef4444; }
-      .site-notification.show { opacity: 1; }
-    `;
-    document.head.appendChild(style);
+// ── Notification ──────────────────────────────────────────
+function showNotification(msg, type = 'success') {
+  let el = document.querySelector('.site-notification');
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'site-notification';
+    document.body.appendChild(el);
   }
-  notification.textContent = message;
-  notification.className = `site-notification ${type} show`;
-  setTimeout(() => notification.classList.remove('show'), 4000);
+  el.textContent = msg;
+  el.className = `site-notification ${type} show`;
+  setTimeout(() => el.classList.remove('show'), 4500);
 }
 
-// ==================== SCROLL ANIMATIONS ====================
+// ── Scroll animations ─────────────────────────────────────
 function initScrollAnimations() {
-  const elements = document.querySelectorAll('.service-card, .step-card, .brand-item, .service-card-full, .faq-item');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+  const els = document.querySelectorAll('.animate-on-scroll');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-        observer.unobserve(entry.target);
+        setTimeout(() => entry.target.classList.add('visible'), i * 55);
+        obs.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.08 });
+  els.forEach(el => obs.observe(el));
+}
 
-  elements.forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
+// ── Active nav highlight ──────────────────────────────────
+function highlightNav() {
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.desktop-nav a, .mobile-nav a').forEach(a => {
+    if (a.getAttribute('href') === page) a.classList.add('active');
   });
 }
 
-// ==================== ACTIVE NAV ====================
-function highlightActiveNav() {
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.desktop-nav a, .mobile-nav a').forEach(link => {
-    if (link.getAttribute('href') === currentPage) {
-      link.style.color = 'var(--primary-color)';
-    }
-  });
-}
-
-// ==================== ESCAPE HTML ====================
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ==================== LOGO ERROR HANDLER ====================
-function initLogoErrorHandler() {
-  document.querySelectorAll('.brand-item img').forEach(img => {
-    img.addEventListener('error', function() { 
-      this.style.display = 'none'; 
+// ── Logo image error handler ──────────────────────────────
+function initLogoErrors() {
+  document.querySelectorAll('.logo-chip img, .brand-item img').forEach(img => {
+    img.addEventListener('error', function() {
+      this.style.display = 'none';
     });
   });
 }
 
-// ==================== INITIALIZATION ====================
+// ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   initMobileMenu();
-  highlightActiveNav();
+  highlightNav();
 
-  // Load data first, then animate
+  // Theme toggle buttons
+  document.getElementById('themeToggleDesktop')
+    ?.addEventListener('click', toggleTheme);
+  document.getElementById('themeToggleMobile')
+    ?.addEventListener('click', toggleTheme);
+
   await loadAllData();
+
   initScrollAnimations();
   initContactForm();
-  initLogoErrorHandler();
-
-  // Add theme toggle event listeners
-  const desktopToggle = document.getElementById('themeToggleDesktop');
-  const mobileToggle = document.getElementById('themeToggleMobile');
-  
-  if (desktopToggle) {
-    desktopToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleTheme();
-    });
-  }
-  
-  if (mobileToggle) {
-    mobileToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleTheme();
-    });
-  }
+  initProductSearch();
+  initLogoErrors();
 });
