@@ -1,5 +1,5 @@
 // ============================================================
-// SANJAY MEHER — main.js
+// SANJAY MEHER — main.js (Updated with fail-safe checks)
 // Supabase: colors, settings, products, leads
 // ============================================================
 
@@ -131,8 +131,11 @@ function formatPhone(num) {
 }
 
 // ── Apply Products from Supabase ─────────────────────────
+let allProducts = [];
+
 function applyProducts(products, query = '') {
   const grid = document.getElementById('productsGrid');
+  // Only run if productsGrid exists on this page
   if (!grid) return;
 
   let active = products.filter(p => p.active !== false && p.active !== 'FALSE');
@@ -187,8 +190,6 @@ function esc(text) {
 }
 
 // ── Load all Supabase data ────────────────────────────────
-let allProducts = [];
-
 async function loadAllData() {
   try {
     const [colors, settings, products] = await Promise.all([
@@ -201,7 +202,7 @@ async function loadAllData() {
     applySettings(settings);
 
     allProducts = products;
-    applyProducts(products);
+    applyProducts(products); // This will only run if productsGrid exists
 
     // Re-init theme after colors load
     initTheme();
@@ -218,14 +219,14 @@ async function loadAllData() {
 // ── Product search ────────────────────────────────────────
 function initProductSearch() {
   const input = document.getElementById('searchInput');
-  if (!input) return;
+  if (!input) return; // Only run on products page
   input.addEventListener('input', () => applyProducts(allProducts, input.value));
 }
 
 // ── Contact form ──────────────────────────────────────────
 function initContactForm() {
   const form = document.getElementById('contactForm');
-  if (!form) return;
+  if (!form) return; // Only run on contact page
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -256,7 +257,7 @@ function initContactForm() {
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error(res.status);
-      showNotification('✅ Message sent! I'll reply on WhatsApp within 24 hours.', 'success');
+      showNotification('✅ Message sent! I\'ll reply on WhatsApp within 24 hours.', 'success');
       form.reset();
     } catch {
       showNotification('❌ Something went wrong. Please WhatsApp me directly.', 'error');
@@ -283,6 +284,8 @@ function showNotification(msg, type = 'success') {
 // ── Scroll animations ─────────────────────────────────────
 function initScrollAnimations() {
   const els = document.querySelectorAll('.animate-on-scroll');
+  if (els.length === 0) return;
+  
   const obs = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
@@ -313,21 +316,25 @@ function initLogoErrors() {
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Page loaded, initializing...');
+  
   initTheme();
   initMobileMenu();
   highlightNav();
 
   // Theme toggle buttons
-  document.getElementById('themeToggleDesktop')
-    ?.addEventListener('click', toggleTheme);
-  document.getElementById('themeToggleMobile')
-    ?.addEventListener('click', toggleTheme);
+  const desktopToggle = document.getElementById('themeToggleDesktop');
+  const mobileToggle = document.getElementById('themeToggleMobile');
+  
+  if (desktopToggle) desktopToggle.addEventListener('click', toggleTheme);
+  if (mobileToggle) mobileToggle.addEventListener('click', toggleTheme);
 
   await loadAllData();
 
   initScrollAnimations();
-  initContactForm();
-  initProductSearch();
+  initContactForm();  // Safe - checks if form exists
+  initProductSearch(); // Safe - checks if search input exists
   initLogoErrors();
+  
+  console.log('Initialization complete');
 });
-
