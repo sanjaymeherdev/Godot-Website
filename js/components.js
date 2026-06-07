@@ -1,27 +1,18 @@
-// components.js — Context-aware Header & Footer
-// Detects which of the 3 sub-sites is active and renders the matching nav.
+// components.js — Unified Header & Footer
+// Single navigation across all pages.
 // Usage: <div id="sanjay-header"></div>  and  <div id="sanjay-footer"></div>
 
 (function () {
 
-    // ─── SITE DETECTION ───────────────────────────────────────────────
-    // Returns 'godotdev' | 'sanjaymeher' | 'techtools' | 'root'
-    function detectSite() {
-        const path = window.location.pathname;
-        if (path.startsWith('/godotdev') || path.startsWith('/sanjaymeherdev')) return 'godotdev';
-        if (path.startsWith('/sanjaymeher')) return 'sanjaymeher';
-        if (path.startsWith('/tech-tools')) return 'techtools';
-        return 'root';
-    }
-
-    // Relative base path for pages inside subfolders like /legal/, /blog/
+    // ─── BASE PATH ────────────────────────────────────────────────────
+    // Returns '../' for any page inside a subfolder, './' for root-level pages
     function getBasePath() {
         const path = window.location.pathname;
-        if (path.includes('/legal/') || path.includes('/blog/')) return '../';
-        return './';
+        // Count path segments after the first slash
+        const segments = path.split('/').filter(Boolean);
+        return segments.length >= 2 ? '../' : './';
     }
 
-    const site = detectSite();
     const base = getBasePath();
 
     // ─── SHARED STYLES ────────────────────────────────────────────────
@@ -40,7 +31,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .sm-header .sm-inner {
-    max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+    max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
     display: flex; align-items: center; justify-content: space-between;
     height: 58px; gap: 1rem;
 }
@@ -49,49 +40,44 @@
 .sm-logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; flex-shrink: 0; }
 .sm-logo-text { font-size: 1.15rem; font-weight: 700; color: #fff; }
 .sm-logo-text span { color: #4f46e5; }
-.sm-logo-badge {
-    font-size: 0.65rem; font-weight: 600; padding: 2px 7px; border-radius: 20px;
-    background: rgba(79,70,229,0.18); color: #818cf8; border: 1px solid rgba(79,70,229,0.3);
-    letter-spacing: 0.03em; white-space: nowrap;
-}
 
 /* ── Desktop nav ── */
-.sm-nav { display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center; }
+.sm-nav { display: flex; align-items: center; gap: 0.1rem; flex: 1; justify-content: center; }
 .sm-nav a, .sm-nav .sm-drop-btn {
-    color: #a0a0c0; text-decoration: none; font-size: 0.9rem; font-weight: 500;
-    padding: 0.45rem 0.75rem; border-radius: 6px; transition: all 0.15s;
+    color: #a0a0c0; text-decoration: none; font-size: 0.875rem; font-weight: 500;
+    padding: 0.45rem 0.7rem; border-radius: 6px; transition: all 0.15s;
     background: none; border: none; cursor: pointer; font-family: inherit;
-    white-space: nowrap;
+    white-space: nowrap; display: flex; align-items: center; gap: 0.3rem;
 }
 .sm-nav a:hover, .sm-nav .sm-drop-btn:hover,
 .sm-nav a.active { color: #fff; background: rgba(255,255,255,0.07); }
 
 /* ── Dropdown ── */
 .sm-dropdown { position: relative; }
+.sm-drop-arrow { font-size: 0.6rem; opacity: 0.6; transition: transform 0.2s; }
+.sm-dropdown:hover .sm-drop-arrow { transform: rotate(180deg); }
 .sm-dropdown-menu {
-    display: none; position: absolute; top: calc(100% + 4px); left: 50%;
+    display: none; position: absolute; top: calc(100% + 6px); left: 50%;
     transform: translateX(-50%);
-    background: #1c1c2e; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px; padding: 0.4rem; min-width: 220px; z-index: 200;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    background: #1a1a2e; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 0.4rem; min-width: 230px; z-index: 200;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 .sm-dropdown-menu a {
-    display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.55rem 0.85rem; border-radius: 8px;
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.6rem 0.9rem; border-radius: 8px;
     color: #c4c4d4; font-size: 0.85rem; text-decoration: none;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s; white-space: nowrap;
 }
-.sm-dropdown-menu a:hover { background: rgba(79,70,229,0.15); color: #fff; }
-.sm-dropdown-menu .sm-divider {
-    height: 1px; background: rgba(255,255,255,0.07); margin: 0.3rem 0.5rem;
-}
+.sm-dropdown-menu a .sm-drop-icon { font-size: 1rem; flex-shrink: 0; }
+.sm-dropdown-menu a:hover { background: rgba(79,70,229,0.18); color: #fff; }
 /* Bridge to prevent hover gap */
 .sm-dropdown::after {
     content: ''; position: absolute; bottom: -8px; left: 0;
     width: 100%; height: 8px;
 }
 
-/* ── CTA buttons ── */
+/* ── CTA button ── */
 .sm-ctas { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .sm-btn-primary {
     background: #4f46e5; color: #fff; padding: 0.45rem 1.1rem;
@@ -100,26 +86,6 @@
     white-space: nowrap;
 }
 .sm-btn-primary:hover { background: #4338ca; transform: translateY(-1px); }
-.sm-btn-outline {
-    border: 1px solid rgba(255,255,255,0.2); color: #c4c4d4;
-    padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
-    text-decoration: none; transition: all 0.2s; white-space: nowrap;
-}
-.sm-btn-outline:hover { border-color: #4f46e5; color: #818cf8; background: rgba(79,70,229,0.08); }
-
-/* ── Site switcher pill ── */
-.sm-switcher {
-    display: flex; align-items: center; gap: 0.25rem;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 30px; padding: 3px; flex-shrink: 0;
-}
-.sm-switcher a {
-    font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px;
-    text-decoration: none; color: #888; transition: all 0.2s; white-space: nowrap;
-}
-.sm-switcher a.active, .sm-switcher a:hover {
-    background: #4f46e5; color: #fff;
-}
 
 /* ── Mobile hamburger ── */
 .sm-hamburger {
@@ -159,38 +125,28 @@ body.sm-no-scroll { overflow: hidden; }
 }
 .sm-drawer-close:hover { background: rgba(255,255,255,0.15); }
 
-.sm-drawer-switcher {
-    display: flex; gap: 0.3rem; padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+.sm-drawer-body { padding: 0.5rem 0.75rem 1rem; }
+.sm-drawer-section-label {
+    font-size: 0.68rem; font-weight: 700; color: #4f46e5;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.75rem 0.75rem 0.3rem;
 }
-.sm-drawer-switcher a {
-    flex: 1; text-align: center; padding: 6px 4px; border-radius: 8px;
-    font-size: 0.72rem; font-weight: 600; color: #888; text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s;
-}
-.sm-drawer-switcher a.active, .sm-drawer-switcher a:hover {
-    background: #4f46e5; color: #fff; border-color: #4f46e5;
-}
-
-.sm-drawer-body { padding: 0.5rem 0.75rem 2rem; }
 .sm-drawer-body a {
     display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.65rem 0.75rem; border-radius: 8px;
-    color: #c4c4d4; text-decoration: none; font-size: 0.9rem;
+    padding: 0.6rem 0.75rem; border-radius: 8px;
+    color: #c4c4d4; text-decoration: none; font-size: 0.875rem;
     transition: background 0.15s, color 0.15s;
 }
 .sm-drawer-body a:hover { background: rgba(79,70,229,0.15); color: #fff; }
-.sm-drawer-section { padding: 0.75rem 0.75rem 0.25rem; }
-.sm-drawer-section-label {
-    font-size: 0.7rem; font-weight: 700; color: #555; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 0 0.25rem;
-}
 .sm-drawer-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 0.4rem 0.5rem; }
-.sm-drawer-ctas { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.sm-drawer-ctas { padding: 0.75rem; }
 .sm-drawer-ctas a {
-    display: block; text-align: center; padding: 0.65rem; border-radius: 8px;
-    font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 0.2s;
+    display: block; text-align: center; padding: 0.7rem;
+    border-radius: 8px; font-weight: 600; font-size: 0.88rem;
+    text-decoration: none; background: #4f46e5; color: #fff;
+    transition: background 0.2s;
 }
+.sm-drawer-ctas a:hover { background: #4338ca; }
 
 /* ── Footer ── */
 .sm-footer {
@@ -199,12 +155,12 @@ body.sm-no-scroll { overflow: hidden; }
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin-top: 4rem;
 }
-.sm-footer .sm-f-inner { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 1.5rem; }
+.sm-footer .sm-f-inner { max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem 1.5rem; }
 .sm-footer .sm-f-top {
     display: grid; grid-template-columns: 2fr repeat(3, 1fr);
     gap: 2rem; margin-bottom: 2rem;
 }
-.sm-footer h4 { font-size: 0.8rem; font-weight: 700; color: #4f46e5; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.sm-footer h4 { font-size: 0.78rem; font-weight: 700; color: #4f46e5; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
 .sm-footer p { font-size: 0.85rem; color: #666; line-height: 1.6; }
 .sm-footer a { display: block; font-size: 0.85rem; color: #888; text-decoration: none; margin-bottom: 0.4rem; transition: color 0.15s; }
 .sm-footer a:hover { color: #818cf8; }
@@ -223,8 +179,8 @@ body.sm-no-scroll { overflow: hidden; }
 .sm-footer .sm-f-copy { font-size: 0.78rem; color: #444; }
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
-    .sm-nav, .sm-switcher, .sm-ctas { display: none !important; }
+@media (max-width: 960px) {
+    .sm-nav, .sm-ctas { display: none !important; }
     .sm-hamburger { display: flex; }
     .sm-footer .sm-f-top { grid-template-columns: 1fr 1fr; }
 }
@@ -234,132 +190,76 @@ body.sm-no-scroll { overflow: hidden; }
 }
 </style>`;
 
-    // ─── NAV CONFIGS ──────────────────────────────────────────────────
-    const NAV = {
-        root: {
-            logo: 'Sanjay<span>Meher</span>',
-            badge: 'Hub',
-            logoHref: '/',
-            links: [
-                { label: '🏢 Business', href: '/sanjaymeher' },
-                { label: '🎮 Godot Dev', href: '/godotdev' },
-                { label: '⚙️ Tech Tools', href: '/tech-tools' },
-                { label: 'Blog', href: `${base}blog.html` },
-                { label: 'Contact', href: `${base}contact.html` },
-            ],
-            ctas: [
-                { label: '💬 WhatsApp', href: 'https://wa.me/917504704502', primary: true },
+    // ─── UNIFIED NAV CONFIG ───────────────────────────────────────────
+    const NAV_LINKS = [
+        {
+            label: 'Business',
+            dropdown: [
+                { icon: '🏢', label: 'Sanjay Meher',     href: '/sanjaymeher' },
+                { icon: '📦', label: 'Products',          href: '/sanjaymeher/products' },
+                { icon: '⚙️', label: 'Services',          href: '/sanjaymeher/services' },
+                { icon: '📣', label: 'Digital Services',  href: `${base}marketing/digital-services.html` },
             ]
         },
-        godotdev: {
-            logo: 'Sanjay<span>MeherDev</span>',
-            badge: 'Godot',
-            logoHref: '/godotdev',
-            links: [
-                { label: 'Home', href: '/godotdev' },
-                {
-                    label: 'Store', dropdown: [
-                        { icon: '🎮', label: 'Multiplayer Systems', href: `${base}cgstore.html?category=multiplayer` },
-                        { icon: '🤖', label: 'AI & Tools', href: `${base}cgstore.html?category=ai` },
-                        { icon: '🎲', label: 'Complete Game Kits', href: `${base}cgstore.html?category=gamekits` },
-                        { icon: '⚙️', label: 'Universal Systems', href: `${base}cgstore.html?category=systems` },
-                        { icon: '📦', label: 'Bundles', href: `${base}cgstore.html?category=bundles` },
-                    ]
-                },
-                {
-                    label: 'Multiplayer', dropdown: [
-                        { icon: '⚡', label: 'Done-For-You Setup', href: `${base}godotmp.html` },
-                        { icon: '🔒', label: 'GodotConnect P2P', href: `${base}godotconnect.html` },
-                        { icon: '🔄', label: 'CGRelay Server', href: `${base}cgrelay.html` },
-                        { icon: '🛠️', label: 'Custom Dev Services', href: `${base}services.html` },
-                    ]
-                },
-                { label: 'Free Tools', href: `${base}freegodotassets.html` },
-                { label: 'Learn', href: `${base}GDScourse.html` },
-                { label: 'Blog', href: `${base}blog.html` },
-            ],
-            ctas: [
-                { label: '🎮 Shop', href: `${base}cgstore.html`, primary: true },
-                { label: '💬 Consult', href: `${base}services.html`, primary: false },
+        {
+            label: 'GodotDev',
+            dropdown: [
+                { icon: '🛒', label: 'CG Store',          href: `${base}cgstore.html` },
+                { icon: '🔄', label: 'CGRelay',           href: `${base}cgrelay.html` },
+                { icon: '⚡', label: 'Multiplayer Setup', href: `${base}godotmp.html` },
+                { icon: '🔒', label: 'GodotConnect',      href: `${base}godotconnect.html` },
+                { icon: '🌐', label: 'CGOW',              href: `${base}godot-4-mobile-game.html` },
+                { icon: '🎮', label: 'Godot4Systems',     href: `${base}Godot4Systems/index.html` },
             ]
         },
-        sanjaymeher: {
-            logo: 'Sanjay<span>Meher</span>',
-            badge: 'Business',
-            logoHref: '/sanjaymeher',
-            links: [
-                { label: 'Home', href: '/sanjaymeher' },
-                { label: 'Services', href: '/sanjaymeher/services' },
-                { label: 'Products', href: '/sanjaymeher/products' },
-                { label: 'About', href: '/sanjaymeher/about' },
-                { label: 'Contact', href: '/sanjaymeher/contact' },
-            ],
-            ctas: [
-                { label: '💬 WhatsApp', href: 'https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20project%20for%20you', primary: true },
+        {
+            label: 'Tech',
+            dropdown: [
+                { icon: '⚙️', label: 'Tech Tools',    href: `${base}tech-tools.html` },
+                { icon: '🤖', label: 'AI Commander',  href: `${base}marketing/AICommander.html` },
+                { icon: '📱', label: 'PocketAI',      href: `${base}marketing/pocketai.html` },
             ]
         },
-        techtools: {
-            logo: 'Sanjay<span>Tech</span>',
-            badge: 'Tools',
-            logoHref: '/tech-tools',
-            links: [
-                { label: 'Home', href: '/tech-tools' },
-                {
-                    label: 'Products', dropdown: [
-                        { icon: '📱', label: 'WhatsApp Tools', href: '/tech-tools#whatsapp' },
-                        { icon: '⚙️', label: 'Self-Host Servers', href: '/tech-tools#servers' },
-                        { icon: '💼', label: 'Business Tools', href: '/tech-tools#business' },
-                    ]
-                },
-                { label: 'Game Services', href: `${base}services.html` },
-                { label: 'Blog', href: `${base}blog.html` },
-            ],
-            ctas: [
-                { label: '💬 Free Consult', href: 'https://wa.me/917504704502?text=Hi%20Sanjay%2C%20I%20need%20something%20built%20for%20my%20business', primary: true },
+        {
+            label: 'Top Products',
+            dropdown: [
+                { icon: '🔥', label: 'LeadFlow',  href: `${base}marketing/leadflow.html` },
+                { icon: '📊', label: 'SiteSheet', href: `${base}marketing/sitesheet.html` },
+                { icon: '💬', label: 'WABlast',   href: `${base}marketing/wablast.html` },
+                { icon: '📲', label: 'SanjayWA',  href: `${base}sanjaywa/index.html` },
             ]
-        }
-    };
-
-    const cfg = NAV[site];
-
-    // ─── SITE SWITCHER HTML ───────────────────────────────────────────
-    function switcherHTML(mobile = false) {
-        const items = [
-            { key: 'godotdev',    label: '🎮 Godot',    href: '/godotdev' },
-            { key: 'sanjaymeher', label: '🏢 Business',  href: '/sanjaymeher' },
-            { key: 'techtools',   label: '⚙️ Tools',    href: '/tech-tools' },
-        ];
-        return items.map(i =>
-            `<a href="${i.href}" class="${site === i.key ? 'active' : ''}">${i.label}</a>`
-        ).join('');
-    }
+        },
+        { label: 'Blog',    href: `${base}blog.html` },
+        { label: 'Contact', href: `${base}contact.html` },
+        { label: 'Review',  href: `${base}review.html` },
+    ];
 
     // ─── RENDER DESKTOP NAV LINKS ─────────────────────────────────────
     function desktopLinks() {
-        return cfg.links.map(l => {
+        return NAV_LINKS.map(l => {
             if (l.dropdown) {
                 const items = l.dropdown.map(d =>
-                    `<a href="${d.href}">${d.icon ? d.icon + ' ' : ''}${d.label}</a>`
+                    `<a href="${d.href}"><span class="sm-drop-icon">${d.icon}</span>${d.label}</a>`
                 ).join('');
                 return `
                 <div class="sm-dropdown" data-drop>
-                    <button class="sm-drop-btn">${l.label} ▾</button>
+                    <button class="sm-drop-btn">${l.label} <span class="sm-drop-arrow">▼</span></button>
                     <div class="sm-dropdown-menu">${items}</div>
                 </div>`;
             }
-            const active = window.location.pathname === l.href || window.location.href.includes(l.href.replace('./','')) ? ' active' : '';
-            return `<a href="${l.href}"${active ? ' class="active"' : ''}>${l.label}</a>`;
+            const active = window.location.href.includes(l.href.replace(/^\.\//, '')) ? ' class="active"' : '';
+            return `<a href="${l.href}"${active}>${l.label}</a>`;
         }).join('');
     }
 
     // ─── RENDER MOBILE DRAWER LINKS ──────────────────────────────────
     function drawerLinks() {
         let html = '';
-        cfg.links.forEach(l => {
+        NAV_LINKS.forEach(l => {
             if (l.dropdown) {
-                html += `<div class="sm-drawer-section"><div class="sm-drawer-section-label">${l.label}</div></div>`;
+                html += `<div class="sm-drawer-section-label">${l.label}</div>`;
                 l.dropdown.forEach(d => {
-                    html += `<a href="${d.href}">${d.icon ? d.icon + ' ' : ''}${d.label}</a>`;
+                    html += `<a href="${d.href}"><span>${d.icon}</span>${d.label}</a>`;
                 });
                 html += `<div class="sm-drawer-divider"></div>`;
             } else {
@@ -371,27 +271,20 @@ body.sm-no-scroll { overflow: hidden; }
 
     // ─── RENDER HEADER ────────────────────────────────────────────────
     function renderHeader() {
-        const ctaHTML = cfg.ctas.map(c =>
-            `<a href="${c.href}" class="${c.primary ? 'sm-btn-primary' : 'sm-btn-outline'}">${c.label}</a>`
-        ).join('');
-
         return `
 <header class="sm-header" role="banner">
     <div class="sm-inner">
-        <a href="${cfg.logoHref}" class="sm-logo">
-            <span class="sm-logo-text">${cfg.logo}</span>
-            <span class="sm-logo-badge">${cfg.badge}</span>
+        <a href="${base}index.html" class="sm-logo">
+            <span class="sm-logo-text">Sanjay<span>Meher</span></span>
         </a>
 
         <nav class="sm-nav" aria-label="Main">
             ${desktopLinks()}
         </nav>
 
-        <div class="sm-switcher" aria-label="Switch section">
-            ${switcherHTML()}
+        <div class="sm-ctas">
+            <a href="https://wa.me/917504704502" class="sm-btn-primary">💬 WhatsApp</a>
         </div>
-
-        <div class="sm-ctas">${ctaHTML}</div>
 
         <button class="sm-hamburger" id="sm-open" aria-label="Open menu" aria-expanded="false">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -405,17 +298,12 @@ body.sm-no-scroll { overflow: hidden; }
 <div id="sm-overlay" role="presentation"></div>
 <nav id="sm-drawer" aria-label="Mobile navigation">
     <div class="sm-drawer-head">
-        <span class="sm-drawer-logo">${cfg.logo}</span>
+        <span class="sm-drawer-logo">Sanjay<span>Meher</span></span>
         <button class="sm-drawer-close" id="sm-close" aria-label="Close menu">✕</button>
     </div>
-    <div class="sm-drawer-switcher">${switcherHTML(true)}</div>
     <div class="sm-drawer-body">${drawerLinks()}</div>
     <div class="sm-drawer-ctas">
-        ${cfg.ctas.map(c =>
-            `<a href="${c.href}" style="${c.primary
-                ? 'background:#4f46e5;color:#fff;'
-                : 'border:1px solid rgba(255,255,255,0.15);color:#c4c4d4;'}">${c.label}</a>`
-        ).join('')}
+        <a href="https://wa.me/917504704502">💬 WhatsApp</a>
     </div>
 </nav>`;
     }
@@ -423,24 +311,6 @@ body.sm-no-scroll { overflow: hidden; }
     // ─── RENDER FOOTER ────────────────────────────────────────────────
     function renderFooter() {
         const year = new Date().getFullYear();
-        const godotLinks = `
-            <a href="${base}cgstore.html">🎮 Godot Store</a>
-            <a href="${base}cgrelay.html">🔄 CGRelay</a>
-            <a href="${base}godotmp.html">⚡ Multiplayer Setup</a>
-            <a href="${base}freegodotassets.html">✨ Free Tools</a>
-            <a href="${base}GDScourse.html">📚 Learn GDScript</a>`;
-        const businessLinks = `
-            <a href="/sanjaymeher/services">🏢 Business Services</a>
-            <a href="/sanjaymeher/products">📦 Products</a>
-            <a href="/tech-tools">⚙️ Tech Tools</a>
-            <a href="/sanjaymeher/contact">📧 Contact</a>`;
-        const resourceLinks = `
-            <a href="${base}blog.html">📝 Blog</a>
-            <a href="${base}contact.html">💬 Contact</a>
-            <a href="${base}legal/terms.html">Terms</a>
-            <a href="${base}legal/privacy.html">Privacy</a>
-            <a href="${base}legal/refund.html">Refund Policy</a>`;
-
         return `
 <footer class="sm-footer">
     <div class="sm-f-inner">
@@ -464,16 +334,30 @@ body.sm-no-scroll { overflow: hidden; }
                 </div>
             </div>
             <div>
-                <h4>Godot Dev</h4>
-                ${godotLinks}
+                <h4>GodotDev</h4>
+                <a href="${base}cgstore.html">🛒 CG Store</a>
+                <a href="${base}cgrelay.html">🔄 CGRelay</a>
+                <a href="${base}godotmp.html">⚡ Multiplayer Setup</a>
+                <a href="${base}godotconnect.html">🔒 GodotConnect</a>
+                <a href="${base}godot-4-mobile-game.html">🌐 CGOW</a>
+                <a href="${base}Godot4Systems/index.html">🎮 Godot4Systems</a>
             </div>
             <div>
-                <h4>Business</h4>
-                ${businessLinks}
+                <h4>Business & Tech</h4>
+                <a href="/sanjaymeher">🏢 Sanjay Meher</a>
+                <a href="/sanjaymeher/services">⚙️ Services</a>
+                <a href="${base}marketing/digital-services.html">📣 Digital Services</a>
+                <a href="${base}tech-tools.html">🔧 Tech Tools</a>
+                <a href="${base}marketing/AICommander.html">🤖 AI Commander</a>
             </div>
             <div>
-                <h4>Resources</h4>
-                ${resourceLinks}
+                <h4>Top Products</h4>
+                <a href="${base}marketing/leadflow.html">🔥 LeadFlow</a>
+                <a href="${base}marketing/sitesheet.html">📊 SiteSheet</a>
+                <a href="${base}marketing/wablast.html">💬 WABlast</a>
+                <a href="${base}sanjaywa/index.html">📲 SanjayWA</a>
+                <a href="${base}blog.html">📝 Blog</a>
+                <a href="${base}contact.html">📧 Contact</a>
             </div>
         </div>
         <div class="sm-f-bottom">
@@ -492,14 +376,23 @@ body.sm-no-scroll { overflow: hidden; }
 
     // ─── INIT INTERACTIONS ────────────────────────────────────────────
     function initInteractions() {
-        // Hamburger / drawer
         const open    = document.getElementById('sm-open');
         const close   = document.getElementById('sm-close');
         const drawer  = document.getElementById('sm-drawer');
         const overlay = document.getElementById('sm-overlay');
 
-        function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); document.body.classList.add('sm-no-scroll'); open && open.setAttribute('aria-expanded','true'); }
-        function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.classList.remove('sm-no-scroll'); open && open.setAttribute('aria-expanded','false'); }
+        function openDrawer()  {
+            drawer.classList.add('open');
+            overlay.classList.add('open');
+            document.body.classList.add('sm-no-scroll');
+            open && open.setAttribute('aria-expanded', 'true');
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+            document.body.classList.remove('sm-no-scroll');
+            open && open.setAttribute('aria-expanded', 'false');
+        }
 
         open    && open.addEventListener('click', openDrawer);
         close   && close.addEventListener('click', closeDrawer);
@@ -527,12 +420,10 @@ body.sm-no-scroll { overflow: hidden; }
         if (headerEl || footerEl) {
             document.head.insertAdjacentHTML('beforeend', SHARED_CSS);
         }
-
         if (headerEl) {
             headerEl.innerHTML = renderHeader();
             initInteractions();
         }
-
         if (footerEl) {
             footerEl.innerHTML = renderFooter();
         }
