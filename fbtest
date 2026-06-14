@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FB Auth · Stream Tester</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --border: #252932;
+    --border-hi: #353c4a;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.1);
+    --red: #f76f6f;
+    --red-dim: rgba(247,111,111,0.1);
+    --text: #e4e8f0;
+    --muted: #6b7385;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px 80px;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 4px;
+  }
+
+  .logo {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo svg { width: 20px; height: 20px; fill: #fff; }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .field input, .field textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+    resize: none;
+  }
+
+  .field input:focus, .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .field input::placeholder, .field textarea::placeholder {
+    color: var(--muted);
+    opacity: .6;
+  }
+
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row .field { flex: 1; }
+
+  button {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    padding: 10px 18px;
+    white-space: nowrap;
+  }
+
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: .4; cursor: default; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-secondary {
+    background: var(--border);
+    color: var(--text);
+  }
+
+  .btn-green {
+    background: var(--green);
+    color: #0d0f14;
+  }
+
+  /* Output boxes */
+  .out-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    min-height: 48px;
+    word-break: break-all;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .out-box .out-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: var(--sans);
+    margin-bottom: 2px;
+  }
+
+  .out-value {
+    color: var(--green);
+    word-break: break-all;
+    line-height: 1.5;
+  }
+
+  .out-empty { color: var(--muted); font-style: italic; font-family: var(--sans); font-size: 12px; }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--border);
+    color: var(--muted);
+    border: none;
+    border-radius: 5px;
+    font-size: 11px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 500;
+    transition: color .15s, background .15s;
+  }
+  .copy-btn:hover { background: var(--border-hi); color: var(--text); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2px 0;
+  }
+
+  /* Status badge */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--border);
+    color: var(--muted);
+    align-self: flex-start;
+  }
+  .status.ok { background: var(--green-dim); color: var(--green); }
+  .status.err { background: var(--red-dim); color: var(--red); }
+  .status.loading { background: var(--accent-dim); color: var(--accent); }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .loading-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  /* Log */
+  .log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: var(--muted);
+  }
+  .log .entry { line-height: 1.5; }
+  .log .entry.success { color: var(--green); }
+  .log .entry.error { color: var(--red); }
+  .log .entry.info { color: var(--accent); }
+  .log .ts { opacity: .5; user-select: none; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+    </div>
+    <div>
+      <h1>FB Auth · Stream Tester</h1>
+      <p>Test login flow & retrieve stream credentials</p>
+    </div>
+  </header>
+
+  <!-- Config card -->
+  <div class="card">
+    <div class="card-label">⚙ Configuration</div>
+    <div class="field">
+      <label>Supabase Anon Key</label>
+      <textarea id="anonKey" rows="3" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+    </div>
+    <div class="field">
+      <label>Supabase Project URL (auto-detected)</label>
+      <input id="projectUrl" type="text" value="https://lgfzoprhyjrmosvigwlb.supabase.co" />
+    </div>
+  </div>
+
+  <!-- Auth card -->
+  <div class="card">
+    <div class="card-label">① Facebook Login</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6">
+      Calls <code style="font-family:var(--mono);font-size:11px;color:var(--accent);">/functions/v1/fb-auth</code> to start the OAuth flow. A popup or redirect will open for Facebook login.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="startFbAuth()">🔐 Start Facebook Login</button>
+      <button class="btn-secondary" onclick="checkSession()">↻ Check Session</button>
+    </div>
+    <div id="authStatus" class="status">
+      <span class="dot"></span> Not connected
+    </div>
+  </div>
+
+  <!-- Stream card -->
+  <div class="card">
+    <div class="card-label">② Create Stream & Get Credentials</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6">
+      After login, create a stream via the meta API and retrieve its RTMP URL and stream key.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-green" onclick="createStream()" id="createBtn">▶ Create Stream</button>
+      <button class="btn-secondary" onclick="fetchMetaStreams()">⟳ Fetch Existing Streams</button>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="two-col">
+      <div class="out-box" id="box-url">
+        <div class="out-label">Stream URL (RTMP)</div>
+        <div id="val-url" class="out-empty">—</div>
+        <button class="copy-btn" onclick="copyField('val-url')">copy</button>
+      </div>
+      <div class="out-box" id="box-key">
+        <div class="out-label">Stream Key</div>
+        <div id="val-key" class="out-empty">—</div>
+        <button class="copy-btn" onclick="copyField('val-key')">copy</button>
+      </div>
+    </div>
+
+    <div class="out-box" id="box-id">
+      <div class="out-label">Stream ID</div>
+      <div id="val-id" class="out-empty">—</div>
+      <button class="copy-btn" onclick="copyField('val-id')">copy</button>
+    </div>
+  </div>
+
+  <!-- Raw response -->
+  <div class="card">
+    <div class="card-label">③ Activity Log</div>
+    <div class="log" id="log">
+      <div class="entry info"><span class="ts">[ready] </span>Paste your Supabase anon key above to begin.</div>
+    </div>
+    <button class="btn-secondary" style="align-self:flex-end;font-size:12px;padding:6px 14px" onclick="clearLog()">Clear log</button>
+  </div>
+
+</div>
+
+<script>
+  const BASE_URL = () => document.getElementById('projectUrl').value.trim().replace(/\/$/, '');
+  const ANON_KEY = () => document.getElementById('anonKey').value.trim();
+
+  let accessToken = null;
+  let fbUserId = null;
+
+  // ─── Logging ────────────────────────────────────────────────────────────────
+  function log(msg, type = '') {
+    const el = document.getElementById('log');
+    const ts = new Date().toLocaleTimeString();
+    const div = document.createElement('div');
+    div.className = 'entry ' + type;
+    div.innerHTML = `<span class="ts">[${ts}] </span>${msg}`;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  }
+  function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+  // ─── Status badge ────────────────────────────────────────────────────────────
+  function setStatus(text, type) {
+    const el = document.getElementById('authStatus');
+    el.className = 'status ' + (type || '');
+    const dotClass = type === 'loading' ? 'loading-dot' : 'dot';
+    el.innerHTML = `<span class="${dotClass}"></span> ${text}`;
+  }
+
+  // ─── Copy helper ─────────────────────────────────────────────────────────────
+  function copyField(id) {
+    const val = document.getElementById(id).textContent.trim();
+    if (!val || val === '—') return;
+    navigator.clipboard.writeText(val).then(() => log(`Copied: ${id.replace('val-', '')}`, 'success'));
+  }
+
+  // ─── Set output value ────────────────────────────────────────────────────────
+  function setOut(id, value) {
+    const el = document.getElementById(id);
+    if (value) {
+      el.className = 'out-value';
+      el.textContent = value;
+    } else {
+      el.className = 'out-empty';
+      el.textContent = '—';
+    }
+  }
+
+  // ─── Auth headers ────────────────────────────────────────────────────────────
+  function headers(extra = {}) {
+    const h = {
+      'Content-Type': 'application/json',
+      'apikey': ANON_KEY(),
+      'Authorization': `Bearer ${ANON_KEY()}`,
+      ...extra,
+    };
+    if (accessToken) h['Authorization'] = `Bearer ${accessToken}`;
+    return h;
+  }
+
+  // ─── 1. FB Auth ──────────────────────────────────────────────────────────────
+  async function startFbAuth() {
+    if (!ANON_KEY()) { log('⚠ Paste your Supabase anon key first.', 'error'); return; }
+    setStatus('Initiating…', 'loading');
+    log('Calling /functions/v1/fb-auth …', 'info');
+
+    try {
+      const res = await fetch(`${BASE_URL()}/functions/v1/fb-auth`, {
+        method: 'GET',
+        headers: headers(),
+      });
+
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+      log(`Response ${res.status}: ${JSON.stringify(data).slice(0, 300)}`, res.ok ? 'success' : 'error');
+
+      // Handle redirect URL returned by the function
+      if (data.url) {
+        log('Opening OAuth popup → ' + data.url, 'info');
+        openAuthPopup(data.url);
+      } else if (data.access_token) {
+        accessToken = data.access_token;
+        fbUserId = data.user?.id;
+        setStatus('Authenticated ✓', 'ok');
+        log('Got access token directly.', 'success');
+      } else {
+        setStatus('Check log', 'err');
+        log('No redirect URL or token in response. Check the log above.', 'error');
+      }
+    } catch (e) {
+      setStatus('Error', 'err');
+      log('Fetch error: ' + e.message, 'error');
+    }
+  }
+
+  function openAuthPopup(url) {
+    const popup = window.open(url, 'fbauth', 'width=600,height=700,scrollbars=yes');
+    const poll = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(poll);
+          log('Popup closed. Checking session…', 'info');
+          checkSession();
+        }
+      } catch {}
+    }, 500);
+  }
+
+  // ─── 2. Check Session ────────────────────────────────────────────────────────
+  async function checkSession() {
+    if (!ANON_KEY()) { log('⚠ Paste your Supabase anon key first.', 'error'); return; }
+    log('Checking Supabase session…', 'info');
+    try {
+      const res = await fetch(`${BASE_URL()}/auth/v1/user`, { headers: headers() });
+      const data = await res.json();
+      if (data?.id) {
+        accessToken = ANON_KEY(); // use anon key as bearer if no user JWT yet
+        fbUserId = data.user_metadata?.provider_id || data.id;
+        setStatus(`Logged in: ${data.email || data.id.slice(0, 8)}`, 'ok');
+        log(`Session active. User: ${data.email || data.id}`, 'success');
+      } else {
+        setStatus('No session', 'err');
+        log('No active session found.', 'error');
+      }
+    } catch (e) {
+      log('Session check error: ' + e.message, 'error');
+    }
+  }
+
+  // ─── 3. Create Stream (Meta / Facebook Live API) ─────────────────────────────
+  async function createStream() {
+    if (!ANON_KEY()) { log('⚠ Paste your Supabase anon key first.', 'error'); return; }
+    const btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    log('Creating stream via meta API through edge function…', 'info');
+
+    try {
+      const res = await fetch(`${BASE_URL()}/functions/v1/fb-auth`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ action: 'create_stream', title: 'Test Stream ' + Date.now() }),
+      });
+
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+      log(`Stream response ${res.status}: ${JSON.stringify(data).slice(0, 400)}`, res.ok ? 'success' : 'error');
+      parseStreamResponse(data);
+    } catch (e) {
+      log('Create stream error: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ─── 4. Fetch existing streams ───────────────────────────────────────────────
+  async function fetchMetaStreams() {
+    if (!ANON_KEY()) { log('⚠ Paste your Supabase anon key first.', 'error'); return; }
+    log('Fetching existing streams…', 'info');
+    try {
+      const res = await fetch(`${BASE_URL()}/functions/v1/fb-auth?action=get_streams`, {
+        method: 'GET',
+        headers: headers(),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+      log(`Streams response ${res.status}: ${JSON.stringify(data).slice(0, 500)}`, res.ok ? 'success' : 'error');
+      parseStreamResponse(data);
+    } catch (e) {
+      log('Fetch streams error: ' + e.message, 'error');
+    }
+  }
+
+  // ─── Parse and display stream credentials ────────────────────────────────────
+  function parseStreamResponse(data) {
+    // Try various possible field names from Facebook Live API
+    const streamUrl =
+      data?.stream_url ||
+      data?.secure_stream_url ||
+      data?.rtmp_url ||
+      data?.ingest_streams?.[0]?.stream_url ||
+      data?.data?.[0]?.stream_url ||
+      data?.live_video?.stream_url ||
+      null;
+
+    const streamKey =
+      data?.stream_key ||
+      data?.secure_stream_key ||
+      data?.ingest_streams?.[0]?.stream_key ||
+      data?.data?.[0]?.stream_key ||
+      data?.live_video?.stream_key ||
+      null;
+
+    const streamId =
+      data?.id ||
+      data?.stream_id ||
+      data?.live_video?.id ||
+      data?.data?.[0]?.id ||
+      null;
+
+    if (streamUrl) { setOut('val-url', streamUrl); log('✓ Stream URL retrieved', 'success'); }
+    if (streamKey) { setOut('val-key', streamKey); log('✓ Stream key retrieved', 'success'); }
+    if (streamId)  { setOut('val-id', streamId);   log('✓ Stream ID: ' + streamId, 'success'); }
+
+    if (!streamUrl && !streamKey) {
+      log('Could not find stream URL/key in response. Check log for raw response.', 'error');
+    }
+  }
+</script>
+</body>
+</html>
