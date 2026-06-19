@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI‑Assisted 3D Pipeline · Blender + AI Course</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #0b1120;
+      line-height: 1.7;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Header */
+    .header {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e9edf4;
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .logo { font-weight: 800; font-size: 1.4rem; letter-spacing: -0.02em; }
+    .logo span { color: #2563eb; }
+    .btn {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 60px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-size: 1rem;
+      box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+    }
+    .btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+    .btn-large { font-size: 1.1rem; padding: 16px 48px; }
+    .btn-gold { background: #facc15; color: #0b1120; box-shadow: 0 4px 12px rgba(250,204,21,0.3); }
+    .btn-gold:hover { background: #fde047; }
+
+    /* Hero */
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 6px 20px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      max-width: 800px;
+      margin: 0 auto 16px;
+    }
+    .hero h1 .highlight { color: #2563eb; font-style: normal; }
+    .hero .sub {
+      font-size: 1.2rem;
+      color: #475569;
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+
+    /* Trust bar */
+    .trust-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px 40px;
+      background: #ffffff;
+      padding: 20px 32px;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      margin: 24px auto 40px;
+      max-width: 750px;
+      font-weight: 500;
+    }
+    .trust-bar i { color: #2563eb; margin-right: 8px; }
+
+    /* Section titles */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      color: #475569;
+      max-width: 700px;
+      margin-bottom: 32px;
+    }
+    .text-center { text-align: center; }
+    .mt-40 { margin-top: 40px; }
+    .mb-40 { margin-bottom: 40px; }
+
+    /* Comparison table */
+    .compare-wrap {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 24px 20px;
+      border: 1px solid #eef2f6;
+      overflow-x: auto;
+      margin: 40px 0;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      min-width: 700px;
+    }
+    .compare-table th {
+      text-align: left;
+      padding: 14px 12px;
+      background: #f1f5f9;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .compare-table td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #eef2f6;
+      vertical-align: top;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .highlight-col {
+      background: #f0f7ff;
+      border-left: 3px solid #2563eb;
+    }
+    .compare-table .check { color: #2563eb; font-weight: 700; }
+    .compare-table .cross { color: #dc2626; font-weight: 700; }
+    .compare-table .tick { color: #16a34a; font-weight: 700; }
+
+    /* Features grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin: 32px 0;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 32px 0;
+    }
+    .card {
+      background: #ffffff;
+      padding: 24px 20px;
+      border-radius: 20px;
+      border: 1px solid #eef2f6;
+      transition: 0.2s;
+    }
+    .card:hover { border-color: #cbd8e8; }
+    .card i { font-size: 1.6rem; color: #2563eb; margin-bottom: 12px; }
+    .card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+
+    /* Pipeline steps */
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin: 32px 0;
+    }
+    .step {
+      background: #ffffff;
+      padding: 24px 20px;
+      border-radius: 20px;
+      border-left: 4px solid #2563eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .step .num {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #2563eb;
+    }
+
+    /* Pricing */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin: 40px 0;
+    }
+    .pricing-card {
+      background: #ffffff;
+      padding: 32px 24px;
+      border-radius: 28px;
+      border: 1px solid #eef2f6;
+      text-align: center;
+      transition: 0.2s;
+    }
+    .pricing-card:hover { border-color: #cbd8e8; transform: translateY(-4px); }
+    .pricing-card .price {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+    .pricing-card .price small {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #64748b;
+    }
+    .pricing-card ul {
+      list-style: none;
+      text-align: left;
+      margin: 16px 0 24px;
+    }
+    .pricing-card ul li { padding: 6px 0; display: flex; gap: 10px; align-items: center; }
+    .pricing-card ul li i { color: #2563eb; width: 18px; }
+    .pricing-card .btn { width: 100%; text-align: center; }
+    .pricing-card.popular {
+      border-color: #2563eb;
+      background: #f8faff;
+    }
+    .pricing-card.popular .badge-pop {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 60px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* CTA section */
+    .cta-section {
+      background: #0b1120;
+      color: white;
+      padding: 60px 32px;
+      border-radius: 28px;
+      text-align: center;
+      margin: 40px 0;
+    }
+    .cta-section h2 { font-size: 2rem; margin-bottom: 12px; }
+    .cta-section p { color: #94a3b8; max-width: 500px; margin: 0 auto 24px; }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid #e9edf4;
+      padding: 32px 0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+    .footer a { color: #1f2a44; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .grid-2, .grid-3, .pricing-grid, .pipeline-steps { grid-template-columns: 1fr; }
+      .trust-bar { flex-direction: column; align-items: center; gap: 12px; border-radius: 32px; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo">Sanjay<span>Meher</span></div>
+    <a href="#pricing" class="btn" style="padding:8px 24px;">Enroll Now</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero container">
+  <div class="badge"><i class="fas fa-cube"></i> Blender + AI · Full Pipeline</div>
+  <h1>
+    You don't make AI movies.<br />
+    You build <span class="highlight">real 3D worlds</span> —<br />
+    AI just adds the motion.
+  </h1>
+  <p class="sub">
+    No paid AI credits. No inconsistent characters. No loss of control.<br />
+    Learn a repeatable pipeline where <strong>you</strong> control lighting, design, and texture —<br />
+    and AI assists with animation, simulation, and procedural generation.
+  </p>
+  <a href="#pricing" class="btn btn-large">Enroll Now – Pay After Demo</a>
+  <div class="trust-bar">
+    <span><i class="fas fa-check-circle"></i> No AI credits</span>
+    <span><i class="fas fa-check-circle"></i> Full creative control</span>
+    <span><i class="fas fa-check-circle"></i> Consistent characters & scenes</span>
+    <span><i class="fas fa-check-circle"></i> Professional output</span>
+  </div>
+</section>
+
+<!-- COMPARISON: AI vs Pipeline -->
+<section class="container">
+  <h2 class="section-title">AI‑Only vs. My Pipeline</h2>
+  <p class="section-sub">Most "AI movie" tools leave you with no control, inconsistent results, and recurring costs. This pipeline is built differently.</p>
+
+  <div class="compare-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="min-width:200px;">Factor</th>
+          <th style="min-width:250px;">AI‑Only (Runway, Pika, etc.)</th>
+          <th style="min-width:250px;" class="highlight-col">My Pipeline (Blender + AI)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cost</strong></td>
+          <td><span class="cross">✗</span> Paid tools, limited credits even in paid plans</td>
+          <td class="highlight-col"><span class="tick">✓</span> No AI credits — unlimited, irrespective of movie length</td>
+        </tr>
+        <tr>
+          <td><strong>Quality Guarantee</strong></td>
+          <td><span class="cross">✗</span> No guarantee — output is often inconsistent</td>
+          <td class="highlight-col"><span class="tick">✓</span> You control the quality — AI just assists</td>
+        </tr>
+        <tr>
+          <td><strong>Control</strong></td>
+          <td><span class="cross">✗</span> No tweaking possible — you get what AI gives</td>
+          <td class="highlight-col"><span class="tick">✓</span> Full control — lighting, design, movement, everything</td>
+        </tr>
+        <tr>
+          <td><strong>Consistency</strong></td>
+          <td><span class="cross">✗</span> Characters, lighting, style change between scenes</td>
+          <td class="highlight-col"><span class="tick">✓</span> Consistent characters, lighting, textures — whole movie</td>
+        </tr>
+        <tr>
+          <td><strong>Long‑form content</strong></td>
+          <td><span class="cross">✗</span> Limited to short clips — no long movie generation</td>
+          <td class="highlight-col"><span class="tick">✓</span> Full movie — consistent scenes, characters, and style</td>
+        </tr>
+        <tr>
+          <td><strong>Export quality</strong></td>
+          <td><span class="cross">✗</span> Often compressed or limited resolution</td>
+          <td class="highlight-col"><span class="tick">✓</span> Professional quality — export at any resolution</td>
+        </tr>
+        <tr>
+          <td><strong>Iteration</strong></td>
+          <td><span class="cross">✗</span> If you don't like it, regenerate — and hope</td>
+          <td class="highlight-col"><span class="tick">✓</span> Tweak easily — you own the scene, AI just assists</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- WHAT YOU'LL LEARN -->
+<section class="container">
+  <h2 class="section-title">The Full Pipeline</h2>
+  <p class="section-sub">Six modules — from scene layout to final compositing. Every step is repeatable, controllable, and AI‑assisted.</p>
+
+  <div class="pipeline-steps">
+    <div class="step">
+      <div class="num">01</div>
+      <h3>Scene Layout</h3>
+      <p>Build props with proper names & bounds. AI arranges them via JSON — position, rotation, scale.</p>
+    </div>
+    <div class="step">
+      <div class="num">02</div>
+      <h3>Texturing</h3>
+      <p>Create clean UV maps. AI generates textures that fit your UV perfectly — no stretching, no seams.</p>
+    </div>
+    <div class="step">
+      <div class="num">03</div>
+      <h3>Animation</h3>
+      <p>Model a character → Mixamo auto‑rig → download animations. AI sequences them based on your story.</p>
+    </div>
+    <div class="step">
+      <div class="num">04</div>
+      <h3>Procedural & Simulation</h3>
+      <p>AI helps build geometry nodes, particles, destruction — and scripts Blender's simulation engines.</p>
+    </div>
+    <div class="step">
+      <div class="num">05</div>
+      <h3>Compositing</h3>
+      <p>AI builds node trees — color grading, effects, motion graphics. Shape keys & geo nodes for animation.</p>
+    </div>
+    <div class="step">
+      <div class="num">06</div>
+      <h3>Final Project</h3>
+      <p>Combine everything into a short film — consistent characters, lighting, and style. Portfolio ready.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KEY BENEFITS -->
+<section class="container">
+  <h2 class="section-title">Why This Pipeline Works</h2>
+  <div class="grid-3">
+    <div class="card">
+      <i class="fas fa-crown"></i>
+      <h3>You Stay in Control</h3>
+      <p>Lighting, design, character movement — all yours. AI just helps you get there faster.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-infinity"></i>
+      <h3>No AI Credits</h3>
+      <p>No per‑video costs. No limited generations. Make as long a movie as you want — without paying per second.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-rotate-left"></i>
+      <h3>Iterate Freely</h3>
+      <p>Don't like an animation? Tweak it. AI is an assistant — not a black box. You own every scene.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-palette"></i>
+      <h3>Consistent Everywhere</h3>
+      <p>Same character, same lighting, same textures across every scene. Your movie looks like a movie — not a collage.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-film"></i>
+      <h3>Professional Output</h3>
+      <p>Export at any resolution — 4K, 8K, or whatever your project needs. No compression, no quality loss.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-code"></i>
+      <h3>AI + Python</h3>
+      <p>Use AI to generate Python scripts — control Blender, RBD Lab, simulations, and compositing nodes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS YOU'LL USE -->
+<section class="container">
+  <h2 class="section-title">Tools You'll Master</h2>
+  <div class="grid-3">
+    <div class="card"><i class="fas fa-cube"></i><h3>Blender</h3><p>Full 3D suite — modeling, animation, simulation, compositing.</p></div>
+    <div class="card"><i class="fas fa-robot"></i><h3>Mixamo</h3><p>Auto‑rigging and motion library — AI‑powered character animation.</p></div>
+    <div class="card"><i class="fas fa-bolt"></i><h3>RBD Lab</h3><p>Professional destruction addon — fracture, physics, and simulation.</p></div>
+    <div class="card"><i class="fas fa-code"></i><h3>Python</h3><p>Script Blender, control addons, and automate your pipeline.</p></div>
+    <div class="card"><i class="fas fa-brain"></i><h3>AI (GPT, Claude, Groq)</h3><p>Generate scripts, node setups, texture ideas, and animation sequences.</p></div>
+    <div class="card"><i class="fas fa-layer-group"></i><h3>Geometry Nodes</h3><p>Procedural generation — cities, environments, destruction, and more.</p></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="container">
+  <h2 class="section-title text-center">Choose Your Path</h2>
+  <p class="section-sub text-center" style="max-width:600px; margin:0 auto 32px;">Pay after the demo session. No risk — see the pipeline in action before you commit.</p>
+
+  <div class="pricing-grid">
+    <!-- Core -->
+    <div class="pricing-card">
+      <h3>Core Pipeline</h3>
+      <div class="price">₹10,000 <small>one‑time</small></div>
+      <ul>
+        <li><i class="fas fa-check"></i> Scene layout + AI arrangement</li>
+        <li><i class="fas fa-check"></i> Texturing + AI UV‑based textures</li>
+        <li><i class="fas fa-check"></i> Animation + AI sequencing</li>
+        <li><i class="fas fa-check"></i> Procedural & geometry nodes</li>
+        <li><i class="fas fa-check"></i> Compositing + AI node trees</li>
+        <li><i class="fas fa-check"></i> Final project — short film</li>
+      </ul>
+      <a href="#contact" class="btn">Enroll →</a>
+    </div>
+
+    <!-- Full Pipeline (Popular) -->
+    <div class="pricing-card popular">
+      <div class="badge-pop">Most Popular</div>
+      <h3>Full Pipeline</h3>
+      <div class="price">₹15,000 <small>one‑time</small></div>
+      <ul>
+        <li><i class="fas fa-check"></i> Everything in Core</li>
+        <li><i class="fas fa-check"></i> <strong>RBD Lab</strong> destruction integration</li>
+        <li><i class="fas fa-check"></i> Python scripting with AI</li>
+        <li><i class="fas fa-check"></i> Advanced simulations (fluid, cloth, fire)</li>
+        <li><i class="fas fa-check"></i> AI‑generated Python scripts for Blender</li>
+        <li><i class="fas fa-check"></i> Full movie project — 1–2 minute scene</li>
+      </ul>
+      <a href="#contact" class="btn btn-gold">Enroll →</a>
+    </div>
+
+    <!-- Premium -->
+    <div class="pricing-card">
+      <h3>Premium 1‑on‑1</h3>
+      <div class="price">₹25,000 <small>one‑time</small></div>
+      <ul>
+        <li><i class="fas fa-check"></i> Everything in Full Pipeline</li>
+        <li><i class="fas fa-check"></i> Personalized project feedback</li>
+        <li><i class="fas fa-check"></i> Custom AI script generation</li>
+        <li><i class="fas fa-check"></i> One‑on‑one sessions (4 sessions)</li>
+        <li><i class="fas fa-check"></i> Portfolio review & polish</li>
+        <li><i class="fas fa-check"></i> Lifetime access + future updates</li>
+      </ul>
+      <a href="#contact" class="btn">Enroll →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section id="contact" class="container">
+  <div class="cta-section">
+    <h2>Ready to build your first AI‑assisted 3D scene?</h2>
+    <p>Join the next batch. Limited seats — first come, first served.</p>
+    <a href="https://wa.me/918984636695" class="btn" style="font-size:1.1rem; padding:16px 48px; background:#facc15; color:#0b1120;">
+      <i class="fab fa-whatsapp"></i> Message on WhatsApp
+    </a>
+    <p style="margin-top:16px; font-size:0.9rem; color:#94a3b8;">or email: graphicyin@gmail.com</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer container">
+  <p>© 2025 Sanjay Meher — built for artists who want to control AI, not be controlled by it.</p>
+  <p style="margin-top:4px;">
+    <a href="#">Home</a> ·
+    <a href="#pricing">Pricing</a> ·
+    <a href="#contact">Contact</a>
+  </p>
+</footer>
+
+</body>
+</html>
