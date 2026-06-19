@@ -3,7 +3,7 @@
 // ============================================================
 
 // --- CONFIGURATION ---
-const APPSCRIPT_URL = 'YOUR_APPSCRIPT_DEPLOYMENT_URL'; // ⚠️ REPLACE THIS
+const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxp4uwQbc0sgd5kAMHuNz_NW61MFsNmn0ZkspvQO8y8N_VHZlwkdNgjgbqDfrSSSntZGg/exec'; // ⚠️ REPLACE THIS
 
 // --- SMOOTH SCROLL ---
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
