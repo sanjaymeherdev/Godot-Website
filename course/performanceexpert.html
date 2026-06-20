@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Wiring — Marketing Infrastructure, Done Right | Sanjay Meher</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg: #0E1410;
+  --bg-raised: #141B16;
+  --line: #243029;
+  --line-bright: #34433A;
+  --ink: #EDEFEA;
+  --ink-dim: #8A968F;
+  --ink-faint: #5C665F;
+  --signal: #4DFFA0;
+  --signal-dim: #2B7A55;
+  --warn: #D97B3F;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+}
+
+/* ---------- background texture ---------- */
+.grain{
+  position:fixed; inset:0; pointer-events:none; z-index:1;
+  opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.circuit-bg{
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:64px 64px;
+  opacity:0.25;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 70%);
+}
+
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px; position:relative; z-index:2;}
+.eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--signal); display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 8px var(--signal);}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky; top:0; z-index:50;
+  background:rgba(14,20,16,0.85); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px;}
+.brand{font-family:var(--mono); font-size:14px; font-weight:700; letter-spacing:0.02em;}
+.brand span{color:var(--signal);}
+.nav-cta{
+  font-family:var(--mono); font-size:13px; padding:9px 16px;
+  border:1px solid var(--line-bright); border-radius:3px; color:var(--ink-dim);
+  transition:all .2s;
+}
+.nav-cta:hover{border-color:var(--signal); color:var(--signal);}
+
+/* ---------- hero ---------- */
+.hero{padding:100px 0 80px; position:relative;}
+.hero-kicker{margin-bottom:28px;}
+h1{
+  font-family:var(--sans); font-weight:800; letter-spacing:-0.03em;
+  font-size:clamp(34px, 5.4vw, 62px); line-height:1.05; max-width:780px;
+}
+h1 .accent{color:var(--signal); font-style:normal;}
+.hero-sub{
+  margin-top:24px; font-size:19px; color:var(--ink-dim); max-width:620px; line-height:1.6;
+}
+.hero-sub strong{color:var(--ink); font-weight:600;}
+.hero-actions{display:flex; gap:14px; margin-top:40px; flex-wrap:wrap;}
+.btn{
+  font-family:var(--mono); font-size:14px; font-weight:500;
+  padding:14px 24px; border-radius:3px; display:inline-flex; align-items:center; gap:8px;
+  transition:all .2s; cursor:pointer; border:1px solid transparent;
+}
+.btn-primary{background:var(--signal); color:#0E1410; font-weight:700;}
+.btn-primary:hover{background:#6BFFB4; transform:translateY(-1px);}
+.btn-ghost{border-color:var(--line-bright); color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ink-dim);}
+
+.proof-strip{
+  margin-top:56px; padding-top:28px; border-top:1px solid var(--line);
+  display:flex; gap:36px; flex-wrap:wrap;
+}
+.proof-item{font-family:var(--mono); font-size:13px; color:var(--ink-faint);}
+.proof-item b{color:var(--ink); font-weight:600; display:block; font-size:15px; font-family:var(--sans);}
+
+/* ---------- section shell ---------- */
+section{padding:88px 0; border-top:1px solid var(--line); position:relative;}
+.section-head{max-width:680px; margin-bottom:56px;}
+.section-head h2{
+  font-family:var(--sans); font-weight:800; letter-spacing:-0.02em;
+  font-size:clamp(26px, 3.4vw, 38px); margin-top:14px;
+}
+.section-head p{color:var(--ink-dim); font-size:16.5px; margin-top:14px; line-height:1.65;}
+
+/* ---------- the gap (3 col) ---------- */
+.gap-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:8px;}
+.gap-card{background:var(--bg); padding:32px 28px;}
+.gap-card .tag{font-family:var(--mono); font-size:11px; color:var(--warn); letter-spacing:0.08em; text-transform:uppercase;}
+.gap-card h3{font-size:18px; font-weight:700; margin-top:12px; font-family:var(--sans);}
+.gap-card p{color:var(--ink-dim); font-size:14.5px; margin-top:10px; line-height:1.6;}
+
+/* ---------- wiring diagram ---------- */
+.wiring{margin-top:64px; position:relative;}
+.wiring svg{width:100%; height:auto; display:block;}
+.node-label{font-family:var(--mono); fill:var(--ink); font-size:13px; font-weight:500;}
+.node-sub{font-family:var(--mono); fill:var(--ink-faint); font-size:10.5px;}
+.trunk-label{font-family:var(--mono); fill:var(--signal); font-size:12px; font-weight:700; letter-spacing:0.04em;}
+
+/* ---------- modules ---------- */
+.modules{margin-top:8px; display:flex; flex-direction:column; border:1px solid var(--line);}
+.module{
+  display:grid; grid-template-columns:64px 1fr auto; gap:24px; align-items:start;
+  padding:26px 28px; border-bottom:1px solid var(--line); transition:background .2s;
+}
+.module:last-child{border-bottom:none;}
+.module:hover{background:var(--bg-raised);}
+.module-num{font-family:var(--mono); color:var(--signal-dim); font-size:13px; padding-top:3px;}
+.module-body h3{font-size:17px; font-weight:700; font-family:var(--sans);}
+.module-body .module-tools{font-family:var(--mono); font-size:11.5px; color:var(--signal); margin-top:6px; letter-spacing:0.02em;}
+.module-body p{color:var(--ink-dim); font-size:14.5px; margin-top:10px; line-height:1.6; max-width:600px;}
+.module-why{
+  font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-align:right; max-width:160px;
+  padding-top:3px; line-height:1.5;
+}
+.module-why .lbl{color:var(--warn); display:block; margin-bottom:4px;}
+
+/* ---------- bonus topics ---------- */
+.bonus-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:32px;}
+.bonus-chip{
+  font-family:var(--mono); font-size:12.5px; padding:8px 14px;
+  border:1px solid var(--line-bright); border-radius:20px; color:var(--ink-dim);
+}
+.bonus-chip b{color:var(--signal); font-weight:500;}
+
+/* ---------- proof / evidence ---------- */
+.evidence-box{
+  margin-top:8px; border:1px solid var(--line); background:var(--bg-raised);
+  padding:32px; font-family:var(--mono); font-size:13.5px; line-height:1.8; color:var(--ink-dim);
+  position:relative; overflow:hidden;
+}
+.evidence-box::before{
+  content:'// LIVE PROPERTY — cggodotassets.shop'; display:block; color:var(--signal-dim);
+  font-size:11px; margin-bottom:16px; letter-spacing:0.04em;
+}
+.evidence-line{display:flex; gap:12px; padding:4px 0;}
+.evidence-line .ok{color:var(--signal);}
+.evidence-line .key{color:var(--ink-faint); min-width:170px;}
+
+/* ---------- pricing ---------- */
+.tracks{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:8px;}
+.track{background:var(--bg); padding:40px 32px; display:flex; flex-direction:column;}
+.track.featured{background:var(--bg-raised);}
+.track-tag{font-family:var(--mono); font-size:11px; color:var(--ink-faint); letter-spacing:0.1em; text-transform:uppercase;}
+.track.featured .track-tag{color:var(--signal);}
+.track h3{font-size:24px; font-weight:800; margin-top:10px; font-family:var(--sans);}
+.track .desc{color:var(--ink-dim); font-size:14.5px; margin-top:10px; line-height:1.6;}
+.track .price{font-family:var(--mono); font-size:36px; font-weight:700; margin-top:24px; color:var(--ink);}
+.track .price span{font-size:14px; color:var(--ink-faint); font-weight:400;}
+.track ul{list-style:none; margin-top:22px; flex-grow:1;}
+.track li{
+  font-size:14px; color:var(--ink-dim); padding:9px 0; padding-left:22px; position:relative;
+  border-top:1px solid var(--line);
+}
+.track li:first-child{border-top:none;}
+.track li::before{content:'›'; position:absolute; left:0; color:var(--signal); font-weight:700;}
+.track .btn{margin-top:28px; justify-content:center;}
+
+/* ---------- faq ---------- */
+.faq-item{border-bottom:1px solid var(--line); padding:24px 0;}
+.faq-item:first-child{border-top:1px solid var(--line);}
+.faq-q{font-weight:600; font-size:15.5px; font-family:var(--sans);}
+.faq-a{color:var(--ink-dim); font-size:14.5px; margin-top:10px; line-height:1.65; max-width:680px;}
+
+/* ---------- footer cta ---------- */
+.closer{text-align:center; padding:100px 0 80px;}
+.closer h2{
+  font-family:var(--sans); font-weight:800; letter-spacing:-0.02em;
+  font-size:clamp(28px,4vw,44px); max-width:680px; margin:0 auto;
+}
+.closer .btn{margin-top:32px;}
+footer{
+  border-top:1px solid var(--line); padding:32px 0; font-family:var(--mono); font-size:12px;
+  color:var(--ink-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+}
+
+@media (max-width:760px){
+  .gap-grid{grid-template-columns:1fr;}
+  .module{grid-template-columns:1fr; gap:10px;}
+  .module-why{text-align:left; max-width:none;}
+  .tracks{grid-template-columns:1fr;}
+  .proof-strip{gap:24px;}
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="circuit-bg"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">SANJAY<span>MEHER</span> / THE WIRING</div>
+    <a href="#enroll" class="nav-cta">Get started →</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow hero-kicker">MARKETING INFRASTRUCTURE COURSE</div>
+    <h1>Every marketing course teaches the dashboard.<br>Nobody teaches <span class="accent">the wiring</span> behind it.</h1>
+    <p class="hero-sub">GA4, Search Console, Tag Manager, Merchant Center, Pixel, AdSense — the plumbing every "10x your ROAS" course quietly assumes is already working. It almost never is. <strong>You'll learn to wire it correctly, once, so every campaign on top of it can actually be trusted.</strong></p>
+    <div class="hero-actions">
+      <a href="#enroll" class="btn btn-primary">See the tracks →</a>
+      <a href="#modules" class="btn btn-ghost">What's covered ↓</a>
+    </div>
+    <div class="proof-strip">
+      <div class="proof-item"><b>7+ yrs</b>marketing &amp; dev work</div>
+      <div class="proof-item"><b>Live property</b>real GA4 + GTM in production</div>
+      <div class="proof-item"><b>1-on-1 or cohort</b>your pace, your format</div>
+      <div class="proof-item"><b>Built, not taught from docs</b>shipped checkout flows, real tracking</div>
+    </div>
+  </div>
+</header>
+
+<section id="gap">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">THE ACTUAL PROBLEM</div>
+      <h2>Strategy doesn't matter if the data underneath it is lying to you.</h2>
+      <p>Most marketing education skips straight to "how to run better ads" or "how to grow your blog." That advice assumes your tracking is accurate. For most businesses, it isn't — and nobody ever goes back to check.</p>
+    </div>
+    <div class="gap-grid">
+      <div class="gap-card">
+        <div class="tag">What courses teach</div>
+        <h3>The exciting layer</h3>
+        <p>Ad copy, targeting, content calendars, "growth hacks." All built on top of an assumption nobody verifies.</p>
+      </div>
+      <div class="gap-card">
+        <div class="tag">What's actually broken</div>
+        <h3>The plumbing underneath</h3>
+        <p>GA4 not tracking real conversions. Pixel firing on the wrong event. Search Console never verified. Nobody touches Tag Manager because nobody understands the container.</p>
+      </div>
+      <div class="gap-card">
+        <div class="tag">The result</div>
+        <h3>Strategy built on noise</h3>
+        <p>You optimize toward numbers that were never measuring the right thing. Every decision downstream inherits the error.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modules">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">THE SIX, WIRED TOGETHER</div>
+      <h2>It's not six separate tools. It's one data pipe with six inlets.</h2>
+      <p>Each module teaches the "why" before the click-path — what breaks downstream if you get it wrong, and when a tool (like Tag Manager) genuinely isn't the right answer at all.</p>
+    </div>
+
+    <div class="wiring">
+      <svg viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="dot" markerWidth="6" markerHeight="6" refX="3" refY="3"><circle cx="3" cy="3" r="2.5" fill="#4DFFA0"/></marker>
+        </defs>
+        <!-- trunk line -->
+        <line x1="500" y1="200" x2="500" y2="320" stroke="#34433A" stroke-width="2"/>
+        <rect x="420" y="320" width="160" height="34" rx="3" fill="#141B16" stroke="#4DFFA0" stroke-width="1.2"/>
+        <text x="500" y="341" text-anchor="middle" class="trunk-label">YOUR DATA</text>
+
+        <!-- six nodes -->
+        <!-- positions across top -->
+        <g id="nodes">
+          <!-- node template repeated manually -->
+        </g>
+
+        <!-- Node 1: GA4 -->
+        <circle cx="100" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="100" y1="65" x2="100" y2="140" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M100,140 Q100,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="100" y="40" text-anchor="middle" class="node-label">GA4</text>
+        <text x="100" y="56" text-anchor="middle" class="node-sub">analytics</text>
+
+        <!-- Node 2: Search Console -->
+        <circle cx="260" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="260" y1="65" x2="260" y2="150" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M260,150 Q260,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="260" y="40" text-anchor="middle" class="node-label">SEARCH</text>
+        <text x="260" y="56" text-anchor="middle" class="node-sub">console</text>
+
+        <!-- Node 3: GTM -->
+        <circle cx="420" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="420" y1="65" x2="420" y2="160" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M420,160 Q420,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="420" y="40" text-anchor="middle" class="node-label">TAG MGR</text>
+        <text x="420" y="56" text-anchor="middle" class="node-sub">optional</text>
+
+        <!-- Node 4: Merchant Center -->
+        <circle cx="580" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="580" y1="65" x2="580" y2="160" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M580,160 Q580,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="580" y="40" text-anchor="middle" class="node-label">MERCHANT</text>
+        <text x="580" y="56" text-anchor="middle" class="node-sub">center</text>
+
+        <!-- Node 5: Pixel -->
+        <circle cx="740" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="740" y1="65" x2="740" y2="150" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M740,150 Q740,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="740" y="40" text-anchor="middle" class="node-label">PIXEL</text>
+        <text x="740" y="56" text-anchor="middle" class="node-sub">meta</text>
+
+        <!-- Node 6: AdSense -->
+        <circle cx="900" cy="60" r="5" fill="#4DFFA0"/>
+        <line x1="900" y1="65" x2="900" y2="140" stroke="#34433A" stroke-width="1.5"/>
+        <path d="M900,140 Q900,200 500,200" stroke="#34433A" stroke-width="1.5" fill="none"/>
+        <text x="900" y="40" text-anchor="middle" class="node-label">ADSENSE</text>
+        <text x="900" y="56" text-anchor="middle" class="node-sub">blogs</text>
+
+        <!-- animated signal dashes along trunk paths -->
+        <g stroke="#4DFFA0" stroke-width="2" fill="none" opacity="0.9">
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.2s" repeatCount="indefinite" path="M100,65 L100,140 Q100,200 500,200 L500,320"/></circle>
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.6s" begin="0.4s" repeatCount="indefinite" path="M260,65 L260,150 Q260,200 500,200 L500,320"/></circle>
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.0s" begin="0.8s" repeatCount="indefinite" path="M420,65 L420,160 Q420,200 500,200 L500,320"/></circle>
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.4s" begin="1.2s" repeatCount="indefinite" path="M580,65 L580,160 Q580,200 500,200 L500,320"/></circle>
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.1s" begin="1.6s" repeatCount="indefinite" path="M740,65 L740,150 Q740,200 500,200 L500,320"/></circle>
+          <circle r="2.5" fill="#4DFFA0"><animateMotion dur="3.5s" begin="2.0s" repeatCount="indefinite" path="M900,65 L900,140 Q900,200 500,200 L500,320"/></circle>
+        </g>
+      </svg>
+    </div>
+
+    <div class="modules">
+      <div class="module">
+        <div class="module-num">01</div>
+        <div class="module-body">
+          <h3>Google Analytics 4</h3>
+          <div class="module-tools">events · conversions · multi-currency · audiences</div>
+          <p>Not "install the snippet." Event architecture that survives coupons, multiple payment rails, and currency switches without quietly corrupting your revenue numbers — the exact mess most real checkouts produce and most tutorials never show.</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>Events fire before discounts apply. Nobody catches it.</div>
+      </div>
+
+      <div class="module">
+        <div class="module-num">02</div>
+        <div class="module-body">
+          <h3>Search Console</h3>
+          <div class="module-tools">verification · indexing · query data · core web vitals</div>
+          <p>Verifying ownership properly, reading what Google actually thinks of your site, and using query data to inform content instead of guessing.</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>Verified once, never opened again.</div>
+      </div>
+
+      <div class="module">
+        <div class="module-num">03</div>
+        <div class="module-body">
+          <h3>Tag Manager — and when to skip it</h3>
+          <div class="module-tools">containers · triggers · when gtag alone is cleaner</div>
+          <p>GTM is taught as mandatory scaffolding everywhere. It isn't. You'll learn to judge when wiring GA4/Ads directly is the more maintainable choice — and when a container actually earns its complexity.</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>Containers nobody understands become containers nobody touches.</div>
+      </div>
+
+      <div class="module">
+        <div class="module-num">04</div>
+        <div class="module-body">
+          <h3>Merchant Center</h3>
+          <div class="module-tools">product feed · approval · disapproval triage</div>
+          <p>Getting a product feed actually approved, and diagnosing the disapproval reasons that send most store owners into a support-ticket spiral.</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>One feed attribute error halts every Shopping ad silently.</div>
+      </div>
+
+      <div class="module">
+        <div class="module-num">05</div>
+        <div class="module-body">
+          <h3>Meta Pixel</h3>
+          <div class="module-tools">standard events · custom conversions · custom-coded sites</div>
+          <p>Straightforward on supported platforms — the part nobody teaches is wiring it correctly on a fully custom-coded site, where there's no app to "just connect."</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>Fires on page load instead of the real event.</div>
+      </div>
+
+      <div class="module">
+        <div class="module-num">06</div>
+        <div class="module-body">
+          <h3>AdSense for blogs</h3>
+          <div class="module-tools">approval · placement · policy compliance</div>
+          <p>Getting approved without the common rejection traps, and placing units where they earn without wrecking the reading experience or violating policy.</p>
+        </div>
+        <div class="module-why"><span class="lbl">WHY IT BREAKS</span>Approved once, then silently de-monetized for a policy drift nobody noticed.</div>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:64px; margin-bottom:0;">
+      <div class="eyebrow">FOR THE 1-ON-1 TRACK</div>
+      <h2 style="font-size:22px;">Add depth in the areas that matter to your actual site.</h2>
+    </div>
+    <div class="bonus-row">
+      <div class="bonus-chip">Technical <b>SEO</b> audits</div>
+      <div class="bonus-chip"><b>Schema markup</b> &amp; rich results</div>
+      <div class="bonus-chip"><b>DNS</b> &amp; domain config for tracking</div>
+      <div class="bonus-chip"><b>Google Ads</b> conversion setup</div>
+      <div class="bonus-chip">Core Web Vitals &amp; <b>page speed</b></div>
+      <div class="bonus-chip">Robots.txt &amp; <b>crawl control</b></div>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">PROOF, NOT PROMISES</div>
+      <h2>This isn't taught from documentation. It's wired into a real, running store.</h2>
+      <p>cggodotassets.shop is a live, custom-coded storefront — dual currency, dual payment rail (Razorpay + PayPal), coupon logic. Here's a slice of what's actually firing in production:</p>
+    </div>
+    <div class="evidence-box">
+      <div class="evidence-line"><span class="key">view_item</span><span class="ok">✓ fires with live product id, price, currency, category</span></div>
+      <div class="evidence-line"><span class="key">select_content</span><span class="ok">✓ engagement tracked before purchase intent</span></div>
+      <div class="evidence-line"><span class="key">watch_demo</span><span class="ok">✓ custom event, per-product, on outbound click</span></div>
+      <div class="evidence-line"><span class="key">buy_click</span><span class="ok">✓ fires pre-payment, holds price + currency at intent</span></div>
+      <div class="evidence-line"><span class="key">coupon discount</span><span class="ok">✓ tracked value reconciled after price changes mid-flow</span></div>
+      <div class="evidence-line"><span class="key">INR / USD split</span><span class="ok">✓ Razorpay + PayPal tracked as distinct, correct rails</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="enroll">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">PICK YOUR FORMAT</div>
+      <h2>Done with you, or done for your understanding.</h2>
+    </div>
+    <div class="tracks">
+      <div class="track">
+        <div class="track-tag">1-on-1</div>
+        <h3>Personal Training</h3>
+        <p class="desc">Your site, your accounts, your pace. We work through your actual GA4/GTM/Pixel setup live — not a demo account — and you walk away with it correctly wired.</p>
+        <div class="price">₹6,999 <span>/ 3 sessions</span></div>
+        <ul>
+          <li>3× 90-min live 1-on-1 sessions</li>
+          <li>All 6 core modules, applied to your real site</li>
+          <li>Any bonus topic included if relevant to you</li>
+          <li>WhatsApp support between sessions</li>
+          <li>Setup checklist + audit doc to keep</li>
+        </ul>
+        <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20the%201-on-1%20Marketing%20Infrastructure%20training" class="btn btn-ghost">Book on WhatsApp →</a>
+      </div>
+      <div class="track featured">
+        <div class="track-tag">Small live cohort</div>
+        <h3>The Wiring — Group Batch</h3>
+        <p class="desc">Same six modules, taught live, in a small capped batch. You bring your own site or a sandbox property — everyone leaves with working tracking, not just notes.</p>
+        <div class="price">₹2,499 <span>/ one-time</span></div>
+        <ul>
+          <li>6 live sessions, one per module</li>
+          <li>Capped seats — real doubt-clearing, not a webinar</li>
+          <li>Hindi or English, your preference</li>
+          <li>Recordings of your own batch's sessions</li>
+          <li>Group WhatsApp for ongoing questions</li>
+        </ul>
+        <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20join%20the%20next%20Wiring%20cohort" class="btn btn-primary">Join next batch →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">BEFORE YOU ASK</div>
+      <h2>Quick answers.</h2>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do I need an existing website to take this?</div>
+      <div class="faq-a">No. If you don't have a live site yet, we set up a sandbox property so every module is still hands-on, not theoretical.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is this for beginners or people who already "know" these tools?</div>
+      <div class="faq-a">Both, honestly. Most people who've "used" GA4 or Pixel before have it half-wired — this rebuilds the foundation properly rather than assuming prior setup is correct.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why isn't Tag Manager guaranteed to be part of the setup?</div>
+      <div class="faq-a">Because it's not always the right tool. Part of this course is learning to judge that, not defaulting to it because every other course does.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I add SEO, schema, or DNS topics to the group batch, not just 1-on-1?</div>
+      <div class="faq-a">Message before the batch starts — if there's enough interest from the group, a bonus session gets added for everyone.</div>
+    </div>
+  </div>
+</section>
+
+<section class="closer" style="border-top:none;">
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center;">STOP GUESSING WHAT YOUR DATA SAYS</div>
+    <h2 style="margin-top:18px;">Wire it once. Trust every number after.</h2>
+    <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20The%20Wiring%20course" class="btn btn-primary">Talk to Sanjay on WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:12px;">
+    <div>© 2026 Sanjay Meher · The Wiring</div>
+    <div>Built &amp; taught by a working marketer, not a documentation reader</div>
+  </div>
+</footer>
+
+</body>
+</html>
