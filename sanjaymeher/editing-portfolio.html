@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sanjay Meher — Edits</title>
+<meta name="description" content="A working cut of everything I've edited — Reels, Shorts, client raws. No theory. Just the timeline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --surface:#141925;
+    --surface-2:#1a2030;
+    --line:#252c3d;
+    --text:#e4e7ed;
+    --muted:#7b879c;
+    --accent:#4facfe;
+    --accent-2:#f5576c;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== Header ===== */
+  .page-head{
+    padding:5rem 1.5rem 3rem;
+    max-width:1100px;
+    margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    margin-bottom:1.25rem;
+  }
+  .eyebrow::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent-2);
+    box-shadow:0 0 0 3px rgba(245,87,108,0.18);
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(2.2rem, 6vw, 3.6rem);
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    max-width:16ch;
+  }
+  h1 .accent{color:var(--accent);}
+  .page-sub{
+    margin-top:1.1rem;
+    color:var(--muted);
+    font-size:1.02rem;
+    max-width:46ch;
+    line-height:1.6;
+  }
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    margin-top:1.75rem;
+    font-size:0.85rem;
+    color:var(--muted);
+    border:1px solid var(--line);
+    padding:0.5rem 0.9rem;
+    border-radius:100px;
+    transition:border-color .2s, color .2s;
+  }
+  .back-link:hover{border-color:var(--accent);color:var(--text);}
+
+  /* ===== Filter bar ===== */
+  .filter-bar{
+    max-width:1100px;
+    margin:0 auto;
+    padding:1.75rem 1.5rem 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.55rem;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:0.5rem 0.95rem;
+    border-radius:100px;
+    border:1px solid var(--line);
+    color:var(--muted);
+    background:transparent;
+    cursor:pointer;
+    transition:all .18s ease;
+  }
+  .chip:hover{color:var(--text);border-color:#3a4258;}
+  .chip.active{
+    color:#0b0e14;
+    background:var(--accent);
+    border-color:var(--accent);
+    font-weight:600;
+  }
+
+  /* ===== Grid ===== */
+  .grid-wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:2.25rem 1.5rem 6rem;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:1.1rem;
+  }
+  .clip{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .clip:hover{transform:translateY(-3px);border-color:#3a4258;}
+  .clip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .clip-thumb{
+    aspect-ratio:9/14;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(79,172,254,0.16), transparent 55%),
+      linear-gradient(160deg, var(--surface-2), #0e1320 75%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .clip-thumb img{
+    width:100%;height:100%;object-fit:cover;
+    position:absolute; inset:0;
+  }
+  .play-glyph{
+    width:46px;height:46px;
+    border-radius:50%;
+    background:rgba(11,14,20,0.55);
+    border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .clip:hover .play-glyph{transform:scale(1.08);background:rgba(79,172,254,0.35);}
+  .play-glyph svg{width:16px;height:16px;fill:var(--text);margin-left:2px;}
+
+  /* format sticker — the signature element */
+  .fmt-tag{
+    position:absolute;
+    top:0.65rem; left:0.65rem;
+    z-index:3;
+    font-family:var(--mono);
+    font-size:0.62rem;
+    letter-spacing:0.08em;
+    padding:0.28rem 0.5rem;
+    border-radius:5px;
+    text-transform:uppercase;
+    border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter:blur(4px);
+  }
+  .fmt-tag.reel{background:rgba(245,87,108,0.22);color:#ff9bb0;border-color:rgba(245,87,108,0.4);}
+  .fmt-tag.short{background:rgba(255,76,76,0.2);color:#ff8a8a;border-color:rgba(255,76,76,0.35);}
+  .fmt-tag.raw{background:rgba(79,172,254,0.2);color:#9cd2ff;border-color:rgba(79,172,254,0.35);}
+  .fmt-tag.drive{background:rgba(255,209,102,0.18);color:#ffd166;border-color:rgba(255,209,102,0.35);}
+
+  .clip-meta{
+    padding:0.85rem 0.95rem 1rem;
+  }
+  .clip-title{
+    font-size:0.9rem;
+    font-weight:600;
+    line-height:1.3;
+    margin-bottom:0.3rem;
+  }
+  .clip-tags{
+    display:flex;
+    gap:0.4rem;
+    flex-wrap:wrap;
+    margin-top:0.5rem;
+  }
+  .clip-tag{
+    font-family:var(--mono);
+    font-size:0.62rem;
+    color:var(--muted);
+    border:1px solid var(--line);
+    padding:0.18rem 0.45rem;
+    border-radius:4px;
+  }
+
+  .empty-state{
+    grid-column:1/-1;
+    text-align:center;
+    padding:4rem 1rem;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:0.85rem;
+  }
+
+  /* ===== Lightbox ===== */
+  .lightbox{
+    position:fixed; inset:0;
+    background:rgba(6,8,12,0.92);
+    backdrop-filter:blur(10px);
+    z-index:100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:2rem 1rem;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-inner{
+    width:100%;
+    max-width:420px;
+    max-height:90vh;
+  }
+  .lightbox-frame{
+    width:100%;
+    aspect-ratio:9/16;
+    background:#000;
+    border-radius:16px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .lightbox-frame.landscape{aspect-ratio:16/9;}
+  .lightbox-frame iframe,
+  .lightbox-frame video{
+    width:100%;height:100%;border:0;display:block;
+  }
+  .lightbox-cap{
+    margin-top:1rem;
+    text-align:center;
+  }
+  .lightbox-cap .title{font-weight:600;font-size:0.95rem;}
+  .lightbox-cap .sub{color:var(--muted);font-size:0.8rem;margin-top:0.25rem;font-family:var(--mono);}
+  .lightbox-close{
+    position:absolute;
+    top:1.25rem; right:1.25rem;
+    width:40px;height:40px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text);
+    font-size:1.1rem;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:101;
+  }
+  .lightbox-open-original{
+    display:inline-block;
+    margin-top:0.85rem;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--accent);
+    border-bottom:1px solid transparent;
+  }
+  .lightbox-open-original:hover{border-color:var(--accent);}
+
+  @media (prefers-reduced-motion: reduce){
+    .clip, .play-glyph, .chip{transition:none;}
+  }
+
+  @media (max-width:560px){
+    .page-head{padding:3.5rem 1.25rem 2.25rem;}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(150px,1fr));gap:0.75rem;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="page-head">
+    <div class="eyebrow">Portfolio · Live Cuts</div>
+    <h1>Not theory.<br><span class="accent">Real edits, real footage.</span></h1>
+    <p class="page-sub">Reels, Shorts, raw client cuts — pulled straight from where they live. Filter by source or scroll the whole reel.</p>
+    <a href="index.html" class="back-link">← Back home</a>
+  </header>
+
+  <nav class="filter-bar" id="filterBar">
+    <button class="chip active" data-filter="all">All</button>
+    <button class="chip" data-filter="reel">Instagram Reels</button>
+    <button class="chip" data-filter="short">YT Shorts</button>
+    <button class="chip" data-filter="drive">Drive</button>
+    <button class="chip" data-filter="raw">Raw Files</button>
+  </nav>
+
+  <main class="grid-wrap">
+    <div class="grid" id="grid"><!-- clips injected by JS --></div>
+  </main>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+    <div class="lightbox-inner">
+      <div class="lightbox-frame" id="lightboxFrame"></div>
+      <div class="lightbox-cap">
+        <div class="title" id="lightboxTitle"></div>
+        <div class="sub" id="lightboxSub"></div>
+        <a class="lightbox-open-original" id="lightboxOriginal" href="#" target="_blank" rel="noopener">Open original ↗</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   EDIT THIS LIST to add your own clips.
+   type: "reel"  -> Instagram Reel/Post URL
+   type: "short" -> YouTube Shorts/video URL
+   type: "drive" -> Google Drive share URL (file must be link-shareable)
+   type: "raw"   -> direct video file URL (.mp4 etc.)
+   thumb: optional poster image URL (used for short/drive/raw cards;
+          reel cards auto-render Instagram's own embed)
+   ========================================================= */
+const CLIPS = [
+  {
+    type: "reel",
+    title: "Personal Brand Before After",
+    tag: "Reel",
+    url: "https://www.instagram.com/reel/DJO-xQksI5f/"
+  },
+   {
+    type: "reel",
+    title: "Trending First Person Reel Style",
+    tag: "Reel",
+    url: "https://www.instagram.com/reel/DJRl16ISn6E/"
+  },
+   {
+    type: "reel",
+    title: "Personal Brand Reel Edit",
+    tag: "Reel",
+    url: "https://www.instagram.com/reel/DJUKvklyPZZ/"
+  },
+  {
+    type: "short",
+    title: "Quick Edit — CapCut transitions demo",
+    tag: "YT Short",
+    url: "youtube.com/shorts/uZc7Th-tr14"
+  },
+  {
+    type: "drive",
+    title: "Full client edit — unlisted raw",
+    tag: "Drive",
+    url: "https://drive.google.com/file/d/REPLACE_ME/view"
+  },
+  {
+    type: "raw",
+    title: "Before/after — raw vs graded",
+    tag: "Raw file",
+    url: "https://example.com/path/to/video.mp4",
+    thumb: ""
+  }
+];
+
+const grid = document.getElementById('grid');
+const filterBar = document.getElementById('filterBar');
+const lightbox = document.getElementById('lightbox');
+const lightboxFrame = document.getElementById('lightboxFrame');
+const lightboxTitle = document.getElementById('lightboxTitle');
+const lightboxSub = document.getElementById('lightboxSub');
+const lightboxOriginal = document.getElementById('lightboxOriginal');
+const lightboxClose = document.getElementById('lightboxClose');
+
+const FMT_LABEL = { reel: 'Reel', short: 'Short', drive: 'Drive', raw: 'Raw' };
+
+function igUsernameFromUrl(url){
+  try{
+    const m = url.match(/instagram\.com\/([^/]+)\/(reel|p)\//);
+    return m ? m[1] : null;
+  }catch(e){ return null; }
+}
+
+function youTubeIdFromUrl(url){
+  const m = url.match(/(?:shorts\/|v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function driveIdFromUrl(url){
+  const m = url.match(/\/d\/([A-Za-z0-9_-]+)/) || url.match(/id=([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+function renderThumb(clip){
+  if(clip.type === 'reel'){
+    // Instagram requires its own embed.js for a true preview;
+    // a static placeholder card keeps the grid fast + consistent,
+    // the lightbox renders the real embed on click.
+    return `<div class="play-glyph">${playIcon()}</div>`;
+  }
+  if(clip.type === 'short'){
+    const id = youTubeIdFromUrl(clip.url);
+    const thumb = id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : clip.thumb;
+    return `${thumb ? `<img src="${thumb}" alt="" loading="lazy">` : ''}<div class="play-glyph">${playIcon()}</div>`;
+  }
+  if(clip.type === 'drive' || clip.type === 'raw'){
+    return `${clip.thumb ? `<img src="${clip.thumb}" alt="" loading="lazy">` : ''}<div class="play-glyph">${playIcon()}</div>`;
+  }
+  return `<div class="play-glyph">${playIcon()}</div>`;
+}
+
+function playIcon(){
+  return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+}
+
+function renderGrid(filter){
+  const items = filter === 'all' ? CLIPS : CLIPS.filter(c => c.type === filter);
+  if(!items.length){
+    grid.innerHTML = `<div class="empty-state">No clips filed under this format yet.</div>`;
+    return;
+  }
+  grid.innerHTML = items.map((clip, i) => `
+    <div class="clip" tabindex="0" role="button" data-index="${CLIPS.indexOf(clip)}" aria-label="Play ${clip.title}">
+      <div class="clip-thumb">
+        <span class="fmt-tag ${clip.type}">${FMT_LABEL[clip.type]}</span>
+        ${renderThumb(clip)}
+      </div>
+      <div class="clip-meta">
+        <div class="clip-title">${clip.title}</div>
+        <div class="clip-tags"><span class="clip-tag">${clip.tag}</span></div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.clip').forEach(el => {
+    el.addEventListener('click', () => openLightbox(CLIPS[+el.dataset.index]));
+    el.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openLightbox(CLIPS[+el.dataset.index]);
+      }
+    });
+  });
+}
+
+function openLightbox(clip){
+  lightboxTitle.textContent = clip.title;
+  lightboxSub.textContent = FMT_LABEL[clip.type] + ' · tap outside or ✕ to close';
+  lightboxOriginal.href = clip.url;
+  lightboxFrame.innerHTML = '';
+  lightboxFrame.classList.remove('landscape');
+
+  if(clip.type === 'reel'){
+    const cleanUrl = clip.url.split('?')[0];
+    lightboxFrame.innerHTML = `
+      <blockquote class="instagram-media" data-instgrm-permalink="${cleanUrl}"
+        data-instgrm-version="14" style="width:100%;height:100%;margin:0;"></blockquote>`;
+    loadInstagramEmbed();
+  } else if(clip.type === 'short'){
+    const id = youTubeIdFromUrl(clip.url);
+    lightboxFrame.innerHTML = id
+      ? `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`
+      : `<div class="empty-state">Could not parse YouTube link.</div>`;
+  } else if(clip.type === 'drive'){
+    const id = driveIdFromUrl(clip.url);
+    lightboxFrame.classList.add('landscape');
+    lightboxFrame.innerHTML = id
+      ? `<iframe src="https://drive.google.com/file/d/${id}/preview" allow="autoplay" allowfullscreen></iframe>`
+      : `<div class="empty-state">Could not parse Drive link.</div>`;
+  } else if(clip.type === 'raw'){
+    lightboxFrame.classList.add('landscape');
+    lightboxFrame.innerHTML = `<video src="${clip.url}" controls autoplay playsinline></video>`;
+  }
+
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  lightboxFrame.innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+function loadInstagramEmbed(){
+  if(window.instgrm){
+    window.instgrm.Embeds.process();
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = 'https://www.instagram.com/embed.js';
+  s.async = true;
+  document.body.appendChild(s);
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+
+filterBar.addEventListener('click', e => {
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  filterBar.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(btn.dataset.filter);
+});
+
+renderGrid('all');
+</script>
+</body>
+</html>
