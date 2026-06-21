@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sanjay — The Builder's Workshop</title>
 
-  <!-- Libraries -->
+  <!-- Only 2 lightweight libraries -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tsParticles/2.11.0/tsParticles.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
   <style>
     * {
@@ -27,7 +23,36 @@
       overflow-x: hidden;
     }
 
-    /* ---- Hero Section ---- */
+    /* ---- Particle Background (Pure CSS) ---- */
+    #particle-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #4facfe;
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 0.4; }
+      90% { opacity: 0.4; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* ---- Hero ---- */
     #hero {
       height: 100vh;
       display: flex;
@@ -40,22 +65,12 @@
       padding: 0 20px;
     }
 
-    #particles-js {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
     #hero h1 {
       font-size: 4rem;
       font-weight: 800;
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      z-index: 3;
       margin-bottom: 1rem;
     }
 
@@ -63,7 +78,6 @@
       font-size: 1.8rem;
       font-weight: 300;
       color: #aab;
-      z-index: 3;
     }
 
     #typed-text {
@@ -78,9 +92,9 @@
       padding: 0.8rem 2rem;
       border-radius: 60px;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      z-index: 3;
       font-size: 1rem;
       color: #8899bb;
+      z-index: 3;
     }
 
     .hero-badge span {
@@ -93,6 +107,8 @@
       padding: 80px 20px;
       max-width: 1200px;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
     }
 
     .section-title {
@@ -155,16 +171,17 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       text-align: center;
       color: #aab;
       transition: all 0.3s ease;
       padding: 6px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      will-change: transform;
     }
 
     .orbit-item:hover {
-      transform: scale(1.15);
+      transform: scale(1.15) !important;
       border-color: #4facfe;
       background: rgba(79, 172, 254, 0.12);
     }
@@ -174,7 +191,7 @@
       margin-bottom: 4px;
     }
 
-    /* ---- Trust Counters ---- */
+    /* ---- Counters ---- */
     .counter-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -203,21 +220,49 @@
       margin-top: 0.5rem;
     }
 
+    /* ---- Footer ---- */
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      z-index: 2;
+    }
+
+    footer p {
+      font-size: 1.4rem;
+      color: #aab;
+    }
+
+    footer p span.highlight {
+      color: #4facfe;
+      font-weight: 600;
+    }
+
+    footer .credit {
+      margin-top: 1rem;
+      color: #667;
+      font-size: 0.9rem;
+    }
+
     /* ---- Responsive ---- */
     @media (max-width: 768px) {
       #hero h1 { font-size: 2.8rem; }
       #hero .sub { font-size: 1.2rem; }
       .section-title { font-size: 2rem; }
-      .orbit-item { width: 70px; height: 70px; font-size: 0.6rem; }
+      .orbit-item { width: 70px; height: 70px; font-size: 0.55rem; }
       .orbit-item .icon { font-size: 1.4rem; }
+      .hero-badge { font-size: 0.8rem; padding: 0.6rem 1.2rem; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ===== PARTICLE BACKGROUND (Pure CSS) ===== -->
+  <div id="particle-bg"></div>
+
   <!-- ===== HERO ===== -->
   <div id="hero">
-    <div id="particles-js"></div>
     <h1 data-aos="fade-up">The Builder's Workshop</h1>
     <div class="sub" data-aos="fade-up" data-aos-delay="200">
       I'm <span id="typed-text"></span>
@@ -230,48 +275,44 @@
   <!-- ===== SKILL CLOUD ===== -->
   <section>
     <h2 class="section-title" data-aos="fade-up">⚡ The Toolbelt</h2>
-    <div id="skill-cloud" data-aos="fade-up" data-aos-delay="100">
-      <!-- Skills injected by JS -->
-    </div>
+    <div id="skill-cloud" data-aos="fade-up" data-aos-delay="100"></div>
   </section>
 
   <!-- ===== PRODUCT ORBIT ===== -->
   <section>
     <h2 class="section-title" data-aos="fade-up">🌀 The Products</h2>
-    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200">
-      <!-- Injected by JS -->
-    </div>
+    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200"></div>
   </section>
 
-  <!-- ===== TRUST COUNTERS ===== -->
+  <!-- ===== COUNTERS ===== -->
   <section>
     <h2 class="section-title" data-aos="fade-up">📊 By the Numbers</h2>
     <div class="counter-grid">
       <div class="counter-box" data-aos="fade-up">
-        <div class="number counter" data-target="8">0</div>
+        <div class="number" data-target="8">0</div>
         <div class="label">Products Built</div>
       </div>
       <div class="counter-box" data-aos="fade-up" data-aos-delay="100">
-        <div class="number counter" data-target="18">0</div>
+        <div class="number" data-target="18">0</div>
         <div class="label">Skills Stacked</div>
       </div>
       <div class="counter-box" data-aos="fade-up" data-aos-delay="200">
-        <div class="number counter" data-target="0">0</div>
+        <div class="number" data-target="0">0</div>
         <div class="label">₹ Paid Upfront</div>
       </div>
       <div class="counter-box" data-aos="fade-up" data-aos-delay="300">
-        <div class="number counter" data-target="100">0</div>
+        <div class="number" data-target="100">0</div>
         <div class="label">% Trust Built</div>
       </div>
     </div>
   </section>
 
-  <!-- ===== FOOTER / CTA ===== -->
-  <footer style="text-align:center;padding:60px 20px;border-top:1px solid rgba(255,255,255,0.05);">
-    <p style="font-size:1.4rem;color:#aab;" data-aos="fade-up">
-      “Pay <span style="color:#4facfe;font-weight:600;">after</span> it works. No upfront. <span style="color:#f5576c;">Ever.</span>”
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p data-aos="fade-up">
+      “Pay <span class="highlight">after</span> it works. No upfront. <span style="color:#f5576c;">Ever.</span>”
     </p>
-    <p style="margin-top:1rem;color:#667;" data-aos="fade-up" data-aos-delay="100">
+    <p class="credit" data-aos="fade-up" data-aos-delay="100">
       👨‍💻 Sanjay Meher · Solo Builder · Self-Funded
     </p>
   </footer>
@@ -279,6 +320,7 @@
   <!-- ===== SCRIPTS ===== -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script>
+    // ---- AOS ----
     AOS.init({ duration: 800, once: true });
 
     // ---- TYPED.JS ----
@@ -296,30 +338,22 @@
       cursorChar: '|'
     });
 
-    // ---- PARTICLE.JS ----
-    tsParticles.load('particles-js', {
-      particles: {
-        number: { value: 60 },
-        color: { value: '#4facfe' },
-        shape: { type: 'circle' },
-        opacity: { value: 0.4, random: true },
-        size: { value: 3, random: true },
-        move: {
-          enable: true,
-          speed: 1.2,
-          direction: 'none',
-          random: true,
-          straight: false,
-          outModes: 'out'
-        }
-      },
-      interactivity: {
-        events: {
-          onHover: { enable: true, mode: 'repulse' },
-          onClick: { enable: true, mode: 'push' }
-        }
+    // ---- PARTICLES (Pure JS) ----
+    (function createParticles() {
+      const container = document.getElementById('particle-bg');
+      const count = 60;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.width = (2 + Math.random() * 4) + 'px';
+        p.style.height = p.style.width;
+        p.style.animationDuration = (12 + Math.random() * 20) + 's';
+        p.style.animationDelay = (Math.random() * 20) + 's';
+        p.style.opacity = 0.2 + Math.random() * 0.4;
+        container.appendChild(p);
       }
-    });
+    })();
 
     // ---- SKILL CLOUD ----
     const skills = [
@@ -365,43 +399,80 @@
 
     const orbit = document.getElementById('orbit-container');
     const radius = Math.min(180, window.innerWidth / 3);
-    const centerX = 0, centerY = 0;
+    const items = [];
 
     products.forEach((p, i) => {
       const angle = (i / products.length) * 2 * Math.PI - Math.PI / 2;
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-
       const el = document.createElement('div');
       el.className = 'orbit-item';
-      el.style.transform = `translate(${x}px, ${y}px)`;
       el.innerHTML = `<span class="icon">${p.icon}</span>${p.name}`;
       orbit.appendChild(el);
-
-      // Animate orbit rotation
-      let currentAngle = angle;
-      setInterval(() => {
-        currentAngle += 0.008;
-        const nx = radius * Math.cos(currentAngle);
-        const ny = radius * Math.sin(currentAngle);
-        el.style.transform = `translate(${nx}px, ${ny}px)`;
-      }, 50 + i * 10);
+      items.push({ el, angle });
     });
 
-    // ---- COUNTER-UP ----
-    $(document).ready(function () {
-      $('.counter').counterUp({
-        delay: 10,
-        time: 1200
+    // Animate orbit
+    let orbitAngle = 0;
+    function animateOrbit() {
+      orbitAngle += 0.006;
+      items.forEach((item, i) => {
+        const a = item.angle + orbitAngle;
+        const x = radius * Math.cos(a);
+        const y = radius * Math.sin(a);
+        item.el.style.transform = `translate(${x}px, ${y}px)`;
       });
+      requestAnimationFrame(animateOrbit);
+    }
+    animateOrbit();
+
+    // ---- COUNTER (No jQuery) ----
+    function animateCounter(el, target, duration = 1500) {
+      const start = 0;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+        el.textContent = current;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          el.textContent = target;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Trigger counters when they come into view
+    const counterElements = document.querySelectorAll('.number');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = parseInt(entry.target.getAttribute('data-target'));
+          if (target > 0) {
+            animateCounter(entry.target, target);
+          } else {
+            entry.target.textContent = '0';
+          }
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    counterElements.forEach(el => observer.observe(el));
+
+    // ---- Handle Resize ----
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        location.reload();
+      }, 300);
     });
 
-    // ---- RESPONSIVE ORBIT RESIZE ----
-    window.addEventListener('resize', () => {
-      const newRadius = Math.min(180, window.innerWidth / 3);
-      // Recalculate positions (simplified: just reload)
-      location.reload();
-    });
+    console.log('🚀 The Builder\'s Workshop is live.');
   </script>
 </body>
 </html>
