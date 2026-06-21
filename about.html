@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanjay — The Builder's Workshop</title>
+
+  <!-- Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tsParticles/2.11.0/tsParticles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #0b0e14;
+      color: #e4e7ed;
+      overflow-x: hidden;
+    }
+
+    /* ---- Hero Section ---- */
+    #hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      padding: 0 20px;
+    }
+
+    #particles-js {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      z-index: 3;
+      margin-bottom: 1rem;
+    }
+
+    #hero .sub {
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: #aab;
+      z-index: 3;
+    }
+
+    #typed-text {
+      color: #f5576c;
+      font-weight: 600;
+    }
+
+    .hero-badge {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      padding: 0.8rem 2rem;
+      border-radius: 60px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 3;
+      font-size: 1rem;
+      color: #8899bb;
+    }
+
+    .hero-badge span {
+      color: #4facfe;
+      font-weight: 600;
+    }
+
+    /* ---- Sections ---- */
+    section {
+      padding: 80px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      text-align: center;
+      background: linear-gradient(135deg, #e4e7ed, #8899bb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ---- Skill Cloud ---- */
+    #skill-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem 0;
+    }
+
+    .skill-tag {
+      background: rgba(79, 172, 254, 0.08);
+      border: 1px solid rgba(79, 172, 254, 0.15);
+      padding: 0.6rem 1.6rem;
+      border-radius: 40px;
+      font-size: 1rem;
+      color: #c8d0e0;
+      transition: all 0.3s ease;
+      cursor: default;
+      backdrop-filter: blur(4px);
+    }
+
+    .skill-tag:hover {
+      background: rgba(79, 172, 254, 0.2);
+      transform: scale(1.08) translateY(-4px);
+      border-color: #4facfe;
+      box-shadow: 0 8px 30px rgba(79, 172, 254, 0.15);
+    }
+
+    /* ---- Product Orbit ---- */
+    #orbit-container {
+      position: relative;
+      height: 400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 3rem 0;
+    }
+
+    .orbit-item {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.7rem;
+      text-align: center;
+      color: #aab;
+      transition: all 0.3s ease;
+      padding: 6px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .orbit-item:hover {
+      transform: scale(1.15);
+      border-color: #4facfe;
+      background: rgba(79, 172, 254, 0.12);
+    }
+
+    .orbit-item .icon {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    /* ---- Trust Counters ---- */
+    .counter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 2rem;
+      text-align: center;
+      margin: 3rem 0;
+    }
+
+    .counter-box {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 2rem 1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .counter-box .number {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f093fb, #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .counter-box .label {
+      color: #8899bb;
+      margin-top: 0.5rem;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      #hero h1 { font-size: 2.8rem; }
+      #hero .sub { font-size: 1.2rem; }
+      .section-title { font-size: 2rem; }
+      .orbit-item { width: 70px; height: 70px; font-size: 0.6rem; }
+      .orbit-item .icon { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <div id="hero">
+    <div id="particles-js"></div>
+    <h1 data-aos="fade-up">The Builder's Workshop</h1>
+    <div class="sub" data-aos="fade-up" data-aos-delay="200">
+      I'm <span id="typed-text"></span>
+    </div>
+    <div class="hero-badge" data-aos="fade-up" data-aos-delay="400">
+      🛠️ <span>18 skills</span> · 8 products · ₹0 until it works
+    </div>
+  </div>
+
+  <!-- ===== SKILL CLOUD ===== -->
+  <section>
+    <h2 class="section-title" data-aos="fade-up">⚡ The Toolbelt</h2>
+    <div id="skill-cloud" data-aos="fade-up" data-aos-delay="100">
+      <!-- Skills injected by JS -->
+    </div>
+  </section>
+
+  <!-- ===== PRODUCT ORBIT ===== -->
+  <section>
+    <h2 class="section-title" data-aos="fade-up">🌀 The Products</h2>
+    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- ===== TRUST COUNTERS ===== -->
+  <section>
+    <h2 class="section-title" data-aos="fade-up">📊 By the Numbers</h2>
+    <div class="counter-grid">
+      <div class="counter-box" data-aos="fade-up">
+        <div class="number counter" data-target="8">0</div>
+        <div class="label">Products Built</div>
+      </div>
+      <div class="counter-box" data-aos="fade-up" data-aos-delay="100">
+        <div class="number counter" data-target="18">0</div>
+        <div class="label">Skills Stacked</div>
+      </div>
+      <div class="counter-box" data-aos="fade-up" data-aos-delay="200">
+        <div class="number counter" data-target="0">0</div>
+        <div class="label">₹ Paid Upfront</div>
+      </div>
+      <div class="counter-box" data-aos="fade-up" data-aos-delay="300">
+        <div class="number counter" data-target="100">0</div>
+        <div class="label">% Trust Built</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER / CTA ===== -->
+  <footer style="text-align:center;padding:60px 20px;border-top:1px solid rgba(255,255,255,0.05);">
+    <p style="font-size:1.4rem;color:#aab;" data-aos="fade-up">
+      “Pay <span style="color:#4facfe;font-weight:600;">after</span> it works. No upfront. <span style="color:#f5576c;">Ever.</span>”
+    </p>
+    <p style="margin-top:1rem;color:#667;" data-aos="fade-up" data-aos-delay="100">
+      👨‍💻 Sanjay Meher · Solo Builder · Self-Funded
+    </p>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script>
+    AOS.init({ duration: 800, once: true });
+
+    // ---- TYPED.JS ----
+    new Typed('#typed-text', {
+      strings: [
+        'an Automation Engineer.',
+        'an AI Integrator.',
+        'a System Architect.',
+        'a Full-Stack Builder.',
+        'a Solo Founder.'
+      ],
+      typeSpeed: 60,
+      backSpeed: 30,
+      loop: true,
+      cursorChar: '|'
+    });
+
+    // ---- PARTICLE.JS ----
+    tsParticles.load('particles-js', {
+      particles: {
+        number: { value: 60 },
+        color: { value: '#4facfe' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.4, random: true },
+        size: { value: 3, random: true },
+        move: {
+          enable: true,
+          speed: 1.2,
+          direction: 'none',
+          random: true,
+          straight: false,
+          outModes: 'out'
+        }
+      },
+      interactivity: {
+        events: {
+          onHover: { enable: true, mode: 'repulse' },
+          onClick: { enable: true, mode: 'push' }
+        }
+      }
+    });
+
+    // ---- SKILL CLOUD ----
+    const skills = [
+      'Video Editing (PR, Capcut, Filmora)',
+      'Motion Graphics (AE)',
+      'Graphic Design (Canva, PS, CDR)',
+      'Digital Marketing',
+      'Web Design & Dev (WP, Shopify, Code)',
+      '3D Animation (Blender)',
+      'Web Apps',
+      'Android Apps',
+      'Windows Apps',
+      'Chrome Extensions',
+      'Godot (Games, Apps, Addons)',
+      'Backend, Auth, API, Database',
+      'Automation Engineering',
+      'AI Integration',
+      'System Architecture',
+      'Self-Hosting / Infrastructure',
+      'Product Strategy',
+      'Payment Integration'
+    ];
+
+    const cloud = document.getElementById('skill-cloud');
+    skills.forEach(skill => {
+      const tag = document.createElement('span');
+      tag.className = 'skill-tag';
+      tag.textContent = skill;
+      cloud.appendChild(tag);
+    });
+
+    // ---- PRODUCT ORBIT ----
+    const products = [
+      { name: 'SiteSheet', icon: '🌐' },
+      { name: 'n8n Setup', icon: '⚙️' },
+      { name: 'GOwa API', icon: '💬' },
+      { name: 'GMB Tracker', icon: '📍' },
+      { name: 'SMBooking', icon: '📅' },
+      { name: 'YourMate', icon: '🧑‍🏫' },
+      { name: 'ContentPlanner', icon: '✍️' },
+      { name: 'PocketAI', icon: '🤖' }
+    ];
+
+    const orbit = document.getElementById('orbit-container');
+    const radius = Math.min(180, window.innerWidth / 3);
+    const centerX = 0, centerY = 0;
+
+    products.forEach((p, i) => {
+      const angle = (i / products.length) * 2 * Math.PI - Math.PI / 2;
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+
+      const el = document.createElement('div');
+      el.className = 'orbit-item';
+      el.style.transform = `translate(${x}px, ${y}px)`;
+      el.innerHTML = `<span class="icon">${p.icon}</span>${p.name}`;
+      orbit.appendChild(el);
+
+      // Animate orbit rotation
+      let currentAngle = angle;
+      setInterval(() => {
+        currentAngle += 0.008;
+        const nx = radius * Math.cos(currentAngle);
+        const ny = radius * Math.sin(currentAngle);
+        el.style.transform = `translate(${nx}px, ${ny}px)`;
+      }, 50 + i * 10);
+    });
+
+    // ---- COUNTER-UP ----
+    $(document).ready(function () {
+      $('.counter').counterUp({
+        delay: 10,
+        time: 1200
+      });
+    });
+
+    // ---- RESPONSIVE ORBIT RESIZE ----
+    window.addEventListener('resize', () => {
+      const newRadius = Math.min(180, window.innerWidth / 3);
+      // Recalculate positions (simplified: just reload)
+      location.reload();
+    });
+  </script>
+</body>
+</html>
