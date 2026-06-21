@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sanjay — The Builder's Workshop</title>
 
-  <!-- Only 2 lightweight libraries -->
+  <!-- Libraries -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
 
@@ -23,7 +23,7 @@
       overflow-x: hidden;
     }
 
-    /* ---- Particle Background (Pure CSS) ---- */
+    /* ---- Particle Background ---- */
     #particle-bg {
       position: fixed;
       top: 0;
@@ -121,32 +121,88 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* ---- Skill Cloud ---- */
-    #skill-cloud {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      padding: 2rem 0;
+    /* ---- Skill Flip Cards ---- */
+    #skill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
     }
 
-    .skill-tag {
-      background: rgba(79, 172, 254, 0.08);
-      border: 1px solid rgba(79, 172, 254, 0.15);
-      padding: 0.6rem 1.6rem;
-      border-radius: 40px;
-      font-size: 1rem;
-      color: #c8d0e0;
-      transition: all 0.3s ease;
+    .flip-card {
+      background: transparent;
+      height: 200px;
+      perspective: 800px;
       cursor: default;
-      backdrop-filter: blur(4px);
     }
 
-    .skill-tag:hover {
-      background: rgba(79, 172, 254, 0.2);
-      transform: scale(1.08) translateY(-4px);
-      border-color: #4facfe;
-      box-shadow: 0 8px 30px rgba(79, 172, 254, 0.15);
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card:hover .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .flip-card-front {
+      background: rgba(79, 172, 254, 0.06);
+      border-color: rgba(79, 172, 254, 0.15);
+    }
+
+    .flip-card-front .icon {
+      font-size: 2.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .flip-card-front .name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e4e7ed;
+      line-height: 1.3;
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+      background: rgba(20, 25, 35, 0.95);
+      border-color: rgba(79, 172, 254, 0.25);
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #aab;
+      line-height: 1.5;
+      padding: 1rem;
+    }
+
+    .flip-card-back .tools {
+      font-size: 0.65rem;
+      color: #4facfe;
+      margin-top: 0.5rem;
+      background: rgba(79, 172, 254, 0.1);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      display: inline-block;
     }
 
     /* ---- Product Orbit ---- */
@@ -176,7 +232,7 @@
       color: #aab;
       transition: all 0.3s ease;
       padding: 6px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       will-change: transform;
     }
 
@@ -247,18 +303,59 @@
 
     /* ---- Responsive ---- */
     @media (max-width: 768px) {
-      #hero h1 { font-size: 2.8rem; }
-      #hero .sub { font-size: 1.2rem; }
-      .section-title { font-size: 2rem; }
-      .orbit-item { width: 70px; height: 70px; font-size: 0.55rem; }
-      .orbit-item .icon { font-size: 1.4rem; }
-      .hero-badge { font-size: 0.8rem; padding: 0.6rem 1.2rem; }
+      #hero h1 {
+        font-size: 2.8rem;
+      }
+      #hero .sub {
+        font-size: 1.2rem;
+      }
+      .section-title {
+        font-size: 2rem;
+      }
+      .orbit-item {
+        width: 70px;
+        height: 70px;
+        font-size: 0.55rem;
+      }
+      .orbit-item .icon {
+        font-size: 1.4rem;
+      }
+      .hero-badge {
+        font-size: 0.8rem;
+        padding: 0.6rem 1.2rem;
+      }
+      #skill-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+      .flip-card {
+        height: 170px;
+      }
+      .flip-card-front .icon {
+        font-size: 2rem;
+      }
+      .flip-card-front .name {
+        font-size: 0.75rem;
+      }
+      .flip-card-back {
+        font-size: 0.65rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #skill-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.8rem;
+      }
+      .flip-card {
+        height: 150px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- ===== PARTICLE BACKGROUND (Pure CSS) ===== -->
+  <!-- ===== PARTICLE BACKGROUND ===== -->
   <div id="particle-bg"></div>
 
   <!-- ===== HERO ===== -->
@@ -272,16 +369,20 @@
     </div>
   </div>
 
-  <!-- ===== SKILL CLOUD ===== -->
+  <!-- ===== SKILL CARDS (FLIP) ===== -->
   <section>
     <h2 class="section-title" data-aos="fade-up">⚡ The Toolbelt</h2>
-    <div id="skill-cloud" data-aos="fade-up" data-aos-delay="100"></div>
+    <div id="skill-grid" data-aos="fade-up" data-aos-delay="100">
+      <!-- Cards injected by JS -->
+    </div>
   </section>
 
   <!-- ===== PRODUCT ORBIT ===== -->
   <section>
     <h2 class="section-title" data-aos="fade-up">🌀 The Products</h2>
-    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200"></div>
+    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200">
+      <!-- Injected by JS -->
+    </div>
   </section>
 
   <!-- ===== COUNTERS ===== -->
@@ -315,13 +416,22 @@
     <p class="credit" data-aos="fade-up" data-aos-delay="100">
       👨‍💻 Sanjay Meher · Solo Builder · Self-Funded
     </p>
+    <div style="margin-top:2rem;">
+      <a href="/tools" style="color:#4facfe;text-decoration:none;border:1px solid rgba(79,172,254,0.2);padding:10px 24px;border-radius:40px;display:inline-block;backdrop-filter:blur(8px);font-size:0.9rem;">
+        ← See all tools
+      </a>
+    </div>
   </footer>
 
   <!-- ===== SCRIPTS ===== -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js">
+  </script>
   <script>
     // ---- AOS ----
-    AOS.init({ duration: 800, once: true });
+    AOS.init({
+      duration: 800,
+      once: true
+    });
 
     // ---- TYPED.JS ----
     new Typed('#typed-text', {
@@ -338,7 +448,7 @@
       cursorChar: '|'
     });
 
-    // ---- PARTICLES (Pure JS) ----
+    // ---- PARTICLES ----
     (function createParticles() {
       const container = document.getElementById('particle-bg');
       const count = 60;
@@ -355,34 +465,117 @@
       }
     })();
 
-    // ---- SKILL CLOUD ----
-    const skills = [
-      'Video Editing (PR, Capcut, Filmora)',
-      'Motion Graphics (AE)',
-      'Graphic Design (Canva, PS, CDR)',
-      'Digital Marketing',
-      'Web Design & Dev (WP, Shopify, Code)',
-      '3D Animation (Blender)',
-      'Web Apps',
-      'Android Apps',
-      'Windows Apps',
-      'Chrome Extensions',
-      'Godot (Games, Apps, Addons)',
-      'Backend, Auth, API, Database',
-      'Automation Engineering',
-      'AI Integration',
-      'System Architecture',
-      'Self-Hosting / Infrastructure',
-      'Product Strategy',
-      'Payment Integration'
-    ];
+    // ---- SKILL FLIP CARDS ----
+    const skills = [{
+      name: 'Video Editing',
+      icon: '🎬',
+      description: 'Edit like a pro. PR, Capcut, Filmora — fast, clean, story-driven.',
+      tools: 'PR · Capcut · Filmora'
+    }, {
+      name: 'Motion Graphics',
+      icon: '✨',
+      description: 'Bring ideas to life with dynamic motion. After Effects is my playground.',
+      tools: 'After Effects'
+    }, {
+      name: 'Graphic Design',
+      icon: '🎨',
+      description: 'Visual identity that sticks. Canva, PS, Corel — all in one.',
+      tools: 'Canva · PS · CorelDRAW'
+    }, {
+      name: 'Digital Marketing',
+      icon: '📈',
+      description: 'Strategy + execution. Content, SEO, social — growth that works.',
+      tools: 'SEO · Social · Content'
+    }, {
+      name: 'Web Design & Dev',
+      icon: '🌐',
+      description: 'From WordPress to custom code — sites that load fast and look great.',
+      tools: 'WP · Shopify · HTML/CSS'
+    }, {
+      name: '3D Animation',
+      icon: '🧊',
+      description: 'Blender is my canvas. Models, animations, and product renders.',
+      tools: 'Blender'
+    }, {
+      name: 'Web Apps',
+      icon: '⚛️',
+      description: 'Full-stack web apps. React, Next.js, Node — built to scale.',
+      tools: 'React · Node · Next.js'
+    }, {
+      name: 'Android Apps',
+      icon: '📱',
+      description: 'Native Android apps. Kotlin/Java — smooth, fast, reliable.',
+      tools: 'Kotlin · Java'
+    }, {
+      name: 'Windows Apps',
+      icon: '🖥️',
+      description: 'Desktop apps for Windows. Electron or native — your choice.',
+      tools: 'Electron · .NET'
+    }, {
+      name: 'Chrome Extensions',
+      icon: '🧩',
+      description: 'Extensions that extend the web. Side panels, overlays, automation.',
+      tools: 'JS · Chrome API'
+    }, {
+      name: 'Godot Engine',
+      icon: '🎮',
+      description: 'Games, apps, addons — all in Godot. Lightweight, powerful, open.',
+      tools: 'GDScript · Godot 4'
+    }, {
+      name: 'Backend & APIs',
+      icon: '🔗',
+      description: 'Auth, REST, WebSockets, DB — the engine behind every app.',
+      tools: 'Node · SQL · Auth'
+    }, {
+      name: 'Automation',
+      icon: '⚙️',
+      description: 'n8n, APIs, workflows — automate everything, own your data.',
+      tools: 'n8n · APIs · Webhooks'
+    }, {
+      name: 'AI Integration',
+      icon: '🤖',
+      description: 'LLMs, prompts, orchestration — AI that actually works for you.',
+      tools: 'Claude · GPT · DeepSeek'
+    }, {
+      name: 'System Architecture',
+      icon: '🏗️',
+      description: 'Scalable, self-hosted systems. Designed to last, built to grow.',
+      tools: 'Design · Scalability'
+    }, {
+      name: 'Self-Hosting',
+      icon: '🛡️',
+      description: 'Own your data. Self-host on Vercel, Neon, your own servers.',
+      tools: 'Vercel · Neon · Docker'
+    }, {
+      name: 'Product Strategy',
+      icon: '📦',
+      description: 'From idea to product to pricing. I package solutions, not code.',
+      tools: 'Strategy · Launch'
+    }, {
+      name: 'Payment Integration',
+      icon: '💳',
+      description: 'Razorpay, UPI, subscriptions — payments that actually work.',
+      tools: 'Razorpay · UPI'
+    }];
 
-    const cloud = document.getElementById('skill-cloud');
+    const grid = document.getElementById('skill-grid');
     skills.forEach(skill => {
-      const tag = document.createElement('span');
-      tag.className = 'skill-tag';
-      tag.textContent = skill;
-      cloud.appendChild(tag);
+      const card = document.createElement('div');
+      card.className = 'flip-card';
+      card.innerHTML = `
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">${skill.icon}</div>
+              <div class="name">${skill.name}</div>
+            </div>
+            <div class="flip-card-back">
+              <div style="font-size:0.9rem;font-weight:500;color:#e4e7ed;margin-bottom:0.4rem;">${skill.name}</div>
+              <div>${skill.description}</div>
+              <div class="tools">🛠️ ${skill.tools}</div>
+            </div>
+          </div>
+        `;
+      grid.appendChild(card);
     });
 
     // ---- PRODUCT ORBIT ----
@@ -410,8 +603,8 @@
       items.push({ el, angle });
     });
 
-    // Animate orbit
     let orbitAngle = 0;
+
     function animateOrbit() {
       orbitAngle += 0.006;
       items.forEach((item, i) => {
@@ -424,7 +617,7 @@
     }
     animateOrbit();
 
-    // ---- COUNTER (No jQuery) ----
+    // ---- COUNTER ----
     function animateCounter(el, target, duration = 1500) {
       const start = 0;
       const startTime = performance.now();
@@ -445,7 +638,6 @@
       requestAnimationFrame(update);
     }
 
-    // Trigger counters when they come into view
     const counterElements = document.querySelectorAll('.number');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -463,7 +655,7 @@
 
     counterElements.forEach(el => observer.observe(el));
 
-    // ---- Handle Resize ----
+    // ---- RESIZE HANDLER ----
     let resizeTimeout;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
