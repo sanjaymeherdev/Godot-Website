@@ -444,8 +444,8 @@
     }
 
     function init() {
-        const headerContainer = document.getElementById('graphicy-header');
-        const footerContainer = document.getElementById('graphicy-footer');
+        const headerContainer = document.getElementById('graphicy-header') || document.getElementById('sanjay-header');
+        const footerContainer = document.getElementById('graphicy-footer') || document.getElementById('sanjay-footer');
 
         if (headerContainer) {
             document.head.insertAdjacentHTML('beforeend', headerStyles);
