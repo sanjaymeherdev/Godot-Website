@@ -398,9 +398,11 @@
     }
     .wa-float:hover{ transform:scale(1.1) rotate(-2deg);box-shadow:0 12px 32px rgba(37,211,102,0.6); }
 
-    /* reveal */
-    .reveal{ opacity:0;transform:translateY(30px);transition:opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1); }
-    .reveal.in{ opacity:1;transform:none; }
+    /* reveal — visible by default; JS adds the animated entrance only if it successfully initializes.
+       This guarantees content is never hidden if JS is blocked, slow, or errors out. */
+    .reveal{ opacity:1; transform:none; }
+    body.js-reveal-ready .reveal{ opacity:0; transform:translateY(30px); transition:opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1); }
+    body.js-reveal-ready .reveal.in{ opacity:1; transform:none; }
 
     /* responsive */
     @media (max-width:760px){
@@ -959,17 +961,37 @@
 </a>
 
 <script>
-  // scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-  reveals.forEach(el => observer.observe(el));
+  // scroll reveal — fail-safe: only animate if IntersectionObserver exists,
+  // and force-reveal everything after a timeout no matter what, so a JS error
+  // or unsupported browser can never leave sections permanently hidden.
+  try {
+    const reveals = document.querySelectorAll('.reveal');
+
+    if ('IntersectionObserver' in window) {
+      document.body.classList.add('js-reveal-ready');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      reveals.forEach(el => observer.observe(el));
+
+      // Safety net: if anything goes wrong with the observer firing
+      // (e.g. layout quirks on some hosts), force everything visible after 4s.
+      setTimeout(() => {
+        reveals.forEach(el => el.classList.add('in'));
+      }, 4000);
+    }
+    // If IntersectionObserver isn't supported, .js-reveal-ready is never added,
+    // so the base CSS rule (opacity:1, no animation) just applies — content stays visible.
+  } catch (err) {
+    console.warn('Reveal animation failed to initialize; content remains visible by default.', err);
+  }
 
   // promo video/image resolver — set ONE of these, video wins if both are filled
   const promoVideoSrc = ""; // e.g. "videos/promo.mp4" or "https://www.youtube.com/embed/VIDEO_ID"
@@ -1004,52 +1026,6 @@
     }
     // if neither is set, the placeholder stays as-is
   })();
-
-  // ===== DIAGNOSTIC LOGGING: video embeds =====
-  // This block exists purely to help debug "video boxes are blank" on the live site.
-  // Open DevTools > Console on the deployed page and look for lines starting with [VideoDiag].
-  // Remove this whole block once embeds are confirmed working.
-  (function diagnoseVideoEmbeds() {
-    console.log('[VideoDiag] Page protocol:', window.location.protocol, '| host:', window.location.host);
-
-    const shortIframes = document.querySelectorAll('.short-slot iframe');
-    console.log('[VideoDiag] Found', shortIframes.length, 'short-slot iframe(s) in the DOM.');
-
-    shortIframes.forEach((frame, i) => {
-      const label = frame.title || ('Slot ' + (i + 1));
-      console.log('[VideoDiag]', label, '-> src =', frame.src);
-
-      frame.addEventListener('load', () => {
-        console.log('[VideoDiag] ✅ LOADED:', label, frame.src);
-      });
-
-      frame.addEventListener('error', (e) => {
-        console.error('[VideoDiag] ❌ ERROR loading iframe:', label, frame.src, e);
-      });
-
-      // After a short delay, check if the iframe actually has dimensions/rendered content.
-      // A 0x0 or hidden iframe after load usually means CSS, not network, is the problem.
-      setTimeout(() => {
-        const rect = frame.getBoundingClientRect();
-        console.log('[VideoDiag] 📐', label, 'rendered size:', rect.width + 'x' + rect.height,
-          rect.width === 0 || rect.height === 0 ? '⚠️ ZERO SIZE — check CSS/layout' : '✓ has size');
-      }, 1500);
-    });
-
-    // Try a raw fetch to YouTube's embed domain to see if it's a network/CSP block vs. something else.
-    // Note: this will likely show a CORS-related console message even when embedding works fine —
-    // that's expected and not itself the bug. We're watching for it to fail to even attempt the request.
-    fetch('https://www.youtube.com/embed/WqtFD94r2jI', { mode: 'no-cors' })
-      .then(() => console.log('[VideoDiag] ✅ Network reach to youtube.com/embed succeeded (no-cors, response opaque by design).'))
-      .catch((err) => console.error('[VideoDiag] ❌ Could not even reach youtube.com — likely blocked by network/extension/CSP:', err));
-
-    // Surface any CSP violation reports the browser raises, which is the most common
-    // reason an iframe silently shows blank on a host that injects security headers.
-    document.addEventListener('securitypolicyviolation', (e) => {
-      console.error('[VideoDiag] 🚫 CSP VIOLATION:', e.violatedDirective, '| blocked URI:', e.blockedURI, '| policy:', e.originalPolicy);
-    });
-  })();
-  // ===== END DIAGNOSTIC LOGGING =====
 
   // booking form
   document.getElementById('bookingForm').addEventListener('submit', function(e) {
