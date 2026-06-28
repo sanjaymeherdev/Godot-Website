@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Web Apps Course – Build with Sanjay</title>
+  <meta name="description" content="Learn to build real web apps — AI chat, dashboards, booking systems. Live cohort in Hindi. Build for yourself, or earn by building for others." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      --bg:#0b0b14;
+      --bg-card:#14141f;
+      --bg-card-hover:#1a1a29;
+      --text:#f2f1f7;
+      --text-dim:#a8a3bd;
+      --border:rgba(255,255,255,0.09);
+      --accent:#8b5cf6;
+      --accent-light:#c4b5fd;
+      --accent-dim:rgba(139,92,246,0.14);
+      --wa:#25d366;
+      --radius:16px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:'DM Sans',sans-serif;
+      line-height:1.65;
+      -webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4{ font-family:'Syne',sans-serif;font-weight:800;line-height:1.15;letter-spacing:-0.01em; }
+    a{ color:inherit;text-decoration:none; }
+    .container{ max-width:1080px;margin:0 auto;padding:0 1.25rem; }
+    section{ padding:5rem 0; }
+    :focus-visible{ outline:2px solid var(--accent-light);outline-offset:3px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
+
+    /* top bar */
+    .topbar {
+      position:sticky;top:0;z-index:50;
+      background:rgba(11,11,20,0.82);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar .container{ display:flex;align-items:center;justify-content:space-between;height:64px; }
+    .brand{ font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem; }
+    .brand .sub{ display:block;font-family:'DM Sans',sans-serif;font-weight:500;font-size:0.68rem;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;margin-top:1px; }
+    .btn {
+      display:inline-flex;align-items:center;gap:0.5rem;
+      font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;
+      padding:0.7rem 1.4rem;border-radius:999px;
+      transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+      border:1px solid transparent;
+      white-space:nowrap;cursor:pointer;
+    }
+    .btn:hover{ transform:translateY(-3px) scale(1.02);box-shadow:0 12px 28px -8px rgba(139,92,246,0.3); }
+    .btn-primary{ background:var(--accent);color:#fff; }
+    .btn-primary:hover{ filter:brightness(1.12); }
+    .btn-wa{ background:var(--wa);color:#fff; }
+    .btn-wa:hover{ filter:brightness(1.08); }
+    .btn-sm{ padding:0.55rem 1.1rem;font-size:0.82rem; }
+
+    /* hero */
+    .hero{ padding:4rem 0 2.5rem;text-align:center; }
+    .badge {
+      display:inline-flex;align-items:center;gap:0.5rem;
+      background:var(--accent-dim);color:var(--accent-light);
+      border:1px solid rgba(139,92,246,0.3);
+      padding:0.45rem 1rem;border-radius:999px;
+      font-size:0.82rem;font-weight:600;margin-bottom:1.75rem;
+      animation:floatBadge 4s ease-in-out infinite;
+    }
+    @keyframes floatBadge { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+    .dot{ width:7px;height:7px;border-radius:50%;background:var(--wa);animation:pulse 1.8s infinite; }
+    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+    .hero h1{ font-size:clamp(2.3rem,6vw,3.7rem);max-width:780px;margin:0 auto 1.4rem; }
+    .hero h1 .grad{ color:var(--accent-light); }
+    .hero-sub{ max-width:600px;margin:0 auto 2.2rem;color:var(--text-dim);font-size:1.05rem; }
+    .hero-sub strong{ color:var(--text); }
+    .hero-ctas{ display:flex;gap:0.9rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.8rem; }
+    .stats {
+      display:flex;justify-content:center;gap:2.4rem;flex-wrap:wrap;
+      border-top:1px solid var(--border);padding-top:2rem;max-width:680px;margin:0 auto;
+    }
+    .stat .num{ display:block;font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent-light);transition:0.2s; }
+    .stat:hover .num{ transform:scale(1.08);color:#fff; }
+    .stat .lbl{ font-size:0.78rem;color:var(--text-dim); }
+
+    /* promo image */
+    .promo-wrap {
+      max-width:920px;margin:0 auto;
+      border-radius:24px;overflow:hidden;
+      border:1px solid var(--border);
+      background:var(--bg-card);
+      box-shadow:0 30px 80px -30px rgba(139,92,246,0.35);
+      transition:0.3s;
+    }
+    .promo-wrap:hover{ border-color:var(--accent-dim); }
+    .promo-frame{ position:relative;width:100%;aspect-ratio:16/9;background:#000; }
+    .promo-frame img{ width:100%;height:100%;object-fit:cover;display:block; }
+    .promo-empty {
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;
+      color:var(--text-dim);background:radial-gradient(circle at 50% 40%, rgba(139,92,246,0.12), transparent 65%);
+    }
+    .promo-empty i{ font-size:2.6rem;color:var(--accent-light);opacity:0.7; }
+    .promo-empty span{ font-size:0.85rem; }
+
+    /* strip */
+    .strip {
+      border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      background:var(--bg-card);padding:1.1rem 0;
+      overflow:hidden;
+    }
+    .strip .track{ display:flex;gap:2.5rem;white-space:nowrap;animation:scroll-x 26s linear infinite;width:max-content; }
+    .strip span{ font-size:0.85rem;color:var(--text-dim);font-weight:500; }
+    .strip span i{ color:var(--accent-light);margin-right:0.4rem; }
+    @keyframes scroll-x{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+    /* section headers */
+    .eyebrow {
+      display:inline-block;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;
+      text-transform:uppercase;color:var(--accent-light);margin-bottom:0.9rem;
+    }
+    .section-head{ text-align:center;max-width:640px;margin:0 auto 3rem; }
+    .section-head h2{ font-size:clamp(1.7rem,3.5vw,2.4rem);margin-bottom:0.8rem; }
+    .section-head p{ color:var(--text-dim); }
+
+    /* problems */
+    .problems{ display:grid;grid-template-columns:repeat(2,1fr);gap:1rem; }
+    .p-card {
+      background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .p-card:hover{ background:var(--bg-card-hover);transform:translateY(-4px);box-shadow:0 12px 28px -12px rgba(0,0,0,0.5);border-color:var(--accent-dim); }
+    .p-q{ font-size:0.92rem;color:var(--text-dim);font-style:italic;margin-bottom:0.6rem; }
+    .p-a{ font-weight:700;font-size:0.97rem; }
+    .p-a i{ color:var(--wa);margin-right:0.4rem; }
+
+    /* who is it for */
+    .who-grid{ display:grid;grid-template-columns:repeat(4,1fr);gap:1rem; }
+    .who-card {
+      background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+      padding:1.5rem 1.2rem;text-align:center;
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .who-card:hover{ transform:translateY(-6px);background:var(--bg-card-hover);border-color:var(--accent-dim);box-shadow:0 16px 32px -16px rgba(139,92,246,0.25); }
+    .who-icon {
+      width:46px;height:46px;border-radius:50%;margin:0 auto 0.9rem;
+      background:var(--accent-dim);border:1px solid rgba(139,92,246,0.3);
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;color:var(--accent-light);
+    }
+    .who-card h4{ font-size:0.98rem;margin-bottom:0.5rem; }
+    .who-card p{ font-size:0.8rem;color:var(--text-dim);line-height:1.5; }
+
+    /* tools showcase - 6 images */
+    .tools-grid{ display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem; }
+    .tool-slot {
+      aspect-ratio:16/10;border-radius:var(--radius);overflow:hidden;
+      background:var(--bg-card);border:1px solid var(--border);
+      position:relative;transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .tool-slot:hover{ transform:translateY(-4px);border-color:var(--accent-dim);box-shadow:0 16px 32px -16px rgba(139,92,246,0.3); }
+    .tool-slot img{ width:100%;height:100%;object-fit:cover;display:block; }
+    .tool-slot .tool-label {
+      position:absolute;bottom:0;left:0;right:0;
+      padding:0.6rem 0.8rem;
+      background:linear-gradient(transparent, rgba(0,0,0,0.7));
+      font-size:0.75rem;font-weight:600;color:#fff;
+      text-align:center;
+    }
+    .tool-empty {
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.6rem;
+      color:var(--text-dim);background:linear-gradient(180deg, rgba(139,92,246,0.06), transparent);
+    }
+    .tool-empty i{ font-size:1.8rem;color:var(--accent-light);opacity:0.6; }
+    .tool-empty span{ font-size:0.72rem;padding:0 1rem;text-align:center; }
+
+    /* timeline */
+    .timeline-wrap{ background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.2rem 1.6rem 1.6rem; }
+    .clips{ display:flex;gap:6px;height:64px;position:relative;margin-bottom:0.6rem; }
+    .clip {
+      flex:1;border-radius:8px;position:relative;
+      background:linear-gradient(180deg, rgba(139,92,246,var(--op)) 0%, rgba(139,92,246,calc(var(--op) - 0.15)) 100%);
+      border:1px solid rgba(139,92,246,0.35);
+      overflow:hidden;
+    }
+    .clip::before {
+      content:'';position:absolute;inset:0;
+      background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 1px, transparent 1px, transparent 7px);
+      opacity:0.5;
+    }
+    .playhead {
+      position:absolute;top:-6px;bottom:-6px;width:2px;background:#fff;
+      box-shadow:0 0 10px rgba(255,255,255,0.8);
+      animation:scrub 7s ease-in-out infinite;
+      left:0;
+    }
+    .playhead::before {
+      content:'';position:absolute;top:-5px;left:-4px;
+      width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+      border-top:6px solid #fff;
+    }
+    @keyframes scrub{ 0%{left:0%;} 45%{left:99%;} 55%{left:99%;} 100%{left:0%;} }
+    .week-labels{ display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:2rem; }
+    .week-labels .wl{ text-align:left; }
+    .week-labels .wl .wk{ font-size:0.68rem;font-weight:700;letter-spacing:0.06em;color:var(--accent-light);text-transform:uppercase; }
+    .syllabus-grid{ display:grid;grid-template-columns:repeat(4,1fr);gap:1rem; }
+    .syl-card {
+      background:var(--bg);border-radius:12px;padding:1.2rem;border:1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    .syl-card:hover{ transform:translateY(-4px);background:var(--bg-card-hover);border-color:var(--accent-dim);box-shadow:0 12px 24px -12px rgba(139,92,246,0.2); }
+    .syl-card h4{ font-size:1rem;margin-bottom:0.5rem; }
+    .syl-card p{ font-size:0.85rem;color:var(--text-dim); }
+    .sunday-note {
+      display:flex;align-items:center;gap:0.7rem;margin-top:1.4rem;padding:0.9rem 1.1rem;
+      background:var(--accent-dim);border:1px solid rgba(139,92,246,0.3);border-radius:12px;
+      font-size:0.85rem;color:var(--accent-light);
+    }
+    .sunday-note i{ font-size:1rem; }
+
+    /* features */
+    .feat-grid{ display:grid;grid-template-columns:repeat(4,1fr);gap:1rem; }
+    .feat-card {
+      background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+      padding:1.3rem;transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .feat-card:hover{ transform:translateY(-4px);background:var(--bg-card-hover);border-color:var(--accent-dim); }
+    .feat-card i{ color:var(--accent-light);font-size:1.2rem;margin-bottom:0.7rem;display:block; }
+    .feat-card h4{ font-size:0.92rem;font-weight:700;font-family:'DM Sans',sans-serif; }
+
+    /* scope */
+    .scope{ display:grid;grid-template-columns:1fr 1fr;gap:1.5rem; }
+    .scope-card {
+      border-radius:var(--radius);padding:1.8rem;border:1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    .scope-card:hover{ transform:translateY(-4px); }
+    .scope-card.no{ background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25); }
+    .scope-card.yes{ background:rgba(37,211,102,0.06);border-color:rgba(37,211,102,0.3); }
+    .scope-card h3{ font-size:1.05rem;margin-bottom:1rem; }
+    .scope-card ul{ list-style:none; }
+    .scope-card li{ font-size:0.92rem;margin-bottom:0.7rem;display:flex;gap:0.6rem;color:var(--text-dim); }
+    .scope-card.no li i{ color:#ef4444;margin-top:0.2rem; }
+    .scope-card.yes li i{ color:var(--wa);margin-top:0.2rem; }
+
+    /* instructor */
+    .instructor {
+      display:flex;gap:2rem;align-items:center;
+      background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.2rem;
+      transition: all 0.3s ease;
+    }
+    .instructor:hover{ border-color:var(--accent-dim);box-shadow:0 20px 40px -20px rgba(139,92,246,0.2); }
+    .instructor .pic {
+      width:96px;height:96px;border-radius:50%;flex-shrink:0;
+      background:linear-gradient(135deg,var(--accent),#5b21b6);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:#fff;
+      box-shadow:0 0 0 3px rgba(139,92,246,0.3);
+      transition:0.3s;
+      overflow:hidden;
+    }
+    .instructor .pic img{ width:100%;height:100%;object-fit:cover; }
+    .instructor:hover .pic{ box-shadow:0 0 0 6px rgba(139,92,246,0.5);transform:scale(1.03); }
+    .instructor h3{ font-size:1.2rem;margin-bottom:0.3rem; }
+    .instructor .role{ color:var(--accent-light);font-size:0.85rem;font-weight:600;margin-bottom:0.7rem; }
+    .instructor p{ color:var(--text-dim);font-size:0.92rem; }
+
+    /* pricing */
+    .price-card {
+      max-width:420px;margin:0 auto;text-align:center;
+      background:var(--bg-card);border:1px solid var(--accent-dim);
+      border-radius:20px;padding:2.4rem 2rem;
+      box-shadow:0 0 0 1px rgba(139,92,246,0.15), 0 20px 60px -20px rgba(139,92,246,0.25);
+      transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .price-card:hover{ transform:scale(1.02);box-shadow:0 0 0 1px rgba(139,92,246,0.4), 0 30px 70px -20px rgba(139,92,246,0.4); }
+    .price-card .seats{ font-size:0.8rem;color:var(--wa);font-weight:700;margin-bottom:1rem; }
+    .price-card .amount{ font-family:'Syne',sans-serif;font-weight:800;font-size:2.6rem;margin-bottom:0.2rem; }
+    .price-card .amount sup{ font-size:1.1rem;color:var(--text-dim);font-weight:600; }
+    .price-card .note{ font-size:0.8rem;color:var(--text-dim);margin-bottom:1.6rem; }
+    .price-list{ list-style:none;text-align:left;margin-bottom:1.8rem; }
+    .price-list li{ font-size:0.9rem;margin-bottom:0.65rem;display:flex;gap:0.6rem; }
+    .price-list li i{ color:var(--wa);margin-top:0.2rem; }
+    .price-card .btn{ width:100%;justify-content:center; }
+
+    /* faq */
+    .faq-item{ border-bottom:1px solid var(--border);padding:1.2rem 0; }
+    .faq-item summary {
+      cursor:pointer;font-weight:700;font-size:0.98rem;list-style:none;
+      display:flex;justify-content:space-between;align-items:center;
+      transition:0.2s;
+    }
+    .faq-item summary:hover{ color:var(--accent-light); }
+    .faq-item summary::-webkit-details-marker{ display:none; }
+    .faq-item summary::after{ content:'+';font-size:1.3rem;color:var(--accent-light);font-weight:400;transition:0.25s; }
+    .faq-item[open] summary::after{ content:'–';transform:rotate(180deg); }
+    .faq-item p{ color:var(--text-dim);font-size:0.9rem;margin-top:0.7rem; }
+
+    /* form */
+    .form-wrap {
+      max-width:560px;margin:0 auto;
+      background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.2rem;
+      transition:0.3s;
+    }
+    .form-wrap:hover{ border-color:var(--accent-dim); }
+    .field{ margin-bottom:1.1rem; }
+    .field label{ display:block;font-size:0.82rem;font-weight:600;margin-bottom:0.45rem;color:var(--text-dim); }
+    .field input,.field select {
+      width:100%;background:var(--bg);border:1px solid var(--border);
+      color:var(--text);border-radius:10px;padding:0.75rem 0.9rem;font-size:0.95rem;
+      font-family:'DM Sans',sans-serif;
+      transition:0.2s;
+    }
+    .field input:focus,.field select:focus{ border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(139,92,246,0.2); }
+    .form-wrap .btn{ width:100%;justify-content:center;margin-top:0.4rem; }
+    .form-note{ text-align:center;font-size:0.82rem;color:var(--text-dim);margin-top:1rem; }
+    .form-note a{ color:var(--accent-light);font-weight:600; }
+    #formStatus{ text-align:center;font-size:0.85rem;margin-top:0.8rem;min-height:1.2em;color:var(--wa); }
+
+    /* final cta */
+    .final-cta{ text-align:center; }
+    .final-cta h2{ font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:1rem; }
+    .final-cta p{ color:var(--text-dim);max-width:480px;margin:0 auto 2rem; }
+
+    /* footer */
+    footer{ border-top:1px solid var(--border);padding:2.2rem 0;text-align:center; }
+    footer p{ font-size:0.82rem;color:var(--text-dim); }
+    footer a{ color:var(--accent-light);font-weight:600; }
+
+    /* whatsapp float */
+    .wa-float {
+      position:fixed;bottom:1.4rem;right:1.4rem;z-index:60;
+      width:56px;height:56px;border-radius:50%;background:var(--wa);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 24px rgba(37,211,102,0.4);
+      transition: all 0.3s ease;
+    }
+    .wa-float:hover{ transform:scale(1.1) rotate(-2deg);box-shadow:0 12px 32px rgba(37,211,102,0.6); }
+
+    /* reveal */
+    .reveal{ opacity:1; transform:none; }
+    body.js-reveal-ready .reveal{ opacity:0; transform:translateY(30px); transition:opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1); }
+    body.js-reveal-ready .reveal.in{ opacity:1; transform:none; }
+
+    /* responsive */
+    @media (max-width:760px){
+      .problems{ grid-template-columns:1fr; }
+      .who-grid{ grid-template-columns:1fr 1fr; }
+      .tools-grid{ grid-template-columns:1fr 1fr; }
+      .feat-grid{ grid-template-columns:1fr 1fr; }
+      .syllabus-grid{ grid-template-columns:1fr 1fr; }
+      .week-labels{ grid-template-columns:1fr 1fr; }
+      .scope{ grid-template-columns:1fr; }
+      .instructor{ flex-direction:column;text-align:center; }
+      .stats{ gap:1.4rem; }
+      section{ padding:3.2rem 0; }
+    }
+    @media (max-width:480px){
+      .who-grid{ grid-template-columns:1fr 1fr; }
+      .tools-grid{ grid-template-columns:1fr; }
+      .feat-grid{ grid-template-columns:1fr; }
+      .syllabus-grid{ grid-template-columns:1fr; }
+      .week-labels{ grid-template-columns:1fr; }
+      .week-labels .wl{ display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <div class="brand">Web Apps Course<span class="sub">by Sanjay Meher</span></div>
+    <a href="#book" class="btn btn-primary btn-sm">Book your seat</a>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+
+    <!-- HERO -->
+    <section class="hero reveal in">
+      <div class="badge"><span class="dot"></span> Live cohort in Hindi · Seats limited to 15</div>
+      <h1>Build web apps that <span class="grad">actually work.</span></h1>
+      <p class="hero-sub">A 4-week live cohort — AI chat, dashboards, booking systems, and more. Build for yourself, earn by building for others, or offer it as a service.</p>
+      <div class="hero-ctas">
+        <a href="#book" class="btn btn-primary">Book your seat →</a>
+        <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Web%20Apps%20Course" target="_blank" rel="noopener" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Ask a question</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="num">4</span><span class="lbl">Weeks, live</span></div>
+        <div class="stat"><span class="num">₹7,000</span><span class="lbl">One-time</span></div>
+        <div class="stat"><span class="num">Hindi</span><span class="lbl">Google Meet</span></div>
+        <div class="stat"><span class="num">₹0</span><span class="lbl">Paid tools</span></div>
+      </div>
+    </section>
+
+    <!-- PROMO IMAGE -->
+    <section class="reveal" style="padding-top:0;">
+      <div class="promo-wrap">
+        <div class="promo-frame" id="promoFrame">
+          <img src="web-apps-promo.png" alt="Web Apps Course - Build with Sanjay" />
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="track">
+      <span><i class="fa-solid fa-check"></i>Live, not pre-recorded</span>
+      <span><i class="fa-solid fa-check"></i>Build real products</span>
+      <span><i class="fa-solid fa-check"></i>Taught personally by Sanjay</span>
+      <span><i class="fa-solid fa-check"></i>No coding experience needed</span>
+      <span><i class="fa-solid fa-check"></i>Hindi sessions</span>
+      <span><i class="fa-solid fa-check"></i>Live, not pre-recorded</span>
+      <span><i class="fa-solid fa-check"></i>Build real products</span>
+      <span><i class="fa-solid fa-check"></i>Taught personally by Sanjay</span>
+      <span><i class="fa-solid fa-check"></i>No coding experience needed</span>
+      <span><i class="fa-solid fa-check"></i>Hindi sessions</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- PROBLEMS -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Sound familiar?</div>
+        <h2>You don't need more theory.</h2>
+        <p>You need to build something that actually works.</p>
+      </div>
+      <div class="problems">
+        <div class="p-card"><div class="p-q">"I've watched coding tutorials for months and still can't build anything."</div><div class="p-a"><i class="fa-solid fa-check"></i>You'll build real projects — not follow along with demos that break.</div></div>
+        <div class="p-card"><div class="p-q">"Agencies quoted ₹80,000 and 3 months for a simple web app."</div><div class="p-a"><i class="fa-solid fa-check"></i>Most small business apps are 1-3 day builds once you know how.</div></div>
+        <div class="p-card"><div class="p-q">"I pay ₹3,000+ every month for tools I could own once."</div><div class="p-a"><i class="fa-solid fa-check"></i>Learn to self-host and own your tools forever — no subscriptions.</div></div>
+        <div class="p-card"><div class="p-q">"I want to earn by building for others, but don't know where to start."</div><div class="p-a"><i class="fa-solid fa-check"></i>You'll learn the skills and the business side — get paid for what you build.</div></div>
+      </div>
+    </section>
+
+    <!-- WHO IS IT FOR -->
+    <section class="reveal" id="who">
+      <div class="section-head">
+        <div class="eyebrow">Built for</div>
+        <h2>Who this course is for.</h2>
+        <p>If you want to build, earn, or scale — this is for you.</p>
+      </div>
+      <div class="who-grid">
+        <div class="who-card">
+          <div class="who-icon"><i class="fa-solid fa-store"></i></div>
+          <h4>Business Owners</h4>
+          <p>Build your own tools — booking systems, client portals, internal dashboards. Stop renting software.</p>
+        </div>
+        <div class="who-card">
+          <div class="who-icon"><i class="fa-solid fa-laptop-code"></i></div>
+          <h4>Freelancers</h4>
+          <p>Add web app development to your services. Charge more, build faster, and own your client relationships.</p>
+        </div>
+        <div class="who-card">
+          <div class="who-icon"><i class="fa-solid fa-rocket"></i></div>
+          <h4>Side-Hustlers</h4>
+          <p>Build and sell web apps as a service. No upfront investment, no monthly fees — just your time and skill.</p>
+        </div>
+        <div class="who-card">
+          <div class="who-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <h4>Career Changers</h4>
+          <p>Learn a skill that's in demand. Build a portfolio of real projects — not another certificate.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLS SHOWCASE - 6 IMAGES -->
+    <section class="reveal" id="showcase">
+      <div class="section-head">
+        <div class="eyebrow">What you'll learn to build</div>
+        <h2>Tools I've already built.</h2>
+        <p>These are real — not mockups. You'll learn to build apps just like these.</p>
+      </div>
+      <div class="tools-grid">
+        <div class="tool-slot">
+          <img src="tool-1.png" alt="Tool 1" />
+          <div class="tool-label">WhatsApp Blaster</div>
+        </div>
+        <div class="tool-slot">
+          <img src="tool-2.png" alt="Tool 2" />
+          <div class="tool-label">AI Chat App</div>
+        </div>
+        <div class="tool-slot">
+          <img src="tool-3.png" alt="Tool 3" />
+          <div class="tool-label">Lead CRM</div>
+        </div>
+        <div class="tool-slot">
+          <img src="tool-4.png" alt="Tool 4" />
+          <div class="tool-label">Local Rank Tracker</div>
+        </div>
+        <div class="tool-slot">
+          <img src="tool-5.png" alt="Tool 5" />
+          <div class="tool-label">HR Management Tool</div>
+        </div>
+        <div class="tool-slot">
+          <img src="tool-6.png" alt="Tool 6" />
+          <div class="tool-label">Ecommerce Store</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYLLABUS / TIMELINE -->
+    <section class="reveal" id="syllabus">
+      <div class="section-head">
+        <div class="eyebrow">The syllabus</div>
+        <h2>Four weeks, laid out like a timeline.</h2>
+        <p>Because that's exactly what you're learning to build.</p>
+      </div>
+      <div class="timeline-wrap">
+        <div class="clips">
+          <div class="clip" style="--op:0.35"></div>
+          <div class="clip" style="--op:0.55"></div>
+          <div class="clip" style="--op:0.72"></div>
+          <div class="clip" style="--op:0.88"></div>
+          <div class="playhead"></div>
+        </div>
+        <div class="week-labels">
+          <div class="wl"><span class="wk">Week 01</span></div>
+          <div class="wl"><span class="wk">Week 02</span></div>
+          <div class="wl"><span class="wk">Week 03</span></div>
+          <div class="wl"><span class="wk">Week 04</span></div>
+        </div>
+        <div class="syllabus-grid">
+          <div class="syl-card"><h4>Foundations</h4><p>Hosting, domains, Supabase, n8n — the stack that makes web apps work.</p></div>
+          <div class="syl-card"><h4>AI Chat App</h4><p>Build a working AI chat site with real API integration — SaaS-style.</p></div>
+          <div class="syl-card"><h4>Booking / HR Tool</h4><p>Build a Calendly alternative or internal HR tool with auth and database.</p></div>
+          <div class="syl-card"><h4>Launch & Monetize</h4><p>Deploy, add payments, share with clients — and start earning.</p></div>
+        </div>
+        <div class="sunday-note"><i class="fa-solid fa-circle-question"></i> Sundays are off from new lessons — they're reserved for live doubt-clearing on everything taught that week.</div>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <a href="web-apps-syllabus" class="btn btn-secondary">View full syllabus →</a>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="reveal" id="features">
+      <div class="section-head">
+        <div class="eyebrow">What's covered</div>
+        <h2>Beginner to building, in one course.</h2>
+        <p>No coding experience needed. You'll build real, working products.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><i class="fa-solid fa-server"></i><h4>Hosting & Deployment</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-database"></i><h4>Supabase (DB + Auth)</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-robot"></i><h4>AI Integrations</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-diagram-project"></i><h4>n8n Automations</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-credit-card"></i><h4>Payments</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-whatsapp"></i><h4>WhatsApp API</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-chart-simple"></i><h4>Dashboards</h4></div>
+        <div class="feat-card"><i class="fa-solid fa-cloud"></i><h4>Self-Hosting</h4></div>
+      </div>
+    </section>
+
+    <!-- SCOPE / REFRAME -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Let's be clear upfront</div>
+        <h2>What this course is — and isn't.</h2>
+      </div>
+      <div class="scope">
+        <div class="scope-card no">
+          <h3>✕ This is NOT</h3>
+          <ul>
+            <li><i class="fa-solid fa-xmark"></i>A theory-heavy coding course you'll never use</li>
+            <li><i class="fa-solid fa-xmark"></i>A "watch me build" demo with no hands-on work</li>
+            <li><i class="fa-solid fa-xmark"></i>Just a single tool or platform tutorial</li>
+            <li><i class="fa-solid fa-xmark"></i>A course that teaches you to be a developer — it teaches you to build</li>
+          </ul>
+        </div>
+        <div class="scope-card yes">
+          <h3>✓ You'll actually build</h3>
+          <ul>
+            <li><i class="fa-solid fa-check"></i>Real, working web apps you can use or sell</li>
+            <li><i class="fa-solid fa-check"></i>AI chat apps, dashboards, booking systems, and more</li>
+            <li><i class="fa-solid fa-check"></i>Tools that are self-hosted — you own everything</li>
+            <li><i class="fa-solid fa-check"></i>A portfolio you can show to clients</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTRUCTOR -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Who's teaching</div>
+        <h2>You'll be learning from me, directly.</h2>
+      </div>
+      <div class="instructor">
+        <div class="pic">
+          <img src="https://sanjaymeher.online/sanjaymeher/images/passport.jpg" alt="Sanjay Meher" />
+        </div>
+        <div>
+          <h3>Sanjay Meher</h3>
+          <div class="role">Builder · 3+ years · 20+ tools shipped</div>
+          <p>I've built and shipped over 20 real products — WhatsApp tools, AI apps, CRMs, rank trackers, and more. I teach every session myself, live, in Hindi. No pre-recorded filler. If you're stuck, you ask me directly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="reveal" id="pricing">
+      <div class="section-head">
+        <div class="eyebrow">One price. No upsells.</div>
+        <h2>Everything, for one fixed fee.</h2>
+      </div>
+      <div class="price-card">
+        <div class="seats">⚡ Only 15 seats per batch</div>
+        <div class="amount">₹7,000</div>
+        <div class="note">One-time payment · 4 weeks · No hidden cost</div>
+        <ul class="price-list">
+          <li><i class="fa-solid fa-check"></i>4 weeks of live sessions on Google Meet, daily except Sunday</li>
+          <li><i class="fa-solid fa-check"></i>Build real web apps — AI chat, dashboards, booking systems</li>
+          <li><i class="fa-solid fa-check"></i>Supabase, n8n, AI APIs, payments, and more</li>
+          <li><i class="fa-solid fa-check"></i>Sundays reserved for live doubt-clearing</li>
+          <li><i class="fa-solid fa-check"></i>Direct teaching from Sanjay, in Hindi</li>
+        </ul>
+        <a href="#book" class="btn btn-primary">Book your seat →</a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="reveal" id="faq">
+      <div class="section-head">
+        <div class="eyebrow">Before you ask</div>
+        <h2>Quick answers.</h2>
+      </div>
+      <div style="max-width:680px;margin:0 auto;">
+        <details class="faq-item" open>
+          <summary>Do I need any coding experience?</summary>
+          <p>No. The course is built for absolute beginners. You'll learn everything from the ground up — no prior coding knowledge required.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What will I be able to build after this course?</summary>
+          <p>You'll be able to build AI chat apps, booking systems, client dashboards, internal HR tools, and more — all self-hosted, all yours.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I earn money from what I build?</summary>
+          <p>Yes. You can build for your own business, build for clients, or offer web app development as a service. The course covers all three paths.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if I'm a complete beginner?</summary>
+          <p>That's exactly who this is for. You'll go from zero to building real, working web apps in 4 weeks.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do I need to buy any software?</summary>
+          <p>No. All tools we use are free or have generous free tiers — Supabase, n8n, Render, Vercel, and more.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What language are the sessions in?</summary>
+          <p>Hindi, conducted live over Google Meet.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- BOOKING FORM -->
+    <section class="reveal" id="book">
+      <div class="section-head">
+        <div class="eyebrow">Last step</div>
+        <h2>Book your seat.</h2>
+        <p>Fill this in and it'll open WhatsApp with your details, ready to confirm.</p>
+      </div>
+      <div class="form-wrap">
+        <form id="bookingForm">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" required placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label for="phone">WhatsApp number</label>
+            <input type="tel" id="phone" required placeholder="10-digit mobile number" />
+          </div>
+          <div class="field">
+            <label for="email">Email (optional)</label>
+            <input type="email" id="email" placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label for="level">Experience level</label>
+            <select id="level">
+              <option>Never built anything before</option>
+              <option>Some experience, want to get serious</option>
+              <option>Comfortable, want to go further</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Confirm seat on WhatsApp</button>
+        </form>
+        <p id="formStatus"></p>
+        <p class="form-note">Just have a question, not ready to book? <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Web%20Apps%20Course" target="_blank" rel="noopener">Message Sanjay directly →</a></p>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta reveal">
+      <h2>15 seats. One batch.<br>Decide now or wait for the next one.</h2>
+      <p>Learn to build web apps you can use, sell, or offer as a service — taught live by someone who's built 20+ of them.</p>
+      <a href="#book" class="btn btn-primary">Book your seat →</a>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Sanjay Meher · Web Apps Course · <a href="https://sanjaymeher.online/course">Back to all courses →</a></p>
+  </div>
+</footer>
+
+<a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Web%20Apps%20Course" target="_blank" rel="noopener" class="wa-float" aria-label="Chat on WhatsApp">
+  <i class="fab fa-whatsapp" style="font-size:26px;color:#fff;"></i>
+</a>
+
+<script>
+  // scroll reveal
+  try {
+    const reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      document.body.classList.add('js-reveal-ready');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      reveals.forEach(el => observer.observe(el));
+      setTimeout(() => {
+        reveals.forEach(el => el.classList.add('in'));
+      }, 4000);
+    }
+  } catch (err) {
+    console.warn('Reveal animation skipped; content remains visible.', err);
+  }
+
+  // booking form
+  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const level = document.getElementById('level').value;
+
+    let msg = `Hi Sanjay, I want to book a seat in the Web Apps Course.\n\nName: ${name}\nWhatsApp: ${phone}`;
+    if(email) msg += `\nEmail: ${email}`;
+    msg += `\nExperience: ${level}`;
+
+    const url = `https://wa.me/918984636695?text=${encodeURIComponent(msg)}`;
+    document.getElementById('formStatus').textContent = 'Opening WhatsApp to confirm your seat...';
+    window.open(url, '_blank', 'noopener');
+  });
+</script>
+</body>
+</html>
