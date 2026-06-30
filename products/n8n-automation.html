@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SanjayLeadHub — Done-for-you lead automation</title>
+  <meta name="description" content="Auto-reply, WhatsApp, follow-ups, and open tracking for your leads — prebuilt n8n workflows, set up personally on your own Gmail, Sheets, and WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      --bg:#0b0b14;
+      --bg-card:#14141f;
+      --bg-card-hover:#1a1a29;
+      --text:#f2f1f7;
+      --text-dim:#a8a3bd;
+      --border:rgba(255,255,255,0.09);
+      --accent:#8b5cf6;
+      --accent-light:#c4b5fd;
+      --accent-dim:rgba(139,92,246,0.14);
+      --wa:#25d366;
+      --warn:#ef4444;
+      --radius:16px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:'DM Sans',sans-serif;
+      line-height:1.65;
+      -webkit-font-smoothing:antialiased;
+    }
+    h1,h2,h3,h4{ font-family:'Syne',sans-serif;font-weight:800;line-height:1.15;letter-spacing:-0.01em; }
+    a{ color:inherit;text-decoration:none; }
+    .container{ max-width:1080px;margin:0 auto;padding:0 1.25rem; }
+    section{ padding:5rem 0; }
+    :focus-visible{ outline:2px solid var(--accent-light);outline-offset:3px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
+
+    .topbar { position:sticky;top:0;z-index:50;background:rgba(11,11,20,0.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border); }
+    .topbar .container{ display:flex;align-items:center;justify-content:space-between;height:64px;gap:0.6rem; }
+    .brand{ font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem; }
+    .brand .sub{ display:block;font-family:'DM Sans',sans-serif;font-weight:500;font-size:0.68rem;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;margin-top:1px; }
+    .topbar-actions{ display:flex;gap:0.6rem; }
+    .btn { display:inline-flex;align-items:center;gap:0.5rem;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:0.7rem 1.4rem;border-radius:999px;transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);border:1px solid transparent;white-space:nowrap;cursor:pointer; }
+    .btn:hover{ transform:translateY(-3px) scale(1.02);box-shadow:0 12px 28px -8px rgba(139,92,246,0.3); }
+    .btn-primary{ background:var(--accent);color:#fff; }
+    .btn-primary:hover{ filter:brightness(1.12); }
+    .btn-wa{ background:var(--wa);color:#fff; }
+    .btn-wa:hover{ filter:brightness(1.08); }
+    .btn-sm{ padding:0.55rem 1.1rem;font-size:0.82rem; }
+
+    .hero{ padding:4rem 0 2.5rem;text-align:center; }
+    .badge { display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent-dim);color:var(--accent-light);border:1px solid rgba(139,92,246,0.3);padding:0.45rem 1rem;border-radius:999px;font-size:0.82rem;font-weight:600;margin-bottom:1.75rem;animation:floatBadge 4s ease-in-out infinite; }
+    @keyframes floatBadge { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+    .dot{ width:7px;height:7px;border-radius:50%;background:var(--wa);animation:pulse 1.8s infinite; }
+    @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+    .hero h1{ font-size:clamp(2.2rem,5.6vw,3.5rem);max-width:800px;margin:0 auto 1.4rem; }
+    .hero h1 .grad{ color:var(--accent-light); }
+    .hero-sub{ max-width:620px;margin:0 auto 2.2rem;color:var(--text-dim);font-size:1.05rem; }
+    .hero-sub strong{ color:var(--text); }
+    .hero-ctas{ display:flex;gap:0.9rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.8rem; }
+    .stats { display:flex;justify-content:center;gap:2.2rem;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:2rem;max-width:720px;margin:0 auto; }
+    .stat .num{ display:block;font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--accent-light);transition:0.2s; }
+    .stat:hover .num{ transform:scale(1.08);color:#fff; }
+    .stat .lbl{ font-size:0.76rem;color:var(--text-dim); }
+
+    .promo-wrap { max-width:920px;margin:0 auto;border-radius:24px;overflow:hidden;border:1px solid var(--border);background:var(--bg-card);box-shadow:0 30px 80px -30px rgba(139,92,246,0.35);transition:0.3s; }
+    .promo-wrap:hover{ border-color:var(--accent-dim); }
+    .promo-frame{ position:relative;width:100%;aspect-ratio:16/9;background:#000; }
+    .promo-frame iframe,.promo-frame video{ position:absolute;inset:0;width:100%;height:100%;border:0; }
+    .promo-frame img{ position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+    .promo-empty { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;color:var(--text-dim);background:radial-gradient(circle at 50% 40%, rgba(139,92,246,0.12), transparent 65%); }
+    .promo-empty i{ font-size:2.4rem;color:var(--accent-light);opacity:0.7; }
+    .promo-empty span{ font-size:0.85rem; }
+
+    .strip { border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-card);padding:1.1rem 0;overflow:hidden; }
+    .strip .track{ display:flex;gap:2.5rem;white-space:nowrap;animation:scroll-x 28s linear infinite;width:max-content; }
+    .strip span{ font-size:0.85rem;color:var(--text-dim);font-weight:500; }
+    .strip span i{ color:var(--accent-light);margin-right:0.4rem; }
+    @keyframes scroll-x{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+    .eyebrow { display:inline-block;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-light);margin-bottom:0.9rem; }
+    .section-head{ text-align:center;max-width:660px;margin:0 auto 3rem; }
+    .section-head h2{ font-size:clamp(1.6rem,3.2vw,2.3rem);margin-bottom:0.8rem; }
+    .section-head p{ color:var(--text-dim); }
+
+    .problems{ display:grid;grid-template-columns:repeat(2,1fr);gap:1rem; }
+    .p-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;transition: all 0.3s cubic-bezier(0.23,1,0.32,1); }
+    .p-card:hover{ background:var(--bg-card-hover);transform:translateY(-4px);box-shadow:0 12px 28px -12px rgba(0,0,0,0.5);border-color:var(--accent-dim); }
+    .p-q{ font-size:0.92rem;color:var(--text-dim);font-style:italic;margin-bottom:0.6rem; }
+    .p-a{ font-weight:700;font-size:0.95rem; }
+    .p-a i{ color:var(--wa);margin-right:0.4rem; }
+
+    .who-grid{ display:grid;grid-template-columns:repeat(5,1fr);gap:1rem; }
+    .who-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem 1.2rem;text-align:center;transition: all 0.3s cubic-bezier(0.23,1,0.32,1); }
+    .who-card:hover{ transform:translateY(-6px);background:var(--bg-card-hover);border-color:var(--accent-dim);box-shadow:0 16px 32px -16px rgba(139,92,246,0.25); }
+    .who-icon { width:46px;height:46px;border-radius:50%;margin:0 auto 0.9rem;background:var(--accent-dim);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent-light); }
+    .who-card h4{ font-size:0.96rem;margin-bottom:0.5rem; }
+    .who-card p{ font-size:0.8rem;color:var(--text-dim);line-height:1.5; }
+
+    .feat-grid{ display:grid;grid-template-columns:repeat(4,1fr);gap:1rem; }
+    .feat-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem;transition: all 0.3s cubic-bezier(0.23,1,0.32,1); }
+    .feat-card:hover{ transform:translateY(-4px);background:var(--bg-card-hover);border-color:var(--accent-dim); }
+    .feat-card i{ color:var(--accent-light);font-size:1.2rem;margin-bottom:0.7rem;display:block; }
+    .feat-card h4{ font-size:0.9rem;font-weight:700;font-family:'DM Sans',sans-serif; }
+    .feat-card p{ font-size:0.78rem;color:var(--text-dim);margin-top:0.35rem; }
+
+    .steps{ display:grid;grid-template-columns:repeat(4,1fr);gap:1rem; }
+    .step-card{ background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;transition: all 0.3s cubic-bezier(0.23,1,0.32,1); }
+    .step-card:hover{ transform:translateY(-4px);background:var(--bg-card-hover);border-color:var(--accent-dim); }
+    .step-num{ width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1px solid rgba(139,92,246,0.35);color:var(--accent-light);font-family:'Syne',sans-serif;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:0.9rem;font-size:0.9rem; }
+    .step-card h4{ font-size:0.95rem;margin-bottom:0.4rem; }
+    .step-card p{ font-size:0.82rem;color:var(--text-dim); }
+
+    .exp-stats{ display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:620px;margin:0 auto; }
+    .exp-stat{ background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;transition:0.3s; }
+    .exp-stat:hover{ transform:translateY(-4px);border-color:var(--accent-dim); }
+    .exp-stat .num{ display:block;font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--accent-light); }
+    .exp-stat .lbl{ font-size:0.8rem;color:var(--text-dim); }
+
+    .scope{ display:grid;grid-template-columns:1fr 1fr;gap:1.5rem; }
+    .scope-card { border-radius:var(--radius);padding:1.8rem;border:1px solid var(--border);transition: all 0.3s ease; }
+    .scope-card:hover{ transform:translateY(-4px); }
+    .scope-card.no{ background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25); }
+    .scope-card.yes{ background:rgba(37,211,102,0.06);border-color:rgba(37,211,102,0.3); }
+    .scope-card h3{ font-size:1.03rem;margin-bottom:1rem; }
+    .scope-card ul{ list-style:none; }
+    .scope-card li{ font-size:0.9rem;margin-bottom:0.7rem;display:flex;gap:0.6rem;color:var(--text-dim); }
+    .scope-card.no li i{ color:#ef4444;margin-top:0.2rem; }
+    .scope-card.yes li i{ color:var(--wa);margin-top:0.2rem; }
+
+    .alert-box{ max-width:780px;margin:0 auto;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:1.8rem 2rem;transition:0.3s; }
+    .alert-box:hover{ border-color:rgba(239,68,68,0.5); }
+    .alert-box h3{ font-size:1.05rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.6rem;color:#fca5a5;font-family:'Syne',sans-serif;font-weight:800; }
+    .alert-box p{ font-size:0.92rem;color:var(--text-dim);line-height:1.75; }
+    .alert-box p + p{ margin-top:0.8rem; }
+    .alert-box strong{ color:var(--text); }
+
+    .instructor { display:flex;gap:2rem;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.2rem;transition: all 0.3s ease; }
+    .instructor:hover{ border-color:var(--accent-dim);box-shadow:0 20px 40px -20px rgba(139,92,246,0.2); }
+    .instructor .pic { width:96px;height:96px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),#5b21b6);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:#fff;box-shadow:0 0 0 3px rgba(139,92,246,0.3);transition:0.3s;overflow:hidden; }
+    .instructor .pic img{ width:100%;height:100%;object-fit:cover; }
+    .instructor:hover .pic{ box-shadow:0 0 0 6px rgba(139,92,246,0.5);transform:scale(1.03); }
+    .instructor h3{ font-size:1.2rem;margin-bottom:0.3rem; }
+    .instructor .role{ color:var(--accent-light);font-size:0.85rem;font-weight:600;margin-bottom:0.7rem; }
+    .instructor p{ color:var(--text-dim);font-size:0.92rem; }
+
+    .price-grid{ display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:920px;margin:0 auto; }
+    .price-card { text-align:center;background:var(--bg-card);border:1px solid var(--accent-dim);border-radius:20px;padding:2.4rem 2rem;box-shadow:0 0 0 1px rgba(139,92,246,0.15), 0 20px 60px -20px rgba(139,92,246,0.25);transition: all 0.4s cubic-bezier(0.23,1,0.32,1); }
+    .price-card:hover{ transform:scale(1.02);box-shadow:0 0 0 1px rgba(139,92,246,0.4), 0 30px 70px -20px rgba(139,92,246,0.4); }
+    .price-card .seats{ font-size:0.8rem;color:var(--wa);font-weight:700;margin-bottom:1rem; }
+    .price-card .amount{ font-family:'Syne',sans-serif;font-weight:800;font-size:2.3rem;margin-bottom:0.2rem; }
+    .price-card .amount small{ font-size:1.1rem;color:var(--text-dim);font-weight:600; }
+    .price-card .note{ font-size:0.8rem;color:var(--text-dim);margin-bottom:1.6rem; }
+    .price-list{ list-style:none;text-align:left;margin-bottom:1.4rem; }
+    .price-list li{ font-size:0.9rem;margin-bottom:0.65rem;display:flex;gap:0.6rem; }
+    .price-list li i{ color:var(--wa);margin-top:0.2rem; }
+    .price-card .btn{ width:100%;justify-content:center; }
+    .price-fineprint{ font-size:0.76rem;color:var(--text-dim);margin-top:1.2rem;line-height:1.6; }
+
+    .faq-item{ border-bottom:1px solid var(--border);padding:1.2rem 0; }
+    .faq-item summary { cursor:pointer;font-weight:700;font-size:0.98rem;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:0.2s; }
+    .faq-item summary:hover{ color:var(--accent-light); }
+    .faq-item summary::-webkit-details-marker{ display:none; }
+    .faq-item summary::after{ content:'+';font-size:1.3rem;color:var(--accent-light);font-weight:400;transition:0.25s; }
+    .faq-item[open] summary::after{ content:'–';transform:rotate(180deg); }
+    .faq-item p{ color:var(--text-dim);font-size:0.9rem;margin-top:0.7rem; }
+
+    .form-wrap { max-width:560px;margin:0 auto;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:2.2rem;transition:0.3s; }
+    .form-wrap:hover{ border-color:var(--accent-dim); }
+    .field{ margin-bottom:1.1rem; }
+    .field label{ display:block;font-size:0.82rem;font-weight:600;margin-bottom:0.45rem;color:var(--text-dim); }
+    .field input,.field select { width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:0.75rem 0.9rem;font-size:0.95rem;font-family:'DM Sans',sans-serif;transition:0.2s; }
+    .field input:focus,.field select:focus{ border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(139,92,246,0.2); }
+    .form-wrap .btn{ width:100%;justify-content:center;margin-top:0.4rem; }
+    .form-note{ text-align:center;font-size:0.82rem;color:var(--text-dim);margin-top:1rem; }
+    .form-note a{ color:var(--accent-light);font-weight:600; }
+    #formStatus{ text-align:center;font-size:0.85rem;margin-top:0.8rem;min-height:1.2em;color:var(--wa); }
+
+    .final-cta{ text-align:center; }
+    .final-cta h2{ font-size:clamp(1.7rem,3.6vw,2.4rem);margin-bottom:1rem; }
+    .final-cta p{ color:var(--text-dim);max-width:500px;margin:0 auto 2rem; }
+
+    footer{ border-top:1px solid var(--border);padding:2.2rem 0;text-align:center; }
+    footer p{ font-size:0.8rem;color:var(--text-dim);max-width:680px;margin:0 auto;line-height:1.7; }
+
+    .wa-float { position:fixed;bottom:1.4rem;right:1.4rem;z-index:60;width:56px;height:56px;border-radius:50%;background:var(--wa);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,0.4);transition: all 0.3s ease; }
+    .wa-float:hover{ transform:scale(1.1) rotate(-2deg);box-shadow:0 12px 32px rgba(37,211,102,0.6); }
+
+    .reveal{ opacity:1; transform:none; }
+    body.js-reveal-ready .reveal{ opacity:0; transform:translateY(30px); transition:opacity 0.7s cubic-bezier(0.23,1,0.32,1), transform 0.7s cubic-bezier(0.23,1,0.32,1); }
+    body.js-reveal-ready .reveal.in{ opacity:1; transform:none; }
+
+    @media (max-width:760px){
+      .problems{ grid-template-columns:1fr; }
+      .who-grid{ grid-template-columns:1fr 1fr; }
+      .feat-grid{ grid-template-columns:1fr 1fr; }
+      .steps{ grid-template-columns:1fr 1fr; }
+      .scope{ grid-template-columns:1fr; }
+      .price-grid{ grid-template-columns:1fr; }
+      .instructor{ flex-direction:column;text-align:center; }
+      .stats{ gap:1.4rem; }
+      .exp-stats{ grid-template-columns:1fr;max-width:300px; }
+      section{ padding:3.2rem 0; }
+    }
+    @media (max-width:480px){
+      .who-grid{ grid-template-columns:1fr 1fr; }
+      .feat-grid{ grid-template-columns:1fr; }
+      .steps{ grid-template-columns:1fr; }
+      .topbar-actions .btn-sm span{ display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <div class="brand">SanjayLeadHub<span class="sub">Setup by Sanjay Meher</span></div>
+    <div class="topbar-actions">
+      <a href="#book" class="btn btn-primary btn-sm"><span>Get it set up</span></a>
+      <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Lead%20Automation%20Setup" target="_blank" rel="noopener" class="btn btn-wa btn-sm"><i class="fab fa-whatsapp"></i> <span>Ask</span></a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+
+    <!-- HERO -->
+    <section class="hero reveal in">
+      <div class="badge"><span class="dot"></span> Your Gmail, your Sheet, your WhatsApp number</div>
+      <h1>Every lead gets a reply.<br><span class="grad">In under a minute.</span></h1>
+      <p class="hero-sub">A done-for-you automation that replies to new leads on email and WhatsApp instantly, follows up automatically if they go quiet, tracks who's actually opened your emails, and stops the moment they respond — <strong>set up personally on your own accounts</strong>, so nothing routes through mine.</p>
+      <div class="hero-ctas">
+        <a href="#book" class="btn btn-primary">Get it set up →</a>
+        <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Lead%20Automation%20Setup" target="_blank" rel="noopener" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Ask a question</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="num">5</span><span class="lbl">Workflows included</span></div>
+        <div class="stat"><span class="num">&lt;1 min</span><span class="lbl">Lead response time</span></div>
+        <div class="stat"><span class="num">₹999</span><span class="lbl">Basic setup, one-time</span></div>
+        <div class="stat"><span class="num">100%</span><span class="lbl">Your Gmail, Sheet & WhatsApp</span></div>
+      </div>
+    </section>
+
+    <!-- PROMO -->
+    <section class="reveal" style="padding-top:0;">
+      <div class="promo-wrap">
+        <div class="promo-frame" id="promoFrame">
+          <div class="promo-empty" id="promoEmpty">
+            <i class="fa-solid fa-display"></i>
+            <span>Workflow demo screenshot/recording goes here</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="track">
+      <span><i class="fa-solid fa-check"></i>Instant AI email reply</span>
+      <span><i class="fa-solid fa-check"></i>WhatsApp lead reply built in</span>
+      <span><i class="fa-solid fa-check"></i>Automatic follow-ups</span>
+      <span><i class="fa-solid fa-check"></i>Open tracking on every email</span>
+      <span><i class="fa-solid fa-check"></i>Stops the moment a lead replies</span>
+      <span><i class="fa-solid fa-check"></i>Instant AI email reply</span>
+      <span><i class="fa-solid fa-check"></i>WhatsApp lead reply built in</span>
+      <span><i class="fa-solid fa-check"></i>Automatic follow-ups</span>
+      <span><i class="fa-solid fa-check"></i>Open tracking on every email</span>
+      <span><i class="fa-solid fa-check"></i>Stops the moment a lead replies</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- PROBLEMS -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Sound familiar?</div>
+        <h2>Most leads go cold before you even see the message.</h2>
+        <p>You don't need to hire someone to fix this. You need this running in the background.</p>
+      </div>
+      <div class="problems">
+        <div class="p-card"><div class="p-q">"A lead messages at 11pm. I reply the next morning. By then they've already messaged someone else."</div><div class="p-a"><i class="fa-solid fa-check"></i>Email and WhatsApp auto-reply within a minute, any time of day.</div></div>
+        <div class="p-card"><div class="p-q">"I send one email and forget to follow up. Most leads never hear from me again."</div><div class="p-a"><i class="fa-solid fa-check"></i>Two automatic follow-ups, timed around whether they've even opened your email.</div></div>
+        <div class="p-card"><div class="p-q">"I keep following up with people who already replied — it looks careless."</div><div class="p-a"><i class="fa-solid fa-check"></i>Follow-ups stop automatically the moment a lead actually responds.</div></div>
+        <div class="p-card"><div class="p-q">"I don't want my leads or my Gmail routing through someone else's server."</div><div class="p-a"><i class="fa-solid fa-check"></i>Everything runs on your own Gmail, Google Sheet, and WhatsApp number.</div></div>
+      </div>
+    </section>
+
+    <!-- WHO IS IT FOR -->
+    <section class="reveal" id="who">
+      <div class="section-head">
+        <div class="eyebrow">Built for</div>
+        <h2>Who this is for.</h2>
+        <p>If leads come to you and you're the one expected to reply first.</p>
+      </div>
+      <div class="who-grid">
+        <div class="who-card"><div class="who-icon"><i class="fa-solid fa-house"></i></div><h4>Real Estate</h4><p>Reply to enquiries the moment they land, before another agent gets there first.</p></div>
+        <div class="who-card"><div class="who-icon"><i class="fa-solid fa-chalkboard-user"></i></div><h4>Coaches & Trainers</h4><p>Answer "what's the fee / duration" questions instantly, day or night.</p></div>
+        <div class="who-card"><div class="who-icon"><i class="fa-solid fa-cart-shopping"></i></div><h4>Local Businesses</h4><p>Never lose a customer enquiry to a slow reply again.</p></div>
+        <div class="who-card"><div class="who-icon"><i class="fa-solid fa-laptop-code"></i></div><h4>Freelancers & Agencies</h4><p>Look responsive to every client lead without manually managing it.</p></div>
+        <div class="who-card"><div class="who-icon"><i class="fa-solid fa-building"></i></div><h4>Small Sales Teams</h4><p>Give every inbound lead a fast first touch before a human takes over.</p></div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="reveal" id="features">
+      <div class="section-head">
+        <div class="eyebrow">What's actually inside</div>
+        <h2>Five workflows, one lead pipeline.</h2>
+        <p>Prebuilt and tested in n8n — you just add your business details and connect your accounts.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><i class="fa-solid fa-envelope-open-text"></i><h4>AI email auto-reply</h4><p>Replies to new enquiries using your own business details and tone.</p></div>
+        <div class="feat-card"><i class="fa-brands fa-whatsapp"></i><h4>WhatsApp lead reply</h4><p>Sends an instant WhatsApp message alongside the email reply.</p></div>
+        <div class="feat-card"><i class="fa-solid fa-clock-rotate-left"></i><h4>Smart follow-ups</h4><p>Two timed follow-ups based on whether the lead opened your email.</p></div>
+        <div class="feat-card"><i class="fa-solid fa-eye"></i><h4>Open tracking</h4><p>Know who's actually reading your emails, logged straight to your Sheet.</p></div>
+        <div class="feat-card"><i class="fa-solid fa-reply"></i><h4>Reply detector</h4><p>Watches for real replies and stops follow-ups automatically.</p></div>
+        <div class="feat-card"><i class="fa-solid fa-table"></i><h4>Google Sheets dashboard</h4><p>Every lead, every status, in a sheet you already know how to read.</p></div>
+        <div class="feat-card"><i class="fa-solid fa-shield-halved"></i><h4>Your accounts only</h4><p>Your Gmail, your Sheet, your WhatsApp — nothing shared across clients.</p></div>
+        <div class="feat-card" style="grid-column:span 2;"><i class="fa-solid fa-server"></i><h4>Deployed and running</h4><p>n8n hosted on Railway (or your own VPS if you have one) — live and tested before handover.</p></div>
+      </div>
+    </section>
+
+    <!-- SETUP STEPS -->
+    <section class="reveal" id="setup">
+      <div class="section-head">
+        <div class="eyebrow">How setup works</div>
+        <h2>One Zoom call. Done by me.</h2>
+        <p>You never need to touch n8n yourself.</p>
+      </div>
+      <div class="steps">
+        <div class="step-card"><div class="step-num">1</div><h4>We get on a call</h4><p>One-hour Zoom — I take control, connect your Gmail, Sheet, and WhatsApp.</p></div>
+        <div class="step-card"><div class="step-num">2</div><h4>You share your business details</h4><p>Just your files — pricing, FAQs, tone of voice. The workflows are already built.</p></div>
+        <div class="step-card"><div class="step-num">3</div><h4>I deploy and test live</h4><p>n8n on Railway (or your VPS), every workflow tested with a real lead before you pay.</p></div>
+        <div class="step-card"><div class="step-num">4</div><h4>Happy, then pay</h4><p>You see it working end-to-end on the call before any payment changes hands.</p></div>
+      </div>
+    </section>
+
+    <!-- BUILT & TESTED -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Built & verified</div>
+        <h2>Not a template — a tested pipeline.</h2>
+        <p>Every workflow below was built, run, and debugged on a live lead before this was ever offered for sale.</p>
+      </div>
+      <div class="exp-stats">
+        <div class="exp-stat"><span class="num">5</span><span class="lbl">Core workflows</span></div>
+        <div class="exp-stat"><span class="num">2</span><span class="lbl">Channels: Email + WhatsApp</span></div>
+        <div class="exp-stat"><span class="num">100%</span><span class="lbl">Tested live before handover</span></div>
+      </div>
+    </section>
+
+    <!-- SCOPE / CONDITIONS -->
+    <section class="reveal" id="scope">
+      <div class="section-head">
+        <div class="eyebrow">Let's be completely clear</div>
+        <h2>What this is — and isn't.</h2>
+      </div>
+      <div class="scope">
+        <div class="scope-card no">
+          <h3>✕ This is NOT</h3>
+          <ul>
+            <li><i class="fa-solid fa-xmark"></i>Lifetime free support — covered for 2 months from handover, then maintenance is a separate call</li>
+            <li><i class="fa-solid fa-xmark"></i>A guarantee against Gmail, Google, or WhatsApp changing their own policies</li>
+            <li><i class="fa-solid fa-xmark"></i>Free hosting forever — if I provision a free Railway instance and the provider changes its terms, that's outside my control</li>
+            <li><i class="fa-solid fa-xmark"></i>A replacement for a CRM — it's a fast-reply and follow-up layer on your existing Sheet</li>
+          </ul>
+        </div>
+        <div class="scope-card yes">
+          <h3>✓ What you're actually getting</h3>
+          <ul>
+            <li><i class="fa-solid fa-check"></i>Five prebuilt workflows, personally deployed and tested on your accounts</li>
+            <li><i class="fa-solid fa-check"></i>n8n hosted on Railway or your own VPS, your choice</li>
+            <li><i class="fa-solid fa-check"></i>Your Gmail, Sheet, and WhatsApp number — nothing shared or routed through mine</li>
+            <li><i class="fa-solid fa-check"></i>2 months of bug-fix support included after handover</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONDITIONS ALERT -->
+    <section class="reveal">
+      <div class="alert-box">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> Please read before booking</h3>
+        <p>This runs on <strong>your own Gmail, Google Sheets, and WhatsApp number</strong>. Google and WhatsApp — not me — control their own rate limits, account policies, and terms of service.</p>
+        <p>If you don't have your own server, I'll set up a <strong>free Railway instance</strong> for you at no extra cost. If Railway changes its pricing or free-tier terms later, that's on their end, not mine — you're always free to move hosting at that point.</p>
+        <p>What I deliver is a working, fully tested setup at handover, plus <strong>2 months of bug-fix support</strong> from that date. After that — or for new automations beyond what was agreed — support continues as a separate, paid engagement.</p>
+      </div>
+    </section>
+
+    <!-- INSTRUCTOR -->
+    <section class="reveal">
+      <div class="section-head">
+        <div class="eyebrow">Who's setting it up</div>
+        <h2>I build and deploy it myself.</h2>
+      </div>
+      <div class="instructor">
+        <div class="pic"><img src="../sanjaymeher/images/passport.jpg" alt="Sanjay Meher" /></div>
+        <div>
+          <h3>Sanjay Meher</h3>
+          <div class="role">Setup done personally, on a call with you</div>
+          <p>I personally connect, configure, and test every workflow on your own Gmail, Sheet, and WhatsApp before you pay — no outsourcing, no template dump-and-run. If something breaks within the support window, you message me directly on WhatsApp.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="reveal" id="pricing">
+      <div class="section-head">
+        <div class="eyebrow">One base price. Add only what you need.</div>
+        <h2>Setup, done for you.</h2>
+      </div>
+      <div class="price-grid">
+        <div class="price-card">
+          <div class="seats">📞 One-hour Zoom setup call</div>
+          <div class="amount">₹999</div>
+          <div class="note">Basic setup · One-time payment · 2 months of bug-fix support included</div>
+          <ul class="price-list">
+            <li><i class="fa-solid fa-check"></i>n8n deployed on Railway (or your own VPS)</li>
+            <li><i class="fa-solid fa-check"></i>Gowa WhatsApp connected to your number</li>
+            <li><i class="fa-solid fa-check"></i>Prebuilt core automations imported and tested live</li>
+            <li><i class="fa-solid fa-check"></i>You just add your own business files — no custom build needed</li>
+          </ul>
+          <a href="#book" class="btn btn-primary">Get it set up →</a>
+        </div>
+        <div class="price-card">
+          <div class="seats">🧩 Need more than the basics?</div>
+          <div class="amount">Add-on <small>per automation</small></div>
+          <div class="note">Priced per workflow, based on what your business actually needs</div>
+          <ul class="price-list">
+            <li><i class="fa-solid fa-check"></i>Lead scoring, hot-lead alerts, booking handoff, daily digests, and more</li>
+            <li><i class="fa-solid fa-check"></i>Quoted upfront on the call once I know your specific use case</li>
+            <li><i class="fa-solid fa-check"></i>Each add-on tested live before it's counted as delivered</li>
+            <li><i class="fa-solid fa-check"></i>No surprise charges — price agreed before any work starts</li>
+          </ul>
+          <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20want%20to%20know%20about%20additional%20automations%20for%20my%20business" target="_blank" rel="noopener" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Discuss add-ons</a>
+        </div>
+      </div>
+      <p class="price-fineprint" style="text-align:center;max-width:680px;margin:1.6rem auto 0;">If you already have a VPS, I'll deploy there instead of Railway at no extra cost. Either way, the workflows are prebuilt — onboarding is mostly you handing me your business files, not me writing new automations from scratch.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="reveal" id="faq">
+      <div class="section-head">
+        <div class="eyebrow">Before you ask</div>
+        <h2>Quick answers.</h2>
+      </div>
+      <div style="max-width:680px;margin:0 auto;">
+        <details class="faq-item" open>
+          <summary>Whose Gmail / WhatsApp does this run on?</summary>
+          <p>Yours. You connect your own Gmail account, your own Google Sheet, and your own WhatsApp number. Nothing routes through my accounts or my number.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What's included in the ₹999 basic setup?</summary>
+          <p>n8n deployed (Railway, or your own VPS if you have one), Gowa connected to your WhatsApp, and the core prebuilt automations imported and tested on a real lead during our call. You just supply your business files — pricing, FAQs, tone — nothing is built from scratch.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if I need more than the core automations?</summary>
+          <p>That's priced separately, per automation, based on what your business specifically needs — quoted upfront before any work starts, no surprises after.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if something breaks?</summary>
+          <p>Bug fixes are covered free for 2 months from handover. After that, or for new requests beyond the original scope, support continues as a separate paid call — message me on WhatsApp.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What if Railway or WhatsApp changes their terms?</summary>
+          <p>That's on their end, not something I can prevent or guarantee against. If a free Railway instance's terms change, you're always free to move to your own VPS — I'll help with that migration.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do I need to know how to use n8n?</summary>
+          <p>No. The whole point is that you don't touch it. I run the entire setup live on the call and hand you a working system, not a DIY kit.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- BOOKING FORM -->
+    <section class="reveal" id="book">
+      <div class="section-head">
+        <div class="eyebrow">Last step</div>
+        <h2>Get it set up.</h2>
+        <p>Fill this in and it'll open WhatsApp with your details, ready to book the call.</p>
+      </div>
+      <div class="form-wrap">
+        <form id="bookingForm">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" required placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label for="phone">WhatsApp number</label>
+            <input type="tel" id="phone" required placeholder="10-digit mobile number" />
+          </div>
+          <div class="field">
+            <label for="business">What kind of business?</label>
+            <input type="text" id="business" placeholder="e.g. Real estate, coaching, local shop" />
+          </div>
+          <div class="field">
+            <label for="vps">Do you already have your own server (VPS)?</label>
+            <select id="vps">
+              <option>No, set up a free Railway instance for me</option>
+              <option>Yes, I have my own VPS</option>
+              <option>Not sure what that means</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-wa"><i class="fab fa-whatsapp"></i> Book setup on WhatsApp</button>
+        </form>
+        <p id="formStatus"></p>
+        <p class="form-note">Just have a question, not ready to start? <a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Lead%20Automation%20Setup" target="_blank" rel="noopener">Message Sanjay directly →</a></p>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta reveal">
+      <h2>Stop losing leads to slow replies.<br>Let it run itself.</h2>
+      <p>One call, your own accounts, fully tested before you pay.</p>
+      <a href="#book" class="btn btn-primary">Get it set up →</a>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Sanjay Meher · SanjayLeadHub Setup · Runs on your own Gmail, Google Sheets, and WhatsApp account — pricing, quotas, and platform terms for those services are controlled by Google and WhatsApp, not by Sanjay Meher.</p>
+  </div>
+</footer>
+
+<a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20have%20a%20question%20about%20the%20Lead%20Automation%20Setup" target="_blank" rel="noopener" class="wa-float" aria-label="Chat on WhatsApp">
+  <i class="fab fa-whatsapp" style="font-size:26px;color:#fff;"></i>
+</a>
+
+<script>
+  try {
+    const reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      document.body.classList.add('js-reveal-ready');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      reveals.forEach(el => observer.observe(el));
+      setTimeout(() => { reveals.forEach(el => el.classList.add('in')); }, 4000);
+    }
+  } catch (err) {
+    console.warn('Reveal animation failed to initialize; content remains visible by default.', err);
+  }
+
+  // promo video/image resolver — set ONE of these, video wins if both are filled
+  const promoVideoSrc = ""; // e.g. "videos/demo.mp4" or "https://www.youtube.com/embed/VIDEO_ID"
+  const promoImageSrc = ""; // e.g. "images/dashboard-screenshot.png"
+
+  (function renderPromoMedia() {
+    const frame = document.getElementById('promoFrame');
+    const empty = document.getElementById('promoEmpty');
+    if (!frame) return;
+    if (promoVideoSrc) {
+      const isYouTube = promoVideoSrc.includes('youtube.com/embed') || promoVideoSrc.includes('youtu.be');
+      const el = document.createElement(isYouTube ? 'iframe' : 'video');
+      el.src = promoVideoSrc;
+      if (isYouTube) {
+        el.title = 'Workflow demo';
+        el.loading = 'lazy';
+        el.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        el.allowFullscreen = true;
+      } else {
+        el.controls = true;
+        el.playsInline = true;
+      }
+      if (empty) empty.remove();
+      frame.appendChild(el);
+    } else if (promoImageSrc) {
+      const img = document.createElement('img');
+      img.src = promoImageSrc;
+      img.alt = 'Workflow screenshot';
+      if (empty) empty.remove();
+      frame.appendChild(img);
+    }
+  })();
+
+  // booking form
+  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const business = document.getElementById('business').value.trim();
+    const vps = document.getElementById('vps').value;
+
+    let msg = `Hi Sanjay, I want to get the Lead Automation (SanjayLeadHub) set up.\n\nName: ${name}\nWhatsApp: ${phone}`;
+    if (business) msg += `\nBusiness: ${business}`;
+    msg += `\nHosting: ${vps}`;
+
+    const url = `https://wa.me/918984636695?text=${encodeURIComponent(msg)}`;
+    document.getElementById('formStatus').textContent = 'Opening WhatsApp to book your setup call...';
+    window.open(url, '_blank', 'noopener');
+  });
+</script>
+</body>
+</html>
