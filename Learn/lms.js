@@ -73,8 +73,6 @@ class LMSManager {
             const tier = this.userProfile.subscription_tier || 'basic';
             document.getElementById('currentTier').textContent = tier;
             document.getElementById('displayTier').textContent = tier;
-            document.getElementById('progressTier').textContent = tier;
-            document.getElementById('userTier').textContent = tier;
             document.getElementById('mobileUserTier').textContent = tier;
             
         } catch (error) {
