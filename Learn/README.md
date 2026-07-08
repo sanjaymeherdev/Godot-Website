@@ -7,7 +7,9 @@ This is a complete Learning Management System (LMS) with tier-based access contr
 ```
 Learn/
 ├── index.html          # Main dashboard
-├── login.html          # Authentication page
+├── login.html          # User authentication page
+├── admin.html          # Admin panel (requires admin email)
+├── admin-login.html    # Admin login page
 ├── lms.js              # Core LMS functionality
 ├── admin.js            # Admin panel functionality
 ├── lms.css             # Dashboard styles
@@ -111,10 +113,13 @@ The system uses these tables:
 - ✅ Mobile-responsive design
 
 ### Admin Features
+- ✅ Email-based admin authentication (configured in `admin.js`)
 - ✅ Course management
 - ✅ Module management
 - ✅ User management
 - ✅ Analytics dashboard
+
+**Admin Access:** By default, only `graphicyin@gmail.com` has admin access. To add more admins, edit the `adminEmails` array in `admin.js` line 51 and `admin-login.html`.
 
 ## Customization
 
