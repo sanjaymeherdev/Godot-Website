@@ -162,9 +162,10 @@ CREATE POLICY "Users can update their own profile"
 
 CREATE POLICY "Admins can view all profiles"
     ON profiles FOR SELECT
-    USING (EXISTS (
-        SELECT 1 FROM profiles WHERE id = auth.uid() AND subscription_tier = 'premium'
-    ));
+    USING (
+        auth.uid() = id OR
+        COALESCE(auth.jwt() ->> 'email', '') = 'graphicyin@gmail.com'
+    );
 
 -- Courses policies (public read for active courses)
 CREATE POLICY "Anyone can view active courses"

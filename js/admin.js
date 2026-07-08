@@ -143,13 +143,14 @@ class AdminPanel {
 
     async loadStats() {
         try {
-            // Get total students from profiles table
             const { data: profiles, error: profilesError } = await supabase
                 .from('profiles')
                 .select('id');
             
-            if (!profilesError) {
+            if (!profilesError && Array.isArray(profiles)) {
                 document.getElementById('totalStudents').textContent = profiles.length;
+            } else {
+                document.getElementById('totalStudents').textContent = '0';
             }
 
             // Get total courses and active courses
@@ -205,18 +206,27 @@ class AdminPanel {
             
             const { data, error } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('id, email, subscription_tier, created_at, updated_at')
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                const message = (error.message || '').toLowerCase();
+                if (message.includes('policy') || message.includes('infinite recursion') || message.includes('permission denied')) {
+                    console.warn('Profiles query is blocked by current RLS policy. Showing an empty student list.');
+                    this.students = [];
+                    this.renderStudents();
+                    return;
+                }
+                throw error;
+            }
             
             this.students = data || [];
             this.renderStudents();
             
         } catch (error) {
             console.error('Error loading students:', error);
-            this.showMessage('Error loading students: ' + error.message, 'error');
             this.students = [];
+            this.renderStudents();
         }
     }
 
