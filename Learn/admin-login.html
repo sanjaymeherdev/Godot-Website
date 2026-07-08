@@ -72,7 +72,7 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb29jbGltZmtyZWd3cnRtZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0Nzg2MTEsImV4cCI6MjA3OTA1NDYxMX0.43Wy4GS_DSx4IWXmFKg5wz0YwmV7lsadWcm0ysCcfe0';
 
         // Initialize Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // SIMPLE ADMIN CHECK - Only graphicyin@gmail.com is admin
         function isAdminUser(email) {
@@ -100,7 +100,7 @@
                 console.log('🚀 Attempting login for:', email);
                 
                 // 1. Sign in
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -117,7 +117,7 @@
                 
                 if (!isAdmin) {
                     console.log('❌ Not an admin user:', authData.user.email);
-                    await supabase.auth.signOut();
+                    await supabaseClient.auth.signOut();
                     throw new Error('Admin privileges required. Only specific users can access the admin panel.');
                 }
 
@@ -148,7 +148,7 @@
         });
 
         // Check if already logged in
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
             if (session?.user) {
                 console.log('📱 Already signed in as:', session.user.email);
                 document.getElementById('adminEmail').value = session.user.email;
