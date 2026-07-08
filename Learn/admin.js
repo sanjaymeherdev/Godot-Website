@@ -891,8 +891,8 @@ function showSection(sectionId) {
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Supabase Configuration
-    const SUPABASE_URL = 'https://yfjzvpzgecbnfysacbjq.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlmanp2cHpnZWNibmZ5c2FjYmpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5OTY2MzcsImV4cCI6MjA4MzU3MjYzN30.v27rjgUTGuHAq6sAjhjQYWb-Y9O23f5FpwXQBFZyjmQ';
+    const SUPABASE_URL = 'https://dawxhfdvozykhxkzpfbv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhd3hoZmR2b3p5a2h4a3pwZmJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTgyMzAsImV4cCI6MjA5OTA5NDIzMH0.MiGLrpu3i-5u9hyQrdyBFm9J5pb689Oe21eUsKUjbyU';
 
     // Initialize Supabase
     window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
