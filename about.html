@@ -1,670 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sanjay — The Builder's Workshop</title>
-
-  <!-- Libraries -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
-
-    body {
-      background: #0b0e14;
-      color: #e4e7ed;
-      overflow-x: hidden;
-    }
-
-    /* ---- Particle Background ---- */
-    #particle-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #4facfe;
-      border-radius: 50%;
-      opacity: 0.4;
-      animation: float linear infinite;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      10% { opacity: 0.4; }
-      90% { opacity: 0.4; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-    }
-
-    /* ---- Hero ---- */
-    #hero {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      padding: 0 20px;
-    }
-
-    #hero h1 {
-      font-size: 4rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 1rem;
-    }
-
-    #hero .sub {
-      font-size: 1.8rem;
-      font-weight: 300;
-      color: #aab;
-    }
-
-    #typed-text {
-      color: #f5576c;
-      font-weight: 600;
-    }
-
-    .hero-badge {
-      margin-top: 2rem;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      padding: 0.8rem 2rem;
-      border-radius: 60px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 1rem;
-      color: #8899bb;
-      z-index: 3;
-    }
-
-    .hero-badge span {
-      color: #4facfe;
-      font-weight: 600;
-    }
-
-    /* ---- Sections ---- */
-    section {
-      padding: 80px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .section-title {
-      font-size: 2.8rem;
-      font-weight: 700;
-      margin-bottom: 3rem;
-      text-align: center;
-      background: linear-gradient(135deg, #e4e7ed, #8899bb);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* ---- Skill Flip Cards ---- */
-    #skill-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1.5rem;
-      padding: 1rem 0;
-    }
-
-    .flip-card {
-      background: transparent;
-      height: 200px;
-      perspective: 800px;
-      cursor: default;
-    }
-
-    .flip-card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-      transform-style: preserve-3d;
-    }
-
-    .flip-card:hover .flip-card-inner {
-      transform: rotateY(180deg);
-    }
-
-    .flip-card-front,
-    .flip-card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 16px;
-      padding: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-
-    .flip-card-front {
-      background: rgba(79, 172, 254, 0.06);
-      border-color: rgba(79, 172, 254, 0.15);
-    }
-
-    .flip-card-front .icon {
-      font-size: 2.6rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .flip-card-front .name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #e4e7ed;
-      line-height: 1.3;
-    }
-
-    .flip-card-back {
-      transform: rotateY(180deg);
-      background: rgba(20, 25, 35, 0.95);
-      border-color: rgba(79, 172, 254, 0.25);
-      justify-content: center;
-      font-size: 0.75rem;
-      color: #aab;
-      line-height: 1.5;
-      padding: 1rem;
-    }
-
-    .flip-card-back .tools {
-      font-size: 0.65rem;
-      color: #4facfe;
-      margin-top: 0.5rem;
-      background: rgba(79, 172, 254, 0.1);
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      display: inline-block;
-    }
-
-    /* ---- Product Orbit ---- */
-    #orbit-container {
-      position: relative;
-      height: 400px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 3rem 0;
-    }
-
-    .orbit-item {
-      position: absolute;
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.65rem;
-      text-align: center;
-      color: #aab;
-      transition: all 0.3s ease;
-      padding: 6px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      will-change: transform;
-    }
-
-    .orbit-item:hover {
-      transform: scale(1.15) !important;
-      border-color: #4facfe;
-      background: rgba(79, 172, 254, 0.12);
-    }
-
-    .orbit-item .icon {
-      font-size: 1.8rem;
-      margin-bottom: 4px;
-    }
-
-    /* ---- Counters ---- */
-    .counter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 2rem;
-      text-align: center;
-      margin: 3rem 0;
-    }
-
-    .counter-box {
-      background: rgba(255, 255, 255, 0.03);
-      padding: 2rem 1rem;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .counter-box .number {
-      font-size: 3rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #f093fb, #4facfe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .counter-box .label {
-      color: #8899bb;
-      margin-top: 0.5rem;
-    }
-
-    /* ---- Footer ---- */
-    footer {
-      text-align: center;
-      padding: 60px 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-      z-index: 2;
-    }
-
-    footer p {
-      font-size: 1.4rem;
-      color: #aab;
-    }
-
-    footer p span.highlight {
-      color: #4facfe;
-      font-weight: 600;
-    }
-
-    footer .credit {
-      margin-top: 1rem;
-      color: #667;
-      font-size: 0.9rem;
-    }
-
-    /* ---- Responsive ---- */
-    @media (max-width: 768px) {
-      #hero h1 {
-        font-size: 2.8rem;
-      }
-      #hero .sub {
-        font-size: 1.2rem;
-      }
-      .section-title {
-        font-size: 2rem;
-      }
-      .orbit-item {
-        width: 70px;
-        height: 70px;
-        font-size: 0.55rem;
-      }
-      .orbit-item .icon {
-        font-size: 1.4rem;
-      }
-      .hero-badge {
-        font-size: 0.8rem;
-        padding: 0.6rem 1.2rem;
-      }
-      #skill-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
-      }
-      .flip-card {
-        height: 170px;
-      }
-      .flip-card-front .icon {
-        font-size: 2rem;
-      }
-      .flip-card-front .name {
-        font-size: 0.75rem;
-      }
-      .flip-card-back {
-        font-size: 0.65rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      #skill-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 0.8rem;
-      }
-      .flip-card {
-        height: 150px;
-      }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Sanjay Meher | 7+ Years Creative Excellence</title>
+  <meta name="description" content="Sanjay Meher — 7+ years video editing, graphic design, AI automation. Founder of Graphicy. Based in Sambalpur, India.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== PARTICLE BACKGROUND ===== -->
-  <div id="particle-bg"></div>
+<div class="theme-toggle">
+  <button id="themeToggleDesktop" aria-label="Switch theme">
+    <span class="theme-icon">🌙</span>
+  </button>
+</div>
 
-  <!-- ===== HERO ===== -->
-  <div id="hero">
-    <h1 data-aos="fade-up">Sanjay's Workshop</h1>
-    <div class="sub" data-aos="fade-up" data-aos-delay="200">
-      I'm <span id="typed-text"></span>
-    </div>
-    <div class="hero-badge" data-aos="fade-up" data-aos-delay="400">
-      🛠️ <span>18 skills</span> · 8 products · ₹0 until it works
+<header class="main-header">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <a href="index.html" class="logo-text">Sanjay<span class="accent">Meher</span></a>
+      </div>
+      <nav class="desktop-nav">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html" class="active">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="products.html">Products</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+</header>
 
-  <!-- ===== SKILL CARDS (FLIP) ===== -->
-  <section>
-    <h2 class="section-title" data-aos="fade-up">⚡ The Toolbelt</h2>
-    <div id="skill-grid" data-aos="fade-up" data-aos-delay="100">
-      <!-- Cards injected by JS -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="container">
+    <nav class="mobile-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="mobile-theme-toggle">
+      <button id="themeToggleMobile" class="mobile-theme-btn">
+        <span class="theme-icon">🌙</span> Switch Theme
+      </button>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- ===== PRODUCT ORBIT ===== -->
-  <section>
-    <h2 class="section-title" data-aos="fade-up">🌀 The Products</h2>
-    <div id="orbit-container" data-aos="fade-up" data-aos-delay="200">
-      <!-- Injected by JS -->
-    </div>
-  </section>
+<!-- Page hero -->
+<section class="page-hero animate-on-scroll">
+  <div class="container">
+    <div class="section-tag">About</div>
+    <h1>Sanjay <span class="accent">Meher</span></h1>
+    <p>Founder of Graphicy — 7+ years of turning creative visions into reality</p>
+  </div>
+</section>
 
-  <!-- ===== COUNTERS ===== -->
-  <section>
-    <h2 class="section-title" data-aos="fade-up">📊 By the Numbers</h2>
-    <div class="counter-grid">
-      <div class="counter-box" data-aos="fade-up">
-        <div class="number" data-target="8">0</div>
-        <div class="label">Products Built</div>
-      </div>
-      <div class="counter-box" data-aos="fade-up" data-aos-delay="100">
-        <div class="number" data-target="18">0</div>
-        <div class="label">Skills Stacked</div>
-      </div>
-      <div class="counter-box" data-aos="fade-up" data-aos-delay="200">
-        <div class="number" data-target="0">0</div>
-        <div class="label">₹ Paid Upfront</div>
-      </div>
-      <div class="counter-box" data-aos="fade-up" data-aos-delay="300">
-        <div class="number" data-target="100">0</div>
-        <div class="label">% Trust Built</div>
-      </div>
-    </div>
-  </section>
+<main>
+  <div class="container">
 
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    <p data-aos="fade-up">
-      “Pay <span class="highlight">after</span> it works. No upfront. <span style="color:#f5576c;">Ever.</span>”
-    </p>
-    <p class="credit" data-aos="fade-up" data-aos-delay="100">
-      👨‍💻 Sanjay Meher · Solo Builder · Self-Funded
-    </p>
-    <div style="margin-top:2rem;">
-      <a href="/tech-tools" style="color:#4facfe;text-decoration:none;border:1px solid rgba(79,172,254,0.2);padding:10px 24px;border-radius:40px;display:inline-block;backdrop-filter:blur(8px);font-size:0.9rem;">
-        ← See all tools
-      </a>
-    </div>
-  </footer>
+    <!-- About grid -->
+    <section class="about-section">
+      <div class="about-grid">
 
-  <!-- ===== SCRIPTS ===== -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js">
-  </script>
-  <script>
-    // ---- AOS ----
-    AOS.init({
-      duration: 800,
-      once: true
-    });
+        <!-- Left: content -->
+        <div class="about-content">
 
-    // ---- TYPED.JS ----
-    new Typed('#typed-text', {
-      strings: [
-        'an Automation Engineer.',
-        'an AI Integrator.',
-        'a System Architect.',
-        'a Full-Stack Builder.',
-        'a Solo Founder.'
-      ],
-      typeSpeed: 60,
-      backSpeed: 30,
-      loop: true,
-      cursorChar: '|'
-    });
+          <h2 class="animate-on-scroll">👋 My Story</h2>
+          <p class="animate-on-scroll">From a young age, I was fascinated with technology and creativity. This passion led me to learn video editing, which quickly turned into a profession. I started freelancing, earning extra money in my free time while pursuing my studies and a full-time job.</p>
+          <p class="animate-on-scroll">The experience encouraged me to learn other related skills — Graphic Design, WordPress Website Design, Digital Marketing, and AI. With over <strong>7 years in Video Editing & Graphic Design</strong> and <strong>2 years in Digital Marketing</strong>, I've worked for multiple clients across diverse niches.</p>
 
-    // ---- PARTICLES ----
-    (function createParticles() {
-      const container = document.getElementById('particle-bg');
-      const count = 60;
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.width = (2 + Math.random() * 4) + 'px';
-        p.style.height = p.style.width;
-        p.style.animationDuration = (12 + Math.random() * 20) + 's';
-        p.style.animationDelay = (Math.random() * 20) + 's';
-        p.style.opacity = 0.2 + Math.random() * 0.4;
-        container.appendChild(p);
-      }
-    })();
+          <div class="highlight-text animate-on-scroll">
+            "I started my agency Graphicy in 2023 to help businesses grow through creative excellence and digital marketing — while also teaching others the skills I've mastered."
+          </div>
 
-    // ---- SKILL FLIP CARDS ----
-    const skills = [{
-      name: 'Video Editing',
-      icon: '🎬',
-      description: 'Edit like a pro. PR, Capcut, Filmora — fast, clean, story-driven.',
-      tools: 'PR · Capcut · Filmora'
-    }, {
-      name: 'Motion Graphics',
-      icon: '✨',
-      description: 'Bring ideas to life with dynamic motion. After Effects is my playground.',
-      tools: 'After Effects'
-    }, {
-      name: 'Graphic Design',
-      icon: '🎨',
-      description: 'Visual identity that sticks. Canva, PS, Corel — all in one.',
-      tools: 'Canva · PS · CorelDRAW'
-    }, {
-      name: 'Digital Marketing',
-      icon: '📈',
-      description: 'Strategy + execution. Content, SEO, social — growth that works.',
-      tools: 'SEO · Social · Content'
-    }, {
-      name: 'Web Design & Dev',
-      icon: '🌐',
-      description: 'From WordPress to custom code — sites that load fast and look great.',
-      tools: 'WP · Shopify · HTML/CSS'
-    }, {
-      name: '3D Animation',
-      icon: '🧊',
-      description: 'Blender is my canvas. Models, animations, and product renders.',
-      tools: 'Blender'
-    }, {
-      name: 'Web Apps',
-      icon: '⚛️',
-      description: 'Full-stack web apps. React, Next.js, Node — built to scale.',
-      tools: 'React · Node · Next.js'
-    }, {
-      name: 'Android Apps',
-      icon: '📱',
-      description: 'Native Android apps. Kotlin/Java — smooth, fast, reliable.',
-      tools: 'Kotlin · Java'
-    }, {
-      name: 'Windows Apps',
-      icon: '🖥️',
-      description: 'Desktop apps for Windows. Electron or native — your choice.',
-      tools: 'Electron · .NET'
-    }, {
-      name: 'Chrome Extensions',
-      icon: '🧩',
-      description: 'Extensions that extend the web. Side panels, overlays, automation.',
-      tools: 'JS · Chrome API'
-    }, {
-      name: 'Godot Engine',
-      icon: '🎮',
-      description: 'Games, apps, addons — all in Godot. Lightweight, powerful, open.',
-      tools: 'GDScript · Godot 4'
-    }, {
-      name: 'Backend & APIs',
-      icon: '🔗',
-      description: 'Auth, REST, WebSockets, DB — the engine behind every app.',
-      tools: 'Node · SQL · Auth'
-    }, {
-      name: 'Automation',
-      icon: '⚙️',
-      description: 'n8n, APIs, workflows — automate everything, own your data.',
-      tools: 'n8n · APIs · Webhooks'
-    }, {
-      name: 'AI Integration',
-      icon: '🤖',
-      description: 'LLMs, prompts, orchestration — AI that actually works for you.',
-      tools: 'Claude · GPT · DeepSeek'
-    }, {
-      name: 'System Architecture',
-      icon: '🏗️',
-      description: 'Scalable, self-hosted systems. Designed to last, built to grow.',
-      tools: 'Design · Scalability'
-    }, {
-      name: 'Self-Hosting',
-      icon: '🛡️',
-      description: 'Own your data. Self-host on Vercel, Neon, your own servers.',
-      tools: 'Vercel · Neon · Docker'
-    }, {
-      name: 'Product Strategy',
-      icon: '📦',
-      description: 'From idea to product to pricing. I package solutions, not code.',
-      tools: 'Strategy · Launch'
-    }, {
-      name: 'Payment Integration',
-      icon: '💳',
-      description: 'Razorpay, UPI, subscriptions — payments that actually work.',
-      tools: 'Razorpay · UPI'
-    }];
+          <h2 class="animate-on-scroll">💼 What I Do</h2>
+          <p class="animate-on-scroll">I help businesses — from small local shops to growing brands — stand out with professional video editing, graphic design, AI integrations, and digital marketing strategies. Every project is custom-tailored, with transparent pricing and no hidden fees.</p>
 
-    const grid = document.getElementById('skill-grid');
-    skills.forEach(skill => {
-      const card = document.createElement('div');
-      card.className = 'flip-card';
-      card.innerHTML = `
-          <div class="flip-card-inner">
-            <div class="flip-card-front">
-              <div class="icon">${skill.icon}</div>
-              <div class="name">${skill.name}</div>
+          <h3 class="animate-on-scroll">Core Skills</h3>
+          <div class="skills-tags animate-on-scroll">
+            <span class="skill-tag">🎬 Video Editing</span>
+            <span class="skill-tag">🎨 Graphic Design</span>
+            <span class="skill-tag">✨ Motion Graphics</span>
+            <span class="skill-tag">🎮 2D/3D Animation</span>
+            <span class="skill-tag">🌐 Website Design</span>
+            <span class="skill-tag">📈 SEO</span>
+            <span class="skill-tag">📱 Social Media</span>
+            <span class="skill-tag">💬 WhatsApp Marketing</span>
+            <span class="skill-tag">⚙️ Automation</span>
+            <span class="skill-tag">🤖 AI Integration</span>
+          </div>
+
+          <h2 class="animate-on-scroll">📋 My Journey</h2>
+          <div class="timeline animate-on-scroll">
+            <div class="timeline-item">
+              <div class="timeline-year">2016–17</div>
+              <div class="timeline-content">
+                <h4>🎬 Started Freelancing</h4>
+                <p>Began video editing as a side hustle while studying. First clients in gaming and tech niches.</p>
+              </div>
             </div>
-            <div class="flip-card-back">
-              <div style="font-size:0.9rem;font-weight:500;color:#e4e7ed;margin-bottom:0.4rem;">${skill.name}</div>
-              <div>${skill.description}</div>
-              <div class="tools">🛠️ ${skill.tools}</div>
+            <div class="timeline-item">
+              <div class="timeline-year">2018–20</div>
+              <div class="timeline-content">
+                <h4>📈 Expanded Skills</h4>
+                <p>Learned graphic design, motion graphics, and WordPress. Started getting regular clients.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">2021–22</div>
+              <div class="timeline-content">
+                <h4>🚀 Digital Marketing & AI</h4>
+                <p>Mastered SEO, social media management, marketing automation, and AI content tools.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">2023</div>
+              <div class="timeline-content">
+                <h4>🏢 Founded Graphicy</h4>
+                <p>Launched agency to help businesses across India with creative and digital marketing services.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">2024–Now</div>
+              <div class="timeline-content">
+                <h4>🌟 Full-Time Growth</h4>
+                <p>Serving clients across gaming, tech, food, real estate, fashion, and education sectors.</p>
+              </div>
             </div>
           </div>
-        `;
-      grid.appendChild(card);
-    });
 
-    // ---- PRODUCT ORBIT ----
-    const products = [
-      { name: 'SiteSheet', icon: '🌐' },
-      { name: 'n8n Setup', icon: '⚙️' },
-      { name: 'GOwa API', icon: '💬' },
-      { name: 'GMB Tracker', icon: '📍' },
-      { name: 'SMBooking', icon: '📅' },
-      { name: 'YourMate', icon: '🧑‍🏫' },
-      { name: 'ContentPlanner', icon: '✍️' },
-      { name: 'PocketAI', icon: '🤖' }
-    ];
+        </div>
 
-    const orbit = document.getElementById('orbit-container');
-    const radius = Math.min(180, window.innerWidth / 3);
-    const items = [];
+        <!-- Right: stats + profile -->
+        <div>
+          <!-- Profile card -->
+          <div class="stat-card animate-on-scroll" style="text-align:center;padding:2rem;margin-bottom:1.25rem;">
+           <img src="images/passport.jpg" alt="Video Editing" style="width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;">
+            <h3 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:0.25rem;">Sanjay Meher</h3>
+            <p style="color:var(--accent);font-size:0.85rem;margin-bottom:0.25rem;">Founder &amp; Creative Director</p>
+            <p style="color:var(--text-secondary);font-size:0.78rem;">Sambalpur, Odisha, India 🇮🇳</p>
+          </div>
 
-    products.forEach((p, i) => {
-      const angle = (i / products.length) * 2 * Math.PI - Math.PI / 2;
-      const el = document.createElement('div');
-      el.className = 'orbit-item';
-      el.innerHTML = `<span class="icon">${p.icon}</span>${p.name}`;
-      orbit.appendChild(el);
-      items.push({ el, angle });
-    });
+          <!-- Stats -->
+          <div class="about-stats animate-on-scroll">
+            <div class="stat-card">
+              <span class="num">7+</span>
+              <span class="lbl">Years Video &amp; Design</span>
+            </div>
+            <div class="stat-card">
+              <span class="num">2+</span>
+              <span class="lbl">Years Digital Marketing</span>
+            </div>
+            <div class="stat-card">
+              <span class="num">5+</span>
+              <span class="lbl">Projects Delivered</span>
+            </div>
+            <div class="stat-card">
+              <span class="num">18+</span>
+              <span class="lbl">Brands Served</span>
+            </div>
+          </div>
 
-    let orbitAngle = 0;
+          <!-- Industries -->
+          <div class="stat-card animate-on-scroll" style="margin-top:1.25rem;">
+            <p style="font-weight:700;font-family:'Syne',sans-serif;font-size:0.875rem;margin-bottom:1rem;">🎯 Industries I've Worked With</p>
+            <div class="skills-tags">
+              <span class="skill-tag">🎮 Gaming</span>
+              <span class="skill-tag">💻 Tech</span>
+              <span class="skill-tag">🍔 Food</span>
+              <span class="skill-tag">🏠 Real Estate</span>
+              <span class="skill-tag">👗 Fashion</span>
+              <span class="skill-tag">📚 Education</span>
+            </div>
+          </div>
 
-    function animateOrbit() {
-      orbitAngle += 0.006;
-      items.forEach((item, i) => {
-        const a = item.angle + orbitAngle;
-        const x = radius * Math.cos(a);
-        const y = radius * Math.sin(a);
-        item.el.style.transform = `translate(${x}px, ${y}px)`;
-      });
-      requestAnimationFrame(animateOrbit);
-    }
-    animateOrbit();
+          <!-- Philosophy -->
+          <div class="stat-card animate-on-scroll" style="margin-top:1.25rem;font-style:italic;">
+            <p style="font-size:0.875rem;color:var(--text-primary);line-height:1.7;margin-bottom:0.5rem;">"I don't believe in disappearing mid-project. Every client gets direct WhatsApp access to me. We work together until you're happy."</p>
+            <p style="color:var(--accent);font-weight:600;font-size:0.82rem;">— Sanjay Meher</p>
+          </div>
 
-    // ---- COUNTER ----
-    function animateCounter(el, target, duration = 1500) {
-      const start = 0;
-      const startTime = performance.now();
+          <!-- CTA -->
+          <div class="stat-card animate-on-scroll" style="margin-top:1.25rem;text-align:center;">
+            <h4 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:0.5rem;">Let's Work Together</h4>
+            <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:1rem;">Have a project in mind? Let's discuss how I can help.</p>
+            <a href="contact.html" class="btn btn-primary" style="width:100%;justify-content:center;">📞 Get Free Quote →</a>
+          </div>
+        </div>
 
-      function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(eased * target);
-        el.textContent = current;
+      </div>
+    </section>
 
-        if (progress < 1) {
-          requestAnimationFrame(update);
-        } else {
-          el.textContent = target;
-        }
-      }
-      requestAnimationFrame(update);
-    }
+  </div>
 
-    const counterElements = document.querySelectorAll('.number');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const target = parseInt(entry.target.getAttribute('data-target'));
-          if (target > 0) {
-            animateCounter(entry.target, target);
-          } else {
-            entry.target.textContent = '0';
-          }
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
+  <!-- Tools section -->
+  <section class="tools-section">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-tag">Expertise</div>
+        <h2 class="section-title">Tools I <span class="accent">Use</span></h2>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-category animate-on-scroll">
+          <h3><i class="fas fa-video" style="color:var(--accent)"></i> Video Editing</h3>
+          <div class="skill-items">
+            <span>Adobe Premiere Pro</span>
+            <span>After Effects</span>
+            <span>CapCut Pro</span>
+            <span>Filmora</span>
+            <span>Inshot</span>
+            <span>VN Editor</span>
+          </div>
+        </div>
+        <div class="skill-category animate-on-scroll">
+          <h3><i class="fas fa-paintbrush" style="color:var(--accent)"></i> Graphic Design</h3>
+          <div class="skill-items">
+            <span>Photoshop</span>
+            <span>Illustrator</span>
+            <span>Canva</span>
+            <span>Figma</span>
+            <span>CorelDRAW</span>
+            <span>Blender</span>
+          </div>
+        </div>
+        <div class="skill-category animate-on-scroll">
+          <h3><i class="fas fa-code" style="color:var(--accent)"></i> Web &amp; Development</h3>
+          <div class="skill-items">
+            <span>HTML/CSS/JS</span>
+            <span>React</span>
+            <span>Flutter</span>
+            <span>WordPress</span>
+            <span>Supabase</span>
+            <span>Node.js</span>
+          </div>
+        </div>
+        <div class="skill-category animate-on-scroll">
+          <h3><i class="fas fa-robot" style="color:var(--accent)"></i> AI &amp; Automation</h3>
+          <div class="skill-items">
+            <span>Groq AI</span>
+            <span>Gemini</span>
+            <span>OpenAI</span>
+            <span>n8n</span>
+            <span>WhatsApp API</span>
+            <span>ElevenLabs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    counterElements.forEach(el => observer.observe(el));
+  <div class="container">
+    <section class="cta-section animate-on-scroll">
+      <h2>Ready to Work <span class="accent">Together?</span></h2>
+      <p>Let's bring your vision to life. Free consultation, no obligation.</p>
+      <div class="cta-buttons">
+        <a href="contact.html" class="btn btn-primary">📞 Get in Touch →</a>
+        <a href="services.html" class="btn btn-secondary">See Services →</a>
+      </div>
+    </section>
+  </div>
+</main>
 
-    // ---- RESIZE HANDLER ----
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        location.reload();
-      }, 300);
-    });
+<footer>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="logo-text">Sanjay<span class="accent">Meher</span></div>
+        <p>Video Editor, Designer &amp; AI Specialist</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="products.html">Products</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-social">
+        <a href="#" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <a href="#" target="_blank"><i class="fab fa-github"></i></a>
+        <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Sanjay Meher · Built with <i class="fas fa-heart" style="color:var(--accent)"></i> in India</p>
+    </div>
+  </div>
+</footer>
 
-    console.log('🚀 The Builder\'s Workshop is live.');
-  </script>
+<a href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20need%20a%20quote%20for%20my%20business."
+   class="whatsapp-float" target="_blank" aria-label="WhatsApp">
+  <i class="fab fa-whatsapp" style="font-size:28px;color:#fff;"></i>
+</a>
+
+<script src="js/main.js"></script>
 </body>
 </html>
