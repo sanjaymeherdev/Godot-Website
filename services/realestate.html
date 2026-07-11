@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A system for your leads, not another app to check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F3EA;
+    --paper-alt:#EFE7D6;
+    --ink:#16273A;
+    --ink-soft:#4B5E77;
+    --brass:#B07E36;
+    --brass-dark:#8A5F24;
+    --line:#D9CDB2;
+    --line-strong:#C3B492;
+    --whatsapp:#25D366;
+    --whatsapp-dark:#1DA851;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--brass-dark);
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px 28px;
+    max-width:1080px; margin:0 auto;
+  }
+  .wordmark{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    letter-spacing:-.01em;
+  }
+  .wordmark span{color:var(--brass);}
+  .nav-cta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    border:1px solid var(--ink);
+    padding:9px 16px;
+    text-decoration:none;
+    transition:.15s;
+  }
+  .nav-cta:hover{background:var(--ink); color:var(--paper);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:70px 0 90px;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .blueprint-bg{
+    position:absolute; top:-40px; right:-120px; width:640px; height:640px;
+    opacity:.55; pointer-events:none;
+  }
+  .hero-inner{position:relative; z-index:2; max-width:640px;}
+  .hero h1{
+    font-size:clamp(34px, 5.4vw, 54px);
+    line-height:1.08;
+    margin:18px 0 22px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--brass-dark);
+  }
+  .hero p.lead{
+    font-size:18px;
+    color:var(--ink-soft);
+    max-width:520px;
+    margin-bottom:34px;
+  }
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn-primary{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--whatsapp);
+    color:#fff;
+    font-weight:500;
+    padding:14px 24px;
+    text-decoration:none;
+    border-radius:2px;
+    font-size:15.5px;
+    transition:.15s;
+  }
+  .btn-primary:hover{background:var(--whatsapp-dark);}
+  .btn-ghost{
+    display:inline-flex; align-items:center;
+    border:1px solid var(--ink);
+    padding:14px 22px;
+    text-decoration:none;
+    font-size:15.5px;
+    color:var(--ink);
+    transition:.15s;
+  }
+  .btn-ghost:hover{background:var(--ink); color:var(--paper);}
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:78px 0;}
+  .section-head{max-width:600px; margin-bottom:48px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px); margin-top:12px;}
+  .section-head p{color:var(--ink-soft); font-size:16px; margin-top:12px;}
+
+  /* ---------- PAIN POINTS ---------- */
+  .pain-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .pain-item{
+    background:var(--paper);
+    padding:28px 26px;
+  }
+  .pain-item .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--brass-dark);
+    display:block; margin-bottom:10px;
+  }
+  .pain-item p{font-size:15.5px; color:var(--ink-soft);}
+  .pain-item strong{color:var(--ink); font-weight:600;}
+
+  /* ---------- SYSTEM PILLARS ---------- */
+  .pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .pillar{
+    border:1px solid var(--line-strong);
+    padding:30px 26px 26px;
+    position:relative;
+    background:var(--paper);
+  }
+  .pillar::before{
+    content:"";
+    position:absolute; top:10px; left:10px; right:10px; bottom:10px;
+    border:1px solid var(--line);
+    pointer-events:none;
+  }
+  .pillar .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--brass-dark);
+    display:block; margin-bottom:16px;
+  }
+  .pillar h3{font-size:21px; margin-bottom:10px;}
+  .pillar p{font-size:14.5px; color:var(--ink-soft); margin-bottom:18px;}
+  .pillar .price{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    color:var(--ink);
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  .pillar .price b{color:var(--brass-dark);}
+
+  /* ---------- FLOW / DIMENSION LINE ---------- */
+  .flow{position:relative; padding-top:10px;}
+  .flow-track{
+    position:relative;
+    padding-left:2px;
+  }
+  .flow-line{
+    position:absolute; left:19px; top:8px; bottom:8px; width:1px;
+    background:var(--line-strong);
+  }
+  .flow-step{
+    position:relative;
+    padding:0 0 40px 56px;
+  }
+  .flow-step:last-child{padding-bottom:0;}
+  .flow-step .dot{
+    position:absolute; left:11px; top:2px;
+    width:17px; height:17px;
+    border:1px solid var(--brass-dark);
+    background:var(--paper);
+    border-radius:50%;
+  }
+  .flow-step .dot::after{
+    content:"";
+    position:absolute; top:50%; left:50%;
+    width:5px; height:5px;
+    background:var(--brass-dark);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .flow-step .step-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--brass-dark);
+    display:block; margin-bottom:6px;
+  }
+  .flow-step h4{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:19px;
+    margin-bottom:6px;
+  }
+  .flow-step p{font-size:14.5px; color:var(--ink-soft); max-width:520px;}
+
+  /* ---------- PRICING TABLE ---------- */
+  .price-table{width:100%; border-collapse:collapse; font-size:15px;}
+  .price-table th{
+    text-align:left;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:12px 16px;
+    border-bottom:1px solid var(--ink);
+  }
+  .price-table td{
+    padding:18px 16px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  .price-table td.name{font-weight:600; font-family:'Fraunces', serif; font-size:17px;}
+  .price-table td.cost{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--brass-dark);
+    white-space:nowrap;
+  }
+  .price-table tr:last-child td{border-bottom:1px solid var(--ink);}
+  .price-table td.desc{color:var(--ink-soft); font-size:14px;}
+
+  .total-row td{
+    padding-top:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- CLOSING CTA ---------- */
+  .closing{
+    background:var(--ink);
+    color:var(--paper);
+    padding:80px 0;
+    text-align:center;
+  }
+  .closing h2{color:var(--paper); font-size:clamp(28px,4vw,40px); margin-bottom:16px;}
+  .closing p{color:#B7C2D1; max-width:480px; margin:0 auto 32px; font-size:16px;}
+
+  footer{
+    padding:34px 0 50px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  @media (max-width:760px){
+    .pain-grid{grid-template-columns:1fr;}
+    .pillars{grid-template-columns:1fr;}
+    .price-table{font-size:14px;}
+    .price-table th:nth-child(3), .price-table td.desc{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wordmark">Sanjay<span>Tools</span></div>
+  <a class="nav-cta" href="https://wa.me/910000000000" target="_blank" rel="noopener">Message on WhatsApp</a>
+</nav>
+
+<header class="hero">
+  <svg class="blueprint-bg" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg">
+    <rect x="60" y="60" width="520" height="520" fill="none" stroke="#B07E36" stroke-width="1"/>
+    <line x1="60" y1="220" x2="580" y2="220" stroke="#B07E36" stroke-width="1"/>
+    <line x1="320" y1="220" x2="320" y2="580" stroke="#B07E36" stroke-width="1"/>
+    <line x1="60" y1="400" x2="320" y2="400" stroke="#B07E36" stroke-width="1"/>
+    <rect x="100" y="90" width="70" height="40" fill="none" stroke="#B07E36" stroke-width="1"/>
+    <circle cx="500" cy="500" r="46" fill="none" stroke="#B07E36" stroke-width="1"/>
+    <line x1="400" y1="250" x2="400" y2="380" stroke="#B07E36" stroke-width="1" stroke-dasharray="4 4"/>
+  </svg>
+  <div class="wrap hero-inner">
+    <span class="eyebrow">WhatsApp · Booking · Google Workspace — one system</span>
+    <h1>Your leads are worth lakhs.<br>Right now they're sitting in <em>a WhatsApp inbox nobody's watching.</em></h1>
+    <p class="lead">A buyer messages about a 3BHK, gets a reply two days later, and books a visit with someone who follows up faster. This is the system that closes that gap — built specifically for how Indian real estate businesses actually work.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="https://wa.me/910000000000" target="_blank" rel="noopener">Talk it through on WhatsApp →</a>
+      <a class="btn-ghost" href="#system">See how it works</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Sound familiar?</span>
+      <h2>The leak isn't in your marketing. It's in what happens after.</h2>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-item">
+        <span class="tag">01 — LOST LEADS</span>
+        <p><strong>A lead comes in on WhatsApp and sits there.</strong> No one remembers to follow up, or it gets buried under the next ten chats.</p>
+      </div>
+      <div class="pain-item">
+        <span class="tag">02 — MANUAL SCHEDULING</span>
+        <p><strong>"What time works for you?"</strong> repeated on every single site visit, across every single buyer, by phone.</p>
+      </div>
+      <div class="pain-item">
+        <span class="tag">03 — GENERIC FOLLOW-UP</span>
+        <p><strong>Every buyer gets the same copy-pasted message,</strong> not the two properties that actually match their budget and locality.</p>
+      </div>
+      <div class="pain-item">
+        <span class="tag">04 — SLOW NEW LISTING ALERTS</span>
+        <p><strong>A new property comes on the market</strong> and it takes a day to tell the buyers who were waiting for exactly that.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="system" style="background:var(--paper-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The system</span>
+      <h2>Three pieces. Built to work as one.</h2>
+      <p>Not three subscriptions to juggle — one connected system for how a lead actually becomes a closed deal.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <span class="num">PIECE 01</span>
+        <h3>WaBlast</h3>
+        <p>Bulk WhatsApp on Meta's official Business API. New listing alerts, follow-ups, and campaigns sent to your entire buyer list — without risking your number getting banned.</p>
+        <div class="price">from <b>₹1</b> / marketing message</div>
+      </div>
+      <div class="pillar">
+        <span class="num">PIECE 02</span>
+        <h3>SMBooking</h3>
+        <p>Your own site-visit booking page. Buyer picks a slot, it lands straight on your Google Calendar with a Meet link attached — no back-and-forth calls.</p>
+        <div class="price"><b>₹1,000</b> once, no monthly fee</div>
+      </div>
+      <div class="pillar">
+        <span class="num">PIECE 03</span>
+        <h3>The Automation</h3>
+        <p>A new enquiry auto-matches your inventory, builds a personalized property deck, books the visit, and emails it all — while you're doing something else.</p>
+        <div class="price">built into your setup</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What happens automatically</span>
+      <h2>From "interested" to a confirmed visit — untouched by hand.</h2>
+      <p>One buyer fills a short form. Here's everything that happens next, in order.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-track">
+        <div class="flow-line"></div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 01</span>
+          <h4>Buyer submits a short interest form</h4>
+          <p>Budget, preferred locality, and a visit date — takes them under a minute.</p>
+        </div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 02</span>
+          <h4>Your inventory gets matched instantly</h4>
+          <p>The system checks their answers against your live property list and shortlists the actual fits — not everything you have.</p>
+        </div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 03</span>
+          <h4>A personalized property deck is built</h4>
+          <p>Photos, price, and locality for each matched property, assembled into a clean deck — automatically, every time.</p>
+        </div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 04</span>
+          <h4>The site visit is booked and confirmed</h4>
+          <p>A slot goes straight onto the assigned agent's calendar, with a video call link included for buyers who want a virtual walkthrough first.</p>
+        </div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 05</span>
+          <h4>The buyer gets one email with everything</h4>
+          <p>Their property deck, the visit date and time, the meeting link, and a short form for anything else you need from them before the visit.</p>
+        </div>
+
+        <div class="flow-step">
+          <div class="dot"></div>
+          <span class="step-label">STEP 06</span>
+          <h4>Your lead sheet updates itself</h4>
+          <p>Status, matched properties, and visit time — logged, so you always know where every buyer stands without asking anyone.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--paper-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Simple, honest pricing</span>
+      <h2>No subscriptions you forget you're paying for.</h2>
+    </div>
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>Piece</th>
+          <th>Cost</th>
+          <th>What it replaces</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">WaBlast</td>
+          <td class="cost">₹1 / marketing msg<br>₹0.5 / utility msg</td>
+          <td class="desc">Manually messaging buyers one by one, or a bulk tool that risks your number</td>
+        </tr>
+        <tr>
+          <td class="name">SMBooking</td>
+          <td class="cost">₹1,000 once</td>
+          <td class="desc">Calendly and similar — ₹800–2,500 every month, forever</td>
+        </tr>
+        <tr>
+          <td class="name">Automation setup</td>
+          <td class="cost">Quoted after a quick call</td>
+          <td class="desc">Depends on your inventory size and how your team currently follows up</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <h2>One closed deal pays for this many times over.</h2>
+    <p>Send this to whoever handles your leads, or just message directly — happy to walk through exactly how it'd work with your current listings.</p>
+    <a class="btn-primary" href="https://wa.me/910000000000" target="_blank" rel="noopener">Message on WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  BUILT BY SANJAY · WABLAST RUNS ON META'S OFFICIAL WHATSAPP BUSINESS API · NOT AFFILIATED WITH META OR GOOGLE
+</footer>
+
+</body>
+</html>
