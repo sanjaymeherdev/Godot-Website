@@ -288,7 +288,7 @@ body.sm-no-scroll { overflow: hidden; }
                 { icon: '🌐', label: 'SiteSheet — Editable Website',  href: `${base}marketing/sitesheet.html` },
                 { icon: '📱', label: 'PocketAI — AI on Every App',    href: `${base}marketing/pocketai.html` },
                 { icon: '🤖', label: 'AICommander',                  href: `${base}marketing/AICommander.html` },
-                { icon: '📝', label: 'ContentPlanner',                href: `${base}marketing/aicontentplanner.html` },
+                { icon: '📝', label: 'ContentPlanner',                href: `${base}marketing/aidesigner.html` },
                 { icon: '📣', label: 'Social Media Management',       href: `${base}marketing/digital-services.html` },
             ]
         },
