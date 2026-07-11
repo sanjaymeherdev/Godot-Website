@@ -18,52 +18,11 @@ async function supabaseFetch(table) {
   return res.json();
 }
 
-// ── Theme ──────────────────────────────────────────────────
-function initTheme() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'light') {
-    document.body.classList.add('light-theme');
-  } else {
-    document.body.classList.remove('light-theme');
-  }
-  updateThemeIcons(saved === 'light' ? 'light' : 'dark');
-}
-
-function updateThemeIcons(theme) {
-  const icon = theme === 'light' ? '☀️' : '🌙';
-  const desktopBtn = document.querySelector('#themeToggleDesktop .theme-icon');
-  const mobileBtn = document.getElementById('themeToggleMobile');
-  if (desktopBtn) desktopBtn.textContent = icon;
-  if (mobileBtn) mobileBtn.innerHTML = `<span class="theme-icon">${icon}</span> Switch Theme`;
-}
-
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light-theme');
-  const theme = isLight ? 'light' : 'dark';
-  localStorage.setItem('theme', theme);
-  updateThemeIcons(theme);
-}
-
-// ── Mobile menu ───────────────────────────────────────────
-function initMobileMenu() {
-  const hamburger = document.getElementById('hamburgerBtn');
-  const menu = document.getElementById('mobileMenu');
-  if (!hamburger || !menu) return;
-
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    menu.classList.toggle('active');
-    document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
-  });
-
-  menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      hamburger.classList.remove('active');
-      menu.classList.remove('active');
-      document.body.style.overflow = '';
-    });
-  });
-}
+// ── Theme & mobile menu ──────────────────────────────────
+// NOTE: theme toggle + hamburger/drawer are now owned centrally by
+// js/components.js (the shared header). This page just needs to make
+// sure the current theme (already applied to <body> by components.js)
+// is reflected once Supabase colors load — see applyColors() below.
 
 // ── Apply Colors from Supabase ────────────────────────────
 function applyColors(colors) {
@@ -204,9 +163,6 @@ async function loadAllData() {
     allProducts = products;
     applyProducts(products); // This will only run if productsGrid exists
 
-    // Re-init theme after colors load
-    initTheme();
-
   } catch (err) {
     console.error('Supabase load error:', err);
     const grid = document.getElementById('productsGrid');
@@ -297,13 +253,8 @@ function initScrollAnimations() {
   els.forEach(el => obs.observe(el));
 }
 
-// ── Active nav highlight ──────────────────────────────────
-function highlightNav() {
-  const page = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.desktop-nav a, .mobile-nav a').forEach(a => {
-    if (a.getAttribute('href') === page) a.classList.add('active');
-  });
-}
+// NOTE: active-nav highlighting is now handled inside js/components.js
+// (the shared header owns the nav markup, so it owns marking it active too).
 
 // ── Logo image error handler ──────────────────────────────
 function initLogoErrors() {
@@ -317,17 +268,6 @@ function initLogoErrors() {
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Page loaded, initializing...');
-  
-  initTheme();
-  initMobileMenu();
-  highlightNav();
-
-  // Theme toggle buttons
-  const desktopToggle = document.getElementById('themeToggleDesktop');
-  const mobileToggle = document.getElementById('themeToggleMobile');
-  
-  if (desktopToggle) desktopToggle.addEventListener('click', toggleTheme);
-  if (mobileToggle) mobileToggle.addEventListener('click', toggleTheme);
 
   await loadAllData();
 
