@@ -209,7 +209,7 @@ body.sm-no-scroll { overflow: hidden; }
                 { icon: '⚡', label: 'Multiplayer Setup', href: `${base}godotmp.html` },
                 { icon: '🔒', label: 'GodotConnect',      href: `${base}godotconnect.html` },
                 { icon: '🌐', label: 'CGOW',              href: `${base}godot-4-mobile-game.html` },
-                { icon: '🎮', label: 'Godot4Systems',     href: `${base}Godot4Systems/index.html` },
+                { icon: '🎮', label: '/godot/assets',     href: `${base}Godot4Systems/index.html` },
             ]
         },
         {

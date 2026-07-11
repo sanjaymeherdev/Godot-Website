@@ -42,48 +42,48 @@ function preflight() {
 // Content overlaps within the Godot scope — NOT deleted, just moved with a
 // -REVIEW suffix so you can read both and pick a winner.
 const NEEDS_MANUAL_REVIEW = [
-  ['courses.html', 'GDScourse.html'],
-  ['visualcode.html', 'godotvisualcoder/index.html'],
+  ['/godot/course/index.html', '/godot/course/GDScourse-REVIEW.html'],
+  ['/godot/visual-coder/visualcode-REVIEW.html', 'godotvisualcoder/index.html'],
 ];
 
 // [from, to] — Godot-only. Folders first where a later file lands inside them.
 const MOVES = [
-  ['Godot4Systems', 'godot/assets'],
-  ['godotvisualcoder', 'godot/visual-coder'],
-  ['cgrelay', 'godot/multiplayer/app'],       // authenticated app (auth/callback/dashboard/register)
-  ['gameadmin', 'godot/store/admin'],
-  ['sale/godot-player-script.html', 'godot/assets/godot-player-script.html'],
+  ['/godot/assets', 'godot/assets'],
+  ['/godot/visual-coder', 'godot/visual-coder'],
+  ['/godot/multiplayer/app', 'godot/multiplayer/app'],       // authenticated app (auth/callback/dashboard/register)
+  ['/godot/store/admin', 'godot/store/admin'],
+  ['/godot/assets/godot-player-script.html', 'godot/assets/godot-player-script.html'],
 
-  ['godotdev.html', 'godot/index.html'],
-  ['courses.html', 'godot/course/index.html'],
-  ['GDScourse.html', 'godot/course/GDScourse-REVIEW.html'],
-  ['freecourse.html', 'godot/course/free.html'],
-  ['minicourses.html', 'godot/course/mini-courses.html'],
-  ['starter-guide.html', 'godot/course/starter-guide.html'],
-  ['GDSGuide.html', 'godot/course/gdscript-guide.html'],
-  ['gdscript.html', 'godot/gdscript.html'],
-  ['freegodotassets.html', 'godot/assets/free.html'],
-  ['scripts.html', 'godot/assets/scripts.html'],
-  ['toolslist.html', 'godot/tools-list.html'],
+  ['/godot/index.html', 'godot/index.html'],
+  ['/godot/course/index.html', 'godot/course/index.html'],
+  ['/godot/course/GDScourse-REVIEW.html', 'godot/course/GDScourse-REVIEW.html'],
+  ['/godot/course/free.html', 'godot/course/free.html'],
+  ['/godot/course/mini-courses.html', 'godot/course/mini-courses.html'],
+  ['/godot/course/starter-guide.html', 'godot/course/starter-guide.html'],
+  ['/godot/course/gdscript-guide.html', 'godot/course/gdscript-guide.html'],
+  ['/godot/gdscript.html', 'godot/gdscript.html'],
+  ['/godot/assets/free.html', 'godot/assets/free.html'],
+  ['/godot/assets/scripts.html', 'godot/assets/scripts.html'],
+  ['/godot/tools-list.html', 'godot/tools-list.html'],
 
-  ['godotmp.html', 'godot/multiplayer/index.html'],
-  ['godotserver.html', 'godot/multiplayer/server-setup.html'],
-  ['cgrelay.html', 'godot/multiplayer/cgrelay.html'],
-  ['cgrelay-guide.html', 'godot/multiplayer/cgrelay-guide.html'],
-  ['cgrelay-trial.html', 'godot/multiplayer/cgrelay-trial.html'],
+  ['/godot/multiplayer/index.html', 'godot/multiplayer/index.html'],
+  ['/godot/multiplayer/server-setup.html', 'godot/multiplayer/server-setup.html'],
+  ['/godot/multiplayer/cgrelay.html', 'godot/multiplayer/cgrelay.html'],
+  ['/godot/multiplayer/cgrelay-guide.html', 'godot/multiplayer/cgrelay-guide.html'],
+  ['/godot/multiplayer/cgrelay-trial.html', 'godot/multiplayer/cgrelay-trial.html'],
 
-  ['visualcode.html', 'godot/visual-coder/visualcode-REVIEW.html'],
-  ['godotassistantpro.html', 'godot/assistant-pro.html'],
-  ['godot-4-mobile-game.html', 'godot/mobile-game.html'],
-  ['godotconnect.html', 'godot/connect.html'],
-  ['touchcontrol.html', 'godot/touch-control.html'],
-  ['pvp-game.html', 'godot/pvp-game.html'],
-  ['gamestore.html', 'godot/store/games.html'],
-  ['cgstore.html', 'godot/store/assets.html'],
-  ['stream.html', 'godot/store/stream-login.html'],  // verify manually — 0 "godot" keyword hits, but tied to gamestore.html
-  ['gamedev-services.html', 'godot/services.html'],
-  ['cglive.html', 'godot/cglive.html'],
-  ['livekit.html', 'godot/livekit.html'],
+  ['/godot/visual-coder/visualcode-REVIEW.html', 'godot/visual-coder/visualcode-REVIEW.html'],
+  ['/godot/assistant-pro.html', 'godot/assistant-pro.html'],
+  ['/godot/mobile-game.html', 'godot/mobile-game.html'],
+  ['/godot/connect.html', 'godot/connect.html'],
+  ['/godot/touch-control.html', 'godot/touch-control.html'],
+  ['/godot/pvp-game.html', 'godot/pvp-game.html'],
+  ['/godot/store/games.html', 'godot/store/games.html'],
+  ['/godot/store/assets.html', 'godot/store/assets.html'],
+  ['/godot/store/stream-login.html', 'godot/store/stream-login.html'],  // verify manually — 0 "godot" keyword hits, but tied to gamestore.html
+  ['/godot/services.html', 'godot/services.html'],
+  ['/godot/cglive.html', 'godot/cglive.html'],
+  ['/godot/livekit.html', 'godot/livekit.html'],
 ];
 
 function exists(p) { return fs.existsSync(p); }
