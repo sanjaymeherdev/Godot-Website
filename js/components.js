@@ -257,17 +257,17 @@ body.sm-no-scroll { overflow: hidden; }
         {
             label: 'Services',
             dropdown: [
-                { icon: '⚙️', label: 'All Services',        href: `${base}services.html` },
+                { icon: '⚙️', label: 'All Services',         href: `${base}services.html` },
                 { icon: '🔄', label: 'Automation Hosting',   href: `${base}services/automation.html` },
                 { icon: '💳', label: 'Payment Gateway Setup',href: `${base}services/payment_gateway.html` },
                 { icon: '📋', label: 'Client & Task Manager',href: `${base}services/smadmin.html` },
-                { icon: '📣', label: 'Social Media Mgmt',    href: `${base}marketing/digital-services.html` },
+                { icon: '📣', label: 'Digital Marketing Agent', href: `${base}marketing/digital-services.html` },
             ]
         },
         {
             label: 'Products',
             dropdown: [
-                { icon: '🧰', label: 'All Products',         href: `${base}products.html` },
+                { icon: '🧰', label: 'All Products',          href: `${base}products.html` },
                 { icon: '📱', label: 'WhatsApp Business',    href: `${base}products.html#whatsapp` },
                 { icon: '💼', label: 'Business Tools',       href: `${base}products.html#business-tools` },
                 { icon: '🎥', label: 'Creator Tools',        href: `${base}products.html#creator-tools` },
@@ -276,6 +276,7 @@ body.sm-no-scroll { overflow: hidden; }
             ]
         },
         { label: 'Portfolio', href: `${base}editing-portfolio.html` },
+        { label: 'Tech Tools', href: `${base}tech-tools.html` },
         { label: 'Contact',   href: `${base}contact.html` },
         { label: 'Review',    href: `${base}review.html` },
     ];
@@ -402,6 +403,7 @@ body.sm-no-scroll { overflow: hidden; }
                 <h4>Company</h4>
                 <a href="${base}about.html">👤 About</a>
                 <a href="${base}editing-portfolio.html">🎬 Portfolio</a>
+                <a href="${base}tech-tools.html">🧰 Tech Tools</a>
                 <a href="${base}contact.html">📧 Contact</a>
                 <a href="${base}review.html">⭐ Leave a Review</a>
                 <a href="${base}donate.html">☕ Donate</a>
