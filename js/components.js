@@ -276,9 +276,24 @@ body.sm-no-scroll { overflow: hidden; }
             ]
         },
         { label: 'Portfolio', href: `${base}editing-portfolio.html` },
-        { label: 'Tech Tools', href: `${base}tech-tools.html` },
+        {
+            label: 'Tech Tools',
+            dropdown: [
+                { icon: '📊', label: 'LeadFlow — WhatsApp CRM',       href: `${base}marketing/waleadflow.html` },
+                { icon: '🔑', label: 'LeadFlow — App Login',          href: `${base}marketing/leadflow.html` },
+                { icon: '💬', label: 'WaBlast Pro — Bulk WhatsApp',   href: `${base}marketing/wablast.html` },
+                { icon: '📤', label: 'AutoSend — Bulk Messaging',     href: `${base}marketing/autosend.html` },
+                { icon: '🏢', label: 'YourMate — Tuition Suite',      href: `${base}marketing/yourmate.html` },
+                { icon: '📅', label: 'SMBooking — Scheduling Page',   href: `${base}marketing/smbooking.html` },
+                { icon: '🌐', label: 'SiteSheet — Editable Website',  href: `${base}marketing/sitesheet.html` },
+                { icon: '📱', label: 'PocketAI — AI on Every App',    href: `${base}marketing/pocketai.html` },
+                { icon: '🤖', label: 'AICommander',                  href: `${base}marketing/AICommander.html` },
+                { icon: '📝', label: 'ContentPlanner',                href: `${base}marketing/aicontentplanner.html` },
+                { icon: '📣', label: 'Social Media Management',       href: `${base}marketing/digital-services.html` },
+            ]
+        },
+        { label: 'SMM', href: `${base}marketing/digital-services.html` },
         { label: 'Contact',   href: `${base}contact.html` },
-        { label: 'Review',    href: `${base}review.html` },
     ];
 
     // ─── RENDER DESKTOP NAV LINKS ─────────────────────────────────────
@@ -403,10 +418,8 @@ body.sm-no-scroll { overflow: hidden; }
                 <h4>Company</h4>
                 <a href="${base}about.html">👤 About</a>
                 <a href="${base}editing-portfolio.html">🎬 Portfolio</a>
-                <a href="${base}tech-tools.html">🧰 Tech Tools</a>
+                <a href="${base}marketing/digital-services.html">📣 SMM</a>
                 <a href="${base}contact.html">📧 Contact</a>
-                <a href="${base}review.html">⭐ Leave a Review</a>
-                <a href="${base}donate.html">☕ Donate</a>
             </div>
         </div>
         <div class="sm-f-bottom">
