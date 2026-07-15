@@ -254,6 +254,8 @@ body.sm-no-scroll { overflow: hidden; }
     // ─── UNIFIED NAV CONFIG (business site only) ───────────────────────
     const NAV_LINKS = [
         { label: 'About', href: `${base}about.html` },
+        { label: 'Portfolio', href: `${base}editing-portfolio.html` },
+        { label: 'SMM', href: `${base}marketing/digital-services.html` },
         {
             label: 'Services',
             dropdown: [
@@ -275,24 +277,30 @@ body.sm-no-scroll { overflow: hidden; }
                 { icon: '🖥️', label: 'Self-Hostable Servers',href: `${base}products.html#self-hosted` },
             ]
         },
-        { label: 'Portfolio', href: `${base}editing-portfolio.html` },
+      
         {
             label: 'Tech Tools',
             dropdown: [
-                { icon: '📊', label: 'LeadFlow — WhatsApp CRM',       href: `${base}marketing/waleadflow.html` },
-                { icon: '🔑', label: 'LeadFlow — App Login',          href: `${base}marketing/leadflow.html` },
-                { icon: '💬', label: 'WaBlast Pro — Bulk WhatsApp',   href: `${base}marketing/wablast.html` },
-                { icon: '📤', label: 'AutoSend — Bulk Messaging',     href: `${base}marketing/autosend.html` },
-                { icon: '🏢', label: 'YourMate — Tuition Suite',      href: `${base}marketing/yourmate.html` },
-                { icon: '📅', label: 'SMBooking — Scheduling Page',   href: `${base}marketing/smbooking.html` },
-                { icon: '🌐', label: 'SiteSheet — Editable Website',  href: `${base}marketing/sitesheet.html` },
+                { icon: '💬', label: 'WaBlast Pro — CRM',   href: `${base}marketing/wablast.html` },
+                { icon: '📤', label: 'AutoSend — WaBulk Unofficial',     href: `${base}marketing/autosend.html` },
+                { icon: '🏢', label: 'YourMate — Coaching Suite',      href: `${base}marketing/yourmate.html` },
+                { icon: '📅', label: 'SMBooking — Appointments',   href: `${base}marketing/smbooking.html` },
+                { icon: '🌐', label: 'SiteSheet — Affordable Website',  href: `${base}marketing/sitesheet.html` },
                 { icon: '📱', label: 'PocketAI — AI on Every App',    href: `${base}marketing/pocketai.html` },
-                { icon: '🤖', label: 'AICommander',                  href: `${base}marketing/AICommander.html` },
-                { icon: '📝', label: 'ContentPlanner',                href: `${base}marketing/aidesigner.html` },
-                { icon: '📣', label: 'Social Media Management',       href: `${base}marketing/digital-services.html` },
+                { icon: '📝', label: 'AIContentDesinger',                href: `${base}marketing/aidesigner.html` },
             ]
         },
-        { label: 'SMM', href: `${base}marketing/digital-services.html` },
+         {
+            label: 'Courses',
+            dropdown: [
+                { icon: '⚙️', label: 'Development',         href: `${base}course/index.html` },
+                { icon: '🔄', label: 'Video Editing',   href: `${base}course/video-editing.html` },
+                { icon: '💳', label: 'Blender',href: `${base}course/blenderai.html` },
+                { icon: '📋', label: 'Automation',href: `${base}course/n8n-course.html` },
+                { icon: '📣', label: 'FREE AI Mastery', href: `${base}course/free-ai-tools.html` },
+            ]
+        },
+        
         { label: 'Contact',   href: `${base}contact.html` },
     ];
 
