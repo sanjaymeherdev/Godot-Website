@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SanjayMeher Suite — 10 Tools, One Workspace</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('sm-theme');
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    if(theme === 'light') document.documentElement.setAttribute('data-theme','light');
+  }catch(e){}
+})();
+</script>
+<style>
+/* ============================================================
+   RESET
+============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0A0B14;
+  --bg-soft:#0E1020;
+  --surface:#141628;
+  --surface-2:#191c33;
+  --border:rgba(255,255,255,0.08);
+  --border-soft:rgba(255,255,255,0.05);
+  --primary:#7C5CFC;
+  --primary-2:#A78BFA;
+  --gold:#F2B441;
+  --gold-2:#FFD98A;
+  --teal:#2ED8C3;
+  --rose:#FB7185;
+  --text:#F4F5FB;
+  --text-muted:#9297B8;
+  --text-dim:#666B8C;
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow-lg:0 30px 80px rgba(0,0,0,0.45);
+  --ease:cubic-bezier(.22,.9,.32,1);
+  --fill-05:rgba(255,255,255,0.02);
+  --fill-1:rgba(255,255,255,0.03);
+  --fill-15:rgba(255,255,255,0.04);
+  --fill-2:rgba(255,255,255,0.05);
+  --fill-25:rgba(255,255,255,0.06);
+  --fill-3:rgba(255,255,255,0.08);
+  --fill-35:rgba(255,255,255,0.09);
+  --fill-4:rgba(255,255,255,0.12);
+  --header-bg:rgba(10,11,20,0.72);
+  --header-bg-scrolled:rgba(10,11,20,0.9);
+  color-scheme:dark;
+}
+[data-theme="light"]{
+  --bg:#F6F7FB;
+  --bg-soft:#EDEFF7;
+  --surface:#FFFFFF;
+  --surface-2:#F0F1F8;
+  --border:rgba(20,22,45,0.10);
+  --border-soft:rgba(20,22,45,0.06);
+  --primary:#6C4FE0;
+  --primary-2:#7B5CF0;
+  --gold:#B9790E;
+  --gold-2:#9C6708;
+  --teal:#0C9C82;
+  --rose:#E14F68;
+  --text:#15172B;
+  --text-muted:#565B7A;
+  --text-dim:#82869E;
+  --shadow-lg:0 24px 60px rgba(30,32,60,0.12);
+  --fill-05:rgba(20,22,45,0.02);
+  --fill-1:rgba(20,22,45,0.035);
+  --fill-15:rgba(20,22,45,0.045);
+  --fill-2:rgba(20,22,45,0.055);
+  --fill-25:rgba(20,22,45,0.065);
+  --fill-3:rgba(20,22,45,0.08);
+  --fill-35:rgba(20,22,45,0.09);
+  --fill-4:rgba(20,22,45,0.11);
+  --header-bg:rgba(246,247,251,0.75);
+  --header-bg-scrolled:rgba(246,247,251,0.92);
+  color-scheme:light;
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  transition:background .45s var(--ease),color .45s var(--ease);
+}
+a{text-decoration:none;color:inherit;}
+img{max-width:100%;display:block;}
+.container{max-width:1280px;margin:0 auto;padding:0 24px;}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-0.01em;}
+html.theming *{transition:background-color .45s var(--ease),border-color .45s var(--ease),color .45s var(--ease),box-shadow .45s var(--ease) !important;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--primary),var(--gold));border-radius:10px;}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+}
+
+/* ============================================================
+   UTILITY
+============================================================ */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
+}
+.eyebrow::before{content:'';width:18px;height:1.5px;background:var(--gold);display:inline-block;}
+.section-title{
+  font-size:clamp(1.9rem,3.4vw,2.6rem);
+  font-weight:700;
+  margin-bottom:12px;
+}
+.section-title .grad{
+  background:linear-gradient(120deg,var(--primary-2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.section-sub{font-size:1.05rem;color:var(--text-muted);max-width:560px;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 30px;border-radius:100px;font-weight:600;font-size:0.95rem;
+  cursor:pointer;border:none;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s var(--ease);
+}
+.btn-primary{background:linear-gradient(120deg,var(--primary),#9B7BFF);color:#fff;box-shadow:0 10px 30px rgba(124,92,252,0.28);}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(124,92,252,0.4);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--gold);background:rgba(242,180,65,0.06);transform:translateY(-3px);}
+.btn-gold{background:linear-gradient(120deg,var(--gold),var(--gold-2));color:#1a1200;box-shadow:0 10px 30px rgba(242,180,65,0.25);}
+.btn-gold:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(242,180,65,0.38);}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.header{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  padding:16px 0;
+  background:var(--header-bg);
+  backdrop-filter:blur(16px) saturate(160%);
+  border-bottom:1px solid var(--border-soft);
+  transition:padding .35s var(--ease),background .35s var(--ease);
+}
+.header.scrolled{padding:10px 0;background:var(--header-bg-scrolled);}
+.header .container{display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bricolage Grotesque',sans-serif;font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:9px;}
+.logo .mark{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--gold));
+  display:flex;align-items:center;justify-content:center;font-size:0.95rem;color:#0A0B14;
+}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:30px;list-style:none;font-size:0.9rem;font-weight:500;}
+.nav-links a:not(.nav-cta){color:var(--text-muted);position:relative;transition:color .3s;}
+.nav-links a:not(.nav-cta):hover,.nav-links a.active{color:var(--text);}
+.nav-links a:not(.nav-cta)::after{
+  content:'';position:absolute;bottom:-6px;left:0;width:0;height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--gold));transition:width .35s var(--ease);
+}
+.nav-links a:not(.nav-cta):hover::after,.nav-links a.active::after{width:100%;}
+.nav-cta{background:linear-gradient(120deg,var(--primary),#9B7BFF);padding:9px 22px;border-radius:100px;font-weight:600;color:#fff !important;transition:transform .3s;}
+.nav-cta:hover{transform:scale(1.04);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;}
+.hamburger span{width:24px;height:2px;background:var(--text);border-radius:4px;transition:.3s;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.theme-toggle{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+  color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;
+  transition:transform .4s var(--ease),border-color .3s,background .3s;flex-shrink:0;
+}
+.theme-toggle:hover{transform:rotate(15deg) scale(1.06);border-color:var(--gold);}
+.theme-toggle .fa-sun{display:none;}
+[data-theme="light"] .theme-toggle .fa-moon{display:none;}
+[data-theme="light"] .theme-toggle .fa-sun{display:inline-block;color:var(--gold);}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero{padding:170px 0 100px;position:relative;overflow:hidden;}
+.hero-mesh{
+  position:absolute;inset:-20%;z-index:0;
+  background:
+    radial-gradient(circle at 18% 20%,rgba(124,92,252,0.22),transparent 42%),
+    radial-gradient(circle at 82% 12%,rgba(242,180,65,0.14),transparent 40%),
+    radial-gradient(circle at 60% 85%,rgba(46,216,195,0.10),transparent 45%);
+  animation:meshDrift 18s ease-in-out infinite alternate;
+  filter:blur(10px);
+}
+@keyframes meshDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-2%,3%) scale(1.08);}}
+.hero-content{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;
+  background:rgba(242,180,65,0.1);border:1px solid rgba(242,180,65,0.25);color:var(--gold-2);
+  padding:7px 18px;border-radius:100px;margin-bottom:26px;
+}
+.hero h1{font-size:clamp(2.4rem,5vw,3.6rem);font-weight:800;line-height:1.08;margin-bottom:20px;}
+.hero h1 .cycle-wrap{
+  display:block;background:linear-gradient(120deg,var(--primary-2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  min-height:1.15em;
+}
+.hero p{font-size:1.1rem;color:var(--text-muted);max-width:520px;margin-bottom:34px;}
+.hero-cta-group{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:44px;}
+.hero-stats{display:flex;gap:34px;flex-wrap:wrap;}
+.hero-stats .stat b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);}
+.hero-stats .stat span{font-size:0.78rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;}
+
+/* orbit visual */
+.hero-orbit{position:relative;width:100%;aspect-ratio:1/1;max-width:440px;margin:0 auto;}
+.orbit-core{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:96px;height:96px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#B7A4FF,var(--primary) 60%,#4B36B8);
+  box-shadow:0 0 60px rgba(124,92,252,0.55),0 0 120px rgba(124,92,252,0.25);
+  display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;
+  animation:corePulse 3.4s ease-in-out infinite;
+}
+@keyframes corePulse{0%,100%{box-shadow:0 0 60px rgba(124,92,252,0.55),0 0 120px rgba(124,92,252,0.25);}50%{box-shadow:0 0 80px rgba(124,92,252,0.7),0 0 150px rgba(242,180,65,0.25);}}
+.orbit-ring{position:absolute;inset:0;border:1px dashed var(--fill-35);border-radius:50%;animation:ringSpin 40s linear infinite;}
+.orbit-ring.r2{inset:14%;animation-duration:55s;animation-direction:reverse;border-color:rgba(242,180,65,0.1);}
+@keyframes ringSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.orbit-chip{
+  position:absolute;top:50%;left:50%;width:46px;height:46px;border-radius:13px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:var(--primary-2);
+  box-shadow:0 10px 26px rgba(0,0,0,0.4);
+  animation:chipFloat 5s ease-in-out infinite;
+}
+@keyframes chipFloat{0%,100%{margin-top:-6px;}50%{margin-top:6px;}}
+
+/* ============================================================
+   PRODUCT GRID
+============================================================ */
+.products-grid-section{padding:70px 0 30px;position:relative;}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;margin-top:44px;}
+.product-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px 22px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .4s var(--ease),border-color .4s var(--ease),box-shadow .4s var(--ease);
+}
+.product-card::before{
+  content:'';position:absolute;inset:0;opacity:0;border-radius:inherit;
+  background:linear-gradient(140deg,rgba(124,92,252,0.14),rgba(242,180,65,0.08));
+  transition:opacity .4s var(--ease);
+}
+.product-card:hover{transform:translateY(-6px);border-color:rgba(124,92,252,0.4);box-shadow:var(--shadow-lg);}
+.product-card:hover::before{opacity:1;}
+.product-card .top-row{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
+.product-card .icon-wrap{
+  width:46px;height:46px;border-radius:12px;background:rgba(124,92,252,0.14);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--primary-2);margin-bottom:16px;
+}
+.product-card .cat-pill{
+  font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;
+  color:var(--text-dim);border:1px solid var(--border);padding:3px 9px;border-radius:20px;
+}
+.product-card h3{font-size:1.08rem;font-weight:700;margin-bottom:5px;position:relative;z-index:1;}
+.product-card p{font-size:0.84rem;color:var(--text-muted);margin-bottom:16px;position:relative;z-index:1;}
+.product-card .price-tag{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;color:var(--gold-2);position:relative;z-index:1;}
+
+/* ============================================================
+   PRODUCT DETAIL SECTIONS
+============================================================ */
+.product-detail{padding:70px 0;border-top:1px solid var(--border-soft);}
+.product-detail .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+.product-detail:nth-of-type(even) .detail-grid{direction:rtl;}
+.product-detail:nth-of-type(even) .detail-grid > *{direction:ltr;}
+.detail-info h2{font-size:clamp(1.7rem,2.6vw,2.2rem);font-weight:700;margin-bottom:10px;}
+.detail-info .tagline{font-size:1.02rem;color:var(--text-muted);margin-bottom:22px;}
+.detail-info ul{list-style:none;margin-bottom:26px;display:flex;flex-direction:column;gap:9px;}
+.detail-info ul li{display:flex;align-items:center;gap:10px;font-size:0.94rem;color:#7759e7;}
+.detail-info ul li i{color:var(--teal);font-size:0.8rem;width:16px;}
+.detail-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:26px;}
+.price-chip{
+  font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--gold-2);
+  background:rgba(242,180,65,0.08);border:1px solid rgba(242,180,65,0.2);padding:9px 18px;border-radius:100px;
+}
+.mini-pricing{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.mini-pricing div span{display:block;color:var(--text-dim);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;}
+.mini-pricing div strong{font-family:'JetBrains Mono',monospace;font-size:0.86rem;}
+
+/* ============================================================
+   DEVICE FRAMES
+============================================================ */
+.stage{display:flex;align-items:center;justify-content:center;min-height:380px;}
+.frame-phone{
+  width:220px;background:#050611;border-radius:38px;padding:14px 10px;position:relative;
+  box-shadow:var(--shadow-lg),inset 0 0 0 2px rgba(255,255,255,0.05);
+}
+.frame-phone::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:60px;height:16px;background:#000;border-radius:20px;z-index:2;}
+.frame-phone .screen{
+  background:linear-gradient(165deg,#151832,#0a0b17);
+  border-radius:26px;padding:26px 14px 16px;min-height:340px;position:relative;overflow:hidden;
+}
+.frame-browser{
+  width:100%;max-width:460px;background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;box-shadow:var(--shadow-lg);
+}
+.frame-browser .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:var(--fill-1);border-bottom:1px solid var(--border-soft);}
+.frame-browser .dot{width:9px;height:9px;border-radius:50%;}
+.frame-browser .dot:nth-child(1){background:#FF6159;}
+.frame-browser .dot:nth-child(2){background:#FFBD2E;}
+.frame-browser .dot:nth-child(3){background:#27C93F;}
+.frame-browser .url{
+  margin-left:10px;flex:1;background:var(--fill-15);border-radius:20px;padding:4px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-dim);
+}
+.frame-browser .content{padding:26px;min-height:300px;}
+
+/* ---- Laptop mockup shell ---- */
+.laptop-shell{width:100%;max-width:460px;margin:0 auto;}
+.laptop-shell .frame-browser{border-radius:14px 14px 4px 4px;box-shadow:none;margin-bottom:0;}
+.laptop-base{
+  height:16px;width:104%;margin-left:-2%;
+  background:linear-gradient(180deg,var(--surface-2),var(--bg-soft));
+  border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;
+  position:relative;box-shadow:var(--shadow-lg);
+}
+.laptop-base::before{
+  content:'';position:absolute;left:50%;top:-1px;transform:translateX(-50%);
+  width:60px;height:5px;background:var(--bg-soft);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;
+}
+
+/* ---- Floating platform icons ---- */
+.stage{position:relative;}
+.floating-icon{
+  position:absolute;width:42px;height:42px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;
+  box-shadow:0 14px 30px rgba(0,0,0,0.35);animation:iconFloat 4.6s ease-in-out infinite;z-index:3;
+}
+@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-14px) rotate(4deg);}}
+.floating-icon.pos-tl{top:-12px;left:-10px;}
+.floating-icon.pos-tr{top:-12px;right:-10px;}
+.floating-icon.pos-bl{bottom:2px;left:-16px;}
+.floating-icon.pos-br{bottom:2px;right:-16px;}
+.floating-icon.wa{background:linear-gradient(135deg,#25D366,#128C7E);}
+.floating-icon.fb{background:linear-gradient(135deg,#1877F2,#0C5DC7);}
+.floating-icon.ig{background:linear-gradient(135deg,#F58529,#DD2A7B 55%,#8134AF);}
+.floating-icon.th{background:linear-gradient(135deg,#2B2B2B,#000);}
+.floating-icon.n8nb{background:linear-gradient(135deg,#EA4B71,#FF6D5A);font-family:'JetBrains Mono',monospace;font-size:0.6rem;font-weight:700;}
+@media (max-width:520px){
+  .floating-icon{width:34px;height:34px;font-size:0.9rem;}
+}
+
+/* ---- AI Hub ---- */
+.ai-carousel-track{display:flex;gap:14px;overflow:hidden;}
+.ai-carousel-track .row{display:flex;gap:14px;animation:carouselMarquee 14s linear infinite;}
+@keyframes carouselMarquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.ai-card{
+  min-width:104px;background:var(--fill-15);border:1px solid var(--border);border-radius:14px;
+  padding:18px 14px;text-align:center;flex-shrink:0;
+}
+.ai-card i{font-size:1.8rem;background:linear-gradient(135deg,var(--primary-2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;display:block;}
+.ai-card span{font-size:0.74rem;color:var(--text-muted);}
+.gen-btn{
+  margin-top:20px;width:100%;background:linear-gradient(120deg,var(--primary),#9B7BFF);border:none;color:#fff;
+  padding:12px;border-radius:100px;font-weight:600;font-size:0.85rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  animation:genPulse 2.6s infinite;
+}
+@keyframes genPulse{0%,100%{box-shadow:0 0 0 0 rgba(124,92,252,0.4);}50%{box-shadow:0 0 0 10px rgba(124,92,252,0);}}
+
+/* ---- Social 3-step builder ---- */
+.step-flow{display:flex;flex-direction:column;gap:10px;}
+.step-flow .step{
+  background:var(--fill-1);border:1px solid var(--border);border-left:3px solid var(--border);
+  border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px;transition:.5s var(--ease);
+}
+.step-flow .step .num{
+  width:26px;height:26px;border-radius:50%;background:rgba(124,92,252,0.15);color:var(--primary-2);
+  display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;
+}
+.step-flow .step .label{flex:1;font-size:0.86rem;}
+.step-flow .step .sub{display:block;font-size:0.7rem;color:var(--text-dim);margin-top:2px;}
+.step-flow .step .check{color:var(--teal);opacity:0;transform:scale(0.5);transition:.4s var(--ease);}
+.step-flow .step.active{border-left-color:var(--primary);background:rgba(124,92,252,0.08);}
+.step-flow .step.done .check{opacity:1;transform:scale(1);}
+
+/* ---- WaBlast chat ---- */
+.chat-stream{display:flex;flex-direction:column;gap:8px;}
+.bubble{
+  max-width:78%;padding:8px 13px;border-radius:14px 14px 14px 4px;font-size:0.78rem;
+  background:var(--fill-25);opacity:0;transform:translateY(8px) scale(0.94);
+  animation:bubbleIn 0.5s var(--ease) forwards;
+}
+.bubble.me{margin-left:auto;border-radius:14px 14px 4px 14px;background:linear-gradient(120deg,var(--primary),#9B7BFF);color:#fff;}
+@keyframes bubbleIn{to{opacity:1;transform:translateY(0) scale(1);}}
+.shield-row{
+  margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:0.66rem;color:var(--teal);background:rgba(46,216,195,0.1);border:1px solid rgba(46,216,195,0.25);
+  padding:6px 12px;border-radius:100px;
+}
+.bulk-counter{
+  margin-top:10px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);
+}
+.bulk-counter b{color:var(--gold-2);}
+
+/* ---- n8n nodes ---- */
+.node-chain{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;}
+.node-chain .node{
+  padding:10px 16px;border-radius:10px;font-size:0.72rem;font-weight:600;
+  background:var(--fill-15);border:1px solid var(--border);color:var(--text-muted);
+  transition:.5s var(--ease);position:relative;
+}
+.node-chain .node.active{border-color:var(--primary);color:var(--text);background:rgba(124,92,252,0.12);box-shadow:0 0 0 4px rgba(124,92,252,0.1);}
+.node-chain .node.success{border-color:var(--teal);color:var(--teal);background:rgba(46,216,195,0.1);}
+.node-chain .connector{width:26px;height:2px;background:var(--border);position:relative;overflow:hidden;}
+.node-chain .connector.flow::after{
+  content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,var(--primary-2),transparent);
+  animation:flowMove 1s linear infinite;
+}
+@keyframes flowMove{to{left:100%;}}
+
+/* ---- SMBooking ---- */
+.meet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.meet-cell{
+  background:var(--fill-15);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;
+  opacity:0;transform:scale(0.85);animation:cellPop 0.5s var(--ease) forwards;
+}
+@keyframes cellPop{to{opacity:1;transform:scale(1);}}
+.meet-cell .av{width:34px;height:34px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#0A0B14;}
+.meet-cell span{font-size:0.72rem;color:var(--text-muted);}
+.transcript-line{
+  margin-top:14px;background:var(--fill-1);border:1px solid var(--border);border-radius:10px;padding:9px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-dim);display:flex;gap:8px;align-items:center;
+}
+.transcript-line .cursor{width:6px;height:11px;background:var(--teal);display:inline-block;animation:blink 0.9s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+/* ---- AI Card designer ---- */
+.card-stack{display:flex;gap:14px;overflow:hidden;}
+.card-stack .row{display:flex;gap:14px;animation:carouselMarquee 16s linear infinite;}
+.mini-card{
+  min-width:118px;height:78px;border-radius:12px;flex-shrink:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;font-size:0.72rem;font-weight:600;color:#fff;
+  box-shadow:0 12px 26px rgba(0,0,0,0.35);
+}
+.mini-card i{font-size:1.2rem;}
+.mini-card.c1{background:linear-gradient(140deg,#7C5CFC,#B383FF);}
+.mini-card.c2{background:linear-gradient(140deg,#1C2340,#3A4270);}
+.mini-card.c3{background:linear-gradient(140deg,#F2B441,#FFD98A);color:#241a00;}
+.mini-card.c4{background:linear-gradient(140deg,#FB7185,#FFB1BE);color:#2b0009;}
+
+/* ---- Freelance dashboard ---- */
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.dash-stats .cell{background:var(--fill-15);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;}
+.dash-stats .cell .n{font-family:'Bricolage Grotesque',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text);}
+.dash-stats .cell .l{font-size:0.66rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;}
+.dash-task-row{
+  background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:11px 14px;
+  display:flex;align-items:center;gap:10px;font-size:0.78rem;
+}
+.dash-task-row .tick{margin-left:auto;color:var(--teal);opacity:0;transform:scale(0.5);transition:.4s var(--ease);}
+.dash-task-row.done .tick{opacity:1;transform:scale(1);}
+
+/* ---- Your Mate attendance ---- */
+.attendance-list{display:flex;flex-direction:column;gap:8px;}
+.att-row{display:flex;align-items:center;justify-content:space-between;background:var(--fill-15);border-radius:10px;padding:9px 12px;font-size:0.8rem;}
+.toggle{width:38px;height:20px;border-radius:20px;background:var(--fill-4);position:relative;cursor:pointer;transition:.3s;flex-shrink:0;}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.3s var(--ease);}
+.toggle.on{background:var(--teal);}
+.toggle.on::after{left:20px;}
+.att-summary{margin-top:12px;text-align:center;font-size:0.75rem;color:var(--text-dim);}
+.att-summary b{color:var(--gold-2);font-family:'JetBrains Mono',monospace;}
+
+/* ---- LMS ---- */
+.video-list{display:flex;flex-direction:column;gap:8px;max-height:210px;overflow:hidden;position:relative;}
+.video-list .scroller{display:flex;flex-direction:column;gap:8px;animation:vscroll 9s linear infinite;}
+@keyframes vscroll{0%{transform:translateY(0);}100%{transform:translateY(-50%);}}
+.v-item{display:flex;align-items:center;gap:10px;background:var(--fill-15);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:0.78rem;}
+.v-item i{color:var(--primary-2);}
+.v-item .dur{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-dim);}
+.progress-track{margin-top:14px;height:6px;background:var(--fill-3);border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--gold));border-radius:10px;transition:width 1.6s var(--ease);}
+.progress-label{font-size:0.68rem;color:var(--text-dim);margin-top:6px;}
+
+/* ---- LeadFlow sheet + ticks ---- */
+.sheet-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;
+  opacity:0;transform:translateY(-10px);animation:sheetIn 0.6s var(--ease) forwards;
+}
+@keyframes sheetIn{to{opacity:1;transform:translateY(0);}}
+.sheet-row div{padding:9px 12px;font-size:0.76rem;background:var(--fill-1);border-right:1px solid var(--border-soft);}
+.sheet-row div:last-child{border-right:none;color:var(--gold-2);}
+.lead-arrow{text-align:center;color:var(--text-dim);margin:10px 0;font-size:0.9rem;}
+.tick-row{display:flex;gap:10px;}
+.tick-chip{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;
+  background:var(--fill-15);border:1px solid var(--border);font-size:0.76rem;opacity:0.4;transition:.5s var(--ease);
+}
+.tick-chip.sent{opacity:1;border-color:var(--teal);background:rgba(46,216,195,0.08);color:var(--teal);}
+
+/* ============================================================
+   PRICING
+============================================================ */
+.pricing-unified{padding:90px 0;text-align:center;}
+.pricing-table-wrap{overflow-x:auto;margin-top:36px;border-radius:var(--radius);}
+.pricing-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.pricing-table th,.pricing-table td{padding:15px 20px;text-align:left;border-bottom:1px solid var(--border-soft);font-size:0.85rem;}
+.pricing-table th{background:rgba(124,92,252,0.08);color:var(--gold-2);font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+.pricing-table tr:last-child td{border-bottom:none;}
+.pricing-table tr:hover td{background:var(--fill-05);}
+.pricing-table .tool-name{font-weight:700;}
+.bundle-cta{
+  margin-top:36px;background:linear-gradient(120deg,rgba(124,92,252,0.1),rgba(242,180,65,0.08));
+  border:1px solid rgba(124,92,252,0.2);padding:28px 34px;border-radius:var(--radius);
+  display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:26px;
+}
+.bundle-cta .label{font-size:0.78rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;}
+.bundle-cta .price{font-family:'Bricolage Grotesque',sans-serif;font-size:2rem;font-weight:800;color:var(--text);}
+.bundle-cta .save{font-size:0.76rem;color:var(--teal);margin-top:2px;}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+.footer{padding:50px 0 34px;border-top:1px solid var(--border-soft);text-align:center;color:var(--text-dim);font-size:0.85rem;}
+.footer .logo{justify-content:center;margin-bottom:12px;}
+.footer a{color:var(--primary-2);}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width:1024px){
+  .hero-content{grid-template-columns:1fr;text-align:center;}
+  .hero p{margin-left:auto;margin-right:auto;}
+  .hero-cta-group{justify-content:center;}
+  .hero-stats{justify-content:center;}
+  .product-detail .detail-grid{grid-template-columns:1fr;gap:36px;}
+  .product-detail:nth-of-type(even) .detail-grid{direction:ltr;}
+}
+@media (max-width:768px){
+  .nav-links{
+    display:none;position:absolute;top:64px;right:16px;flex-direction:column;gap:16px;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;min-width:190px;
+  }
+  .nav-links.open{display:flex;}
+  .hamburger{display:flex;}
+  .hero{padding:130px 0 70px;}
+  .products-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .mini-pricing{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:480px){
+  .hero h1{font-size:2rem;}
+  .products-grid{grid-template-columns:1fr 1fr;}
+  .dash-stats{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="header">
+  <div class="container">
+    <div class="logo"><span class="mark"><i class="fas fa-cubes"></i></span>Sanjay<span>Meher</span></div>
+    <nav class="nav-right">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#products" data-nav>Products</a></li>
+        <li><a href="#pricing" data-nav>Pricing</a></li>
+        <li><a href="#contact" class="nav-cta">Get Started</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme">
+        <i class="fas fa-moon"></i><i class="fas fa-sun"></i>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-mesh"></div>
+  <div class="container hero-content">
+    <div>
+      <div class="hero-badge"><i class="fas fa-sparkles"></i> 10 tools · one workspace</div>
+      <h1>Everything you run your business with, learns to <span class="cycle-wrap" id="cycleWord">Automate.</span></h1>
+      <p>WhatsApp bots, AI generation, booking, courses, leads and freelancing — built as one connected suite for Indian founders, agencies and educators.</p>
+      <div class="hero-cta-group">
+        <a href="#products" class="btn btn-primary"><i class="fas fa-th-large"></i> Explore the suite</a>
+        <a href="#pricing" class="btn btn-outline"><i class="fas fa-tag"></i> See pricing</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><b>10</b><span>Products</span></div>
+        <div class="stat"><b>140+</b><span>AI models</span></div>
+        <div class="stat"><b>₹4,999</b><span>Full bundle</span></div>
+      </div>
+    </div>
+    <div class="hero-orbit" id="heroOrbit">
+      <div class="orbit-ring"></div>
+      <div class="orbit-ring r2"></div>
+      <div class="orbit-core"><i class="fas fa-cubes"></i></div>
+    </div>
+  </div>
+</section>
+
+<section class="products-grid-section" id="products">
+  <div class="container">
+    <div class="center" style="max-width:640px;">
+      <span class="eyebrow">The suite</span>
+      <h2 class="section-title">Ten tools, <span class="grad">every one built to be seen working</span></h2>
+      <p class="section-sub center">Tap a card to jump straight to its live demo below.</p>
+    </div>
+    <div class="products-grid reveal" id="productGrid"></div>
+  </div>
+</section>
+
+<div id="productDetails"></div>
+
+<section class="pricing-unified" id="pricing">
+  <div class="container">
+    <span class="eyebrow">Pricing</span>
+    <h2 class="section-title">Simple, <span class="grad">India-first pricing</span></h2>
+    <p class="section-sub center" style="margin:0 auto;">Pay only for what you use, or take the full bundle and save.</p>
+    <div class="pricing-table-wrap reveal">
+      <table class="pricing-table" id="pricingTable">
+        <thead><tr><th>Tool</th><th>Free</th><th>Starter</th><th>Pro</th><th>Enterprise</th></tr></thead>
+        <tbody id="pricingBody"></tbody>
+      </table>
+    </div>
+    <div class="bundle-cta reveal">
+      <div style="text-align:left;">
+        <div class="label">Get all 10 tools</div>
+        <div class="price">₹4,999 <span style="font-size:1rem;font-weight:400;color:var(--text-muted);">/ month</span></div>
+        <div class="save"><i class="fas fa-check-circle"></i> Save 40% vs. buying separately</div>
+      </div>
+      <a href="#contact" class="btn btn-gold"><i class="fas fa-gem"></i> Claim the bundle</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" id="contact">
+  <div class="container">
+    <div class="logo"><span class="mark"><i class="fas fa-cubes"></i></span>Sanjay<span>Meher</span> Suite</div>
+    <p>&copy; 2026 — Built for builders. <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="mailto:hello@sanjaymeher.online">Contact</a></p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const products = [
+  { id:'aihub', icon:'fa-brain', cat:'AI', name:'AI Hub', tagline:'140+ models — text, image, video, agents',
+    price:'₹499/mo', features:['140+ AI models','Content writing (29 models)','Coding agent','Chatbot builder','Bring your own keys — zero markup'],
+    pricing:{free:'Yes',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'aihub' },
+  { id:'socialmedia', icon:'fa-share-alt', cat:'Automation', name:'Social Media Auto', tagline:'Scheduling + AI replies + chatbot',
+    price:'₹299/mo', features:['Post scheduling','AI comment replies','Chatbot module','Unified inbox','Analytics'],
+    pricing:{free:'Yes',starter:'₹299',pro:'₹398',enterprise:'₹497'}, anim:'social' },
+  { id:'wablast', icon:'fa-bolt', cat:'Messaging', name:'WaBlast Pro', tagline:'Official WhatsApp CRM + bulk messaging',
+    price:'Pay-per-use', features:['Official Meta API','Bulk campaigns','AI auto-reply','Template builder','Analytics'],
+    pricing:{free:'—',starter:'₹1/msg',pro:'₹100/1K',enterprise:'₹5,000 one-time'}, anim:'wablast' },
+  { id:'n8n', icon:'fa-diagram-project', cat:'Automation', name:'n8n Automation', tagline:'Templates + hosted n8n + pre-auth',
+    price:'₹499/mo', features:['100+ templates','Pre-authenticated clients','Hosted n8n','Webhooks','API access'],
+    pricing:{free:'—',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'n8n' },
+  { id:'smbooking', icon:'fa-calendar-check', cat:'Scheduling', name:'SMBokking', tagline:'Meeting booking + Meet + AI transcripts',
+    price:'₹499/mo', features:['Meeting booking','Google Meet integration','AI transcripts','AI summaries','Minutes of meeting'],
+    pricing:{free:'Yes',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'smbooking' },
+  { id:'aicard', icon:'fa-id-card', cat:'Design', name:'AI Card Designer', tagline:'1,000+ templates + AI generation',
+    price:'Free + modules', features:['1,000+ templates','AI generation','Regional languages','Section builder','Publish & share'],
+    pricing:{free:'Yes',starter:'₹299',pro:'₹499',enterprise:'₹699'}, anim:'aicard' },
+  { id:'freelance', icon:'fa-users-cog', cat:'Operations', name:'Freelance Mgmt', tagline:'Clients, tasks, invoices, WhatsApp',
+    price:'₹499/mo', features:['Client management','Task tracking','Invoices','WhatsApp integration','Reminders'],
+    pricing:{free:'14-day',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'freelance' },
+  { id:'yourmate', icon:'fa-chalkboard-teacher', cat:'Education', name:'Your Mate', tagline:'Attendance, fees & marks for coaching',
+    price:'₹499/mo', features:['Attendance','Fee tracking','Marks management','Reminders','Parent portal'],
+    pricing:{free:'Yes',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'yourmate' },
+  { id:'lms', icon:'fa-graduation-cap', cat:'Education', name:'LMS Platform', tagline:'Create, sell and manage courses',
+    price:'₹499/mo', features:['Course builder','Video hosting','Quizzes','Certificates','Payments'],
+    pricing:{free:'Yes',starter:'₹499',pro:'₹999',enterprise:'₹2,499'}, anim:'lms' },
+  { id:'leadflow', icon:'fa-robot', cat:'Sales', name:'LeadFlow', tagline:'Lead capture → WhatsApp + email automation',
+    price:'₹0.25/msg', features:['Unofficial API','Lead automation','AI auto-reply','Bulk sender (200/day)','Multi-client'],
+    pricing:{free:'—',starter:'₹0.25/msg',pro:'Self-hosted',enterprise:'Custom'}, anim:'leadflow' }
+];
+
+const cycleWords = ['Automate.','Communicate.','Design.','Convert.','Educate.'];
+
+/* ============================================================
+   RENDER: PRODUCT GRID
+============================================================ */
+const grid = document.getElementById('productGrid');
+products.forEach(p=>{
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.innerHTML = `
+    <div class="top-row">
+      <div class="icon-wrap"><i class="fas ${p.icon}"></i></div>
+      <span class="cat-pill">${p.cat}</span>
+    </div>
+    <h3>${p.name}</h3>
+    <p>${p.tagline}</p>
+    <div class="price-tag">${p.price}</div>`;
+  card.addEventListener('click', ()=> document.getElementById(p.id).scrollIntoView({behavior:'smooth',block:'start'}));
+  grid.appendChild(card);
+});
+
+/* ============================================================
+   ANIMATION TEMPLATES (per product)
+============================================================ */
+const animHTML = {
+  aihub: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">aihub.suite/generate</span></div>
+      <div class="content">
+        <div class="ai-carousel-track"><div class="row">
+          <div class="ai-card"><i class="fas fa-file-lines"></i><span>Text</span></div>
+          <div class="ai-card"><i class="fas fa-image"></i><span>Image</span></div>
+          <div class="ai-card"><i class="fas fa-video"></i><span>Video</span></div>
+          <div class="ai-card"><i class="fas fa-robot"></i><span>Agent</span></div>
+          <div class="ai-card"><i class="fas fa-file-lines"></i><span>Text</span></div>
+          <div class="ai-card"><i class="fas fa-image"></i><span>Image</span></div>
+          <div class="ai-card"><i class="fas fa-video"></i><span>Video</span></div>
+          <div class="ai-card"><i class="fas fa-robot"></i><span>Agent</span></div>
+        </div></div>
+        <button class="gen-btn"><i class="fas fa-wand-magic-sparkles"></i> Generate with AI</button>
+      </div></div>
+    <div class="laptop-base"></div></div>`,
+  social: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">social.suite/automation/new</span></div>
+      <div class="content"><div class="step-flow" id="stepFlow">
+        <div class="step"><span class="num">1</span><div class="label">Select keyword<span class="sub">"pricing", "demo", "help"</span></div><span class="check"><i class="fas fa-check-circle"></i></span></div>
+        <div class="step"><span class="num">2</span><div class="label">Select reply<span class="sub">Auto DM with pricing link</span></div><span class="check"><i class="fas fa-check-circle"></i></span></div>
+        <div class="step"><span class="num">3</span><div class="label">Set automation<span class="sub">Live on Instagram & Facebook</span></div><span class="check"><i class="fas fa-check-circle"></i></span></div>
+      </div></div></div>
+    <div class="laptop-base"></div></div>
+    <div class="floating-icon fb pos-tl" style="animation-delay:.1s"><i class="fab fa-facebook-f"></i></div>
+    <div class="floating-icon ig pos-tr" style="animation-delay:.6s"><i class="fab fa-instagram"></i></div>
+    <div class="floating-icon th pos-br" style="animation-delay:1.1s"><i class="fab fa-threads"></i></div>`,
+  wablast: `
+    <div class="frame-phone"><div class="screen">
+      <div class="chat-stream" id="chatStream">
+        <div class="bubble" style="animation-delay:.1s">Hi, do you ship to Pune?</div>
+        <div class="bubble me" style="animation-delay:.6s">Yes! Free shipping above ₹999 🚚</div>
+        <div class="bubble" style="animation-delay:1.1s">Perfect, sending payment now</div>
+        <div class="bubble me" style="animation-delay:1.6s">Order confirmed ✅</div>
+      </div>
+      <div class="shield-row"><i class="fas fa-shield-alt"></i> Official Meta API · Verified</div>
+      <div class="bulk-counter">Bulk campaign sent: <b id="bulkCount">0</b>/1,204</div>
+    </div></div>
+    <div class="floating-icon wa pos-tr" style="animation-delay:.3s"><i class="fab fa-whatsapp"></i></div>`,
+  n8n: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">n8n.suite/workflow/run</span></div>
+      <div class="content"><div class="node-chain" id="nodeChain">
+        <span class="node" data-n="0">Trigger</span><span class="connector" data-c="0"></span>
+        <span class="node" data-n="1">Filter</span><span class="connector" data-c="1"></span>
+        <span class="node" data-n="2">Transform</span><span class="connector" data-c="2"></span>
+        <span class="node" data-n="3"><i class="fas fa-check"></i> Success</span>
+      </div></div></div>
+    <div class="laptop-base"></div></div>
+    <div class="floating-icon n8nb pos-tl" style="animation-delay:.4s">n8n</div>`,
+  smbooking: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">meet.suite/room/standup</span></div>
+      <div class="content">
+        <div class="meet-grid" id="meetGrid">
+          <div class="meet-cell" style="animation-delay:.1s"><div class="av" style="background:var(--primary-2);">JD</div><span>John joined</span></div>
+          <div class="meet-cell" style="animation-delay:.4s"><div class="av" style="background:var(--gold);">SM</div><span>Sarah joined</span></div>
+          <div class="meet-cell" style="animation-delay:.7s"><div class="av" style="background:var(--teal);">MK</div><span>Mike joined</span></div>
+          <div class="meet-cell" style="animation-delay:1.0s"><div class="av" style="background:var(--rose);">AT</div><span>You</span></div>
+        </div>
+        <div class="transcript-line"><i class="fas fa-waveform" style="color:var(--teal);"></i> AI transcribing live<span class="cursor"></span></div>
+      </div></div>
+    <div class="laptop-base"></div></div>`,
+  aicard: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">cards.suite/templates</span></div>
+      <div class="content">
+        <div class="card-stack"><div class="row">
+          <div class="mini-card c1"><i class="fas fa-ring"></i>Wedding</div>
+          <div class="mini-card c2"><i class="fas fa-briefcase"></i>Business</div>
+          <div class="mini-card c3"><i class="fas fa-birthday-cake"></i>Birthday</div>
+          <div class="mini-card c4"><i class="fas fa-star"></i>Festival</div>
+          <div class="mini-card c1"><i class="fas fa-ring"></i>Wedding</div>
+          <div class="mini-card c2"><i class="fas fa-briefcase"></i>Business</div>
+          <div class="mini-card c3"><i class="fas fa-birthday-cake"></i>Birthday</div>
+          <div class="mini-card c4"><i class="fas fa-star"></i>Festival</div>
+        </div></div>
+        <button class="gen-btn"><i class="fas fa-wand-magic-sparkles"></i> Generate with AI</button>
+      </div></div>
+    <div class="laptop-base"></div></div>`,
+  freelance: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">freelance.suite/dashboard</span></div>
+      <div class="content">
+        <div class="dash-stats">
+          <div class="cell"><div class="n" id="statTasks">12</div><div class="l">Tasks</div></div>
+          <div class="cell"><div class="n">8</div><div class="l">Clients</div></div>
+          <div class="cell"><div class="n">5</div><div class="l">Invoices</div></div>
+        </div>
+        <div class="dash-task-row" id="dashTaskRow"><i class="fas fa-plus-circle" style="color:var(--primary-2);"></i><span id="dashTaskText">Adding task: "New Project"</span><span class="tick"><i class="fas fa-check-circle"></i></span></div>
+      </div></div>
+    <div class="laptop-base"></div></div>`,
+  yourmate: `
+    <div class="frame-phone"><div class="screen">
+      <div class="attendance-list" id="attList">
+        <div class="att-row"><span>👤 Rahul</span><span class="toggle on"></span></div>
+        <div class="att-row"><span>👤 Priya</span><span class="toggle"></span></div>
+        <div class="att-row"><span>👤 Aman</span><span class="toggle on"></span></div>
+        <div class="att-row"><span>👤 Sneha</span><span class="toggle on"></span></div>
+      </div>
+      <div class="att-summary">Attendance: <b id="attPct">75%</b></div>
+    </div></div>`,
+  lms: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">learn.suite/course/js101</span></div>
+      <div class="content">
+        <div class="video-list"><div class="scroller">
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.1 — Introduction<span class="dur">12:30</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.2 — Variables<span class="dur">15:20</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.3 — Loops<span class="dur">18:45</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.4 — Functions<span class="dur">22:10</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.1 — Introduction<span class="dur">12:30</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.2 — Variables<span class="dur">15:20</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.3 — Loops<span class="dur">18:45</span></div>
+          <div class="v-item"><i class="fas fa-circle-play"></i>Ch.4 — Functions<span class="dur">22:10</span></div>
+        </div></div>
+        <div class="progress-track"><div class="progress-fill" id="lmsProgress"></div></div>
+        <div class="progress-label">Course progress: 60%</div>
+      </div></div>
+    <div class="laptop-base"></div></div>`,
+  leadflow: `
+    <div class="laptop-shell">
+    <div class="frame-browser"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">leadflow.suite/sheet</span></div>
+      <div class="content">
+        <div class="sheet-row"><div>Rahul Sharma</div><div>New Lead</div></div>
+        <div class="lead-arrow"><i class="fas fa-arrow-down"></i></div>
+        <div class="tick-row" id="tickRow">
+          <div class="tick-chip" data-t="0"><i class="fas fa-envelope"></i> Email sent</div>
+          <div class="tick-chip" data-t="1"><i class="fab fa-whatsapp"></i> WhatsApp sent</div>
+        </div>
+      </div></div>
+    <div class="laptop-base"></div></div>
+    <div class="floating-icon wa pos-tr" style="animation-delay:.5s"><i class="fab fa-whatsapp"></i></div>`
+};
+
+/* ============================================================
+   RENDER: PRODUCT DETAILS
+============================================================ */
+const detailsContainer = document.getElementById('productDetails');
+products.forEach(p=>{
+  const section = document.createElement('section');
+  section.className = 'product-detail reveal';
+  section.id = p.id;
+  section.innerHTML = `
+    <div class="container">
+      <div class="detail-grid">
+        <div class="detail-info">
+          <span class="eyebrow">${p.cat}</span>
+          <h2>${p.name}</h2>
+          <div class="tagline">${p.tagline}</div>
+          <ul>${p.features.map(f=>`<li><i class="fas fa-check-circle"></i>${f}</li>`).join('')}</ul>
+          <div class="detail-actions">
+            <span class="price-chip">${p.price}</span>
+            <a href="#pricing" class="btn btn-outline" style="padding:10px 22px;font-size:0.85rem;">View pricing</a>
+          </div>
+          <div class="mini-pricing">
+            <div><span>Free</span><strong>${p.pricing.free}</strong></div>
+            <div><span>Starter</span><strong>${p.pricing.starter}</strong></div>
+            <div><span>Pro</span><strong>${p.pricing.pro}</strong></div>
+            <div><span>Enterprise</span><strong>${p.pricing.enterprise}</strong></div>
+          </div>
+        </div>
+        <div class="stage">${animHTML[p.anim]}</div>
+      </div>
+    </div>`;
+  detailsContainer.appendChild(section);
+});
+
+/* ============================================================
+   RENDER: PRICING TABLE
+============================================================ */
+const pricingBody = document.getElementById('pricingBody');
+products.forEach(p=>{
+  const row = document.createElement('tr');
+  row.innerHTML = `<td class="tool-name">${p.name}</td><td>${p.pricing.free}</td><td>${p.pricing.starter}</td><td>${p.pricing.pro}</td><td>${p.pricing.enterprise}</td>`;
+  pricingBody.appendChild(row);
+});
+
+/* ============================================================
+   HERO ORBIT ICONS (built from product list)
+============================================================ */
+const orbit = document.getElementById('heroOrbit');
+products.forEach((p,i)=>{
+  const angle = (360/products.length)*i;
+  const chip = document.createElement('div');
+  chip.className = 'orbit-chip';
+  chip.style.transform = `rotate(${angle}deg) translate(178px) rotate(-${angle}deg)`;
+  chip.style.animationDelay = (i*0.25)+'s';
+  chip.innerHTML = `<i class="fas ${p.icon}"></i>`;
+  orbit.appendChild(chip);
+});
+
+/* ============================================================
+   HERO WORD CYCLE
+============================================================ */
+let wordIdx = 0;
+const cycleEl = document.getElementById('cycleWord');
+setInterval(()=>{
+  wordIdx = (wordIdx+1) % cycleWords.length;
+  cycleEl.style.opacity = 0;
+  setTimeout(()=>{ cycleEl.textContent = cycleWords[wordIdx]; cycleEl.style.opacity = 1; }, 300);
+}, 2600);
+cycleEl.style.transition = 'opacity .3s ease';
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+const revealObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      triggerAnim(entry.target);
+    }
+  });
+}, {threshold:0.18});
+document.querySelectorAll('.reveal, .product-detail').forEach(el=>revealObserver.observe(el));
+
+/* ============================================================
+   PER-PRODUCT INTERACTIVE ANIMATION LOGIC
+   (re-triggered when its section scrolls into view)
+============================================================ */
+const triggered = new Set();
+function triggerAnim(section){
+  if(!section.id || triggered.has(section.id)) return;
+  triggered.add(section.id);
+
+  if(section.id === 'socialmedia'){
+    const steps = section.querySelectorAll('.step');
+    let i = 0;
+    const run = ()=>{
+      steps.forEach((s,idx)=>{ s.classList.toggle('active', idx===i); s.classList.toggle('done', idx<i); });
+      if(i===steps.length){ steps.forEach(s=>s.classList.remove('active')); i=0; setTimeout(run,1200); return; }
+      i++; setTimeout(run,1300);
+    };
+    run();
+  }
+
+  if(section.id === 'n8n'){
+    const nodes = section.querySelectorAll('.node');
+    const cons = section.querySelectorAll('.connector');
+    let i = 0;
+    const run = ()=>{
+      nodes.forEach((n,idx)=>{ n.classList.toggle('active', idx===i); n.classList.toggle('success', idx<i || (idx===nodes.length-1 && i>=nodes.length-1)); });
+      cons.forEach((c,idx)=> c.classList.toggle('flow', idx===i));
+      if(i >= nodes.length){ i=0; setTimeout(run,1400); return; }
+      i++; setTimeout(run,900);
+    };
+    run();
+  }
+
+  if(section.id === 'wablast'){
+    let count = 0;
+    const el = section.querySelector('#bulkCount');
+    const iv = setInterval(()=>{
+      count += Math.floor(Math.random()*80)+20;
+      if(count>=1204){count=1204; clearInterval(iv);}
+      el.textContent = count;
+    }, 220);
+  }
+
+  if(section.id === 'freelance'){
+    const stat = section.querySelector('#statTasks');
+    const row = section.querySelector('#dashTaskRow');
+    const text = section.querySelector('#dashTaskText');
+    let count = 12;
+    setInterval(()=>{
+      row.classList.remove('done');
+      text.textContent = 'Adding task: "New Project"';
+      setTimeout(()=>{
+        count++; stat.textContent = count;
+        text.textContent = 'Task added!';
+        row.classList.add('done');
+      }, 1000);
+    }, 3200);
+  }
+
+  if(section.id === 'yourmate'){
+    const toggles = section.querySelectorAll('.toggle');
+    const pct = section.querySelector('#attPct');
+    const update = ()=>{
+      const on = Array.from(toggles).filter(t=>t.classList.contains('on')).length;
+      pct.textContent = Math.round((on/toggles.length)*100)+'%';
+    };
+    toggles.forEach(t=> t.addEventListener('click', ()=>{ t.classList.toggle('on'); update(); }));
+  }
+
+  if(section.id === 'lms'){
+    const fill = section.querySelector('#lmsProgress');
+    setTimeout(()=>{ fill.style.width = '60%'; }, 300);
+  }
+
+  if(section.id === 'leadflow'){
+    const chips = section.querySelectorAll('.tick-chip');
+    const run = ()=>{
+      chips.forEach(c=>c.classList.remove('sent'));
+      chips.forEach((c,idx)=> setTimeout(()=> c.classList.add('sent'), 500 + idx*600));
+    };
+    run();
+    setInterval(run, 4200);
+  }
+}
+
+/* ============================================================
+   NAV SCROLLSPY
+============================================================ */
+const header = document.getElementById('header');
+window.addEventListener('scroll', ()=> header.classList.toggle('scrolled', window.scrollY > 40));
+
+const navEls = document.querySelectorAll('[data-nav]');
+const spySections = [document.getElementById('products'), document.getElementById('pricing')];
+const spyObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navEls.forEach(a=>a.classList.remove('active'));
+      const match = document.querySelector(`[data-nav][href="#${entry.target.id}"]`);
+      if(match) match.classList.add('active');
+    }
+  });
+}, {threshold:0.4});
+spySections.forEach(s=> s && spyObserver.observe(s));
+
+/* ============================================================
+   THEME TOGGLE
+============================================================ */
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+themeToggle.addEventListener('click', ()=>{
+  root.classList.add('theming');
+  const isLight = root.getAttribute('data-theme') === 'light';
+  if(isLight){ root.removeAttribute('data-theme'); }
+  else{ root.setAttribute('data-theme','light'); }
+  try{ localStorage.setItem('sm-theme', isLight ? 'dark' : 'light'); }catch(e){}
+  setTimeout(()=> root.classList.remove('theming'), 500);
+});
+
+/* ============================================================
+   NAV / SMOOTH SCROLL
+============================================================ */
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(link=> link.addEventListener('click', ()=> navLinks.classList.remove('open')));
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+  anchor.addEventListener('click', function(e){
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+</script>
+</body>
+</html>
