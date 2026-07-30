@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Portfolio — Sanjay Meher</title>
-<meta name="description" content="A collection of design work by Sanjay Meher, organized by orientation.">
+<title>Arrange — Sanjay Meher</title>
+<meta name="description" content="Drag to reorder designs, then export the arrangement as JSON.">
 <style>
   :root{
     --bg: #0c0e12;
@@ -25,10 +25,11 @@
     color:var(--text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height:100vh;
+    padding-bottom: 100px; /* room for sticky bar */
   }
 
   header{
-    padding: 64px 20px 40px;
+    padding: 40px 20px 24px;
     text-align:center;
     border-bottom: 1px solid var(--line);
     background: linear-gradient(180deg, rgba(94,230,200,0.07), transparent);
@@ -43,7 +44,7 @@
   }
   header h1{
     margin:0 0 10px;
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
     letter-spacing: -0.02em;
     font-weight: 700;
   }
@@ -52,14 +53,14 @@
     margin: 0 auto;
     max-width: 560px;
     color: var(--muted);
-    font-size: 1rem;
+    font-size: 0.95rem;
     line-height: 1.5;
   }
 
   main{
     max-width: 1300px;
     margin: 0 auto;
-    padding: 8px 20px 40px;
+    padding: 24px 20px 40px;
   }
 
   #status{
@@ -70,69 +71,115 @@
   }
   #status.error{ color: var(--danger); }
 
-  .category{
-    margin-top: 56px;
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
   }
-  .category-head{
-    display:flex;
-    align-items:baseline;
-    gap: 12px;
-    margin-bottom: 18px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--line);
-  }
-  .category-head h2{
-    margin:0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .category-head .count{
-    color: var(--muted);
-    font-size: 0.82rem;
-  }
-
-  /* Masonry via CSS columns so images keep their natural aspect ratio */
-  .masonry{
-    column-count: 1;
-    column-gap: 14px;
-  }
-  @media (min-width: 560px){ .masonry{ column-count: 2; } }
-  @media (min-width: 860px){ .masonry{ column-count: 3; } }
-  @media (min-width: 1180px){ .masonry{ column-count: 4; } }
 
   .card{
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    margin: 0 0 14px;
     position:relative;
     background: var(--panel);
     border:1px solid var(--line);
     border-radius: var(--radius);
     overflow:hidden;
-    cursor: zoom-in;
-    transition: border-color .15s ease, transform .15s ease;
+    cursor: grab;
+    touch-action: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .card:hover{ border-color:#3a4150; transform: translateY(-2px); }
+  .card:active{ cursor: grabbing; }
+  .card:hover{ border-color:#3a4150; }
 
-  .card img{
-    display:block;
+  .card .thumb-wrap{
+    aspect-ratio: 1/1;
     width:100%;
-    height:auto; /* preserves original aspect ratio */
+    overflow:hidden;
+    background: var(--panel-2);
+  }
+  .card img{
+    width:100%; height:100%;
+    object-fit: cover;
+    display:block;
+    pointer-events:none; /* let drag handle clicks, avoid native image drag */
+    -webkit-user-drag:none;
   }
 
   .badge-num{
     position:absolute;
     top:8px; left:8px;
-    background: rgba(12,14,18,0.78);
-    color: var(--text);
-    font-size: 0.72rem;
-    font-weight:600;
+    background: rgba(12,14,18,0.85);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight:700;
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid var(--line);
     pointer-events:none;
+    z-index:2;
   }
+
+  .drag-handle{
+    position:absolute;
+    top:8px; right:8px;
+    width: 26px; height:26px;
+    background: rgba(12,14,18,0.78);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--muted);
+    pointer-events:none;
+    z-index:2;
+    font-size: 0.85rem;
+  }
+
+  /* SortableJS state classes */
+  .sortable-ghost{
+    opacity: 0.35;
+  }
+  .sortable-chosen .thumb-wrap{
+    box-shadow: 0 0 0 2px var(--accent) inset;
+  }
+  .sortable-drag{
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+
+  /* Sticky action bar */
+  #actionbar{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    padding: 12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    z-index: 50;
+  }
+  #actionbar .hint{
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .btn{
+    border:none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 0.92rem;
+    font-weight:600;
+    cursor:pointer;
+    transition: opacity .15s ease, transform .1s ease;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: var(--accent); color:#06231d; }
+  .btn-primary:hover{ opacity:0.9; }
+  .btn-ghost{
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover{ color: var(--text); border-color:#3a4150; }
 
   /* Lightbox */
   #lightbox{
@@ -172,9 +219,7 @@
     text-align:center;
     color: var(--muted);
     font-size: 0.8rem;
-    padding: 40px 16px 30px;
-    border-top: 1px solid var(--line);
-    margin-top: 40px;
+    padding: 30px 16px 16px;
   }
   footer a{ color: var(--accent); text-decoration:none; }
 </style>
@@ -182,15 +227,21 @@
 <body>
 
 <header>
-  <div class="eyebrow">Selected Work</div>
-  <h1>Design <span>Portfolio</span></h1>
-  <p>A collection of design work, organized by orientation. Tap any piece to view it full size.</p>
+  <div class="eyebrow">Layout Tool</div>
+  <h1>Arrange <span>the Set</span></h1>
+  <p>Drag the tiles into the order you want. When you're happy with the sequence, export it as JSON and send it back over — that file becomes the final layout order.</p>
 </header>
 
 <main>
-  <div id="status">Loading portfolio…</div>
-  <div id="categories" style="display:none;"></div>
+  <div id="status">Loading designs…</div>
+  <div class="grid" id="grid" style="display:none;"></div>
 </main>
+
+<div id="actionbar">
+  <span class="hint">Drag tiles to reorder</span>
+  <button class="btn btn-ghost" id="resetBtn">Reset order</button>
+  <button class="btn btn-primary" id="downloadBtn">⬇ Download arrangement (JSON)</button>
+</div>
 
 <div id="lightbox">
   <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
@@ -202,6 +253,7 @@
   Built by <a href="https://cggodotassets.shop" target="_blank" rel="noopener">Sanjay Meher</a>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
 (function(){
   const OWNER = "sanjaymeherdev";
@@ -209,30 +261,27 @@
   const BRANCH = "main";
   const FOLDER_PATH = "designs/gallery";
   const IMAGE_EXT = /\.(jpe?g|png|gif|webp|avif|svg)$/i;
-
-  // Aspect ratio categories, checked in order.
-  // ratio = width / height
-  const CATEGORY_ORDER = ["Landscape", "Square", "Portrait"];
-  const CATEGORIES = {
-    Landscape: { label: "Landscape", test: r => r > 1.15 },
-    Square:    { label: "Square",    test: r => r >= 0.85 && r <= 1.15 },
-    Portrait:  { label: "Portrait",  test: r => r < 0.85 }
-  };
+  const PROBE_TIMEOUT_MS = 8000;
 
   const statusEl = document.getElementById('status');
-  const categoriesEl = document.getElementById('categories');
+  const gridEl = document.getElementById('grid');
+  const resetBtn = document.getElementById('resetBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
   const lbCaption = document.getElementById('lbCaption');
   const lbClose = document.getElementById('lbClose');
 
+  let originalOrder = []; // array of filenames in the order they were fetched
+  let sortableInstance = null;
+
   function rawUrl(filename){
     return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(filename)}`;
   }
 
-  function openLightbox(url, num){
+  function openLightbox(url, name){
     lbImg.src = url;
-    lbCaption.textContent = `Design #${num}`;
+    lbCaption.textContent = name;
     lightbox.classList.add('show');
   }
   function closeLightbox(){
@@ -243,104 +292,113 @@
   lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
 
-  function categorize(ratio){
-    for(const key of CATEGORY_ORDER){
-      if(CATEGORIES[key].test(ratio)) return key;
-    }
-    return "Square";
+  function renumberBadges(){
+    const cards = gridEl.querySelectorAll('.card');
+    cards.forEach((card, i) => {
+      card.querySelector('.badge-num').textContent = '#' + (i + 1);
+    });
   }
 
-  function buildCard(file, num, url){
+  function buildCard(filename, url, position){
     const card = document.createElement('div');
     card.className = 'card';
+    card.dataset.filename = filename;
+    card.dataset.url = url;
 
+    const thumbWrap = document.createElement('div');
+    thumbWrap.className = 'thumb-wrap';
     const img = document.createElement('img');
     img.src = url;
-    img.alt = `Design ${num}`;
+    img.alt = filename;
     img.loading = 'lazy';
+    img.draggable = false;
+    thumbWrap.appendChild(img);
 
     const badge = document.createElement('div');
     badge.className = 'badge-num';
-    badge.textContent = '#' + num;
+    badge.textContent = '#' + position;
 
-    card.appendChild(img);
+    const handle = document.createElement('div');
+    handle.className = 'drag-handle';
+    handle.textContent = '⠿';
+
+    card.appendChild(thumbWrap);
     card.appendChild(badge);
-    card.addEventListener('click', () => openLightbox(url, num));
+    card.appendChild(handle);
+
+    // Click opens the lightbox; SortableJS only fires drag on real pointer movement,
+    // so a plain click/tap still works as a preview.
+    card.addEventListener('click', () => openLightbox(url, filename));
+
     return card;
   }
-
-  const PROBE_TIMEOUT_MS = 8000;
 
   function loadImageMeta(url){
     return new Promise((resolve) => {
       let settled = false;
       const probe = new Image();
-
-      const finish = (ratio) => {
-        if(settled) return;
-        settled = true;
-        resolve(ratio);
-      };
-
-      probe.onload = () => finish(probe.naturalWidth / probe.naturalHeight);
-      probe.onerror = () => finish(1); // fall back to square bucket if it fails to load
-
-      // Don't let one slow/hanging image block the page forever.
-      setTimeout(() => finish(1), PROBE_TIMEOUT_MS);
-
+      const finish = () => { if(!settled){ settled = true; resolve(); } };
+      probe.onload = finish;
+      probe.onerror = finish;
+      setTimeout(finish, PROBE_TIMEOUT_MS);
       probe.src = url;
     });
   }
 
-  // Build (or fetch) the section + masonry container for a category, on demand.
-  const sectionRefs = {};
-  const sectionCounts = {};
-  function ensureSection(key){
-    if(sectionRefs[key]) return sectionRefs[key];
-
-    const section = document.createElement('section');
-    section.className = 'category';
-
-    const head = document.createElement('div');
-    head.className = 'category-head';
-    const h2 = document.createElement('h2');
-    h2.textContent = CATEGORIES[key].label;
-    const count = document.createElement('span');
-    count.className = 'count';
-    count.textContent = '0 pieces';
-    head.appendChild(h2);
-    head.appendChild(count);
-
-    const masonry = document.createElement('div');
-    masonry.className = 'masonry';
-
-    section.appendChild(head);
-    section.appendChild(masonry);
-
-    // Keep sections in a stable, predictable order regardless of arrival order.
-    const idx = CATEGORY_ORDER.indexOf(key);
-    let inserted = false;
-    for(const child of categoriesEl.children){
-      if(CATEGORY_ORDER.indexOf(child.dataset.key) > idx){
-        categoriesEl.insertBefore(section, child);
-        inserted = true;
-        break;
-      }
-    }
-    if(!inserted) categoriesEl.appendChild(section);
-    section.dataset.key = key;
-
-    sectionRefs[key] = { section, masonry, countEl: count };
-    sectionCounts[key] = 0;
-    return sectionRefs[key];
+  function initSortable(){
+    if(sortableInstance) sortableInstance.destroy();
+    sortableInstance = new Sortable(gridEl, {
+      animation: 150,
+      delay: 60,
+      delayOnTouchOnly: true,
+      touchStartThreshold: 4,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      onEnd: renumberBadges
+    });
   }
 
-  function addCardToCategory(key, file, num, url){
-    const ref = ensureSection(key);
-    ref.masonry.appendChild(buildCard(file, num, url));
-    sectionCounts[key] += 1;
-    ref.countEl.textContent = `${sectionCounts[key]} piece${sectionCounts[key] === 1 ? '' : 's'}`;
+  function renderGrid(filenames){
+    gridEl.innerHTML = '';
+    filenames.forEach((filename, idx) => {
+      gridEl.appendChild(buildCard(filename, rawUrl(filename), idx + 1));
+    });
+    renumberBadges();
+    initSortable();
   }
+
+  resetBtn.addEventListener('click', () => {
+    renderGrid(originalOrder);
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const cards = Array.from(gridEl.querySelectorAll('.card'));
+    if(cards.length === 0) return;
+
+    const arrangement = cards.map((card, i) => ({
+      position: i + 1,
+      filename: card.dataset.filename,
+      url: card.dataset.url
+    }));
+
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      count: arrangement.length,
+      arrangement
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = `arrangement-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
 
   async function loadImages(){
     try{
@@ -362,27 +420,22 @@
       const data = await res.json();
       const files = data
         .filter(item => item.type === 'file' && IMAGE_EXT.test(item.name))
-        .sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
+        .sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}))
+        .map(item => item.name);
 
       if(files.length === 0){
         statusEl.textContent = 'No designs found yet. Check back soon.';
         return;
       }
 
-      statusEl.style.display = 'none';
-      categoriesEl.style.display = 'block';
+      originalOrder = files;
 
-      // Render each image's card as soon as its own aspect ratio is known,
-      // instead of waiting for the whole batch — one slow image no longer
-      // blocks the rest of the portfolio from appearing.
-      let done = 0;
-      await Promise.all(files.map(async (file, idx) => {
-        const num = idx + 1;
-        const url = rawUrl(file.name);
-        const ratio = await loadImageMeta(url);
-        addCardToCategory(categorize(ratio), file, num, url);
-        done += 1;
-      }));
+      statusEl.style.display = 'none';
+      gridEl.style.display = 'grid';
+      renderGrid(files);
+
+      // Warm the browser image cache in the background (non-blocking) so drags feel snappy.
+      files.forEach(f => loadImageMeta(rawUrl(f)));
 
     } catch(err){
       statusEl.textContent = '⚠️ ' + err.message;
