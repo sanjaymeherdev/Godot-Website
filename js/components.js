@@ -254,7 +254,12 @@ body.sm-no-scroll { overflow: hidden; }
     // ─── UNIFIED NAV CONFIG (business site only) ───────────────────────
     const NAV_LINKS = [
         { label: 'About', href: `${base}about.html` },
-        { label: 'Portfolio', href: `${base}editing-portfolio.html` },
+        { label: 'Portfolio',
+         dropdown: [
+                { icon: '🎥', label: 'Video Editing',         href: `${base}editing-portfolio.html` },
+                { icon: '💼', label: 'Graphic Design',   href: `${base}designs/gallery.html` },
+            ] 
+        },
         { label: 'SMM', href: `${base}marketing/digital-services.html` },
         {
             label: 'Services',
