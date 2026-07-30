@@ -269,13 +269,77 @@
     return card;
   }
 
+  const PROBE_TIMEOUT_MS = 8000;
+
   function loadImageMeta(url){
     return new Promise((resolve) => {
+      let settled = false;
       const probe = new Image();
-      probe.onload = () => resolve(probe.naturalWidth / probe.naturalHeight);
-      probe.onerror = () => resolve(1); // fall back to square bucket if it fails to load
+
+      const finish = (ratio) => {
+        if(settled) return;
+        settled = true;
+        resolve(ratio);
+      };
+
+      probe.onload = () => finish(probe.naturalWidth / probe.naturalHeight);
+      probe.onerror = () => finish(1); // fall back to square bucket if it fails to load
+
+      // Don't let one slow/hanging image block the page forever.
+      setTimeout(() => finish(1), PROBE_TIMEOUT_MS);
+
       probe.src = url;
     });
+  }
+
+  // Build (or fetch) the section + masonry container for a category, on demand.
+  const sectionRefs = {};
+  const sectionCounts = {};
+  function ensureSection(key){
+    if(sectionRefs[key]) return sectionRefs[key];
+
+    const section = document.createElement('section');
+    section.className = 'category';
+
+    const head = document.createElement('div');
+    head.className = 'category-head';
+    const h2 = document.createElement('h2');
+    h2.textContent = CATEGORIES[key].label;
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = '0 pieces';
+    head.appendChild(h2);
+    head.appendChild(count);
+
+    const masonry = document.createElement('div');
+    masonry.className = 'masonry';
+
+    section.appendChild(head);
+    section.appendChild(masonry);
+
+    // Keep sections in a stable, predictable order regardless of arrival order.
+    const idx = CATEGORY_ORDER.indexOf(key);
+    let inserted = false;
+    for(const child of categoriesEl.children){
+      if(CATEGORY_ORDER.indexOf(child.dataset.key) > idx){
+        categoriesEl.insertBefore(section, child);
+        inserted = true;
+        break;
+      }
+    }
+    if(!inserted) categoriesEl.appendChild(section);
+    section.dataset.key = key;
+
+    sectionRefs[key] = { section, masonry, countEl: count };
+    sectionCounts[key] = 0;
+    return sectionRefs[key];
+  }
+
+  function addCardToCategory(key, file, num, url){
+    const ref = ensureSection(key);
+    ref.masonry.appendChild(buildCard(file, num, url));
+    sectionCounts[key] += 1;
+    ref.countEl.textContent = `${sectionCounts[key]} piece${sectionCounts[key] === 1 ? '' : 's'}`;
   }
 
   async function loadImages(){
@@ -305,54 +369,25 @@
         return;
       }
 
-      // Determine each image's aspect ratio in parallel
-      const withMeta = await Promise.all(files.map(async (file, idx) => {
-        const num = idx + 1;
-        const url = rawUrl(file.name);
-        const ratio = await loadImageMeta(url);
-        return { file, num, url, category: categorize(ratio) };
-      }));
-
-      // Group by category, preserving original numbering order within each group
-      const groups = {};
-      CATEGORY_ORDER.forEach(key => groups[key] = []);
-      withMeta.forEach(item => groups[item.category].push(item));
-
       statusEl.style.display = 'none';
       categoriesEl.style.display = 'block';
 
-      CATEGORY_ORDER.forEach(key => {
-        const items = groups[key];
-        if(items.length === 0) return;
-
-        const section = document.createElement('section');
-        section.className = 'category';
-
-        const head = document.createElement('div');
-        head.className = 'category-head';
-        const h2 = document.createElement('h2');
-        h2.textContent = CATEGORIES[key].label;
-        const count = document.createElement('span');
-        count.className = 'count';
-        count.textContent = `${items.length} piece${items.length === 1 ? '' : 's'}`;
-        head.appendChild(h2);
-        head.appendChild(count);
-
-        const masonry = document.createElement('div');
-        masonry.className = 'masonry';
-
-        items.forEach(item => {
-          masonry.appendChild(buildCard(item.file, item.num, item.url));
-        });
-
-        section.appendChild(head);
-        section.appendChild(masonry);
-        categoriesEl.appendChild(section);
-      });
+      // Render each image's card as soon as its own aspect ratio is known,
+      // instead of waiting for the whole batch — one slow image no longer
+      // blocks the rest of the portfolio from appearing.
+      let done = 0;
+      await Promise.all(files.map(async (file, idx) => {
+        const num = idx + 1;
+        const url = rawUrl(file.name);
+        const ratio = await loadImageMeta(url);
+        addCardToCategory(categorize(ratio), file, num, url);
+        done += 1;
+      }));
 
     } catch(err){
       statusEl.textContent = '⚠️ ' + err.message;
       statusEl.classList.add('error');
+      statusEl.style.display = 'block';
     }
   }
 
