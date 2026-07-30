@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Arrange — Sanjay Meher</title>
-<meta name="description" content="Drag to reorder designs, then export the arrangement as JSON.">
+<title>Portfolio — Sanjay Meher</title>
+<meta name="description" content="A collection of design work by Sanjay Meher, organized by category.">
 <style>
   :root{
     --bg: #0c0e12;
@@ -25,11 +25,10 @@
     color:var(--text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height:100vh;
-    padding-bottom: 100px; /* room for sticky bar */
   }
 
   header{
-    padding: 40px 20px 24px;
+    padding: 64px 20px 40px;
     text-align:center;
     border-bottom: 1px solid var(--line);
     background: linear-gradient(180deg, rgba(94,230,200,0.07), transparent);
@@ -44,7 +43,7 @@
   }
   header h1{
     margin:0 0 10px;
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     letter-spacing: -0.02em;
     font-weight: 700;
   }
@@ -53,14 +52,14 @@
     margin: 0 auto;
     max-width: 560px;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.5;
   }
 
   main{
     max-width: 1300px;
     margin: 0 auto;
-    padding: 24px 20px 40px;
+    padding: 8px 20px 40px;
   }
 
   #status{
@@ -71,115 +70,69 @@
   }
   #status.error{ color: var(--danger); }
 
-  .grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 14px;
+  .category{
+    margin-top: 56px;
+  }
+  .category-head{
+    display:flex;
+    align-items:baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .category-head h2{
+    margin:0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .category-head .count{
+    color: var(--muted);
+    font-size: 0.82rem;
   }
 
+  /* Masonry via CSS columns so images keep their natural aspect ratio */
+  .masonry{
+    column-count: 1;
+    column-gap: 14px;
+  }
+  @media (min-width: 560px){ .masonry{ column-count: 2; } }
+  @media (min-width: 860px){ .masonry{ column-count: 3; } }
+  @media (min-width: 1180px){ .masonry{ column-count: 4; } }
+
   .card{
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin: 0 0 14px;
     position:relative;
     background: var(--panel);
     border:1px solid var(--line);
     border-radius: var(--radius);
     overflow:hidden;
-    cursor: grab;
-    touch-action: none;
-    transition: border-color .15s ease, box-shadow .15s ease;
+    cursor: zoom-in;
+    transition: border-color .15s ease, transform .15s ease;
   }
-  .card:active{ cursor: grabbing; }
-  .card:hover{ border-color:#3a4150; }
+  .card:hover{ border-color:#3a4150; transform: translateY(-2px); }
 
-  .card .thumb-wrap{
-    aspect-ratio: 1/1;
-    width:100%;
-    overflow:hidden;
-    background: var(--panel-2);
-  }
   .card img{
-    width:100%; height:100%;
-    object-fit: cover;
     display:block;
-    pointer-events:none; /* let drag handle clicks, avoid native image drag */
-    -webkit-user-drag:none;
+    width:100%;
+    height:auto; /* preserves original aspect ratio */
   }
 
   .badge-num{
     position:absolute;
     top:8px; left:8px;
-    background: rgba(12,14,18,0.85);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-weight:700;
+    background: rgba(12,14,18,0.78);
+    color: var(--text);
+    font-size: 0.72rem;
+    font-weight:600;
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid var(--line);
     pointer-events:none;
-    z-index:2;
   }
-
-  .drag-handle{
-    position:absolute;
-    top:8px; right:8px;
-    width: 26px; height:26px;
-    background: rgba(12,14,18,0.78);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    display:flex; align-items:center; justify-content:center;
-    color: var(--muted);
-    pointer-events:none;
-    z-index:2;
-    font-size: 0.85rem;
-  }
-
-  /* SortableJS state classes */
-  .sortable-ghost{
-    opacity: 0.35;
-  }
-  .sortable-chosen .thumb-wrap{
-    box-shadow: 0 0 0 2px var(--accent) inset;
-  }
-  .sortable-drag{
-    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-  }
-
-  /* Sticky action bar */
-  #actionbar{
-    position:fixed;
-    left:0; right:0; bottom:0;
-    background: var(--panel);
-    border-top: 1px solid var(--line);
-    padding: 12px 16px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:14px;
-    flex-wrap:wrap;
-    z-index: 50;
-  }
-  #actionbar .hint{
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-
-  .btn{
-    border:none;
-    border-radius: 999px;
-    padding: 10px 20px;
-    font-size: 0.92rem;
-    font-weight:600;
-    cursor:pointer;
-    transition: opacity .15s ease, transform .1s ease;
-  }
-  .btn:active{ transform: scale(0.97); }
-  .btn-primary{ background: var(--accent); color:#06231d; }
-  .btn-primary:hover{ opacity:0.9; }
-  .btn-ghost{
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--line);
-  }
-  .btn-ghost:hover{ color: var(--text); border-color:#3a4150; }
 
   /* Lightbox */
   #lightbox{
@@ -219,7 +172,9 @@
     text-align:center;
     color: var(--muted);
     font-size: 0.8rem;
-    padding: 30px 16px 16px;
+    padding: 40px 16px 30px;
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
   }
   footer a{ color: var(--accent); text-decoration:none; }
 </style>
@@ -227,21 +182,15 @@
 <body>
 
 <header>
-  <div class="eyebrow">Layout Tool</div>
-  <h1>Arrange <span>the Set</span></h1>
-  <p>Drag the tiles into the order you want. When you're happy with the sequence, export it as JSON and send it back over — that file becomes the final layout order.</p>
+  <div class="eyebrow">Selected Work</div>
+  <h1>Design <span>Portfolio</span></h1>
+  <p>A collection of design work, organized by category. Tap any piece to view it full size.</p>
 </header>
 
 <main>
-  <div id="status">Loading designs…</div>
-  <div class="grid" id="grid" style="display:none;"></div>
+  <div id="status">Loading portfolio…</div>
+  <div id="categories" style="display:none;"></div>
 </main>
-
-<div id="actionbar">
-  <span class="hint">Drag tiles to reorder</span>
-  <button class="btn btn-ghost" id="resetBtn">Reset order</button>
-  <button class="btn btn-primary" id="downloadBtn">⬇ Download arrangement (JSON)</button>
-</div>
 
 <div id="lightbox">
   <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
@@ -253,35 +202,154 @@
   Built by <a href="https://cggodotassets.shop" target="_blank" rel="noopener">Sanjay Meher</a>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
 (function(){
-  const OWNER = "sanjaymeherdev";
-  const REPO = "Godot-Website";
-  const BRANCH = "main";
-  const FOLDER_PATH = "designs/gallery";
-  const IMAGE_EXT = /\.(jpe?g|png|gif|webp|avif|svg)$/i;
-  const PROBE_TIMEOUT_MS = 8000;
+
+  // Fixed arrangement: sequence + category exactly as curated.
+  // p = position, f = filename, u = raw image url, c = category
+  const PORTFOLIO = [
+{p:1,f:"1.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/1.jpg",c:"Presentation"},
+{p:2,f:"5.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/5.jpg",c:"Presentation"},
+{p:3,f:"2.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/2.jpg",c:"Presentation"},
+{p:4,f:"7.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/7.jpg",c:"Presentation"},
+{p:5,f:"3.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/3.jpg",c:"Presentation"},
+{p:6,f:"4.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/4.jpg",c:"Presentation"},
+{p:7,f:"1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/1.png",c:"Carousel Nest Achievers"},
+{p:8,f:"3.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/3.png",c:"Carousel Nest Achievers"},
+{p:9,f:"4.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/4.png",c:"Carousel Nest Achievers"},
+{p:10,f:"47.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/47.png",c:"Carousel Nest Achievers"},
+{p:11,f:"5.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/5.png",c:"Carousel Nest Achievers"},
+{p:12,f:"17.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/17.png",c:"Carousel Nest Achievers"},
+{p:13,f:"55.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/55.png",c:"Carousel Nest Achievers"},
+{p:14,f:"37.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/37.png",c:"Carousel Nest Achievers"},
+{p:15,f:"65.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/65.png",c:"Carousel Nest Achievers"},
+{p:16,f:"27.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/27.png",c:"Carousel Nest Achievers"},
+{p:17,f:"2.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/2.png",c:"Carousel Podcast Thumbnail"},
+{p:18,f:"3-1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/3-1.png",c:"Carousel Podcast Thumbnail"},
+{p:19,f:"6.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/6.png",c:"Carousel Podcast Thumbnail"},
+{p:20,f:"7.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/7.png",c:"Carousel Podcast Thumbnail"},
+{p:21,f:"32.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/32.png",c:"Canesaa Graphics"},
+{p:22,f:"8.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/8.png",c:"Canesaa Graphics"},
+{p:23,f:"9.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/9.png",c:"Canesaa Graphics"},
+{p:24,f:"10.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/10.png",c:"Canesaa Graphics"},
+{p:25,f:"11-1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/11-1.png",c:"Canesaa Graphics"},
+{p:26,f:"66.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/66.png",c:"Canesaa Graphics"},
+{p:27,f:"12-1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/12-1.png",c:"Canesaa Graphics"},
+{p:28,f:"61.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/61.png",c:"Canesaa Graphics"},
+{p:29,f:"12.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/12.png",c:"Canesaa Graphics"},
+{p:30,f:"22.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/22.png",c:"Canesaa Graphics"},
+{p:31,f:"42.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/42.png",c:"Canesaa Graphics"},
+{p:32,f:"13-1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/13-1.png",c:"Canesaa Graphics"},
+{p:33,f:"14.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/14.png",c:"Carousel Aksharti Education"},
+{p:34,f:"13.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/13.png",c:"Carousel Aksharti Education"},
+{p:35,f:"23.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/23.png",c:"Carousel Aksharti Education"},
+{p:36,f:"24.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/24.png",c:"Carousel Aksharti Education"},
+{p:37,f:"81.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/81.png",c:"Carousel Aksharti Education"},
+{p:38,f:"33.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/33.png",c:"Carousel Aksharti Education"},
+{p:39,f:"34.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/34.png",c:"Carousel Aksharti Education"},
+{p:40,f:"43.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/43.png",c:"Carousel Aksharti Education"},
+{p:41,f:"44.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/44.png",c:"Carousel Aksharti Education"},
+{p:42,f:"53.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/53.png",c:"Carousel Aksharti Education"},
+{p:43,f:"52.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/52.png",c:"Carousel Aksharti Education"},
+{p:44,f:"62.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/62.png",c:"Carousel Aksharti Education"},
+{p:45,f:"63.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/63.png",c:"Carousel Aksharti Education"},
+{p:46,f:"72.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/72.png",c:"Carousel Aksharti Education"},
+{p:47,f:"71.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/71.png",c:"Carousel Aksharti Education"},
+{p:48,f:"15.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/15.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:49,f:"46.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/46.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:50,f:"54.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/54.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:51,f:"26.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/26.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:52,f:"36.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/36.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:53,f:"16.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/16.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:54,f:"45.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/45.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:55,f:"25.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/25.png",c:"Carousel Hypervive Athlete Fitness"},
+{p:56,f:"2rohit.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/2rohit.png",c:"Single Posts and Banners"},
+{p:57,f:"18.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/18.png",c:"Single Posts and Banners"},
+{p:58,f:"28.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/28.png",c:"Single Posts and Banners"},
+{p:59,f:"11.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/11.png",c:"Single Posts and Banners"},
+{p:60,f:"31.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/31.png",c:"Single Posts and Banners"},
+{p:61,f:"21.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/21.png",c:"Single Posts and Banners"},
+{p:62,f:"29.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/29.png",c:"Single Posts and Banners"},
+{p:63,f:"19.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/19.png",c:"Single Posts and Banners"},
+{p:64,f:"27nov_10.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/27nov_10.jpg",c:"Single Posts and Banners"},
+{p:65,f:"4f64a152-d32e-45df-a361-017afcae30f4.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/4f64a152-d32e-45df-a361-017afcae30f4.jpg",c:"Single Posts and Banners"},
+{p:66,f:"35.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/35.png",c:"Single Posts and Banners"},
+{p:67,f:"38.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/38.png",c:"Single Posts and Banners"},
+{p:68,f:"41.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/41.png",c:"Single Posts and Banners"},
+{p:69,f:"48.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/48.png",c:"Single Posts and Banners"},
+{p:70,f:"51.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/51.png",c:"Single Posts and Banners"},
+{p:71,f:"56.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/56.png",c:"Single Posts and Banners"},
+{p:72,f:"64.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/64.png",c:"Single Posts and Banners"},
+{p:73,f:"85bb6a09-82d5-44a2-8f01-e82bf18955aa.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/85bb6a09-82d5-44a2-8f01-e82bf18955aa.jpg",c:"Professionnal Photoshop Desings"},
+{p:74,f:"94c6f11d-29c4-45e3-9de8-dab849092e5b.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/94c6f11d-29c4-45e3-9de8-dab849092e5b.jpg",c:"Professionnal Photoshop Desings"},
+{p:75,f:"97b254d4-307b-4450-8554-2a4e60ff2d6f.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/97b254d4-307b-4450-8554-2a4e60ff2d6f.jpg",c:"Professionnal Photoshop Desings"},
+{p:76,f:"150_modern_furniture_social_media_post_template.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/150_modern_furniture_social_media_post_template.jpg",c:"Professionnal Photoshop Desings"},
+{p:77,f:"297.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/297.jpg",c:"Professionnal Photoshop Desings"},
+{p:78,f:"565.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/565.jpg",c:"Professionnal Photoshop Desings"},
+{p:79,f:"814c582d-cc71-41d2-a651-4689ce907460.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/814c582d-cc71-41d2-a651-4689ce907460.jpg",c:"Professionnal Photoshop Desings"},
+{p:80,f:"08408af5-5ffc-4482-8a95-5cdf1a0398f5.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/08408af5-5ffc-4482-8a95-5cdf1a0398f5.jpg",c:"Professionnal Photoshop Desings"},
+{p:81,f:"970763b6-345b-4cf3-8d47-8699551f23e7.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/970763b6-345b-4cf3-8d47-8699551f23e7.jpg",c:"Professionnal Photoshop Desings"},
+{p:82,f:"6080892.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/6080892.jpg",c:"Professionnal Photoshop Desings"},
+{p:83,f:"9707801.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/9707801.jpg",c:"Professionnal Photoshop Desings"},
+{p:84,f:"b3080f6a-c0cc-49e8-9ce9-afe563955c76.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/b3080f6a-c0cc-49e8-9ce9-afe563955c76.jpg",c:"Professionnal Photoshop Desings"},
+{p:85,f:"bahi-dooj.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/bahi-dooj.png",c:"Professionnal Photoshop Desings"},
+{p:86,f:"Business card template 02.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Business%20card%20template%2002.jpg",c:"Professionnal Photoshop Desings"},
+{p:87,f:"c3bdfcba-d9ca-4fbf-b14d-b0eb4121f611.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/c3bdfcba-d9ca-4fbf-b14d-b0eb4121f611.jpg",c:"Professionnal Photoshop Desings"},
+{p:88,f:"Certificate Graduation ceremony 02.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Certificate%20Graduation%20ceremony%2002.jpg",c:"Professionnal Photoshop Desings"},
+{p:89,f:"christmas.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/christmas.png",c:"Professionnal Photoshop Desings"},
+{p:90,f:"Dental care roll up banner template 02.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Dental%20care%20roll%20up%20banner%20template%2002.jpg",c:"Professionnal Photoshop Desings"},
+{p:91,f:"Dental clinic brochure template 03.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Dental%20clinic%20brochure%20template%2003.jpg",c:"Professionnal Photoshop Desings"},
+{p:92,f:"Diwali voucher.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Diwali%20voucher.jpg",c:"Professionnal Photoshop Desings"},
+{p:93,f:"Fast Food Flyer Template (2).jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Fast%20Food%20Flyer%20Template%20(2).jpg",c:"Professionnal Photoshop Desings"},
+{p:94,f:"ec96199e-eb0b-46f6-8098-614977dc06d5.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/ec96199e-eb0b-46f6-8098-614977dc06d5.jpg",c:"Professionnal Photoshop Desings"},
+{p:95,f:"Experience certificate 1.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Experience%20certificate%201.png",c:"Professionnal Photoshop Desings"},
+{p:96,f:"f0a8516d-5529-4071-8bdb-cf56607ab91d.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/f0a8516d-5529-4071-8bdb-cf56607ab91d.jpg",c:"Professionnal Photoshop Desings"},
+{p:97,f:"f2.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/f2.png",c:"Professionnal Photoshop Desings"},
+{p:98,f:"f3.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/f3.png",c:"Professionnal Photoshop Desings"},
+{p:99,f:"fa8e0fbe-45e8-4355-9b2a-88a4dab27ee4.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/fa8e0fbe-45e8-4355-9b2a-88a4dab27ee4.jpg",c:"Professionnal Photoshop Desings"},
+{p:100,f:"d40ede63-db3e-4a40-b802-488bb5dce69b.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/d40ede63-db3e-4a40-b802-488bb5dce69b.jpg",c:"Professionnal Photoshop Desings"},
+{p:101,f:"Fast food flyer template flat vector design.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Fast%20food%20flyer%20template%20flat%20vector%20design.jpg",c:"Professionnal Photoshop Desings"},
+{p:102,f:"Fast food restaurant brochure template 05.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Fast%20food%20restaurant%20brochure%20template%2005.jpg",c:"Professionnal Photoshop Desings"},
+{p:103,f:"Flower wedding invitation template.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Flower%20wedding%20invitation%20template.jpg",c:"Professionnal Photoshop Desings"},
+{p:104,f:"Flyer 04.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Flyer%2004.jpg",c:"Professionnal Photoshop Desings"},
+{p:105,f:"ig-3.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/ig-3.jpg",c:"Dheeraj Ujjaini Poha"},
+{p:106,f:"good-fr.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/good-fr.png",c:"Dheeraj Ujjaini Poha"},
+{p:107,f:"january5.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/january5.png",c:"Dheeraj Ujjaini Poha"},
+{p:108,f:"mv2.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/mv2.jpg",c:"Dheeraj Ujjaini Poha"},
+{p:109,f:"new-poha.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/new-poha.png",c:"Dheeraj Ujjaini Poha"},
+{p:110,f:"pag4.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/pag4.png",c:"Dheeraj Ujjaini Poha"},
+{p:111,f:"pg13.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/pg13.png",c:"Dheeraj Ujjaini Poha"},
+{p:112,f:"shiv.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/shiv.jpg",c:"Dheeraj Ujjaini Poha"},
+{p:113,f:"teachers-day.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/teachers-day.png",c:"Dheeraj Ujjaini Poha"},
+{p:114,f:"rabin.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/rabin.png",c:"Dheeraj Ujjaini Poha"},
+{p:115,f:"promo.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/promo.png",c:"Dheeraj Ujjaini Poha"},
+{p:116,f:"rang-panchami.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/rang-panchami.png",c:"Dheeraj Ujjaini Poha"},
+{p:117,f:"rpm-bro.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/rpm-bro.png",c:"Posters and Creative Design"},
+{p:118,f:"rpm-cup.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/rpm-cup.png",c:"Posters and Creative Design"},
+{p:119,f:"Standee banner 01.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Standee%20banner%2001.jpg",c:"Posters and Creative Design"},
+{p:120,f:"tritiya.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/tritiya.png",c:"Posters and Creative Design"},
+{p:121,f:"untitled-design.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/untitled-design.png",c:"Posters and Creative Design"},
+{p:122,f:"Medical Brochure Template Illustration Design.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Medical%20Brochure%20Template%20Illustration%20Design.png",c:"Posters and Creative Design"},
+{p:123,f:"hiring.jpeg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/hiring.jpeg",c:"Posters and Creative Design"},
+{p:124,f:"Meat and chips restaurant menu design template 02.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Meat%20and%20chips%20restaurant%20menu%20design%20template%2002.jpg",c:"Posters and Creative Design"},
+{p:125,f:"m029t0044_a_fashion_social_media_15may23.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/m029t0044_a_fashion_social_media_15may23.jpg",c:"Posters and Creative Design"},
+{p:126,f:"Youtuber business card template vector design 07.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Youtuber%20business%20card%20template%20vector%20design%2007.jpg",c:"Posters and Creative Design"},
+{p:127,f:"Logistic brochure template.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Logistic%20brochure%20template.png",c:"Posters and Creative Design"},
+{p:128,f:"Juice bottle packaging template 01.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Juice%20bottle%20packaging%20template%2001.jpg",c:"Posters and Creative Design"},
+{p:129,f:"Professionnal cv template vector design.jpg",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Professionnal%20cv%20template%20vector%20design.jpg",c:"Posters and Creative Design"},
+{p:130,f:"Kiwi Juice Bottle Packaging Template Design.png",u:"https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/designs/gallery/Kiwi%20Juice%20Bottle%20Packaging%20Template%20Design.png",c:"Posters and Creative Design"}
+];
 
   const statusEl = document.getElementById('status');
-  const gridEl = document.getElementById('grid');
-  const resetBtn = document.getElementById('resetBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
+  const categoriesEl = document.getElementById('categories');
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
   const lbCaption = document.getElementById('lbCaption');
   const lbClose = document.getElementById('lbClose');
 
-  let originalOrder = []; // array of filenames in the order they were fetched
-  let sortableInstance = null;
-
-  function rawUrl(filename){
-    return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER_PATH}/${encodeURIComponent(filename)}`;
-  }
-
-  function openLightbox(url, name){
+  function openLightbox(url, num){
     lbImg.src = url;
-    lbCaption.textContent = name;
+    lbCaption.textContent = `Design #${num}`;
     lightbox.classList.add('show');
   }
   function closeLightbox(){
@@ -292,159 +360,77 @@
   lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
 
-  function renumberBadges(){
-    const cards = gridEl.querySelectorAll('.card');
-    cards.forEach((card, i) => {
-      card.querySelector('.badge-num').textContent = '#' + (i + 1);
-    });
-  }
-
-  function buildCard(filename, url, position){
+  function buildCard(item){
     const card = document.createElement('div');
     card.className = 'card';
-    card.dataset.filename = filename;
-    card.dataset.url = url;
 
-    const thumbWrap = document.createElement('div');
-    thumbWrap.className = 'thumb-wrap';
     const img = document.createElement('img');
-    img.src = url;
-    img.alt = filename;
+    img.src = item.u;
+    img.alt = `Design ${item.p}`;
     img.loading = 'lazy';
-    img.draggable = false;
-    thumbWrap.appendChild(img);
 
     const badge = document.createElement('div');
     badge.className = 'badge-num';
-    badge.textContent = '#' + position;
+    badge.textContent = '#' + item.p;
 
-    const handle = document.createElement('div');
-    handle.className = 'drag-handle';
-    handle.textContent = '⠿';
-
-    card.appendChild(thumbWrap);
+    card.appendChild(img);
     card.appendChild(badge);
-    card.appendChild(handle);
-
-    // Click opens the lightbox; SortableJS only fires drag on real pointer movement,
-    // so a plain click/tap still works as a preview.
-    card.addEventListener('click', () => openLightbox(url, filename));
-
+    card.addEventListener('click', () => openLightbox(item.u, item.p));
     return card;
   }
 
-  function loadImageMeta(url){
-    return new Promise((resolve) => {
-      let settled = false;
-      const probe = new Image();
-      const finish = () => { if(!settled){ settled = true; resolve(); } };
-      probe.onload = finish;
-      probe.onerror = finish;
-      setTimeout(finish, PROBE_TIMEOUT_MS);
-      probe.src = url;
-    });
+  function buildSection(categoryName, items){
+    const section = document.createElement('section');
+    section.className = 'category';
+
+    const head = document.createElement('div');
+    head.className = 'category-head';
+    const h2 = document.createElement('h2');
+    h2.textContent = categoryName;
+    const count = document.createElement('span');
+    count.className = 'count';
+    count.textContent = `${items.length} piece${items.length === 1 ? '' : 's'}`;
+    head.appendChild(h2);
+    head.appendChild(count);
+
+    const masonry = document.createElement('div');
+    masonry.className = 'masonry';
+    items.forEach(item => masonry.appendChild(buildCard(item)));
+
+    section.appendChild(head);
+    section.appendChild(masonry);
+    return section;
   }
 
-  function initSortable(){
-    if(sortableInstance) sortableInstance.destroy();
-    sortableInstance = new Sortable(gridEl, {
-      animation: 150,
-      delay: 60,
-      delayOnTouchOnly: true,
-      touchStartThreshold: 4,
-      ghostClass: 'sortable-ghost',
-      chosenClass: 'sortable-chosen',
-      dragClass: 'sortable-drag',
-      onEnd: renumberBadges
-    });
-  }
-
-  function renderGrid(filenames){
-    gridEl.innerHTML = '';
-    filenames.forEach((filename, idx) => {
-      gridEl.appendChild(buildCard(filename, rawUrl(filename), idx + 1));
-    });
-    renumberBadges();
-    initSortable();
-  }
-
-  resetBtn.addEventListener('click', () => {
-    renderGrid(originalOrder);
-  });
-
-  downloadBtn.addEventListener('click', () => {
-    const cards = Array.from(gridEl.querySelectorAll('.card'));
-    if(cards.length === 0) return;
-
-    const arrangement = cards.map((card, i) => ({
-      position: i + 1,
-      filename: card.dataset.filename,
-      url: card.dataset.url
-    }));
-
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      count: arrangement.length,
-      arrangement
-    };
-
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    a.href = url;
-    a.download = `arrangement-${stamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  async function loadImages(){
-    try{
-      const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER_PATH}`;
-      const res = await fetch(apiUrl, {
-        headers: { 'Accept': 'application/vnd.github+json' }
-      });
-
-      if(!res.ok){
-        if(res.status === 404){
-          throw new Error(`Folder not found. Make sure "${FOLDER_PATH}" exists in the repo.`);
-        }
-        if(res.status === 403){
-          throw new Error('GitHub API rate limit reached. Please try again in a bit.');
-        }
-        throw new Error(`GitHub API error (${res.status})`);
-      }
-
-      const data = await res.json();
-      const files = data
-        .filter(item => item.type === 'file' && IMAGE_EXT.test(item.name))
-        .sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}))
-        .map(item => item.name);
-
-      if(files.length === 0){
-        statusEl.textContent = 'No designs found yet. Check back soon.';
-        return;
-      }
-
-      originalOrder = files;
-
-      statusEl.style.display = 'none';
-      gridEl.style.display = 'grid';
-      renderGrid(files);
-
-      // Warm the browser image cache in the background (non-blocking) so drags feel snappy.
-      files.forEach(f => loadImageMeta(rawUrl(f)));
-
-    } catch(err){
-      statusEl.textContent = '⚠️ ' + err.message;
-      statusEl.classList.add('error');
-      statusEl.style.display = 'block';
+  function render(){
+    if(!PORTFOLIO || PORTFOLIO.length === 0){
+      statusEl.textContent = 'No designs found yet. Check back soon.';
+      return;
     }
+
+    // Sort by curated sequence, then group by category
+    // while preserving each category's first-appearance order.
+    const sorted = [...PORTFOLIO].sort((a,b) => a.p - b.p);
+
+    const order = [];
+    const groups = {};
+    for(const item of sorted){
+      if(!groups[item.c]){
+        groups[item.c] = [];
+        order.push(item.c);
+      }
+      groups[item.c].push(item);
+    }
+
+    statusEl.style.display = 'none';
+    categoriesEl.style.display = 'block';
+
+    order.forEach(categoryName => {
+      categoriesEl.appendChild(buildSection(categoryName, groups[categoryName]));
+    });
   }
 
-  loadImages();
+  render();
 })();
 </script>
 
