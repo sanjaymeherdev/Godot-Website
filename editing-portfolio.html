@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Sanjay Meher — Edits</title>
-<meta name="description" content="A working cut of everything I've edited — Shorts, straight from the timeline.">
+<title>Sanjay Meher — Edits by Category</title>
+<meta name="description" content="A working cut of everything I've edited — Shorts, straight from the timeline. Grouped by style.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<script src="js/components.js" defer></script>
 <style>
   :root{
     --bg:#0b0e14;
@@ -24,16 +23,6 @@
     --body: 'DM Sans', sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body.light-theme {
-    --bg:#f4f7fb;
-    --surface:#ffffff;
-    --surface-2:#eef2f7;
-    --line:#d8e1eb;
-    --text:#0f172a;
-    --muted:#64748b;
-    --accent:#6d28d9;
-    --accent-2:#2563eb;
-  }
   body{
     background:var(--bg);
     color:var(--text);
@@ -44,7 +33,7 @@
   a{color:inherit;text-decoration:none;}
 
   .page-head{
-    padding:6rem 1.5rem 3rem;
+    padding:4rem 1.5rem 2.5rem;
     max-width:1100px;
     margin:0 auto;
     border-bottom:1px solid var(--line);
@@ -99,12 +88,41 @@
   .grid-wrap{
     max-width:1100px;
     margin:0 auto;
-    padding:2.75rem 1.5rem 6rem;
+    padding:2rem 1.5rem 6rem;
   }
+
+  .category-section{
+    margin-bottom:3.5rem;
+  }
+  .category-header{
+    display:flex;
+    align-items:baseline;
+    gap:1rem;
+    margin-bottom:1.25rem;
+    border-bottom:1px solid var(--line);
+    padding-bottom:0.6rem;
+  }
+  .category-name{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:1.5rem;
+    letter-spacing:-0.02em;
+    color:var(--text);
+  }
+  .category-count{
+    font-family:var(--mono);
+    font-size:0.7rem;
+    color:var(--muted);
+    background:var(--surface);
+    padding:0.15rem 0.6rem;
+    border-radius:12px;
+    border:1px solid var(--line);
+  }
+
   .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
-    gap:1.1rem;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:1rem;
   }
   .clip{
     position:relative;
@@ -133,7 +151,7 @@
     position:absolute; inset:0;
   }
   .play-glyph{
-    width:46px;height:46px;
+    width:44px;height:44px;
     border-radius:50%;
     background:rgba(11,14,20,0.55);
     border:1px solid rgba(255,255,255,0.18);
@@ -162,26 +180,26 @@
   }
 
   .clip-meta{
-    padding:0.85rem 0.95rem 1rem;
+    padding:0.7rem 0.8rem 0.9rem;
   }
   .clip-title{
-    font-size:0.9rem;
-    font-weight:600;
+    font-size:0.82rem;
+    font-weight:500;
     line-height:1.3;
-    margin-bottom:0.3rem;
+    margin-bottom:0.2rem;
   }
   .clip-tags{
     display:flex;
     gap:0.4rem;
     flex-wrap:wrap;
-    margin-top:0.5rem;
+    margin-top:0.4rem;
   }
   .clip-tag{
     font-family:var(--mono);
-    font-size:0.62rem;
+    font-size:0.55rem;
     color:var(--muted);
     border:1px solid var(--line);
-    padding:0.18rem 0.45rem;
+    padding:0.15rem 0.4rem;
     border-radius:4px;
   }
 
@@ -262,24 +280,30 @@
   }
 
   @media (max-width:560px){
-    .page-head{padding:3.5rem 1.25rem 2.25rem;}
+    .page-head{padding:2.5rem 1.25rem 1.5rem;}
     .grid{grid-template-columns:repeat(auto-fill, minmax(150px,1fr));gap:0.75rem;}
+    .category-name{font-size:1.2rem;}
+    .category-header{margin-bottom:0.9rem;}
+  }
+
+  @media (max-width:420px){
+    .grid{grid-template-columns:repeat(auto-fill, minmax(130px,1fr));gap:0.6rem;}
+    .clip-title{font-size:0.7rem;}
+    .clip-meta{padding:0.5rem 0.6rem 0.7rem;}
   }
 </style>
 </head>
 <body>
 
-  <div id="sanjay-header"></div>
-
   <header class="page-head">
-    <div class="eyebrow">Portfolio · Live Cuts</div>
-    <h1>Not theory.<br><span class="accent">Real edits, real footage.</span></h1>
-    <p class="page-sub">Every cut below is a real YouTube Short, pulled straight from the channel. Click to play.</p>
+    <div class="eyebrow">Portfolio · Categorized Cuts</div>
+    <h1>Edits by <span class="accent">category.</span></h1>
+    <p class="page-sub">Every cut below is a real YouTube Short, grouped by style — UGC, 3D, VFX, AI tools, and more. Click to play.</p>
     <a href="index.html" class="back-link">← Back home</a>
   </header>
 
-  <main class="grid-wrap">
-    <div class="grid" id="grid">
+  <main class="grid-wrap" id="mainWrap">
+    <div id="categoriesContainer">
       <div class="state-msg">Loading clips…</div>
     </div>
   </main>
@@ -297,23 +321,9 @@
   </div>
 
 <script>
-/* =========================================================
-   Clip data is fetched live from clips.json in this GitHub repo:
-   sanjaymeherdev/Godot-Website  →  /sanjaymeher/clips.json
-
-   To add or change clips: edit clips.json directly on GitHub.
-   No need to touch this file again.
-
-   clips.json format:
-   [
-     { "title": "Brand campaign — pacing & colour grade", "url": "https://www.youtube.com/shorts/XXXXXXXXXXX" },
-     { "title": "CapCut transitions demo", "id": "XXXXXXXXXXX" }
-   ]
-   You can use either "url" (full YouTube link) or "id" (just the video ID).
-   ========================================================= */
 const CLIPS_JSON_URL = "https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/clips.json";
 
-const grid = document.getElementById('grid');
+const container = document.getElementById('categoriesContainer');
 const lightbox = document.getElementById('lightbox');
 const lightboxFrame = document.getElementById('lightboxFrame');
 const lightboxTitle = document.getElementById('lightboxTitle');
@@ -336,35 +346,77 @@ function normalizeClip(raw){
   return {
     id,
     title: raw.title || "Untitled clip",
+    category: raw.category || "Uncategorized",
     url: raw.url || `https://www.youtube.com/shorts/${id}`
   };
 }
 
-function renderGrid(clips){
-  if(!clips.length){
-    grid.innerHTML = `<div class="state-msg">No clips yet. Add some to <code>clips.json</code> in the repo.</div>`;
+function groupByCategory(clips){
+  const groups = {};
+  clips.forEach(clip => {
+    const cat = clip.category || "Uncategorized";
+    if(!groups[cat]) groups[cat] = [];
+    groups[cat].push(clip);
+  });
+  // Sort categories by count (most first) for better visual hierarchy
+  return Object.keys(groups).sort((a,b) => groups[b].length - groups[a].length).map(cat => ({
+    name: cat,
+    clips: groups[cat]
+  }));
+}
+
+function renderCategories(categorized){
+  if(!categorized.length){
+    container.innerHTML = `<div class="state-msg">No clips found. Add some to <code>clips.json</code> with a "category" field.</div>`;
     return;
   }
-  grid.innerHTML = clips.map((clip, i) => `
-    <div class="clip" tabindex="0" role="button" data-index="${i}" aria-label="Play ${clip.title}">
-      <div class="clip-thumb">
-        <span class="fmt-tag">Short</span>
-        <img src="https://i.ytimg.com/vi/${clip.id}/hqdefault.jpg" alt="" loading="lazy">
-        <div class="play-glyph">${playIcon()}</div>
-      </div>
-      <div class="clip-meta">
-        <div class="clip-title">${clip.title}</div>
-        <div class="clip-tags"><span class="clip-tag">YT Short</span></div>
-      </div>
-    </div>
-  `).join('');
 
-  grid.querySelectorAll('.clip').forEach(el => {
-    el.addEventListener('click', () => openLightbox(clips[+el.dataset.index]));
+  let html = '';
+  categorized.forEach(({name, clips}) => {
+    html += `
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-name">${name}</span>
+          <span class="category-count">${clips.length}</span>
+        </div>
+        <div class="grid">
+    `;
+    clips.forEach((clip, i) => {
+      html += `
+        <div class="clip" tabindex="0" role="button" data-cat="${name}" data-idx="${i}" aria-label="Play ${clip.title}">
+          <div class="clip-thumb">
+            <span class="fmt-tag">Short</span>
+            <img src="https://i.ytimg.com/vi/${clip.id}/hqdefault.jpg" alt="" loading="lazy">
+            <div class="play-glyph">${playIcon()}</div>
+          </div>
+          <div class="clip-meta">
+            <div class="clip-title">${clip.title}</div>
+            <div class="clip-tags"><span class="clip-tag">YT Short</span></div>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Attach click events
+  const allClips = {};
+  categorized.forEach(({name, clips}) => {
+    allClips[name] = clips;
+  });
+
+  container.querySelectorAll('.clip').forEach(el => {
+    const cat = el.dataset.cat;
+    const idx = parseInt(el.dataset.idx);
+    const clip = allClips[cat]?.[idx];
+    if(!clip) return;
+    el.addEventListener('click', () => openLightbox(clip));
     el.addEventListener('keydown', e => {
       if(e.key === 'Enter' || e.key === ' '){
         e.preventDefault();
-        openLightbox(clips[+el.dataset.index]);
+        openLightbox(clip);
       }
     });
   });
@@ -372,7 +424,7 @@ function renderGrid(clips){
 
 function openLightbox(clip){
   lightboxTitle.textContent = clip.title;
-  lightboxSub.textContent = 'tap outside or ✕ to close';
+  lightboxSub.textContent = `${clip.category} · tap outside or ✕ to close`;
   lightboxOriginal.href = clip.url;
   lightboxFrame.innerHTML = `<iframe src="https://www.youtube.com/embed/${clip.id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   lightbox.classList.add('open');
@@ -396,12 +448,12 @@ fetch(CLIPS_JSON_URL, { cache: "no-store" })
   })
   .then(data => {
     const clips = (Array.isArray(data) ? data : []).map(normalizeClip).filter(Boolean);
-    renderGrid(clips);
+    const categorized = groupByCategory(clips);
+    renderCategories(categorized);
   })
   .catch(err => {
-    grid.innerHTML = `<div class="state-msg">Couldn't load clips.json yet.<br>Add the file at <code>sanjaymeher/clips.json</code> in the repo.<br><br>${err.message}</div>`;
+    container.innerHTML = `<div class="state-msg">Couldn't load clips.json yet.<br>Add the file at <code>sanjaymeher/clips.json</code> in the repo.<br><br>${err.message}</div>`;
   });
 </script>
-<div id="sanjay-footer"></div>
 </body>
 </html>
