@@ -3,26 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanjay's Reels</title>
+    <title>Sanjay's AI Reels</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #fafafa;
             padding: 2rem 1rem;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; }
         .header h1 {
             font-size: 2.2rem;
             background: linear-gradient(135deg, #405de6, #833ab4, #e1306c);
@@ -42,42 +32,89 @@
             padding: 1rem;
             width: 100%;
             max-width: 400px;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .reel-card:hover {
             transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         }
-        .embed-wrapper {
-            min-height: 400px;
-            background: #f0f0f0;
+        
+        /* Thumbnail Styles */
+        .thumb-link {
+            display: block;
+            position: relative;
+            width: 100%;
+            height: 480px; /* Vertical aspect ratio for Reels */
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
+            text-decoration: none;
+            color: white;
+            background: #f0f0f0;
         }
-        .loading {
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .thumb-link:hover .thumb-img {
+            transform: scale(1.05);
+        }
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 400px;
-            color: #999;
-            font-size: 0.9rem;
+            transition: background 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        /* Instagram's embed.js will inject an iframe, this targets it to fit your card */
-        .reel-card iframe {
-            width: 100% !important;
-            height: 480px !important;
-            border: none !important;
-            max-width: 100% !important;
+        .thumb-link:hover .play-icon {
+            background: rgba(225, 48, 108, 0.95); /* Instagram Pink */
         }
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            color: #8e8e8e;
+        .thumb-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            padding: 3rem 1rem 1.5rem;
         }
+        .thumb-overlay p {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Limits text to 2 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Fallback if proxy fails */
+        .fallback {
+            background: linear-gradient(135deg, #405de6, #833ab4, #e1306c);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .fallback p { margin-top: 15px; font-weight: bold; }
+
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            height: 480px; color: #999; font-size: 0.9rem;
+            background: #f0f0f0; border-radius: 10px;
+        }
+        .footer { text-align: center; margin-top: 3rem; color: #8e8e8e; }
     </style>
-    
-    <!-- Load Instagram's official embed script in the head -->
-    <script async src="//www.instagram.com/embed.js"></script>
 </head>
 <body>
     <div class="container">
@@ -87,8 +124,7 @@
         </div>
 
         <div class="reels-grid" id="reelsGrid">
-            <!-- Reels will be loaded here by JavaScript -->
-            <div class="loading">Loading reels...</div>
+            <div class="loading">Loading portfolio...</div>
         </div>
 
         <div class="footer">
@@ -99,7 +135,6 @@
     </div>
 
     <script>
-        // List of all Reel URLs
         const reelUrls = [
             'https://www.instagram.com/freelance.sanjay/reel/Dbe3bXls-Vm/',
             'https://www.instagram.com/freelance.sanjay/reel/DbZvbOsMomW/',
@@ -116,10 +151,12 @@
             'https://www.instagram.com/freelance.sanjay/reel/DbkNnGKMfqs/'
         ];
 
-        // Function to display each reel
-        function loadReels() {
+        async function loadReels() {
             const grid = document.getElementById('reelsGrid');
-            grid.innerHTML = ''; // Clear loading message
+            grid.innerHTML = ''; 
+
+            // We use a reliable CORS proxy to fetch Instagram oEmbed data (Thumbnails & Titles)
+            const proxy = 'https://api.allorigins.win/get?url=';
 
             for (const url of reelUrls) {
                 const card = document.createElement('div');
@@ -127,26 +164,52 @@
                 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'embed-wrapper';
+                wrapper.innerHTML = '<div class="loading">Fetching cover...</div>';
                 
-                // Create the standard Instagram blockquote element
-                const blockquote = document.createElement('blockquote');
-                blockquote.className = 'instagram-media';
-                blockquote.setAttribute('data-instgrm-permalink', url);
-                blockquote.setAttribute('data-instgrm-version', '14');
-                blockquote.style.cssText = 'background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);';
-                
-                wrapper.appendChild(blockquote);
                 card.appendChild(wrapper);
                 grid.appendChild(card);
-            }
 
-            // Tell Instagram's embed script to process the newly added blockquotes
-            if (window.instgrm) {
-                window.instgrm.Embeds.process();
+                try {
+                    const oembedUrl = `https://api.instagram.com/oembed?url=${encodeURIComponent(url)}`;
+                    const response = await fetch(proxy + encodeURIComponent(oembedUrl));
+                    
+                    if (!response.ok) throw new Error('Proxy fetch failed');
+                    
+                    const wrapperData = await response.json();
+                    const data = JSON.parse(wrapperData.contents);
+                    
+                    // Build a beautiful, interactive thumbnail card
+                    wrapper.innerHTML = `
+                        <a href="${url}" target="_blank" class="thumb-link">
+                            <img src="${data.thumbnail_url}" alt="${data.title || 'Instagram Reel'}" class="thumb-img" loading="lazy">
+                            <div class="play-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                            <div class="thumb-overlay">
+                                <p>${data.title || 'Watch AI Reel on Instagram'}</p>
+                            </div>
+                        </a>
+                    `;
+
+                } catch (error) {
+                    console.error('Error loading reel:', url, error);
+                    // Fallback if the thumbnail fails to load
+                    wrapper.innerHTML = `
+                        <a href="${url}" target="_blank" class="thumb-link fallback">
+                            <div class="play-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                            <p>View on Instagram</p>
+                        </a>
+                    `;
+                }
             }
         }
 
-        // Load reels when page is ready
         document.addEventListener('DOMContentLoaded', loadReels);
     </script>
 </body>
