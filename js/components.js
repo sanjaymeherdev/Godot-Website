@@ -258,6 +258,7 @@ body.sm-no-scroll { overflow: hidden; }
          dropdown: [
                 { icon: '🎥', label: 'Video Editing',         href: `${base}editing-portfolio.html` },
                 { icon: '💼', label: 'Graphic Design',   href: `${base}designs/gallery.html` },
+                { icon: '💼', label: 'AI Reels',   href: `https://sanjaymeher-ai-reels.vercel.app` },
             ] 
         },
         { label: 'SMM', href: `${base}marketing/digital-services.html` },
