@@ -62,10 +62,12 @@
             color: #999;
             font-size: 0.9rem;
         }
+        /* Instagram's embed.js will inject an iframe, this targets it to fit your card */
         .reel-card iframe {
             width: 100% !important;
             height: 480px !important;
             border: none !important;
+            max-width: 100% !important;
         }
         .footer {
             text-align: center;
@@ -73,6 +75,9 @@
             color: #8e8e8e;
         }
     </style>
+    
+    <!-- Load Instagram's official embed script in the head -->
+    <script async src="//www.instagram.com/embed.js"></script>
 </head>
 <body>
     <div class="container">
@@ -111,8 +116,8 @@
             'https://www.instagram.com/freelance.sanjay/reel/DbkNnGKMfqs/'
         ];
 
-        // Function to fetch and display each reel
-        async function loadReels() {
+        // Function to display each reel
+        function loadReels() {
             const grid = document.getElementById('reelsGrid');
             grid.innerHTML = ''; // Clear loading message
 
@@ -122,41 +127,22 @@
                 
                 const wrapper = document.createElement('div');
                 wrapper.className = 'embed-wrapper';
-                wrapper.innerHTML = '<div class="loading">Loading...</div>';
                 
+                // Create the standard Instagram blockquote element
+                const blockquote = document.createElement('blockquote');
+                blockquote.className = 'instagram-media';
+                blockquote.setAttribute('data-instgrm-permalink', url);
+                blockquote.setAttribute('data-instgrm-version', '14');
+                blockquote.style.cssText = 'background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);';
+                
+                wrapper.appendChild(blockquote);
                 card.appendChild(wrapper);
                 grid.appendChild(card);
+            }
 
-                try {
-                    // Fetch embed HTML from Instagram's oEmbed API via proxy
-                    const response = await fetch(
-                        `https://api.instagram.com/oembed?url=${encodeURIComponent(url)}`
-                    );
-                    
-                    if (!response.ok) throw new Error('Failed to fetch embed');
-                    
-                    const data = await response.json();
-                    
-                    // Insert the embed HTML
-                    wrapper.innerHTML = data.html;
-                    
-                    // Execute any scripts in the embed
-                    const scripts = wrapper.querySelectorAll('script');
-                    scripts.forEach(script => {
-                        const newScript = document.createElement('script');
-                        newScript.textContent = script.textContent;
-                        document.body.appendChild(newScript);
-                    });
-
-                } catch (error) {
-                    console.error('Error loading reel:', url, error);
-                    wrapper.innerHTML = `
-                        <div style="padding:2rem;text-align:center;color:#e1306c;">
-                            ⚠️ Could not load reel<br>
-                            <small><a href="${url}" target="_blank">View on Instagram</a></small>
-                        </div>
-                    `;
-                }
+            // Tell Instagram's embed script to process the newly added blockquotes
+            if (window.instgrm) {
+                window.instgrm.Embeds.process();
             }
         }
 
