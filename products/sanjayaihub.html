@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SanjayAIHub — one patchboard for every AI model you already pay for</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #080a0e;
+    --panel:         #0d1119;
+    --panel-raised:  #111623;
+    --border:        #1f2433;
+    --border-soft:   #171b28;
+    --text:          #eef0f7;
+    --text-dim:      #9198ac;
+    --text-faint:    #565d72;
+    --mint:          #00e8a2;
+    --mint-dark:     #00b37a;
+    --mint-glow:     rgba(0,232,162,.22);
+    --font-display:  'Space Grotesk', system-ui, sans-serif;
+    --font-body:     'Inter', system-ui, sans-serif;
+    --font-mono:     'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:inherit; }
+  img,svg{ display:block; max-width:100%; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding-inline:24px; }
+
+  ::selection{ background:var(--mint-glow); color:var(--text); }
+
+  :focus-visible{
+    outline:2px solid var(--mint);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  /* ── background texture: faint patch-panel grid ── */
+  .grid-field{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(238,240,247,.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(238,240,247,.028) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 0%, #000 0%, transparent 75%);
+  }
+
+  main{ position:relative; z-index:1; }
+
+  /* ── eyebrow / mono labels ── */
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--mint);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px; border-radius:50%;
+    background:var(--mint);
+    box-shadow:0 0 0 3px var(--mint-glow);
+  }
+
+  h1,h2,h3{ font-family:var(--font-display); letter-spacing:-.01em; }
+
+  /* ══════════════ NAV ══════════════ */
+  header.nav{
+    position:sticky; top:0; z-index:40;
+    background:rgba(8,10,14,.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-block:16px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark{
+    width:32px; height:32px; border-radius:8px;
+    background:linear-gradient(135deg, var(--mint), var(--mint-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:600; font-size:14px; color:#062018;
+  }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:18px; }
+  .brand-name em{ font-style:normal; color:var(--mint); }
+
+  .nav-links{ display:flex; gap:30px; font-size:14px; color:var(--text-dim); }
+  .nav-links a:hover{ color:var(--text); }
+  @media (max-width: 860px){ .nav-links{ display:none; } }
+
+  .nav-cta{ display:flex; align-items:center; gap:12px; }
+
+  .btn{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:13.5px;
+    padding:10px 18px;
+    border-radius:9px;
+    border:1px solid transparent;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+    white-space:nowrap;
+  }
+  .btn-ghost{ color:var(--text); border-color:var(--border); background:transparent; }
+  .btn-ghost:hover{ border-color:#333c52; background:rgba(255,255,255,.03); }
+  .btn-solid{
+    background:var(--mint); color:#062018;
+    box-shadow:0 6px 20px -6px var(--mint-glow);
+  }
+  .btn-solid:hover{ filter:brightness(1.07); transform:translateY(-1px); }
+  .btn-lg{ padding:14px 26px; font-size:15px; border-radius:11px; }
+
+  /* ══════════════ HERO ══════════════ */
+  .hero{ padding:88px 0 64px; }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:56px;
+    align-items:center;
+  }
+  @media (max-width:940px){ .hero-grid{ grid-template-columns:1fr; } }
+
+  .hero h1{
+    font-size:clamp(34px, 4.6vw, 54px);
+    line-height:1.06;
+    margin-top:18px;
+    font-weight:600;
+  }
+  .hero h1 .accent{ color:var(--mint); }
+
+  .hero p.lede{
+    margin-top:20px;
+    font-size:17px;
+    color:var(--text-dim);
+    max-width:46ch;
+  }
+
+  .hero-actions{ display:flex; gap:14px; margin-top:32px; flex-wrap:wrap; }
+  .hero-note{
+    margin-top:14px;
+    font-size:12.5px;
+    font-family:var(--font-mono);
+    color:var(--text-faint);
+  }
+
+  /* ── signature: the patch diagram ── */
+  .patch{
+    position:relative;
+    background:radial-gradient(120% 100% at 50% 0%, #0f1420 0%, var(--panel) 65%);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:34px 20px 26px;
+    overflow:hidden;
+  }
+  .patch::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 42%, var(--mint-glow), transparent 60%);
+    opacity:.5;
+  }
+  .patch svg{ position:relative; z-index:1; width:100%; height:auto; }
+
+  .patch-line{
+    fill:none; stroke:#2a3348; stroke-width:1.4;
+    stroke-dasharray:4 200;
+    animation:draw 1.6s ease forwards;
+  }
+  .patch-line.lit{ stroke:var(--mint); opacity:.85; }
+  @keyframes draw{ to{ stroke-dasharray:200 0; } }
+
+  .patch-node-core{ fill:var(--panel-raised); stroke:var(--mint); stroke-width:1.6; }
+  .patch-core-pulse{
+    fill:none; stroke:var(--mint); stroke-width:1;
+    transform-origin:center;
+    animation:pulse 2.6s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{ opacity:.65; transform:scale(1); }
+    100%{ opacity:0; transform:scale(2.15); }
+  }
+
+  .patch-chip-bg{ fill:var(--panel-raised); stroke:var(--border); stroke-width:1; }
+  .patch-chip-text{
+    font-family:var(--font-mono); font-size:9.5px; fill:var(--text-dim);
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .patch-core-text{
+    font-family:var(--font-display); font-weight:700; font-size:12.5px; fill:var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .patch-line, .patch-core-pulse{ animation:none; stroke-dasharray:none; }
+  }
+
+  /* ══════════════ BYOK STRIP ══════════════ */
+  .byok{
+    border-top:1px solid var(--border-soft);
+    border-bottom:1px solid var(--border-soft);
+    padding-block:22px;
+    background:var(--panel);
+  }
+  .byok-inner{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    flex-wrap:wrap; text-align:center;
+    font-family:var(--font-mono); font-size:13px; color:var(--text-dim);
+  }
+  .byok-inner strong{ color:var(--text); font-weight:600; }
+  .byok-dot{ color:var(--text-faint); }
+
+  /* ══════════════ SECTION SCAFFOLDING ══════════════ */
+  section{ padding:96px 0; }
+  .section-head{ max-width:640px; margin-bottom:52px; }
+  .section-head h2{
+    font-size:clamp(26px, 3.2vw, 36px);
+    margin-top:14px;
+    font-weight:600;
+    line-height:1.15;
+  }
+  .section-head p{ margin-top:14px; color:var(--text-dim); font-size:15.5px; }
+
+  /* ══════════════ PROBLEM / MATH ══════════════ */
+  .math{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  @media (max-width:760px){ .math{ grid-template-columns:1fr; } }
+  .math-cell{ background:var(--panel); padding:30px 26px; }
+  .math-cell h3{
+    font-family:var(--font-mono); font-size:13px; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:.06em; font-weight:500;
+  }
+  .math-cell .figure{
+    font-family:var(--font-display); font-size:32px; font-weight:600; margin-top:10px;
+  }
+  .math-cell.plain .figure{ color:var(--text-dim); }
+  .math-cell.hub .figure{ color:var(--mint); }
+  .math-cell p{ margin-top:10px; font-size:13.5px; color:var(--text-dim); }
+
+  /* ══════════════ MODULE GRID ══════════════ */
+  .module-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+  }
+  @media (max-width:900px){ .module-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .module-grid{ grid-template-columns:1fr; } }
+
+  .mcard{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px;
+    transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .mcard:hover{ border-color:#2a3348; transform:translateY(-2px); background:var(--panel-raised); }
+
+  .mcard-top{ display:flex; align-items:center; justify-content:space-between; }
+  .mcard-icon{
+    width:38px; height:38px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(0,232,162,.09);
+    color:var(--mint);
+    font-size:16px;
+  }
+  .tier-chip{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase;
+    letter-spacing:.05em; padding:3px 8px; border-radius:100px;
+    border:1px solid var(--border); color:var(--text-faint);
+  }
+  .tier-chip.free{ color:var(--mint); border-color:rgba(0,232,162,.35); }
+
+  .mcard h3{ font-size:15.5px; margin-top:16px; font-weight:600; font-family:var(--font-body); }
+  .mcard p{ font-size:13.5px; color:var(--text-dim); margin-top:6px; }
+
+  .roadmap-row{
+    margin-top:16px;
+    display:flex; gap:10px; flex-wrap:wrap;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-faint);
+  }
+  .roadmap-row span{
+    border:1px dashed var(--border); border-radius:100px;
+    padding:5px 12px;
+  }
+
+  /* ══════════════ CODING AGENT SPOTLIGHT ══════════════ */
+  .spotlight{
+    display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:48px;
+  }
+  @media (max-width:900px){ .spotlight{ grid-template-columns:1fr; padding:32px 24px; } }
+
+  .spotlight h2{ font-size:28px; font-weight:600; margin-top:14px; }
+  .spotlight p{ margin-top:14px; color:var(--text-dim); font-size:15px; }
+  .spotlight ul{ margin-top:20px; display:flex; flex-direction:column; gap:10px; }
+  .spotlight li{ display:flex; gap:10px; font-size:14px; color:var(--text-dim); }
+  .spotlight li i{ color:var(--mint); margin-top:3px; font-size:12px; }
+
+  .terminal{
+    background:#050708; border:1px solid var(--border); border-radius:12px;
+    font-family:var(--font-mono); font-size:12.5px; overflow:hidden;
+  }
+  .terminal-bar{
+    display:flex; gap:6px; padding:11px 14px; border-bottom:1px solid var(--border-soft);
+  }
+  .terminal-bar span{ width:9px; height:9px; border-radius:50%; background:#2a3348; }
+  .terminal-body{ padding:18px; color:#c7cbe0; }
+  .terminal-body .prompt{ color:var(--mint); }
+  .terminal-body .dim{ color:var(--text-faint); }
+  .terminal-body div{ margin-bottom:8px; }
+  .caret{ display:inline-block; width:7px; height:14px; background:var(--mint); vertical-align:middle; animation:blink 1.1s step-end infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ .caret{ animation:none; } }
+
+  /* ══════════════ HOW IT WORKS ══════════════ */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media (max-width:800px){ .steps{ grid-template-columns:1fr; } }
+  .step{ padding:26px 4px; border-top:1px solid var(--border); }
+  .step .idx{
+    font-family:var(--font-mono); color:var(--mint); font-size:13px;
+  }
+  .step h3{ margin-top:12px; font-size:17px; font-weight:600; }
+  .step p{ margin-top:8px; font-size:14px; color:var(--text-dim); }
+
+  /* ══════════════ PRICING ══════════════ */
+  .pricing-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  @media (max-width:980px){ .pricing-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .pricing-grid{ grid-template-columns:1fr; } }
+
+  .plan{
+    border:1px solid var(--border); border-radius:16px; padding:28px 24px;
+    display:flex; flex-direction:column; background:var(--panel);
+  }
+  .plan.featured{
+    border-color:var(--mint);
+    background:linear-gradient(180deg, rgba(0,232,162,.06), var(--panel) 55%);
+    box-shadow:0 0 0 1px var(--mint-glow);
+  }
+  .plan-name{ font-family:var(--font-mono); font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); }
+  .plan.featured .plan-name{ color:var(--mint); }
+  .plan-price{ font-family:var(--font-display); font-size:34px; font-weight:600; margin-top:12px; }
+  .plan-price sub{ font-family:var(--font-body); font-size:13px; color:var(--text-faint); font-weight:400; }
+  .plan-desc{ font-size:13px; color:var(--text-dim); margin-top:8px; min-height:34px; }
+  .plan-feats{ margin-top:20px; display:flex; flex-direction:column; gap:9px; flex:1; }
+  .plan-feats div{ font-size:13px; color:var(--text-dim); display:flex; gap:8px; }
+  .plan-feats i{ color:var(--mint); font-size:11px; margin-top:4px; }
+  .plan .btn{ margin-top:24px; justify-content:center; }
+
+  .pricing-foot{
+    margin-top:22px; text-align:center; font-family:var(--font-mono);
+    font-size:12px; color:var(--text-faint);
+  }
+
+  /* ── currency toggle ── */
+  .currency-toggle{
+    display:inline-flex; align-items:center;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:100px; padding:4px; gap:2px;
+    margin-bottom:36px;
+    font-family:var(--font-mono); font-size:12.5px;
+  }
+  .currency-toggle button{
+    appearance:none; border:none; background:transparent; color:var(--text-faint);
+    padding:8px 18px; border-radius:100px; cursor:pointer;
+    font-family:inherit; font-size:inherit; letter-spacing:.03em;
+    transition:color .2s ease;
+    position:relative; z-index:1;
+  }
+  .currency-toggle{ position:relative; }
+  .currency-toggle .toggle-thumb{
+    position:absolute; top:4px; left:4px; height:calc(100% - 8px);
+    width:calc(50% - 4px); border-radius:100px;
+    background:var(--mint); z-index:0;
+    transition:transform .28s cubic-bezier(.65,0,.35,1);
+  }
+  .currency-toggle button.active{ color:#062018; font-weight:600; }
+  .currency-toggle[data-currency="inr"] .toggle-thumb{ transform:translateX(100%); }
+
+  .plan-price .amount,
+  .plan-price .cur-sym{ transition:opacity .18s ease; display:inline-block; }
+  .plan-price.swapping .amount,
+  .plan-price.swapping .cur-sym{ opacity:0; }
+
+  /* ══════════════ SCROLL REVEAL ══════════════ */
+  .reveal{
+    opacity:0; transform:translateY(20px);
+    transition:opacity .65s cubic-bezier(.2,.6,.25,1), transform .65s cubic-bezier(.2,.6,.25,1);
+    will-change:opacity, transform;
+  }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+
+  /* ══════════════ HERO LOAD-IN ══════════════ */
+  .hero-copy{ opacity:0; transform:translateY(16px); animation:heroIn .75s cubic-bezier(.2,.6,.25,1) forwards; animation-delay:.05s; }
+  .patch{ opacity:0; transform:translateY(16px) scale(.98); animation:heroIn .8s cubic-bezier(.2,.6,.25,1) forwards; animation-delay:.18s; }
+  @keyframes heroIn{ to{ opacity:1; transform:none; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+    .hero-copy, .patch{ animation:none !important; opacity:1 !important; transform:none !important; }
+    .currency-toggle .toggle-thumb{ transition:none; }
+  }
+
+  /* ══════════════ FINAL CTA ══════════════ */
+  .cta-band{
+    text-align:center; border-top:1px solid var(--border-soft);
+    padding:96px 0 100px;
+  }
+  .cta-band h2{ font-size:clamp(26px,3.6vw,40px); font-weight:600; }
+  .cta-band p{ color:var(--text-dim); margin-top:14px; max-width:50ch; margin-inline:auto; }
+  .cta-band .hero-actions{ justify-content:center; margin-top:30px; }
+
+  /* ══════════════ FOOTER ══════════════ */
+  footer{ border-top:1px solid var(--border-soft); padding:36px 0; }
+  .foot-inner{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  .foot-inner .brand-name{ font-size:15px; }
+  footer .foot-links{ display:flex; gap:22px; font-size:13px; color:var(--text-faint); }
+  footer .foot-links a:hover{ color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark">S</span>
+      <span class="brand-name">Sanjay<em>AIHub</em></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#modules">Modules</a>
+      <a href="#coding-agent">Coding agent</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="/login.html">Log in</a>
+      <a class="btn btn-solid" href="/login.html?mode=register">Start free trial</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ══════ HERO ══════ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">One login, eleven engines</span>
+        <h1>Every AI model you already pay for,<br class="hero-br"> <span class="accent">patched into one hub.</span></h1>
+        <p class="lede">
+          Chat, code, images, video, voice, and copy — running on the actual providers you've already chosen,
+          switched from one dashboard instead of eleven browser tabs.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-solid btn-lg" href="/login.html?mode=register">Start your 7-day trial</a>
+          <a class="btn btn-ghost btn-lg" href="#modules">See what's inside</a>
+        </div>
+        <div class="hero-note">NO CREDIT CARD TO START · CANCEL ANYTIME · YOUR PROVIDER KEYS, YOUR DATA</div>
+      </div>
+
+      <div class="patch" role="img" aria-label="Diagram: SanjayAIHub as a central hub patched into eight AI modules">
+        <svg viewBox="0 0 420 380">
+          <!-- lines from core (210,150) to 8 chips -->
+          <path class="patch-line lit"  style="animation-delay:.05s" d="M210,150 L108,58"/>
+          <path class="patch-line"      style="animation-delay:.10s" d="M210,150 L210,44"/>
+          <path class="patch-line lit"  style="animation-delay:.15s" d="M210,150 L312,58"/>
+          <path class="patch-line"      style="animation-delay:.20s" d="M210,150 L58,150"/>
+          <path class="patch-line lit"  style="animation-delay:.25s" d="M210,150 L362,150"/>
+          <path class="patch-line"      style="animation-delay:.30s" d="M210,150 L108,242"/>
+          <path class="patch-line lit"  style="animation-delay:.35s" d="M210,150 L210,256"/>
+          <path class="patch-line"      style="animation-delay:.40s" d="M210,150 L312,242"/>
+
+          <!-- core -->
+          <circle class="patch-core-pulse" cx="210" cy="150" r="30"/>
+          <circle class="patch-node-core" cx="210" cy="150" r="30"/>
+          <text class="patch-core-text" x="210" y="154" text-anchor="middle">HUB</text>
+
+          <!-- chips -->
+          <g>
+            <rect class="patch-chip-bg" x="60" y="34" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="108" y="54" text-anchor="middle">CHAT</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="162" y="14" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="210" y="34" text-anchor="middle">CODE</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="264" y="34" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="312" y="54" text-anchor="middle">IMAGE</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="10" y="134" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="58" y="154" text-anchor="middle">VIDEO</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="314" y="134" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="362" y="154" text-anchor="middle">VOICE</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="60" y="226" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="108" y="246" text-anchor="middle">TTS</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="162" y="240" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="210" y="260" text-anchor="middle">CONTENT</text>
+          </g>
+          <g>
+            <rect class="patch-chip-bg" x="264" y="226" width="96" height="32" rx="8"/>
+            <text class="patch-chip-text" x="312" y="246" text-anchor="middle">PROMPTS</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ BYOK STRIP ══════ -->
+  <div class="byok">
+    <div class="wrap byok-inner">
+      <span><strong>Bring your own provider keys.</strong> NVIDIA</span>
+      <span class="byok-dot">·</span>
+      <span>Alibaba Cloud</span>
+      <span class="byok-dot">·</span>
+      <span>ElevenLabs</span>
+      <span class="byok-dot">·</span>
+      <span>Cloudflare</span>
+      <span class="byok-dot">·</span>
+      <span>Pixazo</span>
+      <span class="byok-dot">·</span>
+      <span>zero markup on generation</span>
+    </div>
+  </div>
+
+  <!-- ══════ PROBLEM / MATH ══════ -->
+  <section id="why">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Why a hub</span>
+        <h2>You didn't sign up for eleven subscriptions.<br>You just needed the tools.</h2>
+        <p>Every new model launch means another account, another billing cycle, another login to remember. SanjayAIHub keeps your provider accounts as they are and gives you one place to actually use them.</p>
+      </div>
+
+      <div class="math stagger">
+        <div class="math-cell plain reveal">
+          <h3>Without a hub</h3>
+          <div class="figure" data-target="11" data-suffix=" tabs">0 tabs</div>
+          <p>Separate dashboards for chat, image, video, voice, and code tools — each with its own login and its own UI.</p>
+        </div>
+        <div class="math-cell plain reveal">
+          <h3>Without a hub</h3>
+          <div class="figure" data-target="11" data-suffix=" bills">0 bills</div>
+          <p>Stacked subscriptions, most of them idle most months, each renewing on its own schedule.</p>
+        </div>
+        <div class="math-cell hub reveal">
+          <h3>With SanjayAIHub</h3>
+          <div class="figure" data-target="1" data-suffix=" hub">0 hub</div>
+          <p>One account, your own provider keys underneath, one place to switch between every module you use.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ MODULE GRID ══════ -->
+  <section id="modules">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">What's live today</span>
+        <h2>Thirteen modules. One session.</h2>
+        <p>Every module below is shipped and running — not a mockup. Free and trial-tier modules work the moment you sign up.</p>
+      </div>
+
+      <div class="module-grid stagger">
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-comments"></i></span><span class="tier-chip free">Free</span></div>
+          <h3>Simple Chatbots</h3>
+          <p>Threaded conversations across your configured chat models, with history saved per thread.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-code"></i></span><span class="tier-chip">Trial</span></div>
+          <h3>Coding Agent</h3>
+          <p>An agent with real file, terminal, and GitHub access, working directly in a connected repo.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-pen-nib"></i></span><span class="tier-chip">Trial</span></div>
+          <h3>Social Content &amp; Resume</h3>
+          <p>Drafts posts, captions, and resume copy tuned to the platform or role you give it.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-earth-americas"></i></span><span class="tier-chip">Trial</span></div>
+          <h3>Wish with Multilanguage</h3>
+          <p>Personal messages and greetings, rewritten fluently across languages for the person you're sending them to.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-book-open"></i></span><span class="tier-chip free">Free</span></div>
+          <h3>Prompt Library</h3>
+          <p>A saved, searchable set of prompts you can reuse across every other module.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-image"></i></span><span class="tier-chip">Trial</span></div>
+          <h3>Text to Image</h3>
+          <p>Generate images from a prompt on your configured image provider.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span><span class="tier-chip">Basic</span></div>
+          <h3>Image to Image</h3>
+          <p>Edit, restyle, or extend an existing image without leaving the hub.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tier-chip">Basic</span></div>
+          <h3>Voice Cloning</h3>
+          <p>Clone a voice from a sample and reuse it across your text-to-speech generations.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-volume-high"></i></span><span class="tier-chip">Trial</span></div>
+          <h3>Text to Audio (TTS)</h3>
+          <p>Natural-sounding narration from text, in your choice of configured voice.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-clapperboard"></i></span><span class="tier-chip">Premium</span></div>
+          <h3>Text to Video</h3>
+          <p>Short-form video generated directly from a written scene description.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-video"></i></span><span class="tier-chip">Premium</span></div>
+          <h3>Image to Video</h3>
+          <p>Animate a still image into motion with a prompt guiding the camera and action.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-music"></i></span><span class="tier-chip">Premium</span></div>
+          <h3>Text to Song</h3>
+          <p>Full compositions with vocals and instrumentation from a text brief.</p>
+        </div>
+
+        <div class="mcard reveal">
+          <div class="mcard-top"><span class="mcard-icon"><i class="fa-solid fa-film"></i></span><span class="tier-chip">Enterprise</span></div>
+          <h3>Video to Video</h3>
+          <p>Restyle, edit, or re-cut existing footage using a connected video model.</p>
+        </div>
+
+      </div>
+
+      <div class="roadmap-row">
+        <span>Design Studio — in progress</span>
+        <span>Chatbot Maker — in progress</span>
+        <span>MCP &amp; Extension Integrator — in progress</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ CODING AGENT SPOTLIGHT ══════ -->
+  <section id="coding-agent">
+    <div class="wrap">
+      <div class="spotlight reveal">
+        <div>
+          <span class="eyebrow">Module spotlight</span>
+          <h2>The coding agent works in your actual repo.</h2>
+          <p>Connect a GitHub repository once, and the agent reads, edits, and runs code with real terminal access — not a sandboxed toy that forgets the codebase between messages.</p>
+          <ul>
+            <li><i class="fa-solid fa-check"></i> Reads and edits real files across the connected repo</li>
+            <li><i class="fa-solid fa-check"></i> Runs commands in an actual terminal session</li>
+            <li><i class="fa-solid fa-check"></i> Opens commits and pull requests through GitHub OAuth</li>
+            <li><i class="fa-solid fa-check"></i> Session carries over from your SanjayAIHub login automatically</li>
+          </ul>
+          <a class="btn btn-solid" style="margin-top:26px;" href="/login.html?mode=register">Try the coding agent</a>
+        </div>
+        <div class="terminal">
+          <div class="terminal-bar"><span></span><span></span><span></span></div>
+          <div class="terminal-body">
+            <div><span class="dim">$</span> connect github.com/you/your-repo</div>
+            <div><span class="dim">→</span> repo linked, branch <span style="color:#c7cbe0">main</span></div>
+            <div><span class="prompt">agent&gt;</span> fix the failing FK constraint in chat threads</div>
+            <div><span class="dim">→</span> reading modules/chatbot.js</div>
+            <div><span class="dim">→</span> reading routes/chat.js</div>
+            <div><span class="dim">→</span> patch applied, tests running<span class="caret"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ HOW IT WORKS ══════ -->
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Getting set up</span>
+        <h2>From signup to your first generation, in three steps.</h2>
+      </div>
+      <div class="steps stagger">
+        <div class="step reveal">
+          <div class="idx">01</div>
+          <h3>Create your account</h3>
+          <p>Every plan starts with a 7-day trial — no card required. Chatbot, prompt library, and several other modules are free from the first minute.</p>
+        </div>
+        <div class="step reveal">
+          <div class="idx">02</div>
+          <h3>Add your provider keys</h3>
+          <p>Drop your NVIDIA, Alibaba Cloud, ElevenLabs, Cloudflare, or Pixazo keys into Profile → API Keys. They stay yours, stored per-account.</p>
+        </div>
+        <div class="step reveal">
+          <div class="idx">03</div>
+          <h3>Switch modules, not tabs</h3>
+          <p>Move between chat, image, video, voice, and code from the same session, with usage billed by your provider — not marked up by us.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ PRICING ══════ -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Pricing</span>
+        <h2>The subscription pays for the hub. You keep paying providers directly.</h2>
+        <p>Plans control which modules and rate limits you get inside SanjayAIHub. Generation cost still runs through your own provider account, at your provider's own price.</p>
+      </div>
+
+      <div class="currency-toggle reveal" data-currency="usd" role="group" aria-label="Display prices in">
+        <span class="toggle-thumb" aria-hidden="true"></span>
+        <button type="button" class="active" data-set-currency="usd" aria-pressed="true">USD · Stripe / PayPal</button>
+        <button type="button" data-set-currency="inr" aria-pressed="false">INR · Razorpay / Cashfree</button>
+      </div>
+
+      <div class="pricing-grid stagger">
+        <div class="plan reveal">
+          <div class="plan-name">Trial</div>
+          <div class="plan-price"><span class="amount">Free</span></div>
+          <div class="plan-desc">7 days, full look around</div>
+          <div class="plan-feats">
+            <div><i class="fa-solid fa-check"></i> Chatbot &amp; prompt library</div>
+            <div><i class="fa-solid fa-check"></i> Text-to-image, TTS, content &amp; message tools</div>
+            <div><i class="fa-solid fa-check"></i> Coding agent access</div>
+          </div>
+          <a class="btn btn-ghost" href="/login.html?mode=register">Start trial</a>
+        </div>
+
+        <div class="plan featured reveal">
+          <div class="plan-name">Basic</div>
+          <div class="plan-price"><span class="cur-sym">$</span><span class="amount" data-usd="55" data-inr="500">55</span><sub>/mo</sub></div>
+          <div class="plan-desc">Adds image editing &amp; voice cloning</div>
+          <div class="plan-feats">
+            <div><i class="fa-solid fa-check"></i> Everything in Trial</div>
+            <div><i class="fa-solid fa-check"></i> Image-to-image editing</div>
+            <div><i class="fa-solid fa-check"></i> Voice cloning</div>
+          </div>
+          <a class="btn btn-solid" href="/login.html?mode=register&plan=basic">Choose Basic</a>
+        </div>
+
+        <div class="plan reveal">
+          <div class="plan-name">Premium</div>
+          <div class="plan-price"><span class="cur-sym">$</span><span class="amount" data-usd="110" data-inr="1,000">110</span><sub>/mo</sub></div>
+          <div class="plan-desc">Adds video &amp; song generation</div>
+          <div class="plan-feats">
+            <div><i class="fa-solid fa-check"></i> Everything in Basic</div>
+            <div><i class="fa-solid fa-check"></i> Text-to-video &amp; image-to-video</div>
+            <div><i class="fa-solid fa-check"></i> Text-to-song</div>
+          </div>
+          <a class="btn btn-ghost" href="/login.html?mode=register&plan=pro">Choose Premium</a>
+        </div>
+
+        <div class="plan reveal">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price"><span class="cur-sym">$</span><span class="amount" data-usd="165" data-inr="1,500">165</span><sub>/mo</sub></div>
+          <div class="plan-desc">Full module access</div>
+          <div class="plan-feats">
+            <div><i class="fa-solid fa-check"></i> Everything in Premium</div>
+            <div><i class="fa-solid fa-check"></i> Video-to-video</div>
+            <div><i class="fa-solid fa-check"></i> Priority module rollout</div>
+          </div>
+          <a class="btn btn-ghost" href="/login.html?mode=register&plan=enterprise">Choose Enterprise</a>
+        </div>
+      </div>
+
+      <div class="pricing-foot reveal">PRICES SHOWN MATCH WHAT YOU'LL BE CHARGED AT CHECKOUT FOR THE SELECTED GATEWAY</div>
+    </div>
+  </section>
+
+  <!-- ══════ FINAL CTA ══════ -->
+  <div class="cta-band">
+    <div class="wrap">
+      <span class="eyebrow" style="justify-content:center;">Ready when you are</span>
+      <h2>Stop juggling logins. Start patching in.</h2>
+      <p>Seven days, every free and trial module unlocked, no card on file.</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid btn-lg" href="/login.html?mode=register">Start your free trial</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark">S</span>
+      <span class="brand-name">Sanjay<em>AIHub</em></span>
+    </a>
+    <div class="foot-links">
+      <a href="#modules">Modules</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/login.html">Log in</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── stagger: assign incremental transition-delay within each grid ── */
+  document.querySelectorAll('.stagger').forEach(function(container){
+    Array.prototype.forEach.call(container.children, function(child, i){
+      if (!child.classList.contains('reveal')) return;
+      child.style.transitionDelay = Math.min(i * 70, 420) + 'ms';
+    });
+  });
+
+  /* ── count-up for the "11 tabs / 11 bills / 1 hub" figures ── */
+  function countUp(el){
+    var target = parseInt(el.dataset.target, 10) || 0;
+    var suffix = el.dataset.suffix || '';
+    if (reduceMotion){ el.textContent = target + suffix; return; }
+    var duration = 700, start = null;
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      el.textContent = Math.round(target * p) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── scroll reveal ── */
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduceMotion || !('IntersectionObserver' in window)){
+    revealEls.forEach(function(el){
+      el.classList.add('in-view');
+      var fig = el.querySelector('.figure[data-target]');
+      if (fig) countUp(fig);
+    });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('in-view');
+        var fig = entry.target.querySelector('.figure[data-target]');
+        if (fig) countUp(fig);
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ── USD / INR pricing toggle ── */
+  var toggle = document.querySelector('.currency-toggle');
+  if (toggle){
+    var buttons = toggle.querySelectorAll('button');
+    toggle.addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-set-currency]');
+      if (!btn) return;
+      var currency = btn.dataset.setCurrency;
+      if (toggle.dataset.currency === currency) return;
+      toggle.dataset.currency = currency;
+
+      buttons.forEach(function(b){
+        var active = b === btn;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      document.querySelectorAll('.plan-price').forEach(function(priceEl){
+        var amount = priceEl.querySelector('.amount[data-usd]');
+        if (!amount) return; // Trial plan has no currency-specific amount
+        var sym = priceEl.querySelector('.cur-sym');
+        var apply = function(){
+          amount.textContent = amount.dataset[currency];
+          if (sym) sym.textContent = currency === 'usd' ? '$' : '₹';
+        };
+        if (reduceMotion){
+          apply();
+        } else {
+          priceEl.classList.add('swapping');
+          setTimeout(function(){
+            apply();
+            priceEl.classList.remove('swapping');
+          }, 160);
+        }
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
