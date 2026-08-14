@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sanjay Meher — Blender Showcase</title>
+<meta name="description" content="3D animation reel — Blender renders, grouped into Shorts and Long Form.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Blender-viewport-inspired token system */
+    --bg:#161616;
+    --surface:#1e1e1e;
+    --surface-2:#262626;
+    --line:#333333;
+    --grid-line: rgba(255,255,255,0.045);
+    --text:#e9e7e2;
+    --muted:#8c8c88;
+    --accent:#eb7c1f;      /* Blender orange */
+    --accent-dim: rgba(235,124,31,0.14);
+    --axis-blue:#5c8fd6;   /* long-form tag */
+    --axis-red:#d65c6e;    /* short tag */
+    --mono:'JetBrains Mono', monospace;
+    --display:'Manrope', sans-serif;
+    --body:'Inter', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 42px 42px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 42px 42px,
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== HUD-style header, modeled on Blender's viewport stats overlay ===== */
+  .page-head{
+    padding:4rem 1.5rem 2rem;
+    max-width:1120px;
+    margin:0 auto;
+    position:relative;
+  }
+  .hud{
+    display:flex;
+    gap:1.75rem;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--muted);
+    letter-spacing:0.02em;
+    margin-bottom:1.75rem;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.015);
+    padding:0.65rem 0.9rem;
+    border-radius:8px;
+    width:fit-content;
+  }
+  .hud span b{
+    color:var(--accent);
+    font-weight:500;
+  }
+  .hud .dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--accent);
+    display:inline-block;
+    margin-right:0.4rem;
+    box-shadow:0 0 0 3px var(--accent-dim);
+  }
+
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(2.3rem, 6vw, 3.8rem);
+    line-height:1.03;
+    letter-spacing:-0.015em;
+    max-width:16ch;
+  }
+  h1 .accent{color:var(--accent);}
+  .page-sub{
+    margin-top:1.1rem;
+    color:var(--muted);
+    font-size:1.02rem;
+    max-width:48ch;
+    line-height:1.65;
+  }
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    margin-top:1.75rem;
+    font-size:0.85rem;
+    color:var(--muted);
+    border:1px solid var(--line);
+    padding:0.5rem 0.9rem;
+    border-radius:100px;
+    transition:border-color .2s, color .2s;
+  }
+  .back-link:hover{border-color:var(--accent);color:var(--text);}
+
+  /* ===== Keyframe-ruler divider between sections, modeled on Blender's dopesheet ===== */
+  .keyframe-ruler{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 1.5rem;
+  }
+  .ruler-track{
+    position:relative;
+    height:28px;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    margin:2.75rem 0 2rem;
+    background:
+      repeating-linear-gradient(90deg, var(--line) 0, var(--line) 1px, transparent 1px, transparent 34px);
+  }
+  .ruler-track .keydot{
+    position:absolute;
+    top:50%;
+    width:9px;height:9px;
+    background:var(--accent);
+    transform:translate(-50%,-50%) rotate(45deg);
+    border:1px solid #0b0b0b;
+  }
+
+  .grid-wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 1.5rem 6rem;
+  }
+
+  .format-section{
+    margin-bottom:1rem;
+  }
+  .format-header{
+    display:flex;
+    align-items:baseline;
+    gap:1rem;
+    margin-bottom:1.4rem;
+  }
+  .format-name{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:1.6rem;
+    letter-spacing:-0.02em;
+  }
+  .format-name.short{color:var(--axis-red);}
+  .format-name.long{color:var(--axis-blue);}
+  .format-count{
+    font-family:var(--mono);
+    font-size:0.7rem;
+    color:var(--muted);
+    background:var(--surface);
+    padding:0.15rem 0.6rem;
+    border-radius:12px;
+    border:1px solid var(--line);
+  }
+  .format-note{
+    margin-left:auto;
+    font-family:var(--mono);
+    font-size:0.68rem;
+    color:var(--muted);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:1rem;
+    margin-bottom:3.5rem;
+  }
+  .grid.grid-long{
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .clip{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .clip:hover{transform:translateY(-3px);border-color:var(--accent);}
+  .clip:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .clip-thumb{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(235,124,31,0.14), transparent 55%),
+      linear-gradient(160deg, var(--surface-2), #101010 75%);
+  }
+  .clip-format-short .clip-thumb{ aspect-ratio:9/16; }
+  .clip-format-long .clip-thumb{ aspect-ratio:16/9; }
+  .clip-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    position:absolute;
+    inset:0;
+  }
+  .clip-thumb img.thumb-long{
+    object-fit:contain;
+    background:#0e0e0e;
+  }
+  .play-glyph{
+    width:44px;height:44px;
+    border-radius:50%;
+    background:rgba(11,11,11,0.55);
+    border:1px solid rgba(255,255,255,0.16);
+    backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .clip:hover .play-glyph{transform:scale(1.08);background:var(--accent-dim);}
+  .play-glyph svg{width:16px;height:16px;fill:var(--text);margin-left:2px;}
+
+  .fmt-tag{
+    position:absolute;
+    top:0.6rem; left:0.6rem;
+    z-index:3;
+    font-family:var(--mono);
+    font-size:0.6rem;
+    letter-spacing:0.08em;
+    padding:0.26rem 0.48rem;
+    border-radius:5px;
+    text-transform:uppercase;
+    backdrop-filter:blur(4px);
+  }
+  .fmt-tag-short{
+    background:rgba(214,92,110,0.2);
+    color:#ff9aa8;
+    border:1px solid rgba(214,92,110,0.35);
+  }
+  .fmt-tag-long{
+    background:rgba(92,143,214,0.2);
+    color:#a3c4ff;
+    border:1px solid rgba(92,143,214,0.35);
+  }
+
+  .clip-meta{
+    padding:0.7rem 0.8rem 0.9rem;
+  }
+  .clip-title{
+    font-size:0.82rem;
+    font-weight:500;
+    line-height:1.32;
+    margin-bottom:0.35rem;
+  }
+  .clip-tags{
+    display:flex;
+    gap:0.4rem;
+    flex-wrap:wrap;
+  }
+  .clip-tag{
+    font-family:var(--mono);
+    font-size:0.55rem;
+    color:var(--muted);
+    border:1px solid var(--line);
+    padding:0.15rem 0.4rem;
+    border-radius:4px;
+  }
+
+  .state-msg{
+    grid-column:1/-1;
+    text-align:center;
+    padding:4rem 1rem;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:0.85rem;
+    line-height:1.8;
+  }
+  .state-msg code{
+    color:var(--accent);
+    background:var(--surface);
+    padding:0.15rem 0.4rem;
+    border-radius:4px;
+  }
+
+  .lightbox{
+    position:fixed; inset:0;
+    background:rgba(6,6,6,0.92);
+    backdrop-filter:blur(10px);
+    z-index:100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:2rem 1rem;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-inner{
+    width:100%;
+    max-height:90vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .lightbox-frame{
+    background:#000;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    width:100%;
+  }
+  .lightbox-format-short .lightbox-frame{ aspect-ratio:9/16; max-width:420px; }
+  .lightbox-format-long .lightbox-frame{ aspect-ratio:16/9; max-width:760px; }
+  .lightbox-frame iframe{ width:100%;height:100%;border:0;display:block; }
+  .lightbox-cap{
+    margin-top:1rem;
+    text-align:center;
+    width:100%;
+    max-width:760px;
+  }
+  .lightbox-cap .title{font-weight:600;font-size:0.95rem;}
+  .lightbox-cap .sub{color:var(--muted);font-size:0.8rem;margin-top:0.25rem;font-family:var(--mono);}
+  .lightbox-close{
+    position:absolute;
+    top:1.25rem; right:1.25rem;
+    width:40px;height:40px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text);
+    font-size:1.1rem;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:101;
+  }
+  .lightbox-open-original{
+    display:inline-block;
+    margin-top:0.85rem;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--accent);
+    border-bottom:1px solid transparent;
+  }
+  .lightbox-open-original:hover{border-color:var(--accent);}
+
+  @media (prefers-reduced-motion: reduce){
+    .clip, .play-glyph{transition:none;}
+  }
+
+  @media (max-width:560px){
+    .page-head{padding:2.5rem 1.25rem 1.5rem;}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(148px,1fr));gap:0.7rem;}
+    .grid.grid-long{grid-template-columns:repeat(auto-fill, minmax(220px,1fr));}
+    .format-name{font-size:1.25rem;}
+    .format-note{display:none;}
+    .lightbox-format-long .lightbox-frame{max-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="page-head">
+    <div class="hud">
+      <span><span class="dot"></span>ENGINE: <b>Cycles / EEVEE</b></span>
+      <span>SOFTWARE: <b>Blender</b></span>
+      <span id="hudCount">RENDERS: <b>—</b></span>
+    </div>
+    <h1>3D renders, <span class="accent">Shorts to Long Form.</span></h1>
+    <p class="page-sub">Every clip below is a rendered Blender project — Shorts and Long Form kept in separate reels so you can jump straight to the format you came for.</p>
+    <a href="index.html" class="back-link">← Back home</a>
+  </header>
+
+  <main>
+    <div class="grid-wrap" id="mainWrap">
+      <div id="shortsSection" class="format-section">
+        <div class="format-header">
+          <span class="format-name short">Shorts</span>
+          <span class="format-count" id="shortsCount">0</span>
+          <span class="format-note">9:16 · vertical</span>
+        </div>
+        <div class="grid" id="shortsGrid">
+          <div class="state-msg">Loading clips…</div>
+        </div>
+      </div>
+
+      <div class="keyframe-ruler">
+        <div class="ruler-track">
+          <div class="keydot" style="left:8%"></div>
+          <div class="keydot" style="left:24%"></div>
+          <div class="keydot" style="left:39%"></div>
+          <div class="keydot" style="left:55%"></div>
+          <div class="keydot" style="left:71%"></div>
+          <div class="keydot" style="left:88%"></div>
+        </div>
+      </div>
+
+      <div id="longSection" class="format-section">
+        <div class="format-header">
+          <span class="format-name long">Long Form</span>
+          <span class="format-count" id="longCount">0</span>
+          <span class="format-note">16:9 · widescreen</span>
+        </div>
+        <div class="grid grid-long" id="longGrid">
+          <div class="state-msg">Loading clips…</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">✕</button>
+    <div class="lightbox-inner">
+      <div class="lightbox-frame" id="lightboxFrame"></div>
+      <div class="lightbox-cap">
+        <div class="title" id="lightboxTitle"></div>
+        <div class="sub" id="lightboxSub"></div>
+        <a class="lightbox-open-original" id="lightboxOriginal" href="#" target="_blank" rel="noopener">Open on YouTube ↗</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Point this at your Blender-specific clips file. Reuses the same schema
+// as the edits page: [{ id | url, title, category, format: "short"|"long" }]
+const CLIPS_JSON_URL = "https://raw.githubusercontent.com/sanjaymeherdev/Godot-Website/main/blender-clips.json";
+
+const shortsGrid = document.getElementById('shortsGrid');
+const longGrid = document.getElementById('longGrid');
+const shortsCount = document.getElementById('shortsCount');
+const longCount = document.getElementById('longCount');
+const hudCount = document.getElementById('hudCount');
+
+const lightbox = document.getElementById('lightbox');
+const lightboxFrame = document.getElementById('lightboxFrame');
+const lightboxTitle = document.getElementById('lightboxTitle');
+const lightboxSub = document.getElementById('lightboxSub');
+const lightboxOriginal = document.getElementById('lightboxOriginal');
+const lightboxClose = document.getElementById('lightboxClose');
+
+function youTubeIdFromUrl(url){
+  const m = url.match(/(?:shorts\/|v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function playIcon(){
+  return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+}
+
+function normalizeClip(raw){
+  const id = raw.id || (raw.url ? youTubeIdFromUrl(raw.url) : null);
+  if(!id) return null;
+  return {
+    id,
+    title: raw.title || "Untitled render",
+    category: raw.category || "Blender",
+    format: raw.format === 'long' ? 'long' : 'short',
+    url: raw.url || `https://www.youtube.com/watch?v=${id}`
+  };
+}
+
+function cardHtml(clip, idx, listName){
+  const formatClass = clip.format === 'long' ? 'clip-format-long' : 'clip-format-short';
+  const tagClass = clip.format === 'long' ? 'fmt-tag-long' : 'fmt-tag-short';
+  const tagText = clip.format === 'long' ? 'Long' : 'Short';
+  const thumbClass = clip.format === 'long' ? 'thumb-long' : '';
+  const thumbUrl = `https://i.ytimg.com/vi/${clip.id}/hqdefault.jpg`;
+  return `
+    <div class="clip ${formatClass}" tabindex="0" role="button" data-list="${listName}" data-idx="${idx}" aria-label="Play ${clip.title}">
+      <div class="clip-thumb">
+        <span class="fmt-tag ${tagClass}">${tagText}</span>
+        <img src="${thumbUrl}" alt="" loading="lazy" class="${thumbClass}">
+        <div class="play-glyph">${playIcon()}</div>
+      </div>
+      <div class="clip-meta">
+        <div class="clip-title">${clip.title}</div>
+        <div class="clip-tags"><span class="clip-tag">${clip.category}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderList(gridEl, clips, listName, emptyMsg){
+  if(!clips.length){
+    gridEl.innerHTML = `<div class="state-msg">${emptyMsg}</div>`;
+    return;
+  }
+  gridEl.innerHTML = clips.map((c, i) => cardHtml(c, i, listName)).join('');
+  gridEl.querySelectorAll('.clip').forEach(el => {
+    const idx = parseInt(el.dataset.idx);
+    const clip = clips[idx];
+    if(!clip) return;
+    el.addEventListener('click', () => openLightbox(clip));
+    el.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openLightbox(clip);
+      }
+    });
+  });
+}
+
+function openLightbox(clip){
+  const formatClass = clip.format === 'long' ? 'lightbox-format-long' : 'lightbox-format-short';
+  lightbox.className = `lightbox open ${formatClass}`;
+
+  lightboxTitle.textContent = clip.title;
+  lightboxSub.textContent = `${clip.category} · ${clip.format === 'long' ? 'Long Form' : 'Short'} · tap outside or ✕ to close`;
+  lightboxOriginal.href = clip.url;
+
+  const embedUrl = `https://www.youtube.com/embed/${clip.id}?autoplay=1&rel=0`;
+  lightboxFrame.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  lightbox.className = 'lightbox';
+  lightboxFrame.innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+
+fetch(CLIPS_JSON_URL, { cache: "no-store" })
+  .then(res => {
+    if(!res.ok) throw new Error('blender-clips.json not found (' + res.status + ')');
+    return res.json();
+  })
+  .then(data => {
+    const clips = (Array.isArray(data) ? data : []).map(normalizeClip).filter(Boolean);
+    const shorts = clips.filter(c => c.format === 'short');
+    const longs = clips.filter(c => c.format === 'long');
+
+    renderList(shortsGrid, shorts, 'shorts', 'No Shorts yet. Add clips with "format": "short" to blender-clips.json.');
+    renderList(longGrid, longs, 'long', 'No Long Form videos yet. Add clips with "format": "long" to blender-clips.json.');
+
+    shortsCount.textContent = shorts.length;
+    longCount.textContent = longs.length;
+    hudCount.innerHTML = `RENDERS: <b>${clips.length}</b>`;
+  })
+  .catch(err => {
+    const msg = `<div class="state-msg">Couldn't load blender-clips.json yet.<br>Add the file at <code>sanjaymeherdev/blender-clips.json</code> in the repo.<br><br>${err.message}</div>`;
+    shortsGrid.innerHTML = msg;
+    longGrid.innerHTML = '';
+    hudCount.innerHTML = `RENDERS: <b>0</b>`;
+  });
+</script>
+</body>
+</html>
