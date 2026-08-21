@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphicy — Rate Card — Sanjay Meher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Bebas+Neue&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F0EEE6;
+    --paper-raised:#FAF9F4;
+    --ink:#1B1F23;
+    --ink-soft:#4B5057;
+    --navy:#1D3557;
+    --signal:#D6402B;
+    --brass:#B08D2A;
+    --line:#D6D2C4;
+    --line-strong:#B9B4A2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:48px 20px 80px;
+  }
+  .sheet{
+    max-width:880px;
+    margin:0 auto;
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    position:relative;
+    box-shadow:0 1px 0 var(--line), 0 24px 60px -30px rgba(27,31,35,0.35);
+  }
+  .sheet::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:6px;
+    background:repeating-linear-gradient(115deg,var(--ink) 0 14px, var(--paper-raised) 14px 22px, var(--signal) 22px 30px, var(--paper-raised) 30px 38px);
+    z-index:2;
+  }
+
+  /* ===== Cover / masthead ===== */
+  .masthead{
+    padding:56px 56px 32px;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:22px;
+  }
+  .rec-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--signal);
+    animation:pulse 1.8s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(214,64,43,.35);}
+    50%{opacity:.55;box-shadow:0 0 0 5px rgba(214,64,43,0);}
+  }
+  .title-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;
+    font-weight:900;
+    font-size:56px;
+    line-height:0.96;
+    letter-spacing:-0.01em;
+  }
+  h1 span{color:var(--ink-soft);font-weight:700;}
+  .studio{
+    text-align:right;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+  .studio b{color:var(--ink);font-weight:500;}
+  .meta-strip{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--line);
+  }
+  .meta-item{
+    padding:14px 18px 0 0;
+    border-right:1px solid var(--line);
+  }
+  .meta-item:last-child{border-right:none;}
+  .meta-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .meta-value{font-size:14px;font-weight:500;}
+
+  /* ===== TOC ===== */
+  .toc{
+    padding:30px 56px 40px;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .toc-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  .toc-list{
+    list-style:none;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 32px;
+  }
+  .toc-list a{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:12px;
+    padding:10px 0;
+    border-top:1px solid var(--line);
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .toc-list li:nth-child(1) a,.toc-list li:nth-child(2) a{border-top:1px solid var(--line);}
+  .toc-n{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:16px;
+    color:var(--line-strong);
+    margin-right:10px;
+  }
+  .toc-name{font-size:14px;font-weight:500;flex:1;}
+  .toc-arrow{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--brass);}
+
+  /* ===== Category divider ===== */
+  .category{
+    padding:44px 56px 4px;
+    scroll-margin-top:24px;
+  }
+  .category-label{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+  }
+  .category-tag{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:15px;
+    letter-spacing:.06em;
+    background:var(--ink);
+    color:var(--paper-raised);
+    padding:4px 10px 2px;
+  }
+  .category-name{
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:24px;
+  }
+  .category-sub{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:6px 0 0 0;
+    max-width:62ch;
+  }
+
+  /* ===== Service cards ===== */
+  .services{
+    padding:8px 56px 10px;
+  }
+  .card{
+    display:grid;
+    grid-template-columns:56px 1fr 200px;
+    gap:22px;
+    padding:26px 0;
+    border-top:1px solid var(--line);
+  }
+  .slate{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--brass);
+    letter-spacing:.04em;
+    padding-top:3px;
+  }
+  .slate .n{
+    display:block;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:26px;
+    color:var(--line-strong);
+    line-height:1;
+    margin-bottom:2px;
+  }
+  .service-icon{
+    font-size:20px;
+    display:block;
+    margin-bottom:10px;
+  }
+  .service-name{
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    margin-bottom:6px;
+  }
+  .service-desc{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    max-width:46ch;
+    margin-bottom:12px;
+  }
+  .bullets{
+    list-style:none;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 10px;
+    margin-bottom:12px;
+  }
+  .bullets li{
+    font-size:11.5px;
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--navy);
+    background:rgba(29,53,87,0.06);
+    border:1px solid rgba(29,53,87,0.15);
+    padding:3px 9px;
+  }
+  .portfolio-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--signal);
+    text-decoration:none;
+    border-bottom:1px solid rgba(214,64,43,0.35);
+    padding-bottom:1px;
+  }
+  .portfolio-link:hover{border-bottom-color:var(--signal);}
+  .price-block{
+    text-align:right;
+    padding-top:2px;
+  }
+  .price-row{
+    display:flex;
+    justify-content:flex-end;
+    align-items:baseline;
+    gap:6px;
+    padding:9px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .price-row:last-child{border-bottom:none;}
+  .price-row .unit{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .price-row .amount{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:500;
+    font-size:20px;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .price-row .amount.quote{font-size:15px;}
+  .price-row .amount small{
+    font-size:11px;
+    color:var(--ink-soft);
+    font-weight:400;
+  }
+  .from-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--signal);
+    display:block;
+    margin-bottom:2px;
+  }
+
+  /* ===== Platforms strip ===== */
+  .platforms{
+    padding:18px 56px 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .platform-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--navy);
+    background:rgba(29,53,87,0.06);
+    border:1px solid rgba(29,53,87,0.15);
+    padding:5px 11px;
+  }
+
+  /* ===== Plan tiers ===== */
+  .plans{
+    padding:26px 56px 6px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  .plan{
+    border:1px solid var(--line-strong);
+    padding:20px 18px 18px;
+    position:relative;
+    background:var(--paper-raised);
+  }
+  .plan.popular{border-color:var(--signal);}
+  .popular-flag{
+    position:absolute;top:-1px;right:-1px;
+    background:var(--signal);
+    color:var(--paper-raised);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+    padding:3px 8px;
+  }
+  .plan-slate{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;color:var(--brass);letter-spacing:.04em;margin-bottom:8px;
+  }
+  .plan-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;}
+  .plan-for{font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.4;}
+  .plan-price{
+    font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:24px;color:var(--ink);
+    padding-bottom:12px;margin-bottom:14px;border-bottom:1px dashed var(--line);
+  }
+  .plan-price small{font-size:12px;font-weight:400;color:var(--ink-soft);}
+  .plan-bullets{list-style:none;}
+  .plan-bullets li{font-size:12.5px;color:var(--ink);padding:4px 0 4px 14px;position:relative;line-height:1.4;}
+  .plan-bullets li::before{content:"—";position:absolute;left:0;color:var(--brass);}
+
+  /* ===== Add-ons ===== */
+  .addons-head{padding:34px 56px 6px;}
+  .addons{padding:0 56px 10px;}
+  .addon-row{
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding:14px 0;border-top:1px solid var(--line);
+  }
+  .addon-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:14.5px;}
+  .addon-desc{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .addon-price{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:16px;white-space:nowrap;}
+
+  /* ===== PaaS terms ===== */
+  .terms{padding:6px 56px 10px;}
+  .term-row{
+    display:grid;grid-template-columns:40px 1fr 160px;gap:18px;align-items:baseline;
+    padding:15px 0;border-top:1px solid var(--line);
+  }
+  .term-n{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--line-strong);}
+  .term-body b{font-family:'Archivo',sans-serif;font-weight:700;font-size:14.5px;display:block;margin-bottom:2px;}
+  .term-body span{font-size:12.5px;color:var(--ink-soft);}
+  .term-value{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:500;white-space:nowrap;}
+  .term-value small{display:block;font-size:10.5px;font-weight:400;color:var(--ink-soft);margin-top:2px;}
+
+  /* ===== Course modules ===== */
+  .modules{
+    padding:22px 56px 6px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .module{border:1px solid var(--line-strong);padding:16px 16px 14px;background:var(--paper-raised);}
+  .module.bundle{
+    border-color:var(--signal);grid-column:span 3;
+    display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;
+  }
+  .module-slate{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--brass);letter-spacing:.04em;margin-bottom:6px;}
+  .module-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:15.5px;margin-bottom:8px;}
+  .module-bullets{list-style:none;margin-bottom:12px;}
+  .module-bullets li{font-size:11.5px;color:var(--ink-soft);padding:2px 0 2px 12px;position:relative;line-height:1.4;}
+  .module-bullets li::before{content:"—";position:absolute;left:0;color:var(--brass);}
+  .module-price{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:17px;color:var(--ink);}
+  .module-price small{font-size:11px;font-weight:400;color:var(--ink-soft);}
+  .bundle .module-name{font-size:18px;margin-bottom:4px;}
+  .bundle .module-bullets{margin-bottom:0;display:flex;flex-wrap:wrap;gap:6px 14px;}
+  .bundle .module-bullets li{padding-left:12px;}
+  .bundle .module-price{font-size:24px;text-align:right;white-space:nowrap;}
+  .flag{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--paper-raised);background:var(--signal);padding:2px 8px;margin-bottom:6px;display:inline-block;
+  }
+
+  /* ===== Cohort card ===== */
+  .cohort-head{padding:34px 56px 4px;}
+  .cohort{
+    margin:6px 56px 10px;border:1px solid var(--line-strong);padding:24px 26px;
+    display:grid;grid-template-columns:1fr 200px;gap:22px;
+  }
+  .cohort-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;margin-bottom:6px;}
+  .cohort-desc{font-size:14px;color:var(--ink-soft);line-height:1.55;max-width:48ch;margin-bottom:12px;}
+  .cohort-price-block{text-align:right;}
+  .cohort-price-block .from-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--signal);display:block;margin-bottom:2px;
+  }
+  .cohort-price-block .amount{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:26px;}
+  .cohort-price-block .unit{font-size:11.5px;color:var(--ink-soft);}
+
+  /* ===== Section footnote (between sections) ===== */
+  .section-note{
+    margin:8px 56px 0;
+    padding:18px 0 6px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+  .section-note b{color:var(--ink);font-weight:500;}
+
+  /* ===== Final footer ===== */
+  .footnote{
+    margin:20px 56px 0;
+    padding:26px 0 48px;
+    border-top:1px solid var(--line-strong);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .footnote p{font-size:12.5px;color:var(--ink-soft);max-width:56ch;line-height:1.6;}
+  .footnote p b{color:var(--ink);font-weight:500;}
+  .cta{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--paper-raised);
+    background:var(--ink);
+    padding:10px 18px;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+
+  @media (max-width:700px){
+    .masthead{padding:36px 24px 24px;}
+    h1{font-size:38px;}
+    .title-row{flex-direction:column;align-items:flex-start;}
+    .studio{text-align:left;}
+    .meta-strip{grid-template-columns:repeat(2,1fr);}
+    .meta-item:nth-child(2){border-right:none;}
+    .toc{padding:24px 24px 30px;}
+    .toc-list{grid-template-columns:1fr;}
+    .category{padding:34px 24px 4px;}
+    .services{padding:8px 24px 10px;}
+    .card{grid-template-columns:1fr;gap:10px;}
+    .price-block{text-align:left;}
+    .price-row{justify-content:space-between;}
+    .platforms{padding:18px 24px 0;}
+    .plans{padding:22px 24px 6px;grid-template-columns:1fr;}
+    .addons-head{padding:30px 24px 6px;}
+    .addons{padding:0 24px 10px;}
+    .terms{padding:6px 24px 10px;}
+    .term-row{grid-template-columns:1fr;gap:4px;}
+    .term-value{text-align:left;}
+    .modules{padding:20px 24px 6px;grid-template-columns:1fr 1fr;}
+    .module.bundle{grid-column:span 2;grid-template-columns:1fr;text-align:left;}
+    .bundle .module-price{text-align:left;}
+    .cohort-head{padding:30px 24px 4px;}
+    .cohort{margin:6px 24px 10px;grid-template-columns:1fr;}
+    .cohort-price-block{text-align:left;}
+    .section-note{margin:8px 24px 0;}
+    .footnote{padding:22px 24px 36px;margin:16px 0 0;}
+  }
+  @media (max-width:520px){
+    .modules{grid-template-columns:1fr;}
+    .module.bundle{grid-column:span 1;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="masthead">
+    <div class="eyebrow"><span class="rec-dot"></span> Rate card &nbsp;·&nbsp; effective August 2026</div>
+    <div class="title-row">
+      <h1>Graphicy<br><span>Rate Card.</span></h1>
+      <div class="studio">
+        <b>Sanjay Meher</b><br>
+        Video · Design · Marketing<br>
+        Apps · SaaS · Training<br>
+        Delhi, India · Remote
+      </div>
+    </div>
+    <div class="meta-strip">
+      <div class="meta-item">
+        <div class="meta-label">Sections</div>
+        <div class="meta-value">6</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Payment</div>
+        <div class="meta-value">After approval</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Contract</div>
+        <div class="meta-value">None, cancel anytime</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Tax</div>
+        <div class="meta-value">Rates exclude GST</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-label">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#content-creation"><span class="toc-n">01</span><span class="toc-name">Content creation</span><span class="toc-arrow">↓</span></a></li>
+      <li><a href="#digital-marketing"><span class="toc-n">02</span><span class="toc-name">Digital marketing</span><span class="toc-arrow">↓</span></a></li>
+      <li><a href="#website"><span class="toc-n">03</span><span class="toc-name">Website design &amp; dev</span><span class="toc-arrow">↓</span></a></li>
+      <li><a href="#app-dev"><span class="toc-n">04</span><span class="toc-name">App development</span><span class="toc-arrow">↓</span></a></li>
+      <li><a href="#saas-paas"><span class="toc-n">05</span><span class="toc-name">SaaS &amp; PaaS</span><span class="toc-arrow">↓</span></a></li>
+      <li><a href="#courses"><span class="toc-n">06</span><span class="toc-name">Courses &amp; training</span><span class="toc-arrow">↓</span></a></li>
+    </ul>
+  </div>
+
+  <!-- ============ 01 CONTENT CREATION ============ -->
+  <div class="category" id="content-creation">
+    <div class="category-label">
+      <span class="category-tag">01</span>
+      <span class="category-name">Content creation</span>
+    </div>
+    <p class="category-sub">Everything needed to keep a feed moving — edits, designs, motion and AI-made content, priced per piece.</p>
+  </div>
+
+  <div class="services">
+
+    <div class="card">
+      <div class="slate"><span class="n">01</span>REEL</div>
+      <div>
+        <span class="service-icon">🎬</span>
+        <div class="service-name">Video editing</div>
+        <p class="service-desc">Short-form cuts only — Reels, Shorts and TikTok-style content. Trimmed, paced and captioned to hold attention. No long-form edits.</p>
+        <ul class="bullets">
+          <li>Short-form only</li>
+          <li>Captions included</li>
+          <li>No long videos</li>
+        </ul><a class="portfolio-link" href="https://sanjaymeher.online/editing-portfolio" target="_blank" rel="noopener">View portfolio ↗</a>
+      </div>
+      <div class="price-block">
+        <span class="from-tag">Starting at</span>
+        <div class="price-row"><span class="amount">₹300</span><span class="unit">under 1 min</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slate"><span class="n">02</span>FRAME</div>
+      <div>
+        <span class="service-icon">🎨</span>
+        <div class="service-name">Graphic design</div>
+        <p class="service-desc">Banners, logos, social posts and print-ready design — one flat rate whatever the use case.</p>
+        <ul class="bullets">
+          <li>Banners</li><li>Logos</li><li>Social posts</li><li>Print</li>
+        </ul>
+        <a class="portfolio-link" href="https://sanjaymeher.online/designs/gallery" target="_blank" rel="noopener">View gallery ↗</a>
+      </div>
+      <div class="price-block">
+        <span class="from-tag">Starting at</span>
+        <div class="price-row"><span class="amount">₹80</span><span class="unit">single design</span></div>
+        <div class="price-row"><span class="amount">₹150</span><span class="unit">carousel</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slate"><span class="n">03</span>MOTION</div>
+      <div>
+        <span class="service-icon">✨</span>
+        <div class="service-name">Motion graphics</div>
+        <p class="service-desc">Animated titles, kinetic text and moving elements layered into a design. Final price depends on complexity.</p>
+        <ul class="bullets"><li>Quoted per project</li></ul><a class="portfolio-link" href="https://sanjaymeher.online/editing-portfolio" target="_blank" rel="noopener">View portfolio ↗</a>
+      </div>
+      <div class="price-block">
+        <span class="from-tag">Starting at</span>
+        <div class="price-row"><span class="amount">₹300</span><span class="unit">base price</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slate"><span class="n">04</span>RENDER</div>
+      <div>
+        <span class="service-icon">🧊</span>
+        <div class="service-name">3D animation</div>
+        <p class="service-desc">Custom 3D animation and renders built in Blender. Final price depends on complexity of the scene and models.</p>
+        <ul class="bullets"><li>Blender</li><li>Quoted per project</li></ul>
+        <a class="portfolio-link" href="https://sanjaymeher.online/services/3danimation" target="_blank" rel="noopener">View work ↗</a>
+      </div>
+      <div class="price-block">
+        <span class="from-tag">Starting at</span>
+        <div class="price-row"><span class="amount">₹500</span><span class="unit">20 sec animation</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="slate"><span class="n">05</span>AI-GEN</div>
+      <div>
+        <span class="service-icon">🤖</span>
+        <div class="service-name">AI videos</div>
+        <p class="service-desc">AI-generated video content, priced per piece or as a running monthly content package.</p>
+        <ul class="bullets"><li>Per video</li><li>Monthly package</li></ul>
+        <a class="portfolio-link" href="https://sanjaymeher-ai-reels.vercel.app/" target="_blank" rel="noopener">View AI reels ↗</a>
+      </div>
+      <div class="price-block">
+        <span class="from-tag">Starting at</span>
+        <div class="price-row"><span class="amount">₹300</span><span class="unit">per video</span></div>
+        <div class="price-row"><span class="amount">₹5,000<small>/mo</small></span><span class="unit">20 videos + 10 images</span></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section-note"><b>Note —</b> Motion graphics and 3D work are quoted after a quick look at the brief; volume and monthly packages available on request.</div>
+
+  <!-- ============ 02 DIGITAL MARKETING ============ -->
+  <div class="category" id="digital-marketing">
+    <div class="category-label">
+      <span class="category-tag">02</span>
+      <span class="category-name">Social media management</span>
+    </div>
+    <p class="category-sub">Content calendar, designed posts, captions and scheduling — done every month, across whichever platforms your customers actually use. <a class="portfolio-link" href="https://sanjaymeher.online/marketing/digital-services" target="_blank" rel="noopener">Full plan details ↗</a></p>
+  </div>
+
+  <div class="platforms">
+    <span class="platform-tag">Instagram</span>
+    <span class="platform-tag">Facebook</span>
+    <span class="platform-tag">LinkedIn</span>
+    <span class="platform-tag">Google My Business</span>
+    <span class="platform-tag">Pinterest</span>
+    <span class="platform-tag">WhatsApp Channel</span>
+  </div>
+
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-slate">TIER 01 · STARTER</div>
+      <div class="plan-name">Starter</div>
+      <div class="plan-for">Small shops, clinics, local services</div>
+      <div class="plan-price">₹2,999<small>/mo</small></div>
+      <ul class="plan-bullets">
+        <li>2 platforms of your choice</li>
+        <li>15 posts / month</li>
+        <li>Designed creatives + captions</li>
+        <li>Scheduling &amp; publishing</li>
+        <li>Monthly performance report</li>
+      </ul>
+    </div>
+    <div class="plan popular">
+      <span class="popular-flag">Most popular</span>
+      <div class="plan-slate">TIER 02 · GROWTH</div>
+      <div class="plan-name">Growth</div>
+      <div class="plan-for">D2C brands, salons, restaurants, coaching</div>
+      <div class="plan-price">₹5,999<small>/mo</small></div>
+      <ul class="plan-bullets">
+        <li>3 platforms of your choice</li>
+        <li>25 posts + 5 Reels / month</li>
+        <li>Hashtag research + A/B testing</li>
+        <li>Strategy call + GMB posts</li>
+        <li>WhatsApp broadcast integration</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-slate">TIER 03 · PRO</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-for">E-commerce, real estate, multi-location</div>
+      <div class="plan-price">₹9,999<small>/mo</small></div>
+      <ul class="plan-bullets">
+        <li>All 5 platforms</li>
+        <li>22 posts + 8 Reels &amp; Stories</li>
+        <li>Premium creatives + video editing</li>
+        <li>Weekly check-in + strategy report</li>
+        <li>Quarterly competitor analysis</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="addons-head">
+    <div class="category-label">
+      <span class="category-tag">02A</span>
+      <span class="category-name">Add-ons</span>
+    </div>
+    <p class="category-sub">Bolt these onto any plan — one-time or recurring.</p>
+  </div>
+  <div class="addons">
+    <div class="addon-row"><div><div class="addon-name">Extra Reel / short video</div><div class="addon-desc">Scripted, edited, captioned</div></div><div class="addon-price">₹499</div></div>
+    <div class="addon-row"><div><div class="addon-name">Meta ads setup</div><div class="addon-desc">Campaign build + targeting — ad budget separate</div></div><div class="addon-price">₹2,500</div></div>
+    <div class="addon-row"><div><div class="addon-name">WhatsApp broadcast campaign</div><div class="addon-desc">Write, design, send to your list</div></div><div class="addon-price">₹1,499</div></div>
+    <div class="addon-row"><div><div class="addon-name">Logo / brand identity</div><div class="addon-desc">Full brand kit — logo, colours, fonts</div></div><div class="addon-price">₹1,999</div></div>
+    <div class="addon-row"><div><div class="addon-name">Festive campaign pack</div><div class="addon-desc">8 posts for Diwali, Holi, and other key dates</div></div><div class="addon-price">₹1,999</div></div>
+    <div class="addon-row"><div><div class="addon-name">Platform audit</div><div class="addon-desc">One-time review + action report</div></div><div class="addon-price">₹999</div></div>
+  </div>
+  <div class="section-note"><b>Note —</b> Monthly retainer, no lock-in contracts — cancel with 15 days' notice.</div>
+
+  <!-- ============ 03 WEBSITE DESIGN & DEV ============ -->
+  <div class="category" id="website">
+    <div class="category-label">
+      <span class="category-tag">03</span>
+      <span class="category-name">Website design &amp; development</span>
+    </div>
+    <p class="category-sub">From a single landing page to a full store — built, set up and handed over. Anything outside these scopes gets a custom quote.</p>
+  </div>
+
+  <div class="services">
+    <div class="card">
+      <div class="slate"><span class="n">01</span>PAGE</div>
+      <div>
+        <span class="service-icon">🖥️</span>
+        <div class="service-name">Basic landing page</div>
+        <p class="service-desc">A clean single-scroll site covering everything a small business needs to be found and contacted online.</p>
+        <ul class="bullets"><li>Home</li><li>About</li><li>Service</li><li>Contact</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Starting at</span><div class="price-row"><span class="amount">₹500</span><span class="unit">4-section page</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">02</span>PRESS</div>
+      <div>
+        <span class="service-icon">📰</span>
+        <div class="service-name">WordPress simple site</div>
+        <p class="service-desc">A multi-page WordPress build for businesses that need more structure and easy self-editing after launch.</p>
+        <ul class="bullets"><li>Multi-page</li><li>Self-editable</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Starting at</span><div class="price-row"><span class="amount">₹3,000</span><span class="unit">simple site</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">03</span>STORE</div>
+      <div>
+        <span class="service-icon">🛒</span>
+        <div class="service-name">Shopify e-com setup</div>
+        <p class="service-desc">Store setup on Shopify — theme, product listings, and checkout ready to accept your first order.</p>
+        <ul class="bullets"><li>Store setup</li><li>Product listings</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Starting at</span><div class="price-row"><span class="amount">₹2,000</span><span class="unit">store setup</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">04</span>CUSTOM</div>
+      <div>
+        <span class="service-icon">⚙️</span>
+        <div class="service-name">Custom requirements</div>
+        <p class="service-desc">Bespoke builds — extra pages, integrations, custom features or apps beyond the standard scopes above.</p>
+        <ul class="bullets"><li>Scoped after a quick call</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Priced on</span><div class="price-row"><span class="amount quote">Based on quote</span></div></div>
+    </div>
+  </div>
+  <div class="section-note"><b>Note —</b> Prices shown are starting rates for the stated scope. Extra pages or integrations are quoted separately.</div>
+
+  <!-- ============ 04 APP DEVELOPMENT ============ -->
+  <div class="category" id="app-dev">
+    <div class="category-label">
+      <span class="category-tag">04</span>
+      <span class="category-name">App development</span>
+    </div>
+    <p class="category-sub">Applications built for the platform your users are actually on, priced from a base rate and scoped to the brief.</p>
+  </div>
+
+  <div class="services">
+    <div class="card">
+      <div class="slate"><span class="n">01</span>APP</div>
+      <div>
+        <span class="service-icon">📲</span>
+        <div class="service-name">Web, Android &amp; Windows apps</div>
+        <p class="service-desc">Applications built for web, Android or Windows. Base rate covers a standard build — final price scales with scope.</p>
+        <ul class="bullets"><li>Web app</li><li>Android</li><li>Windows</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Starting at</span><div class="price-row"><span class="amount">₹5,000</span><span class="unit">base + scope</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">02</span>TOOL</div>
+      <div>
+        <span class="service-icon">🧩</span>
+        <div class="service-name">Chrome extensions &amp; local servers</div>
+        <p class="service-desc">Browser extensions or locally-hosted server tools built to a specific task. Base rate for a standard build — final price scales with scope.</p>
+        <ul class="bullets"><li>Chrome extension</li><li>Local server</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Starting at</span><div class="price-row"><span class="amount">₹1,000</span><span class="unit">base + scope</span></div></div>
+    </div>
+  </div>
+  <div class="section-note"><b>Note —</b> Base prices cover a standard build. Final price is confirmed as a fixed quote once the scope is reviewed.</div>
+
+  <!-- ============ 05 SAAS & PAAS ============ -->
+  <div class="category" id="saas-paas">
+    <div class="category-label">
+      <span class="category-tag">05</span>
+      <span class="category-name">SaaS — ready-made tools</span>
+    </div>
+    <p class="category-sub">Automation and AI products, set up on your accounts. Every build is scoped to what you actually need.</p>
+  </div>
+
+  <div class="services">
+    <div class="card">
+      <div class="slate"><span class="n">01</span>WA</div>
+      <div>
+        <span class="service-icon">💬</span>
+        <div class="service-name">WhatsApp automation</div>
+        <p class="service-desc">Bulk sending and automated flows on WhatsApp — broadcasts, auto-replies, follow-ups.</p>
+        <ul class="bullets"><li>Bulk send</li><li>Automations</li></ul>
+        <a class="portfolio-link" href="https://sanjaymeher.online/marketing/wablast" target="_blank" rel="noopener">View tool ↗</a>
+      </div>
+      <div class="price-block"><span class="from-tag">Pricing</span><div class="price-row"><span class="amount">Quoted per setup</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">02</span>IG</div>
+      <div>
+        <span class="service-icon">📸</span>
+        <div class="service-name">Instagram automation</div>
+        <p class="service-desc">Automated replies and AI-driven responses across comments and DMs.</p>
+        <ul class="bullets"><li>Comments</li><li>DMs</li><li>AI automation</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Pricing</span><div class="price-row"><span class="amount">Quoted per setup</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">03</span>N8N</div>
+      <div>
+        <span class="service-icon">🔗</span>
+        <div class="service-name">n8n automation</div>
+        <p class="service-desc">Workflow automation setup, plus ready-made workflows for common business tasks.</p>
+        <ul class="bullets"><li>Setup</li><li>Ready-made workflows</li></ul>
+      </div>
+      <div class="price-block"><span class="from-tag">Pricing</span><div class="price-row"><span class="amount">Quoted per setup</span></div></div>
+    </div>
+    <div class="card">
+      <div class="slate"><span class="n">04</span>AI</div>
+      <div>
+        <span class="service-icon">🧠</span>
+        <div class="service-name">AI hub</div>
+        <p class="service-desc">Access to a hub of AI tools and models for your business, priced by usage tier.</p>
+        <ul class="bullets"><li>Tier-based pricing</li></ul>
+        <a class="portfolio-link" href="https://sanjayaihub.up.railway.app" target="_blank" rel="noopener">Open AI hub ↗</a>
+      </div>
+      <div class="price-block"><span class="from-tag">Pricing</span><div class="price-row"><span class="amount">See tiers</span></div></div>
+    </div>
+  </div>
+
+  <div class="addons-head">
+    <div class="category-label">
+      <span class="category-tag">05A</span>
+      <span class="category-name">PaaS — custom tools, built &amp; maintained</span>
+    </div>
+    <p class="category-sub">A tool built specifically for you and kept running every month. Here's how costs are split between us.</p>
+  </div>
+  <div class="terms">
+    <div class="term-row"><div class="term-n">01</div><div class="term-body"><b>Hosting cost</b><span>Server / hosting bills are billed at cost, direct to you</span></div><div class="term-value">Client-borne</div></div>
+    <div class="term-row"><div class="term-n">02</div><div class="term-body"><b>Monthly maintenance</b><span>Keeping the tool running, monitored and patched</span></div><div class="term-value">₹1,000<small>base / month</small></div></div>
+    <div class="term-row"><div class="term-n">03</div><div class="term-body"><b>Updates</b><span>Small changes and fixes to the tool each month</span></div><div class="term-value">Free<small>up to 5 / month</small></div></div>
+    <div class="term-row"><div class="term-n">04</div><div class="term-body"><b>API keys</b><span>Any third-party AI or service API used by the tool</span></div><div class="term-value">BYOK<small>bring your own key</small></div></div>
+  </div>
+  <div class="section-note"><b>Note —</b> SaaS setups are quoted after a short scoping chat. PaaS builds are priced separately as a one-time build fee, then billed monthly as above.</div>
+
+  <!-- ============ 06 COURSES ============ -->
+  <div class="category" id="courses">
+    <div class="category-label">
+      <span class="category-tag">06</span>
+      <span class="category-name">Build with Sanjay — AI &amp; automation training</span>
+    </div>
+    <p class="category-sub">Pick a platform, ship a real product you own by the end. Live training, taught personally — not pre-recorded lessons.</p>
+  </div>
+
+  <div class="modules">
+    <div class="module">
+      <div class="module-slate">MODULE 01</div>
+      <div class="module-name">Android</div>
+      <ul class="module-bullets"><li>Floating AI overlay app</li><li>Streaming + PiP app</li><li>Ad monetisation</li></ul>
+      <div class="module-price">₹8,000<small> one-time</small></div>
+    </div>
+    <div class="module">
+      <div class="module-slate">MODULE 02</div>
+      <div class="module-name">Windows</div>
+      <ul class="module-bullets"><li>Local desktop AI agent</li><li>3 build approaches</li><li>Chrome extension bonus</li></ul>
+      <div class="module-price">₹5,000<small> one-time</small></div>
+    </div>
+    <div class="module">
+      <div class="module-slate">MODULE 03</div>
+      <div class="module-name">Web apps</div>
+      <ul class="module-bullets"><li>Self-hosted n8n</li><li>AI chat SaaS site</li><li>HR / Calendly-style app</li></ul>
+      <div class="module-price">₹7,000<small> one-time</small></div>
+    </div>
+    <div class="module">
+      <div class="module-slate">MODULE 04</div>
+      <div class="module-name">Websites</div>
+      <ul class="module-bullets"><li>Client-getting portfolio</li><li>E-com store with DB</li><li>AI chatbot integration</li></ul>
+      <div class="module-price">₹6,000<small> one-time</small></div>
+    </div>
+    <div class="module">
+      <div class="module-slate">MODULE 05</div>
+      <div class="module-name">Infrastructure</div>
+      <ul class="module-bullets"><li>Hosting: Render, Vercel, etc.</li><li>Supabase, Neon, Cloudflare</li><li>Meta / Google / AI APIs</li></ul>
+      <div class="module-price">₹15,000<small> one-time</small></div>
+    </div>
+    <div class="module bundle">
+      <div>
+        <span class="flag">Best value</span>
+        <div class="module-name">All modules</div>
+        <ul class="module-bullets"><li>Everything above</li><li>Unified backend</li><li>Shared auth, DB &amp; APIs</li></ul>
+      </div>
+      <div class="module-price">₹25,000<br><small>one-time</small></div>
+    </div>
+  </div>
+
+  <div class="cohort-head">
+    <div class="category-label">
+      <span class="category-tag">06A</span>
+      <span class="category-name">Quick edit course</span>
+    </div>
+    <p class="category-sub">A 4-week live cohort, taught personally in Hindi — real editing skill, plus AI video creation, no paid software needed.</p>
+  </div>
+  <div class="cohort">
+    <div>
+      <div class="cohort-name">Video editing — live cohort</div>
+      <p class="cohort-desc">CapCut and Filmora from beginner to advanced, plus AI video creation with free tools — live on Google Meet, daily except Sunday.</p>
+      <ul class="bullets">
+        <li>4 weeks</li><li>Hindi</li><li>Live, 20 seats</li><li>₹0 paid software</li>
+      </ul>
+    </div>
+    <div class="cohort-price-block">
+      <span class="from-tag">One-time</span>
+      <div class="amount">₹2,999</div>
+      <div class="unit">per seat</div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <p><b>Get started —</b> Fixed price agreed upfront, pay after approval, 3 revisions included. Message on WhatsApp for a free consultation.</p>
+    <a class="cta" href="https://wa.me/918984636695?text=Hi%20Sanjay%2C%20I%20went%20through%20your%20rate%20card%20and%20want%20a%20quote" target="_blank" rel="noopener">Message on WhatsApp ↗</a>
+  </div>
+
+</div>
+
+</body>
+</html>
