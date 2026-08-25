@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiteGrow — Creative & Tech Growth Partner for Food Businesses</title>
+<meta name="description" content="BiteGrow builds the full growth stack for food businesses — AI reels, ordering systems, automation, apps, ads, local SEO and social media. Start with one course, add more when you're ready.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- home-only styles ---- */
+  .hero{
+    padding:72px 0 88px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:56px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(36px,5.2vw,60px);
+    margin:18px 0 22px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--chili);
+  }
+  .hero .lede{font-size:18px;max-width:520px;}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px;}
+
+  /* the printed ticket visual */
+  .ticket{
+    background:var(--charcoal);
+    color:var(--paper);
+    border-radius:10px;
+    padding:28px 26px 22px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    box-shadow:0 30px 60px -20px rgba(27,22,19,0.45);
+    transform:rotate(1.5deg);
+    animation:print-in 0.9s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes print-in{
+    from{ clip-path:inset(0 0 100% 0); opacity:0; }
+    to{ clip-path:inset(0 0 0% 0); opacity:1; }
+  }
+  .ticket .t-head{
+    text-align:center;
+    border-bottom:1px dashed var(--line-dark);
+    padding-bottom:14px;
+    margin-bottom:14px;
+  }
+  .ticket .t-head .name{font-size:15px;letter-spacing:0.08em;color:var(--turmeric);}
+  .ticket .t-head .sub{color:rgba(250,246,236,0.55);margin-top:4px;font-size:11px;}
+  .ticket .row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;color:rgba(250,246,236,0.85);}
+  .ticket .row .n{color:rgba(250,246,236,0.4);}
+  .ticket .row.done .n{color:var(--herb);}
+  .ticket .row.done::after{content:'✓';color:var(--herb);}
+  .ticket .total{
+    border-top:1px dashed var(--line-dark);
+    margin-top:10px;padding-top:14px;
+    display:flex;justify-content:space-between;
+    color:var(--paper);font-size:13.5px;
+  }
+  .ticket .total b{color:var(--turmeric);}
+  .ticket::after{
+    content:'';
+    display:block;
+    height:10px;
+    margin:16px -26px -22px;
+    background-image:radial-gradient(circle, var(--paper) 3.2px, transparent 3.6px);
+    background-size:18px 18px;
+    background-position:9px 0;
+  }
+
+  .trust{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:28px 0;
+  }
+  .trust .wrap{
+    display:flex; gap:32px; flex-wrap:wrap;
+    font-family:var(--font-mono); font-size:12.5px;
+    color:var(--ink-soft); letter-spacing:0.03em; text-transform:uppercase;
+    justify-content:space-between;
+  }
+  .trust b{color:var(--charcoal); font-family:var(--font-body); font-weight:600; text-transform:none; letter-spacing:0;}
+
+  /* menu preview grid */
+  .menu-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+  }
+  .m-card{
+    background:var(--paper-dim);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+    text-decoration:none;
+    color:var(--ink);
+    display:flex; flex-direction:column; gap:10px;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .m-card:hover{
+    transform:translateY(-4px);
+    background:var(--paper);
+    box-shadow:0 18px 40px -22px rgba(27,22,19,0.35);
+  }
+  .m-card .course{
+    font-family:var(--font-mono);
+    font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--chili);
+  }
+  .m-card h3{font-size:19px; margin:2px 0 4px;}
+  .m-card p{font-size:14.5px; margin:0;}
+
+  .how-it-works{background:var(--charcoal); color:var(--paper);}
+  .how-it-works h2, .how-it-works .section-head p{color:var(--paper);}
+  .how-it-works .section-head p{color:rgba(250,246,236,0.7);}
+  .path-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .path{
+    background:var(--charcoal-soft);
+    border:1px solid var(--line-dark);
+    border-radius:var(--radius);
+    padding:26px;
+  }
+  .path .eyebrow{color:var(--turmeric);}
+  .path .eyebrow::before{background:var(--turmeric);}
+  .path h4{color:var(--paper); font-size:18px; margin:10px 0 8px;}
+  .path p{color:rgba(250,246,236,0.68); font-size:14.5px; margin:0;}
+
+  .why-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:36px 48px;
+  }
+  .why-item{display:flex; gap:16px;}
+  .why-item .num{
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--chili);
+    padding-top:3px;
+  }
+  .why-item h4{font-size:18px; margin:0 0 6px;}
+  .why-item p{font-size:15px; margin:0;}
+
+  .cta-band{
+    background:var(--turmeric);
+    border-radius:20px;
+    padding:56px 48px;
+    display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .cta-band h2{font-size:clamp(24px,3.4vw,34px); max-width:520px; margin-bottom:6px;}
+  .cta-band p{color:var(--charcoal); opacity:0.75; margin:0;}
+
+  @media (max-width:900px){
+    .hero .wrap{grid-template-columns:1fr;}
+    .path-grid{grid-template-columns:1fr;}
+    .why-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<bitegrow-header active="home"></bitegrow-header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Creative &amp; Tech Growth Partner</span>
+      <h1>We don't post for you. We build the <em>whole kitchen</em> that gets you paid.</h1>
+      <p class="lede">BiteGrow is a modular growth stack for food businesses — reels that get attention, ordering systems that convert it, and automation that never lets an order slip. Start with one course. Add more when you're hungry for the next stage.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/918984636695?text=Hi%20BiteGrow%2C%20I%20run%20a%20food%20business%20and%20want%20to%20talk%20growth.">Tell us your problem →</a>
+        <a class="btn btn-ghost" href="services.html">See the full menu</a>
+      </div>
+    </div>
+    <div class="ticket">
+      <div class="t-head">
+        <div class="name">BITEGROW — ORDER TICKET</div>
+        <div class="sub">TABLE: YOUR BUSINESS · SERVED BY SANJAY</div>
+      </div>
+      <div class="row done"><span class="n">01</span><span>AI Reels &amp; Video</span></div>
+      <div class="row done"><span class="n">02</span><span>AR E-com + Ordering</span></div>
+      <div class="row"><span class="n">03</span><span>WA / IG / FB Automation</span></div>
+      <div class="row"><span class="n">04</span><span>Your Own App</span></div>
+      <div class="row"><span class="n">05</span><span>Ads &amp; Campaigns</span></div>
+      <div class="row"><span class="n">06</span><span>GMB Local SEO</span></div>
+      <div class="row"><span class="n">07</span><span>Social Media Mgmt</span></div>
+      <div class="total"><span>Order anytime</span><b>No minimum stack</b></div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="wrap">
+    <span><b>7+ years</b> in video &amp; design</span>
+    <span><b>One person</b> you actually talk to</span>
+    <span><b>Fixed pricing</b> on every course</span>
+    <span><b>Start anywhere</b> on the menu</span>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The Growth Menu</span>
+      <h2>Seven courses. Order what you're hungry for.</h2>
+      <p>Every food business is at a different stage — some need attention, some need an ordering system, some just need to stop missing DMs. Pick your starting course below.</p>
+    </div>
+    <div class="menu-grid">
+      <a class="m-card" href="services.html#reels">
+        <span class="course">Course 01</span>
+        <h3>AI Reels &amp; Video Editing</h3>
+        <p>Get noticed. Scroll-stopping food content, edited to convert — not just look nice.</p>
+      </a>
+      <a class="m-card" href="services.html#ordersystem">
+        <span class="course">Course 02</span>
+        <h3>AR E-com + Ordering System</h3>
+        <p>Turn views into orders with a site people can actually buy from.</p>
+      </a>
+      <a class="m-card" href="services.html#automation">
+        <span class="course">Course 03</span>
+        <h3>IG / FB / WA Automation</h3>
+        <p>Never miss a DM again. Orders taken automatically, around the clock.</p>
+      </a>
+      <a class="m-card" href="services.html#app">
+        <span class="course">Course 04</span>
+        <h3>Your Own App</h3>
+        <p>Stop renting your customers from aggregators. Own the ordering channel.</p>
+      </a>
+      <a class="m-card" href="services.html#ads">
+        <span class="course">Course 05</span>
+        <h3>Ads &amp; Campaigns</h3>
+        <p>Once the funnel works, we pour paid traffic into it — not before.</p>
+      </a>
+      <a class="m-card" href="services.html#seo">
+        <span class="course">Course 06</span>
+        <h3>GMB Local SEO</h3>
+        <p>Show up when someone nearby searches "food near me."</p>
+      </a>
+      <a class="m-card" href="services.html#social">
+        <span class="course">Course 07</span>
+        <h3>Social Media Management</h3>
+        <p>Consistent presence across every platform, handled end to end.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Start Anywhere</span>
+      <h2>Three businesses, three different starting points.</h2>
+      <p>There's no fixed entry point — you order what solves today's problem, then add the next course when you're ready.</p>
+    </div>
+    <div class="path-grid">
+      <div class="path">
+        <span class="eyebrow">New Cloud Kitchen</span>
+        <h4>Starts with Reels</h4>
+        <p>No audience yet. Begins with AI reels to get seen, then adds an ordering system once the views turn into DMs.</p>
+      </div>
+      <div class="path">
+        <span class="eyebrow">Busy Restaurant</span>
+        <h4>Starts with Automation</h4>
+        <p>Already gets orders on WhatsApp but keeps missing them at peak hours. Starts at Course 03, adds Ads once the funnel is airtight.</p>
+      </div>
+      <div class="path">
+        <span class="eyebrow">Established Brand</span>
+        <h4>Starts with Local SEO</h4>
+        <p>Known locally, invisible on Google. Starts with GMB SEO, layers on Social Media Management to stay consistent.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Why BiteGrow</span>
+      <h2>Not another freelancer for your Instagram.</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-item">
+        <span class="num">01</span>
+        <div>
+          <h4>One person, full stack</h4>
+          <p>Creative and tech under one roof — no handoffs between an editor, a developer, and an ads person.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <span class="num">02</span>
+        <div>
+          <h4>Built for food, not generic content</h4>
+          <p>Every course is shaped around how food businesses actually get discovered, ordered from, and rebooked.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <span class="num">03</span>
+        <div>
+          <h4>Modular, not locked-in</h4>
+          <p>Order one course or all seven. No bundled contracts forcing you to buy what you don't need yet.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <span class="num">04</span>
+        <div>
+          <h4>Fixed pricing, real turnaround</h4>
+          <p>You get a number and a timeline up front — not an hourly clock or a vague "it depends."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <div>
+        <h2>What's the thing slowing your food business down right now?</h2>
+        <p>Free consultation on WhatsApp. Tell us the problem, we'll tell you which course to start with.</p>
+      </div>
+      <a class="btn btn-primary" style="border-color:var(--charcoal)" target="_blank" rel="noopener" href="https://wa.me/918984636695?text=Hi%20BiteGrow%2C%20here's%20my%20food%20business%20problem%3A%20">Start the conversation →</a>
+    </div>
+  </div>
+</section>
+
+<bitegrow-footer></bitegrow-footer>
+
+<script src="components.js"></script>
+</body>
+</html>
