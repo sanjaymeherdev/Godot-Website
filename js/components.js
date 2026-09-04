@@ -266,34 +266,18 @@ body.sm-no-scroll { overflow: hidden; }
             label: 'Services',
             dropdown: [
                 { icon: '⚙️', label: 'All Services',         href: `${base}services.html` },
-                { icon: '🔄', label: 'Automation Hosting',   href: `${base}services/automation.html` },
                 { icon: '💳', label: 'Payment Gateway Setup',href: `${base}services/payment_gateway.html` },
                 { icon: '📋', label: 'Client & Task Manager',href: `${base}services/smadmin.html` },
                 { icon: '📣', label: 'Digital Marketing Agent', href: `${base}marketing/digital-services.html` },
             ]
         },
-        {
-            label: 'Products',
-            dropdown: [
-                { icon: '🧰', label: 'All Products',          href: `${base}products.html` },
-                { icon: '📱', label: 'WhatsApp Business',    href: `${base}products.html#whatsapp` },
-                { icon: '💼', label: 'Business Tools',       href: `${base}products.html#business-tools` },
-                { icon: '🎥', label: 'Creator Tools',        href: `${base}products.html#creator-tools` },
-                { icon: '🧠', label: 'AI Infra & Dev Tools', href: `${base}products.html#ai-infra` },
-                { icon: '🖥️', label: 'Self-Hostable Servers',href: `${base}products.html#self-hosted` },
-            ]
-        },
-      
+        { label: 'Products', href: `${base}products.html` },
+
         {
             label: 'Tech Tools',
             dropdown: [
                 { icon: '💬', label: 'WaBlast Pro — CRM',   href: `${base}marketing/wablast.html` },
-                { icon: '📤', label: 'AutoSend — WaBulk Unofficial',     href: `${base}marketing/autosend.html` },
                 { icon: '🏢', label: 'YourMate — Coaching Suite',      href: `${base}marketing/yourmate.html` },
-                { icon: '📅', label: 'SMBooking — Appointments',   href: `${base}marketing/smbooking.html` },
-                { icon: '🌐', label: 'SiteSheet — Affordable Website',  href: `${base}marketing/sitesheet.html` },
-                { icon: '📱', label: 'PocketAI — AI on Every App',    href: `${base}marketing/pocketai.html` },
-                { icon: '📝', label: 'AIContentDesinger',                href: `${base}marketing/aidesigner.html` },
             ]
         },
          {
@@ -415,18 +399,13 @@ body.sm-no-scroll { overflow: hidden; }
             <div>
                 <h4>Services</h4>
                 <a href="${base}services.html">⚙️ All Services</a>
-                <a href="${base}services/automation.html">🔄 Automation Hosting</a>
                 <a href="${base}services/payment_gateway.html">💳 Payment Gateway</a>
                 <a href="${base}services/smadmin.html">📋 Client &amp; Task Manager</a>
                 <a href="${base}marketing/digital-services.html">📣 Social Media Mgmt</a>
             </div>
             <div>
                 <h4>Products</h4>
-                <a href="${base}products.html#whatsapp">📱 WhatsApp Business</a>
-                <a href="${base}products.html#business-tools">💼 Business Tools</a>
-                <a href="${base}products.html#creator-tools">🎥 Creator Tools</a>
-                <a href="${base}products.html#ai-infra">🧠 AI &amp; Dev Tools</a>
-                <a href="${base}products.html#self-hosted">🖥️ Self-Hostable Servers</a>
+                <a href="${base}products.html">🧰 All Products</a>
             </div>
             <div>
                 <h4>Company</h4>
